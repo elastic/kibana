@@ -21,8 +21,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class ParameterForm extends React.Component {
+export class ParameterFormComponent extends React.Component {
 
   renderInputs = () => {
     return this.props.params.map(param => {
@@ -48,7 +49,8 @@ export class ParameterForm extends React.Component {
             />
           );
         default:
-          throw new Error(`Unhandled parameter type ${param.type}`);
+          throw new Error(this.props.intl.formatMessage({ id: 'kbn.home.tutorial.parameterForm.typeErrorMessage',
+            defaultMessage: 'Unhandled parameter type {type}' }, { type: param.type }));
       }
     });
   }
@@ -72,8 +74,10 @@ const paramsShape = PropTypes.shape({
   type: PropTypes.string.isRequired,
 });
 
-ParameterForm.propTypes = {
+ParameterFormComponent.propTypes = {
   params: PropTypes.arrayOf(paramsShape).isRequired,
   paramValues: PropTypes.object.isRequired,
   setParameter: PropTypes.func.isRequired
 };
+
+export const ParameterForm = injectI18n(ParameterFormComponent);

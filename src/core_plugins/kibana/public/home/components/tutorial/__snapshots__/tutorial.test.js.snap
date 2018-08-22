@@ -48,7 +48,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetComponent)
           instructionVariants={
             Array [
               Object {
@@ -143,7 +143,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetComponent)
           instructionVariants={
             Array [
               Object {
@@ -220,7 +220,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetComponent)
           instructionVariants={
             Array [
               Object {

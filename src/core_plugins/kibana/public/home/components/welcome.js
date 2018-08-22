@@ -37,6 +37,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
@@ -67,9 +69,13 @@ export class Welcome extends React.Component {
               <EuiIcon type="logoKibana" size="xxl" />
             </span>
             <EuiTitle size="l" className="home-welcome-title">
-              <h1>Welcome to Kibana</h1>
+              <h1>
+                <FormattedMessage id="kbn.home.welcomeHeader" defaultMessage="Welcome to Kibana"/>
+              </h1>
             </EuiTitle>
-            <EuiText size="s" className="welcome-subtitle">Your window into the Elastic Stack</EuiText>
+            <EuiText size="s" className="welcome-subtitle">
+              <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
+            </EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
@@ -79,9 +85,13 @@ export class Welcome extends React.Component {
               <EuiCard
                 image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
                 textAlign="left"
-                title="Let's get started"
-                description="We noticed that you don't have any data in your cluster.
-                  You can try our sample data and dashboards or jump in with your own data."
+                title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started"/>}
+                description={
+                  <FormattedMessage
+                    id="kbn.home.letsStartDescription"
+                    defaultMessage="We noticed that you don't have any data in your cluster.
+You can try our sample data and dashboards or jump in with your own data."
+                  />}
                 footer={(
                   <footer>
                     <EuiButton
@@ -89,14 +99,14 @@ export class Welcome extends React.Component {
                       className="home-welcome-footer-action"
                       href="#/home/tutorial_directory/sampleData"
                     >
-                      Try our sample data
+                      <FormattedMessage id="kbn.home.tryButton" defaultMessage="Try our sample data"/>
                     </EuiButton>
                     <EuiButtonEmpty
                       className="home-welcome-footer-action"
                       onClick={onSkip}
                       data-test-subj="skipWelcomeScreen"
                     >
-                      Explore on my own
+                      <FormattedMessage id="kbn.home.exploreButton" defaultMessage="Explore on my own"/>
                     </EuiButtonEmpty>
                   </footer>
                 )}

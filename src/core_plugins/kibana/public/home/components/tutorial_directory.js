@@ -38,29 +38,32 @@ import {
 import { getTutorials } from '../load_tutorials';
 import { listSampleDataSets } from '../sample_data_sets';
 
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-export class TutorialDirectory extends React.Component {
+export class TutorialDirectoryComponent extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.tabs = [{
       id: ALL_TAB_ID,
-      name: 'All',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.allTitle', defaultMessage: 'All' }),
     }, {
       id: 'logging',
-      name: 'Logging',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.loggingTitle', defaultMessage: 'Logging' }),
     }, {
       id: 'metrics',
-      name: 'Metrics',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.metricsTitle', defaultMessage: 'Metrics' }),
     }, {
       id: 'security',
-      name: 'Security Analytics',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security Analytics' }),
     }, {
       id: SAMPLE_DATA_TAB_ID,
       name: 'Sample Data',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample Data' }),
     }];
 
     let openTab = ALL_TAB_ID;
@@ -104,8 +107,10 @@ export class TutorialDirectory extends React.Component {
 
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
-      name: 'Sample Data',
-      description: 'Get started exploring Kibana with these "one click" data sets.',
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.card.sampleDataTitle', defaultMessage: 'Sample Data' }),
+      description: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.card.sampleDataDescription',
+        defaultMessage: 'Get started exploring Kibana with these "one click" data sets.'
+      }),
       url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
       elasticCloud: true,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
@@ -217,11 +222,19 @@ export class TutorialDirectory extends React.Component {
       <EuiPage className="home">
         <EuiPageBody>
 
-          <a className="kuiLink" href="#/home">Home</a>
+          <a className="kuiLink" href="#/home">
+            <FormattedMessage
+              id="kbn.home.tutorial.homeTitle"
+              defaultMessage="Home"
+            />
+          </a>
           <EuiSpacer size="s" />
           <EuiTitle size="l">
             <h1>
-              Add Data to Kibana
+              <FormattedMessage
+                id="kbn.home.tutorial.addDataHeader"
+                defaultMessage="Add Data to Kibana"
+              />
             </h1>
           </EuiTitle>
 
@@ -241,7 +254,7 @@ export class TutorialDirectory extends React.Component {
   }
 }
 
-TutorialDirectory.propTypes = {
+TutorialDirectoryComponent.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
@@ -249,3 +262,5 @@ TutorialDirectory.propTypes = {
   setConfig: PropTypes.func.isRequired,
   clearIndexPatternsCache: PropTypes.func.isRequired,
 };
+
+export const TutorialDirectory = injectI18n(TutorialDirectoryComponent);

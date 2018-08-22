@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const createRecentlyAccessed = (length) => {
   const recentlyAccessed = [];
@@ -44,7 +45,7 @@ test('render', () => {
 
 describe('more popover', () => {
   test('should not be rendered when recently accessed list size is less than NUM_LONG_LINKS', () => {
-    const component = mount(<RecentlyAccessed
+    const component = mountWithIntl(<RecentlyAccessed
       recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS - 1)}
     />);
 
@@ -53,7 +54,7 @@ describe('more popover', () => {
   });
 
   test('should not be rendered when recently accessed list size is NUM_LONG_LINKS', () => {
-    const component = mount(<RecentlyAccessed
+    const component = mountWithIntl(<RecentlyAccessed
       recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS)}
     />);
 
@@ -63,7 +64,7 @@ describe('more popover', () => {
 
   describe('recently accessed list size exceeds NUM_LONG_LINKS', () => {
     test('should be rendered', () => {
-      const component = mount(<RecentlyAccessed
+      const component = mountWithIntl(<RecentlyAccessed
         recentlyAccessed={createRecentlyAccessed(NUM_LONG_LINKS + 1)}
       />);
 
@@ -73,7 +74,7 @@ describe('more popover', () => {
 
     test('should only contain overflow recently accessed items when opened', () => {
       const numberOfRecentlyAccessed = NUM_LONG_LINKS + 2;
-      const component = mount(<RecentlyAccessed
+      const component = mountWithIntl(<RecentlyAccessed
         recentlyAccessed={createRecentlyAccessed(numberOfRecentlyAccessed)}
       />);
 

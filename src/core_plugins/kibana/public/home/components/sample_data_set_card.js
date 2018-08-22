@@ -33,6 +33,8 @@ import {
   uninstallSampleDataSet
 } from '../sample_data_sets';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class SampleDataSetCard extends React.Component {
 
   constructor(props) {
@@ -91,7 +93,15 @@ export class SampleDataSetCard extends React.Component {
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
               >
-                {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
+                {this.state.isProcessingRequest
+                  ? <FormattedMessage
+                    id="kbn.home.sampleDataSetCard.removingButton"
+                    defaultMessage="Removing"
+                  />
+                  : <FormattedMessage
+                    id="kbn.home.sampleDataSetCard.removeButton"
+                    defaultMessage="Remove"
+                  />}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -99,7 +109,10 @@ export class SampleDataSetCard extends React.Component {
                 href={this.props.launchUrl}
                 data-test-subj={`launchSampleDataSet${this.props.id}`}
               >
-                View data
+                <FormattedMessage
+                  id="kbn.home.sampleDataSetCard.viewDataButton"
+                  defaultMessage="View data"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -114,7 +127,16 @@ export class SampleDataSetCard extends React.Component {
                 onClick={this.startRequest}
                 data-test-subj={`addSampleDataSet${this.props.id}`}
               >
-                {this.state.isProcessingRequest ? 'Adding' : 'Add'}
+                {this.state.isProcessingRequest
+                  ? <FormattedMessage
+                    id="kbn.home.sampleDataSetCard.addingButton"
+                    defaultMessage="Adding"
+                  />
+                  : <FormattedMessage
+                    id="kbn.home.sampleDataSetCard.addButton"
+                    defaultMessage="Add"
+                  />
+                }
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -126,13 +148,24 @@ export class SampleDataSetCard extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={<p>{`Unable to verify dataset status, error: ${this.props.statusMsg}`}</p>}
+                content={
+                  <p>
+                    <FormattedMessage
+                      id="kbn.home.sampleDataSetCard.default.unableToVerifyErrorMessage"
+                      defaultMessage="Unable to verify dataset status, error: {statusMsg}"
+                      values={{ statusMsg: this.props.statusMsg }}
+                    />
+                  </p>
+                }
               >
                 <EuiButton
                   isDisabled
                   data-test-subj={`addSampleDataSet${this.props.id}`}
                 >
-                  {'Add'}
+                  <FormattedMessage
+                    id="kbn.home.sampleDataSetCard.default.addButton"
+                    defaultMessage="Add"
+                  />
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>

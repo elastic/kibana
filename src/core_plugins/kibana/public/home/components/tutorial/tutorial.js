@@ -28,6 +28,7 @@ import { RadioButtonGroup } from './radio_button_group';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -35,7 +36,7 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
 
-export class Tutorial extends React.Component {
+export class TutorialComponent extends React.Component {
 
   constructor(props) {
     super(props);
@@ -187,9 +188,13 @@ export class Tutorial extends React.Component {
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
+      const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButton',
+        defaultMessage: 'Self managed' });
+      const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButton',
+        defaultMessage: 'Elastic Cloud' });
       const radioButtons = [
-        { onClick: this.onPrem, label: 'Self managed', dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
+        { onClick: this.onPrem, label: selfManagedLabel, dataTestSubj: 'onPremBtn' },
+        { onClick: this.onPremElasticCloud, label: cloudLabel, dataTestSubj: 'onPremElasticCloudBtn' },
       ];
       return (
         <RadioButtonGroup
@@ -284,7 +289,11 @@ export class Tutorial extends React.Component {
         <div className="homePanel">
           <EuiText>
             <p>
-              Unable to find tutorial {this.props.tutorialId}
+              <FormattedMessage
+                id="kbn.home.tutorial.noTutorialLabel"
+                defaultMessage="Unable to find tutorial {tutorialId}"
+                values={{ tutorialId: this.props.tutorialId }}
+              />
             </p>
           </EuiText>
         </div>
@@ -344,7 +353,7 @@ export class Tutorial extends React.Component {
   }
 }
 
-Tutorial.propTypes = {
+TutorialComponent.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   isCloudEnabled: PropTypes.bool.isRequired,
   getTutorial: PropTypes.func.isRequired,
@@ -352,3 +361,5 @@ Tutorial.propTypes = {
   tutorialId: PropTypes.string.isRequired,
   bulkCreate: PropTypes.func.isRequired,
 };
+
+export const Tutorial = injectI18n(TutorialComponent);

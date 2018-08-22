@@ -19,6 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 const sampleDataUrl = chrome.addBasePath('/api/sample_data');
 const headers = new Headers({
@@ -36,13 +37,17 @@ export async function listSampleDataSets() {
     });
 
     if (response.status >= 300) {
-      throw new Error(`Request failed with status code: ${response.status}`);
+      throw new Error(i18n.translate('kbn.home.sampleDataSet.getListFailedErrorMessage', {
+        defaultMessage: 'Request failed with status code: {status}', values: { status: response.status } }
+      ));
     }
 
     return await response.json();
   } catch (err) {
     toastNotifications.addDanger({
-      title: `Unable to load sample data sets list`,
+      title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
+        defaultMessage: 'Unable to load sample data sets list' }
+      ),
       text: `${err.message}`,
     });
     return [];
@@ -59,11 +64,16 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
 
     if (response.status >= 300) {
       const body = await response.text();
-      throw new Error(`Request failed with status code: ${response.status}, message: ${body}`);
+      throw new Error(i18n.translate('kbn.home.sampleDataSet.installfailedErrorMessage', {
+        defaultMessage: 'Request failed with status code: {status}, message: {message}',
+        values: { status: response.status, message: body } }
+      ));
     }
   } catch (err) {
     toastNotifications.addDanger({
-      title: `Unable to install sample data set: ${name}`,
+      title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
+        defaultMessage: 'Unable to install sample data set: {name}', values: { name: name } }
+      ),
       text: `${err.message}`,
     });
     return;
@@ -77,7 +87,9 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
   clearIndexPatternsCache();
 
   toastNotifications.addSuccess({
-    title: `${name} installed`,
+    title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
+      defaultMessage: '{name} installed', values: { name: name } }
+    ),
     ['data-test-subj']: 'sampleDataSetInstallToast'
   });
 }
@@ -91,11 +103,15 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
     });
     if (response.status >= 300) {
       const body = await response.text();
-      throw new Error(`Request failed with status code: ${response.status}, message: ${body}`);
+      throw new Error(i18n.translate('kbn.home.sampleDataSet.uninstallFailedErrorMessage', {
+        defaultMessage: 'Request failed with status code: {status}, message: {message}',
+        values: { status: response.status, message: body } }
+      ));
     }
   } catch (err) {
     toastNotifications.addDanger({
-      title: `Unable to uninstall sample data set`,
+      title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
+        defaultMessage: 'Unable to uninstall sample data set' }),
       text: `${err.message}`,
     });
     return;
@@ -109,7 +125,9 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
   clearIndexPatternsCache();
 
   toastNotifications.addSuccess({
-    title: `${name} uninstalled`,
+    title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
+      defaultMessage: '{name} uninstalled', values: { name: name } }
+    ),
     ['data-test-subj']: 'sampleDataSetUninstallToast'
   });
 }
