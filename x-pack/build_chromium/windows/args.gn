@@ -3,10 +3,6 @@
 # Embed resource.pak into binary to simplify deployment.
 headless_use_embedded_resources = true
 
-# In order to simplify deployment we build ICU data file
-# into binary.
-icu_use_data_file = false
-
 # Use embedded data instead external files for headless in order
 # to simplify deployment.
 v8_use_external_startup_data = false
