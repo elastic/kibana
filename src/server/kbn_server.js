@@ -104,10 +104,6 @@ export default class KbnServer {
         // setup routes for short urls
         urlShorteningMixin,
 
-        // ensure that all bundles are built, or that the
-        // watch bundle server is running
-        optimizeMixin,
-
         // initialize the plugins
         Plugins.initializeMixin,
 
