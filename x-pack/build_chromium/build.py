@@ -54,7 +54,7 @@ runcmd('autoninja -C out/headless headless_shell')
 # Optimize the output on Linux and Mac by stripping inessentials from the binary
 if platform.system() != 'Windows':
   print('Optimizing headless_shell')
-  shutil.move('out/headless/headless_shell out/headless/headless_shell_raw')
+  shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
