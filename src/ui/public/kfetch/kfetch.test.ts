@@ -311,6 +311,33 @@ describe('kfetch', () => {
     });
   });
 
+  describe('when request interceptor reject but responseError interceptor resolves', () => {
+    let resp: any;
+
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      addInterceptor({
+        request: config => {
+          throw new Error('My request error');
+        },
+        responseError: res => {
+          return { custom: 'response' };
+        },
+      });
+
+      resp = await kfetch({ pathname: 'my/path' });
+    });
+
+    it('should not make request', () => {
+      expect(fetchMock.called('*')).toBe(false);
+    });
+
+    it('should resolve', () => {
+      expect(resp).toEqual({ custom: 'response' });
+    });
+  });
+
   describe('when interceptors return synchronously', async () => {
     let resp: any;
     beforeEach(async () => {

@@ -62,23 +62,24 @@ export async function kfetch(
       ...options.headers,
     },
   };
-  const { pathname, query, ...restOptions }: KFetchOptions = await requestInterceptors(
-    combinedOptions
+
+  const promise = requestInterceptors(combinedOptions).then(
+    ({ pathname, query, ...restOptions }: KFetchOptions) => {
+      const fullUrl = url.format({
+        pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
+        query,
+      });
+
+      return fetch(fullUrl, restOptions).then(async res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new KFetchError(res, await getBodyAsJson(res));
+      });
+    }
   );
 
-  const fullUrl = url.format({
-    pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
-    query,
-  });
-
-  const responsePromise = fetch(fullUrl, restOptions).then(async res => {
-    if (res.ok) {
-      return res.json();
-    }
-    throw new KFetchError(res, await getBodyAsJson(res));
-  });
-
-  return responseInterceptors(responsePromise);
+  return responseInterceptors(promise);
 }
 
 function requestInterceptors(config: any) {
