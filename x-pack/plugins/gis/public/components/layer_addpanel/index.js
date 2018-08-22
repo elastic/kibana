@@ -24,7 +24,10 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeFlyout: () => dispatch(updateFlyout(FLYOUT_STATE.NONE)) && dispatch(clearTemporaryLayers()),
+    closeFlyout: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(clearTemporaryLayers());
+    },
     previewSource: (sourceDescriptor) => {
       dispatch(addLayerFromSource(sourceDescriptor, { temporary: true }));
     },

@@ -57,7 +57,7 @@ export class FlyOut extends React.Component {
     const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
 
     return (
-      <EuiFlyout onClose={() => console.warn('EuiFlyout#onClose not implemented.')} style={{ maxWidth: 768 }}>
+      <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
           <EuiTitle size="l">
             <h2>Add layer</h2>
