@@ -221,7 +221,7 @@ export class InstructionSetComponent extends React.Component {
         'fa-caret-right': !this.state.isParamFormVisible,
         'fa-caret-down': this.state.isParamFormVisible
       });
-      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.toggleAriaLabel',
+      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.toggleAria',
         defaultMessage: 'toggle command parameters visibility'
       });
       paramsVisibilityToggle = (

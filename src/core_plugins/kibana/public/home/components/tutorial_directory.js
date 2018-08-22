@@ -154,7 +154,6 @@ export class TutorialDirectoryComponent extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
-        className="homeDirectoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -219,7 +218,7 @@ export class TutorialDirectoryComponent extends React.Component {
 
   render() {
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
 
           <a className="kuiLink" href="#/home">

@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       expect(isApplyButtonEnabled).to.be(true);
     });
 
-    it('should allow resseting changed params', async () => {
+    it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
       const interval = await PageObjects.visualize.getInputTypeParam('interval');
       expect(interval).to.be('2000');

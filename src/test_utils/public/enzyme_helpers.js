@@ -60,7 +60,6 @@ export function mountWithIntl(node, { context = {}, childContextTypes = {}, ...p
 
 export { intl };
 
-
 function cloneNode(node) {
   if (!node) {
     throw new Error(`First argument should be cheerio object or React element, not ${node}`);

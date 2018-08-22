@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './add_data.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -72,13 +71,13 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
     const getApmCard = () =>  (
       <EuiFlexItem>
         <EuiCard
-          className="addDataCard"
-          icon={<EuiIcon className="addDataIcon" type="apmApp" />}
+          className="homAddData__card"
+          icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
           title={apmTitle}
           description={apmDescription}
           footer={
             <EuiButton
-              className="addDataButton"
+              className="homAddData__button"
               href="#/home/tutorial/apm"
             >
               <FormattedMessage
@@ -98,13 +97,13 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon  className="addDataIcon" type="loggingApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
             title={loggingTitle}
             description={loggingDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage
@@ -118,13 +117,13 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="monitoringApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
             title={metricsTitle}
             description={metricsDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/metrics"
               >
                 <FormattedMessage
@@ -138,13 +137,13 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="securityApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
             title={securityTitle}
             description={securityDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/security"
               >
                 <FormattedMessage
@@ -159,7 +158,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
     );
   };
 
-  const footerItemClasses = classNames('addDataFooterItem', { 'addDataFooterItem_highlight': isNewKibanaInstance });
+  const footerItemClasses = classNames('homAddData__footerItem', { 'homAddData__footerItem--highlight': isNewKibanaInstance });
 
   return (
     <EuiPanel paddingSize="l">
