@@ -15,6 +15,7 @@ import { createSelector } from 'reselect';
 import { globalizeSelectors } from '../../../utils/typed_redux';
 import { configurationSelectors as localConfigurationSelectors } from './configuration';
 import { entriesSelectors as localEntriesSelectors } from './entries';
+import { logPositionSelectors as localLogPositionSelectors } from './log_position';
 import { minimapSelectors as localMinimapSelectors } from './minimap';
 import { State } from './reducer';
 // import { searchSelectors as localSearchSelectors } from './search';
@@ -22,7 +23,6 @@ import { State } from './reducer';
 // import { searchSummarySelectors as localSearchSummarySelectors } from './search_summary';
 import { sourceSelectors as localSourceSelectors } from './source';
 import { summarySelectors as localSummarySelectors } from './summary';
-import { targetSelectors as localTargetSelectors } from './target';
 import { textviewSelectors as localTextviewSelectors } from './textview';
 
 export const configurationSelectors = globalizeSelectors(
@@ -35,9 +35,9 @@ export const sourceSelectors = globalizeSelectors(
   localSourceSelectors
 );
 
-export const targetSelectors = globalizeSelectors(
-  (state: State) => state.target,
-  localTargetSelectors
+export const logPositionSelectors = globalizeSelectors(
+  (state: State) => state.logPosition,
+  localLogPositionSelectors
 );
 
 export const entriesSelectors = globalizeSelectors(
@@ -117,7 +117,7 @@ export const sharedSelectors = {
   selectVisibleMidpointOrTargetTime: createSelector(
     entriesSelectors.selectFirstVisibleEntry,
     entriesSelectors.selectLastVisibleEntry,
-    targetSelectors.selectTarget,
+    logPositionSelectors.selectTargetPosition,
     (firstVisibleEntry, lastVisibleEntry, target) => {
       if (firstVisibleEntry && lastVisibleEntry) {
         return (firstVisibleEntry.key.time + lastVisibleEntry.key.time) / 2;
@@ -125,8 +125,10 @@ export const sharedSelectors = {
         return firstVisibleEntry.key.time;
       } else if (lastVisibleEntry) {
         return lastVisibleEntry.key.time;
-      } else {
+      } else if (target) {
         return target.time;
+      } else {
+        return null;
       }
     }
   ),

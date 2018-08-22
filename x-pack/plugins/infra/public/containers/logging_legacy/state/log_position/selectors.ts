@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TargetState } from './reducer';
+import { LogPositionState } from './reducer';
 
-export const selectTarget = (state: TargetState) => state;
+export const selectTargetPosition = (state: LogPositionState) => state.targetPosition;
+
+export const selectIsAutoReloading = (state: LogPositionState) =>
+  state.updatePolicy.policy === 'interval';

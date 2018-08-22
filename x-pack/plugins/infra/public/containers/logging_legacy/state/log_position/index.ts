@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as targetActions from './actions';
-import * as targetSelectors from './selectors';
+import * as logPositionActions from './actions';
+import * as logPositionEpics from './epics';
+import * as logPositionSelectors from './selectors';
 
-export { targetActions, targetSelectors };
+export { logPositionActions, logPositionEpics, logPositionSelectors };
 export * from './reducer';

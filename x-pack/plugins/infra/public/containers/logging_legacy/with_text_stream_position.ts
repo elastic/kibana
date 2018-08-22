@@ -10,7 +10,13 @@ import { createSelector } from 'reselect';
 import { getLogEntryKey } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { entriesActions, entriesSelectors, sharedSelectors, State, targetActions } from './state';
+import {
+  entriesActions,
+  entriesSelectors,
+  logPositionActions,
+  sharedSelectors,
+  State,
+} from './state';
 
 export const withTextStreamPosition = connect(
   (state: State) => ({
@@ -20,7 +26,7 @@ export const withTextStreamPosition = connect(
     visibleMidpoint: sharedSelectors.selectVisibleMidpointOrTargetTime(state),
   }),
   bindPlainActionCreators({
-    jumpToPosition: targetActions.jumpToTarget,
+    jumpToPosition: logPositionActions.jumpToTargetPosition,
     reportVisibleInterval: entriesActions.reportVisibleEntries,
   })
 );

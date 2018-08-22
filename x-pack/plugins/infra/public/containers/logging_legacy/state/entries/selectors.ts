@@ -62,6 +62,8 @@ export const selectHasMoreAfterEnd = createSelector(
   data => (data ? data.hasMoreAfter : true)
 );
 
+export const selectEntriesLastLoadedTime = entriesGraphlStateSelectors.selectLoadingResultTime;
+
 export const selectEntriesStartLoadingState = entriesGraphlStateSelectors.selectLoadingState;
 
 export const selectEntriesEndLoadingState = entriesGraphlStateSelectors.selectLoadingState;

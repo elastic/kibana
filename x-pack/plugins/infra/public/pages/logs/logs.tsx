@@ -30,7 +30,7 @@ import { LogTextWrapControls } from '../../components/logging/log_text_wrap_cont
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
 import { withLibs } from '../../containers/libs';
-import { State, targetActions } from '../../containers/logging_legacy/state';
+import { logPositionActions, State } from '../../containers/logging_legacy/state';
 // import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
 import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
 import { WithSummary } from '../../containers/logging_legacy/with_summary';
@@ -79,7 +79,7 @@ export const LogsPage = withLibs(
 
     public componentDidMount() {
       this.state.store.dispatch(
-        targetActions.jumpToTarget({
+        logPositionActions.jumpToTargetPosition({
           time: Date.now(),
           tiebreaker: 0,
         })
@@ -125,7 +125,21 @@ export const LogsPage = withLibs(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <WithTimeControls>
-                    {timeProps => <LogTimeControls {...timeProps} />}
+                    {({
+                      currentTime,
+                      isLiveStreaming,
+                      jumpToTargetPositionTime,
+                      startLiveStreaming,
+                      stopLiveStreaming,
+                    }) => (
+                      <LogTimeControls
+                        currentTime={currentTime}
+                        isLiveStreaming={isLiveStreaming}
+                        jumpToTime={jumpToTargetPositionTime}
+                        startLiveStreaming={startLiveStreaming}
+                        stopLiveStreaming={stopLiveStreaming}
+                      />
+                    )}
                   </WithTimeControls>
                 </EuiFlexItem>
               </EuiFlexGroup>

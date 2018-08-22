@@ -17,8 +17,8 @@ import {
   // searchActions,
   // searchResultsSelectors,
   // sharedSelectors,
+  logPositionActions,
   State,
-  targetActions,
 } from './state';
 
 export const withLogSearchControlsProps = connect(
@@ -29,7 +29,7 @@ export const withLogSearchControlsProps = connect(
   }),
   bindPlainActionCreators({
     // clearSearch: searchActions.clearSearch,
-    jumpToTarget: targetActions.jumpToTarget,
+    jumpToTarget: logPositionActions.jumpToTargetPosition,
     // search: searchActions.search,
   })
 );

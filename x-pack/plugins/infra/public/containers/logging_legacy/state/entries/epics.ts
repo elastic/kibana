@@ -6,18 +6,12 @@
 
 import { Action } from 'redux';
 import { combineEpics, Epic, EpicWithState } from 'redux-observable';
-import { /*interval,*/ merge } from 'rxjs';
+import { merge } from 'rxjs';
 import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../../common/time';
-import { targetActions } from '../target';
-import {
-  loadEntries,
-  loadMoreEntries,
-  reportVisibleEntries,
-  // startLiveStreaming,
-  // stopLiveStreaming,
-} from './actions';
+import { logPositionActions } from '../log_position';
+import { loadEntries, loadMoreEntries, reportVisibleEntries } from './actions';
 import { loadMoreEntriesEpic } from './load_more_operation';
 import { loadEntriesEpic } from './load_operation';
 
@@ -29,6 +23,7 @@ interface ManageEntriesDependencies<State> {
   selectEntriesEnd: (state: State) => TimeKey | null;
   selectHasMoreBeforeStart: (state: State) => boolean;
   selectHasMoreAfterEnd: (state: State) => boolean;
+  selectIsAutoReloading: (state: State) => boolean;
   selectIsLoadingEntries: (state: State) => boolean;
 }
 
@@ -52,11 +47,12 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     selectEntriesEnd,
     selectHasMoreBeforeStart,
     selectHasMoreAfterEnd,
+    selectIsAutoReloading,
     selectIsLoadingEntries,
   }
 ) => {
   const shouldLoadAround$ = action$.pipe(
-    filter(targetActions.jumpToTarget.match),
+    filter(logPositionActions.jumpToTargetPosition.match),
     withLatestFrom(state$),
     filter(([{ payload }, state]) => {
       const entriesStart = selectEntriesStart(state);
@@ -73,6 +69,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(reportVisibleEntries.match),
     filter(({ payload: { pagesBeforeStart } }) => pagesBeforeStart < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
+    filter(([action, state]) => !selectIsAutoReloading(state)),
     filter(([action, state]) => !selectIsLoadingEntries(state)),
     filter(([action, state]) => selectHasMoreBeforeStart(state)),
     map(([action, state]) => selectEntriesStart(state)),
@@ -84,6 +81,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(reportVisibleEntries.match),
     filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
+    filter(([action, state]) => !selectIsAutoReloading(state)),
     filter(([action, state]) => !selectIsLoadingEntries(state)),
     filter(([action, state]) => selectHasMoreAfterEnd(state)),
     map(([action, state]) => selectEntriesEnd(state)),

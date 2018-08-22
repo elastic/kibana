@@ -12,9 +12,9 @@ import {
   entriesActions,
   entriesSelectors,
   // searchResultsSelectors,
+  logPositionActions,
+  logPositionSelectors,
   State,
-  targetActions,
-  targetSelectors,
 } from '../../containers/logging_legacy/state';
 import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
@@ -22,13 +22,17 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
-    endLoadingState: entriesSelectors.selectEntriesEndLoadingState(state),
+    isReloading: entriesSelectors.selectIsReloadingEntries(state),
+    isLoadingMore: entriesSelectors.selectIsLoadingMoreEntries(state),
+    hasMoreBeforeStart: entriesSelectors.selectHasMoreBeforeStart(state),
+    hasMoreAfterEnd: entriesSelectors.selectHasMoreAfterEnd(state),
+    isStreaming: logPositionSelectors.selectIsAutoReloading(state),
+    lastLoadedTime: entriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
-    startLoadingState: entriesSelectors.selectEntriesStartLoadingState(state),
-    target: targetSelectors.selectTarget(state),
+    target: logPositionSelectors.selectTargetPosition(state),
   }),
   bindPlainActionCreators({
-    jumpToTarget: targetActions.jumpToTarget,
+    jumpToTarget: logPositionActions.jumpToTargetPosition,
     reportVisibleInterval: entriesActions.reportVisibleEntries,
   })
 );
@@ -38,9 +42,10 @@ export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
 const selectItems = createSelector(
   entriesSelectors.selectEntries,
   entriesSelectors.selectIsReloadingEntries,
+  logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading /*, searchResults*/) =>
-    isReloading
+  (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
+    isReloading && !isAutoReloading
       ? []
       : logEntries.map(logEntry =>
           createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)
