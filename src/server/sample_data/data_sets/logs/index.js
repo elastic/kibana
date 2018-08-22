@@ -20,7 +20,7 @@
 import path from 'path';
 import { savedObjects } from './saved_objects';
 
-export function flightsSpecProvider() {
+export function logsSpecProvider() {
   return {
     id: 'logs',
     name: 'Sample log data',
@@ -67,7 +67,7 @@ export function flightsSpecProvider() {
           }
         }
       },
-      @message: {
+      '@message': {
         type: 'text',
         fields: {
           keyword: {
@@ -125,7 +125,7 @@ export function flightsSpecProvider() {
       bytes: {
         type: 'long'
       },
-      @tags: {
+      '@tags': {
         type: 'text',
         fields: {
           keyword: {
