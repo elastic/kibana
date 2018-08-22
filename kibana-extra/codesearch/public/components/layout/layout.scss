@@ -32,3 +32,36 @@
 .noOverflow {
   overflow: hidden;
 }
+
+.directoryView {
+  max-height: 60%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.directoryItem {
+  height: 2rem;
+  line-height: 2rem;
+}
+
+.directoryItem>a {
+  display: block;
+  width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.commitsHeader {
+  font-size: 1.5rem;
+}
+
+.commitItem {
+  padding: 0.5rem 0;
+}
+
+.contentItem {
+  padding: 0.5rem;
+   border: 1px solid;
+}

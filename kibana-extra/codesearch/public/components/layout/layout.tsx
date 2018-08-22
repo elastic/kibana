@@ -13,12 +13,13 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 
 import { parse as parseQuery } from 'query-string';
-import { match } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
+import { Link, match, withRouter } from 'react-router-dom';
 import { Location } from 'vscode-languageserver';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
@@ -64,6 +65,49 @@ interface Props {
   isNotFound: boolean;
 }
 
+const DirectoryView = withRouter(props => {
+  const files = props.node ? props.node.children : null;
+  const { resource, org, repo, revision } = props.match.params;
+  const fileList =
+    files &&
+    files.map(file => {
+      if (file.type === FileTreeItemType.File) {
+        return (
+          <div key={file.name} className="directoryItem">
+            <Link to={`/${resource}/${org}/${repo}/${PathTypes.blob}/${revision}/${file.path}`}>
+              {file.name}
+            </Link>
+          </div>
+        );
+      } else if (file.type === FileTreeItemType.Directory) {
+        return (
+          <div key={file.name} className="directoryItem">
+            <Link to={`/${resource}/${org}/${repo}/${PathTypes.tree}/${revision}/${file.path}`}>
+              {file.name}
+            </Link>
+          </div>
+        );
+      } else {
+        throw new Error('invalid file tree item type');
+      }
+    });
+  return <div className="directoryView">{fileList}</div>;
+});
+
+const Commits = props => {
+  const commitList = props.commits.map(commit => (
+    <div key={commit.id} className="commitItem">
+      {commit.id} {commit.message} {moment(commit.updated).fromNow()}
+    </div>
+  ));
+  return (
+    <div>
+      <h1 className="commitsHeader">Commits</h1>
+      {commitList}
+    </div>
+  );
+};
+
 export class LayoutPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -71,10 +115,6 @@ export class LayoutPage extends React.Component<Props, State> {
       showSearchBox: false,
       tab: parseQuery(props.location.search).tab,
     };
-  }
-
-  public componentDidMount() {
-    this.fetchTree(this.props.match.params.path);
   }
 
   public onClick = (node: Tree) => {
@@ -165,20 +205,38 @@ export class LayoutPage extends React.Component<Props, State> {
       />
     );
 
+  public renderContent = () => {
+    const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
+    if (this.props.match.params.pathType === PathTypes.blob) {
+      return (
+        <Editor
+          file={path}
+          goto={goto}
+          repoUri={`${resource}/${org}/${repo}`}
+          revision={revision || 'HEAD'}
+        />
+      );
+    } else if (pathType === PathTypes.tree) {
+      return (
+        <EuiFlexGroup direction="column" style={noMarginStyle}>
+          <EuiFlexItem className="contentItem">
+            <DirectoryView node={this.findNode(path ? path.split('/') : [], this.props.tree)} />
+          </EuiFlexItem>
+          <EuiFlexItem className="contentItem">
+            <Commits commits={this.props.commits} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      return null;
+    }
+  };
+
   public render() {
     if (this.props.isNotFound) {
       return <NotFound />;
     }
     const { symbols, isSymbolsLoading } = this.props;
-    const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
-    const editor = pathType === 'blob' && (
-      <Editor
-        file={path}
-        goto={goto}
-        repoUri={`${resource}/${org}/${repo}`}
-        revision={revision || 'HEAD'}
-      />
-    );
 
     const symbolOptions = symbols.map((symbol: DetailSymbolInformation) => {
       return {
@@ -240,7 +298,7 @@ export class LayoutPage extends React.Component<Props, State> {
               {this.renderTabContent()}
             </EuiFlexItem>
             <EuiFlexItem style={noMarginStyle} className="autoOverflow">
-              {editor}
+              {this.renderContent()}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -265,6 +323,7 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   symbols: state.symbolSearch.symbols,
   isSymbolsLoading: state.symbolSearch.isLoading,
+  commits: state.file.commits,
 });
 
 const mapDispatchToProps = {
