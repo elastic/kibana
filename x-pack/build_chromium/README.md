@@ -89,6 +89,12 @@ Run the build, replacing the sha with the one you wish to build:
 - Linux: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
 - Windows: `python c:\chromium\build_chromium\build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
 
+## Artifacts
+
+After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}`, for example: `chromium-4747cc2-linux`.
+
+The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename` and `baseUrl`.
+
 ## Diagnosing runtime failures
 
 After getting the build to pass, the resulting binaries often failed to run or would hang.
