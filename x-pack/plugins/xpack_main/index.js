@@ -22,6 +22,7 @@ import {
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
 import { settingsRoute } from './server/routes/api/v1/settings';
+import mappings from './mappings';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
@@ -48,7 +49,7 @@ export const xpackMain = (kibana) => {
     configPrefix: 'xpack.xpack_main',
     publicDir: resolve(__dirname, 'public'),
     require: ['elasticsearch'],
-
+    mappings,
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
