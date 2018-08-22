@@ -7,6 +7,7 @@
 import React from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
+import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import {
   EuiAccordion,
   EuiText,
@@ -55,6 +56,7 @@ export class FlyOut extends React.Component {
     };
     const xyzTmsEditor = XYZTMSSource.renderEditor(editorProperties);
     const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
+    const heatmapEditor = ESGeohashGridSource.renderEditor(editorProperties);
 
     return (
       <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
@@ -91,6 +93,16 @@ export class FlyOut extends React.Component {
               paddingSize="l"
             >
               {xyzTmsEditor}
+            </EuiAccordion>
+          </div>
+          <div>
+            <EuiSpacer size="l"/>
+            <EuiAccordion
+              id="accordion2"
+              buttonContent="Elasticsearch"
+              paddingSize="l"
+            >
+              {heatmapEditor}
             </EuiAccordion>
           </div>
         </EuiFlyoutBody>

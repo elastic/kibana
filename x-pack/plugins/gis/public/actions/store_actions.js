@@ -10,8 +10,10 @@ import { XYZTMSSource } from "../shared/layers/sources/xyz_tms_source";
 
 import { VectorLayer } from "../shared/layers/vector_layer";
 import { TileLayer } from "../shared/layers/tile_layer";
+import { GeohashGridLayer } from "../shared/layers/geohashgrid_layer";
 
 import { GIS_API_PATH } from '../../common/constants';
+import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -88,12 +90,26 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
       layerDescriptor = await createDefaultLayerDescriptorForXYZTMSSource(source, layerOptions);
     } else if (source.type === EMSFileSource.type) {
       layerDescriptor = await createDefaultLayerDescriptorForEMSFileSource(source, layerOptions);
+    } else if (source.type === ESGeohashGridSource.type) {
+      layerDescriptor = await createDefaultLayerDescriptorForESGeohashGridSource(source, layerOptions);
     } else {
       throw new Error('Does not recognize source-type ' + source.type);
     }
     dispatch(addLayer(layerDescriptor, position));
   };
 }
+
+async function createDefaultLayerDescriptorForESGeohashGridSource(esGeohashGridSource, options) {
+  const geojson = await ESGeohashGridSource.getGeoJsonPoints(esGeohashGridSource);
+  return GeohashGridLayer.createDescriptor({
+    source: geojson,
+    sourceDescriptor: esGeohashGridSource,
+    name: esGeohashGridSource.name || esGeohashGridSource.id,
+    ...options
+  });
+}
+
+
 
 async function createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options) {
   const geojson = await EMSFileSource.getGeoJson(emsFileSource);
