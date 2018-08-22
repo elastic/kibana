@@ -6,14 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { Store } from 'redux';
-import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 import styled from 'styled-components';
-
-import { InfraFrontendLibs } from '../../lib/lib';
-import { createStore } from './store';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { Toolbar } from '../../components/eui';
@@ -29,185 +22,177 @@ import { ScrollableLogTextStreamView } from '../../components/logging/log_text_s
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
-import { withLibs } from '../../containers/libs';
-import { logPositionActions, State } from '../../containers/logging_legacy/state';
-// import { withLogSearchControlsProps } from '../../containers/logging_legacy/with_log_search_controls_props';
-import { WithStreamItems } from '../../containers/logging_legacy/with_stream_items';
-import { WithSummary } from '../../containers/logging_legacy/with_summary';
-import { WithTextScale } from '../../containers/logging_legacy/with_text_scale_controls_props';
-import { WithTextStreamPosition } from '../../containers/logging_legacy/with_text_stream_position';
-import { WithTextWrap } from '../../containers/logging_legacy/with_text_wrap_controls_props';
-import { WithTimeControls } from '../../containers/logging_legacy/with_time_controls_props';
-import { withVisibleLogEntries } from '../../containers/logging_legacy/with_visible_log_entries';
+// import { withLogSearchControlsProps } from '../../containers/logs/with_log_search_controls_props';
+import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
+import { WithLogPosition } from '../../containers/logs/with_log_position';
+import { WithStreamItems } from '../../containers/logs/with_stream_items';
+import { WithSummary } from '../../containers/logs/with_summary';
+import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
+import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_props';
 
-const ConnectedLogPositionText = withVisibleLogEntries(LogPositionText);
 // const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
 
-interface LogsPageProps {
-  libs: InfraFrontendLibs;
-}
-
-interface LogsPageState {
-  libs: BehaviorSubject<InfraFrontendLibs>;
-  store: Store<State>;
-}
-
-export const LogsPage = withLibs(
-  class LogPage extends React.PureComponent<LogsPageProps, LogsPageState> {
-    public state: Readonly<LogsPageState>;
-
-    constructor(props: LogsPageProps) {
-      super(props);
-
-      const libs = new BehaviorSubject(props.libs);
-      const store = createStore({
-        apolloClient: libs.pipe(pluck('apolloClient')),
-        observableApi: libs.pipe(pluck('observableApi')),
-      });
-
-      this.state = {
-        libs,
-        store,
-      };
-    }
-
-    public componentDidUpdate(prevProps: LogsPageProps) {
-      if (this.props.libs !== prevProps.libs) {
-        this.state.libs.next(this.props.libs);
-      }
-    }
-
-    public componentDidMount() {
-      this.state.store.dispatch(
-        logPositionActions.jumpToTargetPosition({
-          time: Date.now(),
-          tiebreaker: 0,
-        })
-      );
-    }
-
-    public render() {
-      return (
-        <Provider store={this.state.store}>
-          <ColumnarPage>
-            <Header breadcrumbs={[{ text: 'Logs' }]} />
-            <Toolbar>
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-                <EuiFlexItem>
-                  <ConnectedLogPositionText />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <LogCustomizationMenu>
-                    <WithSummary>
-                      {({ availableIntervalSizes, configureSummary, intervalSize }) => (
-                        <LogMinimapScaleControls
-                          availableIntervalSizes={availableIntervalSizes}
-                          configureSummary={configureSummary}
-                          intervalSize={intervalSize}
-                        />
-                      )}
-                    </WithSummary>
+export class LogsPage extends React.Component {
+  public render() {
+    return (
+      <ColumnarPage>
+        <Header breadcrumbs={[{ text: 'Logs' }]} />
+        <Toolbar>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+            <EuiFlexItem>
+              <WithLogPosition>
+                {({ firstVisiblePosition, lastVisiblePosition }) => (
+                  <LogPositionText
+                    firstVisiblePosition={firstVisiblePosition}
+                    lastVisiblePosition={lastVisiblePosition}
+                  />
+                )}
+              </WithLogPosition>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LogCustomizationMenu>
+                <WithLogMinimap>
+                  {({ availableIntervalSizes, intervalSize, setIntervalSize }) => (
+                    <LogMinimapScaleControls
+                      availableIntervalSizes={availableIntervalSizes}
+                      setIntervalSize={setIntervalSize}
+                      intervalSize={intervalSize}
+                    />
+                  )}
+                </WithLogMinimap>
+                <WithTextWrap>
+                  {({ wrap, setTextWrap }) => (
+                    <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                  )}
+                </WithTextWrap>
+                <WithTextScale>
+                  {({ availableTextScales, textScale, setTextScale }) => (
+                    <LogTextScaleControls
+                      availableTextScales={availableTextScales}
+                      textScale={textScale}
+                      setTextScale={setTextScale}
+                    />
+                  )}
+                </WithTextScale>
+              </LogCustomizationMenu>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WithLogPosition>
+                {({
+                  visibleMidpoint,
+                  isAutoReloading,
+                  jumpToTargetPositionTime,
+                  startLiveStreaming,
+                  stopLiveStreaming,
+                }) => (
+                  <LogTimeControls
+                    currentTime={visibleMidpoint}
+                    isLiveStreaming={isAutoReloading}
+                    jumpToTime={jumpToTargetPositionTime}
+                    startLiveStreaming={startLiveStreaming}
+                    stopLiveStreaming={stopLiveStreaming}
+                  />
+                )}
+              </WithLogPosition>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Toolbar>
+        <LogPageContent>
+          <AutoSizer content>
+            {({ measureRef, content: { width = 0, height = 0 } }) => (
+              <LogPageEventStreamColumn innerRef={measureRef as any}>
+                <WithTextScale>
+                  {({ textScale }) => (
                     <WithTextWrap>
-                      {({ wrap, setTextWrap }) => (
-                        <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
-                      )}
-                    </WithTextWrap>
-                    <WithTextScale>
-                      {({ availableTextScales, textScale, setTextScale }) => (
-                        <LogTextScaleControls
-                          availableTextScales={availableTextScales}
-                          textScale={textScale}
-                          setTextScale={setTextScale}
-                        />
-                      )}
-                    </WithTextScale>
-                  </LogCustomizationMenu>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <WithTimeControls>
-                    {({
-                      currentTime,
-                      isLiveStreaming,
-                      jumpToTargetPositionTime,
-                      startLiveStreaming,
-                      stopLiveStreaming,
-                    }) => (
-                      <LogTimeControls
-                        currentTime={currentTime}
-                        isLiveStreaming={isLiveStreaming}
-                        jumpToTime={jumpToTargetPositionTime}
-                        startLiveStreaming={startLiveStreaming}
-                        stopLiveStreaming={stopLiveStreaming}
-                      />
-                    )}
-                  </WithTimeControls>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Toolbar>
-            <LogPageContent>
-              <AutoSizer content>
-                {({ measureRef, content: { width = 0, height = 0 } }) => (
-                  <LogPageEventStreamColumn innerRef={measureRef as any}>
-                    <WithTextScale>
-                      {({ textScale }) => (
-                        <WithTextWrap>
-                          {({ wrap }) => (
+                      {({ wrap }) => (
+                        <WithLogPosition initializeOnMount>
+                          {({
+                            isAutoReloading,
+                            jumpToTargetPosition,
+                            reportVisiblePositions,
+                            targetPosition,
+                          }) => (
                             <WithStreamItems>
-                              {streamItemsProps => (
+                              {({
+                                hasMoreAfterEnd,
+                                hasMoreBeforeStart,
+                                isLoadingMore,
+                                isReloading,
+                                items,
+                                lastLoadedTime,
+                              }) => (
                                 <ScrollableLogTextStreamView
-                                  scale={textScale}
-                                  wrap={wrap}
+                                  hasMoreAfterEnd={hasMoreAfterEnd}
+                                  hasMoreBeforeStart={hasMoreBeforeStart}
                                   height={height}
+                                  isLoadingMore={isLoadingMore}
+                                  isReloading={isReloading}
+                                  isStreaming={isAutoReloading}
+                                  items={items}
+                                  jumpToTarget={jumpToTargetPosition}
+                                  lastLoadedTime={lastLoadedTime}
+                                  reportVisibleInterval={reportVisiblePositions}
+                                  scale={textScale}
+                                  target={targetPosition}
                                   width={width}
-                                  {...streamItemsProps}
+                                  wrap={wrap}
                                 />
                               )}
                             </WithStreamItems>
                           )}
-                        </WithTextWrap>
+                        </WithLogPosition>
                       )}
-                    </WithTextScale>
-                  </LogPageEventStreamColumn>
-                )}
-              </AutoSizer>
-              <AutoSizer content>
-                {({ measureRef, content: { width = 0, height = 0 } }) => {
-                  return (
-                    <LogPageMinimapColumn innerRef={measureRef as any}>
+                    </WithTextWrap>
+                  )}
+                </WithTextScale>
+              </LogPageEventStreamColumn>
+            )}
+          </AutoSizer>
+          <AutoSizer content>
+            {({ measureRef, content: { width = 0, height = 0 } }) => {
+              return (
+                <LogPageMinimapColumn innerRef={measureRef as any}>
+                  <WithLogMinimap>
+                    {({ intervalSize }) => (
                       <WithSummary>
-                        {({ buckets, intervalSize, reportVisibleInterval }) => (
-                          <WithTextStreamPosition>
-                            {({ jumpToPosition, visibleMidpoint, visibleTimeInterval }) => (
+                        {({ buckets }) => (
+                          <WithLogPosition>
+                            {({
+                              jumpToTargetPosition,
+                              reportVisibleSummary,
+                              visibleMidpoint,
+                              visibleTimeInterval,
+                            }) => (
                               <LogMinimap
                                 height={height}
                                 width={width}
                                 highlightedInterval={visibleTimeInterval}
                                 intervalSize={intervalSize}
-                                jumpToTarget={jumpToPosition}
-                                reportVisibleInterval={reportVisibleInterval}
+                                jumpToTarget={jumpToTargetPosition}
+                                reportVisibleInterval={reportVisibleSummary}
                                 summaryBuckets={buckets}
                                 target={visibleMidpoint}
                               />
                             )}
-                          </WithTextStreamPosition>
+                          </WithLogPosition>
                         )}
                       </WithSummary>
-                    </LogPageMinimapColumn>
-                  );
-                }}
-              </AutoSizer>
-            </LogPageContent>
-            {/*<LogStatusbar>
-              <LogStatusbarItem>
-                <ConnectedLogSearchControls />
-              </LogStatusbarItem>
-            </LogStatusbar>*/}
-          </ColumnarPage>
-        </Provider>
-      );
-    }
+                    )}
+                  </WithLogMinimap>
+                </LogPageMinimapColumn>
+              );
+            }}
+          </AutoSizer>
+        </LogPageContent>
+        {/*<LogStatusbar>
+          <LogStatusbarItem>
+            <ConnectedLogSearchControls />
+          </LogStatusbarItem>
+        </LogStatusbar>*/}
+      </ColumnarPage>
+    );
   }
-);
+}
 
 const LogPageContent = styled.div`
   flex: 1 0 0;

@@ -13,16 +13,43 @@ type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) 
 
 export type ChildFunctionRendererProps<RenderArgs> = {
   children: RendererFunction<RenderArgs>;
+  initializeOnMount?: boolean;
+  resetOnUnmount?: boolean;
 } & RenderArgs;
 
+interface ChildFunctionRendererOptions<RenderArgs> {
+  onInitialize?: (props: RenderArgs) => void;
+  onCleanup?: (props: RenderArgs) => void;
+}
+
 export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
-  hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>
+  hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>,
+  { onInitialize, onCleanup }: ChildFunctionRendererOptions<InjectedProps> = {}
 ) =>
   hoc(
-    Object.assign(
-      (props: ChildFunctionRendererProps<InjectedProps>) => props.children(omit('children', props)),
-      {
-        displayName: 'ChildFunctionRenderer',
+    class ChildFunctionRenderer extends React.Component<ChildFunctionRendererProps<InjectedProps>> {
+      public displayName = 'ChildFunctionRenderer';
+
+      public componentDidMount() {
+        if (this.props.initializeOnMount && onInitialize) {
+          onInitialize(this.getRendererArgs());
+        }
       }
-    )
+
+      public componentWillUnmount() {
+        if (this.props.resetOnUnmount && onCleanup) {
+          onCleanup(this.getRendererArgs());
+        }
+      }
+
+      public render() {
+        return this.props.children(this.getRendererArgs());
+      }
+
+      private getRendererArgs = () =>
+        omit(['children', 'initializeOnMount', 'resetOnUnmount'], this.props) as Pick<
+          ChildFunctionRendererProps<InjectedProps>,
+          keyof InjectedProps
+        >;
+    }
   );

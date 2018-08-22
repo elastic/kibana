@@ -15,20 +15,18 @@ interface IntervalSizeDescriptor {
 interface LogMinimapScaleControlsProps {
   availableIntervalSizes: IntervalSizeDescriptor[];
   intervalSize: number;
-  configureSummary: (params: { intervalSize: number }) => any;
+  setIntervalSize: (intervalSize: number) => any;
 }
 
 export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScaleControlsProps> {
   public handleScaleChange = (intervalSizeDescriptorKey: string) => {
-    const { availableIntervalSizes, configureSummary } = this.props;
+    const { availableIntervalSizes, setIntervalSize } = this.props;
     const [sizeDescriptor] = availableIntervalSizes.filter(
       intervalKeyEquals(intervalSizeDescriptorKey)
     );
 
     if (sizeDescriptor) {
-      configureSummary({
-        intervalSize: sizeDescriptor.intervalSize,
-      });
+      setIntervalSize(sizeDescriptor.intervalSize);
     }
   };
 
