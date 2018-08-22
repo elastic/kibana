@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deleteAll } from '../lib';
+import { deleteAll, deleteEmptyFolders } from '../lib';
 
 export const CleanTask = {
   global: true,
@@ -211,5 +211,14 @@ export const CleanExtraBrowsersTask = {
         await deleteAll(log, getBrowserPaths({ windows: true, darwin: true }));
       }
     }
+  },
+};
+
+export const CleanEmptyFoldersTask = {
+  global: true,
+  description: 'Cleaning all empty folders recursively',
+
+  async run(config, log, build) {
+    await deleteEmptyFolders(log, build.resolvePath('.'));
   },
 };

@@ -253,6 +253,7 @@
     "chromedriver": "2.41.0",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
+    "delete-empty": "^2.0.0",
     "enzyme": "3.2.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "3.3.1",

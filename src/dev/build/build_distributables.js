@@ -22,6 +22,7 @@ import { getConfig, createRunner } from './lib';
 import {
   BootstrapTask,
   BuildPackagesTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
@@ -38,7 +39,7 @@ import {
   CreatePackageJsonTask,
   CreateReadmeTask,
   CreateRpmPackageTask,
-  CreateStaticFilesystem,
+  CreateStaticModulesFsTask,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
@@ -114,7 +115,8 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
-  await run(CreateStaticFilesystem);
+  await run(CleanEmptyFoldersTask);
+  await run(CreateStaticModulesFsTask);
 
   /**
    * copy generic build outputs into platform-specific build
