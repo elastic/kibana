@@ -220,6 +220,7 @@ export class ShareUrlContent extends Component<Props, State> {
     );
   };
 
+  // TODO: switch evt type to ChangeEvent<HTMLInputElement> once https://github.com/elastic/eui/issues/1134 is resolved
   private handleShortUrlChange = async (evt: any) => {
     const isChecked = evt.target.checked;
 
