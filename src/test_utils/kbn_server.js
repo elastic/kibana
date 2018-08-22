@@ -25,7 +25,10 @@ import KbnServer from '../../src/server/kbn_server';
 
 const DEFAULTS_SETTINGS = {
   server: {
-    autoListen: false,
+    autoListen: true,
+    // Use the ephemeral port to make sure that tests use the first available
+    // port and aren't affected by the timing issues in test environment.
+    port: 0,
     xsrf: {
       disableProtection: true
     }
@@ -92,9 +95,12 @@ export function authOptions() {
  *
  * @param {KbnServer} kbnServer
  * @param {object}    options Any additional options or overrides for inject()
- * @param {Function}  fn The callback to pass as the second arg to inject()
  */
-export function makeRequest(kbnServer, options, fn) {
-  options = defaultsDeep({}, authOptions(), options);
-  return kbnServer.server.inject(options, fn);
+export async function makeRequest(kbnServer, options) {
+  // Since all requests to Kibana hit core http server first and only after that
+  // are proxied to the "legacy" Kibana we should inject requests through the top
+  // level Hapi server used by the core.
+  return await kbnServer.newPlatform.proxyListener.root.server.http.service.httpServer.server.inject(
+    defaultsDeep({}, authOptions(), options)
+  );
 }

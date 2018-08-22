@@ -35,6 +35,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    get index() {
+      return {
+        LOGSTASH_TIME_BASED: 'logstash-*',
+        LOGSTASH_NON_TIME_BASED: 'logstash*'
+      };
+    }
+
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize new');
       await PageObjects.common.navigateToUrl('visualize', 'new');
@@ -353,7 +360,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch(indexPattern = 'logstash-*') {
+    async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`paginatedListItem-${indexPattern}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -541,6 +548,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
+      await remote.pressKeys(Keys.RETURN);
+    }
+
+    async setCustomInterval(newValue) {
+      await this.setInterval('Custom');
+      const input = await find.byCssSelector('input[name="customInterval"]');
+      await input.clearValue();
+      await input.type(newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
@@ -602,13 +617,47 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+
+    async changeHeatmapColorNumbers(value = 6) {
+      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
+      await input.clearValue();
+      await input.type(`${value}`);
+    }
+
     async clickMetricsAndAxes() {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickOptionsTab() {
+      await testSubjects.click('visEditorTaboptions');
+    }
+
+    async clickEnableCustomRanges() {
+      await testSubjects.click('heatmapEnableCustomRanges');
+    }
+
+    async clickAddRange() {
+      await testSubjects.click(`heatmapAddRangeButton`);
+    }
+
+    async isCustomRangeTableShown() {
+      await testSubjects.exists('heatmapCustomRangesTable');
+    }
+
+    async addCustomRange(from, to) {
+      const table = await testSubjects.find('heatmapCustomRangesTable');
+      const lastRow = await table.findByCssSelector('tr:last-child');
+      const fromCell = await lastRow.findByCssSelector('td:first-child input');
+      fromCell.clearValue();
+      fromCell.type(`${from}`);
+      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
+      toCell.clearValue();
+      toCell.type(`${to}`);
+    }
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
+
     async clickYAxisAdvancedOptions(axisId) {
       await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
     }
@@ -893,6 +942,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.byCssSelector('.visualization');
     }
 
+    async waitForVisualizationSavedToastGone() {
+      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+    }
+
     async getZoomSelectors(zoomSelector) {
       return await find.allByCssSelector(zoomSelector);
     }
@@ -1010,6 +1063,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           throw new Error('legend color selector not open');
         }
       });
+    }
+
+    async filterOnTableCell(column, row) {
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
     }
 
     async doesLegendColorChoiceExist(color) {

@@ -8,6 +8,7 @@ import { uniq } from 'lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 
 /**
  * @typedef {Object} ReportingUsageStats  Almost all of these stats are optional.
@@ -117,6 +118,7 @@ export function getReportingUsageCollector(server) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
+
     fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
@@ -145,6 +147,24 @@ export function getReportingUsageCollector(server) {
         },
         last7Days: {
           ...statsOverLast7Days
+        }
+      };
+    },
+
+    /*
+     * Format the response data into a model for internal upload
+     * 1. Make this data part of the "kibana_stats" type
+     * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
+     */
+    formatForBulkUpload: result => {
+      return {
+        type: KIBANA_STATS_TYPE_MONITORING,
+        payload: {
+          usage: {
+            xpack: {
+              reporting: result
+            }
+          }
         }
       };
     }

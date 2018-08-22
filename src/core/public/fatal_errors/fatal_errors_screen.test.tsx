@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore EuiCallOut not available until we upgrade to EUI 3.1.0
 import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
 import { mount, shallow } from 'enzyme';

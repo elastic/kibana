@@ -17,42 +17,42 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
+
 import { isSystemApiRequest } from '../../system_api';
 
+let newPlatformLoadingCount;
+
+export function __newPlatformInit__(instance) {
+  if (newPlatformLoadingCount) {
+    throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
+  }
+  newPlatformLoadingCount = instance;
+}
+
 export function initLoadingCountApi(chrome, internals) {
-  const counts = { angular: 0, manual: 0 };
-  const handlers = new Set();
-
-  function getCount() {
-    return counts.angular + counts.manual;
-  }
-
-  // update counts and call handlers with sum if there is a change
-  function update(name, count) {
-    if (counts[name] === count) {
-      return;
-    }
-
-    counts[name] = count;
-    for (const handler of handlers) {
-      handler(getCount());
-    }
-  }
-
   /**
    * Injected into angular module by ui/chrome angular integration
    * and adds a root-level watcher that will capture the count of
-   * active $http requests on each digest loop
+   * active $http requests on each digest loop and expose the count to
+   * the core.loadingCount api
    * @param  {Angular.Scope} $rootScope
    * @param  {HttpService} $http
    * @return {undefined}
    */
   internals.capture$httpLoadingCount = function ($rootScope, $http) {
-    $rootScope.$watch(() => {
-      const reqs = $http.pendingRequests || [];
-      update('angular', reqs.filter(req => !isSystemApiRequest(req)).length);
-    });
+    newPlatformLoadingCount.add(new Rx.Observable(observer => {
+      const unwatch = $rootScope.$watch(() => {
+        const reqs = $http.pendingRequests || [];
+        observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
+      });
+
+      return unwatch;
+    }));
   };
+
+  const manualCount$ = new Rx.BehaviorSubject(0);
+  newPlatformLoadingCount.add(manualCount$);
 
   chrome.loadingCount = new class ChromeLoadingCountApi {
     /**
@@ -63,13 +63,14 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {Function} unsubscribe
      */
     subscribe(handler) {
-      handlers.add(handler);
-
-      // send the current count to the handler
-      handler(getCount());
+      const subscription = newPlatformLoadingCount.getCount$().subscribe({
+        next(count) {
+          handler(count);
+        }
+      });
 
       return () => {
-        handlers.delete(handler);
+        subscription.unsubscribe();
       };
     }
 
@@ -78,7 +79,7 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {undefined}
      */
     increment() {
-      update('manual', counts.manual + 1);
+      manualCount$.next(manualCount$.getValue() + 1);
     }
 
     /**
@@ -86,7 +87,7 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {undefined}
      */
     decrement() {
-      update('manual', counts.manual - 1);
+      manualCount$.next(manualCount$.getValue() - 1);
     }
   };
 }

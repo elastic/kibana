@@ -50,3 +50,9 @@ to Kibana's advanced setting.
 *Impact:* This setting is no longer necessary. If you enable {monitoring} across the Elastic Stack, a monitoring agent runs
 on each Elasticsearch node, Logstash node, Kibana instance, and Beat to collect and index metrics. Each node and instance is
 considered unique based on its persistent UUID, which is written to the path.data directory when the node or instance starts.
+
+[float]
+=== Deprecated API `/shorten` has been removed
+*Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
+
+*Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
