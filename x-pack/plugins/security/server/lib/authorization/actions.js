@@ -22,5 +22,6 @@ export function actionsFactory(config) {
     },
     login: `action:login`,
     version: `version:${kibanaVersion}`,
+    manageSpaces: 'action:manage_spaces/*',
   };
 }

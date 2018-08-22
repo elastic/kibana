@@ -6,7 +6,6 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { isReservedSpace } from '../../common/is_reserved_space';
-import { actions } from './actions';
 
 export class SpacesClient {
   private readonly authorization: any;
@@ -81,7 +80,10 @@ export class SpacesClient {
 
   public async create(space: any) {
     if (this.useRbac()) {
-      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to create spaces');
+      await this.ensureAuthorizedGlobally(
+        this.authorization.actions.manageSpaces,
+        'Unauthorized to create spaces'
+      );
     }
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
@@ -95,7 +97,10 @@ export class SpacesClient {
 
   public async update(id: string, space: any) {
     if (this.useRbac()) {
-      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to update spaces');
+      await this.ensureAuthorizedGlobally(
+        this.authorization.actions.manageSpaces,
+        'Unauthorized to update spaces'
+      );
     }
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
@@ -108,7 +113,10 @@ export class SpacesClient {
 
   public async delete(id: string) {
     if (this.useRbac()) {
-      await this.ensureAuthorizedGlobally(actions.manage, 'Unauthorized to delete spaces');
+      await this.ensureAuthorizedGlobally(
+        this.authorization.actions.manageSpaces,
+        'Unauthorized to delete spaces'
+      );
     }
 
     const existingSpace = await this.get(id);
