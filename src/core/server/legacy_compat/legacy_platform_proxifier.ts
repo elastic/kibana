@@ -63,13 +63,6 @@ export class LegacyPlatformProxifier extends EventEmitter {
         return [
           eventName,
           (...args: any[]) => {
-            // Since it's just a proxy and the underlying server is managed by the core
-            // we don't want to generate unhandled exception if there are no parties
-            // interested in proxy `error` event.
-            if (eventName === 'error' && this.listeners(eventName).length === 0) {
-              return;
-            }
-
             this.log.debug(`Event is being forwarded: ${eventName}`);
             this.emit(eventName, ...args);
           },

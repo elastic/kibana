@@ -84,25 +84,6 @@ test('correctly redirects server events.', () => {
   }
 });
 
-test('redirects server `error` event only if there are listeners.', () => {
-  const [, onServerErrorListener] = server.addListener.mock.calls.find(
-    ([serverEventName]) => serverEventName === 'error'
-  )!;
-
-  const onErrorListener = jest.fn();
-  proxifier.addListener('error', onErrorListener);
-
-  onServerErrorListener(1, 2, 3);
-
-  expect(onErrorListener).toHaveBeenCalledTimes(1);
-  expect(onErrorListener).toHaveBeenCalledWith(1, 2, 3);
-
-  // NodeJS emitter throws error if `error` event is emitted, but listener is found,
-  // but we don't want that to happen.
-  proxifier.removeAllListeners('error');
-  expect(() => onServerErrorListener(3, 4, 5)).not.toThrow();
-});
-
 test('returns `address` from the underlying server.', () => {
   expect(proxifier.address()).toEqual({
     address: 'test-address',
