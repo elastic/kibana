@@ -89,6 +89,14 @@ Run the build, replacing the sha with the one you wish to build:
 - Linux: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
 - Windows: `python c:\chromium\build_chromium\build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
 
+## Diagnosing runtime failures
+
+After getting the build to pass, the resulting binaries often failed to run or would hang.
+
+You can run the headless browser manually to see what errors it is generating (replace the `c:\dev\data` with the path to a dummy folder you've created on your system):
+
+`headless_shell.exe --disable-translate --disable-extensions --disable-background-networking --safebrowsing-disable-auto-update --disable-sync --metrics-recording-only --disable-default-apps --mute-audio --no-first-run --user-data-dir=c:\dev\data --disable-gpu --no-sandbox --headless --hide-scrollbars --window-size=400,400 --remote-debugging-port=3333 about:blank`
+
 ## Resources
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
