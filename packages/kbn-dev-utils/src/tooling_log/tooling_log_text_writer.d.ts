@@ -17,11 +17,26 @@
  * under the License.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
+import { LogLevel, ParsedLogLevel } from './log_levels';
+import { LogMessage } from './tooling_log';
 
-const log = new ToolingLog({
-  level: 'verbose',
-  writeTo: process.stdout,
-});
+export interface ToolingLogWriter {
+  write(msg: LogMessage): boolean;
+}
 
-exports.log = log;
+export interface WriteTarget {
+  write(chunk: string): void;
+}
+
+export interface WriterConfig {
+  level: LogLevel;
+  writeTo: WriteTarget;
+}
+
+export class ToolingLogTextWriter implements ToolingLogTextWriter {
+  public level: ParsedLogLevel;
+  public writeTo: WriteTarget;
+
+  constructor(config: WriterConfig);
+  public write(msg: LogMessage): boolean;
+}

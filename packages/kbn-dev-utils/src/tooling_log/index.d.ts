@@ -17,11 +17,6 @@
  * under the License.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
-
-const log = new ToolingLog({
-  level: 'verbose',
-  writeTo: process.stdout,
-});
-
-exports.log = log;
+export { ToolingLog } from './tooling_log';
+export { ToolingLogTextWriter, WriterConfig } from './tooling_log_text_writer';
+export { pickLevelFromFlags, LogLevel } from './log_levels';

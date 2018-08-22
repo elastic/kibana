@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
@@ -38,8 +38,10 @@ export function runTypeCheckCli() {
     },
   });
 
-  const log = createToolingLog('info');
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
 
   if (extraFlags.length) {
     for (const flag of extraFlags) {

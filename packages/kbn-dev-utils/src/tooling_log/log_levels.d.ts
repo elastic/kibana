@@ -17,11 +17,13 @@
  * under the License.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
+export type LogLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
 
-const log = new ToolingLog({
-  level: 'verbose',
-  writeTo: process.stdout,
-});
+export interface ParsedLogLevel {
+  name: LogLevel;
+  flags: { [key in LogLevel]: boolean };
+}
 
-exports.log = log;
+export function pickLevelFromFlags(flags: { [key: string]: any }): LogLevel;
+
+export function parseLogLevel(level: LogLevel): ParsedLogLevel;
