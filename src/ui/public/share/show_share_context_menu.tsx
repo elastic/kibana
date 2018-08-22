@@ -41,7 +41,7 @@ const onClose = () => {
 interface ShowProps {
   anchorElement: any;
   allowEmbed: boolean;
-  getUnhashableStates: () => any[];
+  getUnhashableStates: () => object[];
   objectId?: string;
   objectType: string;
 }

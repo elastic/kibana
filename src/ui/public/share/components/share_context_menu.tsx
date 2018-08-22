@@ -27,7 +27,7 @@ interface Props {
   allowEmbed: boolean;
   objectId?: string;
   objectType: string;
-  getUnhashableStates: () => any[];
+  getUnhashableStates: () => object[];
 }
 
 export class ShareContextMenu extends Component<Props> {

@@ -51,7 +51,7 @@ interface Props {
   isEmbedded?: boolean;
   objectId?: string;
   objectType: string;
-  getUnhashableStates: () => any[];
+  getUnhashableStates: () => object[];
 }
 
 enum ExportUrlAsType {
