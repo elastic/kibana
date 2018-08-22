@@ -17,9 +17,11 @@
  * under the License.
  */
 
-const { createToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 
-const log = createToolingLog('verbose');
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: 'verbose',
+  writeTo: process.stdout,
+});
 
 exports.log = log;

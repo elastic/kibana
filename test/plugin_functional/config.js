@@ -18,18 +18,23 @@
  */
 
 import path from 'path';
+import fs from 'fs';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
+  // Find all folders in ./plugins since we treat all them as plugin folder
+  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
+  const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
+
   return {
     testFiles: [
-      require.resolve('./index'),
+      require.resolve('./test_suites/app_plugins'),
+      require.resolve('./test_suites/panel_actions'),
     ],
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    env: functionalConfig.get('env'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
     esArchiver: {
@@ -37,13 +42,13 @@ export default async function ({ readConfigFile }) {
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
-      reportName: 'Panel Actions Functional Tests',
+      reportName: 'Plugin Functional Tests',
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${path.resolve(__dirname, './sample_panel_action')}`,
+        ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },
   };

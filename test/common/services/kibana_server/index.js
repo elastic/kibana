@@ -18,3 +18,4 @@
  */
 
 export { KibanaServerProvider } from './kibana_server';
+export { extendEsArchiver } from './extend_es_archiver';

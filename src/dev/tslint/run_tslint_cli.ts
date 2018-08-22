@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import getopts from 'getopts';
 
 import { execInProjects, filterProjectsByFlag, Project } from '../typescript';
@@ -27,8 +27,10 @@ export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
 }
 
 export function runTslintCli(projects?: Project[]) {
-  const log = createToolingLog('info');
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
 
   const opts = getopts(process.argv.slice(2));
   projects = projects || filterProjectsByFlag(opts.project);
