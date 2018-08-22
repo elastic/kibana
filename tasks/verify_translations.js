@@ -19,72 +19,20 @@
 
 // TODO: Integrate a new tool for translations checking
 // https://github.com/elastic/kibana/pull/19826
-import { i18nLoader } from '@kbn/i18n';
-
-import { toArray } from 'rxjs/operators';
-import { fromRoot, formatListAsProse } from '../src/utils';
-import { findPluginSpecs } from '../src/plugin_discovery';
-import { collectUiExports } from '../src/ui';
-
-import * as i18nVerify from './utils/i18n_verify_keys';
+import path from 'path';
+import { extractDefaultTranslations } from '../src/dev/i18n/extract_default_translations';
 
 export default function (grunt) {
   grunt.registerTask('verifyTranslations', async function () {
     const done = this.async();
 
     try {
-      const { spec$ } = findPluginSpecs({
-        env: 'production',
-        plugins: {
-          scanDirs: [fromRoot('src/core_plugins')]
-        }
-      });
-
-      const specs = await spec$.pipe(toArray()).toPromise();
-      const uiExports = collectUiExports(specs);
-      await verifyTranslations(uiExports);
+      const pluginPath = path.resolve(__dirname, '../src/core_plugins/kibana');
+      await extractDefaultTranslations(pluginPath);
 
       done();
     } catch (error) {
       done(error);
     }
   });
-
-}
-
-async function verifyTranslations(uiExports) {
-  const keysUsedInViews = [];
-
-  // Search files for used translation keys
-  const translationPatterns = [
-    { regexp: 'i18n\\(\'(.*)\'\\)',
-      parsePaths: [fromRoot('src/ui/ui_render/views/*.pug')] }
-  ];
-  for (const { regexp, parsePaths } of translationPatterns) {
-    const keys = await i18nVerify.getTranslationKeys(regexp, parsePaths);
-    for (const key of keys) {
-      keysUsedInViews.push(key);
-    }
-  }
-
-  // get all of the translations from uiExports
-  const translations = await i18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
-  const keysWithoutTranslations = Object.entries(
-    i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
-  );
-
-  if (!keysWithoutTranslations.length) {
-    return;
-  }
-
-  throw new Error(
-    '\n' +
-    '\n' +
-    'The following keys are used in angular/pug views but are not translated:\n' +
-    keysWithoutTranslations.map(([locale, keys]) => (
-      `   - ${locale}: ${formatListAsProse(keys)}`
-    )).join('\n') +
-    '\n' +
-    '\n'
-  );
 }
