@@ -131,7 +131,7 @@ By turning this off, only the layers that are configured here will be included.
 `server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*. Details on the format, and the valid options, are available via the [OpenSSL cipher list format documentation](https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT)
 `server.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 `server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect all http requests to https over the port configured as `server.port`.
-`server.ssl.supportedProtocols:`:: *Default: TLSv1, TLSv1.1, TLSv1.2*  Supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
+`server.ssl.supportedProtocols:`:: *Default: TLSv1, TLSv1.1, TLSv1.2* An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled, setting this to `true` allows
 unauthenticated users to access the Kibana server status API and status page.
