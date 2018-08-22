@@ -88,6 +88,15 @@ export default function ({ getService }) {
       });
     };
 
+    const createExpectLegacyForbidden = (username) => resp => {
+      expect(resp.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        // eslint-disable-next-line max-len
+        message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`
+      });
+    };
+
     const expectForbiddenCantFindAnyTypes = resp => {
       expect(resp.body).to.eql({
         statusCode: 403,
@@ -163,27 +172,27 @@ export default function ({ getService }) {
             normal: {
               description: 'forbidden login and find visualization message',
               statusCode: 403,
-              response: createExpectRbacForbidden('visualization'),
+              response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
             },
             unknownType: {
               description: 'forbidden login and find wigwags message',
               statusCode: 403,
-              response: createExpectRbacForbidden('wigwags'),
+              response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
             },
             pageBeyondTotal: {
               description: 'forbidden login and find visualization message',
               statusCode: 403,
-              response: createExpectRbacForbidden('visualization'),
+              response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
             },
             unknownSearchField: {
               description: 'forbidden login and find wigwags message',
               statusCode: 403,
-              response: createExpectRbacForbidden('wigwags'),
+              response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
             },
             noType: {
               description: `forbidded can't find any types`,
               statusCode: 403,
-              response: expectForbiddenCantFindAnyTypes,
+              response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
             }
           }
         });

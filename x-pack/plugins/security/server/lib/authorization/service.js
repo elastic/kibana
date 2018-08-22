@@ -6,9 +6,8 @@
 
 import { actionsFactory } from './actions';
 import { ALL_RESOURCE } from '../../../common/constants';
-import { AuthorizationMode } from './mode';
-import { CHECK_PRIVILEGES_RESULT, checkPrivilegesWithRequestFactory } from './check_privileges';
-import { checkPrivilegesAtAllResourcesWithRequestFactory } from './check_privileges_at_all_resources';
+import { authorizationModeFactory } from './mode';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
@@ -19,25 +18,27 @@ export function createAuthorizationService(server, xpackInfoFeature) {
   const actions = actionsFactory(config);
   const application = `kibana-${config.get('kibana.index')}`;
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(shieldClient, config, actions, application);
-  const checkPrivilegesAtAllResourcesWithRequest = checkPrivilegesAtAllResourcesWithRequestFactory(
+  const resources = {
+    all: ALL_RESOURCE,
+    getSpaceResource(spaceId) {
+      return spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
+    }
+  };
+  const mode = authorizationModeFactory(
+    actions,
     checkPrivilegesWithRequest,
-    server.plugins.elasticsearch,
+    config,
+    server.plugins,
+    resources,
     server.savedObjects,
-    server.plugins.spaces,
+    xpackInfoFeature
   );
-  const mode = new AuthorizationMode(actions, checkPrivilegesAtAllResourcesWithRequest, xpackInfoFeature);
 
   return {
     actions,
     application,
     checkPrivilegesWithRequest,
-    CHECK_PRIVILEGES_RESULT,
     mode,
-    resources: {
-      all: ALL_RESOURCE,
-      getSpaceResource(spaceId) {
-        return spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
-      }
-    }
+    resources,
   };
 }

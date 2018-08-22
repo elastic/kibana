@@ -15,7 +15,6 @@ import { AuthenticationResult } from '../../../../../server/lib/authentication/a
 import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
 import { initAuthenticateApi } from '../authenticate';
 import { DeauthenticationResult } from '../../../../lib/authentication/deauthentication_result';
-import { CHECK_PRIVILEGES_RESULT } from '../../../../lib/authorization';
 
 describe('Authentication routes', () => {
   let serverStub;

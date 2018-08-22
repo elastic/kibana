@@ -141,19 +141,14 @@ export class SpacesClient {
 
   private async ensureAuthorized(resource: string, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { result } = await checkPrivileges([resource], [action]);
+    const { hasAllRequested } = await checkPrivileges([resource], [action]);
 
-    switch (result) {
-      case this.authorization.CHECK_PRIVILEGES_RESULT.AUTHORIZED: {
-        return;
-      }
-      case this.authorization.CHECK_PRIVILEGES_RESULT.LEGACY:
-      case this.authorization.CHECK_PRIVILEGES_RESULT.UNAUTHORIZED: {
-        throw Boom.forbidden(forbiddenMessage);
-      }
-      default: {
-        throw new Error('Unexpected result from checkPrivileges');
-      }
+    if (hasAllRequested) {
+      //TODO: LOG SOMETHING HERE
+      return;
+    } else {
+      //TODO: LOG SOMETHING HERE
+      throw Boom.forbidden(forbiddenMessage);
     }
   }
 

@@ -5,7 +5,6 @@
  */
 
 import { SecureSavedObjectsClient } from './secure_saved_objects_client';
-import { CHECK_PRIVILEGES_RESULT } from '../authorization/check_privileges';
 
 const createMockErrors = () => {
   const forbiddenError = new Error('Mock ForbiddenError');

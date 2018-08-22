@@ -5,16 +5,6 @@
  */
 
 import Joi from 'joi';
-import { buildLegacyIndexPrivileges } from './privileges';
-
-const legacyIndexPrivilegesSchema = Joi.object({
-  ...buildLegacyIndexPrivileges().reduce((acc, privilege) => {
-    return {
-      ...acc,
-      [privilege]: Joi.bool().required()
-    };
-  }, {})
-}).required();
 
 export function validateEsPrivilegeResponse(response, application, actions, resources, kibanaIndex) {
   const schema = buildValidationSchema(application, actions, resources, kibanaIndex);
@@ -38,7 +28,7 @@ function buildActionsValidationSchema(actions) {
   }).required();
 }
 
-function buildValidationSchema(application, actions, resources, kibanaIndex) {
+function buildValidationSchema(application, actions, resources) {
 
   const actionValidationSchema = buildActionsValidationSchema(actions);
 
@@ -58,8 +48,6 @@ function buildValidationSchema(application, actions, resources, kibanaIndex) {
     application: Joi.object({
       [application]: resourceValidationSchema,
     }).required(),
-    index: Joi.object({
-      [kibanaIndex]: legacyIndexPrivilegesSchema
-    }).required()
+    index: Joi.object(),
   }).required();
 }

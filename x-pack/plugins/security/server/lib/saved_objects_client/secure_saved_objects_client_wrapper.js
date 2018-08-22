@@ -5,7 +5,7 @@
  */
 
 import { get, uniq } from 'lodash';
-import { CHECK_PRIVILEGES_RESULT, spaceApplicationPrivilegesSerializer } from '../authorization';
+import { spaceApplicationPrivilegesSerializer } from '../authorization';
 import { ALL_RESOURCE } from '../../../common/constants';
 
 export class SecureSavedObjectsClientWrapper {
@@ -114,21 +114,15 @@ export class SecureSavedObjectsClientWrapper {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
     const resource = this._getResource();
-    const { result, username, response } = await this._checkSavedObjectPrivileges([resource], actions);
+    const { hasAllRequested, username, response } = await this._checkSavedObjectPrivileges([resource], actions);
 
-    switch (result) {
-      case CHECK_PRIVILEGES_RESULT.AUTHORIZED:
-        this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
-        return;
-      // we shouldn't get a legacy response, unless their roles changes since we first determined this, if they do we aren't authorizing them
-      case CHECK_PRIVILEGES_RESULT.LEGACY:
-      case CHECK_PRIVILEGES_RESULT.UNAUTHORIZED:
-        const missing = this._getMissingPrivileges(response, resource);
-        this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
-        const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
-        throw this.errors.decorateForbiddenError(new Error(msg));
-      default:
-        throw new Error('Unexpected result from checkPrivileges');
+    if (hasAllRequested) {
+      this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
+    } else {
+      const missing = this._getMissingPrivileges(response, resource);
+      this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
+      const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
+      throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
 

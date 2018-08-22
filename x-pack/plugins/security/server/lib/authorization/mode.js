@@ -3,37 +3,72 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ALL_RESOURCE } from '../../../common/constants';
 
-import { CHECK_PRIVILEGES_RESULT } from "./check_privileges";
+const hasAnyApplicationPrivileges = applicationPrivilegesResponse => {
+  return Object.values(applicationPrivilegesResponse).some(resource =>
+    Object.values(resource).some(action => action === true)
+  );
+};
 
-export class AuthorizationMode {
-  constructor(actions, checkPrivilegesAtAllResourcesWithRequest, xpackInfoFeature) {
-    this._useRbacForRequestWeakMap = new WeakMap();
-    this._actions = actions;
-    this._checkPrivilegesAtAllResourcesWithRequest = checkPrivilegesAtAllResourcesWithRequest;
-    this._xpackInfoFeature = xpackInfoFeature;
-  }
+export function authorizationModeFactory(
+  actions,
+  checkPrivilegesWithRequest,
+  config,
+  plugins,
+  resources,
+  savedObjects,
+  xpackInfoFeature
+) {
+  const useRbacForRequestWeakMap = new WeakMap();
 
-  async initialize(request) {
-    if (this._useRbacForRequestWeakMap.has(request)) {
-      throw new Error('Authorization mode is already intitialized');
+  const shouldUseRbacForRequest = async (request) => {
+    if (!config.get('xpack.security.authorization.legacyFallback.enabled')) {
+      return true;
     }
 
-    if (!this.isRbacEnabled()) {
-      this._useRbacForRequestWeakMap.set(request, false);
-      return;
-    }
+    const adminCluster = plugins.elasticsearch.getCluster('admin');
+    const { callWithInternalUser } = adminCluster;
 
-    const checkPrivilegesAtAllResources = this._checkPrivilegesAtAllResourcesWithRequest(request);
-    const { result } = await checkPrivilegesAtAllResources([this._actions.login]);
-    this._useRbacForRequestWeakMap.set(request, result !== CHECK_PRIVILEGES_RESULT.LEGACY);
-  }
+    const internalSavedObjectsRepository = savedObjects.getSavedObjectsRepository(
+      callWithInternalUser
+    );
 
-  useRbacForRequest(request) {
-    return this._useRbacForRequestWeakMap.get(request);
-  }
+    const getResources = async () => {
+      if (!plugins.spaces) {
+        return [ALL_RESOURCE];
+      }
 
-  isRbacEnabled() {
-    return this._xpackInfoFeature.getLicenseCheckResults().allowRbac;
-  }
+      const { saved_objects: savedObjects } = await internalSavedObjectsRepository.find({ type: 'space' });
+      return [ALL_RESOURCE, ...savedObjects.map(space => resources.getSpaceResource(space.id))];
+    };
+
+    const checkPrivileges = checkPrivilegesWithRequest(request);
+    const { response } = await checkPrivileges(await getResources(), [actions.login]);
+    return hasAnyApplicationPrivileges(response);
+  };
+
+  return {
+    async initialize(request) {
+      if (useRbacForRequestWeakMap.has(request)) {
+        throw new Error('Authorization mode is already intitialized');
+      }
+
+      if (!this.isRbacEnabled()) {
+        useRbacForRequestWeakMap.set(request, false);
+        return;
+      }
+
+      const result = await shouldUseRbacForRequest(request);
+      useRbacForRequestWeakMap.set(request, result);
+    },
+
+    useRbacForRequest(request) {
+      return useRbacForRequestWeakMap.get(request);
+    },
+
+    isRbacEnabled() {
+      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
+    },
+  };
 }

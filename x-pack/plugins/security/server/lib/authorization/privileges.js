@@ -57,7 +57,3 @@ export function buildPrivilegeMap(savedObjectTypes, actions) {
     },
   };
 }
-
-export function buildLegacyIndexPrivileges() {
-  return ['create', 'delete', 'read', 'view_index_metadata'];
-}

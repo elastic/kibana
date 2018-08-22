@@ -5,54 +5,13 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { buildLegacyIndexPrivileges } from './privileges';
 import { validateEsPrivilegeResponse } from './validate_es_response';
-
-export const CHECK_PRIVILEGES_RESULT = {
-  UNAUTHORIZED: Symbol('Unauthorized'),
-  AUTHORIZED: Symbol('Authorized'),
-  LEGACY: Symbol('Legacy'),
-};
 
 export function checkPrivilegesWithRequestFactory(shieldClient, config, actions, application) {
   const { callWithRequest } = shieldClient;
 
-  const kibanaIndex = config.get('kibana.index');
-
   const hasIncompatibileVersion = (applicationPrivilegesResponse) => {
     return Object.values(applicationPrivilegesResponse).some(resource => !resource[actions.version] && resource[actions.login]);
-  };
-
-  const hasAllApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(resource => Object.values(resource).every(action => action === true));
-  };
-
-  const hasNoApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(resource => Object.values(resource).every(action => action === false));
-  };
-
-  const isLegacyFallbackEnabled = () => {
-    return config.get('xpack.security.authorization.legacyFallback.enabled');
-  };
-
-  const hasLegacyPrivileges = (indexPrivilegesResponse) => {
-    return Object.values(indexPrivilegesResponse).includes(true);
-  };
-
-  const determineResult = (applicationPrivilegesResponse, indexPrivilegesResponse) => {
-    if (hasAllApplicationPrivileges(applicationPrivilegesResponse)) {
-      return CHECK_PRIVILEGES_RESULT.AUTHORIZED;
-    }
-
-    if (
-      isLegacyFallbackEnabled() &&
-      hasNoApplicationPrivileges(applicationPrivilegesResponse) &&
-      hasLegacyPrivileges(indexPrivilegesResponse)
-    ) {
-      return CHECK_PRIVILEGES_RESULT.LEGACY;
-    }
-
-    return CHECK_PRIVILEGES_RESULT.UNAUTHORIZED;
   };
 
   return function checkPrivilegesWithRequest(request) {
@@ -66,24 +25,19 @@ export function checkPrivilegesWithRequestFactory(shieldClient, config, actions,
             resources,
             privileges: allApplicationPrivileges
           }],
-          index: [{
-            names: [kibanaIndex],
-            privileges: buildLegacyIndexPrivileges()
-          }],
         }
       });
 
-      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, resources, kibanaIndex);
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, resources);
 
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
-      const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
 
       if (hasIncompatibileVersion(applicationPrivilegesResponse)) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
       }
 
       return {
-        result: determineResult(applicationPrivilegesResponse, indexPrivilegesResponse),
+        hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
         // we needfilter out the non requested privileges from the response
         response: transform(applicationPrivilegesResponse, (response, resourcePrivilegesResponse, resourceResponse) => {
