@@ -17,5 +17,5 @@
  * under the License.
  */
 
-var $ = window.jQuery = window.$ = module.exports = require('../node_modules/jquery/dist/jquery');
+var $ = window.jQuery = window.$ = module.exports = require('jquery/dist/jquery');
 require('ui/jquery/find_test_subject')($);
