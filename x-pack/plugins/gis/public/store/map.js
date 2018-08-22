@@ -48,18 +48,20 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case ADD_LAYER:
-      let newLayerlist;
+      // Remove temporary layers (if any)
+      const preAddLayerList = action.layer.temporary ? state.layerList.filter(
+        ({ temporary }) => !temporary) : state.layerList;
+      let postAddLayerList;
       if (
         action.position === -1 ||
         action.position > state.layerList.length
       ) {
-        newLayerlist = [ ...state.layerList, action.layer ];
+        postAddLayerList = [ ...preAddLayerList, action.layer ];
       } else {
         state.layerList.splice(action.position, 0, action.layer);
-        newLayerlist = state.layerList.slice();
+        postAddLayerList = state.layerList.slice();
       }
-      return { ...state, layerList: newLayerlist };
-
+      return { ...state, layerList: postAddLayerList };
     case REMOVE_LAYER:
       const removeId = action.id || state.selectedLayerId;
       return { ...state, layerList: [ ...state.layerList.filter(
