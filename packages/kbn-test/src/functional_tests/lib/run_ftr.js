@@ -17,33 +17,26 @@
  * under the License.
  */
 
-import { KIBANA_FTR_SCRIPT, PROJECT_ROOT } from './paths';
+import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
+import { CliError } from './run_cli';
 
-export async function runFtr({
-  procs,
-  configPath,
-  cwd = PROJECT_ROOT,
-  options: { log, bail, grep, updateBaselines },
-}) {
-  const args = [KIBANA_FTR_SCRIPT];
-
-  if (getLogFlag(log)) args.push(`--${getLogFlag(log)}`);
-  if (bail) args.push('--bail');
-  if (configPath) args.push('--config', configPath);
-  if (grep) args.push('--grep', grep);
-  if (updateBaselines) args.push('--updateBaselines');
-
-  await procs.run('ftr', {
-    cmd: 'node',
-    args,
-    cwd,
-    wait: true,
+export async function runFtr({ configPath, options: { log, bail, grep, updateBaselines } }) {
+  const ftr = createFunctionalTestRunner({
+    log,
+    configFile: configPath,
+    configOverrides: {
+      mochaOpts: {
+        bail: !!bail,
+        grep,
+      },
+      updateBaselines,
+    },
   });
-}
 
-function getLogFlag(log) {
-  const level = log.getLevel();
-
-  if (level === 'info') return null;
-  return level === 'error' ? 'quiet' : level;
+  const failureCount = await ftr.run();
+  if (failureCount > 0) {
+    throw new CliError(
+      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
+    );
+  }
 }

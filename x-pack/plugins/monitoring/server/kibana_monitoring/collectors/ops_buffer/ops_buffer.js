@@ -27,8 +27,14 @@ export function opsBuffer(server) {
     },
 
     flush() {
+      let cloud; // a property that will be left out of the result if the details are undefined
+      const cloudDetails = cloudDetector.getCloudDetails();
+      if (cloudDetails != null) {
+        cloud = { cloud: cloudDetails };
+      }
+
       return {
-        cloud: cloudDetector.getCloudDetails(),
+        ...cloud,
         ...eventRoller.flush()
       };
     }

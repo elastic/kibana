@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parses valid log levels correctly: debug 1`] = `
+Object {
+  "flags": Object {
+    "debug": true,
+    "error": true,
+    "info": true,
+    "silent": true,
+    "verbose": false,
+    "warning": true,
+  },
+  "name": "debug",
+}
+`;
+
+exports[`parses valid log levels correctly: error 1`] = `
+Object {
+  "flags": Object {
+    "debug": false,
+    "error": true,
+    "info": false,
+    "silent": true,
+    "verbose": false,
+    "warning": false,
+  },
+  "name": "error",
+}
+`;
+
+exports[`parses valid log levels correctly: info 1`] = `
+Object {
+  "flags": Object {
+    "debug": false,
+    "error": true,
+    "info": true,
+    "silent": true,
+    "verbose": false,
+    "warning": true,
+  },
+  "name": "info",
+}
+`;
+
+exports[`parses valid log levels correctly: silent 1`] = `
+Object {
+  "flags": Object {
+    "debug": false,
+    "error": false,
+    "info": false,
+    "silent": true,
+    "verbose": false,
+    "warning": false,
+  },
+  "name": "silent",
+}
+`;
+
+exports[`parses valid log levels correctly: verbose 1`] = `
+Object {
+  "flags": Object {
+    "debug": true,
+    "error": true,
+    "info": true,
+    "silent": true,
+    "verbose": true,
+    "warning": true,
+  },
+  "name": "verbose",
+}
+`;
+
+exports[`parses valid log levels correctly: warning 1`] = `
+Object {
+  "flags": Object {
+    "debug": false,
+    "error": true,
+    "info": false,
+    "silent": true,
+    "verbose": false,
+    "warning": true,
+  },
+  "name": "warning",
+}
+`;
+
+exports[`throws error for invalid levels: bar 1`] = `"Invalid log level \\"bar\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+
+exports[`throws error for invalid levels: foo 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+
+exports[`throws error for invalid levels: warn 1`] = `"Invalid log level \\"warn\\" (expected one of silent,error,warning,info,debug,verbose)"`;

@@ -35,6 +35,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    get index() {
+      return {
+        LOGSTASH_TIME_BASED: 'logstash-*',
+        LOGSTASH_NON_TIME_BASED: 'logstash*'
+      };
+    }
+
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize new');
       await PageObjects.common.navigateToUrl('visualize', 'new');
@@ -353,7 +360,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch(indexPattern = 'logstash-*') {
+    async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`paginatedListItem-${indexPattern}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -540,6 +547,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
+      await input.type(newValue);
+      await remote.pressKeys(Keys.RETURN);
+    }
+
+    async setCustomInterval(newValue) {
+      await this.setInterval('Custom');
+      const input = await find.byCssSelector('input[name="customInterval"]');
+      await input.clearValue();
       await input.type(newValue);
     }
 
