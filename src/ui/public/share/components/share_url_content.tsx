@@ -47,9 +47,6 @@ import { shortenUrl } from '../lib/url_shortener';
 // TODO: Remove once EuiIconTip supports "content" prop
 const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
-const EXPORT_URL_AS_SAVED_OBJECT = 'savedObject';
-const EXPORT_URL_AS_SNAPSHOT = 'snapshot';
-
 interface Props {
   isEmbedded?: boolean;
   objectId?: string;
@@ -57,8 +54,13 @@ interface Props {
   getUnhashableStates: () => any[];
 }
 
+enum ExportUrlAsType {
+  EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
+  EXPORT_URL_AS_SNAPSHOT = 'snapshot',
+}
+
 interface State {
-  exportUrlAs: string;
+  exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
@@ -72,14 +74,11 @@ export class ShareUrlContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const defaultExportUrlAs = EXPORT_URL_AS_SNAPSHOT;
-    const defaultUseShortUrl = false;
-
     this.state = {
-      exportUrlAs: defaultExportUrlAs,
-      useShortUrl: defaultUseShortUrl,
+      exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
+      useShortUrl: false,
       isCreatingShortUrl: false,
-      url: this.getUrl(defaultExportUrlAs, defaultUseShortUrl),
+      url: '',
     };
   }
 
@@ -91,6 +90,7 @@ export class ShareUrlContent extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
+    this.setUrl();
 
     window.addEventListener('hashchange', this.resetUrl, false);
   }
@@ -107,7 +107,7 @@ export class ShareUrlContent extends Component<Props, State> {
             <EuiButton
               fill
               onClick={copy}
-              disabled={this.state.isCreatingShortUrl}
+              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
               data-share-url={this.state.url}
               data-test-subj="copyShareUrlButton"
             >
@@ -129,40 +129,10 @@ export class ShareUrlContent extends Component<Props, State> {
         {
           useShortUrl: false,
           shortUrl: undefined,
-          url: undefined,
         },
         this.setUrl
       );
     }
-  };
-
-  private createShortUrl = async () => {
-    this.setState({
-      isCreatingShortUrl: true,
-      shortUrlErrorMsg: undefined,
-    });
-
-    let shortUrl;
-    try {
-      shortUrl = await shortenUrl(this.getSnapshotUrl());
-    } catch (fetchError) {
-      if (this.mounted) {
-        this.setState({
-          isCreatingShortUrl: false,
-          shortUrlErrorMsg: `Unable to create short URL. Error: ${fetchError.message}`,
-        });
-      }
-      throw fetchError;
-    }
-
-    if (!this.mounted) {
-      return;
-    }
-
-    this.setState({
-      shortUrl,
-      isCreatingShortUrl: false,
-    });
   };
 
   private getSavedObjectUrl = () => {
@@ -222,33 +192,27 @@ export class ShareUrlContent extends Component<Props, State> {
     return `<iframe src="${embeddableUrl}" height="600" width="800"></iframe>`;
   };
 
-  private getUrl = (exportUrlAs: string, useShortUrl: boolean) => {
+  private setUrl = () => {
     let url;
-    if (exportUrlAs === EXPORT_URL_AS_SAVED_OBJECT) {
+    if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = this.getSavedObjectUrl();
-    } else if (useShortUrl) {
+    } else if (this.state.useShortUrl) {
       url = this.state.shortUrl;
     } else {
       url = this.getSnapshotUrl();
     }
 
     if (this.props.isEmbedded) {
-      return this.makeIframeTag(url);
+      url = this.makeIframeTag(url);
     }
 
-    return url;
-  };
-
-  private setUrl = () => {
-    this.setState({
-      url: this.getUrl(this.state.exportUrlAs, this.state.useShortUrl),
-    });
+    this.setState({ url });
   };
 
   private handleExportUrlAs = (optionId: string) => {
     this.setState(
       {
-        exportUrlAs: optionId,
+        exportUrlAs: optionId as ExportUrlAsType,
       },
       this.setUrl
     );
@@ -256,32 +220,49 @@ export class ShareUrlContent extends Component<Props, State> {
 
   private handleShortUrlChange = async (evt: any) => {
     const isChecked = evt.target.checked;
-    if (this.state.shortUrl === undefined && isChecked) {
-      try {
-        await this.createShortUrl();
-      } catch (fetchError) {
+
+    if (!isChecked || this.state.shortUrl !== undefined) {
+      this.setState({ useShortUrl: isChecked }, this.setUrl);
+      return;
+    }
+
+    // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
+    this.setState({
+      isCreatingShortUrl: true,
+      shortUrlErrorMsg: undefined,
+    });
+
+    try {
+      const shortUrl = await shortenUrl(this.getSnapshotUrl());
+      if (this.mounted) {
         this.setState(
           {
-            useShortUrl: false,
+            shortUrl,
+            isCreatingShortUrl: false,
+            useShortUrl: isChecked,
           },
           this.setUrl
         );
-        return;
+      }
+    } catch (fetchError) {
+      if (this.mounted) {
+        this.setState(
+          {
+            shortUrl: undefined,
+            useShortUrl: false,
+            isCreatingShortUrl: false,
+            shortUrlErrorMsg: `Unable to create short URL. Error: ${fetchError.message}`,
+          },
+          this.setUrl
+        );
       }
     }
-
-    this.setState(
-      {
-        useShortUrl: isChecked,
-      },
-      this.setUrl
-    );
   };
 
   private renderExportUrlAsOptions = () => {
     return [
       {
-        id: EXPORT_URL_AS_SNAPSHOT,
+        id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         label: this.renderWithIconTip(
           'Snapshot',
           `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
@@ -289,7 +270,7 @@ export class ShareUrlContent extends Component<Props, State> {
         ),
       },
       {
-        id: EXPORT_URL_AS_SAVED_OBJECT,
+        id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
         label: this.renderWithIconTip(
           'Saved object',
@@ -328,7 +309,7 @@ export class ShareUrlContent extends Component<Props, State> {
   };
 
   private renderShortUrlSwitch = () => {
-    if (this.state.exportUrlAs === EXPORT_URL_AS_SAVED_OBJECT) {
+    if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       return;
     }
 
