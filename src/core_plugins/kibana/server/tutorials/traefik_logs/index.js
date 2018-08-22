@@ -38,7 +38,7 @@ export function traefikLogsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `traefik` Filebeat module parses access logs created by Traefik. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },

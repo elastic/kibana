@@ -36,7 +36,7 @@ export function windowsMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `windows` Metricbeat module fetches internal metrics from Windows. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-windows.html',
       },

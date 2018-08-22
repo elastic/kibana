@@ -38,8 +38,8 @@ export function systemLogsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.systemLogs.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `system` Filebeat module collects and parses logs created by the system logging service of common \
-        Unix/Linux based distributions. This module is not available on Windows. \
-        [Learn more]({learnMoreLink}).',
+Unix/Linux based distributions. This module is not available on Windows. \
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-system.html',
       },

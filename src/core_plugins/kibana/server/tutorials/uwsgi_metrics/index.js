@@ -35,7 +35,7 @@ export function uwsgiMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.uwsgiMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
       },
