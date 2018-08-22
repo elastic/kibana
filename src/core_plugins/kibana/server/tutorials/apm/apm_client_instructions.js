@@ -38,8 +38,8 @@ export const NODE_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Agents are libraries that run inside of your application process. \
-        APM services are created programmatically based on the `serviceName`. \
-        This agent supports Express, Koa, hapi, and custom Node.js.',
+APM services are created programmatically based on the `serviceName`. \
+This agent supports Express, Koa, hapi, and custom Node.js.',
     }),
     commands: `// ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.addThisToTheFileTopComment', {
       defaultMessage: 'Add this to the VERY top of the first file loaded in your app',
@@ -88,7 +88,7 @@ export const DJANGO_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Agents are libraries that run inside of your application process. \
-      APM services are created programmatically based on the `SERVICE_NAME`.',
+APM services are created programmatically based on the `SERVICE_NAME`.',
     }),
     commands: `# ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.addAgentComment', {
       defaultMessage: 'Add the agent to the installed apps',
@@ -127,9 +127,7 @@ MIDDLEWARE = (
   #...
 )`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPost', {
-      // eslint-disable-next-line no-multi-str
-      defaultMessage: 'See the \
-        [documentation]({documentationLink}) for advanced usage.',
+      defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
       values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/python/2.x/django-support.html' },
     }),
   },
@@ -152,7 +150,7 @@ export const FLASK_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Agents are libraries that run inside of your application process. \
-        APM services are created programmatically based on the `SERVICE_NAME`.',
+APM services are created programmatically based on the `SERVICE_NAME`.',
     }),
     commands: `# ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment', {
       defaultMessage: 'initialize using environment variables',
@@ -373,8 +371,8 @@ export const GO_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.goClient.configure.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Agents are libraries that run inside of your application process. \
-        APM services are created programmatically based on the executable \
-        file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
+APM services are created programmatically based on the executable \
+file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
     }),
     commands: `# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.initializeUsingEnvironmentVariablesComment', {
       defaultMessage: 'Initialize using environment variables:',
@@ -410,7 +408,7 @@ export ELASTIC_APM_SECRET_TOKEN=
     textPre: i18n.translate('kbn.server.tutorials.apm.goClient.instrument.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Instrument your Go application by using one of the provided instrumentation modules or \
-        by using the tracer API directly.',
+by using the tracer API directly.',
     }),
     commands: `
 import (
@@ -427,9 +425,10 @@ func main() {curlyOpen}
 `.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.goClient.instrument.textPost', {
       // eslint-disable-next-line no-multi-str
-      defaultMessage: 'See the [documentation]({config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html) for a detailed \
-        guide to instrumenting Go source code.\n\nguide to instrumenting Go source \
-        code.\n\n**Warning: The Go agent is currently in Beta and not meant for production use.**',
+      defaultMessage: 'See the [documentation]({documentationLink}) for a detailed \
+guide to instrumenting Go source code.\n\nguide to instrumenting Go source \
+code.\n\n**Warning: The Go agent is currently in Beta and not meant for production use.**',
+      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html' },
     }),
   },
 ];
@@ -442,7 +441,7 @@ export const JAVA_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.javaClient.download.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Download the agent jar from [Maven Central]({mavenCentralLink}). \
-        Do **not** add the agent as a dependency to your application.',
+Do **not** add the agent as a dependency to your application.',
       values: { mavenCentralLink: 'http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent' },
     }),
   },
@@ -453,9 +452,10 @@ export const JAVA_CLIENT_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
-        * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
-        * Set custom APM Server URL (default: http://localhost:8200)\n \
-        * Set the base package of your application',
+* Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
+* Set custom APM Server URL (default: {customApmServerUrl})\n \
+* Set the base package of your application',
+      values: { customApmServerUrl: 'http://localhost:8200' },
     }),
     commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
      -Delastic.apm.service_name=my-application \\
@@ -465,7 +465,7 @@ export const JAVA_CLIENT_INSTRUCTIONS = [
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'See the [documentation]({documenationLink}) for configuration options and advanced \
-        usage.\n\n**Warning: The Java agent is currently in Beta and not meant for production use.**',
+usage.\n\n**Warning: The Java agent is currently in Beta and not meant for production use.**',
       values: { documenationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
     }),
   },

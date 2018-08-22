@@ -70,9 +70,9 @@ export function apmSpecProvider(server) {
     longDescription: i18n.translate('kbn.server.tutorials.apm.specProvider.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Application Performance Monitoring (APM) collects in-depth \
-        performance metrics and errors from inside your application. \
-        It allows you to monitor the performance of thousands of applications in real time. \
-        [Learn more]({learnMoreLink}).',
+performance metrics and errors from inside your application. \
+It allows you to monitor the performance of thousands of applications in real time. \
+[Learn more]({learnMoreLink}).',
       values: { learnMoreLink: '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html' },
     }),
     euiIconType: 'apmApp',
@@ -84,7 +84,7 @@ export function apmSpecProvider(server) {
     savedObjectsInstallMsg: i18n.translate('kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Load index pattern, visualizations, and pre-defined dashboards. \
-        An index pattern is required for some features in the APM UI.',
+An index pattern is required for some features in the APM UI.',
     }),
   };
 }

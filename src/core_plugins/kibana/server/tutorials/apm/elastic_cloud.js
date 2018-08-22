@@ -38,7 +38,7 @@ const SERVER_URL_INSTRUCTION = {
   textPre: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.textPre', {
     // eslint-disable-next-line no-multi-str
     defaultMessage: 'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
-      You will also need the APM Server secret token, which was generated on deployment.',
+You will also need the APM Server secret token, which was generated on deployment.',
   }),
 };
 

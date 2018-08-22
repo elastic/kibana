@@ -26,7 +26,7 @@ export const EDIT_CONFIG = {
   textPre: i18n.translate('kbn.server.tutorials.apm.editConfig.textPre', {
     // eslint-disable-next-line no-multi-str
     defaultMessage: 'If you\'re using an X-Pack secured version of Elastic Stack, you must specify \
-      credentials in the `apm-server.yml` config file.',
+credentials in the `apm-server.yml` config file.',
   }),
   commands: [
     'output.elasticsearch:',
@@ -94,12 +94,12 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
     textPre: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPre', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: '1. Download the APM Server Windows zip file from the \
-        [Download page]({downloadPageLink}).\n2. Extract the contents of \
-        the zip file into {zipFileExtractFolder}.\n3. Rename the {apmServerDirectory} \
-        directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
-        (right-click the PowerShell icon and select \
-        **Run As Administrator**). If you are running Windows XP, you might need to download and install \
-        PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
+[Download page]({downloadPageLink}).\n2. Extract the contents of \
+the zip file into {zipFileExtractFolder}.\n3. Rename the {apmServerDirectory} \
+directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
+(right-click the PowerShell icon and select \
+**Run As Administrator**). If you are running Windows XP, you might need to download and install \
+PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
       values: {
         downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
         zipFileExtractFolder: '`C:\\Program Files`',
@@ -113,7 +113,7 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
     textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'Note: If script execution is disabled on your system, you need to set the execution policy for the current session \
-        to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
+to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
     }),
   },
   EDIT_CONFIG,
