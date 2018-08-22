@@ -1,5 +1,7 @@
 # Documentation for APM in x-pack-kibana
 
+_Note: Be sure to run the following commands from inside the `x-pack` directory._
+
 ### Format with Prettier
 ```
 npx prettier "./plugins/apm/**/*.js" --write
