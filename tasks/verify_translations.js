@@ -17,74 +17,30 @@
  * under the License.
  */
 
-// TODO: Integrate a new tool for translations checking
-// https://github.com/elastic/kibana/pull/19826
-import { i18nLoader } from '@kbn/i18n';
+const { resolve } = require('path');
 
-import { toArray } from 'rxjs/operators';
-import { fromRoot, formatListAsProse } from '../src/utils';
-import { findPluginSpecs } from '../src/plugin_discovery';
-import { collectUiExports } from '../src/ui';
-
-import * as i18nVerify from './utils/i18n_verify_keys';
-
-export default function (grunt) {
-  grunt.registerTask('verifyTranslations', async function () {
+module.exports = function (grunt) {
+  grunt.registerTask('verifyTranslations', function () {
     const done = this.async();
 
-    try {
-      const { spec$ } = findPluginSpecs({
-        env: 'production',
-        plugins: {
-          scanDirs: [fromRoot('src/core_plugins')]
+    const serverCmd = {
+      cmd: 'node',
+      args: [resolve(__dirname, '../scripts/extract_default_translations')],
+      opts: { stdio: 'inherit' },
+    };
+
+    new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const error = new Error(`verifyTranslations exited with code ${code}`);
+          grunt.fail.fatal(error);
+          reject(error);
+          return;
         }
+
+        grunt.log.writeln(result);
+        resolve();
       });
-
-      const specs = await spec$.pipe(toArray()).toPromise();
-      const uiExports = collectUiExports(specs);
-      await verifyTranslations(uiExports);
-
-      done();
-    } catch (error) {
-      done(error);
-    }
+    }).then(done, done);
   });
-
-}
-
-async function verifyTranslations(uiExports) {
-  const keysUsedInViews = [];
-
-  // Search files for used translation keys
-  const translationPatterns = [
-    { regexp: 'i18n\\(\'(.*)\'\\)',
-      parsePaths: [fromRoot('src/ui/ui_render/views/*.pug')] }
-  ];
-  for (const { regexp, parsePaths } of translationPatterns) {
-    const keys = await i18nVerify.getTranslationKeys(regexp, parsePaths);
-    for (const key of keys) {
-      keysUsedInViews.push(key);
-    }
-  }
-
-  // get all of the translations from uiExports
-  const translations = await i18nLoader.getAllTranslationsFromPaths(uiExports.translationPaths);
-  const keysWithoutTranslations = Object.entries(
-    i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
-  );
-
-  if (!keysWithoutTranslations.length) {
-    return;
-  }
-
-  throw new Error(
-    '\n' +
-    '\n' +
-    'The following keys are used in angular/pug views but are not translated:\n' +
-    keysWithoutTranslations.map(([locale, keys]) => (
-      `   - ${locale}: ${formatListAsProse(keys)}`
-    )).join('\n') +
-    '\n' +
-    '\n'
-  );
-}
+};
