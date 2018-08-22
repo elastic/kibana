@@ -18,6 +18,7 @@
  */
 
 import { writeFile } from 'fs';
+import { sep } from 'path';
 
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
@@ -186,8 +187,21 @@ export default class BaseOptimizer {
         new webpack.optimize.CommonsChunkPlugin({
           name: 'vendors',
           filename: 'vendors.bundle.js',
-          // only combine node_modules from Kibana
-          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
+          // only combine node_modules from Kibana whether they are
+          // default node_modules during development
+          // or static node_modules during prod/distributable
+          minChunks: (module) => {
+            if (!module || !module.context) {
+              return false;
+            }
+
+            const moduleDirs = module.context.split(sep);
+            const firstDirIdx = moduleDirs.findIndex(e => e === 'node_modules');
+            const isKibanaStaticNodeModule = (firstDirIdx === 0) || (firstDirIdx === 1 && !moduleDirs[0]);
+            const isKibanaDefaultNodeModule = module.context.indexOf(nodeModulesPath) !== -1;
+
+            return isKibanaDefaultNodeModule || isKibanaStaticNodeModule;
+          }
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
