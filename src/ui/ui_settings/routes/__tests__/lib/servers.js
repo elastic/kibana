@@ -52,6 +52,20 @@ export async function startServers() {
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
 
+async function deleteKibanaIndex(callCluster) {
+  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
+  const indexNames = kibanaIndices.map(x => x.index);
+  if (!indexNames.length) {
+    return;
+  }
+  await callCluster('indices.putSettings', {
+    index: indexNames,
+    body: { index: { blocks: { read_only: false } } },
+  });
+  await callCluster('indices.delete', { index: indexNames });
+  return indexNames;
+}
+
 export function getServices() {
   if (services) {
     return services;
@@ -71,6 +85,7 @@ export function getServices() {
     callCluster,
     savedObjectsClient,
     uiSettings,
+    deleteKibanaIndex,
   };
 
   return services;

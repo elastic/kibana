@@ -28,14 +28,11 @@ import {
 
 export function indexMissingSuite() {
   async function setup() {
-    const { callCluster, kbnServer } = getServices();
+    const { callCluster, kbnServer, deleteKibanaIndex } = getServices();
     const indexName = kbnServer.config.get('kibana.index');
 
     // ensure the kibana index does not exist
-    await callCluster('indices.delete', {
-      index: indexName,
-      ignore: [404],
-    });
+    await deleteKibanaIndex(callCluster);
 
     return {
       kbnServer,
