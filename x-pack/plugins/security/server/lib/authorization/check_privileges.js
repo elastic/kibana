@@ -42,7 +42,7 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
       return {
         hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
-        // we needfilter out the non requested privileges from the response
+        // we need to filter out the non requested privileges from the response
         response: transform(applicationPrivilegesResponse, (response, resourcePrivilegesResponse, resourceResponse) => {
           response[resourceResponse] = pick(resourcePrivilegesResponse, privileges);
         }),
@@ -70,6 +70,7 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
         return {
           hasAllRequested,
           username,
+          // we need to turn the resource responses back into the space ids
           response: transform(response, (result, value, key) => {
             result[spaceApplicationPrivilegesSerializer.resource.deserialize(key)] = value;
           }),
