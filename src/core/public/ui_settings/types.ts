@@ -17,18 +17,11 @@
  * under the License.
  */
 
-let newPlatformUiSettingsClient;
-
-export function __newPlatformInit__(instance) {
-  if (newPlatformUiSettingsClient) {
-    throw new Error('ui/chrome/api/ui_settings already initialized');
-  }
-
-  newPlatformUiSettingsClient = instance;
-}
-
-export function initUiSettingsApi(chrome) {
-  chrome.getUiSettingsClient = function () {
-    return newPlatformUiSettingsClient;
+export interface UiSettingsState {
+  [key: string]: {
+    type?: string;
+    userValue?: any;
+    value?: any;
+    isOverridden?: boolean;
   };
 }

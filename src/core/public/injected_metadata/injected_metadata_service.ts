@@ -47,6 +47,10 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getKibanaVersion: () => {
+        return this.getKibanaVersion();
+      },
+
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
       },
