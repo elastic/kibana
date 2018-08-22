@@ -1,0 +1,1 @@
+export { registerCanvasUsageCollector } from './collector';

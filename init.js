@@ -4,6 +4,7 @@ import { typesRegistry } from './common/lib/types_registry';
 import { serverFunctions } from './server/functions';
 import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
+import { registerCanvasUsageCollector } from './server/usage';
 
 export default function(server /*options*/) {
   server.plugins.canvas = {
@@ -45,4 +46,7 @@ export default function(server /*options*/) {
 
   // Load routes here
   routes(server);
+
+  // Register a usage collector with Telemetry service
+  registerCanvasUsageCollector(server);
 }
