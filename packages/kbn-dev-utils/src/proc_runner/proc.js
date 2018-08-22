@@ -82,7 +82,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
     name = name;
 
     lines$ = Rx.merge(observeLines(childProcess.stdout), observeLines(childProcess.stderr)).pipe(
-      tap(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`)),
+      tap(line => log.write(` ${gray('proc')} [${gray(name)}] ${line}`)),
       share()
     );
 

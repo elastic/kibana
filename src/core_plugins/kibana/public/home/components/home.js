@@ -141,7 +141,7 @@ export class Home extends Component {
     }
 
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
           {recentlyAccessedPanel}
 

@@ -10,7 +10,6 @@ import {
   KIBANA_STATS_TYPE_MONITORING
 } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { getKibanaInfoForStats } from '../lib';
 import Oppsy from 'oppsy';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
@@ -74,10 +73,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     type: KIBANA_STATS_TYPE_MONITORING,
     init: opsMonitor.start,
     fetch: () => {
-      return {
-        kibana: getKibanaInfoForStats(server, kbnServer),
-        ...buffer.flush()
-      };
+      return buffer.flush();
     }
   });
 }
