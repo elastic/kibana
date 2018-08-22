@@ -19,7 +19,7 @@
 
 type Freezable = { [k: string]: any } | any[];
 
-export type RecursiveReadOnly<T> = T extends Freezable
+type RecursiveReadOnly<T> = T extends Freezable
   ? Readonly<{ [K in keyof T]: RecursiveReadOnly<T[K]> }>
   : T;
 

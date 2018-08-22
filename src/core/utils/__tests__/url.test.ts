@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from './url';
+import { modifyUrl } from '../url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {

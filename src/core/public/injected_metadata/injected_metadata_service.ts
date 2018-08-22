@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { deepFreeze } from '../../utils';
+import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
   injectedMetadata: {
