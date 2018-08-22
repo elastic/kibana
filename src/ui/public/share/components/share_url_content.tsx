@@ -22,7 +22,6 @@ declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
   export const EuiForm: React.SFC<any>;
 }
-const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
 import React, { Component } from 'react';
 import './share_url_content.less';
@@ -44,6 +43,9 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { unhashUrl } from '../../state_management/state_hashing';
 import { shortenUrl } from '../lib/url_shortener';
+
+// TODO: Remove once EuiIconTip supports "content" prop
+const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
 const EXPORT_URL_AS_SAVED_OBJECT = 'savedObject';
 const EXPORT_URL_AS_SNAPSHOT = 'snapshot';
