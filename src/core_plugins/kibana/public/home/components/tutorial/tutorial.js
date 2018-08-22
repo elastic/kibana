@@ -185,10 +185,6 @@ export class Tutorial extends React.Component {
     return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
-  onInstructionSetChange = (optionId) => {
-    this.setVisibleInstructions(optionId);
-  };
-
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
@@ -207,7 +203,7 @@ export class Tutorial extends React.Component {
             <EuiButtonGroup
               options={radioButtons}
               idSelected={this.state.visibleInstructions}
-              onChange={this.onInstructionSetChange}
+              onChange={this.setVisibleInstructions}
               color="primary"
             />
           </EuiFlexItem>
