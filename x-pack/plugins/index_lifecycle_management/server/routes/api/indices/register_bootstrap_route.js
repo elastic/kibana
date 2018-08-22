@@ -11,7 +11,14 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
 
 async function bootstrap(callWithRequest, payload) {
   await callWithRequest('indices.create', {
-    index: payload.indexName
+    index: payload.indexName,
+    body: {
+      aliases: {
+        [payload.aliasName]: {
+          is_write_alias: true
+        }
+      },
+    }
   });
 }
 

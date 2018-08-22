@@ -38,9 +38,6 @@ async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
   // Fetch existing template
   const template = await getIndexTemplate(callWithRequest, indexTemplatePatch.indexTemplate);
   merge(template, {
-    aliases: {
-      [indexTemplatePatch.rolloverAlias]: {}
-    },
     settings: {
       index: {
         number_of_shards: indexTemplatePatch.primaryShardCount,
