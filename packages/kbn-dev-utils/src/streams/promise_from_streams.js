@@ -66,7 +66,7 @@ export async function createPromiseFromStreams(streams) {
     }
 
     let finalChunk;
-    last.on('data', (chunk) => {
+    last.on('data', chunk => {
       finalChunk = chunk;
     });
     last.on('end', () => {
@@ -76,10 +76,7 @@ export async function createPromiseFromStreams(streams) {
 
   // wait (and rethrow) the first error, or for the last stream
   // to both finish writing and providing values to read
-  await Promise.race([
-    anyStreamFailure,
-    Promise.all([lastFinishedWriting, lastFinishedReading])
-  ]);
+  await Promise.race([anyStreamFailure, Promise.all([lastFinishedWriting, lastFinishedReading])]);
 
   // return the final chunk read from the last stream
   return await lastFinishedReading;
