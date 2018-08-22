@@ -26,11 +26,12 @@ export function ApmOverview({
     metrics.apm_os_load,
     metrics.apm_output_events_rate,
     metrics.apm_requests,
-    metrics.apm_responses_valid,
-    metrics.apm_responses_errors,
+    // metrics.apm_responses_valid,
+    // metrics.apm_responses_errors,
     metrics.apm_incoming_requests_size,
     metrics.apm_memory,
-    metrics.apm_transformations
+    metrics.apm_transformations,
+    metrics.apm_responses_success_failure
   ];
 
   const charts = seriesToShow.map((data, index) => (

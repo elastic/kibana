@@ -111,6 +111,10 @@ function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
     }
   };
 
+  if (metric.debug) {
+    console.log('metric.debug', JSON.stringify(params));
+  }
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params);
 }
