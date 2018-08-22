@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { set } from 'lodash';
 
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../../server/lib/constants';
-import { getDefaultAdminEmail } from '../get_settings_collector';
+import { getDefaultAdminEmail, resetDeprecationWarning } from '../get_settings_collector';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../../lib/constants';
 
 describe('getSettingsCollector / getDefaultAdminEmail', () => {
@@ -53,71 +53,130 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
       }))
       .returns(doc);
 
+    const log = {
+      warn: sinon.stub()
+    };
+
     return {
       config,
-      callCluster
+      callCluster,
+      log,
     };
   }
 
   describe('using xpack:defaultAdminEmail', () => {
+    beforeEach(() => {
+      resetDeprecationWarning();
+    });
+
     describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
+
       it('returns null', async () => {
-        const { config, callCluster } = setup({ enabled: false });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be(null);
+        const { config, callCluster, log } = setup({ enabled: false });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
         sinon.assert.notCalled(callCluster);
+      });
+
+      it('does not log a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ enabled: false });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.notCalled(log.warn);
       });
     });
 
     describe('doc does not exist', () => {
       it('returns null', async () => {
-        const { config, callCluster } = setup({ docExists: false });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be(null);
+        const { config, callCluster, log } = setup({ docExists: false });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
         sinon.assert.calledOnce(callCluster);
+      });
+
+      it('logs a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ docExists: false });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.calledOnce(log.warn);
       });
     });
 
     describe('value is not defined', () => {
       it('returns null', async () => {
-        const { config, callCluster } = setup({ defaultAdminEmail: false });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be(null);
+        const { config, callCluster, log } = setup({ defaultAdminEmail: false });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
         sinon.assert.calledOnce(callCluster);
+      });
+
+      it('logs a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ defaultAdminEmail: false });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.calledOnce(log.warn);
       });
     });
 
     describe('value is defined', () => {
       it('returns value', async () => {
-        const { config, callCluster } = setup({ defaultAdminEmail: 'hello@world' });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be('hello@world');
+        const { config, callCluster, log } = setup({ defaultAdminEmail: 'hello@world' });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be('hello@world');
         sinon.assert.calledOnce(callCluster);
+      });
+
+      it('logs a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ defaultAdminEmail: 'hello@world' });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.calledOnce(log.warn);
       });
     });
   });
 
   describe('using xpack.monitoring.cluster_alerts.email_notifications.email_address', () => {
+    beforeEach(() => {
+      resetDeprecationWarning();
+    });
+
     describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
       it('returns null', async () => {
-        const { config, callCluster } = setup({ enabled: false });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be(null);
+        const { config, callCluster, log } = setup({ enabled: false });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
         sinon.assert.notCalled(callCluster);
+      });
+
+      it('does not log a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ enabled: false });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.notCalled(log.warn);
       });
     });
 
     describe('value is not defined', () => {
       it('returns value from xpack:defaultAdminEmail', async () => {
-        const { config, callCluster } = setup({
+        const { config, callCluster, log } = setup({
           defaultAdminEmail: 'default-admin@email.com',
           adminEmail: false
         });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be('default-admin@email.com');
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be('default-admin@email.com');
         sinon.assert.calledOnce(callCluster);
+      });
+
+      it('logs a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({
+          defaultAdminEmail: 'default-admin@email.com',
+          adminEmail: false
+        });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.calledOnce(log.warn);
       });
     });
 
     describe('value is defined', () => {
       it('returns value', async () => {
-        const { config, callCluster } = setup({ adminEmail: 'hello@world' });
-        expect(await getDefaultAdminEmail(config, callCluster)).to.be('hello@world');
+        const { config, callCluster, log } = setup({ adminEmail: 'hello@world' });
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be('hello@world');
         sinon.assert.notCalled(callCluster);
+      });
+
+      it('does not log a deprecation warning', async () => {
+        const { config, callCluster, log } = setup({ adminEmail: 'hello@world' });
+        await getDefaultAdminEmail(config, callCluster, log);
+        sinon.assert.notCalled(log.warn);
       });
     });
   });

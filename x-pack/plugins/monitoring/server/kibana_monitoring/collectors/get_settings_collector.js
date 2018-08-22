@@ -10,22 +10,38 @@ import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { getKibanaInfoForStats } from '../lib';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../lib/constants';
 
+let loggedDeprecationWarning = false;
+
+export function resetDeprecationWarning() {
+  loggedDeprecationWarning = false;
+}
+
 /*
  * Check if Cluster Alert email notifications is enabled in config
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
-export async function getDefaultAdminEmail(config, callCluster) {
+export async function getDefaultAdminEmail(config, callCluster, log) {
   if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
-  const configuredEmailAddress = config.get(`xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
+  const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
+  const configuredEmailAddress = config.get(emailAddressConfigKey);
 
   if (configuredEmailAddress) {
     return configuredEmailAddress;
   }
 
   // DEPRECATED (Remove below in 7.0): If an email address is not configured in kibana.yml, then fallback to xpack:defaultAdminEmail
+  if (!loggedDeprecationWarning) {
+    const message = (
+      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications,` +
+      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
+    );
+
+    log.warn(message);
+    loggedDeprecationWarning = true;
+  }
 
   const index = config.get('kibana.index');
   const version = config.get('pkg.version');
@@ -45,10 +61,11 @@ let shouldUseNull = true;
 export async function checkForEmailValue(
   config,
   callCluster,
+  log,
   _shouldUseNull = shouldUseNull,
   _getDefaultAdminEmail = getDefaultAdminEmail
 ) {
-  const defaultAdminEmail = await _getDefaultAdminEmail(config, callCluster);
+  const defaultAdminEmail = await _getDefaultAdminEmail(config, callCluster, log);
 
   // Allow null so clearing the advanced setting will be reflected in the data
   const isAcceptableNull = defaultAdminEmail === null && _shouldUseNull;
@@ -71,7 +88,7 @@ export function getSettingsCollector(server, kbnServer) {
     type: KIBANA_SETTINGS_TYPE,
     async fetch(callCluster) {
       let kibanaSettingsData = null;
-      const defaultAdminEmail = await checkForEmailValue(config, callCluster);
+      const defaultAdminEmail = await checkForEmailValue(config, callCluster, this.log);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
