@@ -64,15 +64,17 @@ interface State {
   useShortUrl: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
-  shortUrl?: string;
   shortUrlErrorMsg?: string;
 }
 
 export class ShareUrlContent extends Component<Props, State> {
   private mounted?: boolean;
+  private shortUrlCache?: string;
 
   constructor(props: Props) {
     super(props);
+
+    this.shortUrlCache = undefined;
 
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
@@ -125,10 +127,10 @@ export class ShareUrlContent extends Component<Props, State> {
 
   private resetUrl = () => {
     if (this.mounted) {
+      this.shortUrlCache = undefined;
       this.setState(
         {
           useShortUrl: false,
-          shortUrl: undefined,
         },
         this.setUrl
       );
@@ -197,7 +199,7 @@ export class ShareUrlContent extends Component<Props, State> {
     if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = this.getSavedObjectUrl();
     } else if (this.state.useShortUrl) {
-      url = this.state.shortUrl;
+      url = this.shortUrlCache;
     } else {
       url = this.getSnapshotUrl();
     }
@@ -221,7 +223,7 @@ export class ShareUrlContent extends Component<Props, State> {
   private handleShortUrlChange = async (evt: any) => {
     const isChecked = evt.target.checked;
 
-    if (!isChecked || this.state.shortUrl !== undefined) {
+    if (!isChecked || this.shortUrlCache !== undefined) {
       this.setState({ useShortUrl: isChecked }, this.setUrl);
       return;
     }
@@ -235,9 +237,9 @@ export class ShareUrlContent extends Component<Props, State> {
     try {
       const shortUrl = await shortenUrl(this.getSnapshotUrl());
       if (this.mounted) {
+        this.shortUrlCache = shortUrl;
         this.setState(
           {
-            shortUrl,
             isCreatingShortUrl: false,
             useShortUrl: isChecked,
           },
@@ -246,9 +248,9 @@ export class ShareUrlContent extends Component<Props, State> {
       }
     } catch (fetchError) {
       if (this.mounted) {
+        this.shortUrlCache = undefined;
         this.setState(
           {
-            shortUrl: undefined,
             useShortUrl: false,
             isCreatingShortUrl: false,
             shortUrlErrorMsg: `Unable to create short URL. Error: ${fetchError.message}`,
