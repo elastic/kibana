@@ -28,13 +28,13 @@ export class VectorLayer extends ALayer {
   static _applyDefaultStyle = (() => {
     //todo: should follow fixed ordering, similar to POC
     const defaultColors = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-    let randomNum;
+    let defaultColorIndex = 0;
     return () => {
-      randomNum = Math.floor((Math.random() * defaultColors.length));
-      return FillAndOutlineStyle.createDescriptor(defaultColors[randomNum]);
+      defaultColorIndex = defaultColorIndex >= defaultColors.length
+        ? 0 : defaultColorIndex;
+      return FillAndOutlineStyle.createDescriptor(defaultColors[defaultColorIndex++]);
     };
   })();
-
 
   getSupportedStyles() {
     //todo: this should be data-dependent (e.g. point data will not have FillAndOutlineStyle)
