@@ -43,7 +43,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
 export class Welcome extends React.Component {
-  hideOnEsc = (e) => {
+  hideOnEsc = e => {
     if (e.key === 'Escape') {
       this.props.onSkip();
     }
@@ -61,25 +61,27 @@ export class Welcome extends React.Component {
     const { urlBasePath, onSkip } = this.props;
 
     return (
-      <div className="home-welcome">
-        <header className="home-welcome-header">
-          <div className="home-welcome-content eui-textCenter">
+      <div className="homWelcome">
+        <header className="homWelcome__header">
+          <div className="homWelcome__content eui-textCenter">
             <EuiSpacer size="xxl" />
-            <span className="home-welcome-logo">
+            <span className="homWelcome__logo">
               <EuiIcon type="logoKibana" size="xxl" />
             </span>
-            <EuiTitle size="l" className="home-welcome-title">
+            <EuiTitle size="l" className="homWelcome__title">
               <h1>
                 <FormattedMessage id="kbn.home.welcomeHeader" defaultMessage="Welcome to Kibana"/>
               </h1>
             </EuiTitle>
-            <EuiText size="s" className="welcome-subtitle">
-              <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
+            <EuiText size="s" color="subdued" className="homWelcome__subtitle">
+              <p>
+                <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
+              </p>
             </EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
-        <div className="home-welcome-content home-welcome-body">
+        <div className="homWelcome__content homWelcome-body">
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               <EuiCard
@@ -92,24 +94,24 @@ export class Welcome extends React.Component {
                     defaultMessage="We noticed that you don't have any data in your cluster.
 You can try our sample data and dashboards or jump in with your own data."
                   />}
-                footer={(
+                footer={
                   <footer>
                     <EuiButton
                       fill
-                      className="home-welcome-footer-action"
+                      className="homWelcome__footerAction"
                       href="#/home/tutorial_directory/sampleData"
                     >
                       <FormattedMessage id="kbn.home.tryButton" defaultMessage="Try our sample data"/>
                     </EuiButton>
                     <EuiButtonEmpty
-                      className="home-welcome-footer-action"
+                      className="homWelcome__footerAction"
                       onClick={onSkip}
                       data-test-subj="skipWelcomeScreen"
                     >
                       <FormattedMessage id="kbn.home.exploreButton" defaultMessage="Explore on my own"/>
                     </EuiButtonEmpty>
                   </footer>
-                )}
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>

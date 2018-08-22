@@ -75,9 +75,7 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
   let betaBadge;
   if (isBeta) {
     betaBadge = (
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge className="tutorialIntroBadge" label="BETA" />
-      </EuiFlexItem>
+      <EuiBetaBadge label="Beta" />
     );
   }
   return (
@@ -92,11 +90,11 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h2>
-                {title}
+                {title} &nbsp;
+                {betaBadge}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          {betaBadge}
         </EuiFlexGroup>
 
         <Content text={description} />
