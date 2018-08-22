@@ -7,6 +7,8 @@
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayerInstance } from '../../selectors/map_selectors';
+import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { clearTemporaryStyles } from '../../actions/style_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -14,5 +16,14 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedLayerPanel = connect(mapStateToProps, null)(LayerPanel);
+function mapDispatchToProps(dispatch) {
+  return {
+    cancelLayerPanel: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(clearTemporaryStyles());
+    }
+  };
+}
+
+const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
 export { connectedLayerPanel as LayerPanel };

@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export function LayerPanel({ selectedLayer }) {
+export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
 
   if (!selectedLayer) {
     //todo: temp placeholder to bypass state-bug
@@ -28,7 +28,7 @@ export function LayerPanel({ selectedLayer }) {
 
   return (
     <EuiFlyout
-      onClose={() => console.warn('EuiFlyout#onClose not implemented.')}
+      onClose={cancelLayerPanel}
       style={{ maxWidth: 768 }}
     >
       <EuiFlyoutHeader>
