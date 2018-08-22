@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parseToRgb } from 'polished';
+
 // Units
 export const unit = 16;
 
@@ -65,6 +67,11 @@ export const colors = {
   link: colorBlue2,
   linkHover: colorBlue1
 };
+
+export function rgba(hex, alpha = 1) {
+  const rgb = parseToRgb(hex);
+  return `rgba(${rgb.red}, ${rgb.green}, ${rgb.blue}, ${alpha})`;
+}
 
 // Fonts
 export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';

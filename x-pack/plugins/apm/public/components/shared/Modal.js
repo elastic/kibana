@@ -9,7 +9,7 @@ import Portal from 'react-portal';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Close } from './Icons';
-import { fontSizes, units } from '../../style/variables';
+import { fontSizes, units, colors, rgba } from '../../style/variables';
 
 const Header = styled.div`
   display: flex;
@@ -36,9 +36,10 @@ const ModalFixed = styled.div`
 
 const ModalOverlay = styled(ModalFixed)`
   z-index: 10;
-  background: rgba(45, 45, 45, 0.8);
+  background: ${rgba(colors.gray2, 0.8)};
   height: 100%;
 `;
+// background: rgba(45, 45, 45, 0.8);
 
 const ModalOuterContainer = styled(ModalFixed)`
   z-index: 20;
@@ -118,9 +119,9 @@ Modal.propTypes = {
 };
 
 Modal.defaultProps = {
-  onOpen: () => {},
-  onClose: () => {},
-  close: () => {}
+  onOpen: () => { },
+  onClose: () => { },
+  close: () => { }
 };
 
 export default Modal;
