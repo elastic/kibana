@@ -18,7 +18,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { Server, ServerOptions } from 'hapi-latest';
+import { Server, ServerOptions } from 'hapi';
 import { ServerOptions as TLSOptions } from 'https';
 import { HttpConfig } from './http_config';
 

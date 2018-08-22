@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
+import { Server } from 'hapi';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
 import { ByteSizeValue } from '../config/schema';

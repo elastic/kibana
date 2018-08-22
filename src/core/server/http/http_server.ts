@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
+import { Server } from 'hapi';
 
 import { modifyUrl } from '../../utils';
 import { Env } from '../config';

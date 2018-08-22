@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request } from 'hapi-latest';
+import { Request } from 'hapi';
 import { ObjectType, TypeOf } from '../../config/schema';
 
 import { filterHeaders, Headers } from './headers';

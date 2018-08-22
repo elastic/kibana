@@ -282,8 +282,8 @@
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
 
 "@types/catbox@*":
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/@types/catbox/-/catbox-10.0.0.tgz#1e01e5ad83e224f110cc59f6f57c56558f7eeb61"
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@types/catbox/-/catbox-10.0.1.tgz#266679017749041fe9873fee1131dd2aaa04a07e"
 
 "@types/chance@^1.0.0":
   version "1.0.1"
@@ -365,9 +365,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/hapi-latest@npm:@types/hapi@17.0.12":
-  version "17.0.12"
-  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.12.tgz#5751f4d8db4decb4eae6671a4efbeae671278ceb"
+"@types/hapi@17.0.18":
+  version "17.0.18"
+  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
   dependencies:
     "@types/boom" "*"
     "@types/catbox" "*"
@@ -399,8 +399,8 @@
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
 
 "@types/joi@*":
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.3.0.tgz#bdfa2e49d8d258ba79f23304228d0c4d5cfc848c"
+  version "13.4.3"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.4.3.tgz#4a9b19d9d16ab70f5eb4fc5e5a6c60392d72144a"
 
 "@types/joi@^13.4.2":
   version "13.4.2"
@@ -5934,28 +5934,6 @@ hapi-auth-cookie@9.0.0:
     bounce "1.x.x"
     hoek "5.x.x"
     joi "13.x.x"
-
-"hapi-latest@npm:hapi@17.5.0":
-  version "17.5.0"
-  resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.5.0.tgz#9fc33f10d6f563d0203853937b60dd13a59b51ce"
-  dependencies:
-    accept "3.x.x"
-    ammo "3.x.x"
-    boom "7.x.x"
-    bounce "1.x.x"
-    call "5.x.x"
-    catbox "10.x.x"
-    catbox-memory "3.x.x"
-    heavy "6.x.x"
-    hoek "5.x.x"
-    joi "13.x.x"
-    mimos "4.x.x"
-    podium "3.x.x"
-    shot "4.x.x"
-    statehood "6.x.x"
-    subtext "6.x.x"
-    teamwork "3.x.x"
-    topo "3.x.x"
 
 hapi@17.5.3:
   version "17.5.3"
