@@ -1970,6 +1970,10 @@ detect-newline@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-2.1.0.tgz#f41f1c10be4b00e87b5f13da680759f2c5bfd3e2"
 
+devtools-protocol@^0.0.579242:
+  version "0.0.579242"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.579242.tgz#c2bcfb397f18fbed001eafd0646def9e9b590fcc"
+
 dfa@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/dfa/-/dfa-1.1.0.tgz#d30218bd10d030fa421df3ebbc82285463a31781"
