@@ -25,11 +25,12 @@ export function tutorialsMixin(kbnServer, server) {
   const scopedTutorialContextFactoryies = [];
 
   server.decorate('server', 'getTutorials', (request) => {
+    const initialContext = {};
+    const scopedContext = scopedTutorialContextFactoryies.reduce((accumulatedContext, contextFactory) => {
+      return { ...accumulatedContext, ...contextFactory(request) };
+    }, initialContext);
+
     return tutorialProviders.map((tutorialProvider) => {
-      const initialContext = {};
-      const scopedContext = scopedTutorialContextFactoryies.reduce((accumulatedContext, contextFactory) => {
-        return { ...accumulatedContext, ...contextFactory(request) };
-      }, initialContext);
       return tutorialProvider(server, scopedContext);
     });
   });
