@@ -12,7 +12,6 @@ import {
   asDecimal,
   tpmUnit
 } from '../../utils/formatters';
-import { rgba } from 'polished';
 
 export const getEmptySerie = memoize(
   (start = Date.now() - 3600000, end = Date.now()) => {
@@ -92,7 +91,7 @@ export function getResponseTimeSeries(chartsData) {
       ),
       type: 'area',
       color: 'none',
-      areaColor: rgba(colors.apmBlue, 0.1) //'rgba(49, 133, 252, 0.1)' // apmBlue
+      areaColor: rgba(colors.apmBlue, 0.1)
     });
 
     series.splice(1, 0, {
@@ -106,7 +105,7 @@ export function getResponseTimeSeries(chartsData) {
       ),
       type: 'areaMaxHeight',
       color: 'none',
-      areaColor: rgba(colors.apmRed, 0.1) //'rgba(146, 0, 0, 0.1)' // apmRed
+      areaColor: rgba(colors.apmRed, 0.1)
     });
   }
 

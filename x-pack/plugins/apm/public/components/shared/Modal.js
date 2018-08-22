@@ -39,7 +39,6 @@ const ModalOverlay = styled(ModalFixed)`
   background: ${rgba(colors.gray2, 0.8)};
   height: 100%;
 `;
-// background: rgba(45, 45, 45, 0.8);
 
 const ModalOuterContainer = styled(ModalFixed)`
   z-index: 20;
