@@ -115,7 +115,7 @@ describe('kfetch', () => {
     }
   });
 
-  describe('when throwing KFetchError response error', async () => {
+  describe('when throwing response error (KFetchError)', async () => {
     let error: KFetchError;
     beforeEach(async () => {
       fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
@@ -134,350 +134,340 @@ describe('kfetch', () => {
       expect(error.body).toEqual({ foo: 'bar' });
     });
 
-    it('should contain response headers', () => {
+    it('should contain response properties', () => {
       expect(error.res.status).toBe(404);
       expect(error.res.url).toBe('http://localhost.com/myBase/my/path');
     });
   });
 
-  describe('interceptors', () => {
-    describe('request', () => {
-      it('should add headers and return synchronously', async () => {
-        fetchMock.get('*', {});
-        addInterceptor({
-          request: config => ({
+  describe('when multiple interceptors are added', () => {
+    let resp: any;
+    let interceptorCalls: string[];
+
+    beforeEach(async () => {
+      interceptorCalls = [];
+      fetchMock.get('*', { foo: 'bar' });
+
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request A');
+          return config;
+        },
+        response: res => {
+          interceptorCalls.push('Response A');
+          return res;
+        },
+      });
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request B');
+          return config;
+        },
+        response: res => {
+          interceptorCalls.push('Response B');
+          return res;
+        },
+      });
+
+      resp = await kfetch({ pathname: 'my/path' });
+    });
+
+    it('should call request interceptors in correct order', () => {
+      expect(interceptorCalls).toEqual(['Request B', 'Request A', 'Response A', 'Response B']);
+    });
+
+    it('should make request', () => {
+      expect(fetchMock.called('*')).toBe(true);
+    });
+
+    it('should return response', () => {
+      expect(resp).toEqual({ foo: 'bar' });
+    });
+  });
+
+  describe('when multiple interceptors are added and the newest request interceptor throws', () => {
+    let resp: any;
+    let interceptorCalls: string[];
+
+    beforeEach(async () => {
+      interceptorCalls = [];
+      fetchMock.get('*', { foo: 'bar' });
+
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request A');
+          return config;
+        },
+        requestError: e => {
+          interceptorCalls.push('RequestError A');
+          return {};
+        },
+        response: res => {
+          interceptorCalls.push('Response A');
+          return res;
+        },
+        responseError: res => {
+          interceptorCalls.push('ResponseError A');
+          return res;
+        },
+      });
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request B');
+          throw new Error('Error from Request B');
+        },
+        requestError: e => {
+          interceptorCalls.push('RequestError B');
+          throw e;
+        },
+        response: res => {
+          interceptorCalls.push('Response B');
+          return res;
+        },
+        responseError: res => {
+          interceptorCalls.push('ResponseError B');
+          return res;
+        },
+      });
+
+      resp = await kfetch({ pathname: 'my/path' });
+    });
+
+    it('should call request interceptors in correct order', () => {
+      expect(interceptorCalls).toEqual(['Request B', 'RequestError A', 'Response A', 'Response B']);
+    });
+
+    it('should make request', () => {
+      expect(fetchMock.called('*')).toBe(true);
+    });
+
+    it('should return response', () => {
+      expect(resp).toEqual({ foo: 'bar' });
+    });
+  });
+
+  describe('when multiple interceptors are added and the newest response interceptor throws', () => {
+    let error: Error;
+    let interceptorCalls: string[];
+
+    beforeEach(async () => {
+      interceptorCalls = [];
+      fetchMock.get('*', { foo: 'bar' });
+
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request A');
+          return config;
+        },
+        requestError: e => {
+          interceptorCalls.push('RequestError A');
+          return {};
+        },
+        response: res => {
+          interceptorCalls.push('Response A');
+          throw new Error('Thrown in Response A');
+        },
+        responseError: res => {
+          interceptorCalls.push('ResponseError A');
+          return res;
+        },
+      });
+      addInterceptor({
+        request: config => {
+          interceptorCalls.push('Request B');
+          return config;
+        },
+        requestError: e => {
+          interceptorCalls.push('RequestError B');
+          throw e;
+        },
+        response: res => {
+          interceptorCalls.push('Response B');
+          return res;
+        },
+        responseError: e => {
+          interceptorCalls.push('ResponseError B');
+          throw e;
+        },
+      });
+
+      try {
+        await kfetch({ pathname: 'my/path' });
+      } catch (e) {
+        error = e;
+      }
+    });
+
+    it('should call request interceptors in correct order', () => {
+      expect(interceptorCalls).toEqual(['Request B', 'Request A', 'Response A', 'ResponseError B']);
+    });
+
+    it('should make request', () => {
+      expect(fetchMock.called('*')).toBe(true);
+    });
+
+    it('should throw error', () => {
+      expect(error.message).toEqual('Thrown in Response A');
+    });
+  });
+
+  describe('when interceptors return synchronously', async () => {
+    let resp: any;
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
+      addInterceptor({
+        request: config => ({
+          ...config,
+          addedByRequestInterceptor: true,
+        }),
+        response: res => ({
+          ...res,
+          addedByResponseInterceptor: true,
+        }),
+      });
+
+      resp = await kfetch({ pathname: 'my/path' });
+    });
+
+    it('should modify request', () => {
+      expect(fetchMock.lastOptions('*')).toMatchObject({
+        addedByRequestInterceptor: true,
+        method: 'GET',
+      });
+    });
+
+    it('should modify response', () => {
+      expect(resp).toEqual({
+        addedByResponseInterceptor: true,
+        foo: 'bar',
+      });
+    });
+  });
+
+  describe('when interceptors return promise', async () => {
+    let resp: any;
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
+      addInterceptor({
+        request: config =>
+          Promise.resolve({
             ...config,
-            headers: {
-              ...config.headers,
-              addedByInterceptor: true,
-            },
+            addedByRequestInterceptor: true,
           }),
-        });
-
-        await kfetch({ pathname: 'my/path', headers: { myHeader: 'foo' } });
-
-        expect(fetchMock.lastOptions('*').headers).toEqual({
-          addedByInterceptor: true,
-          myHeader: 'foo',
-          'Content-Type': 'application/json',
-          'kbn-version': 'my-version',
-        });
-      });
-
-      it('should add headers and return promise', async () => {
-        fetchMock.get('*', {});
-        addInterceptor({
-          request: config =>
-            Promise.resolve({
-              ...config,
-              headers: {
-                ...config.headers,
-                addedByInterceptor: true,
-              },
-            }),
-        });
-
-        await kfetch({ pathname: 'my/path', headers: { myHeader: 'foo' } });
-
-        expect(fetchMock.lastOptions('*').headers).toEqual({
-          addedByInterceptor: true,
-          myHeader: 'foo',
-          'Content-Type': 'application/json',
-          'kbn-version': 'my-version',
-        });
-      });
-    });
-
-    describe('requestError', () => {
-      it('should throw custom error', async () => {
-        expect.assertions(1);
-        fetchMock.get('*', {});
-        addInterceptor({
-          request: () => {
-            throw new Error('Initial error');
-          },
-          requestError: e => {
-            throw new Error(`${e.message} intercepted`);
-          },
-        });
-
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
-          expect(e.message).toBe('Initial error intercepted');
-        }
-      });
-
-      it('should return rejected promise', async () => {
-        expect.assertions(1);
-        fetchMock.get('*', {});
-        addInterceptor({
-          request: () => {
-            throw new Error('Initial error');
-          },
-          requestError: e => Promise.reject(new Error(`${e.message} intercepted`)),
-        });
-
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
-          expect(e.message).toBe('Initial error intercepted');
-        }
-      });
-
-      it('should make request when error is resolved', async () => {
-        fetchMock.get('*', { foo: 'bar' });
-        addInterceptor({
-          request: () => {
-            throw new Error('Initial error');
-          },
-          requestError: () => ({ pathname: 'myNewPath', myProp: 'myValue' }),
-        });
-
-        const resp = await kfetch({ pathname: 'my/path' });
-        expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/myNewPath');
-        expect(fetchMock.lastOptions('*')).toEqual({ myProp: 'myValue' });
-        expect(resp).toEqual({ foo: 'bar' });
-      });
-    });
-
-    describe('response', () => {
-      it('should modify response and return synchronously', async () => {
-        fetchMock.get('*', { foo: 'bar' });
-        addInterceptor({
-          response: res => ({
+        response: res =>
+          Promise.resolve({
             ...res,
-            addedByInterceptor: true,
+            addedByResponseInterceptor: true,
           }),
-        });
-
-        const resp = await kfetch({ pathname: 'my/path' });
-        expect(resp).toEqual({
-          addedByInterceptor: true,
-          foo: 'bar',
-        });
       });
 
-      it('should modify response and return promise', async () => {
-        fetchMock.get('*', { foo: 'bar' });
-        addInterceptor({
-          response: res =>
-            Promise.resolve({
-              ...res,
-              addedByInterceptor: true,
-            }),
-        });
+      resp = await kfetch({ pathname: 'my/path' });
+    });
 
-        const resp = await kfetch({ pathname: 'my/path' });
-        expect(resp).toEqual({
-          addedByInterceptor: true,
-          foo: 'bar',
-        });
-      });
-
-      it('should throw via interceptor', async () => {
-        expect.assertions(1);
-        fetchMock.get('*', { foo: 'bar' });
-        addInterceptor({
-          response: res => {
-            throw new Error('custom response error');
-          },
-        });
-
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
-          expect(e.message).toBe('custom response error');
-        }
-      });
-
-      describe('when the first interceptor throws an error', () => {
-        let error: Error;
-        let spy1: jest.Mock;
-        let spy2: jest.Mock;
-        let spy3: jest.Mock;
-
-        beforeEach(async () => {
-          fetchMock.get('*', { foo: 'bar' });
-
-          spy1 = jest.fn(e => {
-            throw new Error('my custom error');
-          });
-
-          spy2 = jest.fn();
-          spy3 = jest.fn();
-
-          addInterceptor({ response: spy1 });
-          addInterceptor({ response: spy2 });
-          addInterceptor({ response: spy3 });
-
-          try {
-            await kfetch({ pathname: 'my/path' });
-          } catch (e) {
-            error = e;
-          }
-        });
-
-        it('should call the first interceptor', () => {
-          expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
-        });
-
-        it('should reject with the error from the first interceptor', () => {
-          expect(error.message).toBe('my custom error');
-        });
-
-        it('should not call subsequent interceptors', () => {
-          expect(spy2).not.toHaveBeenCalled();
-          expect(spy3).not.toHaveBeenCalled();
-        });
-      });
-
-      describe('when no interceptors throw', async () => {
-        let resp: any;
-        let spy1: jest.Mock;
-        let spy2: jest.Mock;
-        let spy3: jest.Mock;
-
-        beforeEach(async () => {
-          fetchMock.get('*', { foo: 'bar' });
-
-          spy1 = jest.fn(res => ({ ...res, spy1: true }));
-          spy2 = jest.fn(res => ({ ...res, spy2: true }));
-          spy3 = jest.fn(res => ({ ...res, spy3: true }));
-          addInterceptor({ response: spy1 });
-          addInterceptor({ response: spy2 });
-          addInterceptor({ response: spy3 });
-          resp = await kfetch({ pathname: 'my/path' });
-        });
-
-        it('should return the value of the last interceptor', () => {
-          expect(resp).toEqual({ foo: 'bar', spy1: true, spy2: true, spy3: true });
-        });
-
-        it('should call each interceptors with the value of the preceding interceptor', () => {
-          expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
-          expect(spy2.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true });
-          expect(spy3.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true, spy2: true });
-        });
+    it('should modify request', () => {
+      expect(fetchMock.lastOptions('*')).toMatchObject({
+        addedByRequestInterceptor: true,
+        method: 'GET',
       });
     });
 
-    describe('responseError', () => {
-      it('should throw custom error', async () => {
-        expect.assertions(1);
-        fetchMock.get('*', { status: 404 });
+    it('should modify request', () => {
+      expect(resp).toEqual({
+        addedByResponseInterceptor: true,
+        foo: 'bar',
+      });
+    });
+  });
 
-        addInterceptor({
-          responseError: e => {
-            throw new Error('my custom error');
-          },
-        });
-
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
-          expect(e.message).toBe('my custom error');
-        }
+  describe('when response interceptor throws', () => {
+    let error: Error;
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
+      addInterceptor({
+        response: res => {
+          throw new Error('custom response error');
+        },
       });
 
-      it('should return rejected promise', async () => {
-        expect.assertions(1);
-        fetchMock.get('*', { status: 404 });
-        addInterceptor({
-          responseError: e => Promise.reject(new Error('my rejected value')),
-        });
+      try {
+        await kfetch({ pathname: 'my/path' });
+      } catch (e) {
+        error = e;
+      }
+    });
 
-        try {
-          await kfetch({ pathname: 'my/path' });
-        } catch (e) {
-          expect(e.message).toBe('my rejected value');
-        }
+    it('should return rejected promise', async () => {
+      expect(error.message).toBe('custom response error');
+    });
+  });
+
+  describe('when the first of three response interceptors throws an error', () => {
+    let error: Error;
+    let spy1: jest.Mock;
+    let spy2: jest.Mock;
+    let spy3: jest.Mock;
+
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      spy1 = jest.fn(e => {
+        throw new Error('my custom error');
       });
 
-      it('should swallow error', async () => {
-        fetchMock.get('*', { status: 404 });
-        addInterceptor({
-          responseError: () => 'resolved valued',
-        });
+      spy2 = jest.fn();
+      spy3 = jest.fn();
 
-        const resp = await kfetch({ pathname: 'my/path' });
-        expect(resp).toBe('resolved valued');
-      });
+      addInterceptor({ response: spy1 });
+      addInterceptor({ response: spy2 });
+      addInterceptor({ response: spy3 });
 
-      describe('when every interceptor re-throws the error', async () => {
-        let error: Error;
-        let spy1: jest.Mock;
-        let spy2: jest.Mock;
-        let spy3: jest.Mock;
+      try {
+        await kfetch({ pathname: 'my/path' });
+      } catch (e) {
+        error = e;
+      }
+    });
 
-        beforeEach(async () => {
-          fetchMock.get('*', { status: 404 });
+    it('should call the first interceptor', () => {
+      expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
+    });
 
-          spy1 = jest.fn(e => {
-            throw new Error('Error from first interceptor');
-          });
-          spy2 = jest.fn(e => {
-            throw new Error('Error from second interceptor');
-          });
-          spy3 = jest.fn(e => {
-            throw new Error('Error from the last interceptor');
-          });
+    it('should reject with the error from the first interceptor', () => {
+      expect(error.message).toBe('my custom error');
+    });
 
-          addInterceptor({ responseError: spy1 });
-          addInterceptor({ responseError: spy2 });
-          addInterceptor({ responseError: spy3 });
+    it('should not call subsequent interceptors', () => {
+      expect(spy2).not.toHaveBeenCalled();
+      expect(spy3).not.toHaveBeenCalled();
+    });
+  });
 
-          try {
-            await kfetch({ pathname: 'my/path' });
-          } catch (e) {
-            error = e;
-          }
-        });
+  describe('when all response interceptors resolve', async () => {
+    let resp: any;
+    let spy1: jest.Mock;
+    let spy2: jest.Mock;
+    let spy3: jest.Mock;
 
-        it('should reject with the error from the last interceptor', () => {
-          expect(error.message).toBe('Error from the last interceptor');
-        });
+    beforeEach(async () => {
+      fetchMock.get('*', { foo: 'bar' });
 
-        it('should call every interceptor with the error of the preceding interceptor', () => {
-          expect(spy1.mock.calls[0][0].message).toBe('Not Found');
-          expect(spy2.mock.calls[0][0].message).toBe('Error from first interceptor');
-          expect(spy3.mock.calls[0][0].message).toBe('Error from second interceptor');
-        });
-      });
+      spy1 = jest.fn(res => ({ ...res, spy1: true }));
+      spy2 = jest.fn(res => ({ ...res, spy2: true }));
+      spy3 = jest.fn(res => ({ ...res, spy3: true }));
+      addInterceptor({ response: spy1 });
+      addInterceptor({ response: spy2 });
+      addInterceptor({ response: spy3 });
+      resp = await kfetch({ pathname: 'my/path' });
+    });
 
-      describe('when the first interceptor swallows the error', async () => {
-        let resp: any;
-        let spy1: jest.Mock;
-        let spy2: jest.Mock;
-        let spy3: jest.Mock;
+    it('should return the value of the last interceptor', () => {
+      expect(resp).toEqual({ foo: 'bar', spy1: true, spy2: true, spy3: true });
+    });
 
-        beforeEach(async () => {
-          fetchMock.get('*', { status: 404 });
-
-          spy1 = jest.fn(e => 'my resolved value');
-          spy2 = jest.fn();
-          spy3 = jest.fn();
-
-          addInterceptor({ responseError: spy1 });
-          addInterceptor({ responseError: spy2 });
-          addInterceptor({ responseError: spy3 });
-
-          resp = await kfetch({ pathname: 'my/path' });
-        });
-
-        it('should call the first interceptor', () => {
-          expect(spy1.mock.calls[0][0].message).toBe('Not Found');
-        });
-
-        it('should resolve with the value of the first interceptor', () => {
-          expect(resp).toBe('my resolved value');
-        });
-
-        it('should not call subsequent interceptors', () => {
-          expect(spy2).not.toHaveBeenCalled();
-          expect(spy3).not.toHaveBeenCalled();
-        });
-      });
+    it('should call each interceptors with the value of the preceding interceptor', () => {
+      expect(spy1.mock.calls[0][0]).toEqual({ foo: 'bar' });
+      expect(spy2.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true });
+      expect(spy3.mock.calls[0][0]).toEqual({ foo: 'bar', spy1: true, spy2: true });
     });
   });
 });

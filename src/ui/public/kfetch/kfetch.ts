@@ -65,6 +65,7 @@ export async function kfetch(
   const { pathname, query, ...restOptions }: KFetchOptions = await requestInterceptors(
     combinedOptions
   );
+
   const fullUrl = url.format({
     pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
     query,
@@ -82,13 +83,13 @@ export async function kfetch(
 
 function requestInterceptors(config: any) {
   return [...interceptors].reverse().reduce((acc, interceptor) => {
-    return acc.then(interceptor.request || noop).catch(interceptor.requestError || noopError);
+    return acc.then(interceptor.request || noop, interceptor.requestError || noopError);
   }, Promise.resolve(config));
 }
 
 function responseInterceptors(responsePromise: Promise<any>) {
   return interceptors.reduce((acc, interceptor) => {
-    return acc.then(interceptor.response || noop).catch(interceptor.responseError || noopError);
+    return acc.then(interceptor.response || noop, interceptor.responseError || noopError);
   }, responsePromise);
 }
 
