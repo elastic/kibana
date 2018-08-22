@@ -42,27 +42,28 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
+function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
+
 function filterPaths(inputPaths) {
   const availablePaths = Object.values(paths);
   const pathsForExtraction = new Set();
 
   for (const inputPath of inputPaths) {
-    const normalizedPath = normalize(path.relative('.', inputPath));
+    const normalizedPath = normalizePath(inputPath);
 
-    if (normalizedPath) {
-      availablePaths
-        .filter(ePath => ePath.startsWith(`${normalizedPath}/`) || ePath === normalizedPath)
-        .forEach(ePath => pathsForExtraction.add(ePath));
-    } else {
-      availablePaths.forEach(ePath => pathsForExtraction.add(ePath));
-    }
-
+    // If input path is the sub path of or equal to any available path, include it.
     if (
-      availablePaths.some(
-        ePath => normalizedPath.startsWith(`${ePath}/`) || ePath === normalizedPath
-      )
+      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
     ) {
       pathsForExtraction.add(normalizedPath);
+    } else {
+      // Otherwise go through all available paths and see if any of them is the sub
+      // path of the input path (empty normalized path corresponds to root or above).
+      availablePaths
+        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
+        .forEach(ePath => pathsForExtraction.add(ePath));
     }
   }
 
@@ -70,7 +71,7 @@ function filterPaths(inputPaths) {
 }
 
 export function validateMessageNamespace(id, filePath) {
-  const normalizedPath = normalize(path.relative('.', filePath));
+  const normalizedPath = normalizePath(filePath);
 
   const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
     normalizedPath.startsWith(`${pluginPath}/`)
@@ -115,14 +116,12 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries
-          .filter(entry => !exclude.includes(normalize(path.relative('.', entry))))
-          .map(async entry => {
-            return {
-              name: entry,
-              content: await readFileAsync(entry),
-            };
-          })
+        entries.filter(entry => !exclude.includes(normalizePath(entry))).map(async entry => {
+          return {
+            name: entry,
+            content: await readFileAsync(entry),
+          };
+        })
       );
 
       for (const { name, content } of files) {
@@ -139,6 +138,45 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   );
 }
 
+function serializeToJson5(defaultMessages) {
+  // .slice(0, -1): remove closing curly brace from json to append messages
+  let jsonBuffer = Buffer.from(
+    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
+  );
+
+  for (const [mapKey, mapValue] of defaultMessages) {
+    const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
+    const formattedContext = mapValue.context
+      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+      : '';
+
+    jsonBuffer = Buffer.concat([
+      jsonBuffer,
+      Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
+      Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
+    ]);
+  }
+
+  // append previously removed closing curly brace
+  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
+
+  return jsonBuffer;
+}
+
+function serializeToJson(defaultMessages) {
+  const resultJsonObject = { formats: i18n.formats };
+
+  for (const [mapKey, mapValue] of defaultMessages) {
+    if (mapValue.context) {
+      resultJsonObject[mapKey] = { message: mapValue.message, context: mapValue.context };
+    } else {
+      resultJsonObject[mapKey] = mapValue.message;
+    }
+  }
+
+  return JSON.stringify(resultJsonObject, undefined, 2);
+}
+
 export async function extractDefaultTranslations({ paths, output, outputFormat }) {
   const defaultMessagesMap = new Map();
 
@@ -151,47 +189,12 @@ export async function extractDefaultTranslations({ paths, output, outputFormat }
     return;
   }
 
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
-    return key1 < key2 ? -1 : 1;
-  });
+  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) =>
+    key1.localeCompare(key2)
+  );
 
-  const defaultMessagesObject = { formats: i18n.formats };
-
-  if (outputFormat === 'json5') {
-    // .slice(0, -1): remove closing curly brace from json to append messages
-    let jsonBuffer = Buffer.from(
-      JSON5.stringify(defaultMessagesObject, { quote: `'`, space: 2 }).slice(0, -1)
-    );
-
-    for (const [mapKey, mapValue] of defaultMessages) {
-      const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
-      const formattedContext = mapValue.context
-        ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-        : '';
-
-      jsonBuffer = Buffer.concat([
-        jsonBuffer,
-        Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
-        Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
-      ]);
-    }
-
-    // append previously removed closing curly brace
-    jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-    await writeFileAsync(path.resolve(output, 'en.json'), jsonBuffer);
-  } else {
-    for (const [mapKey, mapValue] of defaultMessages) {
-      if (mapValue.context) {
-        defaultMessagesObject[mapKey] = { message: mapValue.message, context: mapValue.context };
-      } else {
-        defaultMessagesObject[mapKey] = mapValue.message;
-      }
-    }
-
-    await writeFileAsync(
-      path.resolve(output, 'en.json'),
-      JSON.stringify(defaultMessagesObject, undefined, 2)
-    );
-  }
+  await writeFileAsync(
+    path.resolve(output, 'en.json'),
+    outputFormat === 'json5' ? serializeToJson5(defaultMessages) : serializeToJson(defaultMessages)
+  );
 }

@@ -35,8 +35,6 @@ const LINE_BREAK_REGEX = /\n/g;
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
-export const makeDirAsync = promisify(fs.mkdir);
-export const accessAsync = promisify(fs.access);
 
 export function isPropertyWithKey(property, identifierName) {
   return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
