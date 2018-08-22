@@ -90,6 +90,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the tslint script to check for Typescript linting errors
+    typeCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/type_check')
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
@@ -153,14 +162,30 @@ module.exports = function (grunt) {
       ],
     },
 
-    panelActionTests: {
+    serverIntegrationTests: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/panel_actions/config.js',
+        '--config', 'test/server_integration/http/ssl/config.js',
+        '--config', 'test/server_integration/http/ssl_redirect/config.js',
         '--esFrom', 'source',
         '--bail',
         '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+      ],
+    },
+
+    pluginFunctionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/plugin_functional/config.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
       ],
     },
 
@@ -173,7 +198,7 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--',
-        '--server.maxPayloadBytes=1648576',
+        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 

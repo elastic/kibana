@@ -44,7 +44,7 @@ export interface ResetPanelTitleAction
 
 export interface SetPanelTitleActionPayload {
   panelId: PanelId;
-  title: string;
+  title?: string;
 }
 
 export interface SetPanelTitleAction

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from "redux-actions";
-import { forcemergeIndices as request } from "../../services";
-import { clearRowStatus, reloadIndices } from "../actions";
+import { createAction } from 'redux-actions';
+import { i18n }  from '@kbn/i18n';
+import { forcemergeIndices as request } from '../../services';
+import { clearRowStatus, reloadIndices } from '../actions';
 import { toastNotifications } from 'ui/notify';
 
 export const forcemergeIndicesStart = createAction(
-  "INDEX_MANAGEMENT_FORCEMERGE_INDICES_START"
+  'INDEX_MANAGEMENT_FORCEMERGE_INDICES_START'
 );
 
 export const forcemergeIndices = ({ indexNames, maxNumSegments }) => async (dispatch) => {
@@ -22,5 +23,10 @@ export const forcemergeIndices = ({ indexNames, maxNumSegments }) => async (disp
     return dispatch(clearRowStatus({ indexNames }));
   }
   dispatch(reloadIndices(indexNames));
-  toastNotifications.addSuccess(`Successfully force merged: [${indexNames.join(", ")}]`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage', {
+      defaultMessage: 'Successfully force merged: [{indexNames}]',
+      values: { indexNames: indexNames.join(', ') }
+    })
+  );
 };

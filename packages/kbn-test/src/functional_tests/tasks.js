@@ -91,7 +91,8 @@ export async function startServers(options) {
 }
 
 async function silence(milliseconds, { log }) {
-  await Rx.fromEvent(log, 'data')
+  await log
+    .getWritten$()
     .pipe(
       startWith(null),
       switchMap(() => Rx.timer(milliseconds)),
@@ -115,15 +116,7 @@ async function runSingleConfig(configPath, options) {
 
     const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({ procs, config, options: opts });
-
-    // Note: When solving how to incorporate functional_test_runner
-    // clean this up
-    await runFtr({
-      procs,
-      configPath,
-      cwd: process.cwd(),
-      options: opts,
-    });
+    await runFtr({ configPath, options: opts });
 
     await procs.stop('kibana');
     await es.cleanup();

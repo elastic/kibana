@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe.skip('adding a filter that excludes all data', async () => {
+    describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -101,11 +102,15 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('using a pinned filter that excludes all data', async () => {
+    describe('using a pinned filter that excludes all data', async () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      after(async () => {
+        await filterBar.toggleFilterPinned('bytes');
       });
 
       it('filters on pie charts', async () => {
@@ -158,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('disabling a filter unfilters the data on', async () => {
+    describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -234,10 +239,13 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+
+        // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
+        // as that expects an item with the `data-shared-items-count` tag.
+        await renderable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -247,7 +255,7 @@ export default function ({ getService, getPageObjects }) {
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await renderable.waitForRender();
         await PageObjects.dashboard.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);

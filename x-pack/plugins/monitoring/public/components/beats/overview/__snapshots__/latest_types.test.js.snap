@@ -6,10 +6,12 @@ exports[`Latest Types that latest active component renders normally 1`] = `
     Array [
       Object {
         "field": "type",
+        "name": "",
       },
       Object {
         "dataType": "number",
         "field": "count",
+        "name": "",
       },
     ]
   }

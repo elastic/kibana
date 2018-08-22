@@ -36,3 +36,6 @@ theme.applyTheme('light');
 // All Kibana styles inside of the /styles dir
 const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.)[^\/\\]+\.less/);
 context.keys().forEach(key => context(key));
+
+// manually require non-less files
+require('../styles/disable_animations');
