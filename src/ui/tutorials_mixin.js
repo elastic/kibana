@@ -17,24 +17,39 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import Joi from 'joi';
 import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial_schema';
 
 export function tutorialsMixin(kbnServer, server) {
-  const tutorials = [];
+  const tutorialProviders = [];
+  const scopedTutorialContextFactoryies = [];
 
-  server.decorate('server', 'getTutorials', () => {
-    return _.cloneDeep(tutorials);
+  server.decorate('server', 'getTutorials', (request) => {
+    return tutorialProviders.map((tutorialProvider) => {
+      const initialContext = {};
+      const scopedContext = scopedTutorialContextFactoryies.reduce((accumulatedContext, contextFactory) => {
+        return { ...accumulatedContext, ...contextFactory(request) };
+      }, initialContext);
+      return tutorialProvider(server, scopedContext);
+    });
   });
 
   server.decorate('server', 'registerTutorial', (specProvider) => {
-    const { error, value } = Joi.validate(specProvider(server), tutorialSchema);
+    const emptyContext = {};
+    const { error } = Joi.validate(specProvider(server, emptyContext), tutorialSchema);
 
     if (error) {
       throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
     }
 
-    tutorials.push(value);
+    tutorialProviders.push(specProvider);
+  });
+
+  server.decorate('server', 'addScopedTutorialContextFactory', (scopedTutorialContextFactory) => {
+    if (typeof scopedTutorialContextFactory !== 'function') {
+      throw new Error(`Unable to add scoped(request) context factory because you did not provide a function`);
+    }
+
+    scopedTutorialContextFactoryies.push(scopedTutorialContextFactory);
   });
 }
