@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
-      await comboBox.set('indexPatternSelect-0', 'logstash');
+      await comboBox.set('indexPatternSelect-0', 'logstash- ');
       await comboBox.set('fieldSelect-0', FIELD_NAME);
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash');
+        await comboBox.set('indexPatternSelect-0', 'logstash- ');
         await comboBox.set('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.clickGo();
@@ -233,11 +233,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('controls');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-0', 'logstash');
+        await comboBox.set('indexPatternSelect-0', 'logstash- ');
         await comboBox.set('fieldSelect-0', 'geo.src');
 
         await PageObjects.visualize.addInputControl();
-        await comboBox.set('indexPatternSelect-1', 'logstash');
+        await comboBox.set('indexPatternSelect-1', 'logstash- ');
         await comboBox.set('fieldSelect-1', 'clientip');
         await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
 
