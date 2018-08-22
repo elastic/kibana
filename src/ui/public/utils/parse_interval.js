@@ -23,6 +23,7 @@ import dateMath from '@kbn/datemath';
 
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');
+const ES_INTERVAL_STRING_RE = new RegExp('^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$');
 
 export function parseInterval(interval) {
   const matches = String(interval).trim().match(INTERVAL_STRING_RE);
@@ -50,4 +51,32 @@ export function parseInterval(interval) {
   } catch (e) {
     return null;
   }
+}
+
+/**
+ * Strict version of parseInterval(), enforces ES interval format, and disallows fractional values
+ *
+ * @param interval
+ * @returns {{amount: (RegExpMatchArray | null) | number, unit: (RegExpMatchArray | null) | string, type: string}}
+ */
+export function parseEsInterval(interval = '') {
+  const matches = String(interval).trim().match(ES_INTERVAL_STRING_RE);
+
+  if (!matches) {
+    throw Error(`Invalid interval format: ${interval}`);
+  }
+
+  const value = matches && parseFloat(matches[1]);
+  const unit = matches && matches[2];
+  const type = unit && dateMath.unitsMap[unit].type;
+
+  if (type === 'calendar' && value !== 1) {
+    throw Error(`Invalid calendar interval: ${interval}, value must be 1`);
+  }
+
+  return {
+    value,
+    unit,
+    type: (type === 'mixed' && value === 1) || type === 'calendar' ? 'calendar' : 'fixed',
+  };
 }

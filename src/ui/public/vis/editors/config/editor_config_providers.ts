@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { TimeIntervalParam } from 'ui/vis/editors/config/types';
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
 import { IndexPattern } from '../../../index_patterns';
-import { leastCommonMultiple } from '../../../utils/math';
+import { parseEsInterval } from '../../../utils/parse_interval';
+import { leastCommonInterval } from '../../lib/least_common_interval';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
 
 type EditorConfigProvider = (
@@ -45,6 +47,10 @@ class EditorConfigProviderRegistry {
       provider(aggType, indexPattern, aggConfig)
     );
     return this.mergeConfigs(configs);
+  }
+
+  private isTimeBaseParam(config: EditorParamConfig): config is TimeIntervalParam {
+    return config.hasOwnProperty('default') && config.hasOwnProperty('timeBase');
   }
 
   private isBaseParam(config: EditorParamConfig): config is NumericIntervalParam {
@@ -108,11 +114,43 @@ class EditorConfigProviderRegistry {
         fixedValue: current.fixedValue,
       };
     }
-
     if (this.isBaseParam(current)) {
       return {
         base: current.base,
       };
+    }
+
+    return {};
+  }
+
+  private mergeTimeBase(
+    current: EditorParamConfig,
+    merged: EditorParamConfig,
+    paramName: string
+  ): { timeBase?: string; default?: string } {
+    if (this.isTimeBaseParam(current) && this.isTimeBaseParam(merged)) {
+      // In case both had where interval values, just use the least common multiple between both interval
+      try {
+        const timeBase = leastCommonInterval(current.timeBase, merged.timeBase);
+        return {
+          default: timeBase,
+          timeBase,
+        };
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    if (this.isTimeBaseParam(current)) {
+      try {
+        parseEsInterval(current.timeBase);
+        return {
+          default: current.timeBase,
+          timeBase: current.timeBase,
+        };
+      } catch (e) {
+        throw e;
+      }
     }
 
     return {};
@@ -128,6 +166,7 @@ class EditorConfigProviderRegistry {
             hidden: this.mergeHidden(paramConfig, output[paramName]),
             warning: this.mergeWarning(paramConfig, output[paramName]),
             ...this.mergeFixedAndBase(paramConfig, output[paramName], paramName),
+            ...this.mergeTimeBase(paramConfig, output[paramName], paramName),
           };
         }
       });
