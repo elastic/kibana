@@ -18,3 +18,4 @@
  */
 
 export { flightsSpecProvider } from './flights';
+export { logsSpecProvider } from './logs';
