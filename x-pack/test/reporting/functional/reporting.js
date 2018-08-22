@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
           // report than phantom.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
           // report than phantom.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
           await PageObjects.dashboard.saveDashboard('report test');
           await PageObjects.reporting.openReportingPanel();
