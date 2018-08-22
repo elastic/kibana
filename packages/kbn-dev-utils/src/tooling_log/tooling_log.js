@@ -17,87 +17,85 @@
  * under the License.
  */
 
-import { format } from 'util';
-import { PassThrough } from 'stream';
+import * as Rx from 'rxjs';
+import { EventEmitter } from 'events';
 
-import { magentaBright, yellow, red, blue, green, dim } from 'chalk';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
-import { parseLogLevel } from './log_levels';
+export class ToolingLog extends EventEmitter {
+  /**
+   * Create a ToolingLog object
+   * @param {WriterConfig} writerConfig
+   */
+  constructor(writerConfig) {
+    super();
 
-export function createToolingLog(initialLogLevelName = 'silent') {
-  // current log level (see logLevel.name and logLevel.flags) changed
-  // with ToolingLog#setLevel(newLogLevelName);
-  let logLevel = parseLogLevel(initialLogLevelName);
-
-  // current indentation level, changed with ToolingLog#indent(delta)
-  let indentString = '';
-
-  class ToolingLog extends PassThrough {
-    constructor() {
-      super({ objectMode: true });
-    }
-
-    verbose(...args) {
-      if (!logLevel.flags.verbose) return;
-      this.write(' %s ', magentaBright('sill'), format(...args));
-    }
-
-    debug(...args) {
-      if (!logLevel.flags.debug) return;
-      this.write(' %s ', dim('debg'), format(...args));
-    }
-
-    info(...args) {
-      if (!logLevel.flags.info) return;
-      this.write(' %s ', blue('info'), format(...args));
-    }
-
-    success(...args) {
-      if (!logLevel.flags.info) return;
-      this.write(' %s ', green('succ'), format(...args));
-    }
-
-    warning(...args) {
-      if (!logLevel.flags.warning) return;
-      this.write(' %s ', yellow('warn'), format(...args));
-    }
-
-    error(err) {
-      if (!logLevel.flags.error) return;
-
-      if (typeof err !== 'string' && !(err instanceof Error)) {
-        err = new Error(`"${err}" thrown`);
-      }
-
-      this.write('%s ', red('ERROR'), err.stack || err.message || err);
-    }
-
-    indent(delta = 0) {
-      const width = Math.max(0, indentString.length + delta);
-      indentString = ' '.repeat(width);
-      return indentString.length;
-    }
-
-    getLevel() {
-      return logLevel.name;
-    }
-
-    setLevel(newLogLevelName) {
-      logLevel = parseLogLevel(newLogLevelName);
-    }
-
-    write(...args) {
-      format(...args)
-        .split('\n')
-        .forEach((line, i) => {
-          const subLineIndent = i === 0 ? '' : '       ';
-          const indent = !indentString
-            ? ''
-            : indentString.slice(0, -1) + (i === 0 && line[0] === '-' ? '└' : '│');
-          super.write(`${indent}${subLineIndent}${line}\n`);
-        });
-    }
+    this._indent = 0;
+    this._writers = writerConfig ? [new ToolingLogTextWriter(writerConfig)] : [];
+    this._written$ = new Rx.Subject();
   }
 
-  return new ToolingLog();
+  indent(delta = 0) {
+    this._indent = Math.max(this._indent + delta, 0);
+    return this._indent;
+  }
+
+  verbose(...args) {
+    this._write('verbose', args);
+  }
+
+  debug(...args) {
+    this._write('debug', args);
+  }
+
+  info(...args) {
+    this._write('info', args);
+  }
+
+  success(...args) {
+    this._write('success', args);
+  }
+
+  warning(...args) {
+    this._write('warning', args);
+  }
+
+  error(error) {
+    this._write('error', [error]);
+  }
+
+  write(...args) {
+    this._write('write', args);
+  }
+
+  getWriters() {
+    return this._writers.slice(0);
+  }
+
+  setWriters(writers) {
+    this._writers = [...writers];
+  }
+
+  getWritten$() {
+    return this._written$.asObservable();
+  }
+
+  _write(type, args) {
+    const msg = {
+      type,
+      indent: this._indent,
+      args,
+    };
+
+    let written = false;
+    for (const writer of this._writers) {
+      if (writer.write(msg)) {
+        written = true;
+      }
+    }
+
+    if (written) {
+      this._written$.next(msg);
+    }
+  }
 }
