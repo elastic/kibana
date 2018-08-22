@@ -18,12 +18,11 @@
  */
 
 import path from 'path';
-import fs from 'fs';
 
 import { verifyMessages, integrateLocaleFiles } from './integrate_locale_files';
+import { normalizePath } from './utils';
 
-const testsFixturesRoot = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files');
-const localesPath = path.join(testsFixturesRoot, 'translations');
+const localesPath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files');
 
 const defaultMessagesMap = new Map([
   ['plugin-1.message-id-1', 'Message text 1'],
@@ -31,13 +30,16 @@ const defaultMessagesMap = new Map([
   ['plugin-2.message-id', 'Message text'],
 ]);
 
-jest.mock('../../../.localizationrc.json', () => ({
+jest.mock('../../../.i18nrc.json', () => ({
   paths: {
     'plugin-1': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1',
     'plugin-2': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2',
   },
   exclude: [],
 }));
+
+const utils = require('./utils');
+utils.writeFileAsync = jest.fn();
 
 describe('dev/i18n/check_locale_files', () => {
   describe('verifyMessages', () => {
@@ -52,7 +54,7 @@ describe('dev/i18n/check_locale_files', () => {
       expect(() => verifyMessages(localeMessages, defaultMessagesMap)).not.toThrow();
     });
 
-    it('throws an error for unused id and missing id', async () => {
+    it('throws an error for unused id and missing id', () => {
       const localeMessagesWithMissingMessage = {
         formats: {},
         'plugin-1.message-id-1': 'Translated text 1',
@@ -67,10 +69,10 @@ describe('dev/i18n/check_locale_files', () => {
         'plugin-2.message-id': 'Translated text',
       };
 
-      await expect(() =>
+      expect(() =>
         verifyMessages(localeMessagesWithMissingMessage, defaultMessagesMap)
       ).toThrowErrorMatchingSnapshot();
-      await expect(() =>
+      expect(() =>
         verifyMessages(localeMessagesWithUnusedMessage, defaultMessagesMap)
       ).toThrowErrorMatchingSnapshot();
     });
@@ -80,16 +82,10 @@ describe('dev/i18n/check_locale_files', () => {
     it('splits locale file by plugins and moves it to plugins folders', async () => {
       await integrateLocaleFiles(localesPath, defaultMessagesMap);
 
-      [
-        './src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations/fr.json',
-        './src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2/translations/fr.json',
-      ].map(integratedLocalePath => {
-        const integratedLocaleJSONBuffer = fs.readFileSync(integratedLocalePath);
-        fs.unlinkSync(integratedLocalePath);
-        fs.rmdirSync(path.dirname(integratedLocalePath));
+      const [[path1, json1], [path2, json2]] = utils.writeFileAsync.mock.calls;
 
-        expect(integratedLocaleJSONBuffer.toString()).toMatchSnapshot();
-      });
+      expect([normalizePath(path1), json1]).toMatchSnapshot();
+      expect([normalizePath(path2), json2]).toMatchSnapshot();
     });
   });
 });

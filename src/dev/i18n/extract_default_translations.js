@@ -20,13 +20,12 @@
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import JSON5 from 'json5';
-import normalize from 'normalize-path';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, readFileAsync, writeFileAsync } from './utils';
+import { globAsync, normalizePath, readFileAsync, writeFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
@@ -40,10 +39,6 @@ function addMessageToMap(targetMap, key, value) {
     );
   }
   targetMap.set(key, value);
-}
-
-function normalizePath(inputPath) {
-  return normalize(path.relative('.', inputPath));
 }
 
 function filterPaths(inputPaths) {
@@ -177,12 +172,18 @@ function serializeToJson(defaultMessages) {
   return JSON.stringify(resultJsonObject, undefined, 2);
 }
 
-export async function extractDefaultTranslations({ paths, output, outputFormat }) {
+export async function getDefaultMessagesMap(paths) {
   const defaultMessagesMap = new Map();
 
   for (const inputPath of filterPaths(paths)) {
     await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
   }
+
+  return defaultMessagesMap;
+}
+
+export async function extractDefaultTranslations({ paths, output, outputFormat }) {
+  const defaultMessagesMap = await getDefaultMessagesMap(paths);
 
   // messages shouldn't be extracted to a file if output is not supplied
   if (!output || !defaultMessagesMap.size) {
