@@ -35,7 +35,7 @@ export function kubernetesMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html',
       },

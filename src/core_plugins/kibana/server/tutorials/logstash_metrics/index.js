@@ -36,7 +36,7 @@ export function logstashMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         moduleName,
         learnMoreLink: `{config.docs.beats.metricbeat}/metricbeat-module-${moduleName}.html`,

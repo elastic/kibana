@@ -36,7 +36,7 @@ export function kafkaMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.kafkaMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `kafka` Metricbeat module fetches internal metrics from Kafka. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
       },

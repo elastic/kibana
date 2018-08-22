@@ -36,7 +36,7 @@ export function kibanaMetricsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',
       },

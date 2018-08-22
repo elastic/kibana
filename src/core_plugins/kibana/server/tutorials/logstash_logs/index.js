@@ -38,7 +38,7 @@ export function logstashLogsSpecProvider() {
     longDescription: i18n.translate('kbn.server.tutorials.logstashLogs.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
-        [Learn more]({learnMoreLink}).',
+[Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-logstash.html',
       },
