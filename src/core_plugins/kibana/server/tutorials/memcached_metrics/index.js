@@ -33,7 +33,7 @@ export function memcachedMetricsSpecProvider() {
     shortDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Memcached server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.shortDescription', {
+    longDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.longDescription', {
       // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
 [Learn more]({learnMoreLink}).',
