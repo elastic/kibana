@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -72,6 +73,14 @@ export class Timepicker extends Component {
     this.props.setTime(this.state.from, this.state.to);
   }
 
+  toTimeString = (timeValue) => {
+    if (moment.isMoment()) {
+      return timeValue.toISOString();
+    }
+
+    return timeValue;
+  }
+
   render() {
     let applyButton;
     if (this.state.from !== this.props.from || this.state.to !== this.props.to) {
@@ -97,12 +106,12 @@ export class Timepicker extends Component {
           className="euiDatePickerRange"
         >
           <TimeInput
-            value={this.state.from}
+            value={this.toTimeString(this.state.from)}
             onChange={this.setFrom}
           />
           <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
           <TimeInput
-            value={this.state.to}
+            value={this.toTimeString(this.state.to)}
             onChange={this.setTo}
           />
         </div>
@@ -121,3 +130,9 @@ Timepicker.propTypes = {
   to: timeType,
   setTime: PropTypes.func,
 };
+
+Timepicker.defaultProps = {
+  from: 'now-15m',
+  to: 'now',
+};
+

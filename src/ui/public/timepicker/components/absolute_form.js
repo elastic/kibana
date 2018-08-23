@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 
 import moment from 'moment';
 
-import { toMoment } from '../lib/time_modes';
+import dateMath from '@kbn/datemath';
 
 import {
   EuiDatePicker,
@@ -34,13 +34,13 @@ export class AbsoluteForm extends Component {
     super(props);
 
     this.state = {
-      value: toMoment(this.props.value),
+      value: dateMath.parse(this.props.value),
     };
   }
 
   static getDerivedStateFromProps = (nextProps) => {
     return {
-      value: toMoment(nextProps.value),
+      value: dateMath.parse(nextProps.value),
     };
   }
 
@@ -49,7 +49,6 @@ export class AbsoluteForm extends Component {
   }
 
   render() {
-    console.log(this.state);
     return (
       <EuiDatePicker
         selected={this.state.value}
@@ -63,10 +62,6 @@ export class AbsoluteForm extends Component {
 }
 
 AbsoluteForm.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-};
-
-AbsoluteForm.defaultProps = {
-  value: ''
 };

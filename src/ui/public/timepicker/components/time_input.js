@@ -28,15 +28,41 @@ import {
 } from '@elastic/eui';
 
 import { formatTimeString } from '../pretty_duration';
+import { getTimeMode, TIME_MODES } from '../lib/time_modes';
 
 export class TimeInput extends Component {
 
   constructor(props) {
     super(props);
 
-    this.tabs = [
+    this.state = {
+      isOpen: false,
+    };
+  }
+
+  onTabClick = (selectedTab) => {
+    // to do convert time to selected tab format
+    this.setState({ selectedTab });
+  };
+
+  closePopover = () => {
+    this.setState({ isOpen: false });
+  }
+
+  togglePopover = () => {
+    const timeMode = getTimeMode(this.props.value)
+    this.setState((prevState) => ({
+      isOpen: !prevState.isOpen,
+      selectedTab: this.renderTabs().find(tab => {
+        return tab.id === timeMode;
+      }),
+    }));
+  }
+
+  renderTabs = () => {
+    return [
       {
-        id: 'absolute',
+        id: TIME_MODES.ABSOLUTE,
         name: 'Absolute',
         content: (
           <AbsoluteForm
@@ -46,7 +72,7 @@ export class TimeInput extends Component {
         ),
       },
       {
-        id: 'relative',
+        id: TIME_MODES.RELATIVE,
         name: 'Relative',
         content: (
           <div>
@@ -55,7 +81,7 @@ export class TimeInput extends Component {
         ),
       },
       {
-        id: 'now',
+        id: TIME_MODES.NOW,
         name: 'Now',
         content: (
           <div>
@@ -64,29 +90,9 @@ export class TimeInput extends Component {
         ),
       }
     ];
-
-    this.state = {
-      isOpen: false,
-      selectedTab: this.tabs[0],
-    };
-  }
-
-  onTabClick = (selectedTab) => {
-    this.setState({ selectedTab });
-  };
-
-  closePopover = () => {
-    this.setState({ isOpen: false });
-  }
-
-  togglePopover = () => {
-    this.setState((prevState) => ({
-      isOpen: !prevState.isOpen
-    }));
   }
 
   render() {
-
     const input = (
       <span
         onClick={this.togglePopover}
@@ -105,7 +111,7 @@ export class TimeInput extends Component {
         panelPaddingSize="none"
       >
         <EuiTabbedContent
-          tabs={this.tabs}
+          tabs={this.renderTabs()}
           selectedTab={this.state.selectedTab}
           onTabClick={this.onTabClick}
           expand
@@ -116,10 +122,6 @@ export class TimeInput extends Component {
 }
 
 TimeInput.propTypes = {
-  value: PropTypes.string,
+  value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-};
-
-TimeInput.defaultProps = {
-  value: ''
 };
