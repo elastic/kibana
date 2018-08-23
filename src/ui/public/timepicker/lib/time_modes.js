@@ -46,6 +46,10 @@ export function toAbsoluteString(value, roundUp) {
 }
 
 export function toRelativeString(value) {
+  if (value === 'now') {
+    return 'now-15m';
+  }
+
   const relativeParts = parseRelativeString(value);
   const count = _.get(relativeParts, `count`, 0);
   const round = _.get(relativeParts, `round`, false);

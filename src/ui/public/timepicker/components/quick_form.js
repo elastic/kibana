@@ -55,8 +55,6 @@ const timeUnitsOptions = Object.keys(timeUnits).map(key => {
   return { value: key, text: `${timeUnits[key]}s` };
 });
 
-const commonlyUsed = chrome.getUiSettingsClient().get('timepicker:quickRanges');
-
 export class QuickForm extends Component {
 
   state = {
@@ -176,6 +174,7 @@ export class QuickForm extends Component {
   }
 
   renderCommonlyUsed = () => {
+    const commonlyUsed = chrome.getUiSettingsClient().get('timepicker:quickRanges');
     const sections = _.groupBy(commonlyUsed, 'section');
 
     const renderSectionItems = (section) => {
@@ -196,14 +195,24 @@ export class QuickForm extends Component {
         <EuiTitle size="xxxs"><span>Commonly used</span></EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
-          {Object.keys(sections).map(key => (
-            <Fragment key={key}>
-              <EuiFlexGrid gutterSize="s" columns={2} responsive={false}>
-                {renderSectionItems(sections[key])}
-              </EuiFlexGrid>
-              <EuiSpacer size="m" />
-            </Fragment>
-          ))}
+          {Object.keys(sections).map((key, index) => {
+            const isLastSection = Object.keys(sections).length - 1 === index;
+            const sectionSpacer = isLastSection
+              ? undefined
+              : (<EuiSpacer size="m" />);
+            return (
+              <Fragment key={key}>
+                <EuiFlexGrid
+                  gutterSize="s"
+                  columns={2}
+                  responsive={false}
+                >
+                  {renderSectionItems(sections[key])}
+                </EuiFlexGrid>
+                {sectionSpacer}
+              </Fragment>
+            );
+          })}
         </EuiText>
       </Fragment>
     );
