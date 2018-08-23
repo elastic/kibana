@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 
 const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
@@ -44,7 +44,10 @@ async function loadTutorials() {
     tutorials = await response.json();
     tutorialsLoaded = true;
   } catch(err) {
-    notify.error(`Unable to load tutorials, ${err}`);
+    toastNotifications.addDanger({
+      title: 'Unable to load tutorials',
+      text: err.message,
+    });
   }
 }
 
