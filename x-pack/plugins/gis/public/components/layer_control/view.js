@@ -62,10 +62,7 @@ export class LayerControl extends React.Component {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <LayerTOC
-                layerOrderChange={this._onLayerOrderChange}
-                showLayerDetails={this._showLayerDetails}
-              />
+              <LayerTOC />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
