@@ -302,7 +302,6 @@ export const CleanClientModulesOnDLLTask = {
           }
         }
       };
-
       traverse(ast, visitors);
 
       // Filter node native modules from the result
