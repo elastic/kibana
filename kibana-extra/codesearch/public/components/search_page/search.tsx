@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { IRange } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -14,6 +15,7 @@ import { DocumentSearchResult } from '../../../model';
 import { documentSearch } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
+import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
   query: string;
@@ -71,6 +73,15 @@ class SearchPage extends React.PureComponent<Props, State> {
       );
 
       const resultComp = result.map((item, index) => {
+        const highlightRanges = item.highlights.map(h => {
+          const range: IRange = {
+            startLineNumber: h.range.startLoc.line + 1,
+            startColumn: h.range.startLoc.column + 1,
+            endLineNumber: h.range.endLoc.line + 1,
+            endColumn: h.range.endLoc.column + 1,
+          };
+          return range;
+        });
         const repoLinkUrl = `/${item.uri}/tree/HEAD/`;
         const fileLinkUrl = `/${item.uri}/blob/HEAD/${item.filePath}`;
         return (
@@ -85,9 +96,13 @@ class SearchPage extends React.PureComponent<Props, State> {
               {item.hits} hits from
               <Link to={fileLinkUrl}>{item.filePath}</Link>
             </p>
-            <p>
-              <EuiCodeEditor theme="github" width="100%" value={item.content} isReadOnly={true} />
-            </p>
+            <CodeBlock
+              key={`code${index}`}
+              language={item.language}
+              startLine={0}
+              code={item.content}
+              highlightRanges={highlightRanges}
+            />
             <EuiSpacer />
           </div>
         );

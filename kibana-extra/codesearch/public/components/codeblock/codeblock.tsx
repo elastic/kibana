@@ -6,7 +6,7 @@
 
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { initMonaco, Monaco } from 'init-monaco';
-import { editor, IPosition } from 'monaco-editor';
+import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 
@@ -15,6 +15,7 @@ interface Props {
   file?: string;
   startLine?: number;
   language?: string;
+  highlightRanges?: IRange[];
   onClick?: (event: IPosition) => void;
 }
 
@@ -22,6 +23,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   private el: HTMLDivElement | null = null;
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
+  private currentHighlightDecorations: string[];
 
   public componentDidMount(): void {
     if (this.el) {
@@ -60,6 +62,17 @@ export class CodeBlock extends React.PureComponent<Props> {
             });
           }
         });
+        if (this.props.highlightRanges) {
+          const decorations = this.props.highlightRanges.map((range: IRange) => {
+            return {
+              range,
+              options: {
+                inlineClassName: 'searchHighlight',
+              },
+            };
+          });
+          this.currentHighlightDecorations = this.ed.deltaDecorations([], decorations);
+        }
         this.resizeChecker = new ResizeChecker(this.el!);
         this.resizeChecker.on('resize', () => {
           setTimeout(() => {
@@ -71,9 +84,27 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
-    if (nextProps.code !== this.props.code) {
+    if (
+      nextProps.code !== this.props.code ||
+      nextProps.highlightRanges !== this.props.highlightRanges
+    ) {
       if (this.ed) {
         this.ed.getModel().setValue(nextProps.code);
+
+        if (nextProps.highlightRanges) {
+          const decorations = nextProps.highlightRanges!.map((range: IRange) => {
+            return {
+              range,
+              options: {
+                inlineClassName: 'searchHighlight',
+              },
+            };
+          });
+          this.currentHighlightDecorations = this.ed.deltaDecorations(
+            this.currentHighlightDecorations,
+            decorations
+          );
+        }
       }
     }
   }

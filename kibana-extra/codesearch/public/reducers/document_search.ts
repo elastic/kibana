@@ -55,14 +55,15 @@ export const documentSearch = handleActions(
         });
 
         const result = Array.from(documents).map((document, index) => {
-          const { repoUri, path, content } = document;
-          const highlight = highlights[index];
+          const { repoUri, path, content, language } = document;
+          const fileHighlights = highlights[index];
           return {
             uri: repoUri,
-            hits: highlight.length,
+            hits: fileHighlights.length,
             filePath: path,
             content,
-            highlight,
+            highlights: fileHighlights,
+            language,
           };
         });
         draft.searchResult = {
