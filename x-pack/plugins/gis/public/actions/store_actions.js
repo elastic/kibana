@@ -73,14 +73,10 @@ export function clearTemporaryLayers() {
   };
 }
 
-export function mapExtentChanged({ zoom, extent }) {
+export function mapExtentChanged(mapConstants) {
   return {
     type: MAP_EXTENT_CHANGED,
-    mapConstants: {
-      extent: extent,
-      zoom: zoom,
-      center: [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]//todo: create class to perform these maths
-    }
+    mapConstants: mapConstants
   };
 }
 

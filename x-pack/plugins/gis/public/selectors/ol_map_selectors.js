@@ -7,11 +7,12 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
-import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
+import { WEBMERCATOR, getOlLayerStyle, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
+import _ from 'lodash';
 
 const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
-  featureProjection: FEATURE_PROJECTION
+  featureProjection: WEBMERCATOR
 });
 
 // Layer-specific logic
@@ -68,7 +69,6 @@ function createCorrespondingOLLayer(layer) {
       break;
     default:
       throw new Error('Cannot create corresponding OL layer');
-      break;
   }
   olLayer.set('id', layer.getId());
   return olLayer;
@@ -118,8 +118,8 @@ function updateFillAndOutlineStyle(olLayer, layer) {
 }
 
 const OL_VIEW = new ol.View({
-  center: ol.proj.fromLonLat([37.41, 8.82]),
-  zoom: 4
+  center: ol.proj.fromLonLat([0, 0]),
+  zoom: 0
 });
 const OL_MAP = new ol.Map({
   layers: [],
@@ -133,8 +133,20 @@ function getOLImplementation() {
 const syncOLMap = createSelector(
   getOLImplementation,
   getMapConstants,
-  (olMap) => {
-    //todo: must sync mapConstant state with OL-map
+  (olMap, mapConstants) => {
+    const olView = olMap.getView();
+    const center = olView.getCenter();
+    const zoom = olView.getZoom();
+    const centerInLonLat = ol.proj.transform(center, WEBMERCATOR, WGS_84);
+    //make comparison in lon-lat, to avoid precision errors when projecting in the other direction.
+    //this could trigger infinite loops of dispatching extent-changed actions
+    if (typeof mapConstants.zoom === 'number' && mapConstants.zoom !== zoom) {
+      olView.setZoom(mapConstants.zoom);
+    }
+    if (mapConstants.center && !_.isEqual(mapConstants.center, centerInLonLat)) {
+      const centerInWorldRef = ol.proj.transform(mapConstants.center, WGS_84, WEBMERCATOR);
+      olView.setCenter(centerInWorldRef);
+    }
     return olMap;
   }
 );

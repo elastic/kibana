@@ -31,7 +31,10 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 };
 
 const INITIAL_STATE = {
-  mapConstants: { zoom: null, center: null, extent: null },
+  mapConstants: {
+    zoom: 4,
+    center: [37.41, 8.82]
+  },
   selectedLayerId: null,
   layerList: [],
   layerLoading: false
