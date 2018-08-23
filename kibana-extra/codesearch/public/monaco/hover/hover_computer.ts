@@ -11,18 +11,16 @@ import { AsyncTask, Computer } from '../computer';
 export class HoverComputer implements Computer<Hover> {
   private lspMethods: TextDocumentMethods;
   private range: any = null;
-  private repoUri: string | null = null;
-  private file: string | null = null;
+  private uri: string | null = null;
 
   constructor() {
     const lspClient = new LspRestClient('../api/lsp');
     this.lspMethods = new TextDocumentMethods(lspClient);
   }
 
-  public setParams(repoUri: string, file: string, range: any) {
+  public setParams(uri: string, range: any) {
     this.range = range;
-    this.repoUri = repoUri;
-    this.file = file;
+    this.uri = uri;
   }
 
   public compute(): AsyncTask<Hover> {
@@ -32,7 +30,7 @@ export class HoverComputer implements Computer<Hover> {
         character: this.range!.startColumn - 1,
       },
       textDocument: {
-        uri: `git://${this.repoUri}?HEAD#${this.file}`,
+        uri: this.uri!,
       },
     });
   }

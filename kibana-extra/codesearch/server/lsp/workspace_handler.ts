@@ -8,15 +8,14 @@ import Boom from 'boom';
 import fs from 'fs';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
-import Url from 'url';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
 import { Full } from '@codesearch/lsp-extension';
+import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
-import { parseLspUri } from '../../common/uri_util';
 
 export class WorkspaceHandler {
   private git: GitOperations;
@@ -106,8 +105,8 @@ export class WorkspaceHandler {
             for (const symbol of full.symbols) {
               const parsedLocation = this.convertLocation(symbol.symbolInformation.location);
               if (parsedLocation) {
-                symbol.repoUri = parsedLocation[0];
-                symbol.revision = parsedLocation[1];
+                symbol.repoUri = parsedLocation.repoUri;
+                symbol.revision = parsedLocation.revision;
               }
             }
           }
@@ -141,7 +140,7 @@ export class WorkspaceHandler {
   }
 
   // todo add an unit test
-  private parseLocation(location: Location): [string, string, string] | null {
+  private parseLocation(location: Location) {
     const uri = location.uri;
     if (uri && uri.startsWith('file://')) {
       const filePath = uri.substring('file://'.length);
@@ -154,7 +153,7 @@ export class WorkspaceHandler {
           const revision = m[2];
           const gitRevision = this.revisionMap[`${repoUri}/${revision}`] || revision;
           const file = m[3];
-          return [repoUri, gitRevision, file];
+          return { repoUri, revision: gitRevision, file };
         }
       }
     }
@@ -164,7 +163,8 @@ export class WorkspaceHandler {
   private convertLocation(location: Location) {
     const parsedLocation = this.parseLocation(location);
     if (parsedLocation) {
-      location.uri = `git://${parsedLocation[0]}?${parsedLocation[1]}#${parsedLocation[2]}`;
+      const { repoUri, revision, file } = parsedLocation;
+      location.uri = `git://${repoUri}/blob/${revision}/${file}`;
     }
     return parsedLocation;
   }
@@ -175,7 +175,7 @@ export class WorkspaceHandler {
    */
   private async resolveUri(uri: string) {
     if (uri.startsWith('git://')) {
-      const { repoUri, file, revision } = parseLspUri(uri);
+      const { repoUri, file, revision } = parseLspUrl(uri)!;
       const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
       return {
         workspacePath: workspaceRepo.workdir(),

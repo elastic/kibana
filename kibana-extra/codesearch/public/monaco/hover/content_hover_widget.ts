@@ -8,7 +8,6 @@
 
 import { editor as Editor, IRange } from 'monaco-editor';
 import { Hover, MarkedString } from 'vscode-languageserver-types';
-import { parseLspUri } from '../../../common/uri_util';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
@@ -43,12 +42,11 @@ export class ContentHoverWidget extends ContentWidget {
       return;
     }
     this.hoverOperation.cancel();
-    const uri = this.editor.getModel().uri;
-    const { repoUri, file } = parseLspUri(uri);
+    const url = this.editor.getModel().uri.toString();
     if (this.isVisible) {
       this.hide();
     }
-    this.computer.setParams(repoUri, file, range);
+    this.computer.setParams(url, range);
     this.hoverOperation.start();
     this.lastRange = range;
     this.shouldFocus = focus;

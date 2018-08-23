@@ -8,7 +8,7 @@ import { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
-import { parseLspUri } from '../../common/uri_util';
+import { parseLspUrl } from '../../common/uri_util';
 import { CodeAndLocation, findReferences, findReferencesSuccess } from '../actions';
 import { requestFile } from './file';
 
@@ -40,7 +40,7 @@ function requestAllCodes(locations: Location[]) {
 }
 
 function requestCode(location: Location): Promise<CodeAndLocation> {
-  const { repoUri, revision, file } = parseLspUri(location.uri);
+  const { repoUri, revision, file } = parseLspUrl(location.uri)!;
   const startLine = Math.max(location.range.start.line - 2, 0);
   const endLine = location.range.end.line + 3;
   const line = `${startLine},${endLine}`;

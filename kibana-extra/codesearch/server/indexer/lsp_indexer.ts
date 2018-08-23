@@ -9,6 +9,7 @@ import fs from 'fs';
 import util from 'util';
 
 import { RepositoryUtils } from '../../common/repository_utils';
+import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
@@ -90,7 +91,7 @@ export class LspIndexer extends AbstractIndexer {
 
   protected async processRequest(request: LspIndexRequest) {
     const { repoUri, revision, filePath, localRepoPath } = request;
-    const lspDocUri = `git://${repoUri}?${revision}#${filePath}`;
+    const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const response = await this.lspService.sendRequest('textDocument/full', {
       textDocument: {
         uri: lspDocUri,

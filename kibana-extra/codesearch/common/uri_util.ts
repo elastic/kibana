@@ -5,38 +5,90 @@
  */
 
 import { Uri } from 'monaco-editor';
+import pathToRegexp from 'path-to-regexp';
+import { Position } from 'vscode-languageserver-types';
+import { MAIN } from '../public/components/routes';
 
-function isBrowser() {
-  return typeof window !== 'undefined';
+const re = pathToRegexp(MAIN);
+
+export interface ParsedUrl {
+  schema?: string;
+  uri?: string;
 }
 
-function removeSlash(s: string): string {
-  if (s.startsWith('/')) {
-    return removeSlash(s.substr(1));
+export interface CompleteParsedUrl extends ParsedUrl {
+  repoUri: string;
+  revision: string;
+  pathType?: string;
+  file?: string;
+  schema?: string;
+  position?: Position;
+}
+
+export function parseSchema(url: string): { uri: string; schema?: string } {
+  let [schema, uri] = url.toString().split('//');
+  if (!uri) {
+    uri = schema;
+    // @ts-ignore
+    schema = undefined;
   }
-  return s;
+  if (!uri.startsWith('/')) {
+    uri = '/' + uri;
+  }
+  return { uri, schema };
 }
 
-export function parseLspUri(uri: Uri | string) {
-  if (typeof uri === 'string') {
-    let url;
-    if (isBrowser()) {
-      url = new URL(uri);
-    } else {
-      url = require('url').parse(uri);
+function parseGoto(goto: string): Position | undefined {
+  const regex = /L(\d+)(:\d+)?$/;
+  const m = regex.exec(goto);
+  if (m) {
+    const line = parseInt(m[1], 10);
+    let character = 0;
+    if (m[2]) {
+      character = parseInt(m[2].substring(1), 10);
     }
     return {
-      revision: url.search.substr(1),
-      file: url.hash.substr(1),
-      schema: url.protocol,
-      repoUri: removeSlash(`${url.hostname}${url.pathname}`),
-    };
-  } else {
-    return {
-      revision: uri.query,
-      file: uri.fragment,
-      schema: uri.scheme,
-      repoUri: `${uri.authority}${uri.path}`,
+      line,
+      character,
     };
   }
+}
+
+export function parseLspUrl(url: Uri | string): CompleteParsedUrl {
+  const { schema, uri } = parseSchema(url.toString());
+  const parsed = re.exec(uri);
+  if (parsed) {
+    const [resource, org, repo, pathType, revision, file, goto] = parsed.slice(1);
+    let position;
+    if (goto) {
+      position = parseGoto(goto);
+    }
+    return {
+      uri,
+      repoUri: `${resource}/${org}/${repo}`,
+      pathType,
+      revision,
+      file,
+      schema,
+      position,
+    };
+  } else {
+    throw new Error('invald url ' + url);
+  }
+}
+
+const compiled = pathToRegexp.compile(MAIN);
+
+export function toCanonicalUrl(lspUrl: CompleteParsedUrl) {
+  const [resource, org, repo] = lspUrl.repoUri!.split('/');
+  if (!lspUrl.pathType) {
+    lspUrl.pathType = 'blob';
+  }
+  let goto;
+  if (lspUrl.position) {
+    goto = `!L${lspUrl.position.line}:${lspUrl.position.character}`;
+  }
+  const data = { resource, org, repo, path: lspUrl.file, goto, ...lspUrl };
+  const uri = decodeURIComponent(compiled(data));
+  return lspUrl.schema ? `${lspUrl.schema}/${uri}` : uri;
 }

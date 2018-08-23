@@ -8,6 +8,7 @@ import { LOCATION_CHANGE } from 'connected-react-router';
 import _ from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 
+import { toCanonicalUrl } from '../../common/uri_util';
 import { fetchRepos, fullSearch, loadStructure } from '../actions';
 import * as ROUTES from '../components/routes';
 import { lastRequestPathSelector } from '../selectors';
@@ -24,7 +25,11 @@ function* handleLocationChange(action: any) {
       .exec(pathname)!
       .slice(1);
     if (path && pathType === ROUTES.PathTypes.blob) {
-      const uri = `${resource}/${org}/${repo}?${revision}#${path}`;
+      const uri = toCanonicalUrl({
+        repoUri: `${resource}/${org}/${repo}`,
+        file: path,
+        revision,
+      });
       if (lastRequestPath !== uri) {
         yield put(loadStructure(uri));
       }

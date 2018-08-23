@@ -5,12 +5,12 @@
  */
 
 import { initMonaco, Monaco } from 'init-monaco';
-import { editor, IMouseEvent, languages } from 'monaco-editor';
+import { editor } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
 import { EditorActions } from '../components/editor/editor';
 import { provideDefinition } from './definition/definition_provider';
 
-import { parseLspUri } from '../../common/uri_util';
+import { parseSchema, toCanonicalUrl } from '../../common/uri_util';
 import { history } from '../utils/url';
 import { EditorService } from './editor_service';
 import { HoverController } from './hover/hover_controller';
@@ -32,7 +32,7 @@ export class MonacoHelper {
   ) {}
   public init() {
     return new Promise(resolve => {
-      initMonaco((monaco: Monaco, extensions) => {
+      initMonaco((monaco: Monaco) => {
         this.monaco = monaco;
         // @ts-ignore  a hack to replace function in monaco editor.
         monaco.StandaloneCodeEditorServiceImpl.prototype.openCodeEditor =
@@ -67,8 +67,8 @@ export class MonacoHelper {
         registerReferencesAction(this.editor, this.editorActions);
         this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
           if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-            const { repoUri, revision, file } = parseLspUri(this.editor!.getModel().uri);
-            history.push(`/${repoUri}/blob/${revision}/${file}!L${e.target.position.lineNumber}:0`);
+            const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
+            history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
           }
         });
         const hoverController: HoverController = new HoverController(this.editor);
@@ -95,7 +95,9 @@ export class MonacoHelper {
     }
 
     this.editor!.setModel(null);
-    const uri = this.monaco!.Uri.parse(`git://${repoUri}?${revision}#${file}`);
+    const uri = this.monaco!.Uri.parse(
+      toCanonicalUrl({ schema: 'git:', repoUri, file, revision, pathType: 'blob' })
+    );
     let newModel = this.monaco!.editor.getModel(uri);
     if (!newModel) {
       newModel = this.monaco!.editor.createModel(text, lang, uri);

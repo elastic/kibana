@@ -12,7 +12,7 @@ export enum PathTypes {
 
 export const ROOT = '/';
 export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
-  PathTypes.blob
+  PathTypes.tree
 })/:revision/:path*:goto(!.*)?`;
 export const ADMIN = '/admin';
 export const SEARCH = '/search';

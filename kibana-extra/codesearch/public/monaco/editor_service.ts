@@ -6,7 +6,7 @@
 
 import { editor, IRange, Uri } from 'monaco-editor';
 import ICodeEditor = editor.ICodeEditor;
-import { parseLspUri } from '../../common/uri_util';
+import { parseSchema } from '../../common/uri_util';
 import { history } from '../utils/url';
 
 interface IResourceInput {
@@ -16,13 +16,11 @@ interface IResourceInput {
 
 export class EditorService {
   public openCodeEditor(input: IResourceInput, source: ICodeEditor, sideBySide?: boolean) {
-    const uri = input.resource;
-    const { repoUri, revision, file } = parseLspUri(uri);
-    let newHash = `/${repoUri}/blob/${revision}/${file}`;
+    let { uri } = parseSchema(input.resource.toString())!;
     if (input.options && input.options.selection) {
       const { startColumn, startLineNumber } = input.options.selection;
-      newHash = newHash + `!L${startLineNumber}:${startColumn}`;
-      history.push(newHash);
+      uri = uri + `!L${startLineNumber}:${startColumn}`;
+      history.push(uri);
     }
     return Promise.resolve(source);
   }

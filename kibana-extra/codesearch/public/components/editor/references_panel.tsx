@@ -8,7 +8,7 @@ import { EuiAccordion, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { entries, groupBy } from 'lodash';
 import { IPosition } from 'monaco-editor';
 import React from 'react';
-import { parseLspUri } from '../../../common/uri_util';
+import { parseSchema } from '../../../common/uri_util';
 import { CodeAndLocation } from '../../actions';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
@@ -56,6 +56,7 @@ export class ReferencesPanel extends React.Component<Props> {
     return (
       <EuiAccordion
         id={repo}
+        key={repo}
         buttonClassName="euiAccordionForm__button"
         buttonContent={repo}
         paddingSize="l"
@@ -66,9 +67,12 @@ export class ReferencesPanel extends React.Component<Props> {
   }
 
   private renderReference(ref: CodeAndLocation) {
+    const key = `${ref.location.uri}?L${ref.location.range.start.line}:${
+      ref.location.range.start.character
+    }`;
     return (
       <CodeBlock
-        key={ref.location.uri}
+        key={key}
         language={ref.language}
         startLine={ref.startLine}
         code={ref.code}
@@ -80,8 +84,8 @@ export class ReferencesPanel extends React.Component<Props> {
     );
   }
 
-  private onCodeClick(uri: string, pos: IPosition) {
-    const { repoUri, revision, file } = parseLspUri(uri);
-    history.push(`/${repoUri}/blob/${revision}/${file}!L${pos.lineNumber}:0`);
+  private onCodeClick(url: string, pos: IPosition) {
+    const { uri } = parseSchema(url)!;
+    history.push(`/${uri}!L${pos.lineNumber}:0`);
   }
 }

@@ -8,12 +8,10 @@ import { Monaco } from 'init-monaco';
 import { editor, languages } from 'monaco-editor';
 import { Definition, Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
-import { parseLspUri } from '../../../common/uri_util';
 
 export function provideDefinition(monaco: Monaco, model: editor.ITextModel, position: any) {
   const lspClient = new LspRestClient('../api/lsp');
   const lspMethods = new TextDocumentMethods(lspClient);
-  const { repoUri, file } = parseLspUri(model.uri);
   function handleLocation(location: Location): languages.Location {
     return {
       uri: monaco.Uri.parse(location.uri),
@@ -33,7 +31,7 @@ export function provideDefinition(monaco: Monaco, model: editor.ITextModel, posi
         character: position.column - 1,
       },
       textDocument: {
-        uri: `git://${repoUri}?HEAD#${file}`,
+        uri: model.uri.toString(),
       },
     })
     .then(

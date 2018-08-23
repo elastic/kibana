@@ -6,10 +6,10 @@
 
 import GitUrlParse from 'git-url-parse';
 import path from 'path';
-import Url from 'url';
 import { Location } from 'vscode-languageserver';
 
 import { FileTree, FileTreeItemType, Repository, RepositoryUri } from '../model';
+import { parseLspUrl, toCanonicalUrl } from './uri_util';
 
 export class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
@@ -60,14 +60,10 @@ export class RepositoryUtils {
   }
 
   public static locationToUrl(loc: Location) {
-    const url = Url.parse(loc.uri);
-    const { hostname, pathname, query, hash } = url;
-    if (hostname && pathname && hash && query) {
-      const repoUri = hostname + pathname;
-      const revision = query;
-      const p = hash.slice(1, hash.length);
-      const { line, character } = loc.range.start;
-      return `/${repoUri}/blob/${revision}/${p}!L${line + 1}:${character}`;
+    const url = parseLspUrl(loc.uri);
+    const { repoUri, file, revision } = url;
+    if (repoUri && file && revision) {
+      return toCanonicalUrl({ repoUri, file, revision, position: loc.range.start });
     }
     return '';
   }

@@ -12,19 +12,5 @@ declare module 'init-monaco' {
   export * from 'monaco-editor';
   export type Monaco = typeof Monaco;
 
-  export interface EditorExtensions {
-    registerEditorContribution(ctor: ICommonEditorContributionCtor): void;
-  }
-
-  export type ICommonEditorContributionCtor = IConstructorSignature1<
-    ICodeEditor,
-    IEditorContribution
-  >;
-  export interface IConstructorSignature1<A1, T> {
-    new (first: A1, ...services: Array<{ _serviceBrand: any }>): T;
-  }
-
-  export function initMonaco(
-    callback: (monaco: typeof Monaco, extensions: EditorExtensions) => void
-  ): any;
+  export function initMonaco(callback: (monaco: typeof Monaco) => void): any;
 }
