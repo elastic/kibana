@@ -23,9 +23,18 @@ import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { RadioButtonGroup } from './radio_button_group';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiPageBody,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
@@ -176,25 +185,29 @@ export class Tutorial extends React.Component {
     return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
-  onPrem = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
-  };
-
-  onPremElasticCloud = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
-  };
-
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
-        { onClick: this.onPrem, label: 'Self managed', dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM,
+          label: 'Self managed',
+        },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
+          label: 'Elastic Cloud',
+        }
       ];
       return (
-        <RadioButtonGroup
-          buttons={radioButtons}
-          selectedBtnLabel={radioButtons[0].label}
-        />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              options={radioButtons}
+              idSelected={this.state.visibleInstructions}
+              onChange={this.setVisibleInstructions}
+              color="primary"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
   };
