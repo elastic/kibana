@@ -1,9 +1,7 @@
 import subprocess, os, sys, platform, zipfile, hashlib, shutil
 from build_util import runcmd, mkdir, md5_file, script_dir, root_dir, configure_environment
 
-# This file builds Chromium headless. It is written with the intent to
-# read top-down like a bash script without requiring lots of jumping
-# around / between functions to understand the flow.
+# This file builds Chromium headless on Windows, Mac, and Linux.
 
 # Verify that we have an argument, and if not print instructions
 if (len(sys.argv) < 2):
@@ -14,8 +12,9 @@ if (len(sys.argv) < 2):
   print('python build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479')
   sys.exit(1)
 
-# This is any valid git checkout {source_version} target, so
-# a tag such as 68.0.3440.106, a commit sha, a branch, etc
+# The version of Chromium we wish to build. This can be any valid git
+# commit, tag, or branch, so: 68.0.3440.106 or
+# 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479
 source_version = sys.argv[1]
 
 print('Building Chromium ' + source_version)
@@ -37,9 +36,7 @@ runcmd('git checkout ' + source_version)
 runcmd('gclient sync --with_branch_heads --with_tags --jobs 16')
 runcmd('gclient runhooks')
 
-# Copy args/{Linux | Darwin | Windows}.gn from the root of our directory to out/headless/args.gn,
-# We're currenty in {root}/chromium/src, so we need to back out twice.
-# generate the build arguments basedon that file.
+# Copy build args/{Linux | Darwin | Windows}.gn from the root of our directory to out/headless/args.gn,
 platform_build_args = os.path.join(script_dir, platform.system().lower(), 'args.gn')
 print('Generating platform-specific args')
 print('Copying build args: ' + platform_build_args + ' to out/headless/args.gn')
@@ -58,7 +55,7 @@ if platform.system() != 'Windows':
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
-# chromium-68_0_34-linux.zip
+# chromium-4747cc2-linux.zip
 base_filename = 'out/headless/chromium-' + source_version[:7].strip('.') + '-' + platform.system().lower()
 zip_filename = base_filename + '.zip'
 md5_filename = base_filename + '.md5'
@@ -73,7 +70,7 @@ def archive_file(name):
   archive.write(from_path, to_path)
 
 # Each platform has slightly different requirements for what dependencies
-# must be bundled with the Chromium executable
+# must be bundled with the Chromium executable.
 if platform.system() == 'Linux':
   archive_file('headless_shell')
 elif platform.system() == 'Windows':

@@ -27,8 +27,7 @@ def md5_file(filename):
       md5.update(chunk)
   return md5.hexdigest()
 
-# Set up environment variables required by Chromium build
+# Set up temporary environment variables required by Chromium build
 def configure_environment():
   depot_tools_path = os.path.join(root_dir, 'depot_tools')
   os.environ['PATH'] = depot_tools_path + os.pathsep + os.environ['PATH']
-  os.environ['DEPOT_TOOLS_WIN_TOOLCHAIN'] = '0'
