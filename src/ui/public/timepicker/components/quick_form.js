@@ -57,7 +57,7 @@ const timeUnitsOptions = Object.keys(timeUnits).map(key => {
 
 const commonlyUsed = chrome.getUiSettingsClient().get('timepicker:quickRanges');
 
-export class QuickSelectPopover extends Component {
+export class QuickForm extends Component {
 
   state = {
     isOpen: false,
@@ -272,6 +272,6 @@ export class QuickSelectPopover extends Component {
   }
 }
 
-QuickSelectPopover.propTypes = {
+QuickForm.propTypes = {
   setTime: PropTypes.func.isRequired,
 };

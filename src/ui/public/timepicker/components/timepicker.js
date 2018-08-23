@@ -21,7 +21,7 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { QuickSelectPopover } from './quick_select_popover';
+import { QuickForm } from './quick_form';
 import { TimeInput } from './time_input';
 
 import {
@@ -96,7 +96,7 @@ export class Timepicker extends Component {
     return (
       <EuiFormControlLayout
         prepend={(
-          <QuickSelectPopover
+          <QuickForm
             setTime={this.setTime}
           />
         )}
@@ -113,6 +113,7 @@ export class Timepicker extends Component {
           <TimeInput
             value={this.toTimeString(this.state.to)}
             onChange={this.setTo}
+            roundUp={true}
           />
         </div>
       </EuiFormControlLayout>

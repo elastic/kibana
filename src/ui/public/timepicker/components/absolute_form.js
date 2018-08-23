@@ -28,19 +28,23 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 
+const toMoment = (value, roundUp) => {
+  return dateMath.parse(value, { roundUp });
+};
+
 export class AbsoluteForm extends Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      value: dateMath.parse(this.props.value),
+      value: toMoment(this.props.value, this.props.roundUp),
     };
   }
 
   static getDerivedStateFromProps = (nextProps) => {
     return {
-      value: dateMath.parse(nextProps.value),
+      value: toMoment(nextProps.value, nextProps.roundUp),
     };
   }
 
@@ -64,4 +68,5 @@ export class AbsoluteForm extends Component {
 AbsoluteForm.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  roundUp: PropTypes.bool.isRequired,
 };

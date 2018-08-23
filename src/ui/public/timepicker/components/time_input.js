@@ -28,7 +28,12 @@ import {
 } from '@elastic/eui';
 
 import { formatTimeString } from '../pretty_duration';
-import { getTimeMode, TIME_MODES } from '../lib/time_modes';
+import {
+  getTimeMode,
+  TIME_MODES,
+  toAbsoluteString,
+  toRelativeString,
+} from '../lib/time_modes';
 
 export class TimeInput extends Component {
 
@@ -41,7 +46,22 @@ export class TimeInput extends Component {
   }
 
   onTabClick = (selectedTab) => {
-    // to do convert time to selected tab format
+    const {
+      value,
+      roundUp
+    } = this.props;
+
+    switch(selectedTab.id) {
+      case TIME_MODES.ABSOLUTE:
+        this.props.onChange(toAbsoluteString(value, roundUp));
+        break;
+      case TIME_MODES.RELATIVE:
+        this.props.onChange(toRelativeString(value));
+        break;
+      case TIME_MODES.NOW:
+        this.props.onChange('now');
+        break;
+    }
     this.setState({ selectedTab });
   };
 
@@ -68,6 +88,7 @@ export class TimeInput extends Component {
           <AbsoluteForm
             value={this.props.value}
             onChange={this.props.onChange}
+            roundUp={this.props.roundUp}
           />
         ),
       },
@@ -124,4 +145,9 @@ export class TimeInput extends Component {
 TimeInput.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  roundUp: PropTypes.bool,
+};
+
+TimeInput.defaultProps = {
+  roundUp: false,
 };
