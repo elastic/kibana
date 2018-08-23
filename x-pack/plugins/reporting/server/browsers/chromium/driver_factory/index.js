@@ -27,28 +27,27 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  create({ bridgePort, viewport }) {
+  create({ viewport }) {
     return Rx.Observable.create(async observer => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
-        bridgePort,
         viewport,
         verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
+
       let chromium;
       let page;
       try {
-        // TODO: calling puppeteer w/ the default args works, but the
-        // chromiumArgs breaks it. Need to investigate.
         chromium = await puppeteer.launch({
           userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
           args: chromiumArgs,
         });
+
         page = await chromium.newPage();
       } catch (err) {
         observer.error(new Error(`Caught error spawning Chromium`));
