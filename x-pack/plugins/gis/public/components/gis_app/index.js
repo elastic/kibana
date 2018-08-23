@@ -7,11 +7,5 @@
 import { connect } from 'react-redux';
 import { GISApp } from './view';
 
-function mapStateToProps(state = {}) {
-  return {
-    kbnCoreAPI: state.config
-  };
-}
-
-const connectedGISApp = connect(mapStateToProps)(GISApp);
+const connectedGISApp = connect(null)(GISApp);
 export { connectedGISApp as GISApp };

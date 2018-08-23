@@ -19,10 +19,6 @@ import { LayerPanel } from '../layer_panel';
 
 export class LayerControl extends React.Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   _renderLayerFlyout() {
     const {
       layerDetailsVisible,
