@@ -87,9 +87,17 @@ class AggConfigs extends IndexedArray {
       .commit();
   }
 
-  createAggregation(params) {
-    const aggConfig = params instanceof AggConfig ? params : new AggConfig(this, params);
-    this.push(aggConfig);
+  createAggregation(params, pushToArray = true) {
+    let aggConfig;
+    if (params instanceof AggConfig) {
+      aggConfig = params;
+      params.parent = this;
+    } else {
+      aggConfig = new AggConfig(this, params);
+    }
+    if (pushToArray) {
+      this.push(aggConfig);
+    }
     return aggConfig;
   }
 

@@ -19,21 +19,19 @@
 
 import { AggType } from '../../agg_types/agg_type';
 
-export function PointSeriesFakeXAxisProvider() {
+const allAgg = new AggType({
+  name: 'all',
+  title: 'All docs',
+  ordered: false,
+  hasNoDsl: true
+});
 
-  const allAgg = new AggType({
-    name: 'all',
-    title: 'All docs',
-    ordered: false,
-    hasNoDsl: true
-  });
-
-  return function makeFakeXAxis() {
-    const fake = {
-      makeLabel: () => 'all',
-      fieldFormatter: () => '',
-      type: allAgg
-    };
+export function makeFakeXAspect() {
+  const fake = {
+    makeLabel: () => 'all',
+    fieldFormatter: () => '',
+    type: allAgg
+  };
 
     return {
       i: -1,

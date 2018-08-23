@@ -19,17 +19,9 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesInitXAxisProvider } from '../_init_x_axis';
+import { initXAxis } from '../_init_x_axis';
 
 describe('initXAxis', function () {
-
-  let initXAxis;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    initXAxis = Private(PointSeriesInitXAxisProvider);
-  }));
 
   const baseChart = {
     aspects: {
@@ -60,9 +52,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig.vis = {
-      indexPattern: indexPattern
-    };
+    chart.aspects.x.aggConfig._indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)
@@ -84,9 +74,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig.vis = {
-      indexPattern: indexPattern
-    };
+    chart.aspects.x.aggConfig._indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)

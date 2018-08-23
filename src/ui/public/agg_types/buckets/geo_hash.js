@@ -136,7 +136,7 @@ export const geoHashBucketAgg = new BucketAggType({
             bottom_right: mapCollar.bottom_right
           }
         };
-        aggs.push(agg.parent.createAggConfig({
+        aggs.push(agg.parent.createAggregation({
           type: 'filter',
           id: 'filter_agg',
           enabled: true,
@@ -146,20 +146,20 @@ export const geoHashBucketAgg = new BucketAggType({
           schema: {
             group: 'buckets'
           }
-        }));
+        }, false));
       }
     }
 
     aggs.push(agg);
 
     if (params.useGeocentroid) {
-      aggs.push(agg.parent.createAggConfig({
+      aggs.push(agg.parent.createAggregation({
         type: 'geo_centroid',
         enabled: true,
         params: {
           field: agg.getField()
         }
-      }));
+      }, false));
     }
 
     return aggs;

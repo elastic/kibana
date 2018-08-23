@@ -64,9 +64,8 @@ class AggConfig {
 
   constructor(parent, opts = {}) {
     this.parent = parent;
-    this.id = String(opts.id || AggConfig.nextId(parent.aggs));
+    this.id = String(opts.id || AggConfig.nextId(parent));
     this._indexPattern = parent.indexPattern;
-    this._aggs = parent.aggs;
     this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 

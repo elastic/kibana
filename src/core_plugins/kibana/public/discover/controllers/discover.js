@@ -768,7 +768,8 @@ function discoverController(
         schema: 'segment',
         params: {
           field: $scope.opts.timefield,
-          interval: $state.interval
+          interval: $state.interval,
+          timeRange: timefilter.getTime(),
         }
       }
     ];

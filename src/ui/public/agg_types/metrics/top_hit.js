@@ -41,12 +41,7 @@ export const topHitMetricAgg = new MetricAggType({
     {
       name: 'field',
       onlyAggregatable: false,
-      filterFieldTypes: function (vis, value) {
-        if (vis.type.name === 'table' || vis.type.name === 'metric') {
-          return true;
-        }
-        return value === 'number';
-      },
+      filterFieldTypes: '*',
       write(agg, output) {
         const field = agg.params.field;
         output.params = {};

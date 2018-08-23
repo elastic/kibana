@@ -109,7 +109,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
   // create filters aggregation
-  const filterAgg = this.parent.createAggregation({
+  const filterAgg = aggConfigs.createAggregation({
     type: 'filters',
     id: 'other',
   });
