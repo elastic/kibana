@@ -70,7 +70,7 @@ export class HeadlessChromiumDriverFactory {
         partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
       );
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(chromium, page, {
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page, {
         maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
         logger: this.logger
       }));

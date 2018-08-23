@@ -5,8 +5,7 @@
  */
 
 export class HeadlessChromiumDriver {
-  constructor(client, page, { maxScreenshotDimension, logger }) {
-    this._client = client;
+  constructor(page, { maxScreenshotDimension, logger }) {
     this._page = page;
     this._maxScreenshotDimension = maxScreenshotDimension;
     this._waitForDelayMs = 100;
@@ -17,7 +16,6 @@ export class HeadlessChromiumDriver {
   async open(url, { headers, waitForSelector }) {
     this._logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
 
-    // await ignoreSSLErrorsBehavior(this._client.Security);
     await this._page.setExtraHTTPHeaders(headers);
     await this._page.goto(url, { waitUntil: 'networkidle0' });
 
