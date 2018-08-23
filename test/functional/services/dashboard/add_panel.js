@@ -95,15 +95,6 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForEuiTableLoading() {
-      // Lee.Dr: existing code - waited 10 second timeout to try to find 'euiBasicTable-loading'
-      // const addPanel = await testSubjects.find('dashboardAddPanel');
-      // await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
-
-      // Option 1: waitForDeleted with a 1 second timeout
-      // await remote.setFindTimeout(1000).waitForDeletedByClassName('euiBasicTable-loading');
-
-      // Option 2: find the table and wait for it to not have the 'euiBasicTable-loading' class
-      // This should be the fastest.
       await retry.waitFor('dashboard add panel loading to complete', async () => {
         const table = await find.byClassName('euiBasicTable');
         return !((await table.getAttribute('class')).includes('loading'));
@@ -181,8 +172,6 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
-      // workaround for timing issue with slideout animation
-      // await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
