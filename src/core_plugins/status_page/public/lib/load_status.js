@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { i18n }  from '@kbn/i18n';
 
 // Module-level error returned by notify.error
@@ -130,7 +130,7 @@ async function loadStatus(fetchFn = fetchData) {
       },
     );
 
-    errorNotif = notify.error(serverIsDownErrorMessage);
+    errorNotif = toastNotifications.addDanger(serverIsDownErrorMessage);
     return e;
   }
 
@@ -144,7 +144,7 @@ async function loadStatus(fetchFn = fetchData) {
       },
     );
 
-    errorNotif = notify.error(serverStatusCodeErrorMessage);
+    errorNotif = toastNotifications.addDanger(serverStatusCodeErrorMessage);
     return;
   }
 
