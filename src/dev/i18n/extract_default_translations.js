@@ -47,7 +47,7 @@ function normalizePath(inputPath) {
   return normalize(path.relative('.', inputPath));
 }
 
-function filterPaths(inputPaths) {
+export function filterPaths(inputPaths) {
   const availablePaths = Object.values(paths);
   const pathsForExtraction = new Set();
 
@@ -81,7 +81,7 @@ export function validateMessageNamespace(id, filePath) {
   if (!id.startsWith(`${expectedNamespace}.`)) {
     throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
 Expected "${id}" id to have "${expectedNamespace}" namespace. \
-See i18nrc.json for the list of supported namespaces.`);
+See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
@@ -179,6 +179,10 @@ function serializeToJson(defaultMessages) {
   }
 
   return JSON.stringify(resultJsonObject, undefined, 2);
+}
+
+export async function validateDefaultMessages(inputPath) {
+  await extractMessagesFromPathToMap(inputPath, new Map());
 }
 
 export async function extractDefaultTranslations({ paths, output, outputFormat }) {

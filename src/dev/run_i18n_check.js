@@ -17,13 +17,53 @@
  * under the License.
  */
 
-import { run } from './run';
-import { extractDefaultTranslations } from './i18n/extract_default_translations';
+import chalk from 'chalk';
+import Listr from 'listr';
+import execa from 'execa';
+
+import { run, createFailError } from './run';
+import {
+  extractDefaultTranslations,
+  filterPaths,
+  validateDefaultMessages,
+} from './i18n/extract_default_translations';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
-  await extractDefaultTranslations({
-    paths: Array.isArray(path) ? path : [path || './'],
-    output,
-    outputFormat,
-  });
+  const paths = Array.isArray(path) ? path : [path || './'];
+
+  if (output) {
+    await extractDefaultTranslations({
+      paths,
+      output,
+      outputFormat,
+    });
+  } else {
+    const filteredPaths = filterPaths(paths);
+
+    if (filteredPaths.length === 0) {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} \
+None of input paths is available for extraction or validation. See .i18nrc.json.`
+      );
+    }
+
+    if (filteredPaths.length === 1) {
+      await validateDefaultMessages(filteredPaths[0]);
+    } else {
+      const list = new Listr(
+        filteredPaths.map(filteredPath => ({
+          task: () =>
+            execa('node', ['scripts/i18n_check', '--path', filteredPath], {
+              env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+            }),
+          title: filteredPath,
+        })),
+        {
+          concurrent: true,
+        }
+      );
+
+      await list.run();
+    }
+  }
 });

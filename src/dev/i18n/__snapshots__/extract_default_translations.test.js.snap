@@ -139,4 +139,4 @@ Error: [37m[41m I18N ERROR [49m[39m There is more than one default message f
 \\"Message 1\\" and \\"Message 2\\""
 `;
 
-exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"[37m[41m I18N ERROR [49m[39m Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See i18nrc.json for the list of supported namespaces."`;
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"[37m[41m I18N ERROR [49m[39m Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See .i18nrc.json for the list of supported namespaces."`;
