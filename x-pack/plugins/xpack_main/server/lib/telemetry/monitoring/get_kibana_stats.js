@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, omit } from 'lodash';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_level_stats';
 
 export function rollUpTotals(rolledUp, addOn, field) {
-  return { total: rolledUp[field].total + addOn[field].total };
+  const rolledUpTotal = get(rolledUp, [field, 'total'], 0);
+  return { total: rolledUpTotal + addOn[field].total };
+}
+export function rollUpIndices(rolledUp) {
+  return rolledUp.indices + 1;
 }
 
 /*
@@ -31,49 +35,31 @@ export function getUsageStats(rawStats) {
     }
     clusterIndexCache.add(clusterIndexCombination);
 
-    const {
-      dashboard,
-      visualization,
-      search,
-      index_pattern: indexPattern,
-      graph_workspace: graphWorkspace,
-      timelion_sheet: timelionSheet,
-      index, // eslint-disable-line no-unused-vars
-      ...rest
-    } = currUsage;
-
-    // this cluster/index has not been processed yet
-    let stats;
-    const rolledUpStats = get(accum, clusterUuid);
-    if (rolledUpStats) {
-      // this cluster has been seen, but this index hasn't
-      // roll-up the usage stats for the unique index of this cluster
-      stats = {
-        dashboard: rollUpTotals(rolledUpStats, currUsage, 'dashboard'),
-        visualization: rollUpTotals(rolledUpStats, currUsage, 'visualization'),
-        search: rollUpTotals(rolledUpStats, currUsage, 'search'),
-        index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
-        graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
-        timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
-        indices: ++rolledUpStats.indices
-      };
-    } else {
-      stats = {
-        dashboard: dashboard,
-        visualization: visualization,
-        search: search,
-        index_pattern: indexPattern,
-        graph_workspace: graphWorkspace,
-        timelion_sheet: timelionSheet,
-        indices: 1
-      };
-    }
+    const plugins = omit(currUsage, [
+      'index',
+      'dashboard',
+      'visualization',
+      'search',
+      'index_pattern',
+      'graph_workspace',
+      'timelion_sheet',
+    ]);
+    const rolledUpStats = get(accum, clusterUuid, { indices: 0 });
+    const stats = {
+      dashboard: rollUpTotals(rolledUpStats, currUsage, 'dashboard'),
+      visualization: rollUpTotals(rolledUpStats, currUsage, 'visualization'),
+      search: rollUpTotals(rolledUpStats, currUsage, 'search'),
+      index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
+      graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
+      timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
+      indices: rollUpIndices(rolledUpStats)
+    };
 
     return {
       ...accum,
       [clusterUuid]: {
         ...stats,
-        plugins: rest
+        plugins
       }
     };
   }, {});
