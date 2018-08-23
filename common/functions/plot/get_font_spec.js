@@ -15,7 +15,7 @@ export const getFontSpec = argFont => {
 
   const { fontSize, lineHeight, fontStyle, fontWeight, fontFamily, color } = argFont.spec;
   const size = fontSize && Number(fontSize.replace('px', ''));
-  const lHeight = lineHeight && Number(lineHeight.replace('px', ''));
+  const lHeight = typeof lineHeight === 'string' && Number(lineHeight.replace('px', ''));
 
   return {
     size: !isNaN(size) ? size : defaultSpec.size,
