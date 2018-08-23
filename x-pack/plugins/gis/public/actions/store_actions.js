@@ -109,8 +109,6 @@ async function createDefaultLayerDescriptorForESGeohashGridSource(esGeohashGridS
   });
 }
 
-
-
 async function createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options) {
   const geojson = await EMSFileSource.getGeoJson(emsFileSource);
   return VectorLayer.createDescriptor({
