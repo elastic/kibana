@@ -28,67 +28,67 @@ export class SecureSavedObjectsClient {
     this._actions = actions;
   }
 
-  async create(type, attributes = {}, options = {}) {
+  async create(type, attributes = {}, options = {}, namespace) {
     return await this._execute(
       type,
       'create',
       { type, attributes, options },
-      repository => repository.create(type, attributes, options),
+      repository => repository.create(type, attributes, options, namespace),
     );
   }
 
-  async bulkCreate(objects, options = {}) {
+  async bulkCreate(objects, options = {}, namespace) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_create',
       { objects, options },
-      repository => repository.bulkCreate(objects, options),
+      repository => repository.bulkCreate(objects, options, namespace),
     );
   }
 
-  async delete(type, id) {
+  async delete(type, id, namespace) {
     return await this._execute(
       type,
       'delete',
       { type, id },
-      repository => repository.delete(type, id),
+      repository => repository.delete(type, id, namespace),
     );
   }
 
-  async find(options = {}) {
+  async find(options = {}, namespace) {
     if (options.type) {
-      return await this._findWithTypes(options);
+      return await this._findWithTypes(options, namespace);
     }
 
-    return await this._findAcrossAllTypes(options);
+    return await this._findAcrossAllTypes(options, namespace);
   }
 
-  async bulkGet(objects = [], options = {}) {
+  async bulkGet(objects = [], options = {}, namespace) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_get',
       { objects, options },
-      repository => repository.bulkGet(objects, options)
+      repository => repository.bulkGet(objects, options, namespace)
     );
   }
 
-  async get(type, id, options = {}) {
+  async get(type, id, options = {}, namespace) {
     return await this._execute(
       type,
       'get',
       { type, id, options },
-      repository => repository.get(type, id, options)
+      repository => repository.get(type, id, options, namespace)
     );
   }
 
-  async update(type, id, attributes, options = {}) {
+  async update(type, id, attributes, options = {}, namespace) {
     return await this._execute(
       type,
       'update',
       { type, id, attributes, options },
-      repository => repository.update(type, id, attributes, options)
+      repository => repository.update(type, id, attributes, options, namespace)
     );
   }
 
@@ -121,7 +121,7 @@ export class SecureSavedObjectsClient {
     }
   }
 
-  async _findAcrossAllTypes(options) {
+  async _findAcrossAllTypes(options, namespace) {
     const action = 'find';
 
     // we have to filter for only their authorized types
@@ -152,16 +152,17 @@ export class SecureSavedObjectsClient {
 
     return await this._internalRepository.find({
       ...options,
-      type: authorizedTypes
+      type: authorizedTypes,
+      namespace
     });
   }
 
-  async _findWithTypes(options) {
+  async _findWithTypes(options, namespace) {
     return await this._execute(
       options.type,
       'find',
       { options },
-      repository => repository.find(options)
+      repository => repository.find(options, namespace)
     );
   }
 }

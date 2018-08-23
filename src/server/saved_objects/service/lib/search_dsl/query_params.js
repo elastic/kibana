@@ -69,7 +69,7 @@ function getFieldsForTypes(searchFields, types) {
  *  @return {Object}
  */
 export function getQueryParams(mappings, namespace, type, search, searchFields, filters = []) {
-
+  const types = getTypes(mappings, type);
   const bool = {
     filter: [...filters],
   };
@@ -95,7 +95,7 @@ export function getQueryParams(mappings, namespace, type, search, searchFields, 
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            getTypes(mappings, type)
+            types
           )
         }
       }

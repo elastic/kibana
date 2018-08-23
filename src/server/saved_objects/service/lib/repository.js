@@ -54,9 +54,10 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @param {string} [namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(namespace, type, attributes = {}, options = {}) {
+  async create(type, attributes = {}, options = {}, namespace) {
     const {
       id,
       overwrite = false
@@ -101,10 +102,11 @@ export class SavedObjectsRepository {
    *
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
+   * @param {string} [namespace]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
    */
-  async bulkCreate(namespace, objects, options = {}) {
+  async bulkCreate(objects, options = {}, namespace) {
     const {
       overwrite = false
     } = options;
@@ -184,9 +186,11 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {string} [namespace]
    * @returns {promise}
    */
-  async delete(namespace, type, id) {
+  async delete(type, id, namespace) {
+    console.log('delete', this._generateEsId(namespace, type, id));
     const response = await this._writeToCluster('delete', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
@@ -224,9 +228,10 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(namespace, options = {}) {
+  async find(options = {}, namespace) {
     const {
       type,
       search,
@@ -305,6 +310,7 @@ export class SavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -313,7 +319,7 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(namespace, objects = []) {
+  async bulkGet(objects = [], namespace) {
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -364,9 +370,10 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {string} [namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(namespace, type, id) {
+  async get(type, id, namespace) {
     const response = await this._callCluster('get', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
@@ -403,9 +410,10 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
    * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
+   * @param {string} [namespace]
    * @returns {promise}
    */
-  async update(namespace, type, id, attributes, options = {}) {
+  async update(type, id, attributes, options = {}, namespace) {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(namespace, type, id),
@@ -455,7 +463,7 @@ export class SavedObjectsRepository {
   }
 
   _generateEsId(namespace, type, id) {
-    const namespacePrefix = namespace ? `${namespace}` : '';
+    const namespacePrefix = namespace ? `${namespace}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
