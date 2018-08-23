@@ -68,12 +68,11 @@ export function createServer(settings = {}) {
 }
 
 /**
- *  Creates an instance of KbnServer, including all of the core plugins,
- *  with default configuration tailored for unit tests, and starts es.
- *  When the server is closed, es will also be cleaned up.
+ * Creates an instance of KbnServer, including all of the core plugins,
+ * with default configuration tailored for unit tests, and starts es.
  *
- *  @param  {Object} [settings={}]
- *  @return {KbnServer}
+ * @param  {Object} [settings={}]
+ * @return {KbnServer}
  */
 export async function startTestServers({ adjustTimeout, settings = {} }) {
   const log = new ToolingLog({
