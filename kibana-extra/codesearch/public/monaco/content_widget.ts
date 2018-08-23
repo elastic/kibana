@@ -31,15 +31,15 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     super();
     this.containerDomNode = document.createElement('div');
     this.domNode = document.createElement('div');
-    this.domNode.style.cssText = 'width: max-content';
     this.scrollbar = new window.monaco.scrollable.DomScrollableElement(this.domNode, {});
     this.disposables.push(this.scrollbar);
     this.containerDomNode.appendChild(this.scrollbar.getDomNode());
 
-    this.editor.onDidLayoutChange(e => this.updateMaxHeight());
     this.visible = false;
-    this.editor.addContentWidget(this);
+    this.editor.onDidLayoutChange(e => this.updateMaxHeight());
+    this.updateMaxHeight();
     this.showAtPosition = null;
+    this.editor.addContentWidget(this);
   }
 
   public getId(): string {
@@ -106,9 +106,9 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     const height = Math.max(this.editor.getLayoutInfo().height / 4, 250);
     const { fontSize, lineHeight } = this.editor.getConfiguration().fontInfo;
 
-    this.containerDomNode.style.fontSize = `${fontSize}px`;
-    this.containerDomNode.style.lineHeight = `${lineHeight}px`;
-    this.containerDomNode.style.maxHeight = `${height}px`;
+    this.domNode.style.fontSize = `${fontSize}px`;
+    this.domNode.style.lineHeight = `${lineHeight}px`;
+    this.domNode.style.maxHeight = `${height}px`;
   }
 
   private updateFont(): void {

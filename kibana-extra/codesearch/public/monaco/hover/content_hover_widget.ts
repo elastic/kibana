@@ -26,7 +26,6 @@ export class ContentHoverWidget extends ContentWidget {
     this.containerDomNode.className = 'monaco-editor-hover hidden';
     this.containerDomNode.tabIndex = 0;
     this.domNode.className = 'monaco-editor-hover-content';
-    this.domNode.style.cssText = 'width: 100%';
     this.computer = new HoverComputer();
     this.hoverOperation = new Operation(
       this.computer,
