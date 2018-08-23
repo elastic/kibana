@@ -408,7 +408,9 @@ export const CleanClientModulesOnDLLTask = {
 
     const optimizedBundlesFolder = build.resolvePath('optimize/bundles');
     const dllManifest = JSON.parse(
-      await read(build.resolvePath(optimizedBundlesFolder, 'vendor.manifest.dll.json'))
+      await read(
+        build.resolvePath(optimizedBundlesFolder, 'vendor.manifest.dll.json')
+      )
     );
 
     const getDllModules = (manifest) => {
@@ -416,19 +418,16 @@ export const CleanClientModulesOnDLLTask = {
         return [];
       }
 
-      // In our setup the last manifest content entry
-      // should be the dll entry file and so we need
-      // to remove it from the modules entry paths array
       const modules = Object.keys(manifest.content);
-      const lastModule = modules.slice(-1).pop() || '';
-      const isLastModuleDllEntry = lastModule.includes('.entry.dll.js');
 
-      if (isLastModuleDllEntry) {
-        modules.pop();
-      }
+      // Only includes modules who are not in the black list of modules
+      // or there are not dll entry files
+      return modules.filter(entry => {
+        const isBlackListed = blackListModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
+        const isDllEntryFile = entry.includes('.entry.dll.js');
 
-      // TODO: it was made without node_modulespart
-      return modules.filter(entry => !blackListModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`)));
+        return !isBlackListed || !isDllEntryFile;
+      });
     };
 
     const cleanModule = async (moduleEntryPath) => {
@@ -472,7 +471,7 @@ export const CleanClientModulesOnDLLTask = {
       // Rewrite modified package.json
       await write(
         modulePkgPath,
-        JSON.stringify(modulePkg, null, '  ')
+        JSON.stringify(modulePkg, null, 2)
       );
     };
 
