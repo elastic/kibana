@@ -4,7 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const args = ({ userDataDir, viewport, disableSandbox, proxyConfig, verboseLogging }) => {
+interface Opts {
+  userDataDir: string;
+  viewport: { width: number; height: number };
+  disableSandbox: boolean;
+  proxyConfig: {
+    enabled: boolean;
+    server: string;
+    bypass?: string[];
+  };
+  verboseLogging: boolean;
+}
+
+export const args = ({
+  userDataDir,
+  viewport,
+  disableSandbox,
+  proxyConfig,
+  verboseLogging,
+}: Opts) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
