@@ -13,6 +13,7 @@ uiModules.get('kibana')
   // disable stat reporting while running tests,
   // MockInjector used in these tests is not impacted
   .constant('telemetryEnabled', false)
+  .constant('telemetryOptedIn', null)
   .constant('telemetryUrl', 'not.a.valid.url.0');
 
 const getMockInjector = ({ allowReport, lastReport }) => {
@@ -21,9 +22,7 @@ const getMockInjector = ({ allowReport, lastReport }) => {
     get: sinon.stub().returns({ lastReport: lastReport }),
     set: sinon.stub()
   });
-  get.withArgs('config').returns({
-    get: () => allowReport
-  });
+  get.withArgs('telemetryOptedIn').returns(allowReport);
   const mockHttp = (req) => {
     return req;
   };
