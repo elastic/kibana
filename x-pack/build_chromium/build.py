@@ -63,8 +63,8 @@ md5_filename = base_filename + '.md5'
 print('Creating ' + zip_filename)
 archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
 
-# A little helper function to write individual files to the zip file
 def archive_file(name):
+  """A little helper function to write individual files to the zip file"""
   from_path = os.path.join('out/headless', name)
   to_path = os.path.join('headless_shell-' + platform.system().lower(), name)
   archive.write(from_path, to_path)
