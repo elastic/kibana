@@ -7,12 +7,14 @@
 import React from 'react';
 import { OLMapContainer } from '../map';
 import { LayerControl } from '../layer_control/index';
+import { AddLayerPanel } from '../layer_addpanel/index';
 
 export function GISApp() {
   return (
     <div className="wrapper">
       <OLMapContainer/>
       <LayerControl/>
+      <AddLayerPanel/>
     </div>
   );
 }

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { AddLayerPanel } from '../layer_addpanel/index';
 
 export class OLMapContainer extends React.Component {
 
@@ -17,7 +16,6 @@ export class OLMapContainer extends React.Component {
     return (
       <div>
         <div className="mapContainer" ref="mapContainer"/>
-        <AddLayerPanel/>
       </div>
     );
   }
