@@ -78,7 +78,7 @@ class JobActionMenuUi extends Component {
           id: 'xpack.rollupJobs.jobActionMenu.stopJobLabel',
           defaultMessage: 'Stop {entity}',
         }, { entity }),
-        icon: <EuiIcon type="pause" />,
+        icon: <EuiIcon type="stop" />,
         onClick: () => {
           this.closePopover();
           stopJobs();
