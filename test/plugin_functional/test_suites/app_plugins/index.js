@@ -17,22 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-
-export function PanelError({ error }) {
-  return (
-    <div className="dshPanel__error panel-content">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
-      <span>{error}</span>
-    </div>
-  );
+export default function ({ loadTestFile }) {
+  describe('app plugins', () => {
+    loadTestFile(require.resolve('./app_navigation'));
+  });
 }
-
-PanelError.propTypes = {
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.node
-  ]),
-};
-

@@ -22,7 +22,7 @@ import { resolve } from 'path';
 
 import getopts from 'getopts';
 import dedent from 'dedent';
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
 import { REPO_ROOT } from '../constants';
 import { generateNoticeFromSource } from './generate_notice_from_source';
@@ -40,8 +40,10 @@ const opts = getopts(process.argv.slice(2), {
   }
 });
 
-const log = createToolingLog(pickLevelFromFlags(opts));
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: pickLevelFromFlags(opts),
+  writeTo: process.stdout
+});
 
 if (unknownFlags.length) {
   log.error(`Unknown flags ${unknownFlags.map(f => `"${f}"`).join(',')}`);
