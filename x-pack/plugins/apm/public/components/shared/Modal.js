@@ -9,7 +9,8 @@ import Portal from 'react-portal';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Close } from './Icons';
-import { fontSizes, units, colors, rgba } from '../../style/variables';
+import { fontSizes, units, colors } from '../../style/variables';
+import { rgba } from 'polished';
 
 const Header = styled.div`
   display: flex;

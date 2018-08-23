@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseToRgb } from 'polished';
-
 // Units
 export const unit = 16;
 
@@ -67,17 +65,6 @@ export const colors = {
   link: colorBlue2,
   linkHover: colorBlue1
 };
-
-/**
- * Takes a color string and returns its corresponding rgba string value
- *
- * @param {string} color - a polished compatible hex, rgb, rgba, hsl, or hsla color string
- * @param {number} a - number between 0 and 1 to set the alpha value
- */
-export function rgba(color, a = 1) {
-  const { red, green, blue, alpha = a } = parseToRgb(color);
-  return `rgba(${red},${green},${blue},${alpha})`;
-}
 
 // Fonts
 export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';
