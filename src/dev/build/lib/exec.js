@@ -36,10 +36,5 @@ export async function exec(log, cmd, args, options = {}) {
     cwd,
   });
 
-  // TODO: DELETE THIS
-  proc.stdout.on('data', function (data) {
-    console.log('stdout: ' + data.toString());
-  });
-
   await watchStdioForLine(proc, line => log[level](line), exitAfter);
 }
