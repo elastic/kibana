@@ -68,9 +68,15 @@ export const colors = {
   linkHover: colorBlue1
 };
 
-export function rgba(hex, alpha = 1) {
-  const rgb = parseToRgb(hex);
-  return `rgba(${rgb.red}, ${rgb.green}, ${rgb.blue}, ${alpha})`;
+/**
+ * Takes a color string and returns its corresponding rgba string value
+ *
+ * @param {string} color - a polished compatible hex, rgb, rgba, hsl, or hsla color string
+ * @param {number} a - number between 0 and 1 to set the alpha value
+ */
+export function rgba(color, a = 1) {
+  const { red, green, blue, alpha = a } = parseToRgb(color);
+  return `rgba(${red},${green},${blue},${alpha})`;
 }
 
 // Fonts

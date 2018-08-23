@@ -15,7 +15,8 @@ const List = styled.ul`
   width: 100%;
   border: 1px solid ${colors.gray4};
   border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${rgba(colors.black, 0.1)};
+  box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
+    ${rgba(colors.black, 0.1)};
   position: absolute;
   background: #fff;
   z-index: 10;

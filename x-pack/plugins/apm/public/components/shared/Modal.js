@@ -118,9 +118,9 @@ Modal.propTypes = {
 };
 
 Modal.defaultProps = {
-  onOpen: () => { },
-  onClose: () => { },
-  close: () => { }
+  onOpen: () => {},
+  onClose: () => {},
+  close: () => {}
 };
 
 export default Modal;
