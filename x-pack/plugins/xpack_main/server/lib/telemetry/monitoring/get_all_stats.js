@@ -114,18 +114,6 @@ export function addStackStats(cluster, allProductStats, product) {
   }
 }
 
-export function addXPackStats(cluster, allProductStats, product) {
-  const productStats = get(allProductStats, cluster.cluster_uuid);
-
-  if (productStats) {
-    if (!get(cluster, 'stack_stats.xpack')) {
-      set(cluster, 'stack_stats.xpack', {});
-    }
-
-    set(cluster, `stack_stats.xpack[${product}]`, productStats);
-  }
-}
-
 export function mergeXPackStats(cluster, allProductStats, path, product) {
   const productStats = get(allProductStats, cluster.cluster_uuid + '.' + path);
 
