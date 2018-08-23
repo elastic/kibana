@@ -28,8 +28,8 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(clearTemporaryLayers());
     },
-    previewSource: (sourceDescriptor) => {
-      dispatch(addLayerFromSource(sourceDescriptor, { temporary: true }));
+    previewSource: (source) => {
+      dispatch(addLayerFromSource(source, { temporary: true }));
     },
     removeAction: layerName => dispatch(removeLayer(layerName)),
     addAction: () => dispatch(promoteTemporaryLayers())

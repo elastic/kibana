@@ -68,6 +68,8 @@ export class ALayer {
     this._source.renderDetails();
   }
 
-
+  toLayerDescriptor() {
+    return this._descriptor;
+  }
 }
 

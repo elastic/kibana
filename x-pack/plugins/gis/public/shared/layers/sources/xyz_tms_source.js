@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 
 import { ASource } from './source';
+import { TileLayer } from '../tile_layer';
 
 export class XYZTMSSource extends ASource {
 
@@ -33,15 +34,11 @@ export class XYZTMSSource extends ASource {
   static renderEditor({  onPreviewSource }) {
     const previewTMS = (urlTemplate) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
-      onPreviewSource(sourceDescriptor);
+      const source = new XYZTMSSource(sourceDescriptor);
+      onPreviewSource(source);
     };
     return (<XYZTMSEditor previewTMS={previewTMS} />);
   }
-
-  constructor(descriptor) {
-    super(descriptor);
-  }
-
 
   renderDetails() {
     return (
@@ -54,6 +51,16 @@ export class XYZTMSSource extends ASource {
         </div>
       </Fragment>
     );
+  }
+
+  async createDefaultLayerDescriptor(options) {
+    const service = await XYZTMSSource.getTMSOptions(this._descriptor);
+    return TileLayer.createDescriptor({
+      source: service.url,
+      sourceDescriptor: this._descriptor,
+      name: service.url,
+      ...options
+    });
   }
 }
 
@@ -93,5 +100,4 @@ class XYZTMSEditor extends  React.Component {
       </Fragment>
     );
   }
-
 }

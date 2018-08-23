@@ -11,6 +11,7 @@ import {
 } from '@elastic/eui';
 
 import { ASource } from './source';
+import { GeohashGridLayer } from '../geohashgrid_layer';
 
 export class ESGeohashGridSource extends ASource {
 
@@ -50,18 +51,14 @@ export class ESGeohashGridSource extends ASource {
             const sourceDescriptor = ESGeohashGridSource.createDescriptor({
               esIndexPattern: "foo",
               pointField: "bar"
-            });
-            onPreviewSource(sourceDescriptor);
+            }); const source = new ESGeohashGridSource(sourceDescriptor);
+            onPreviewSource(source);
           }}
         >
           Show some dummy data.
         </EuiButton>
       </Fragment>
     );
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   renderDetails() {
@@ -79,4 +76,16 @@ export class ESGeohashGridSource extends ASource {
       </Fragment>
     );
   }
+
+
+  async createDefaultLayerDescriptor(options) {
+    const geojson = await ESGeohashGridSource.getGeoJsonPoints(this._descriptor);
+    return GeohashGridLayer.createDescriptor({
+      source: geojson,
+      sourceDescriptor: this._descriptor,
+      name: this._descriptor.name || this._descriptor.id,
+      ...options
+    });
+  }
+
 }

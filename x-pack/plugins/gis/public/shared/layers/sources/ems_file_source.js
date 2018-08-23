@@ -12,6 +12,7 @@ import {
   EuiSelect,
   EuiSpacer
 } from '@elastic/eui';
+import { VectorLayer } from '../vector_layer';
 
 export class EMSFileSource extends ASource {
 
@@ -23,24 +24,29 @@ export class EMSFileSource extends ASource {
       name: name
     };
   }
+
   static async getGeoJson(descriptor) {
     try {
       const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(descriptor.name)}`);
       return await vectorFetch.json();
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       throw e;
     }
   }
 
-  static renderEditor({ dataSourcesMeta, onPreviewSource })  {
+  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
 
     const emsVectorOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.ems.file : [];
-    const emsVectorOptions = emsVectorOptionsRaw ? emsVectorOptionsRaw.map((file) => ({ value: file.name, text: file.name })) : [];
+    const emsVectorOptions = emsVectorOptionsRaw ? emsVectorOptionsRaw.map((file) => ({
+      value: file.name,
+      text: file.name
+    })) : [];
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].text;
-      const emsFileSource = EMSFileSource.createDescriptor(selectedId);
+      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
     };
     return (
@@ -55,10 +61,6 @@ export class EMSFileSource extends ASource {
         </Fragment>
       </EuiText>
     );
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   renderDetails() {
@@ -78,6 +80,16 @@ export class EMSFileSource extends ASource {
         </div>
       </Fragment>
     );
+  }
+
+  async createDefaultLayerDescriptor(options) {
+    const geojson = await EMSFileSource.getGeoJson(this._descriptor);
+    return VectorLayer.createDescriptor({
+      source: geojson,
+      sourceDescriptor: this._descriptor,
+      name: this._descriptor.name || this._descriptor.id,
+      ...options
+    });
   }
 
 }

@@ -23,4 +23,9 @@ export class ASource {
   renderDetails() {
     return (<div>{`Here be details for source`}</div>);
   }
+
+  async createDefaultLayerDescriptor() {
+    throw new Error(`Source#createDefaultLayerDescriptor not implemented`);
+  }
 }
+
