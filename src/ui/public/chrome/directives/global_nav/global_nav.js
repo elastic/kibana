@@ -24,7 +24,6 @@ import './global_nav_link';
 import globalNavTemplate from './global_nav.html';
 import './global_nav.less';
 import { uiModules } from '../../../modules';
-import validate from 'vali-date';
 
 const module = uiModules.get('kibana');
 
@@ -53,7 +52,6 @@ module.directive('globalNav', (globalNavState, chrome) => {
 
         // Notify visualizations, e.g. the dashboard, that they should re-render.
         scope.$root.$broadcast('globalNav:update');
-        console.log(validate('foo')); //eslint-disable-line
       }
 
       updateGlobalNav();
