@@ -117,23 +117,41 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       <div
         className="eui-textCenter"
       >
-        <RadioButtonGroup
-          buttons={
-            Array [
-              Object {
-                "dataTestSubj": "onPremBtn",
-                "label": "Self managed",
-                "onClick": [Function],
-              },
-              Object {
-                "dataTestSubj": "onPremElasticCloudBtn",
-                "label": "Elastic Cloud",
-                "onClick": [Function],
-              },
-            ]
-          }
-          selectedBtnLabel="Self managed"
-        />
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButtonGroup
+              buttonSize="s"
+              color="primary"
+              idSelected="onPrem"
+              idToSelectedMap={Object {}}
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "id": "onPrem",
+                    "label": "Self managed",
+                  },
+                  Object {
+                    "id": "onPremElasticCloud",
+                    "label": "Elastic Cloud",
+                  },
+                ]
+              }
+              type="single"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       <EuiSpacer
         size="l"

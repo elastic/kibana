@@ -23,9 +23,18 @@ import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { RadioButtonGroup } from './radio_button_group';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiPageBody,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -177,14 +186,6 @@ export class TutorialComponent extends React.Component {
     return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
-  onPrem = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
-  };
-
-  onPremElasticCloud = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
-  };
-
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButton',
@@ -192,14 +193,26 @@ export class TutorialComponent extends React.Component {
       const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButton',
         defaultMessage: 'Elastic Cloud' });
       const radioButtons = [
-        { onClick: this.onPrem, label: selfManagedLabel, dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: cloudLabel, dataTestSubj: 'onPremElasticCloudBtn' },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM,
+          label: selfManagedLabel,
+        },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
+          label: cloudLabel,
+        }
       ];
       return (
-        <RadioButtonGroup
-          buttons={radioButtons}
-          selectedBtnLabel={radioButtons[0].label}
-        />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              options={radioButtons}
+              idSelected={this.state.visibleInstructions}
+              onChange={this.setVisibleInstructions}
+              color="primary"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
   };
