@@ -53,3 +53,8 @@ export const REPORT_INTERVAL_MS = 86400000;
  * Key for the localStorage service
  */
 export const LOCALSTORAGE_KEY = 'xpack.data';
+
+/**
+ * Link to the Elastic Telemetry privacy statement.
+ */
+export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;

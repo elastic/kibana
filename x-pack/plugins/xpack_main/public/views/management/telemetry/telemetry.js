@@ -13,7 +13,7 @@ import template from 'plugins/xpack_main/views/management/telemetry/telemetry.ht
 import { TelemetryOptInProvider } from '../../../services/telemetry_opt_in';
 import { ManageTelemetryPage } from './manage_telemetry_page';
 
-routes.when('/management/kibana/telemetry', {
+routes.when('/management/kibana/usageData', {
   template,
   controllerAs: 'telemetryCtrl',
   controller($scope, $route, kbnUrl, Private) {

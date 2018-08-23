@@ -18,7 +18,7 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
-import { CONFIG_TELEMETRY_DESC } from '../../../../common/constants';
+import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../../common/constants';
 import { OptInExampleFlyout } from '../../../hacks/welcome_banner/opt_in_details_component';
 import './manage_telemetry_page.less';
 
@@ -48,7 +48,7 @@ export class ManageTelemetryPage extends Component {
     return (
       <EuiPage className="manageTelemetryPage">
         <EuiPageBody restrictWidth>
-          <EuiTitle size="l"><h1>Manage telemetry</h1></EuiTitle>
+          <EuiTitle size="l"><h1>Manage usage data</h1></EuiTitle>
 
           <EuiSpacer />
 
@@ -65,12 +65,17 @@ export class ManageTelemetryPage extends Component {
                   <Fragment>
                     <p>{CONFIG_TELEMETRY_DESC}</p>
                     <p><EuiLink onClick={this.toggleExample}>See an example of what we collect</EuiLink></p>
+                    <p>
+                      <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                        Read our usage data privacy statement
+                      </EuiLink>
+                    </p>
                   </Fragment>
                 }
               >
                 <EuiFormRow hasEmptyLabelSpace={true} describedByIds={['manage-telemetry-aria']}>
                   <EuiSwitch
-                    label="Enable telemetry"
+                    label="Enable usage data"
                     checked={telemetryOptInProvider.getOptIn()}
                     onChange={this.toggleOptIn}
                     disabled={this.state.processing}

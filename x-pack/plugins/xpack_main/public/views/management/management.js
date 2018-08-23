@@ -20,8 +20,8 @@ routes.defaults(/\/management/, {
 
       kibanaManagementSection.register('telemetry', {
         order: 25,
-        display: 'Telemetry',
-        url: '#/management/kibana/telemetry'
+        display: 'Usage Data',
+        url: '#/management/kibana/usageData'
       });
     }
   }
