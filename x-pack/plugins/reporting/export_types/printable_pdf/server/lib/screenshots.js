@@ -6,9 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
-import path from 'path';
 import fs from 'fs';
-import moment from 'moment';
 import getPort from 'get-port';
 import { promisify } from 'bluebird';
 import { LevelLogger } from '../../../../server/lib/level_logger';
@@ -24,23 +22,11 @@ export function screenshotsObservableFactory(server) {
   const browserDriverFactory = server.plugins.reporting.browserDriverFactory;
   const captureConfig = config.get('xpack.reporting.capture');
 
-  const dataDirectory = config.get('path.data');
-
   const asyncDurationLogger = async (description, promise) => {
     const start = new Date();
     const result = await promise;
     logger.debug(`${description} took ${new Date() - start}ms`);
     return result;
-  };
-
-  const startRecording = (browser) => {
-    if (captureConfig.record) {
-      if (!browser.record) {
-        throw new Error('Unable to record capture with current browser');
-      }
-
-      browser.record(path.join(dataDirectory, `recording-${moment().utc().format().replace(/:/g, '_')}`));
-    }
   };
 
   const openUrl = async (browser, url, headers) => {
@@ -256,7 +242,6 @@ export function screenshotsObservableFactory(server) {
 
 
         const screenshot$ = driver$.pipe(
-          tap(browser => startRecording(browser)),
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
             browser => openUrl(browser, url, headers),
