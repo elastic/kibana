@@ -58,7 +58,7 @@ export class OptInExampleFlyout extends Component {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl"/>
+            <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -79,7 +79,7 @@ export class OptInExampleFlyout extends Component {
 
     return (
       <EuiCodeBlock language="js">
-        { JSON.stringify(data, null, 2) }
+        {JSON.stringify(data, null, 2)}
       </EuiCodeBlock>
     );
   }
@@ -90,7 +90,7 @@ export class OptInExampleFlyout extends Component {
         <EuiFlyout
           ownFocus
           onClose={this.props.onClose}
-          size="s"
+          maxWidth={true}
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -104,7 +104,7 @@ export class OptInExampleFlyout extends Component {
             </EuiTextColor>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            { this.renderBody(this.state) }
+            {this.renderBody(this.state)}
           </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>

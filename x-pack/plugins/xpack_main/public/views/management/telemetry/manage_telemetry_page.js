@@ -47,8 +47,8 @@ export class ManageTelemetryPage extends Component {
 
     return (
       <EuiPage className="manageTelemetryPage">
-        <EuiPageBody>
-          <EuiTitle size="l"><h1>Manage Telemetry</h1></EuiTitle>
+        <EuiPageBody restrictWidth>
+          <EuiTitle size="l"><h1>Manage telemetry</h1></EuiTitle>
 
           <EuiSpacer />
 
@@ -63,7 +63,8 @@ export class ManageTelemetryPage extends Component {
                 title={<h3>Opt-In</h3>}
                 description={
                   <Fragment>
-                    {CONFIG_TELEMETRY_DESC}
+                    <p>{CONFIG_TELEMETRY_DESC}</p>
+                    <p><EuiLink onClick={this.toggleExample}>See an example of what we collect</EuiLink></p>
                   </Fragment>
                 }
               >
@@ -74,9 +75,6 @@ export class ManageTelemetryPage extends Component {
                     onChange={this.toggleOptIn}
                     disabled={this.state.processing}
                   />
-                </EuiFormRow>
-                <EuiFormRow hasEmptyLabelSpace={true}>
-                  <EuiLink onClick={this.toggleExample}>See an example of what we collect</EuiLink>
                 </EuiFormRow>
               </EuiDescribedFormGroup>
             </EuiPanel>
