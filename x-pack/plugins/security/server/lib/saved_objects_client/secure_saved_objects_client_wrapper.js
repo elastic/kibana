@@ -117,13 +117,19 @@ export class SecureSavedObjectsClientWrapper {
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
-    const { hasAllRequested, username, response } = await this._checkSavedObjectPrivileges(actions);
+    const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missing = this._getMissingPrivileges(response);
-      this._auditLogger.savedObjectsAuthorizationFailure(username, action, types, missing, args);
+      const missing = this._getMissingPrivileges(privileges);
+      this._auditLogger.savedObjectsAuthorizationFailure(
+        username,
+        action,
+        types,
+        missing,
+        args
+      );
       const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
@@ -135,11 +141,10 @@ export class SecureSavedObjectsClientWrapper {
     // we have to filter for only their authorized types
     const types = this._savedObjectTypes;
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
-    const { username, response } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
+    const { username, privileges } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
-    const missing = this._getMissingPrivileges(response);
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([, privilege]) => !missing.includes(privilege))
+      .filter(([, privilege]) => privileges[privilege])
       .map(([type]) => type);
 
     if (authorizedTypes.length === 0) {
@@ -147,7 +152,7 @@ export class SecureSavedObjectsClientWrapper {
         username,
         action,
         types,
-        missing,
+        this._getMissingPrivileges(privileges),
         { options }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
@@ -172,7 +177,6 @@ export class SecureSavedObjectsClientWrapper {
   }
 
   _getMissingPrivileges(response) {
-    return Object.keys(response)
-      .filter(privilege => !response[privilege]);
+    return Object.keys(response).filter(privilege => !response[privilege]);
   }
 }

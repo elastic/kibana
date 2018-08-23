@@ -43,18 +43,18 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
         hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
         // we need to filter out the non requested privileges from the response
-        response: transform(applicationPrivilegesResponse, (response, resourcePrivilegesResponse, resourceResponse) => {
-          response[resourceResponse] = pick(resourcePrivilegesResponse, privileges);
+        resourcePrivileges: transform(applicationPrivilegesResponse, (result, value, key) => {
+          result[key] = pick(value, privileges);
         }),
       };
     };
 
     const checkPrivilegesAtResource = async (resource, privilegeOrPrivileges) => {
-      const { hasAllRequested, username, response } = await checkPrivilegesAtResources([resource], privilegeOrPrivileges);
+      const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources([resource], privilegeOrPrivileges);
       return {
         hasAllRequested,
         username,
-        response: response[resource],
+        privileges: resourcePrivileges[resource],
       };
     };
 
@@ -66,12 +66,12 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
       },
       async atSpaces(spaceIds, privilegeOrPrivileges) {
         const spaceResources = spaceIds.map(spaceId => spaceApplicationPrivilegesSerializer.resource.serialize(spaceId));
-        const { hasAllRequested, username, response } = await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
+        const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
         return {
           hasAllRequested,
           username,
           // we need to turn the resource responses back into the space ids
-          response: transform(response, (result, value, key) => {
+          spacePrivileges: transform(resourcePrivileges, (result, value, key) => {
             result[spaceApplicationPrivilegesSerializer.resource.deserialize(key)] = value;
           }),
         };

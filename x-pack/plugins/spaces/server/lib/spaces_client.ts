@@ -37,13 +37,13 @@ export class SpacesClient {
 
       const spaceIds = spaces.map((space: any) => space.id);
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-      const { response } = await checkPrivileges.atSpaces(
+      const { spacePrivileges } = await checkPrivileges.atSpaces(
         spaceIds,
         this.authorization.actions.login
       );
 
-      const authorized = Object.keys(response).filter(spaceId => {
-        return response[spaceId][this.authorization.actions.login];
+      const authorized = Object.keys(spacePrivileges).filter(spaceId => {
+        return spacePrivileges[spaceId][this.authorization.actions.login];
       });
 
       if (authorized.length === 0) {

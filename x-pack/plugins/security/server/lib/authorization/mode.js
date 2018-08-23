@@ -6,9 +6,13 @@
 import { GLOBAL_RESOURCE } from '../../../common/constants';
 import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
-const hasAnyApplicationPrivileges = applicationPrivilegesResponse => {
-  return Object.values(applicationPrivilegesResponse).some(resource =>
-    Object.values(resource).some(action => action === true)
+const hasAnyPrivileges = privileges => {
+  return Object.values(privileges).some(hasPrivilege => hasPrivilege);
+};
+
+const hasAnyResourcePrivileges = resourcePrivileges => {
+  return Object.values(resourcePrivileges).some(resource =>
+    Object.values(resource).some(privilege => privilege === true)
   );
 };
 
@@ -36,15 +40,15 @@ export function authorizationModeFactory(
 
     const checkPrivileges = checkPrivilegesWithRequest(request);
     if (!plugins.spaces) {
-      const { response } = await checkPrivileges.globally(actions.login);
-      return hasAnyApplicationPrivileges(response);
+      const { privileges } = await checkPrivileges.globally(actions.login);
+      return hasAnyPrivileges(privileges);
     }
 
     const { saved_objects: spaceSavedObjects } = await internalSavedObjectsRepository.find({ type: 'space' });
     const spaceResources = spaceSavedObjects.map(space => spaceApplicationPrivilegesSerializer.resource.serialize(space.id));
     const allResources = [GLOBAL_RESOURCE, ...spaceResources];
-    const { response } = await checkPrivileges.atResources(allResources, actions.login);
-    return hasAnyApplicationPrivileges(response);
+    const { resourcePrivileges } = await checkPrivileges.atResources(allResources, actions.login);
+    return hasAnyResourcePrivileges(resourcePrivileges);
   };
 
   return {
