@@ -28,21 +28,34 @@ import regenerate from 'regenerate';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 
-// create a regular expression using regenerate() that selects any character that is not explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const invalidXmlCharsRE = new RegExp(
-  `[^${
+// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
+const validXmlCharsRE = new RegExp(
+  `(?:${
     regenerate()
       .add(0x9, 0xA, 0xD)
       .addRange(0x20, 0xD7FF)
       .addRange(0xE000, 0xFFFD)
       .addRange(0x10000, 0x10FFFF)
       .toString()
-  }]`,
+  })+`,
   'g'
 );
 
 function escapeCdata(string) {
-  return stripAnsi(string).replace(invalidXmlCharsRE, '');
+  const colorless = stripAnsi(string);
+  let validXmlChars = '';
+  while (true) {
+    const match = validXmlCharsRE.exec(colorless);
+
+    if (match) {
+      // if the regex matched add the valid characters
+      // to the result and try again
+      validXmlChars += match[0];
+      continue;
+    }
+
+    return validXmlChars;
+  }
 }
 
 export function setupJUnitReportGeneration(runner, options = {}) {
