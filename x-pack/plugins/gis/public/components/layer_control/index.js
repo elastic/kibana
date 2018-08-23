@@ -9,8 +9,7 @@ import { LayerControl } from './view';
 import { updateFlyout, getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
 
 const mapDispatchToProps = {
-  showAddLayerWizard: () => updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD),
-  showLayerDetails: () => updateFlyout(FLYOUT_STATE.LAYER_PANEL)
+  showAddLayerWizard: () => updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD)
 };
 
 function mapStateToProps(state = {}) {
