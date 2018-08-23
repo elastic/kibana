@@ -167,6 +167,10 @@ export function MochaReporterProvider({ getService }) {
           .map(line => ` ${line}`)
           .join('\n')
       );
+
+      // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
+      // them here. Tests will re-capture the snapshot in `onTestEnd()`
+      snapshotLogsForRunnable(runnable);
     }
 
     onEnd = () => {
