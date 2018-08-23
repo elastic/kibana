@@ -13,16 +13,12 @@ import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
-export const getMapConstants = ({ map }) => map && map.mapConstants;
-
-export const getSelectedLayerInstance = ({ map }) => {
-  if (!map.selectedLayerId || !map.layerList) {
-    return null;
-  }
-  const selectedLayer = map.layerList.find(layerDescriptor => layerDescriptor.id === map.selectedLayerId);
-  return createLayerInstance(selectedLayer);
-};
-
+/**
+ *
+ * todo: this should be the only place where there is any type-checking.
+ * Everywhere else in the code, transformations of the state should happen by method-call on the object.
+ * Polymorphism will resolve the correct implementation.
+ */
 function createLayerInstance(layerDescriptor) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor);
   if (layerDescriptor.type === TileLayer.type) {
@@ -49,12 +45,21 @@ function createSourceInstance(sourceDescriptor) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
 }
-export const getLayerList = ({ map }) => map && map.layerList;
 
-export const getLayerInstanceList = ({ map }) => {
+export const getMapConstants = ({ map }) => map && map.mapConstants;
+
+export const getSelectedLayerInstance = ({ map }) => {
+  if (!map.selectedLayerId || !map.layerList) {
+    return null;
+  }
+  const selectedLayer = map.layerList.find(layerDescriptor => layerDescriptor.id === map.selectedLayerId);
+  return createLayerInstance(selectedLayer);
+};
+
+export const getLayerList = ({ map }) => {
   return map.layerList ?  map.layerList.map(layerDescriptor => createLayerInstance(layerDescriptor)) : [];
 };
 
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
-export const getTemporaryLayers = createSelector(getLayerInstanceList, (layerList) => layerList.filter(layer => layer.isTemporary()));
+export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

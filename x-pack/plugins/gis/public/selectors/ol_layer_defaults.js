@@ -14,7 +14,8 @@ const fillOpacity = '15';
 const tempStrokeOpacity = '77';
 const strokeOpacity = 'FF';
 
-export const getOlLayerStyle = ({ color = defaultColor }, temp = false) => {
+export const getOlLayerStyle = (fillAndOutlineStyle, temp = false) => {
+  const color = fillAndOutlineStyle.getHexColor() || defaultColor;
   return new ol.style.Style({
     fill: new ol.style.Fill({
       // TODO: Make alpha channel adjustable
