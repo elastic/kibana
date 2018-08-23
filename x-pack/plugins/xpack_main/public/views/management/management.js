@@ -14,6 +14,10 @@ routes.defaults(/\/management/, {
     telemetryManagementSection: function () {
       const kibanaManagementSection = management.getSection('kibana');
 
+      if (kibanaManagementSection.hasItem('telemetry')) {
+        kibanaManagementSection.deregister('telemetry');
+      }
+
       kibanaManagementSection.register('telemetry', {
         order: 25,
         display: 'Telemetry',
