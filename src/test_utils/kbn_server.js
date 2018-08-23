@@ -75,6 +75,10 @@ export function createServer(settings = {}) {
  * @return {KbnServer}
  */
 export async function startTestServers({ adjustTimeout, settings = {} }) {
+  if (!adjustTimeout) {
+    throw new Error('adjustTimeout is required in order to avoid flaky tests');
+  }
+
   const log = new ToolingLog({
     level: 'debug',
     writeTo: process.stdout
@@ -87,10 +91,6 @@ export async function startTestServers({ adjustTimeout, settings = {} }) {
   const es = createEsTestCluster({ log });
 
   log.indent(-4);
-
-  if (!adjustTimeout) {
-    throw new Error('adjustTimeout is required in order to avoid flaky tests');
-  }
 
   adjustTimeout(es.getStartTimeout());
 
