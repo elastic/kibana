@@ -67,7 +67,7 @@ export function logsSpecProvider() {
           }
         }
       },
-      '@message': {
+      message: {
         type: 'text',
         fields: {
           keyword: {
@@ -125,7 +125,7 @@ export function logsSpecProvider() {
       bytes: {
         type: 'long'
       },
-      '@tags': {
+      tags: {
         type: 'text',
         fields: {
           keyword: {
@@ -160,7 +160,7 @@ export function logsSpecProvider() {
       }
     },
     timeFields: ['timestamp'],
-    currentTimeMarker: '2018-01-09T00:00:00',
+    currentTimeMarker: '2018-08-01T00:00:00',
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
