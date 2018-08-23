@@ -20,6 +20,8 @@ function mapDispatchToProps(dispatch) {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      //todo: needs to be a generic layer-reset, not just styles
+      // e.g. filters, data-enrichment, style... all would need to revert to the original
       dispatch(clearTemporaryStyles());
     }
   };

@@ -6,14 +6,7 @@
 
 import { EMSTMSSource } from "../shared/layers/sources/ems_tms_source";
 import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
-import { XYZTMSSource } from "../shared/layers/sources/xyz_tms_source";
-
-import { VectorLayer } from "../shared/layers/vector_layer";
-import { TileLayer } from "../shared/layers/tile_layer";
-import { GeohashGridLayer } from "../shared/layers/geohashgrid_layer";
-
 import { GIS_API_PATH } from '../../common/constants';
-import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -81,75 +74,19 @@ export function clearTemporaryLayers() {
 
 
 export function addLayerFromSource(source, layerOptions = {}, position) {
-
   return async (dispatch) => {
     dispatch(layerLoading(true));
-    //todo: creating a default layer-descriptor should just be an implementation on the source
-    let layerDescriptor;
-    if (source.type === XYZTMSSource.type) {
-      layerDescriptor = await createDefaultLayerDescriptorForXYZTMSSource(source, layerOptions);
-    } else if (source.type === EMSFileSource.type) {
-      layerDescriptor = await createDefaultLayerDescriptorForEMSFileSource(source, layerOptions);
-    } else if (source.type === ESGeohashGridSource.type) {
-      layerDescriptor = await createDefaultLayerDescriptorForESGeohashGridSource(source, layerOptions);
-    } else {
-      throw new Error('Does not recognize source-type ' + source.type);
-    }
+    //todo: remove this asyncyness. data loading will get a lot more flexible..
+    const layerDescriptor = await source.createDefaultLayerDescriptor(layerOptions);
     dispatch(addLayer(layerDescriptor, position));
-  };
-}
-
-async function createDefaultLayerDescriptorForESGeohashGridSource(esGeohashGridSource, options) {
-  const geojson = await ESGeohashGridSource.getGeoJsonPoints(esGeohashGridSource);
-  return GeohashGridLayer.createDescriptor({
-    source: geojson,
-    sourceDescriptor: esGeohashGridSource,
-    name: esGeohashGridSource.name || esGeohashGridSource.id,
-    ...options
-  });
-}
-
-
-
-async function createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options) {
-  const geojson = await EMSFileSource.getGeoJson(emsFileSource);
-  return VectorLayer.createDescriptor({
-    source: geojson,
-    sourceDescriptor: emsFileSource,
-    name: emsFileSource.name || emsFileSource.id,
-    ...options
-  });
-}
-
-async function createDefaultLayerDescriptorForXYZTMSSource(xyzTMSsource, options) {
-  const service = await XYZTMSSource.getTMSOptions(xyzTMSsource);
-  return TileLayer.createDescriptor({
-    source: service.url,
-    sourceDescriptor: xyzTMSsource,
-    name: service.url,
-    ...options
-  });
-}
-
-export function addVectorLayerFromEMSFileSource(emsFileSource, options = {}, position) {
-  return async (dispatch) => {
-    dispatch(layerLoading(true));
-    const layer = await createDefaultLayerDescriptorForEMSFileSource(emsFileSource, options);
-    dispatch(addLayer(layer, position));
   };
 }
 
 export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
   return async (dispatch, getState) => {
     dispatch(layerLoading(true));
-    const allServices = getState().config.meta.data_sources.ems.tms;
-    const service = await EMSTMSSource.getTMSOptions(sourceDescriptor, allServices);
-    const layer = TileLayer.createDescriptor({
-      source: service.url,
-      sourceDescriptor: sourceDescriptor,
-      name: sourceDescriptor.id,
-      ...options
-    });
+    const source = new EMSTMSSource(sourceDescriptor);
+    const layer = await source.createDefaultLayerDescriptor(options, getState().config.meta.data_sources);
     dispatch(addLayer(layer, position));
   };
 }
@@ -170,7 +107,6 @@ export function setMeta(metaJson) {
   };
 }
 
-
 export async function loadMapResources(dispatch) {
 
   const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
@@ -181,6 +117,6 @@ export async function loadMapResources(dispatch) {
   const roadMapEms = EMSTMSSource.createDescriptor('road_map');
   await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
 
-  const worldCountries = EMSFileSource.createDescriptor('World Countries');
-  await dispatch(addVectorLayerFromEMSFileSource(worldCountries, {}, 1));
+  const worldCountrySource = new EMSFileSource(EMSFileSource.createDescriptor('World Countries'));
+  await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
 }

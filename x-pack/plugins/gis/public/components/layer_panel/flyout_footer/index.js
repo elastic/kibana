@@ -29,9 +29,5 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-function mapStateToProps() {
-  return {};
-}
-
-const connectedFlyoutFooter = connect(mapStateToProps, mapDispatchToProps)(FlyoutFooter);
+const connectedFlyoutFooter = connect(null, mapDispatchToProps)(FlyoutFooter);
 export { connectedFlyoutFooter as FlyoutFooter };

@@ -10,63 +10,68 @@ import { LAYER_TYPE } from "../shared/layers/layer";
 import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
 import * as ol from 'openlayers';
 
-
 const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
   featureProjection: FEATURE_PROJECTION
 });
 
 // Layer-specific logic
-function convertTmsLayersToOl({ source, visible }) {
+function convertTmsLayersToOl(layer) {
   const tileLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: source
+      url: layer.toLayerDescriptor().source
     })
   });
-  tileLayer.setVisible(visible);
+  tileLayer.setVisible(layer.isVisible());
   return tileLayer;
 }
 
-function generatePlaceHolderLayerForGeohashGrid({ visible, source }) {
+function generatePlaceHolderLayerForGeohashGrid(layer) {
+  const { source } = layer.toLayerDescriptor();
   const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
-  const placeHolderLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: olFeatures
-    })
+  const vectorModel = new ol.source.Vector({
+    features: olFeatures
   });
-  placeHolderLayer.setVisible(visible);
-  placeHolderLayer.setStyle(getOlLayerStyle({}));
+  const placeHolderLayer = new ol.layer.Heatmap({
+    source: vectorModel,
+  });
+  placeHolderLayer.setVisible(layer.isVisible());
   return placeHolderLayer;
 }
 
 
-const convertVectorLayersToOl = ({ source, visible, temporary, style }) => {
+const convertVectorLayersToOl = (layer) => {
+  const { source } = layer.toLayerDescriptor();
   const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
   const vectorLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: olFeatures
-    })
+    }),
+    renderMode: 'image'
   });
-  vectorLayer.setVisible(visible);
-  vectorLayer.setStyle(getOlLayerStyle(style, temporary));
+  vectorLayer.setVisible(layer.isVisible());
+  const style = layer.getCurrentStyle();
+  vectorLayer.setStyle(getOlLayerStyle(style, layer.isTemporary()));
   return vectorLayer;
 };
 
-function convertLayerByType(layer) {
-  //todo: don't do this! do not keep reference to openlayers-objects directly in the store
-  switch (layer.type) {
+function createCorrespondingOLLayer(layer) {
+  let olLayer;
+  switch (layer.getType()) {
     case LAYER_TYPE.TILE:
-      layer.olLayer = convertTmsLayersToOl(layer);
+      olLayer = convertTmsLayersToOl(layer);
       break;
     case LAYER_TYPE.VECTOR:
-      layer.olLayer = convertVectorLayersToOl(layer);
+      olLayer = convertVectorLayersToOl(layer);
       break;
     case LAYER_TYPE.GEOHASH_GRID:
-      layer.olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
+      olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
+      break;
     default:
+      throw new Error('Cannot create corresponding OL layer');
       break;
   }
-  layer.olLayer.set('id', layer.id);
-  return layer;
+  olLayer.set('id', layer.getId());
+  return olLayer;
 }
 
 // OpenLayers helper function
@@ -106,9 +111,10 @@ function removeLayers(map, existingMapLayers, updatedLayersIds) {
   layersToRemove.forEach(layerIdx => existingMapLayers.removeAt(layerIdx));
 }
 
-function updateStyle(layer, { style, temporary }) {
-  const appliedStyle = getOlLayerStyle(style, temporary);
-  layer.setStyle && layer.setStyle(appliedStyle);
+function updateFillAndOutlineStyle(olLayer, layer) {
+  const style = layer.getCurrentStyle();
+  const appliedStyle = getOlLayerStyle(style, layer.isTemporary());
+  olLayer.setStyle && olLayer.setStyle(appliedStyle);
 }
 
 // Selectors
@@ -130,13 +136,17 @@ const getLayersWithOl = createSelector(
   getOlMap,
   getLayerList,
   (olMap, layerList) => {
-    const layersIds = getLayersIds(olMap.getLayers());
     return layerList.map(layer => {
-      if (layersIds.find(id => id === layer.id)) {
-        return layer;
+      // const descriptor = layer.toLayerDescriptor();
+      const layerTuple = {  layer: layer };
+      const olLayerArray = olMap.getLayers().getArray();
+      const olLayer = olLayerArray.find(olLayer => olLayer.get('id') === layer.getId());
+      if (olLayer) {
+        layerTuple.olLayer = olLayer;
       } else {
-        return convertLayerByType(layer);
+        layerTuple.olLayer = createCorrespondingOLLayer(layer);
       }
+      return layerTuple;
     });
   }
 );
@@ -147,12 +157,17 @@ export const getOlMapAndLayers = createSelector(
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates
-    layersWithOl.forEach(({ olLayer, visible, ...layerDescriptor }) => {
+    layersWithOl.forEach(({ olLayer, layer }) => {
       addLayers(olMap, olLayer, layersIds);
-      olLayer.setVisible(visible);
-      updateStyle(olLayer, layerDescriptor);
+      olLayer.setVisible(layer.isVisible());
+      if (layer.getType() === LAYER_TYPE.VECTOR) {
+        //todo: this function is NOT universally applicable
+        //hence the if-branch is just hack to not silently fail on tile and heatmaplayers
+        //needs to be factored into the class
+        updateFillAndOutlineStyle(olLayer, layer);
+      }
     });
-    const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
+    const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.getId());
     // Deletes
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     // Update layers order

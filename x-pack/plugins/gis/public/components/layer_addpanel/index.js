@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { FlyOut } from './view';
+import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { getLayerLoading, getTemporaryLayers } from "../../selectors/map_selectors";
 import { addLayerFromSource, removeLayer, clearTemporaryLayers, promoteTemporaryLayers } from "../../actions/store_actions";
@@ -28,13 +28,13 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(clearTemporaryLayers());
     },
-    previewSource: (sourceDescriptor) => {
-      dispatch(addLayerFromSource(sourceDescriptor, { temporary: true }));
+    previewSource: (source) => {
+      dispatch(addLayerFromSource(source, { temporary: true }));
     },
     removeAction: layerName => dispatch(removeLayer(layerName)),
     addAction: () => dispatch(promoteTemporaryLayers())
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(FlyOut);
-export { connectedFlyOut as FlyOut };
+const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(AddLayerPanel);
+export { connectedFlyOut as AddLayerPanel };

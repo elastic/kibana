@@ -5,6 +5,7 @@
  */
 import React, { Fragment } from 'react';
 import { ASource } from './source';
+import { TileLayer } from '../tile_layer';
 
 export class EMSTMSSource extends  ASource {
 
@@ -23,11 +24,6 @@ export class EMSTMSSource extends  ASource {
     });
   }
 
-  constructor(descriptor) {
-    super(descriptor);
-  }
-
-
   renderDetails() {
     return (
       <Fragment>
@@ -43,4 +39,17 @@ export class EMSTMSSource extends  ASource {
       </Fragment>
     );
   }
+
+  async createDefaultLayerDescriptor(options, dataSourceMeta = {}) {
+    const allServices = dataSourceMeta.ems.tms;
+    const service = await EMSTMSSource.getTMSOptions(this._descriptor, allServices);
+    return TileLayer.createDescriptor({
+      source: service.url,
+      sourceDescriptor: this._descriptor,
+      name: this._descriptor.id,
+      ...options
+    });
+  }
+
+
 }

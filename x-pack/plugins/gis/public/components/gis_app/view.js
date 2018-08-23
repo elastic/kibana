@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-import { KibanaMap } from '../map';
+import { OLMapContainer } from '../map';
 import { LayerControl } from '../layer_control/index';
 
 export function GISApp() {
   return (
     <div className="wrapper">
-      <KibanaMap/>
+      <OLMapContainer/>
       <LayerControl/>
     </div>
   );

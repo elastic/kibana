@@ -11,10 +11,6 @@ export class GeohashGridLayer extends ALayer {
 
   static type = LAYER_TYPE.GEOHASH_GRID;
 
-  constructor(layerDescriptor) {
-    super(layerDescriptor);
-  }
-
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
     heatmapLayerDescriptor.type = LAYER_TYPE.GEOHASH_GRID;

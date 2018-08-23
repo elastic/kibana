@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { KibanaMap } from './view';
+import { OLMapContainer } from './view';
 import { getOlMapAndLayers } from "../../selectors/ol_map_selectors";
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { setSelectedLayer } from '../../actions/store_actions';
@@ -22,5 +22,5 @@ function mapStateToProps(state = {}) {
 }
 
 const connectedKibanaMap = connect(mapStateToProps, mapDispatchToProps, null,
-  { withRef: true })(KibanaMap);
-export { connectedKibanaMap as KibanaMap };
+  { withRef: true })(OLMapContainer);
+export { connectedKibanaMap as OLMapContainer };

@@ -10,10 +10,6 @@ export class TileLayer extends ALayer {
 
   static type = LAYER_TYPE.TILE;
 
-  constructor(layerDescriptor) {
-    super(layerDescriptor);
-  }
-
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.TILE;

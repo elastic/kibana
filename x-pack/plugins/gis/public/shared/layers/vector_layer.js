@@ -11,10 +11,6 @@ export class VectorLayer extends ALayer {
 
   static type = LAYER_TYPE.VECTOR;
 
-  constructor(layerDescriptor) {
-    super(layerDescriptor);
-  }
-
   static createDescriptor(options) {
     const vectorLayerDescriptor = super.createDescriptor(options);
     vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
