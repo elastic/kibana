@@ -99,11 +99,12 @@ export const resolvedArgsReducer = handleActions(
      */
     [flushContextAfterIndex]: (transientState, { payload }) => {
       const { elementId, index } = payload;
-      const indexKeys = Object.keys(
-        get(transientState, getFullPath([elementId, 'expressionContext']))
-      );
+      const expressionContext = get(transientState, getFullPath([elementId, 'expressionContext']));
 
-      return indexKeys.reduce((state, indexKey) => {
+      // if there is not existing context, there's nothing to do here
+      if (!expressionContext) return transientState;
+
+      return Object.keys(expressionContext).reduce((state, indexKey) => {
         const indexAsNum = parseInt(indexKey, 10);
         if (indexAsNum >= index) {
           return del(state, getFullPath([elementId, 'expressionContext', indexKey]));
