@@ -19,6 +19,10 @@ export const registerRouter = reactRouter => {
   router = reactRouter;
 };
 
+export const getRouter = () => {
+  return router;
+};
+
 /**
  * The logic for generating hrefs and onClick handlers from the `to` prop is largely borrowed from
  * https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/modules/Link.js.

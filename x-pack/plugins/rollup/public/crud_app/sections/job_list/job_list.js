@@ -62,7 +62,7 @@ export class JobList extends Component {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}create`)}>
+                <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
                   Create rollup job
                 </EuiButton>
               </EuiFlexItem>

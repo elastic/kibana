@@ -56,7 +56,7 @@ const renderReact = async (elem) => {
   );
 };
 
-routes.when(`${CRUD_APP_BASE_PATH}:view?`, {
+routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
   template: template,
   controllerAs: 'rollupJobs',
   controller: class IndexRollupJobsController {

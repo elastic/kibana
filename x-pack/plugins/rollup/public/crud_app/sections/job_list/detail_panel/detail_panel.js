@@ -96,8 +96,8 @@ export class DetailPanelUi extends Component {
       indexPattern,
       rollupIndex,
       rollupCron,
-      rollupInterval,
-      rollupDelay,
+      dateHistogramInterval,
+      dateHistogramDelay,
       dateHistogramTimeZone,
       dateHistogramField,
       metrics,
@@ -118,8 +118,8 @@ export class DetailPanelUi extends Component {
           indexPattern={indexPattern}
           rollupIndex={rollupIndex}
           rollupCron={rollupCron}
-          rollupInterval={rollupInterval}
-          rollupDelay={rollupDelay}
+          dateHistogramInterval={dateHistogramInterval}
+          dateHistogramDelay={dateHistogramDelay}
           dateHistogramTimeZone={dateHistogramTimeZone}
           dateHistogramField={dateHistogramField}
           documentsProcessed={documentsProcessed}

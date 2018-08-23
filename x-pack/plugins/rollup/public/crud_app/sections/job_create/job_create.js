@@ -20,16 +20,17 @@ import {
 } from '@elastic/eui';
 
 import { Navigation } from './navigation';
+import { StepIndices } from './step_indices';
 
 const STEP_INDICES = 'STEP_INDICES';
-const STEP_SCHEDULE = 'STEP_SCHEDULE';
+const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
 const STEP_GROUPS = 'STEP_GROUPS';
 const STEP_METRICS = 'STEP_METRICS';
 const STEP_REVIEW = 'STEP_REVIEW';
 
 const stepIds = [
   STEP_INDICES,
-  STEP_SCHEDULE,
+  STEP_DATE_HISTOGRAM,
   STEP_GROUPS,
   STEP_METRICS,
   STEP_REVIEW,
@@ -38,24 +39,37 @@ const stepIds = [
 const stepIdToStepMap = {
   [STEP_INDICES]: {
     defaultFields: {
-      rollupIndex: undefined,
-      indexPattern: undefined,
+      id: '',
+      indexPattern: '',
+      rollupIndex: '',
+      rollupCron: '/30 * * * * ?',
+      rollupPageSize: 1000,
     },
   },
-  [STEP_SCHEDULE]: {
+  [STEP_DATE_HISTOGRAM]: {
     defaultFields: {
-      cron: undefined,
-      pageSize: undefined,
+      dateHistogramInterval: '1h',
+      dateHistogramDelay: null,
+      dateHistogramTimeZone: 'UTC',
+      dateHistogramField: 'utc_time',
     },
   },
   [STEP_GROUPS]: {
     defaultFields: {
-      groups: undefined,
+      terms: ['index.keyword'],
+      histogram: ['memory'],
+      histogramInterval: 5,
     },
   },
   [STEP_METRICS]: {
     defaultFields: {
-      metrics: undefined,
+      metrics: [{
+        'field': 'bytes',
+        'metrics': ['min', 'max', 'avg']
+      }, {
+        'field': 'memory',
+        'metrics': ['min', 'max', 'avg']
+      }],
     },
   },
   [STEP_REVIEW]: {
@@ -64,7 +78,7 @@ const stepIdToStepMap = {
 
 const stepIdToTitleMap = {
   [STEP_INDICES]: 'Indices',
-  [STEP_SCHEDULE]: 'Schedule',
+  [STEP_DATE_HISTOGRAM]: 'Date histogram',
   [STEP_GROUPS]: 'Groups',
   [STEP_METRICS]: 'Metrics',
   [STEP_REVIEW]: 'Review and save',
@@ -159,29 +173,74 @@ export class JobCreate extends Component {
     }, {});
   }
 
+  onFieldsChange = (fields, currentStepId = this.state.currentStepId) => {
+    const { stepsFields } = this.state;
+    const prevFields = stepsFields[currentStepId];
+
+    const newFields = {
+      ...prevFields,
+      ...fields,
+    };
+
+    const newStepsFields = {
+      ...cloneDeep(stepsFields),
+      [currentStepId]: newFields,
+    };
+
+    this.setState({
+      stepsFields: newStepsFields,
+      stepsFieldErrors: this.getStepsFieldsErrors(newStepsFields),
+    });
+  };
+
+  getAllFields() {
+    const {
+      stepsFields: {
+        [STEP_INDICES]: {
+          id,
+          indexPattern,
+          rollupIndex,
+          rollupCron,
+          rollupPageSize,
+        },
+        [STEP_DATE_HISTOGRAM]: {
+          dateHistogramInterval,
+          dateHistogramDelay,
+          dateHistogramTimeZone,
+          dateHistogramField,
+        },
+        [STEP_GROUPS]: {
+          terms,
+          histogram,
+          histogramInterval,
+        },
+        [STEP_METRICS]: {
+          metrics,
+        },
+      },
+    } = this.state;
+
+    return {
+      id,
+      indexPattern,
+      rollupIndex,
+      rollupCron,
+      rollupPageSize,
+      dateHistogramInterval,
+      dateHistogramDelay,
+      dateHistogramTimeZone,
+      dateHistogramField,
+      terms,
+      histogram,
+      histogramInterval,
+      metrics,
+    };
+  }
+
   save = () => {
     const { createJob } = this.props;
-    createJob({
-      id: 'new-job',
-      indexPattern: 'log*',
-      rollupIndex: 'test_rollup_index',
-      rollupCron: '*/30 * * * * ?',
-      rollupInterval: '1h',
-      rollupDelay: undefined,
-      rollupPageSize: 5,
-      dateHistogramTimeZone: 'UTC',
-      dateHistogramField: 'utc_time',
-      metrics: [{
-        'field': 'bytes',
-        'metrics': ['min', 'max', 'avg']
-      }, {
-        'field': 'memory',
-        'metrics': ['min', 'max', 'avg']
-      }],
-      terms: ['index.keyword'],
-      histogram: ['memory'],
-      histogramInterval: 5,
-    });
+    const jobConfig = this.getAllFields();
+    createJob(jobConfig);
   };
 
   render() {
@@ -203,6 +262,10 @@ export class JobCreate extends Component {
 
             <EuiSpacer />
 
+            {this.renderCurrentStep()}
+
+            <EuiSpacer size="l" />
+
             {this.renderNavigation()}
           </EuiPageContent>
         </EuiPageBody>
@@ -210,7 +273,28 @@ export class JobCreate extends Component {
     );
   }
 
-  renderNavigation = () => {
+  renderCurrentStep() {
+    const { currentStepId, stepsFields, stepsFieldErrors, showStepErrors } = this.state;
+    const currentStepFields = stepsFields[currentStepId];
+    const currentStepFieldErrors = stepsFieldErrors[currentStepId];
+
+    switch (currentStepId) {
+      case STEP_INDICES:
+        return (
+          <StepIndices
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
+            fieldErrors={currentStepFieldErrors}
+            showStepErrors={showStepErrors}
+          />
+        );
+
+      default:
+        return null;
+    }
+  }
+
+  renderNavigation() {
     const { nextStepId, previousStepId } = this.state;
     const { isSaving } = this.props;
 
@@ -219,9 +303,9 @@ export class JobCreate extends Component {
         isSaving={isSaving}
         hasNextStep={nextStepId != null}
         hasPreviousStep={previousStepId != null}
-        goToNextStep={this.goToNextStep.bind(this)}
-        goToPreviousStep={this.goToPreviousStep.bind(this)}
-        save={this.save.bind(this)}
+        goToNextStep={this.goToNextStep}
+        goToPreviousStep={this.goToPreviousStep}
+        save={this.save}
       />
     );
   }

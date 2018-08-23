@@ -25,5 +25,6 @@ export {
 
 export {
   registerRouter,
+  getRouter,
   getRouterLinkProps,
 } from './routing';

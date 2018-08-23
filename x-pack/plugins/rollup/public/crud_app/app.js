@@ -37,7 +37,7 @@ export class App extends Component {
       <div>
         <Switch>
           <Route exact path={`${CRUD_APP_BASE_PATH}`} component={JobList} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}create`} component={JobCreate} />
+          <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
         </Switch>
       </div>
     );
