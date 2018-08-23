@@ -30,8 +30,8 @@ const mapDispatchToProps = (dispatch) => {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
-    openDetailPanel: ({ panelType, job }) => {
-      dispatch(openDetailPanel({ panelType, job }));
+    openDetailPanel: ({ panelType, jobId }) => {
+      dispatch(openDetailPanel({ panelType, jobId }));
     },
   };
 };

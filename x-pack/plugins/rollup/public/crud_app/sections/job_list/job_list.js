@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -17,7 +17,7 @@ import {
 
 const REFRESH_RATE_MS = 30000;
 
-export class JobList extends PureComponent {
+export class JobList extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
   }

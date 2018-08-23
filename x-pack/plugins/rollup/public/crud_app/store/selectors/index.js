@@ -9,14 +9,14 @@ import { Pager } from '@elastic/eui';
 import { createSelector } from 'reselect';
 import { filterItems, sortTable } from '../../services';
 
-export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
-export const getDetailPanelJob = (state) => state.detailPanel.job;
-
 export const getJobs = (state) => state.jobs.byId;
-export const getJobByJobName = (state, name) => getJobs(state)[name];
+export const getJobByJobId = (state, id) => getJobs(state)[id];
 export const getFilteredIds = (state) => state.jobs.filteredIds;
 export const getTableState = (state) => state.tableState;
+
+export const getDetailPanelType = (state) => state.detailPanel.panelType;
+export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
+export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPanel.jobId);
 
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);
