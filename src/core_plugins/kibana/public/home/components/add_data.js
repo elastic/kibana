@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './add_data.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -42,13 +41,13 @@ export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
     const getApmCard = () =>  (
       <EuiFlexItem>
         <EuiCard
-          className="addDataCard"
-          icon={<EuiIcon className="addDataIcon" type="apmApp" />}
+          className="homAddData__card"
+          icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
           title="APM"
           description="APM automatically collects in-depth performance metrics and errors from inside your applications."
           footer={
             <EuiButton
-              className="addDataButton"
+              className="homAddData__button"
               href="#/home/tutorial/apm"
             >
               Add APM
@@ -65,13 +64,13 @@ export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon  className="addDataIcon" type="loggingApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
             title="Logging"
             description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/logging"
               >
                 Add log data
@@ -82,13 +81,13 @@ export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="monitoringApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
             title="Metrics"
             description="Collect metrics from the operating system and services running on your servers."
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/metrics"
               >
                 Add metric data
@@ -99,13 +98,13 @@ export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="securityApp" />}
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
             title="Security Analytics"
             description="Centralize security events for interactive investigation in ready-to-go visualizations."
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/security"
               >
                 Add security events
@@ -117,7 +116,7 @@ export function AddData({ apmUiEnabled, isNewKibanaInstance }) {
     );
   };
 
-  const footerItemClasses = classNames('addDataFooterItem', { 'addDataFooterItem_highlight': isNewKibanaInstance });
+  const footerItemClasses = classNames('homAddData__footerItem', { 'homAddData__footerItem--highlight': isNewKibanaInstance });
 
   return (
     <EuiPanel paddingSize="l">

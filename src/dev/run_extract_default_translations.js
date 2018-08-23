@@ -20,8 +20,10 @@
 import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
 
-run(async () => {
-  for (const inputPath of process.argv.slice(2)) {
-    await extractDefaultTranslations(inputPath);
-  }
+run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
+  await extractDefaultTranslations({
+    paths: Array.isArray(path) ? path : [path || './'],
+    output,
+    outputFormat,
+  });
 });
