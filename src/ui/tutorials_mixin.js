@@ -22,11 +22,11 @@ import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial
 
 export function tutorialsMixin(kbnServer, server) {
   const tutorialProviders = [];
-  const scopedTutorialContextFactoryies = [];
+  const scopedTutorialContextFactories = [];
 
   server.decorate('server', 'getTutorials', (request) => {
     const initialContext = {};
-    const scopedContext = scopedTutorialContextFactoryies.reduce((accumulatedContext, contextFactory) => {
+    const scopedContext = scopedTutorialContextFactories.reduce((accumulatedContext, contextFactory) => {
       return { ...accumulatedContext, ...contextFactory(request) };
     }, initialContext);
 
@@ -51,6 +51,6 @@ export function tutorialsMixin(kbnServer, server) {
       throw new Error(`Unable to add scoped(request) context factory because you did not provide a function`);
     }
 
-    scopedTutorialContextFactoryies.push(scopedTutorialContextFactory);
+    scopedTutorialContextFactories.push(scopedTutorialContextFactory);
   });
 }
