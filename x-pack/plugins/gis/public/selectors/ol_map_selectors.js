@@ -137,7 +137,6 @@ const getLayersWithOl = createSelector(
   getLayerList,
   (olMap, layerList) => {
     return layerList.map(layer => {
-      // const descriptor = layer.toLayerDescriptor();
       const layerTuple = {  layer: layer };
       const olLayerArray = olMap.getLayers().getArray();
       const olLayer = olLayerArray.find(olLayer => olLayer.get('id') === layer.getId());
@@ -172,7 +171,7 @@ export const getOlMapAndLayers = createSelector(
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     // Update layers order
     const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
-    if (oldLayerIdsOrder !== newLayerIdsOrder) {
+    if (oldLayerIdsOrder !== newLayerIdsOrder) {//todo: evaluates to true always
       updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
     }
     return olMap;
