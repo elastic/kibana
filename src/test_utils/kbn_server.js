@@ -20,8 +20,9 @@
 import { resolve } from 'path';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
-import { esTestConfig, kibanaTestUser, kibanaServerTestUser } from '@kbn/test';
+import { createEsTestCluster, esTestConfig, kibanaTestUser, kibanaServerTestUser } from '@kbn/test';
 import KbnServer from '../../src/server/kbn_server';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -64,6 +65,51 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
  */
 export function createServer(settings = {}) {
   return new KbnServer(defaultsDeep({}, settings, DEFAULTS_SETTINGS));
+}
+
+/**
+ * Creates an instance of KbnServer, including all of the core plugins,
+ * with default configuration tailored for unit tests, and starts es.
+ *
+ * @param  {Object} [settings={}]
+ * @return {KbnServer}
+ */
+export async function startTestServers({ adjustTimeout, settings = {} }) {
+  if (!adjustTimeout) {
+    throw new Error('adjustTimeout is required in order to avoid flaky tests');
+  }
+
+  const log = new ToolingLog({
+    level: 'debug',
+    writeTo: process.stdout
+  });
+
+  log.indent(6);
+  log.info('starting elasticsearch');
+  log.indent(4);
+
+  const es = createEsTestCluster({ log });
+
+  log.indent(-4);
+
+  adjustTimeout(es.getStartTimeout());
+
+  await es.start();
+
+  const kbnServer = createServerWithCorePlugins(settings);
+
+  await kbnServer.ready();
+  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+
+  return {
+    kbnServer,
+    es,
+
+    async stop() {
+      await this.kbnServer.close();
+      await es.cleanup();
+    },
+  };
 }
 
 /**
