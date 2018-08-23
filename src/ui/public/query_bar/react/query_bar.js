@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { QueryLanguageSwitcher } from './language_switcher';
 
 import {
   EuiFlexGroup,
@@ -58,7 +59,7 @@ export class QueryBar extends Component {
         language: nextProps.language,
       });
     }
-    else if (nextProps.language !== nextProps.language) {
+    else if (nextProps.language !== this.props.language) {
       this.setState({
         query: '',
         language: nextProps.language,
@@ -68,18 +69,36 @@ export class QueryBar extends Component {
 
   render() {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
-          <EuiFieldSearch
-            placeholder="Search..."
-            value={this.state.query}
-            onChange={this.onChange}
-            onSearch={this.props.onSubmit}
-            fullWidth
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div
+        className="kuiLocalSearch"
+        role="search"
+      >
+        <div className="kuiLocalSearchAssistedInput">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
+              <EuiFieldSearch
+                placeholder="Search..."
+                value={this.state.query}
+                onChange={this.onChange}
+                onSearch={() => this.props.onSubmit({ query: this.state.query, language: this.state.language })}
+                fullWidth
+              />
+              <div className="kuiLocalSearchAssistedInput__assistance">
+                <QueryLanguageSwitcher
+                  language={this.state.language}
+                  onSelectLanguage={(language) => {
+                    this.props.onSubmit({
+                      query: this.state.query,
+                      language: language,
+                    });
+                  }}
+                />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
     );
   }
 }
