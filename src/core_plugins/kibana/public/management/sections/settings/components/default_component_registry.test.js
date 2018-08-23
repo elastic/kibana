@@ -19,7 +19,7 @@
 
 import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './default_component_registry';
 import { getComponent } from './component_registry';
-import { PageTitle } from './PageTitle';
+import { PageTitle } from './page_title';
 
 describe('default_component_registry', () => {
   it('should register default components with the registry', () => {
