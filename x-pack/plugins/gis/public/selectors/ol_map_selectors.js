@@ -10,7 +10,6 @@ import { LAYER_TYPE } from "../shared/layers/layer";
 import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
 import * as ol from 'openlayers';
 
-
 const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
   featureProjection: FEATURE_PROJECTION
 });
@@ -27,14 +26,17 @@ function convertTmsLayersToOl({ source, visible }) {
 }
 
 function generatePlaceHolderLayerForGeohashGrid({ visible, source }) {
-  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
-  const placeHolderLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: olFeatures
-    })
+  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source, {
+    dataProjection: 'EPSG:4326',
+    featureProjection: 'EPSG:3857'
+  });
+  const vectorModel = new ol.source.Vector({
+    features: olFeatures
+  });
+  const placeHolderLayer = new ol.layer.Heatmap({
+    source: vectorModel,
   });
   placeHolderLayer.setVisible(visible);
-  placeHolderLayer.setStyle(getOlLayerStyle({}));
   return placeHolderLayer;
 }
 
@@ -44,7 +46,8 @@ const convertVectorLayersToOl = ({ source, visible, temporary, style }) => {
   const vectorLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: olFeatures
-    })
+    }),
+    renderMode: 'image'
   });
   vectorLayer.setVisible(visible);
   vectorLayer.setStyle(getOlLayerStyle(style, temporary));
@@ -150,7 +153,12 @@ export const getOlMapAndLayers = createSelector(
     layersWithOl.forEach(({ olLayer, visible, ...layerDescriptor }) => {
       addLayers(olMap, olLayer, layersIds);
       olLayer.setVisible(visible);
-      updateStyle(olLayer, layerDescriptor);
+      if (layerDescriptor.type === LAYER_TYPE.VECTOR) {
+        //todo: this updateStyle() is NOT universally applicable
+        //hence the if-branch is just hack to not silently fail on tile and heatmaplayers
+        //needs to be factored into the class
+        updateStyle(olLayer, layerDescriptor);
+      }
     });
     const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
     // Deletes

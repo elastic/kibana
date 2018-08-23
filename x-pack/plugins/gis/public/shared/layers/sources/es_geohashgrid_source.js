@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import DUMMY_GEOJSON from './junk/points.json';
 
 import {
   EuiButton
@@ -27,19 +28,7 @@ export class ESGeohashGridSource extends ASource {
 
   static async getGeoJsonPoints({}) {
     //todo: placeholder now, obviously
-    //not points yet, because just relying on OL-vector fill/outlines now
-    return {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [[[0, 0], [0, 10], [10, 0], [10, 10], [0, 0]]]
-          }
-        }
-      ]
-    };
+    return DUMMY_GEOJSON;
   }
 
   static renderEditor({ onPreviewSource }) {
@@ -51,7 +40,8 @@ export class ESGeohashGridSource extends ASource {
             const sourceDescriptor = ESGeohashGridSource.createDescriptor({
               esIndexPattern: "foo",
               pointField: "bar"
-            }); const source = new ESGeohashGridSource(sourceDescriptor);
+            });
+            const source = new ESGeohashGridSource(sourceDescriptor);
             onPreviewSource(source);
           }}
         >
