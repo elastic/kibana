@@ -5,9 +5,14 @@
  */
 
 export {
-  loadJobs,
   setHttpClient,
+  loadJobs,
+  startJobs,
+  stopJobs,
+  deleteJobs,
 } from './api';
+
 export { sortTable } from './sort_table';
 export { filterItems } from './filter_items';
 export { deserializeJobs } from './jobs';
+export { flattenPanelTree } from './flatten_panel_tree';
