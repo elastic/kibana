@@ -12,7 +12,7 @@ import { JobList } from './sections';
 export const App = () => (
   <div>
     <Switch>
-      <Route path={CRUD_APP_BASE_PATH} component={JobList} />
+      <Route exact path={CRUD_APP_BASE_PATH} component={JobList} />
     </Switch>
   </div>
 );
