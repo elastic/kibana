@@ -22,10 +22,11 @@ import { getConfig, createRunner } from './lib';
 import {
   BootstrapTask,
   BuildPackagesTask,
+  CleanClientModulesOnDLLTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
-  CleanNodeModulesOnDLLTask,
   CleanPackagesTask,
   CleanTypescriptTask,
   CleanNodeBuildsTask,
@@ -113,8 +114,9 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(OptimizeBuildTask);
-  await run(CleanNodeModulesOnDLLTask);
+  await run(CleanClientModulesOnDLLTask);
   await run(CleanExtraFilesFromModulesTask);
+  await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build

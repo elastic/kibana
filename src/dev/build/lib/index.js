@@ -30,4 +30,5 @@ export {
   getFileHash,
   untar,
   deleteAll,
+  deleteEmptyFolders,
 } from './fs';

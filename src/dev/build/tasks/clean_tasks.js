@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { deleteAll, read, write } from '../lib';
+import { deleteAll, deleteEmptyFolders, read, write } from '../lib';
 import { readFileSync } from 'fs';
 import { dirname, isAbsolute, sep, extname } from 'path';
 import globby from 'globby';
-import deleteEmpty from 'delete-empty';
 import pkgUp from 'pkg-up';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
@@ -221,9 +220,17 @@ export const CleanExtraBrowsersTask = {
   },
 };
 
-export const CleanNodeModulesOnDLLTask = {
+export const CleanEmptyFoldersTask = {
+  description: 'Cleaning all empty folders recursively',
+
+  async run(config, log, build) {
+    await deleteEmptyFolders(log, build.resolvePath('.'));
+  },
+};
+
+export const CleanClientModulesOnDLLTask = {
   description:
-    'Cleaning node_modules bundled in the DLL',
+    'Cleaning client node_modules bundled into the DLL',
 
   async run(config, log, build) {
     const canRequire = (entry) => {
@@ -448,7 +455,10 @@ export const CleanNodeModulesOnDLLTask = {
 
       // Delete module contents. It will delete everything
       // excepts package.json, images and css
-      // TODO: use the CWD option instead of append everytime the moduleDir
+      //
+      // NOTE: We can't use cwd option with globby
+      // until the following issue gets closed
+      // https://github.com/sindresorhus/globby/issues/87
       const deletePatterns = await globby([
         `${moduleDir}/**`,
         `!${moduleDir}/**/*.+(css)`,
@@ -460,9 +470,6 @@ export const CleanNodeModulesOnDLLTask = {
         log,
         deletePatterns
       );
-
-      // TODO: investigate better here and also in the del. We can also create a new task and delete every empty dir in the end
-      await deleteEmpty(moduleDir);
 
       // Mark this module as cleaned
       modulePkg.cleaned = true;

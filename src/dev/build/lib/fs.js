@@ -27,6 +27,7 @@ import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
 import del from 'del';
+import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../utils';
 
 import { Extract } from 'tar';
@@ -110,6 +111,20 @@ export async function deleteAll(log, patterns) {
   });
   log.debug('Deleted %d files/directories', files.length);
   log.verbose('Deleted:', longInspect(files));
+}
+
+export async function deleteEmptyFolders(log, rootFolderPath) {
+  if (typeof rootFolderPath !== 'string') {
+    throw new TypeError('Expected root folder to be a string path');
+  }
+
+  log.debug('Deleting all empty folders and their children recursively starting on ', rootFolderPath);
+
+  assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
+  const deletedEmptyFolders = await deleteEmpty(rootFolderPath);
+
+  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
+  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
 }
 
 export async function copyAll(sourceDir, destination, options = {}) {
