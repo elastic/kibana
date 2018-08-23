@@ -107,7 +107,6 @@ export function setMeta(metaJson) {
   };
 }
 
-
 export async function loadMapResources(dispatch) {
 
   const meta = await fetch(`${GIS_API_RELATIVE}/meta`);

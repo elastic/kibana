@@ -25,11 +25,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-export class FlyOut extends React.Component {
-
-  constructor() {
-    super();
-  }
+export class AddLayerPanel extends React.Component {
 
   _addToMapBtn() {
     const { layerLoading, temporaryLayers, addAction } = this.props;

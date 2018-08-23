@@ -5,24 +5,19 @@
  */
 
 import React from 'react';
-import { FlyOut } from '../layer_addpanel/index';
+import { AddLayerPanel } from '../layer_addpanel/index';
 
-export class KibanaMap extends React.Component {
-
-  constructor() {
-    super();
-  }
+export class OLMapContainer extends React.Component {
 
   componentDidMount() {
-    const { olMap } = this.props;
-    olMap.setTarget(this.refs.mapContainer);
+    this.props.olMap.setTarget(this.refs.mapContainer);
   }
 
   render() {
     return (
       <div>
         <div className="mapContainer" ref="mapContainer"/>
-        <FlyOut/>
+        <AddLayerPanel/>
       </div>
     );
   }
