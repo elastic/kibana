@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,17 +25,29 @@ export function mongodbMetricsSpecProvider() {
   const moduleName = 'mongodb';
   return {
     id: 'mongodbMetrics',
-    name: 'MongoDB metrics',
+    name: i18n.translate('kbn.server.tutorials.mongodbMetrics.nameTitle', {
+      defaultMessage: 'MongoDB metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from MongoDB.',
-    longDescription: 'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mongodb.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from MongoDB.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mongodb.html',
+      },
+    }),
     //euiIconType: 'logoMongoDB',
     artifacts: {
       dashboards: [
         {
           id: 'Metricbeat-MongoDB',
-          linkLabel: 'MongoDB metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.mongodbMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'MongoDB metrics dashboard',
+          }),
           isOverview: true
         }
       ],
