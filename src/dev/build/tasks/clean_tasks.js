@@ -464,11 +464,7 @@ export const CleanClientModulesOnDLLTask = {
         `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
         `!${modulePkgPath}`,
       ]);
-
-      await deleteAll(
-        log,
-        deletePatterns
-      );
+      await deleteAll(log, deletePatterns);
 
       // Mark this module as cleaned
       modulePkg.cleaned = true;
