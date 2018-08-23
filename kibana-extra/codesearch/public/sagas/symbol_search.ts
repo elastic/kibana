@@ -7,9 +7,9 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
-import { searchFailed, searchQueryChanged, searchSuccess } from '../actions';
+import { symbolSearchFailed, symbolSearchQueryChanged, symbolSearchSuccess } from '../actions';
 
-function requestSearch(query: string) {
+function requestSymbolSearch(query: string) {
   if (query && query.length > 0) {
     return kfetch({
       pathname: `../api/cs/search/symbol`,
@@ -25,15 +25,15 @@ function requestSearch(query: string) {
   }
 }
 
-function* handleSearchQueryChanged(action: Action<string>) {
+function* handleSymbolSearchQueryChanged(action: Action<string>) {
   try {
-    const data = yield call(requestSearch, action.payload || '');
-    yield put(searchSuccess(data));
+    const data = yield call(requestSymbolSearch, action.payload || '');
+    yield put(symbolSearchSuccess(data));
   } catch (err) {
-    yield put(searchFailed(err));
+    yield put(symbolSearchFailed(err));
   }
 }
 
-export function* watchSearchQueryChanged() {
-  yield takeLatest(String(searchQueryChanged), handleSearchQueryChanged);
+export function* watchSymbolSearchQueryChanged() {
+  yield takeLatest(String(symbolSearchQueryChanged), handleSymbolSearchQueryChanged);
 }

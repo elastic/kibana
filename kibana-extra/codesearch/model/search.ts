@@ -100,7 +100,7 @@ export interface SearchResultItem {
   // TODO: add more in here.
 }
 
-export interface FullSearchResult {
+export interface DocumentSearchResult {
   query: string;
   stats: SearchResultStats;
   result: SearchResultItem[];

@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { put, select, takeLatest } from 'redux-saga/effects';
 
 import { toCanonicalUrl } from '../../common/uri_util';
-import { fetchRepos, fullSearch, loadStructure } from '../actions';
+import { documentSearch, fetchRepos, loadStructure } from '../actions';
 import * as ROUTES from '../components/routes';
 import { lastRequestPathSelector } from '../selectors';
 
@@ -42,7 +42,7 @@ function* handleLocationChange(action: any) {
       .fromPairs()
       .value();
     const { q } = queryParams;
-    yield put(fullSearch(q));
+    yield put(documentSearch(q));
   }
 }
 

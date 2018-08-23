@@ -25,7 +25,7 @@ import {
   closeTreePath,
   fetchRepoTree,
   FetchRepoTreePayload,
-  searchQueryChanged,
+  symbolSearchQueryChanged,
 } from '../../actions';
 import { RootState } from '../../reducers';
 
@@ -34,7 +34,6 @@ import { Editor } from '../editor/editor';
 import { FileTree } from '../file_tree/file_tree';
 import { NotFound } from './not_found';
 
-import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
@@ -58,7 +57,7 @@ interface Props {
   fetchRepoTree: (payload: FetchRepoTreePayload) => void;
   closeTreePath: (path: string) => void;
   symbols: DetailSymbolInformation[];
-  searchQueryChanged: (query: string) => void;
+  symbolSearchQueryChanged: (query: string) => void;
   isSymbolsLoading: boolean;
   isNotFound: boolean;
 }
@@ -104,7 +103,7 @@ export class LayoutPage extends React.Component<Props, State> {
   };
 
   public searchInputOnChangedHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.searchQueryChanged(event.target.value);
+    this.props.symbolSearchQueryChanged(event.target.value);
   };
 
   public getSymbolLinkUrl = (loc: Location) => {
@@ -123,7 +122,7 @@ export class LayoutPage extends React.Component<Props, State> {
   };
 
   public onSearchChange = (searchValue: string) => {
-    this.props.searchQueryChanged(searchValue.toLowerCase());
+    this.props.symbolSearchQueryChanged(searchValue.toLowerCase());
   };
 
   public onSelectedTabChanged = (tab: Tabs) => {
@@ -258,15 +257,15 @@ const mapStateToProps = (state: RootState) => ({
   tree: state.file.tree,
   openedPaths: state.file.openedPaths,
   loading: state.file.loading,
-  symbols: state.search.symbols,
-  isSymbolsLoading: state.search.isLoading,
   isNotFound: state.file.isNotFound,
+  symbols: state.symbolSearch.symbols,
+  isSymbolsLoading: state.symbolSearch.isLoading,
 });
 
 const mapDispatchToProps = {
   fetchRepoTree,
   closeTreePath,
-  searchQueryChanged,
+  symbolSearchQueryChanged,
 };
 
 export const Layout = connect(

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
 import { SymbolInformation } from 'vscode-languageserver-types';
@@ -22,30 +23,26 @@ const initialState: SymbolState = {
 
 export const symbol = handleActions(
   {
-    [String(loadStructure)]: (state: SymbolState, action: Action<string>) => {
-      return {
-        ...state,
-        loading: true,
-        lastRequestPath: action.payload || '',
-      };
-    },
-    [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolInformation[]>) => {
-      return {
-        ...state,
-        symbols: {
+    [String(loadStructure)]: (state: SymbolState, action: Action<any>) =>
+      produce<SymbolState>(state, draft => {
+        draft.loading = true;
+        draft.lastRequestPath = action.payload || '';
+      }),
+    [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolInformation[]>) =>
+      produce<SymbolState>(state, draft => {
+        draft.loading = false;
+        const { path, data } = action.payload;
+        draft.symbols = {
           ...state.symbols,
-          [action.payload.path]: action.payload.data!,
-        },
-        loading: false,
-      };
-    },
+          [path]: data,
+        };
+      }),
     [String(loadStructureFailed)]: (state: SymbolState, action: Action<any>) => {
       if (action.payload) {
-        return {
-          ...state,
-          error: action.payload,
-          loading: false,
-        };
+        return produce<SymbolState>(state, draft => {
+          draft.loading = false;
+          draft.error = action.payload;
+        });
       } else {
         return state;
       }

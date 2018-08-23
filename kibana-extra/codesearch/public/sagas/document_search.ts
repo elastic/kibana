@@ -7,9 +7,9 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
-import { fullSearch, fullSearchFailed, fullSearchSuccess } from '../actions';
+import { documentSearch, documentSearchFailed, documentSearchSuccess } from '../actions';
 
-function requestFullSearch(query: string) {
+function requestDocumentSearch(query: string) {
   if (query && query.length > 0) {
     return kfetch({
       pathname: `../api/cs/search/doc`,
@@ -25,15 +25,15 @@ function requestFullSearch(query: string) {
   }
 }
 
-function* handleFullSearch(action: Action<string>) {
+function* handleDocumentSearch(action: Action<string>) {
   try {
-    const data = yield call(requestFullSearch, action.payload || '');
-    yield put(fullSearchSuccess(data));
+    const data = yield call(requestDocumentSearch, action.payload || '');
+    yield put(documentSearchSuccess(data));
   } catch (err) {
-    yield put(fullSearchFailed(err));
+    yield put(documentSearchFailed(err));
   }
 }
 
-export function* watchFullSearch() {
-  yield takeLatest(String(fullSearch), handleFullSearch);
+export function* watchDocumentSearch() {
+  yield takeLatest(String(documentSearch), handleDocumentSearch);
 }

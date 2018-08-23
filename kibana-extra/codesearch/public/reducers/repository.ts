@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
 import { Repository } from '../../model';
@@ -32,55 +33,42 @@ const initialState: RepositoryState = {
 
 export const repository = handleActions(
   {
-    [String(fetchRepos)]: (state: RepositoryState) => {
-      return {
-        ...state,
-        loading: true,
-      };
-    },
-    [String(fetchReposSuccess)]: (state: RepositoryState, action: Action<Repository[]>) => {
-      return {
-        ...state,
-        repositories: action.payload || [],
-        loading: false,
-      };
-    },
+    [String(fetchRepos)]: (state: RepositoryState) =>
+      produce<RepositoryState>(state, draft => {
+        draft.loading = true;
+      }),
+    [String(fetchReposSuccess)]: (state: RepositoryState, action: Action<Repository[]>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.loading = false;
+        draft.repositories = action.payload || [];
+      }),
     [String(fetchReposFailed)]: (state: RepositoryState, action: Action<any>) => {
       if (action.payload) {
-        return {
-          ...state,
-          error: action.payload,
-          loading: false,
-        };
+        return produce<RepositoryState>(state, draft => {
+          draft.error = action.payload;
+          draft.loading = false;
+        });
       } else {
         return state;
       }
     },
-    [String(deleteRepoSuccess)]: (state: RepositoryState, action: Action<any>) => {
-      return {
-        ...state,
-        repositories: state.repositories.filter(repo => repo.uri !== action.payload),
-      };
-    },
-    [String(importRepo)]: (state: RepositoryState) => {
-      return {
-        ...state,
-        importLoading: true,
-      };
-    },
-    [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) => {
-      return {
-        ...state,
-        repositories: [...state.repositories, action.payload],
-        importLoading: false,
-      };
-    },
-    [String(importRepoFailed)]: (state: RepositoryState) => {
-      return {
-        ...state,
-        importLoading: false,
-      };
-    },
+    [String(deleteRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.repositories = state.repositories.filter(repo => repo.uri !== action.payload);
+      }),
+    [String(importRepo)]: (state: RepositoryState) =>
+      produce<RepositoryState>(state, draft => {
+        draft.importLoading = true;
+      }),
+    [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.importLoading = false;
+        draft.repositories = [...state.repositories, action.payload];
+      }),
+    [String(importRepoFailed)]: (state: RepositoryState) =>
+      produce<RepositoryState>(state, draft => {
+        draft.importLoading = false;
+      }),
   },
   initialState
 );

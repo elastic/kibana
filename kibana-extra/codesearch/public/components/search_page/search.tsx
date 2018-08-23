@@ -10,8 +10,8 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { FullSearchResult } from '../../../model';
-import { fullSearch } from '../../actions';
+import { DocumentSearchResult } from '../../../model';
+import { documentSearch } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 
@@ -19,8 +19,8 @@ interface Props {
   query: string;
   isLoading: boolean;
   error?: Error;
-  searchResult?: FullSearchResult;
-  fullSearch: (q: string) => void;
+  searchResult?: DocumentSearchResult;
+  documentSearch: (q: string) => void;
 }
 
 interface State {
@@ -32,8 +32,8 @@ class SearchPage extends React.PureComponent<Props, State> {
     uri: '',
   };
 
-  public onSearchChanged = ({ query, error }) => {
-    this.props.fullSearch(query.text);
+  public onSearchChanged = ({ query }) => {
+    this.props.documentSearch(query.text);
     // Update the url and push to history as well.
     history.push(`/search?q=${query.text}`);
   };
@@ -72,7 +72,7 @@ class SearchPage extends React.PureComponent<Props, State> {
 
       const resultComp = result.map((item, index) => {
         const repoLinkUrl = `/${item.uri}/tree/HEAD/`;
-        const fileLinkUrl = `${repoLinkUrl}${item.filePath}`;
+        const fileLinkUrl = `/${item.uri}/blob/HEAD/${item.filePath}`;
         return (
           <div key={`resultitem${index}`}>
             <p>
@@ -144,11 +144,11 @@ class SearchPage extends React.PureComponent<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  ...state.fullsearch,
+  ...state.documentSearch,
 });
 
 const mapDispatchToProps = {
-  fullSearch,
+  documentSearch,
 };
 
 export const Search = connect(

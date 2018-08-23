@@ -8,31 +8,35 @@ import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { FullSearchResult } from '../../model';
-import { fullSearch, fullSearchFailed, fullSearchSuccess } from '../actions';
+import { DocumentSearchResult } from '../../model';
+import {
+  documentSearch as documentSearchQuery,
+  documentSearchFailed,
+  documentSearchSuccess,
+} from '../actions';
 
-export interface FullSearchState {
+export interface DocumentSearchState {
   query: string;
   isLoading: boolean;
   error?: Error;
-  searchResult?: FullSearchResult;
+  searchResult?: DocumentSearchResult;
 }
 
-const initialState: FullSearchState = {
+const initialState: DocumentSearchState = {
   query: 'queryBuilder',
   isLoading: false,
 };
 
-export const fullsearch = handleActions(
+export const documentSearch = handleActions(
   {
-    [String(fullSearch)]: (state: FullSearchState, action: Action<any>) =>
-      produce<FullSearchState>(state, draft => {
+    [String(documentSearchQuery)]: (state: DocumentSearchState, action: Action<any>) =>
+      produce<DocumentSearchState>(state, draft => {
         draft.query = action.payload;
         draft.isLoading = true;
         draft.error = undefined;
       }),
-    [String(fullSearchSuccess)]: (state: FullSearchState, action: Action<any>) =>
-      produce<FullSearchState>(state, draft => {
+    [String(documentSearchSuccess)]: (state: DocumentSearchState, action: Action<any>) =>
+      produce<DocumentSearchState>(state, draft => {
         const { documents, highlights, total, repoAggregations, langAggregations } = action.payload;
         draft.isLoading = false;
 
@@ -75,9 +79,9 @@ export const fullsearch = handleActions(
           result,
         };
       }),
-    [String(fullSearchFailed)]: (state: FullSearchState, action: Action<any>) => {
+    [String(documentSearchFailed)]: (state: DocumentSearchState, action: Action<any>) => {
       if (action.payload) {
-        return produce<FullSearchState>(state, draft => {
+        return produce<DocumentSearchState>(state, draft => {
           draft.isLoading = false;
           draft.error = action.payload.error;
         });

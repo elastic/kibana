@@ -5,17 +5,17 @@
  */
 import { combineReducers } from 'redux';
 
+import { documentSearch, DocumentSearchState } from './document_search';
 import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
-import { fullsearch, FullSearchState } from './fullsearch';
 import { repository, RepositoryState } from './repository';
-import { search, SearchState } from './search';
 import { symbol, SymbolState } from './symbol';
+import { symbolSearch, SymbolSearchState } from './symbol_search';
 
 export interface RootState {
   repository: RepositoryState;
-  search: SearchState;
-  fullsearch: FullSearchState;
+  symbolSearch: SymbolSearchState;
+  documentSearch: DocumentSearchState;
   file: FileState;
   symbol: SymbolState;
   editor: EditorState;
@@ -23,9 +23,9 @@ export interface RootState {
 
 export const rootReducer = combineReducers({
   repository,
-  search,
   file,
   symbol,
   editor,
-  fullsearch,
+  documentSearch,
+  symbolSearch,
 });
