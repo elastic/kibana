@@ -65,6 +65,7 @@ function createCorrespondingOLLayer(layer) {
       break;
     case LAYER_TYPE.GEOHASH_GRID:
       olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
+      break;
     default:
       throw new Error('Cannot create corresponding OL layer');
       break;
