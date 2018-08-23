@@ -14,12 +14,12 @@ export const detailPanel = handleActions(
     [openDetailPanel](state, action) {
       const {
         panelType,
-        job,
+        jobId,
       } = action.payload;
 
       return {
         panelType: panelType || state.panelType || 'Summary',
-        job,
+        jobId,
       };
     },
     [closeDetailPanel]() {
