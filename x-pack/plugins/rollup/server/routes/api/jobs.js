@@ -14,10 +14,69 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/jobs',
     method: 'GET',
     handler: async (request, reply) => {
-      const callWithRequest = callWithRequestFactory(server, request);
-
       try {
+        const callWithRequest = callWithRequestFactory(server, request);
         const results = await callWithRequest('rollup.jobs');
+        reply(results);
+      } catch(err) {
+        if (isEsError(err)) {
+          return reply(wrapEsError(err));
+        }
+
+        reply(wrapUnknownError(err));
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/rollup/start',
+    method: 'POST',
+    handler: async (request, reply) => {
+      try {
+        const { jobIds } = request.payload;
+        const callWithRequest = callWithRequestFactory(server, request);
+        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })));
+
+        reply(results);
+      } catch(err) {
+        if (isEsError(err)) {
+          return reply(wrapEsError(err));
+        }
+
+        reply(wrapUnknownError(err));
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/rollup/stop',
+    method: 'POST',
+    handler: async (request, reply) => {
+      try {
+        const { jobIds } = request.payload;
+        const callWithRequest = callWithRequestFactory(server, request);
+        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })));
+
+        reply(results);
+      } catch(err) {
+        if (isEsError(err)) {
+          return reply(wrapEsError(err));
+        }
+
+        reply(wrapUnknownError(err));
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/rollup/delete',
+    method: 'POST',
+    handler: async (request, reply) => {
+      try {
+        const { jobIds } = request.payload;
+        const callWithRequest = callWithRequestFactory(server, request);
+        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
+
         reply(results);
       } catch(err) {
         if (isEsError(err)) {

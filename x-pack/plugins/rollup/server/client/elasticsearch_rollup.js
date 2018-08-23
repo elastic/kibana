@@ -64,5 +64,47 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     method: 'GET'
   });
+
+  rollup.startJob = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/<%=id%>/_start',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      },
+    ],
+    method: 'POST'
+  });
+
+  rollup.stopJob = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/<%=id%>/_stop',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      },
+    ],
+    method: 'POST'
+  });
+
+  rollup.deleteJob = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/<%=id%>',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      },
+    ],
+    method: 'DELETE'
+  });
 };
 

@@ -8,6 +8,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 
@@ -23,7 +24,7 @@ esSection.register('rollup_jobs', {
   visible: true,
   display: 'Rollup Jobs',
   order: 2,
-  url: `#${CRUD_APP_BASE_PATH}home`
+  url: `#${CRUD_APP_BASE_PATH}`
 });
 
 export const manageAngularLifecycle = ($scope, $route, elem) => {
@@ -44,11 +45,13 @@ export const manageAngularLifecycle = ($scope, $route, elem) => {
 
 const renderReact = async (elem) => {
   render(
-    <Provider store={rollupJobsStore()}>
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </Provider>,
+    <I18nProvider>
+      <Provider store={rollupJobsStore()}>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </Provider>
+    </I18nProvider>,
     elem
   );
 };

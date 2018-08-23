@@ -15,6 +15,7 @@ import {
 } from '../../../store/selectors';
 
 import {
+  closeDetailPanel,
   filterChanged,
   openDetailPanel,
   pageChanged,
@@ -36,6 +37,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    closeDetailPanel: () => {
+      dispatch(closeDetailPanel());
+    },
     filterChanged: (filter) => {
       dispatch(filterChanged({ filter }));
     },
@@ -48,13 +52,13 @@ const mapDispatchToProps = (dispatch) => {
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
-    openDetailPanel: (job) => {
-      dispatch(openDetailPanel({ job }));
+    openDetailPanel: (jobId) => {
+      dispatch(openDetailPanel({ jobId: jobId }));
     },
   };
 };
 
 export const JobTable = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(JobTableComponent);

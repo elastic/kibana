@@ -10,6 +10,21 @@ export {
 } from './load_jobs';
 
 export {
+  startJobs,
+  startJobsSuccess,
+} from './start_jobs';
+
+export {
+  stopJobs,
+  stopJobsSuccess,
+} from './stop_jobs';
+
+export {
+  deleteJobs,
+  deleteJobsSuccess,
+} from './delete_jobs';
+
+export {
   applyFilters,
   filtersApplied,
   filterChanged,
