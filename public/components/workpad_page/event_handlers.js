@@ -31,9 +31,14 @@ const setupHandler = (commit, target) => {
   };
 };
 
-const handleMouseMove = (commit, { target, clientX, clientY, altKey, metaKey }) => {
+const resetHandler = () => {
+  window.onmousemove = null;
+  window.onmouseup = null;
+};
+
+const handleMouseMove = (commit, { target, clientX, clientY, altKey, metaKey }, isEditable) => {
   // mouse move must be handled even before an initial click
-  if (!window.onmousemove) {
+  if (!window.onmousemove && isEditable) {
     const { x, y } = localMousePosition(target, clientX, clientY);
     setupHandler(commit, target);
     commit('cursorPosition', { x, y, altKey, metaKey });
@@ -43,7 +48,10 @@ const handleMouseMove = (commit, { target, clientX, clientY, altKey, metaKey }) 
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
   const { target, clientX, clientY, button, altKey, metaKey } = e;
-  if (button !== 0 || !isEditable) return; // left-click and edit mode only
+  if (button !== 0 || !isEditable) {
+    resetHandler();
+    return; // left-click and edit mode only
+  }
   const ancestor = ancestorElement(target, 'canvasPage');
   if (!ancestor) return;
   const { x, y } = localMousePosition(ancestor, clientX, clientY);
@@ -77,10 +85,10 @@ const isNotTextInput = ({ tagName, type }) => {
   }
 };
 
-const handleKeyDown = (commit, e, editable, remove) => {
+const handleKeyDown = (commit, e, isEditable, remove) => {
   const { key, target } = e;
 
-  if (editable) {
+  if (isEditable) {
     if (isNotTextInput(target) && (key === 'Backspace' || key === 'Delete')) {
       e.preventDefault();
       remove();
@@ -93,16 +101,17 @@ const handleKeyDown = (commit, e, editable, remove) => {
   }
 };
 
-const handleKeyUp = (commit, { key }) => {
-  commit('keyboardEvent', {
-    event: 'keyUp',
-    code: keyCode(key), // convert to standard event code
-  });
+const handleKeyUp = (commit, { key }, isEditable) => {
+  if (isEditable)
+    commit('keyboardEvent', {
+      event: 'keyUp',
+      code: keyCode(key), // convert to standard event code
+    });
 };
 
 export const withEventHandlers = withHandlers({
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
-  onMouseMove: props => e => handleMouseMove(props.commit, e),
+  onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
   onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
-  onKeyUp: props => e => handleKeyUp(props.commit, e),
+  onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
 });

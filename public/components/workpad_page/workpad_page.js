@@ -29,7 +29,7 @@ export const WorkpadPage = ({
     <div
       key={page.id}
       id={page.id}
-      className={`canvasPage ${className}`}
+      className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
       data-shared-items-container
       style={{
         ...page.style,
