@@ -65,7 +65,7 @@ export class ALayer {
   }
 
   renderSourceDetails() {
-    this._source.renderDetails();
+    return this._source.renderDetails();
   }
 
   toLayerDescriptor() {
