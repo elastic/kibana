@@ -23,7 +23,8 @@ export interface FetchRepoTreePayload extends FetchFilePayload {
 }
 
 export interface FetchFileResponse {
-  content: string;
+  isNotFound?: boolean;
+  content?: string;
   lang?: string;
   isImage?: boolean;
 }
@@ -49,4 +50,5 @@ export const fetchFileFailed = createAction<Error>('FETCH FILE ERROR');
 
 export const fetchDirectory = createAction<FetchRepoTreePayload>('FETCH REPO DIR');
 export const fetchDirectorySuccess = createAction<FileTree>('FETCH REPO DIR SUCCESS');
-export const fetchDirectoryFaile = createAction<Error>('FETCH REPO DIR FAILED');
+export const fetchDirectoryFailed = createAction<Error>('FETCH REPO DIR FAILED');
+export const setNotFound = createAction<boolean>('SET NOT FOUND');

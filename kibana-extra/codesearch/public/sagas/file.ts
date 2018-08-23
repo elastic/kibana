@@ -5,18 +5,18 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, select, takeEvery } from 'redux-saga/effects';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
+  fetchDirectory,
+  fetchDirectoryFailed,
+  fetchDirectorySuccess,
   fetchFile,
   fetchFileFailed,
   FetchFilePayload,
   FetchFileResponse,
   fetchFileSuccess,
-  fetchDirectory,
-  fetchDirectoryFaile,
-  fetchDirectorySuccess,
   fetchRepoBranches,
   fetchRepoBranchesFailed,
   fetchRepoBranchesSuccess,
@@ -30,6 +30,7 @@ import {
   FetchRepoTreePayload,
   fetchRepoTreeSuccess,
   openTreePath,
+  setNotFound,
 } from '../actions';
 import { getTree } from '../selectors';
 
@@ -145,14 +146,23 @@ export async function requestFile(
         content: await response.text(),
       };
     }
+  } else if (response.status === 404) {
+    return {
+      isNotFound: true,
+    };
   }
   throw new Error('invalid file type');
 }
 
 function* handleFetchFile(action: Action<FetchFilePayload>) {
   try {
-    const results: FetchFileResponse = yield call(requestFile, action.payload!);
-    yield put(fetchFileSuccess(results));
+    const results = yield call(requestFile, action.payload!);
+    if (results.isNotFound) {
+      yield put(setNotFound(true));
+      yield put(fetchFileFailed(new Error('file not found')));
+    } else {
+      yield put(fetchFileSuccess(results));
+    }
   } catch (err) {
     yield put(fetchFileFailed(err));
   }
@@ -163,13 +173,13 @@ function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
     const dir = yield call(requestRepoTree, action.payload);
     yield put(fetchDirectorySuccess(dir));
   } catch (err) {
-    yield fetchDirectoryFaile(err);
+    yield fetchDirectoryFailed(err);
   }
 }
 
 export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoBranches), handleFetchBranches);
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
-  yield takeEvery(String(fetchFile), handleFetchFile);
+  yield takeLatest(String(fetchFile), handleFetchFile);
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
 }

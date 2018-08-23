@@ -4,25 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LOCATION_CHANGE } from 'connected-react-router';
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 import { FileTree, FileTreeItemType } from '../../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   closeTreePath,
+  fetchDirectory,
+  fetchDirectorySuccess,
   fetchFile,
   fetchFileFailed,
   FetchFilePayload,
   FetchFileResponse,
   fetchFileSuccess,
-  fetchDirectory,
-  fetchDirectorySuccess,
   fetchRepoBranchesSuccess,
   fetchRepoCommitsSuccess,
   fetchRepoTree,
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
   openTreePath,
+  setNotFound,
 } from '../actions';
 
 export interface FileState {
@@ -36,6 +38,7 @@ export interface FileState {
   fileContent?: string;
   fileLanguage?: string;
   opendir?: FileTree;
+  isNotFound: boolean;
 }
 
 const initialState: FileState = {
@@ -50,6 +53,7 @@ const initialState: FileState = {
   branches: [],
   tags: [],
   commits: [],
+  isNotFound: false,
 };
 
 function mergeTree(draft: FileState, update: FileTree) {
@@ -129,6 +133,7 @@ export const file = handleActions(
         const response = action.payload as FetchFileResponse;
         draft.fileContent = response.content;
         draft.fileLanguage = response.lang;
+        draft.isNotFound = false;
       }),
     [String(fetchFileFailed)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
@@ -142,6 +147,14 @@ export const file = handleActions(
     [String(fetchDirectory)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.opendir = undefined;
+      }),
+    [String(setNotFound)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.isNotFound = action.payload;
+      }),
+    [LOCATION_CHANGE]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.isNotFound = false;
       }),
   },
   initialState

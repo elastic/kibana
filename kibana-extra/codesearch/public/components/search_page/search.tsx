@@ -81,7 +81,8 @@ class SearchPage extends React.PureComponent<Props, State> {
               </Link>
             </p>
             <p>
-              &nbsp;&nbsp;&nbsp;&nbsp;{item.hits} hits from
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              {item.hits} hits from
               <Link to={fileLinkUrl}>{item.filePath}</Link>
             </p>
             <p>
@@ -150,4 +151,7 @@ const mapDispatchToProps = {
   fullSearch,
 };
 
-export const Search = connect(mapStateToProps, mapDispatchToProps)(SearchPage);
+export const Search = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SearchPage);

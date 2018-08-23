@@ -30,8 +30,9 @@ import {
 import { RootState } from '../../reducers';
 
 import { history } from '../../utils/url';
-import { FileTree } from '../file_tree/file_tree';
 import { Editor } from '../editor/editor';
+import { FileTree } from '../file_tree/file_tree';
+import { NotFound } from './not_found';
 
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
@@ -59,6 +60,7 @@ interface Props {
   symbols: DetailSymbolInformation[];
   searchQueryChanged: (query: string) => void;
   isSymbolsLoading: boolean;
+  isNotFound: boolean;
 }
 
 export class LayoutPage extends React.Component<Props, State> {
@@ -160,6 +162,9 @@ export class LayoutPage extends React.Component<Props, State> {
     );
 
   public render() {
+    if (this.props.isNotFound) {
+      return <NotFound />;
+    }
     const { symbols, isSymbolsLoading } = this.props;
     const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
     const editor = pathType === 'blob' && (
@@ -255,6 +260,7 @@ const mapStateToProps = (state: RootState) => ({
   loading: state.file.loading,
   symbols: state.search.symbols,
   isSymbolsLoading: state.search.isLoading,
+  isNotFound: state.file.isNotFound,
 });
 
 const mapDispatchToProps = {

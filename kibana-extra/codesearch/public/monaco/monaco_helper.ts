@@ -80,7 +80,9 @@ export class MonacoHelper {
 
   public destroy = () => {
     this.monaco = null;
-    this.resizeChecker!.destroy();
+    if (this.resizeChecker) {
+      this.resizeChecker!.destroy();
+    }
   };
 
   public async loadFile(

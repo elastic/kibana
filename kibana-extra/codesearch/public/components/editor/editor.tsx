@@ -70,10 +70,7 @@ export class EditorComponent extends React.Component<Props> {
     if (nextProps.goto && nextProps.goto !== this.props.goto) {
       this.revealPosition(nextProps.goto);
     }
-    if (
-      nextProps.fileContent !== this.props.fileContent ||
-      nextProps.fileLanguage !== this.props.fileLanguage
-    ) {
+    if (nextProps.fileContent) {
       this.loadText(
         nextProps.fileContent!,
         nextProps.repoUri,
@@ -166,4 +163,7 @@ const mapDispatchToProps = {
   hoverResult,
 };
 
-export const Editor = connect(mapStateToProps, mapDispatchToProps)(EditorComponent);
+export const Editor = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(EditorComponent);
