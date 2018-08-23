@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,15 +25,27 @@ export function vSphereMetricsSpecProvider() {
   const moduleName = 'vsphere';
   return {
     id: 'vsphereMetrics',
-    name: 'vSphere metrics',
+    name: i18n.translate('kbn.server.tutorials.vsphereMetrics.nameTitle', {
+      defaultMessage: 'vSphere metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from vSphere.',
-    longDescription: 'The `vsphere` Metricbeat module fetches internal metrics from a vSphere cluster.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-vsphere.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.vsphereMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from vSphere.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.vsphereMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `vsphere` Metricbeat module fetches internal metrics from a vSphere cluster. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',
+      },
+    }),
     //euiIconType: 'logoVSphere',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.vsphereMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
