@@ -42,27 +42,36 @@ export class QueryBar extends Component {
     See https://github.com/elastic/kibana/issues/14086
   */
   state = {
-    query: this.props.query,
-    language: this.props.language,
+    query: {
+      query: this.props.query.query,
+      language: this.props.query.language,
+    },
   };
 
   onChange = (event) => {
     this.setState({
-      query: event.target.value,
+      query: {
+        query: event.target.value,
+        language: this.state.query.language,
+      },
     });
   };
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.query !== this.props.query) {
+    if (nextProps.query.query !== this.props.query.query) {
       this.setState({
-        query: nextProps.query,
-        language: nextProps.language,
+        query: {
+          query: nextProps.query.query,
+          language: nextProps.query.language,
+        },
       });
     }
-    else if (nextProps.language !== this.props.language) {
+    else if (nextProps.query.language !== this.props.query.language) {
       this.setState({
-        query: '',
-        language: nextProps.language,
+        query: {
+          query: '',
+          language: nextProps.query.language,
+        },
       });
     }
   }
@@ -79,17 +88,20 @@ export class QueryBar extends Component {
               {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
               <EuiFieldSearch
                 placeholder="Search..."
-                value={this.state.query}
+                value={this.state.query.query}
                 onChange={this.onChange}
-                onSearch={() => this.props.onSubmit({ query: this.state.query, language: this.state.language })}
+                onSearch={() => this.props.onSubmit({
+                  query: this.state.query.query,
+                  language: this.state.query.language,
+                })}
                 fullWidth
               />
               <div className="kuiLocalSearchAssistedInput__assistance">
                 <QueryLanguageSwitcher
-                  language={this.state.language}
+                  language={this.state.query.language}
                   onSelectLanguage={(language) => {
                     this.props.onSubmit({
-                      query: this.state.query,
+                      query: this.state.query.query,
                       language: language,
                     });
                   }}
@@ -105,7 +117,9 @@ export class QueryBar extends Component {
 
 
 QueryBar.propTypes = {
-  query: PropTypes.string,
-  language: PropTypes.string,
+  query: PropTypes.shape({
+    query: PropTypes.string,
+    language: PropTypes.string,
+  }),
   onSubmit: PropTypes.func,
 };
