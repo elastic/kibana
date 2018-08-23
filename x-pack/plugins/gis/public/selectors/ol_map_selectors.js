@@ -54,22 +54,23 @@ const convertVectorLayersToOl = ({ source, visible, temporary, style }) => {
   return vectorLayer;
 };
 
-function convertLayerByType(layer) {
-  //todo: don't do this! do not keep reference to openlayers-objects directly in the store
+function createCorrespondingOLLayer(layer) {
+  let olLayer;
   switch (layer.type) {
     case LAYER_TYPE.TILE:
-      layer.olLayer = convertTmsLayersToOl(layer);
+      olLayer = convertTmsLayersToOl(layer);
       break;
     case LAYER_TYPE.VECTOR:
-      layer.olLayer = convertVectorLayersToOl(layer);
+      olLayer = convertVectorLayersToOl(layer);
       break;
     case LAYER_TYPE.GEOHASH_GRID:
-      layer.olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
+      olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
     default:
+      throw new Error('Cannot create corresponding OL layer');
       break;
   }
-  layer.olLayer.set('id', layer.id);
-  return layer;
+  olLayer.set('id', layer.id);
+  return olLayer;
 }
 
 // OpenLayers helper function
@@ -133,13 +134,16 @@ const getLayersWithOl = createSelector(
   getOlMap,
   getLayerList,
   (olMap, layerList) => {
-    const layersIds = getLayersIds(olMap.getLayers());
     return layerList.map(layer => {
-      if (layersIds.find(id => id === layer.id)) {
-        return layer;
+      const layerTuple = { layer: layer };
+      const olLayerArray = olMap.getLayers().getArray();
+      const match = olLayerArray.find(olLayer => olLayer.get('id') === layer.id);
+      if (match) {
+        layerTuple.olLayer = match;
       } else {
-        return convertLayerByType(layer);
+        layerTuple.olLayer = createCorrespondingOLLayer(layer);
       }
+      return layerTuple;
     });
   }
 );
@@ -150,7 +154,8 @@ export const getOlMapAndLayers = createSelector(
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates
-    layersWithOl.forEach(({ olLayer, visible, ...layerDescriptor }) => {
+    layersWithOl.forEach(({ olLayer, layer }) => {
+      const { visible, ...layerDescriptor } = layer;
       addLayers(olMap, olLayer, layersIds);
       olLayer.setVisible(visible);
       if (layerDescriptor.type === LAYER_TYPE.VECTOR) {
@@ -160,7 +165,7 @@ export const getOlMapAndLayers = createSelector(
         updateStyle(olLayer, layerDescriptor);
       }
     });
-    const newLayerIdsOrder = layersWithOl.map(({ id }) => id);
+    const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.id);
     // Deletes
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     // Update layers order
