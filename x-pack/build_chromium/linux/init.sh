@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# This only needs to be run once per environment to set it up
-# It needs to be a flavor that supports apt get, such as Ubuntu.
+# Initializes a Linux environment. This need only be done once per
+# machine. The OS needs to be a flavor that supports apt get, such as Ubuntu.
 
-# Linux only, install python
-if ! [ -x "$(command -v pythonista)" ]; then
+if ! [ -x "$(command -v python)" ]; then
   echo "Installing Python"
   sudo apt-get --assume-yes install python
 fi
