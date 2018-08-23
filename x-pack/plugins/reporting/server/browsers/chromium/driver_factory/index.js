@@ -6,7 +6,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
@@ -41,6 +41,8 @@ export class HeadlessChromiumDriverFactory {
       let chromium;
       let page;
       try {
+        // TODO: calling puppeteer w/ the default args works, but the
+        // chromiumArgs breaks it. Need to investigate.
         chromium = await puppeteer.launch({
           userDataDir,
           executablePath: this.binaryPath,

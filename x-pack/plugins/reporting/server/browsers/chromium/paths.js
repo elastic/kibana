@@ -12,7 +12,7 @@ export const paths = {
   packages: [{
     platforms: ['darwin', 'freebsd', 'openbsd'],
     archiveFilename: 'chromium-4747cc2-darwin.zip',
-    archiveChecksum: '23e769b9fdbbb7efdac719c03738c56d',
+    archiveChecksum: '3f509e2fa994da3a1399d18d03b6eef7',
     binaryRelativePath: 'headless_shell-darwin/headless_shell',
   }, {
     platforms: ['linux'],
@@ -22,7 +22,7 @@ export const paths = {
   }, {
     platforms: ['win32'],
     archiveFilename: 'chromium-4747cc2-windows.zip',
-    archiveChecksum: '99547641a07745fc095211706162323d',
+    archiveChecksum: 'fac0967cd54bb2492a5a858fbefdf983',
     binaryRelativePath: 'headless_shell-windows\\headless_shell.exe'
   }]
 };
