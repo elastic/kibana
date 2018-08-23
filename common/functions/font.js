@@ -17,8 +17,8 @@ export const font = () => ({
     },
     lHeight: {
       types: ['number'],
+      aliases: ['lineHeight'],
       help: 'Line height (px)',
-      default: 21,
     },
     family: {
       types: ['string'],
@@ -72,6 +72,9 @@ export const font = () => ({
     if (!weights.includes(args.weight)) throw new Error(`Invalid font weight: ${args.weight}`);
     if (!alignments.includes(args.align)) throw new Error(`Invalid text alignment: ${args.align}`);
 
+    // the line height shouldn't ever be lower than the size
+    const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
+
     const spec = {
       fontFamily: args.family,
       fontWeight: args.weight,
@@ -79,7 +82,7 @@ export const font = () => ({
       textDecoration: args.underline ? 'underline' : 'none',
       textAlign: args.align,
       fontSize: `${args.size}px`, // apply font size as a pixel setting
-      lineHeight: `${args.lHeight}px`, // apply line height as a pixel setting
+      lineHeight: lineHeight, // apply line height as a pixel setting
     };
 
     // conditionally apply styles based on input

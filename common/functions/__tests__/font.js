@@ -25,7 +25,7 @@ describe('font', () => {
         expect(result.css).to.contain('font-size:20px');
       });
 
-      it('defaults to 14', () => {
+      it('defaults to 14px', () => {
         const result = fn(null);
         expect(result.spec).to.have.property('fontSize', '14px');
         expect(result.css).to.contain('font-size:14px');
@@ -39,10 +39,10 @@ describe('font', () => {
         expect(result.css).to.contain('line-height:30px');
       });
 
-      it('defaults to 21', () => {
+      it('defaults to 1', () => {
         const result = fn(null);
-        expect(result.spec).to.have.property('lineHeight', '21px');
-        expect(result.css).to.contain('line-height:21px');
+        expect(result.spec).to.have.property('lineHeight', 1);
+        expect(result.css).to.contain('line-height:1');
       });
     });
 
