@@ -6,18 +6,16 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiContextMenu,
   EuiIcon,
   EuiPopover,
-  EuiConfirmModal,
-  EuiOverlayMask
 } from '@elastic/eui';
 
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { flattenPanelTree } from '../../../services';
 
 class JobActionMenuUi extends Component {
@@ -144,85 +142,33 @@ class JobActionMenuUi extends Component {
   }
 
   confirmDeleteModal = () => {
-    const isSingleSelection = this.isSingleSelection();
-    const entity = this.getEntity(isSingleSelection);
-
-    const {
-      deleteJobs,
-      jobs,
-      intl,
-    } = this.props;
-
     const { showDeleteConfirmation } = this.state;
 
     if (!showDeleteConfirmation) {
       return null;
     }
 
-    const onDelete = () => {
+    const {
+      deleteJobs,
+      jobs,
+    } = this.props;
+
+    const onConfirmDelete = () => {
       this.closePopover();
       deleteJobs();
     };
 
+    const isSingleSelection = this.isSingleSelection();
+    const entity = this.getEntity(isSingleSelection);
+
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            intl.formatMessage({
-              id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.modalTitle',
-              defaultMessage: 'Confirm delete {entity}',
-            }, { entity })
-          }
-          onCancel={this.closeDeleteConfirmationModal}
-          onConfirm={onDelete}
-          cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
-          }
-          confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
-              defaultMessage: 'Confirm',
-            })
-          }
-        >
-          <div>
-            <p>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobActionMenu.deleteJob.deleteDescription"
-                defaultMessage="You are about to delete {mergedKeyword}"
-                values={{ mergedKeyword: isSingleSelection ? 'this' : 'these' }}
-              />
-              {' '}
-              {entity}:
-            </p>
-            <ul>
-              {jobs.map(job => (
-                <li key={job.id}>{job.id}</li>
-              ))}
-            </ul>
-            <EuiCallOut
-              title={
-                intl.formatMessage({
-                  id: 'xpack.rollupJobs.jobActionMenu.deleteJob.proceedWithCautionCallOutTitle',
-                  defaultMessage: 'Proceed with caution!',
-                })
-              }
-              color="warning"
-              iconType="help"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobActionMenu.deleteJob.deleteEntityWarningDescription"
-                  defaultMessage="This operation cannot be undone."
-                />
-              </p>
-            </EuiCallOut>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <ConfirmDeleteModal
+        isSingleSelection={isSingleSelection}
+        entity={entity}
+        jobs={jobs}
+        onConfirm={onConfirmDelete}
+        onCancel={this.closeDeleteConfirmationModal}
+      />
     );
   };
 

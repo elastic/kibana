@@ -151,7 +151,6 @@ export class DetailPanelUi extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"
-        maxWidth="520px"
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
