@@ -117,23 +117,30 @@ function updateFillAndOutlineStyle(olLayer, layer) {
   olLayer.setStyle && olLayer.setStyle(appliedStyle);
 }
 
+const OL_VIEW = new ol.View({
+  center: ol.proj.fromLonLat([37.41, 8.82]),
+  zoom: 4
+});
+const OL_MAP = new ol.Map({
+  layers: [],
+  view: OL_VIEW
+});
+function getOLImplementation() {
+  return OL_MAP;
+}
+
 // Selectors
-const getOlMap = createSelector(
+const syncOLMap = createSelector(
+  getOLImplementation,
   getMapConstants,
-  mapConstants => {
-    const olView = new ol.View({
-      center: ol.proj.fromLonLat(mapConstants.mapCenter),
-      zoom: mapConstants.mapInitZoomLevel
-    });
-    return new ol.Map({
-      layers: [],
-      view: olView
-    });
+  (olMap) => {
+    //todo: must sync mapConstant state with OL-map
+    return olMap;
   }
 );
 
-const getLayersWithOl = createSelector(
-  getOlMap,
+const syncLayerInitialization = createSelector(
+  syncOLMap,
   getLayerList,
   (olMap, layerList) => {
     return layerList.map(layer => {
@@ -150,9 +157,9 @@ const getLayersWithOl = createSelector(
   }
 );
 
-export const getOlMapAndLayers = createSelector(
-  getOlMap,
-  getLayersWithOl,
+export const syncOLState = createSelector(
+  syncOLMap,
+  syncLayerInitialization,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates

@@ -6,14 +6,23 @@
 
 import { connect } from 'react-redux';
 import { OLMapContainer } from './view';
-import { getOlMapAndLayers } from "../../selectors/ol_map_selectors";
+import { syncOLState } from "../../selectors/ol_map_selectors";
+import { mapExtentChanged } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    olMap: getOlMapAndLayers(state)
+    olMap: syncOLState(state)
   };
 }
 
-const connectedKibanaMap = connect(mapStateToProps, {}, null,
+function mapDispatchToProps(dispatch) {
+  return {
+    extentChanged: (e) => {
+      dispatch(mapExtentChanged(e));
+    }
+  };
+}
+
+const connectedKibanaMap = connect(mapStateToProps, mapDispatchToProps, null,
   { withRef: true })(OLMapContainer);
 export { connectedKibanaMap as OLMapContainer };
