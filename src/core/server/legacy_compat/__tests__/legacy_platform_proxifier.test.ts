@@ -17,131 +17,74 @@
  * under the License.
  */
 
-import { EventEmitter } from 'events';
-import { IncomingMessage, ServerResponse } from 'http';
-
-class MockNetServer extends EventEmitter {
-  public address() {
-    return { port: 1234, family: 'test-family', address: 'test-address' };
-  }
-
-  public getConnections(callback: (error: Error | null, count: number) => void) {
-    callback(null, 100500);
-  }
-}
-
-function mockNetServer() {
-  return new MockNetServer();
-}
-
-jest.mock('net', () => ({
-  createServer: jest.fn(() => mockNetServer()),
-}));
-
-import { createServer } from 'net';
+import { Server as HapiServer } from 'hapi-latest';
+import { Server } from 'net';
 import { LegacyPlatformProxifier } from '..';
+import { Env } from '../../config';
+import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+import { logger } from '../../logging/__mocks__';
 
+let server: jest.Mocked<Server>;
+let mockHapiServer: jest.Mocked<HapiServer>;
 let root: any;
 let proxifier: LegacyPlatformProxifier;
 beforeEach(() => {
+  server = {
+    addListener: jest.fn(),
+    address: jest
+      .fn()
+      .mockReturnValue({ port: 1234, family: 'test-family', address: 'test-address' }),
+    getConnections: jest.fn(),
+  } as any;
+
+  mockHapiServer = { listener: server, route: jest.fn() } as any;
+
   root = {
-    logger: {
-      get: jest.fn(() => ({
-        debug: jest.fn(),
-        info: jest.fn(),
-      })),
-    },
+    logger,
     shutdown: jest.fn(),
     start: jest.fn(),
   } as any;
 
-  proxifier = new LegacyPlatformProxifier(root);
+  const env = new Env('/kibana', getEnvOptions());
+  proxifier = new LegacyPlatformProxifier(root, env);
+  env.legacy.emit('connection', {
+    server: mockHapiServer,
+    options: { someOption: 'foo', someAnotherOption: 'bar' },
+  });
 });
 
 test('correctly binds to the server.', () => {
-  const server = createServer();
-  jest.spyOn(server, 'addListener');
-  proxifier.bind(server);
-
-  expect(server.addListener).toHaveBeenCalledTimes(4);
-  for (const eventName of ['listening', 'error', 'clientError', 'connection']) {
+  expect(mockHapiServer.route.mock.calls).toMatchSnapshot('proxy route options');
+  expect(server.addListener).toHaveBeenCalledTimes(6);
+  for (const eventName of ['clientError', 'close', 'connection', 'error', 'listening', 'upgrade']) {
     expect(server.addListener).toHaveBeenCalledWith(eventName, expect.any(Function));
   }
 });
 
-test('correctly binds to the server and redirects its events.', () => {
-  const server = createServer();
-  proxifier.bind(server);
+test('correctly redirects server events.', () => {
+  for (const eventName of ['clientError', 'close', 'connection', 'error', 'listening', 'upgrade']) {
+    expect(server.addListener).toHaveBeenCalledWith(eventName, expect.any(Function));
 
-  const eventsAndListeners = new Map(
-    ['listening', 'error', 'clientError', 'connection'].map(eventName => {
-      const listener = jest.fn();
-      proxifier.addListener(eventName, listener);
-
-      return [eventName, listener] as [string, () => void];
-    })
-  );
-
-  for (const [eventName, listener] of eventsAndListeners) {
-    expect(listener).not.toHaveBeenCalled();
+    const listener = jest.fn();
+    proxifier.addListener(eventName, listener);
 
     // Emit several events, to make sure that server is not being listened with `once`.
-    server.emit(eventName, 1, 2, 3, 4);
-    server.emit(eventName, 5, 6, 7, 8);
+    const [, serverListener] = server.addListener.mock.calls.find(
+      ([serverEventName]) => serverEventName === eventName
+    )!;
+
+    serverListener(1, 2, 3, 4);
+    serverListener(5, 6, 7, 8);
 
     expect(listener).toHaveBeenCalledTimes(2);
     expect(listener).toHaveBeenCalledWith(1, 2, 3, 4);
     expect(listener).toHaveBeenCalledWith(5, 6, 7, 8);
-  }
-});
 
-test('correctly unbinds from the previous server.', () => {
-  const previousServer = createServer();
-  proxifier.bind(previousServer);
-
-  const currentServer = createServer();
-  proxifier.bind(currentServer);
-
-  const eventsAndListeners = new Map(
-    ['listening', 'error', 'clientError', 'connection'].map(eventName => {
-      const listener = jest.fn();
-      proxifier.addListener(eventName, listener);
-
-      return [eventName, listener] as [string, () => void];
-    })
-  );
-
-  // Any events from the previous server should not be forwarded.
-  for (const [eventName, listener] of eventsAndListeners) {
-    // `error` event is a special case in node, if `error` is emitted, but
-    // there is no listener for it error will be thrown.
-    if (eventName === 'error') {
-      expect(() =>
-        previousServer.emit(eventName, new Error('Some error'))
-      ).toThrowErrorMatchingSnapshot();
-    } else {
-      previousServer.emit(eventName, 1, 2, 3, 4);
-    }
-
-    expect(listener).not.toHaveBeenCalled();
-  }
-
-  // Only events from the last server should be forwarded.
-  for (const [eventName, listener] of eventsAndListeners) {
-    expect(listener).not.toHaveBeenCalled();
-
-    currentServer.emit(eventName, 1, 2, 3, 4);
-
-    expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith(1, 2, 3, 4);
+    proxifier.removeListener(eventName, listener);
   }
 });
 
 test('returns `address` from the underlying server.', () => {
-  expect(proxifier.address()).toBeUndefined();
-
-  proxifier.bind(createServer());
-
   expect(proxifier.address()).toEqual({
     address: 'test-address',
     family: 'test-family',
@@ -168,33 +111,35 @@ test('`close` shuts down the `root`.', async () => {
 });
 
 test('returns connection count from the underlying server.', () => {
+  server.getConnections.mockImplementation(callback => callback(null, 0));
   const onGetConnectionsComplete = jest.fn();
-
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);
   expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 0);
   onGetConnectionsComplete.mockReset();
 
-  proxifier.bind(createServer());
+  server.getConnections.mockImplementation(callback => callback(null, 100500));
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);
   expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 100500);
 });
 
-test('correctly proxies request and response objects.', () => {
+test('proxy route abandons request processing and forwards it to the legacy Kibana', async () => {
+  const mockResponseToolkit = { response: jest.fn(), abandon: Symbol('abandon') };
+  const mockRequest = { raw: { req: { a: 1 }, res: { b: 2 } } };
+
   const onRequest = jest.fn();
   proxifier.addListener('request', onRequest);
 
-  const request = {} as IncomingMessage;
-  const response = {} as ServerResponse;
-  proxifier.proxy(request, response);
+  const [[{ handler }]] = mockHapiServer.route.mock.calls;
+  const response = await handler(mockRequest, mockResponseToolkit);
 
+  expect(response).toBe(mockResponseToolkit.abandon);
+  expect(mockResponseToolkit.response).not.toHaveBeenCalled();
+
+  // Make sure request hasn't been passed to the legacy platform.
   expect(onRequest).toHaveBeenCalledTimes(1);
-  expect(onRequest).toHaveBeenCalledWith(request, response);
-
-  // Check that exactly same objects were passed as event arguments.
-  expect(onRequest.mock.calls[0][0]).toBe(request);
-  expect(onRequest.mock.calls[0][1]).toBe(response);
+  expect(onRequest).toHaveBeenCalledWith(mockRequest.raw.req, mockRequest.raw.res);
 });
