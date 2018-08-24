@@ -14,7 +14,7 @@ export const CONFIG_TELEMETRY = 'telemetry:optIn';
  * @type {string}
  */
 export const CONFIG_TELEMETRY_DESC = (
-  'Help us improve the Elastic Stack by providing basic feature usage statistics? We will never share this data outside of Elastic.'
+  'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.'
 );
 
 /**

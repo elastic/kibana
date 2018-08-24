@@ -60,7 +60,7 @@ export class ManageTelemetryPage extends Component {
             <EuiPanel>
               <EuiDescribedFormGroup
                 idAria="manage-telemetry-aria"
-                title={<h3>Opt-In</h3>}
+                title={<div />}
                 description={
                   <Fragment>
                     <p>{CONFIG_TELEMETRY_DESC}</p>
@@ -75,7 +75,7 @@ export class ManageTelemetryPage extends Component {
               >
                 <EuiFormRow hasEmptyLabelSpace={true} describedByIds={['manage-telemetry-aria']}>
                   <EuiSwitch
-                    label="Enable usage data"
+                    label="Send usage data to Elastic"
                     checked={telemetryOptInProvider.getOptIn()}
                     onChange={this.toggleOptIn}
                     disabled={this.state.processing}

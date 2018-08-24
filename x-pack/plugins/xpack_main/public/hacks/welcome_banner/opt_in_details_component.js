@@ -94,12 +94,13 @@ export class OptInExampleFlyout extends Component {
         >
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h2>Cluster Statistics</h2>
+              <h2>Cluster statistics</h2>
             </EuiTitle>
             <EuiTextColor color="subdued">
               <EuiText>
-                This is an example of the basic cluster statistics we&rsquo;ll gather, which includes number of indexes,
-                number of shards, number of nodes, and high-level usage statistics, such as whether monitoring is enabled.
+                This is an example of the basic cluster statistics that we&rsquo;ll collect.
+                It includes the number of indices, shards, and nodes.
+                It also includes high-level usage statistics, such as whether monitoring is turned on.
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>
