@@ -179,7 +179,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.waitFor('not in view mode', async () => (
         !await this.getIsInViewMode()
       ));
-      await this.waitForRenderComplete();
+      // TODO: use waitForRenderComplete instead of sleep after https://github.com/elastic/kibana/issues/22382 is fixed
+      // await this.waitForRenderComplete();
+      await PageObjects.common.sleep(1011);
     }
 
     async getIsInViewMode() {
