@@ -1,3 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`correctly unbinds from the previous server. 1`] = `"Unhandled \\"error\\" event. (Error: Some error)"`;
+exports[`correctly binds to the server.: proxy route options 1`] = `
+Array [
+  Array [
+    Object {
+      "handler": [Function],
+      "method": "*",
+      "options": Object {
+        "payload": Object {
+          "maxBytes": 9007199254740991,
+          "output": "stream",
+          "parse": false,
+          "timeout": false,
+        },
+      },
+      "path": "/{p*}",
+    },
+  ],
+]
+`;

@@ -36,6 +36,7 @@ exports[`props exportedFieldsUrl 1`] = `
         >
           <h2>
             Great tutorial
+              
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -113,6 +114,7 @@ exports[`props iconType 1`] = `
         >
           <h2>
             Great tutorial
+              
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -164,18 +166,13 @@ exports[`props isBeta 1`] = `
         >
           <h2>
             Great tutorial
+              
+            <EuiBetaBadge
+              label="Beta"
+              tooltipPosition="top"
+            />
           </h2>
         </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiBetaBadge
-          className="tutorialIntroBadge"
-          label="BETA"
-          tooltipPosition="top"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
     <Content
@@ -225,6 +222,7 @@ exports[`props previewUrl 1`] = `
         >
           <h2>
             Great tutorial
+              
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -285,6 +283,7 @@ exports[`render 1`] = `
         >
           <h2>
             Great tutorial
+              
           </h2>
         </EuiTitle>
       </EuiFlexItem>

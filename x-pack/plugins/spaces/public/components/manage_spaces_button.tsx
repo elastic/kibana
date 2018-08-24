@@ -5,7 +5,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { Component } from 'react';
+import React, { Component, CSSProperties } from 'react';
 import { MANAGE_SPACES_URL } from '../lib/constants';
 
 interface Props {

@@ -37,6 +37,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
     </div>
   }
   closePopover={[Function]}
+  hasArrow={true}
   id="spacesMenuPopover"
   isOpen={false}
   ownFocus={true}

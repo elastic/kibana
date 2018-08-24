@@ -26,7 +26,7 @@ jest.mock('../http_server', () => ({
 }));
 
 import { noop } from 'lodash';
-import { BehaviorSubject } from '../../../lib/kbn_observable';
+import { BehaviorSubject } from 'rxjs';
 
 import { Env } from '../../config';
 import { logger } from '../../logging/__mocks__';

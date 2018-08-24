@@ -98,6 +98,8 @@ export class SpacesMenu extends Component<Props, State> {
         <EuiFieldSearch
           placeholder="Find a space"
           incremental={true}
+          // FIXME needs updated typedef
+          // @ts-ignore
           onSearch={this.onSearch}
           onKeyDown={this.onSearchKeyDown}
           onFocus={this.onSearchFocus}
