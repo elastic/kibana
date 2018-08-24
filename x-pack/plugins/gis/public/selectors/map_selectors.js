@@ -9,6 +9,7 @@ import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
 import { GeohashGridLayer } from '../shared/layers/geohashgrid_layer';
 import { EMSFileSource } from '../shared/layers/sources/ems_file_source';
+import { KibanaRegionmapSource } from '../shared/layers/sources/kibana_regionmap_source';
 import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
@@ -39,6 +40,8 @@ function createSourceInstance(sourceDescriptor) {
     return new EMSTMSSource(sourceDescriptor);
   } else if (sourceDescriptor.type === EMSFileSource.type) {
     return new EMSFileSource(sourceDescriptor);
+  } else if (sourceDescriptor.type === KibanaRegionmapSource.type) {
+    return new KibanaRegionmapSource(sourceDescriptor);
   } else if (sourceDescriptor.type === ESGeohashGridSource.type) {
     return new ESGeohashGridSource(sourceDescriptor);
   } else {

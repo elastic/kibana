@@ -7,6 +7,7 @@
 import React from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
+import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import {
   EuiAccordion,
@@ -52,6 +53,7 @@ export class AddLayerPanel extends React.Component {
     };
     const xyzTmsEditor = XYZTMSSource.renderEditor(editorProperties);
     const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
+    const regionmapEditor = KibanaRegionmapSource.renderEditor(editorProperties);
     const heatmapEditor = ESGeohashGridSource.renderEditor(editorProperties);
 
     return (
@@ -99,6 +101,16 @@ export class AddLayerPanel extends React.Component {
               paddingSize="l"
             >
               {heatmapEditor}
+            </EuiAccordion>
+          </div>
+          <div>
+            <EuiSpacer size="l"/>
+            <EuiAccordion
+              id="accordion2"
+              buttonContent="From Kibana Config"
+              paddingSize="l"
+            >
+              {regionmapEditor}
             </EuiAccordion>
           </div>
         </EuiFlyoutBody>
