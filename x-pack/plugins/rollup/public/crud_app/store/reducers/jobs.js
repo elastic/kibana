@@ -8,6 +8,7 @@ import { combineReducers } from 'redux';
 import { handleActions } from 'redux-actions';
 import {
   loadJobsSuccess,
+  clearJobs,
 } from '../actions';
 
 const byId = handleActions({
@@ -19,12 +20,20 @@ const byId = handleActions({
     });
     return newState;
   },
+
+  [clearJobs]() {
+    return {};
+  },
 }, {});
 
 const allIds = handleActions({
   [loadJobsSuccess](state, action) {
     const { jobs } = action.payload;
     return jobs.map(job => job.id);
+  },
+
+  [clearJobs]() {
+    return [];
   },
 }, []);
 

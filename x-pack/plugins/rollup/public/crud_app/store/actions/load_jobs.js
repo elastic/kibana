@@ -8,7 +8,10 @@ import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
 
+export const clearJobs = createAction('CLEAR_JOBS');
+
 export const loadJobsSuccess = createAction('LOAD_JOBS_SUCCESS');
+
 export const loadJobs = () => async (dispatch) => {
   let jobs;
   try {
@@ -18,4 +21,9 @@ export const loadJobs = () => async (dispatch) => {
   }
 
   dispatch(loadJobsSuccess({ jobs: deserializeJobs(jobs) }));
+};
+
+export const clearAndLoadJobs = () => async (dispatch) => {
+  dispatch(clearJobs());
+  dispatch(loadJobs());
 };

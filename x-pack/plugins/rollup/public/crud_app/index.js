@@ -46,7 +46,7 @@ export const manageAngularLifecycle = ($scope, $route, elem) => {
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
-      <Provider store={rollupJobsStore()}>
+      <Provider store={rollupJobsStore}>
         <HashRouter>
           <App />
         </HashRouter>

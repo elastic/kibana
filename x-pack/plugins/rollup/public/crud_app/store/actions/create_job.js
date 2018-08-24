@@ -8,7 +8,6 @@ import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { CRUD_APP_BASE_PATH } from '../../../../common';
 import { createJob as sendCreateJobRequest, serializeJob, getRouter } from '../../services';
-// import { openDetailPanel } from './detail_panel';
 
 export const createJobSuccess = createAction('CREATE_JOB_SUCCESS');
 export const createJob = (jobConfig) => async (dispatch) => {
@@ -18,9 +17,12 @@ export const createJob = (jobConfig) => async (dispatch) => {
     return toastNotifications.addDanger(error.data.message);
   }
 
+  // This will open the new job in the detail panel.
+  getRouter().history.push({
+    pathname: CRUD_APP_BASE_PATH,
+    search: `?job=${jobConfig.id}`,
+  });
+
   toastNotifications.addSuccess(`Rollup job '${jobConfig.id}' was created`);
-  getRouter().history.push(CRUD_APP_BASE_PATH);
   dispatch(createJobSuccess());
-  // TODO: display the new job in the detail panel
-  // dispatch(openDetailPanel({ job }));
 };

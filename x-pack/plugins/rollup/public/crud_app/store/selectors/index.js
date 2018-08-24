@@ -10,6 +10,7 @@ import { createSelector } from 'reselect';
 import { filterItems, sortTable } from '../../services';
 
 export const getJobs = (state) => state.jobs.byId;
+export const getJobsList = (state) => state.jobs.allIds;
 export const getJobByJobId = (state, id) => getJobs(state)[id];
 export const getFilteredIds = (state) => state.jobs.filteredIds;
 export const getTableState = (state) => state.tableState;

@@ -4,27 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleActions } from 'redux-actions';
-import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
+const initialState = {};
 
-const defaultState = {};
+export function detailPanel(state = initialState, action) {
+  const { type, payload } = action;
 
-export const detailPanel = handleActions(
-  {
-    [openDetailPanel](state, action) {
+  switch (type) {
+    case 'INDEX_ROLLUP_JOB_OPEN_DETAIL_PANEL':
       const {
         panelType,
         jobId,
-      } = action.payload;
+      } = payload;
 
       return {
         panelType: panelType || state.panelType || 'Summary',
         jobId,
       };
-    },
-    [closeDetailPanel]() {
+
+    case 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL':
       return {};
-    },
-  },
-  defaultState
-);
+
+    default:
+      return state;
+  }
+}

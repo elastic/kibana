@@ -35,10 +35,26 @@ const REFRESH_RATE_MS = 30000;
 export class JobListUi extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
+    hasJobs: PropTypes.bool,
+    showDeepLinkedJob: PropTypes.func,
   }
 
-  componentWillMount() {
-    this.props.loadJobs();
+  static getDerivedStateFromProps(props) {
+    const { hasJobs, showDeepLinkedJob } = props;
+
+    if (hasJobs) {
+      showDeepLinkedJob();
+    }
+
+    return null;
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {};
+
+    props.clearAndLoadJobs();
   }
 
   componentDidMount() {
@@ -47,6 +63,10 @@ export class JobListUi extends Component {
 
   componentWillUnmount() {
     clearInterval(this.interval);
+
+    // Close the panel, otherwise it will default to already being open when we navigate back to
+    // this page.
+    this.props.closeDetailPanel();
   }
 
   render() {

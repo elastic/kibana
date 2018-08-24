@@ -8,15 +8,33 @@ import { connect } from 'react-redux';
 import { JobList as JobListView } from './job_list';
 
 import {
-  loadJobs,
+  getJobsList,
+} from '../../store/selectors';
+
+import {
+  clearAndLoadJobs,
+  showDeepLinkedJob,
+  closeDetailPanel,
 } from '../../store/actions';
+
+const mapStateToProps = (state) => {
+  return {
+    hasJobs: Boolean(getJobsList(state).length),
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    loadJobs: () => {
-      dispatch(loadJobs());
+    clearAndLoadJobs: () => {
+      dispatch(clearAndLoadJobs());
+    },
+    showDeepLinkedJob: () => {
+      dispatch(showDeepLinkedJob());
+    },
+    closeDetailPanel: () => {
+      dispatch(closeDetailPanel());
     },
   };
 };
 
-export const JobList = connect(null, mapDispatchToProps)(JobListView);
+export const JobList = connect(mapStateToProps, mapDispatchToProps)(JobListView);
