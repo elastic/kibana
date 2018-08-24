@@ -84,9 +84,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.decorate('server', 'spaces', spacesService);
 
-    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
-      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+      spacesSavedObjectsClientWrapperFactory(spacesService)
     );
 
     initSpacesApi(server);
