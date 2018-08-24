@@ -224,6 +224,9 @@ export const CleanEmptyFoldersTask = {
   description: 'Cleaning all empty folders recursively',
 
   async run(config, log, build) {
+    // Delete every single empty folder from
+    // the distributable. Plugins and Data folder
+    // will also be deleted!
     await deleteEmptyFolders(log, build.resolvePath('.'));
   },
 };
@@ -423,12 +426,12 @@ export const CleanClientModulesOnDLLTask = {
       const modules = Object.keys(manifest.content);
 
       // Only includes modules who are not in the black list of modules
-      // or there are not dll entry files
+      // and there are not dll entry files
       return modules.filter(entry => {
         const isBlackListed = blackListModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
         const isDllEntryFile = entry.includes('.entry.dll.js');
 
-        return !isBlackListed || !isDllEntryFile;
+        return !isBlackListed && !isDllEntryFile;
       });
     };
 
