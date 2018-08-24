@@ -14,7 +14,9 @@ const collectFns = (ast, cb) => {
       // recurse the argumetns and update the set along the way
       Object.keys(cArguments).forEach(argName => {
         cArguments[argName].forEach(subAst => {
-          collectFns(subAst, cb);
+          if (subAst != null) {
+            collectFns(subAst, cb);
+          }
         });
       });
     });
