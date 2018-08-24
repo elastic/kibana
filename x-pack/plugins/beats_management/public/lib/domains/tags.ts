@@ -47,7 +47,8 @@ export class TagsLib {
           type,
           description,
           block_obj: knownConfigIds.reduce((blockObj: any, id: string) => {
-            blockObj[id] = id === 'other' ? omit(rawConfig, knownConfigIds) : rawConfig[id];
+            blockObj[id] =
+              id === 'other' ? yaml.dump(omit(rawConfig, knownConfigIds)) : rawConfig[id];
 
             return blockObj;
           }, {}),

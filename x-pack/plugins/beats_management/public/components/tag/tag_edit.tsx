@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
+import { isEqual } from 'lodash';
 import React from 'react';
 import { CMBeat } from '../../../common/domain_types';
 import { ClientSideBeatTag, ClientSideConfigurationBlock } from '../../lib/lib';
@@ -41,6 +42,7 @@ interface TagEditProps {
 interface TagEditState {
   showFlyout: boolean;
   tableRef: any;
+  selectedConfigIndex?: number;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -124,11 +126,24 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 onConfigClick={(action: string, config: ClientSideConfigurationBlock) => {
                   if (action === 'delete') {
                     // TODO delete
+                  } else {
+                    this.setState({
+                      showFlyout: true,
+                      selectedConfigIndex: tag.configurations.findIndex(c => {
+                        return isEqual(config, c);
+                      }),
+                    });
                   }
                 }}
               />
               <br />
-              <EuiButton onClick={this.openConfigFlyout}>Add a new configuration</EuiButton>
+              <EuiButton
+                onClick={() => {
+                  this.setState({ showFlyout: true });
+                }}
+              >
+                Add a new configuration
+              </EuiButton>
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -142,7 +157,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             </EuiTitle>
             <Table
               actionHandler={(a, b) => {
-                /* TODO: handle assignment/delete actions */
+                /* TODO: this prop should be optional */
               }}
               assignmentOptions={[]}
               assignmentTitle={null}
@@ -156,9 +171,22 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
 
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={undefined}
-            onClose={() => this.setState({ showFlyout: false })}
-            onSave={this.updateTag('configurations')}
+            configBlock={
+              this.state.selectedConfigIndex !== undefined
+                ? tag.configurations[this.state.selectedConfigIndex]
+                : undefined
+            }
+            onClose={() => this.setState({ showFlyout: false, selectedConfigIndex: undefined })}
+            onSave={(config: any) => {
+              this.setState({ showFlyout: false, selectedConfigIndex: undefined });
+              if (this.state.selectedConfigIndex !== undefined) {
+                const configs = [...tag.configurations];
+                configs[this.state.selectedConfigIndex] = config;
+                this.updateTag('configurations', configs);
+              } else {
+                this.updateTag('configurations', [...tag.configurations, config]);
+              }
+            }}
           />
         )}
       </div>
@@ -173,13 +201,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     }
   };
 
-  private openConfigFlyout = () => {
-    this.setState({
-      showFlyout: true,
-    });
-  };
-
   // TODO this should disable save button on bad validations
-  private updateTag = (key: keyof ClientSideBeatTag) => (e: any) =>
-    this.props.onTagChange(key, e.target ? e.target.value : e);
+  private updateTag = (key: keyof ClientSideBeatTag, value?: any) =>
+    value !== undefined
+      ? this.props.onTagChange(key, value)
+      : (e: any) => this.props.onTagChange(key, e.target ? e.target.value : e);
 }

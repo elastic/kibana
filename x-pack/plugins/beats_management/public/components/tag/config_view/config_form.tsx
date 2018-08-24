@@ -7,7 +7,7 @@
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import React from 'react';
-import { YamlConfigSchema } from '../../../lib/lib';
+import { ClientSideConfigurationBlock, YamlConfigSchema } from '../../../lib/lib';
 import { FormsyEuiCodeEditor } from '../../inputs/code';
 import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
@@ -50,7 +50,7 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
 });
 
 interface ComponentProps {
-  values: {};
+  values: ClientSideConfigurationBlock;
   schema: YamlConfigSchema[];
   id: string;
   canSubmit(canIt: boolean): any;
@@ -112,6 +112,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiFieldText
                     key={schema.id}
                     id={schema.id}
+                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
@@ -125,6 +126,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiMultiFieldText
                     key={schema.id}
                     id={schema.id}
+                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
@@ -139,6 +141,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={schema.id}
                     id={schema.id}
                     name={schema.id}
+                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     options={[{ value: '', text: 'Please Select An Option' }].concat(
@@ -155,6 +158,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={`${schema.id}-${this.props.id}`}
                     mode="yaml"
                     id={schema.id}
+                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}

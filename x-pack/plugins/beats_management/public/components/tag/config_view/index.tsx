@@ -80,6 +80,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
           </EuiFormRow>
           <EuiFormRow label="Configuration description">
             <EuiFieldText
+              value={this.state.configBlock.description}
               onChange={this.onValueChange('description')}
               placeholder="Description (optional)"
             />

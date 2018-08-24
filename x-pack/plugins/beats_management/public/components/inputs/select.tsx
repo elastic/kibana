@@ -75,7 +75,6 @@ class FieldSelect extends Component<
       label,
       options,
       value,
-      defaultValue,
       isValid,
       isPristine,
       getErrorMessage,
@@ -101,7 +100,6 @@ class FieldSelect extends Component<
           name={name}
           value={value}
           options={options}
-          defaultValue={defaultValue}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

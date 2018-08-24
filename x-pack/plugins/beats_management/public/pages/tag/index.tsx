@@ -58,18 +58,9 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
             tag={this.state.tag}
             mode={this.mode}
             onTagChange={(field: string, value: string | number) =>
-              this.setState(oldState => {
-                let newValue;
-                if (field === 'configurations') {
-                  newValue = [...oldState.tag.configurations, value];
-                } else {
-                  newValue = value;
-                }
-
-                return {
-                  tag: { ...oldState.tag, [field]: newValue },
-                };
-              })
+              this.setState(oldState => ({
+                tag: { ...oldState.tag, [field]: value },
+              }))
             }
             attachedBeats={this.state.attachedBeats}
           />

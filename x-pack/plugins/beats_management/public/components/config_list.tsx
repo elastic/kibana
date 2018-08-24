@@ -17,29 +17,28 @@ interface ComponentProps {
 
 export const ConfigList: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
-    items={props.configs.map(config => {
-      const type = supportedConfigs.find((sc: any) => sc.value === config.type);
-      return {
-        ...config,
-        block_obj: { ...config.block_obj, module: (config.block_obj as any).module || 'N/A' },
-        type: type ? type.text : config.type,
-      };
-    })}
+    items={props.configs}
     columns={[
       {
         field: 'type',
         name: 'Type',
         truncateText: false,
-        hideForMobile: false,
-        render: (value: string, item: ClientSideConfigurationBlock) => (
-          <EuiLink onClick={props.onConfigClick('edit', item)}>{value}</EuiLink>
-        ),
+        render: (value: string, config: ClientSideConfigurationBlock) => {
+          const type = supportedConfigs.find((sc: any) => sc.value === config.type);
+
+          return (
+            <EuiLink onClick={() => props.onConfigClick('edit', config)}>
+              {type ? type.text : config.type}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'block_obj.module',
         name: 'Module',
         truncateText: false,
-        hideForMobile: true,
+        render: (item: ClientSideConfigurationBlock) =>
+          (item && (item.block_obj as any).module) || 'N/A',
       },
       {
         field: 'description',

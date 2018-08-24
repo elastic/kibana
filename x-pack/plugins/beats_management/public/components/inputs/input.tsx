@@ -70,7 +70,6 @@ class FieldText extends Component<
       id,
       required,
       label,
-      defaultValue,
       value,
       isValid,
       isPristine,
@@ -96,7 +95,6 @@ class FieldText extends Component<
           id={id}
           name={name}
           value={value}
-          defaultValue={defaultValue}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
