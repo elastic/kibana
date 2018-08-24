@@ -712,13 +712,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
-      log.debug('click submit button');
-      await testSubjects.click('saveVisualizationButton');
       if (saveAsNew) {
+        log.debug('Check save as new visualization');
         await testSubjects.click('saveAsNewCheckbox');
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      return await testSubjects.exists('saveVisualizationSuccess');
+      log.debug('Click Save Visualization button');
+      await testSubjects.click('saveVisualizationButton');
+      await testSubjects.existOrFail('saveVisualizationSuccess', defaultFindTimeout);
     }
 
     async clickLoadSavedVisButton() {
