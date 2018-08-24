@@ -31,7 +31,6 @@ export default async (kbnServer, kibanaHapiServer, config) => {
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.watchPrebuild'),
-      unsafeCache: config.get('optimize.unsafeCache'),
     })
   );
 

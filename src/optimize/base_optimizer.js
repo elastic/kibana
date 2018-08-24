@@ -58,13 +58,6 @@ export default class BaseOptimizer {
         this.sourceMaps = opts.sourceMaps || false;
         break;
     }
-
-    this.unsafeCache = opts.unsafeCache || false;
-    if (typeof this.unsafeCache === 'string') {
-      this.unsafeCache = [
-        new RegExp(this.unsafeCache.slice(1, -1))
-      ];
-    }
   }
 
   isCompilerReady() {
@@ -72,7 +65,7 @@ export default class BaseOptimizer {
   }
 
   async init() {
-    if (this.isCompilerReady()) return this;
+    if (this.isCompilerReady()) return this; // we dont do this anymore
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
@@ -197,7 +190,7 @@ export default class BaseOptimizer {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       parallelism: os.cpus().length - 1,
-      cache: !!this.unsafeCache,
+      cache: true,
       entry: this.uiBundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
@@ -218,7 +211,7 @@ export default class BaseOptimizer {
               name: 'commons',
               chunks: 'initial',
               minChunks: 2,
-              reuseExistingChunk: true,
+              reuseExistingChunk: true, // check this again
             }
           }
         },
@@ -322,7 +315,10 @@ export default class BaseOptimizer {
       },
 
       performance: {
-        hints: false // TODO: review this
+        // NOTE: we are disabling this as those hints
+        // are more tailored for the final bundles result
+        // and not for the webpack compilations performance itself
+        hints: false
       }
     };
 

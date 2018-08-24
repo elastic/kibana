@@ -382,6 +382,7 @@ export const CleanClientModulesOnDLLTask = {
       const calculateTLDep = (inputDep, outputDep = '') => {
         const depSplitPaths = inputDep.split(sep);
         const firstPart = depSplitPaths.shift();
+        // it will always be the / not the os sep
         const outputDepFirstArgAppend = outputDep ? sep : '';
 
         outputDep += `${outputDepFirstArgAppend}${firstPart}`;
@@ -415,6 +416,7 @@ export const CleanClientModulesOnDLLTask = {
 
     const getDllModules = (manifest) => {
       if (!manifest || !manifest.content) {
+        // It should fails if we don't have modules
         return [];
       }
 
