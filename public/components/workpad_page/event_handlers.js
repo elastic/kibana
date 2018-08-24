@@ -16,6 +16,11 @@ const localMousePosition = (target, clientX, clientY) => {
   };
 };
 
+const resetHandler = () => {
+  window.onmousemove = null;
+  window.onmouseup = null;
+};
+
 const setupHandler = (commit, target) => {
   window.onmousemove = ({ clientX, clientY, altKey, metaKey }) => {
     const { x, y } = localMousePosition(target, clientX, clientY);
@@ -26,14 +31,8 @@ const setupHandler = (commit, target) => {
     const { clientX, clientY, altKey, metaKey } = e;
     const { x, y } = localMousePosition(target, clientX, clientY);
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey });
-    window.onmousemove = null;
-    window.onmouseup = null;
+    resetHandler();
   };
-};
-
-const resetHandler = () => {
-  window.onmousemove = null;
-  window.onmouseup = null;
 };
 
 const handleMouseMove = (commit, { target, clientX, clientY, altKey, metaKey }, isEditable) => {
