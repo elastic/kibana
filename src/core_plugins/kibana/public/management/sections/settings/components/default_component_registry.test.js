@@ -34,7 +34,7 @@ describe('default_component_registry', () => {
   });
 
   it('should not override components if they are already registered', () => {
-    const newComponent = Symbol();
+    const newComponent = {};
     registerSettingsComponent(PAGE_TITLE_COMPONENT, newComponent, true);
     registerDefaultComponents();
 

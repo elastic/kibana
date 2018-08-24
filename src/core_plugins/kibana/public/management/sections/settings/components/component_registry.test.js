@@ -22,46 +22,65 @@ import { tryRegisterSettingsComponent, registerSettingsComponent, getSettingsCom
 
 describe('tryRegisterSettingsComponent', () => {
   it('should allow a component to be registered', () => {
-    const component = Symbol();
+    const component = {};
     expect(tryRegisterSettingsComponent('tryTest1', component)).toEqual(true);
   });
 
   it('should return false if the component is already registered, and not allow an override', () => {
-    const component = Symbol();
+    const component = {};
     expect(tryRegisterSettingsComponent('tryTest2', component)).toEqual(true);
 
-    const updatedComponent = Symbol;
+    const updatedComponent = { updated: 'yay' };
     expect(tryRegisterSettingsComponent('tryTest2', updatedComponent)).toEqual(false);
-    expect(getSettingsComponent('tryTest2')).toEqual(component);
+    expect(getSettingsComponent('tryTest2')).toBe(component);
   });
 });
 
 describe('registerSettingsComponent', () => {
   it('should allow a component to be registered', () => {
-    const component = Symbol();
+    const component = {};
     registerSettingsComponent('test', component);
   });
 
   it('should disallow registering a component with a duplicate id', () => {
-    const component = Symbol();
+    const component = {};
     registerSettingsComponent('test2', component);
     expect(() => registerSettingsComponent('test2', 'some other component')).toThrowErrorMatchingSnapshot();
   });
 
   it('should allow a component to be overriden', () => {
-    const component = Symbol();
+    const component = {};
     registerSettingsComponent('test3', component);
-    registerSettingsComponent('test3', 'another component', true);
 
-    expect(getSettingsComponent('test3')).toEqual('another component');
+    const anotherComponent = { 'anotherComponent': 'ok' };
+    registerSettingsComponent('test3', anotherComponent, true);
+
+    expect(getSettingsComponent('test3')).toBe(anotherComponent);
+  });
+
+  it('should set a displayName for the component if one does not exist', () => {
+    const component = {};
+    registerSettingsComponent('display_name_component', component);
+
+    expect(component.displayName).toEqual('display_name_component');
+  });
+
+  it('should not set a displayName for the component if one already exists', () => {
+    const component = {
+      displayName: '<AwesomeComponent>'
+    };
+
+    registerSettingsComponent('another_display_name_component', component);
+
+    expect(component.displayName).toEqual('<AwesomeComponent>');
   });
 });
 
 describe('getSettingsComponent', () => {
   it('should allow a component to be retrieved', () => {
-    const component = Symbol();
+    const component = {};
     registerSettingsComponent('test4', component);
-    expect(getSettingsComponent('test4')).toEqual(component);
+    expect(getSettingsComponent('test4')).toBe(component);
   });
 
   it('should throw an error when requesting a component that does not exist', () => {

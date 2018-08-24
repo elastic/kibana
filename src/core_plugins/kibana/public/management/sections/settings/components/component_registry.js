@@ -31,7 +31,7 @@ export function tryRegisterSettingsComponent(id, component) {
     return false;
   }
 
-  registry[id] = component;
+  registerSettingsComponent(id, component);
   return true;
 }
 
@@ -48,6 +48,12 @@ export function tryRegisterSettingsComponent(id, component) {
 export function registerSettingsComponent(id, component, allowOverride = false) {
   if (!allowOverride && id in registry) {
     throw new Error(`Component with id ${id} is already registered.`);
+  }
+
+  // Setting a display name if one does not already exist.
+  // This enhances the snapshots, as well as the debugging experience.
+  if (!component.displayName) {
+    component.displayName = id;
   }
 
   registry[id] = component;
