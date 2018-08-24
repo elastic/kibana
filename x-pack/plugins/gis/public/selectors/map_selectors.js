@@ -12,6 +12,7 @@ import { EMSFileSource } from '../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../shared/layers/sources/kibana_regionmap_source';
 import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
+import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
 /**
@@ -38,6 +39,8 @@ function createSourceInstance(sourceDescriptor) {
     return new XYZTMSSource(sourceDescriptor);
   } else if (sourceDescriptor.type === EMSTMSSource.type) {
     return new EMSTMSSource(sourceDescriptor);
+  } else if (sourceDescriptor.type === KibanaTilemapSource.type) {
+    return new KibanaTilemapSource(sourceDescriptor);
   } else if (sourceDescriptor.type === EMSFileSource.type) {
     return new EMSFileSource(sourceDescriptor);
   } else if (sourceDescriptor.type === KibanaRegionmapSource.type) {

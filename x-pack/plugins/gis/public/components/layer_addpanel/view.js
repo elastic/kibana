@@ -8,6 +8,7 @@ import React from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
+import { KibanaTilemapSource } from '../../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import {
   EuiAccordion,
@@ -55,6 +56,7 @@ export class AddLayerPanel extends React.Component {
     const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
     const regionmapEditor = KibanaRegionmapSource.renderEditor(editorProperties);
     const heatmapEditor = ESGeohashGridSource.renderEditor(editorProperties);
+    const tilemapEditor = KibanaTilemapSource.renderEditor(editorProperties);
 
     return (
       <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
@@ -111,6 +113,8 @@ export class AddLayerPanel extends React.Component {
               paddingSize="l"
             >
               {regionmapEditor}
+              <EuiSpacer size="l"/>
+              {tilemapEditor}
             </EuiAccordion>
           </div>
         </EuiFlyoutBody>

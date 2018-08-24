@@ -7,7 +7,7 @@ import React, { Fragment } from 'react';
 import { ASource } from './source';
 import { TileLayer } from '../tile_layer';
 
-export class EMSTMSSource extends  ASource {
+export class EMSTMSSource extends ASource {
 
   static type = 'EMS_TMS';
 
