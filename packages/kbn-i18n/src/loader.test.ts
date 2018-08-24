@@ -69,7 +69,8 @@ describe('I18n loader', () => {
         join(__dirname, './__fixtures__/test_plugin_1/translations/en-US.json')
       );
 
-      expect(i18nLoader.getRegisteredLocales()).toContain('en', 'en-US');
+      expect(i18nLoader.getRegisteredLocales()).toContain('en');
+      expect(i18nLoader.getRegisteredLocales()).toContain('en-US');
       expect(i18nLoader.getRegisteredLocales().length).toBe(2);
     });
   });
@@ -83,7 +84,8 @@ describe('I18n loader', () => {
         join(__dirname, './__fixtures__/test_plugin_1/translations/en-US.json'),
       ]);
 
-      expect(i18nLoader.getRegisteredLocales()).toContain('en', 'en-US');
+      expect(i18nLoader.getRegisteredLocales()).toContain('en');
+      expect(i18nLoader.getRegisteredLocales()).toContain('en-US');
       expect(i18nLoader.getRegisteredLocales().length).toBe(2);
     });
   });
