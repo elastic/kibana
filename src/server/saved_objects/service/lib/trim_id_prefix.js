@@ -38,7 +38,6 @@ export function trimIdPrefix(schema, id, namespace, type) {
   const prefix = `${namespacePrefix}${type}:`;
 
   if (!id.startsWith(prefix)) {
-    console.log({ id, namespace, type });
     throw new Error('Unable to trim id');
   }
 

@@ -34,12 +34,7 @@ export class SpacesSavedObjectsClient {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    try {
-      return await this._client.create(type, attributes, options, this._getNamespace(this._spaceId));
-    } catch (err) {
-      console.log("WE KNOW THE ERROR", err);
-      throw err;
-    }
+    return await this._client.create(type, attributes, options, this._getNamespace(this._spaceId));
   }
 
   /**

@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if types contains an empty entry 1`] = `"type is required to build filter clause"`;
-
-exports[`throws when no types are provided 1`] = `"At least one type must be provided to \\"getSpacesQueryFilters\\""`;
