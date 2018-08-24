@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { Space } from '../../../common/model/space';
 import { SpaceCard } from './space_card';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
 import './space_cards.less';
 
-export class SpaceCards extends Component {
-  render() {
+interface Props {
+  spaces: Space[];
+  onSpaceSelect: (space: Space) => void;
+}
+
+export class SpaceCards extends Component<Props, {}> {
+  public render() {
     return (
       <div className="spaceCards">
         <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
@@ -24,20 +26,15 @@ export class SpaceCards extends Component {
     );
   }
 
-  renderSpace = (space) => (
+  public renderSpace = (space: Space) => (
     <EuiFlexItem key={space.id} grow={false}>
       <SpaceCard space={space} onClick={this.createSpaceClickHandler(space)} />
     </EuiFlexItem>
   );
 
-  createSpaceClickHandler = (space) => {
+  public createSpaceClickHandler = (space: Space) => {
     return () => {
       this.props.onSpaceSelect(space);
     };
   };
 }
-
-SpaceCards.propTypes = {
-  spaces: PropTypes.array.isRequired,
-  onSpaceSelect: PropTypes.func.isRequired,
-};

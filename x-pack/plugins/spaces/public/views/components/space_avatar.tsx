@@ -11,7 +11,7 @@ import { Space } from '../../../common/model/space';
 
 interface Props {
   space: Space;
-  size?: string;
+  size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
 }
 
