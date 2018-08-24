@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -31,7 +32,7 @@ import {
 
 const REFRESH_RATE_MS = 30000;
 
-export class JobList extends Component {
+export class JobListUi extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
   }
@@ -56,13 +57,23 @@ export class JobList extends Component {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle size="l">
-                  <h1>Rollup jobs</h1>
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.jobList.title"
+                      defaultMessage="Rollup jobs"
+                    />
+                  </h1>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
 
               <EuiPageContentHeaderSection>
                 <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
-                  Create rollup job
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.jobList.createButton.label"
+                      defaultMessage="Create rollup job"
+                    />
+                  </h1>
                 </EuiButton>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
@@ -76,3 +87,6 @@ export class JobList extends Component {
     );
   }
 }
+
+export const JobList = injectI18n(JobListUi);
+
