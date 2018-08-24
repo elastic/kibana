@@ -138,7 +138,12 @@ export const schema = Joi.object().keys({
 
   // settings for the esArchiver module
   esArchiver: Joi.object().keys({
-    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver'))
+    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+  }).default(),
+
+  // settings for the kibanaServer.uiSettings module
+  uiSettings: Joi.object().keys({
+    defaults: Joi.object().unknown(true)
   }).default(),
 
   // settings for the screenshots module

@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import path from 'path';
 import { i18n } from '@kbn/i18n';
 import JSON5 from 'json5';
+import normalize from 'normalize-path';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
 import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
+import { globAsync, readFileAsync, writeFileAsync } from './utils';
+import { paths, exclude } from '../../../.i18nrc.json';
+
+const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -38,7 +42,48 @@ function addMessageToMap(targetMap, key, value) {
   targetMap.set(key, value);
 }
 
-export async function extractDefaultTranslations(inputPath) {
+function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
+
+function filterPaths(inputPaths) {
+  const availablePaths = Object.values(paths);
+  const pathsForExtraction = new Set();
+
+  for (const inputPath of inputPaths) {
+    const normalizedPath = normalizePath(inputPath);
+
+    // If input path is the sub path of or equal to any available path, include it.
+    if (
+      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
+    ) {
+      pathsForExtraction.add(normalizedPath);
+    } else {
+      // Otherwise go through all available paths and see if any of them is the sub
+      // path of the input path (empty normalized path corresponds to root or above).
+      availablePaths
+        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
+        .forEach(ePath => pathsForExtraction.add(ePath));
+    }
+  }
+
+  return [...pathsForExtraction];
+}
+
+export function validateMessageNamespace(id, filePath) {
+  const normalizedPath = normalizePath(filePath);
+
+  const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
+    normalizedPath.startsWith(`${pluginPath}/`)
+  );
+
+  if (!id.startsWith(`${expectedNamespace}.`)) {
+    throw new Error(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See i18nrc.json for the list of supported namespaces.`);
+  }
+}
+
+export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -46,7 +91,7 @@ export async function extractDefaultTranslations(inputPath) {
 
   const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolve(inputPath, entry);
+      const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
@@ -63,8 +108,6 @@ export async function extractDefaultTranslations(inputPath) {
     { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
   );
 
-  const defaultMessagesMap = new Map();
-
   await Promise.all(
     [
       [htmlEntries, extractHtmlMessages],
@@ -73,7 +116,7 @@ export async function extractDefaultTranslations(inputPath) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries.map(async entry => {
+        entries.filter(entry => !exclude.includes(normalizePath(entry))).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),
@@ -84,7 +127,8 @@ export async function extractDefaultTranslations(inputPath) {
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            addMessageToMap(defaultMessagesMap, id, value);
+            validateMessageNamespace(id, name);
+            addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
           throw new Error(`Error in ${name}\n${error.message || error}`);
@@ -92,32 +136,65 @@ export async function extractDefaultTranslations(inputPath) {
       }
     })
   );
+}
 
+function serializeToJson5(defaultMessages) {
   // .slice(0, -1): remove closing curly brace from json to append messages
   let jsonBuffer = Buffer.from(
     JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
   );
 
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
-    return key1 < key2 ? -1 : 1;
-  });
-
   for (const [mapKey, mapValue] of defaultMessages) {
+    const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
+    const formattedContext = mapValue.context
+      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+      : '';
+
     jsonBuffer = Buffer.concat([
       jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${mapValue.message}',`),
-      Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
+      Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
+      Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
     ]);
   }
 
   // append previously removed closing curly brace
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
 
-  try {
-    await accessAsync(resolve(inputPath, 'translations'));
-  } catch (_) {
-    await makeDirAsync(resolve(inputPath, 'translations'));
+  return jsonBuffer;
+}
+
+function serializeToJson(defaultMessages) {
+  const resultJsonObject = { formats: i18n.formats };
+
+  for (const [mapKey, mapValue] of defaultMessages) {
+    if (mapValue.context) {
+      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+    } else {
+      resultJsonObject[mapKey] = mapValue.message;
+    }
   }
 
-  await writeFileAsync(resolve(inputPath, 'translations', 'en.json'), jsonBuffer);
+  return JSON.stringify(resultJsonObject, undefined, 2);
+}
+
+export async function extractDefaultTranslations({ paths, output, outputFormat }) {
+  const defaultMessagesMap = new Map();
+
+  for (const inputPath of filterPaths(paths)) {
+    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
+  }
+
+  // messages shouldn't be extracted to a file if output is not supplied
+  if (!output || !defaultMessagesMap.size) {
+    return;
+  }
+
+  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) =>
+    key1.localeCompare(key2)
+  );
+
+  await writeFileAsync(
+    path.resolve(output, 'en.json'),
+    outputFormat === 'json5' ? serializeToJson5(defaultMessages) : serializeToJson(defaultMessages)
+  );
 }

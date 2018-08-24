@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,12 +25,22 @@ export function phpfpmMetricsSpecProvider() {
   const moduleName = 'php_fpm';
   return {
     id: 'phpfpmMetrics',
-    name: 'PHP-FPM metrics',
+    name: i18n.translate('kbn.server.tutorials.phpFpmMetrics.nameTitle', {
+      defaultMessage: 'PHP-FPM metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
     isBeta: true,
-    shortDescription: 'Fetch internal metrics from PHP-FPM.',
-    longDescription: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from PHP-FPM.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
+      },
+    }),
     //euiIconType: 'logoPHPFPM',
     artifacts: {
       dashboards: [

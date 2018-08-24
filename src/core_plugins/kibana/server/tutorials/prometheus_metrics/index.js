@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,15 +25,28 @@ export function prometheusMetricsSpecProvider() {
   const moduleName = 'prometheus';
   return {
     id: moduleName + 'Metrics',
-    name: 'Prometheus metrics',
+    name: i18n.translate('kbn.server.tutorials.prometheusMetrics.nameTitle', {
+      defaultMessage: 'Prometheus metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics from a Prometheus exporter.',
-    longDescription: 'The `' + moduleName + '` Metricbeat module fetches metrics from Prometheus endpoint.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.shortDescription', {
+      defaultMessage: 'Fetch metrics from a Prometheus exporter.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `{moduleName}` Metricbeat module fetches metrics from Prometheus endpoint. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        moduleName,
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
+      },
+    }),
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.prometheusMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],

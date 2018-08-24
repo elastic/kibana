@@ -60,7 +60,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "3.6.1",
+    "@elastic/eui": "3.7.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -310,6 +310,7 @@
     "mutation-observer": "^1.0.3",
     "nock": "8.0.0",
     "node-sass": "^4.9.0",
+    "normalize-path": "^3.0.0",
     "pixelmatch": "4.0.2",
     "postcss": "^7.0.2",
     "prettier": "^1.14.0",

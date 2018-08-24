@@ -18,16 +18,29 @@
  */
 
 import { EventEmitter } from 'events';
-import { IncomingMessage, ServerResponse } from 'http';
 import { Server } from 'net';
 
+import { Server as HapiServer, ServerOptions as HapiServerOptions } from 'hapi-latest';
+import { Env } from '../config';
 import { Logger } from '../logging';
 import { Root } from '../root';
+
+interface ConnectionInfo {
+  server: HapiServer;
+  options: HapiServerOptions;
+}
 
 /**
  * List of the server events to be forwarded to the legacy platform.
  */
-const ServerEventsToForward = ['listening', 'error', 'clientError', 'connection'];
+const ServerEventsToForward = [
+  'clientError',
+  'close',
+  'connection',
+  'error',
+  'listening',
+  'upgrade',
+];
 
 /**
  * Represents "proxy" between legacy and current platform.
@@ -38,7 +51,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   private readonly log: Logger;
   private server?: Server;
 
-  constructor(private readonly root: Root) {
+  constructor(private readonly root: Root, private readonly env: Env) {
     super();
 
     this.log = root.logger.get('legacy-platform-proxifier');
@@ -55,6 +68,14 @@ export class LegacyPlatformProxifier extends EventEmitter {
           },
         ] as [string, (...args: any[]) => void];
       })
+    );
+
+    // Once core HTTP service is ready it broadcasts the internal server it relies on
+    // and server options that were used to create that server so that we can properly
+    // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is managed
+    // by ClusterManager or optimizer) then this event will never fire.
+    this.env.legacy.once('connection', (connectionInfo: ConnectionInfo) =>
+      this.onConnection(connectionInfo)
     );
   }
 
@@ -116,31 +137,36 @@ export class LegacyPlatformProxifier extends EventEmitter {
     }
   }
 
-  /**
-   * Binds Http/Https server to the LegacyPlatformProxifier.
-   * @param server Server to bind to.
-   */
-  public bind(server: Server) {
-    const oldServer = this.server;
-    this.server = server;
+  private onConnection({ server }: ConnectionInfo) {
+    this.server = server.listener;
 
     for (const [eventName, eventHandler] of this.eventHandlers) {
-      if (oldServer !== undefined) {
-        oldServer.removeListener(eventName, eventHandler);
-      }
-
       this.server.addListener(eventName, eventHandler);
     }
-  }
 
-  /**
-   * Forwards request and response objects to the legacy platform.
-   * This method is used whenever new platform doesn't know how to handle the request.
-   * @param request Native Node request object instance.
-   * @param response Native Node response object instance.
-   */
-  public proxy(request: IncomingMessage, response: ServerResponse) {
-    this.log.debug(`Request will be handled by proxy ${request.method}:${request.url}.`);
-    this.emit('request', request, response);
+    // We register Kibana proxy middleware right before we start server to allow
+    // all new platform plugins register their routes, so that `legacyProxy`
+    // handles only requests that aren't handled by the new platform.
+    server.route({
+      path: '/{p*}',
+      method: '*',
+      options: {
+        payload: {
+          output: 'stream',
+          parse: false,
+          timeout: false,
+          // Having such a large value here will allow legacy routes to override
+          // maximum allowed payload size set in the core http server if needed.
+          maxBytes: Number.MAX_SAFE_INTEGER,
+        },
+      },
+      handler: async ({ raw: { req, res } }, responseToolkit) => {
+        this.log.trace(`Request will be handled by proxy ${req.method}:${req.url}.`);
+        // Forward request and response objects to the legacy platform. This method
+        // is used whenever new platform doesn't know how to handle the request.
+        this.emit('request', req, res);
+        return responseToolkit.abandon;
+      },
+    });
   }
 }

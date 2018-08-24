@@ -138,13 +138,12 @@ export class ConfigService {
       );
     }
 
-    const environmentMode = this.env.getMode();
     const config = ConfigClass.schema.validate(
       rawConfig,
       {
-        dev: environmentMode.dev,
-        prod: environmentMode.prod,
-        ...this.env.getPackageInfo(),
+        dev: this.env.mode.dev,
+        prod: this.env.mode.prod,
+        ...this.env.packageInfo,
       },
       namespace
     );

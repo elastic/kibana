@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
@@ -54,23 +53,19 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector(server, kbnServer) {
+export function getSettingsCollector(server) {
   const config = server.config();
-
   const { collectorSet } = server.usage;
+
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     async fetch(callCluster) {
-      let kibanaSettingsData = null;
+      let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config, callCluster);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = {
-          xpack: {
-            default_admin_email: defaultAdminEmail
-          }
-        };
+        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
         this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
       } else {
         this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
@@ -79,16 +74,15 @@ export function getSettingsCollector(server, kbnServer) {
       // remember the current email so that we can mark it as successful if the bulk does not error out
       shouldUseNull = !!defaultAdminEmail;
 
-      // return nothing when there was no result
-      let settingsDoc;
-      if (kibanaSettingsData !== null) {
-        settingsDoc = {
-          kibana: getKibanaInfoForStats(server, kbnServer),
-          ...kibanaSettingsData
-        };
-      }
-
-      return settingsDoc;
+      // returns undefined if there was no result
+      return kibanaSettingsData;
+    },
+    getEmailValueStructure(email) {
+      return {
+        xpack: {
+          default_admin_email: email
+        }
+      };
     }
   });
 }
