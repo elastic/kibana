@@ -19,7 +19,33 @@
 
 const registry = {};
 
-export function registerComponent(id, component, allowOverride = false) {
+/**
+ * Attempts to register the provided component.
+ * If a component with that ID is already registered, then the registration fails.
+ *
+ * @param {*} id the id of the component to register
+ * @param {*} component the component
+ */
+export function tryRegisterSettingsComponent(id, component) {
+  if (id in registry) {
+    return false;
+  }
+
+  registry[id] = component;
+  return true;
+}
+
+/**
+ * Attempts to register the provided component, with the ability to optionally allow
+ * the component to override an existing one.
+ *
+ * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.
+ *
+ * @param {*} id the id of the component to register
+ * @param {*} component the component
+ * @param {*} allowOverride (default: false) - optional flag to allow this component to override a previously registered component
+ */
+export function registerSettingsComponent(id, component, allowOverride = false) {
   if (!allowOverride && id in registry) {
     throw new Error(`Component with id ${id} is already registered.`);
   }
@@ -27,7 +53,13 @@ export function registerComponent(id, component, allowOverride = false) {
   registry[id] = component;
 }
 
-export function getComponent(id) {
+/**
+ * Retrieve a registered component by its ID.
+ * If the component does not exist, then an exception is thrown.
+ *
+ * @param {*} id the ID of the component to retrieve
+ */
+export function getSettingsComponent(id) {
   if (!(id in registry)) {
     throw new Error(`Component not found with id ${id}`);
   }

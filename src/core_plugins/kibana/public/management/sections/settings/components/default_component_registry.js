@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { registerComponent } from './component_registry';
+import { tryRegisterSettingsComponent } from './component_registry';
 import { PageTitle } from './page_title';
 
 export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
 
 export function registerDefaultComponents() {
-  registerComponent(PAGE_TITLE_COMPONENT, PageTitle);
+  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
 }

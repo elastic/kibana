@@ -18,12 +18,26 @@
  */
 
 import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './default_component_registry';
-import { getComponent } from './component_registry';
+import { getSettingsComponent, registerSettingsComponent } from './component_registry';
 import { PageTitle } from './page_title';
 
 describe('default_component_registry', () => {
   it('should register default components with the registry', () => {
     registerDefaultComponents();
-    expect(getComponent(PAGE_TITLE_COMPONENT)).toEqual(PageTitle);
+    expect(getSettingsComponent(PAGE_TITLE_COMPONENT)).toEqual(PageTitle);
+  });
+
+  it('should be able to call "registerDefaultComponents" several times without throwing', () => {
+    registerDefaultComponents();
+    registerDefaultComponents();
+    registerDefaultComponents();
+  });
+
+  it('should not override components if they are already registered', () => {
+    const newComponent = Symbol();
+    registerSettingsComponent(PAGE_TITLE_COMPONENT, newComponent, true);
+    registerDefaultComponents();
+
+    expect(getSettingsComponent(PAGE_TITLE_COMPONENT)).toEqual(newComponent);
   });
 });

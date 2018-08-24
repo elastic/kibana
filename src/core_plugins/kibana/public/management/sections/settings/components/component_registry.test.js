@@ -17,37 +17,54 @@
  * under the License.
  */
 
-import { registerComponent, getComponent } from './component_registry';
+import { tryRegisterSettingsComponent, registerSettingsComponent, getSettingsComponent } from './component_registry';
 
-describe('registerComponent', () => {
+
+describe('tryRegisterSettingsComponent', () => {
   it('should allow a component to be registered', () => {
     const component = Symbol();
-    registerComponent('test', component);
+    expect(tryRegisterSettingsComponent('tryTest1', component)).toEqual(true);
+  });
+
+  it('should return false if the component is already registered, and not allow an override', () => {
+    const component = Symbol();
+    expect(tryRegisterSettingsComponent('tryTest2', component)).toEqual(true);
+
+    const updatedComponent = Symbol;
+    expect(tryRegisterSettingsComponent('tryTest2', updatedComponent)).toEqual(false);
+    expect(getSettingsComponent('tryTest2')).toEqual(component);
+  });
+});
+
+describe('registerSettingsComponent', () => {
+  it('should allow a component to be registered', () => {
+    const component = Symbol();
+    registerSettingsComponent('test', component);
   });
 
   it('should disallow registering a component with a duplicate id', () => {
     const component = Symbol();
-    registerComponent('test2', component);
-    expect(() => registerComponent('test2', 'some other component')).toThrowErrorMatchingSnapshot();
+    registerSettingsComponent('test2', component);
+    expect(() => registerSettingsComponent('test2', 'some other component')).toThrowErrorMatchingSnapshot();
   });
 
   it('should allow a component to be overriden', () => {
     const component = Symbol();
-    registerComponent('test3', component);
-    registerComponent('test3', 'another component', true);
+    registerSettingsComponent('test3', component);
+    registerSettingsComponent('test3', 'another component', true);
 
-    expect(getComponent('test3')).toEqual('another component');
+    expect(getSettingsComponent('test3')).toEqual('another component');
   });
 });
 
-describe('getComponent', () => {
+describe('getSettingsComponent', () => {
   it('should allow a component to be retrieved', () => {
     const component = Symbol();
-    registerComponent('test4', component);
-    expect(getComponent('test4')).toEqual(component);
+    registerSettingsComponent('test4', component);
+    expect(getSettingsComponent('test4')).toEqual(component);
   });
 
   it('should throw an error when requesting a component that does not exist', () => {
-    expect(() => getComponent('does not exist')).toThrowErrorMatchingSnapshot();
+    expect(() => getSettingsComponent('does not exist')).toThrowErrorMatchingSnapshot();
   });
 });

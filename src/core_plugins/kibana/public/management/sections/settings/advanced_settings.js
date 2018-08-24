@@ -36,7 +36,7 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import './advanced_settings.less';
 import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './components/default_component_registry';
-import { getComponent } from './components/component_registry';
+import { getSettingsComponent } from './components/component_registry';
 
 export class AdvancedSettings extends Component {
   static propTypes = {
@@ -136,7 +136,7 @@ export class AdvancedSettings extends Component {
   render() {
     const { filteredSettings, query } = this.state;
 
-    const PageTitle = getComponent(PAGE_TITLE_COMPONENT);
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
 
     return (
       <div className="advancedSettings">
