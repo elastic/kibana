@@ -25,6 +25,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiPage,
   Query,
 } from '@elastic/eui';
 
@@ -33,8 +34,6 @@ import { Search } from './components/search';
 import { Form } from './components/form';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
-
-import './advanced_settings.less';
 import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './components/default_component_registry';
 import { getSettingsComponent } from './components/component_registry';
 
@@ -139,31 +138,33 @@ export class AdvancedSettings extends Component {
     const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
 
     return (
-      <div className="advancedSettings">
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <PageTitle />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search
-              query={query}
-              categories={this.categories}
-              onQueryChange={this.onQueryChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <CallOuts />
-        <EuiSpacer size="m" />
-        <Form
-          settings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          clear={this.clearConfig}
-        />
-      </div>
+      <EuiPage restrictWidth>
+        <div className="mgtAdvancedSettings">
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <PageTitle />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Search
+                query={query}
+                categories={this.categories}
+                onQueryChange={this.onQueryChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <CallOuts/>
+          <EuiSpacer size="m" />
+          <Form
+            settings={filteredSettings}
+            categories={this.categories}
+            categoryCounts={this.categoryCounts}
+            clearQuery={this.clearQuery}
+            save={this.saveConfig}
+            clear={this.clearConfig}
+          />
+        </div>
+      </EuiPage>
     );
   }
 }

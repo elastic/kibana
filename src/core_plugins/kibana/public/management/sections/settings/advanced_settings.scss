@@ -1,0 +1,19 @@
+.mgtAdvancedSettings {
+  padding: $euiSizeL;
+  background: $euiColorLightestShade;
+  min-height: calc(100vh - 70px);
+
+  .mgtAdvancedSettings__field {
+    + * {
+      margin-top: $euiSizeL;
+    }
+
+    &Wrapper {
+      width: 720px;
+    }
+
+    &Actions {
+      padding-top: $euiSizeL;
+    }
+  }
+}
