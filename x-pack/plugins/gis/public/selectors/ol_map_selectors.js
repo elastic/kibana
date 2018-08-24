@@ -11,65 +11,8 @@ import { WEBMERCATOR, getOlLayerStyle, WGS_84 } from '../shared/ol_layer_default
 import * as ol from 'openlayers';
 import _ from 'lodash';
 
-const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
-  featureProjection: WEBMERCATOR
-});
-
-// Layer-specific logic
-function convertTmsLayersToOl(layer) {
-  const tileLayer = new ol.layer.Tile({
-    source: new ol.source.XYZ({
-      url: layer.toLayerDescriptor().source
-    })
-  });
-  tileLayer.setVisible(layer.isVisible());
-  return tileLayer;
-}
-
-function generatePlaceHolderLayerForGeohashGrid(layer) {
-  const { source } = layer.toLayerDescriptor();
-  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
-  const vectorModel = new ol.source.Vector({
-    features: olFeatures
-  });
-  const placeHolderLayer = new ol.layer.Heatmap({
-    source: vectorModel,
-  });
-  placeHolderLayer.setVisible(layer.isVisible());
-  return placeHolderLayer;
-}
-
-
-const convertVectorLayersToOl = (layer) => {
-  const { source } = layer.toLayerDescriptor();
-  const olFeatures = OL_GEOJSON_FORMAT.readFeatures(source);
-  const vectorLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: olFeatures
-    }),
-    renderMode: 'image'
-  });
-  vectorLayer.setVisible(layer.isVisible());
-  const style = layer.getCurrentStyle();
-  vectorLayer.setStyle(getOlLayerStyle(style, layer.isTemporary()));
-  return vectorLayer;
-};
-
 function createCorrespondingOLLayer(layer) {
-  let olLayer;
-  switch (layer.getType()) {
-    case LAYER_TYPE.TILE:
-      olLayer = convertTmsLayersToOl(layer);
-      break;
-    case LAYER_TYPE.VECTOR:
-      olLayer = convertVectorLayersToOl(layer);
-      break;
-    case LAYER_TYPE.GEOHASH_GRID:
-      olLayer = generatePlaceHolderLayerForGeohashGrid(layer);
-      break;
-    default:
-      throw new Error('Cannot create corresponding OL layer');
-  }
+  const olLayer = layer.createCorrespondingOLLayer();
   olLayer.set('id', layer.getId());
   return olLayer;
 }

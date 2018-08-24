@@ -31,7 +31,7 @@ export class ALayer {
   static _setName({ nameList, name }, id) {
     const layerName = name || `Layer ${id}`;
     const duplicateCount = (nameList ? nameList : []).filter((listName) => listName === layerName
-        || listName.match(new RegExp(`${layerName} \\d`)))
+      || listName.match(new RegExp(`${layerName} \\d`)))
       .length;
     return duplicateCount ? `${layerName} ${duplicateCount}` : layerName;
   }
@@ -71,5 +71,13 @@ export class ALayer {
   toLayerDescriptor() {
     return this._descriptor;
   }
+
+  /**
+   * this is a temp method, in progress of refactoring this.
+   */
+  createCorrespondingOLLayer() {
+    throw new Error('Should implement Layer#createCorrespondingOLLayer');
+  }
+
 }
 

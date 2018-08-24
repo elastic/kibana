@@ -6,6 +6,8 @@
 
 import { ALayer, LAYER_TYPE } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
+import { getOlLayerStyle, OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
+import * as ol from 'openlayers';
 
 export class VectorLayer extends ALayer {
 
@@ -43,6 +45,20 @@ export class VectorLayer extends ALayer {
     } else {
       throw new Error('Style type not recognized by VectorLayer');
     }
+  }
+
+  createCorrespondingOLLayer() {
+    const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.source);
+    const vectorLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: olFeatures
+      }),
+      renderMode: 'image'
+    });
+    vectorLayer.setVisible(this.isVisible());
+    const style = this.getCurrentStyle();
+    vectorLayer.setStyle(getOlLayerStyle(style, this.isTemporary()));
+    return vectorLayer;
   }
 
 }

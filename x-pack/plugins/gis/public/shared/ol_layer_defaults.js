@@ -28,3 +28,7 @@ export const getOlLayerStyle = (fillAndOutlineStyle, temp = false) => {
     })
   });
 };
+
+export const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
+  featureProjection: WEBMERCATOR
+});

@@ -5,6 +5,7 @@
  */
 
 import { ALayer, LAYER_TYPE } from './layer';
+import * as ol from 'openlayers';
 
 export class TileLayer extends ALayer {
 
@@ -18,5 +19,15 @@ export class TileLayer extends ALayer {
 
   getCurrentStyle() {
     return null;
+  }
+
+  createCorrespondingOLLayer() {
+    const tileLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: this._descriptor.source
+      })
+    });
+    tileLayer.setVisible(this.isVisible());
+    return tileLayer;
   }
 }
