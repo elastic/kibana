@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import angular from 'angular';
+import * as angular from 'angular';
 import 'angular-mocks';
-import { i18nProvider } from './provider';
 import * as i18n from '../core/i18n';
+import { i18nProvider } from './provider';
 
 angular.module('app', []).provider('i18n', i18nProvider);
 

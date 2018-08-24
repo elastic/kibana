@@ -1,10 +1,41 @@
 {
   "env": {
     "web": {
-      "presets": ["@kbn/babel-preset/webpack_preset"]
+      "presets": [
+        ["@babel/env", {
+          "targets": {
+            "browsers": [
+              "last 2 versions",
+              "> 5%",
+              "Safari 7"
+            ]
+          }
+        }],
+        "@babel/typescript",
+        "@babel/preset-react"
+      ],
+      "plugins": [
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread"
+      ]
     },
     "node": {
-      "presets": ["@kbn/babel-preset/node_preset"]
+      "presets": [
+        ["@babel/env", {
+          "targets": {
+            "node": "8.11.4"
+          }
+        }],
+        "@babel/typescript",
+        "@babel/preset-react"
+      ],
+      "plugins": [
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread"
+      ]
     }
-  }
+  },
+  "ignore": [
+    "**/*.test.ts"
+  ]
 }

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import angular from 'angular';
+import * as angular from 'angular';
 import 'angular-mocks';
-import { i18nProvider } from './provider';
-import { i18nFilter } from './filter';
 import * as i18n from '../core/i18n';
+import { i18nFilter } from './filter';
+import { i18nProvider } from './provider';
 
 jest.mock('../core/i18n', () => ({
   translate: jest.fn().mockImplementation(() => 'translation'),

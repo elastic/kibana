@@ -18,16 +18,16 @@
  */
 
 /**
- @typedef Messages - messages tree, where leafs are translated strings
- @type {object<string, object>}
- @property {string} [locale] - locale of the messages
- @property {object} [formats] - set of options to the underlying formatter
+ * @typedef Messages - messages tree, where leafs are translated strings
+ * @type {object<string, object>}
+ * @property {string} [locale] - locale of the messages
+ * @property {object} [formats] - set of options to the underlying formatter
  */
 
-import path from 'path';
 import { readFile } from 'fs';
+import * as JSON5 from 'json5';
+import * as path from 'path';
 import { promisify } from 'util';
-import JSON5 from 'json5';
 import { unique } from './core/helper';
 
 const asyncReadFile = promisify(readFile);
@@ -38,14 +38,14 @@ const TRANSLATION_FILE_EXTENSION = '.json';
  * Internal property for storing registered translations paths
  * @type {Map<string, string[]>|{}} - Key is locale, value is array of registered paths
  */
-const translationsRegistry = {};
+const translationsRegistry: { [key: string]: string[] } = {};
 
 /**
  * Internal property for caching loaded translations files
  * @type {Map<string, Messages>|{}} - Key is path to translation file, value is
  * object with translation messages
  */
-const loadedFiles = {};
+const loadedFiles: { [key: string]: { [key: string]: string } } = {};
 
 /**
  * Returns locale by the given translation file name
@@ -54,7 +54,7 @@ const loadedFiles = {};
  * @example
  * getLocaleFromFileName('./path/to/translation/ru.json') // => 'ru'
  */
-function getLocaleFromFileName(fullFileName) {
+function getLocaleFromFileName(fullFileName: string) {
   if (!fullFileName) {
     throw new Error('Filename is empty');
   }
@@ -75,7 +75,7 @@ function getLocaleFromFileName(fullFileName) {
  * @param {string} pathToFile
  * @returns {Promise<object>}
  */
-async function loadFile(pathToFile) {
+async function loadFile(pathToFile: string) {
   return JSON5.parse(await asyncReadFile(pathToFile, 'utf8'));
 }
 
@@ -84,7 +84,7 @@ async function loadFile(pathToFile) {
  * @param {string[]} files
  * @returns {Promise<void>}
  */
-async function loadAndCacheFiles(files) {
+async function loadAndCacheFiles(files: string[]) {
   const translations = await Promise.all(files.map(loadFile));
 
   files.forEach((file, index) => {
@@ -96,7 +96,7 @@ async function loadAndCacheFiles(files) {
  * Registers translation file with i18n loader
  * @param {string} translationFilePath - Absolute path to the translation file to register.
  */
-export function registerTranslationFile(translationFilePath) {
+export function registerTranslationFile(translationFilePath: string) {
   if (!path.isAbsolute(translationFilePath)) {
     throw new TypeError(
       'Paths to translation files must be absolute. ' +
@@ -116,7 +116,7 @@ export function registerTranslationFile(translationFilePath) {
  * Registers array of translation files with i18n loader
  * @param {string[]} arrayOfPaths - Array of absolute paths to the translation files to register.
  */
-export function registerTranslationFiles(arrayOfPaths = []) {
+export function registerTranslationFiles(arrayOfPaths: string[] = []) {
   arrayOfPaths.forEach(registerTranslationFile);
 }
 
@@ -133,7 +133,7 @@ export function getRegisteredLocales() {
  * @param {string} locale
  * @returns {Promise<Messages>} translations - translation messages
  */
-export async function getTranslationsByLocale(locale) {
+export async function getTranslationsByLocale(locale: string) {
   const files = translationsRegistry[locale] || [];
   const notLoadedFiles = files.filter(file => !loadedFiles[file]);
 
@@ -177,7 +177,7 @@ export async function getAllTranslations() {
  * @returns {Promise<Map<string, Messages>>} translations - A Promise object
  * where keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslationsFromPaths(paths) {
+export async function getAllTranslationsFromPaths(paths: string[]) {
   registerTranslationFiles(paths);
 
   return await getAllTranslations();

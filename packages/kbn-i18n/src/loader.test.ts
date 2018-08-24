@@ -20,7 +20,7 @@
 import { join } from 'path';
 
 describe('I18n loader', () => {
-  let i18nLoader;
+  let i18nLoader: any;
 
   beforeEach(() => {
     i18nLoader = require('./loader');

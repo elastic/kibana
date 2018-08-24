@@ -18,7 +18,7 @@
  */
 
 export function i18nFilter(i18n) {
-  return function(id, { defaultMessage = '', values = {} } = {}) {
+  return (id: string, { defaultMessage = '', values = {} } = {}) => {
     return i18n(id, {
       values,
       defaultMessage,

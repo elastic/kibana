@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export const isString = value => typeof value === 'string';
+export const isString = (value: any) => typeof value === 'string';
 
-export const isObject = value => typeof value === 'object' && value !== null;
+export const isObject = (value: any) => typeof value === 'object' && value !== null;
 
-export const hasValues = values => Object.keys(values).length > 0;
+export const hasValues = (values: any) => Object.keys(values).length > 0;
 
-export const unique = (arr = []) => [...new Set(arr)];
+export const unique = (arr: string[] = []) => [...new Set(arr)];
 
 const merge = (a, b) =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {

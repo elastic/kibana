@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import angular from 'angular';
+import * as angular from 'angular';
 import 'angular-mocks';
 import { i18nDirective } from './directive';
 import { i18nProvider } from './provider';

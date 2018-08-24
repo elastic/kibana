@@ -18,17 +18,17 @@
  */
 
 /**
- @typedef Messages - messages tree, where leafs are translated strings
- @type {object<string, object>}
- @property {string} [locale] - locale of the messages
- @property {object} [formats] - set of options to the underlying formatter
+ * @typedef Messages - messages tree, where leafs are translated strings
+ * @type {object<string, object>}
+ * @property {string} [locale] - locale of the messages
+ * @property {object} [formats] - set of options to the underlying formatter
  */
 
+import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
-import memoizeIntlConstructor from 'intl-format-cache';
-import { isString, isObject, hasValues, mergeAll } from './helper';
 import { formats as EN_FORMATS } from './formats';
+import { hasValues, isObject, isString, mergeAll } from './helper';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales';
@@ -50,7 +50,7 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * @param {string} id - path to the message
  * @returns {string} message - translated message from messages tree
  */
-function getMessageById(id) {
+function getMessageById(id: string) {
   return getMessages()[id];
 }
 
@@ -59,7 +59,7 @@ function getMessageById(id) {
  * @param {string} locale
  * @returns {string} normalizedLocale
  */
-function normalizeLocale(locale) {
+function normalizeLocale(locale: string) {
   return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
 }
 
@@ -99,7 +99,7 @@ export function getMessages() {
  * Tells the engine which language to use by given language key
  * @param {string} locale
  */
-export function setLocale(locale) {
+export function setLocale(locale: string) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
@@ -119,7 +119,7 @@ export function getLocale() {
  * Tells the library which language to fallback when missing translations
  * @param {string} locale
  */
-export function setDefaultLocale(locale) {
+export function setDefaultLocale(locale: string) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
