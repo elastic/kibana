@@ -17,18 +17,11 @@
  * under the License.
  */
 
-/**
- * Represents a wrapper around legacy `kbnServer` instance that exposes only
- * a subset of `kbnServer` APIs used by the new platform.
- * @internal
- */
-export class LegacyKbnServer {
-  constructor(private readonly rawKbnServer: any) {}
+import { dirname } from 'path';
 
-  /**
-   * Custom HTTP Listener used by HapiJS server in the legacy platform.
-   */
-  get newPlatformProxyListener() {
-    return this.rawKbnServer.newPlatform.proxyListener;
-  }
-}
+export const pkg = {
+  __filename: require.resolve('../../package.json'),
+  __dirname: dirname(require.resolve('../../package.json')),
+  // tslint:disable no-var-requires
+  ...require('../../package.json'),
+};
