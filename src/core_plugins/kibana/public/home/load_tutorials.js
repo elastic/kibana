@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
 const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
@@ -47,9 +47,12 @@ async function loadTutorials() {
     tutorials = await response.json();
     tutorialsLoaded = true;
   } catch(err) {
-    notify.error(i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
-      defaultMessage: 'Unable to load tutorials, {err}', values: { err: err } }
-    ));
+    toastNotifications.addDanger({
+      title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
+        defaultMessage: 'Unable to load tutorials' }
+      ),
+      text: err.message,
+    });
   }
 }
 
