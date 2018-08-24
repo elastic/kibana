@@ -49,7 +49,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 9,109', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          console.log(`======================== ${data}`);
           return data.trim() === '9,109';
         });
       });
