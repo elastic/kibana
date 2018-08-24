@@ -48,6 +48,39 @@ const stepIdToStepMap = {
       rollupCron: '/30 * * * * ?',
       rollupPageSize: 1000,
     },
+    fieldsValidator: fields => {
+      const {
+        id,
+        indexPattern,
+        rollupIndex,
+        rollupCron,
+        rollupPageSize,
+      } = fields;
+
+      const errors = {};
+
+      if (!id || !id.trim()) {
+        errors.id = 'You must provide a name';
+      }
+
+      if (!indexPattern || !indexPattern.trim()) {
+        errors.indexPattern = 'You must provide an index pattern';
+      }
+
+      if (!rollupIndex || !rollupIndex.trim()) {
+        errors.rollupIndex = 'You must provide a rollup index';
+      }
+
+      if (!rollupCron || !rollupCron.trim()) {
+        errors.rollupCron = 'You must provide an interval';
+      }
+
+      if (!rollupPageSize) {
+        errors.rollupPageSize = 'You must provide a page size';
+      }
+
+      return errors;
+    },
   },
   [STEP_DATE_HISTOGRAM]: {
     defaultFields: {
@@ -138,6 +171,9 @@ export class JobCreate extends Component {
     // this step, and render a global error message to clearly convey the
     // error.
     if (!this.canGoToStep(stepId)) {
+      this.setState({
+        showStepErrors: true,
+      });
       return;
     }
 
@@ -147,6 +183,7 @@ export class JobCreate extends Component {
       currentStepId: stepId,
       nextStepId: stepIds[currentStepIndex + 1],
       previousStepId: stepIds[currentStepIndex - 1],
+      showStepErrors: false,
     });
 
     if (stepIds.indexOf(stepId) > stepIds.indexOf(this.state.checkpointStepId)) {

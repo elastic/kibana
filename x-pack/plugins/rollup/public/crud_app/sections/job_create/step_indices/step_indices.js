@@ -37,6 +37,14 @@ export class StepIndices extends Component {
       rollupPageSize,
     } = fields;
 
+    const {
+      id: errorId,
+      indexPattern: errorIndexPattern,
+      rollupIndex: errorRollupIndex,
+      rollupCron: errorRollupCron,
+      rollupPageSize: errorRollupPageSize,
+    } = fieldErrors;
+
     return (
       <Fragment>
         <EuiTitle>
@@ -50,9 +58,13 @@ export class StepIndices extends Component {
         {this.renderErrors()}
 
         <EuiForm>
-          <EuiFormRow label="Rollup job name">
+          <EuiFormRow
+            label="Rollup job name"
+            error={errorId}
+            isInvalid={Boolean(showStepErrors && errorId)}
+          >
             <EuiFieldText
-              isInvalid={showStepErrors && fieldErrors.name}
+              isInvalid={Boolean(showStepErrors && errorId)}
               value={id}
               onChange={e => onFieldsChange({ id: e.target.value })}
             />
@@ -73,10 +85,15 @@ export class StepIndices extends Component {
 
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiFormRow label="Index pattern">
+              <EuiFormRow
+                label="Index pattern"
+                error={errorIndexPattern}
+                isInvalid={Boolean(showStepErrors && errorIndexPattern)}
+              >
                 <EuiFieldText
                   value={indexPattern}
                   onChange={e => onFieldsChange({ indexPattern: e.target.value })}
+                  isInvalid={Boolean(showStepErrors && errorIndexPattern)}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -88,10 +105,15 @@ export class StepIndices extends Component {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiFormRow label="Rollup index">
+              <EuiFormRow
+                label="Rollup index"
+                error={errorRollupIndex}
+                isInvalid={Boolean(showStepErrors && errorRollupIndex)}
+              >
                 <EuiFieldText
                   value={rollupIndex}
                   onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
+                  isInvalid={Boolean(showStepErrors && errorRollupIndex)}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -111,17 +133,27 @@ export class StepIndices extends Component {
 
           <EuiSpacer size="l" />
 
-          <EuiFormRow label="Cron">
+          <EuiFormRow
+            label="Cron"
+            error={errorRollupCron}
+            isInvalid={Boolean(showStepErrors && errorRollupCron)}
+          >
             <EuiFieldText
               value={rollupCron}
               onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+              isInvalid={Boolean(showStepErrors && errorRollupCron)}
             />
           </EuiFormRow>
 
-          <EuiFormRow label="Page size">
+          <EuiFormRow
+            label="Page size"
+            error={errorRollupPageSize}
+            isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
+          >
             <EuiFieldNumber
               value={rollupPageSize}
               onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
+              isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
             />
           </EuiFormRow>
         </EuiForm>
@@ -130,25 +162,21 @@ export class StepIndices extends Component {
   }
 
   renderErrors = () => {
-    const { showStepErrors, fieldErrors } = this.props;
+    const { showStepErrors } = this.props;
 
     if (!showStepErrors) {
       return null;
     }
 
-    const { name } = fieldErrors;
-
-    if (name) {
-      return (
-        <Fragment>
-          <EuiCallOut
-            title="You must name your deployment template before saving it"
-            color="danger"
-            iconType="cross"
-          />
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
-    }
+    return (
+      <Fragment>
+        <EuiCallOut
+          title="Fix errors before going to next step"
+          color="danger"
+          iconType="cross"
+        />
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
   }
 }
