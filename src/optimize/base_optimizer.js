@@ -58,44 +58,40 @@ export default class BaseOptimizer {
         this.sourceMaps = opts.sourceMaps || false;
         break;
     }
-
-    this.unsafeCache = opts.unsafeCache || false;
-    if (typeof this.unsafeCache === 'string') {
-      this.unsafeCache = [
-        new RegExp(this.unsafeCache.slice(1, -1))
-      ];
-    }
-  }
-
-  isCompilerReady() {
-    return this.compiler;
   }
 
   async init() {
-    if (this.isCompilerReady()) return this;
+    if (this.compiler) {
+      return this;
+    }
 
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.writeStatsHook();
+    this.registerCompilerHooks();
 
     return this;
   }
 
-  writeStatsHook() {
-    this.compiler.hooks.done.tap({
-      name: 'kibana-writeStatsJson',
-      fn: stats => {
-        if (!this.profile || stats.compilation.needAdditionalPass) {
-          return;
-        }
+  registerCompilerHooks() {
+    this.registerCompilerDoneHook();
+  }
 
-        const path = this.uiBundles.resolvePath('stats.json');
-        const content = JSON.stringify(stats.toJson());
-        writeFile(path, content, function (err) {
-          if (err) throw err;
-        });
+  registerCompilerDoneHook() {
+    this.compiler.hooks.done.tap('base_optimizer-done', stats => {
+      // We are not done while we have an additional
+      // compilation pass to run
+      // We also don't need to emit the stats if we don't have
+      // the profile option set
+      if (!this.profile || stats.compilation.needAdditionalPass) {
+        return;
       }
+
+      const path = this.uiBundles.resolvePath('stats.json');
+      const content = JSON.stringify(stats.toJson());
+      writeFile(path, content, function (err) {
+        if (err) throw err;
+      });
     });
   }
 
@@ -197,7 +193,7 @@ export default class BaseOptimizer {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       parallelism: os.cpus().length - 1,
-      cache: !!this.unsafeCache,
+      cache: true,
       entry: this.uiBundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
@@ -218,7 +214,7 @@ export default class BaseOptimizer {
               name: 'commons',
               chunks: 'initial',
               minChunks: 2,
-              reuseExistingChunk: true,
+              reuseExistingChunk: true, // check this again
             }
           }
         },
@@ -226,6 +222,11 @@ export default class BaseOptimizer {
       },
 
       plugins: [
+        new DLLBundlerPlugin({
+          dllConfig: this.getDLLConfig(),
+          log: this.log
+        }),
+
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),
@@ -322,7 +323,10 @@ export default class BaseOptimizer {
       },
 
       performance: {
-        hints: false // TODO: review this
+        // NOTE: we are disabling this as those hints
+        // are more tailored for the final bundles result
+        // and not for the webpack compilations performance itself
+        hints: false
       }
     };
 
@@ -409,13 +413,18 @@ export default class BaseOptimizer {
             sourceMap: false,
             uglifyOptions: {
               compress: {
-                // the following is required for dead-code the removal
+                // The following is required for dead-code the removal
                 // check in React DevTools
+                //
+                // default
                 unused: true,
                 dead_code: true,
                 conditionals: true,
                 evaluate: true,
 
+                // changed
+                keep_fnames: true,
+                keep_infinity: true,
                 comparisons: false,
                 sequences: false,
                 properties: false,
@@ -431,8 +440,6 @@ export default class BaseOptimizer {
                 reduce_vars: false,
                 warnings: false,
                 negate_iife: false,
-                keep_fnames: true,
-                keep_infinity: true,
                 side_effects: false
               },
               mangle: false
@@ -442,18 +449,8 @@ export default class BaseOptimizer {
       }
     };
 
-    const dllBundlerPlugin = {
-      plugins: [
-        new DLLBundlerPlugin({
-          dllConfig: this.getDLLConfig(),
-          log: this.log
-        })
-      ]
-    };
-
     return webpackMerge(
       commonConfig,
-      dllBundlerPlugin,
       IS_KIBANA_DISTRIBUTABLE
         ? isDistributableConfig
         : getSourceConfig(),
@@ -495,9 +492,5 @@ export default class BaseOptimizer {
         ...Stats.presetToOptions('detailed')
       }))
     );
-  }
-
-  async run(args) {
-    return await this.compiler.run(args);
   }
 }

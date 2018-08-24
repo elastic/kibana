@@ -21,15 +21,13 @@ import BaseOptimizer from './base_optimizer';
 import { fromNode } from 'bluebird';
 
 export default class FsOptimizer extends BaseOptimizer {
-  async init() {
-    await super.init();
-  }
-
   async run() {
-    if (!this.isCompilerReady()) await this.init();
+    if (!this.compiler) {
+      await this.init();
+    }
 
     await fromNode(cb => {
-      return super.run((err, stats) => {
+      return this.compiler.run((err, stats) => {
         if (err || !stats) return cb(err);
 
         if (this.isFailure(stats)) {

@@ -48,8 +48,6 @@ export default class WatchOptimizer extends BaseOptimizer {
     await this.uiBundles.resetBundleDir();
     await super.init();
 
-    this.compiler.hooks.watchRun.tap(this.compilerWatchRunTap);
-    this.compiler.hooks.done.tap(this.compilerDoneTap);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -57,6 +55,45 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
 
     this.initializing = false;
+  }
+
+  registerCompilerHooks() {
+    super.registerCompilerHooks();
+    this.registerCompilerWatchRunHook();
+  }
+
+  registerCompilerWatchRunHook() {
+    this.compiler.hooks.watchRun.tap('watch_optimizer-watchRun', () => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
+    });
+  }
+
+  registerCompilerDoneHook() {
+    super.registerCompilerHooks();
+
+    this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
+      if (stats.compilation.needAdditionalPass) {
+        return;
+      }
+
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (this.isFailure(stats)) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    });
   }
 
   bindToServer(server, basePath) {
@@ -97,40 +134,6 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerWatchRunTap = {
-    name: 'kibana-compilerWatchRunTap',
-    fn: () => {
-      this.status$.next({
-        type: STATUS.RUNNING
-      });
-    }
-  }
-
-  compilerDoneTap = {
-    name: 'kibana-compilerDoneTap',
-    fn: (stats) => {
-      if (stats.compilation.needAdditionalPass) {
-        return;
-      }
-
-      this.initialBuildComplete = true;
-      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-      if (this.isFailure(stats)) {
-        this.status$.next({
-          type: STATUS.FAILURE,
-          seconds,
-          error: this.failedStatsToError(stats)
-        });
-      } else {
-        this.status$.next({
-          type: STATUS.SUCCESS,
-          seconds,
-        });
-      }
-    }
-  }
-
   compilerWatchErrorHandler = (error) => {
     if (error) {
       this.status$.next({
@@ -138,7 +141,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         error
       });
     }
-  }
+  };
 
   onStatusChangeHandler = ({ type, seconds, error }) => {
     switch (type) {

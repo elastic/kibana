@@ -6,10 +6,11 @@ window.onload = function () {
   }
 
   var files = [
+    createAnchor('{{bundlePath}}/vendors.dll.style.css'),
     createAnchor('{{bundlePath}}/commons.style.css'),
     createAnchor('{{bundlePath}}/{{appId}}.style.css'),
 
-    createAnchor('{{bundlePath}}/vendor.dll.js'),
+    createAnchor('{{bundlePath}}/vendor.dll.bundle.js'),
     createAnchor('{{bundlePath}}/commons.bundle.js'),
     createAnchor('{{bundlePath}}/{{appId}}.bundle.js')
   ];
