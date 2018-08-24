@@ -12,12 +12,15 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiPageContentHeader,
   EuiSpacer,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiStepsHorizontal,
+  EuiBreadcrumbs,
 } from '@elastic/eui';
+
+import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
+import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
 import { StepIndices } from './step_indices';
@@ -244,19 +247,25 @@ export class JobCreate extends Component {
   };
 
   render() {
+    const breadcrumbs = [{
+      text: 'Rollup jobs',
+      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
+    }, {
+      text: 'Create',
+    }];
+
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent horizontalPosition="center" style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>Create rollup job</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
+            <EuiSpacer size="xs" />
 
-            <EuiSpacer />
+            <EuiPageContentHeader>
+              <EuiTitle size="l">
+                <h1>Create rollup job</h1>
+              </EuiTitle>
+            </EuiPageContentHeader>
 
             <EuiStepsHorizontal steps={this.getSteps()} />
 

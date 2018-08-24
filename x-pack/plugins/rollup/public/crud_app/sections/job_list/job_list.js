@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -12,10 +12,9 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
@@ -54,21 +53,19 @@ export class JobList extends Component {
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
                 <EuiTitle size="l">
                   <h1>Rollup jobs</h1>
                 </EuiTitle>
-              </EuiFlexItem>
+              </EuiPageContentHeaderSection>
 
-              <EuiFlexItem grow={false}>
+              <EuiPageContentHeaderSection>
                 <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
                   Create rollup job
                 </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer />
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
 
             <JobTable />
 
