@@ -233,7 +233,7 @@ export function SegmentedSearchRequestProvider(Private, config) {
       this.resp = _.omit(this._mergedResp, '_bucketIndex');
 
       if (firstHits) this._handle.emit('first', seg);
-      if (gotHits)   this._handle.emit('segment', seg);
+      gotHits ? this._handle.emit('segment', seg) : this._handle.emit('emptySegment', seg);
       if (haveHits)  this._handle.emit('mergedSegment', this.resp);
     }
 

@@ -516,12 +516,26 @@ function discoverController(
 
   function handleSegmentedFetch(segmented) {
     function flushResponseData() {
-      inspectorAdapters.requests.reset();
       $scope.fetchError = undefined;
       $scope.hits = 0;
       $scope.failures = [];
       $scope.rows = [];
       $scope.fieldCounts = {};
+    }
+
+    function logRequestInInspector(resp) {
+      const inspectorRequest = inspectorAdapters.requests.start(
+        `Segment ${$scope.fetchStatus.complete}`,
+        {
+          description: `This request queries Elasticsearch to fetch the data for the search.`,
+        });
+      inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+      $scope.searchSource.getSearchRequestBody().then(body => {
+        inspectorRequest.json(body);
+      });
+      inspectorRequest
+        .stats(getResponseInspectorStats($scope.searchSource, resp))
+        .ok({ json: resp });
     }
 
     if (!$scope.rows) flushResponseData();
@@ -564,6 +578,10 @@ function discoverController(
     // triggered when the status updated
     segmented.on('status', function (status) {
       $scope.fetchStatus = status;
+      if (status.complete === 0) {
+        // starting new segmented search request
+        inspectorAdapters.requests.reset();
+      }
     });
 
     segmented.on('first', function () {
@@ -577,21 +595,15 @@ function discoverController(
           return failure.index + failure.shard + failure.reason;
         });
       }
+      logRequestInInspector(resp);
+    });
+
+    segmented.on('emptySegment', function (resp) {
+      logRequestInInspector(resp);
     });
 
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
-
-      const inspectorRequest = inspectorAdapters.requests.start('Data', {
-        description: `This request queries Elasticsearch to fetch the data for the search.`,
-      });
-      inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-      $scope.searchSource.getSearchRequestBody().then(body => {
-        inspectorRequest.json(body);
-      });
-      inspectorRequest
-        .stats(getResponseInspectorStats($scope.searchSource, merged))
-        .ok({ json: merged });
 
       if ($scope.opts.timefield) {
         $scope.searchSource.rawResponse = merged;
@@ -645,7 +657,6 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
-
     $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
       .catch((error) => {
         const fetchError = getPainlessError(error);
