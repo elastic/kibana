@@ -17,30 +17,5 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-
-module.exports = function (grunt) {
-  grunt.registerTask('verifyTranslations', function () {
-    const done = this.async();
-
-    const serverCmd = {
-      cmd: 'node',
-      args: [resolve(__dirname, '../scripts/extract_default_translations')],
-      opts: { stdio: 'inherit' },
-    };
-
-    new Promise((resolve, reject) => {
-      grunt.util.spawn(serverCmd, (error, result, code) => {
-        if (error || code !== 0) {
-          const error = new Error(`verifyTranslations exited with code ${code}`);
-          grunt.fail.fatal(error);
-          reject(error);
-          return;
-        }
-
-        grunt.log.writeln(result);
-        resolve();
-      });
-    }).then(done, done);
-  });
-};
+require('../src/setup_node_env');
+require('../src/dev/run_i18n_check');

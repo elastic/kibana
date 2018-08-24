@@ -26,6 +26,7 @@ module.exports = function (grunt) {
     'run:eslint',
     'run:tslint',
     'run:typeCheck',
+    'run:i18nCheck',
     'run:checkFileCasing',
     'licenses',
     'verifyDependencyVersions',
@@ -36,7 +37,6 @@ module.exports = function (grunt) {
     'test:projects',
     'test:browser-ci',
     'run:apiIntegrationTests',
-    'verifyTranslations',
   ]);
 
   grunt.registerTask('jenkins:selenium', [
