@@ -15,10 +15,6 @@ export default function ({ getService }) {
   describe('get', () => {
 
     const expectResults = (spaceId) => () => (resp) => {
-
-      // The default space does not assign a space id.
-      const expectedSpaceId = spaceId === 'default' ? undefined : spaceId;
-
       const expectedBody = {
         id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
         type: 'visualization',
@@ -35,10 +31,6 @@ export default function ({ getService }) {
           kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta
         }
       };
-
-      if (expectedSpaceId) {
-        expectedBody.namespace = expectedSpaceId;
-      }
 
       expect(resp.body).to.eql(expectedBody);
     };

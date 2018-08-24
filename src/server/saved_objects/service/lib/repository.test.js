@@ -792,28 +792,12 @@ describe('SavedObjectsRepository', () => {
       }
     };
 
-    it('formats Elasticsearch response when there is no namespace', async () => {
-      callAdminCluster.returns(Promise.resolve(noNamespaceResult));
-      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      sinon.assert.notCalled(onBeforeWrite);
-      expect(response).toEqual({
-        id: 'logstash-*',
-        type: 'index-pattern',
-        updated_at: mockTimestamp,
-        version: 2,
-        attributes: {
-          title: 'Testing'
-        }
-      });
-    });
-
-    it('formats Elasticsearch response when there is a namespace', async () => {
+    it('formats Elasticsearch response', async () => {
       callAdminCluster.returns(Promise.resolve(namespacedResult));
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*', 'foo-namespace');
       sinon.assert.notCalled(onBeforeWrite);
       expect(response).toEqual({
         id: 'logstash-*',
-        namespace: 'foo-namespace',
         type: 'index-pattern',
         updated_at: mockTimestamp,
         version: 2,
@@ -951,64 +935,6 @@ describe('SavedObjectsRepository', () => {
         id: 'bad',
         type: 'config',
         error: { statusCode: 404, message: 'Not found' }
-      });
-    });
-
-    it(`includes namespace if it's specified on the document source`, async () => {
-      callAdminCluster.returns(Promise.resolve({
-        docs: [{
-          _type: 'doc',
-          _id: 'foo-namespace:config:one',
-          found: true,
-          _version: 2,
-          _source: {
-            namespace: 'foo-namespace',
-            ...mockTimestampFields,
-            type: 'config',
-            specialProperty: 'specialValue',
-            config: { title: 'Test' }
-          }
-        }, {
-          _id: 'no-ns-type:two',
-          _type: 'doc',
-          found: true,
-          _version: 2,
-          _source: {
-            type: 'no-ns-type',
-            ...mockTimestampFields,
-            'no-ns-type': {
-              name: 'bar'
-            }
-          }
-        }]
-      }));
-
-      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet(
-        [
-          { id: 'one', type: 'config' },
-          { id: 'two', type: 'no-ns-type' }
-        ]
-      );
-
-      expect(savedObjects).toHaveLength(2);
-
-      expect(savedObjects[0]).toEqual({
-        id: 'one',
-        namespace: 'foo-namespace',
-        type: 'config',
-        ...mockTimestampFields,
-        version: 2,
-        attributes: { title: 'Test' }
-      });
-
-      expect(savedObjects[1]).toEqual({
-        id: 'two',
-        type: 'no-ns-type',
-        ...mockTimestampFields,
-        version: 2,
-        attributes: {
-          name: 'bar'
-        }
       });
     });
   });

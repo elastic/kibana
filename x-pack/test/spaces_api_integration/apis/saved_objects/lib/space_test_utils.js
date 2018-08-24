@@ -13,12 +13,3 @@ export function getUrlPrefix(spaceId) {
 export function getIdPrefix(spaceId) {
   return spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 }
-
-export function getExpectedNamespaceProperty(spaceId) {
-  if (spaceId === DEFAULT_SPACE_ID) {
-    return {};
-  }
-  return {
-    namespace: spaceId
-  };
-}

@@ -355,7 +355,6 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          ...doc._source.namespace && { namespace: doc._source.namespace },
           attributes: {
             ...doc._source[type],
           }
@@ -396,7 +395,6 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      ...response._source.namespace && { namespace: response._source.namespace },
       attributes: {
         ...response._source[type],
       }
