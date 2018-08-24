@@ -9,6 +9,7 @@ import { EMS_V2 } from '../common/ems_v2';
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import  *  as elasticsearch from 'elasticsearch';
+import _ from 'lodash';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -134,7 +135,6 @@ export function initRoutes(server) {
     }
   });
 
-
   server.route({
     method: 'GET',
     path: `${ROOT}/meta`,
@@ -153,14 +153,13 @@ export function initRoutes(server) {
             indexPatterns: indexPatterns
           },
           kibana: {
-            file: [],
-            tms: []
+            regionmap: _.get(mapConfig, 'regionmap.layers', []),
+            tilemap: _.get(mapConfig, 'tilemap', [])
           }
         }
       });
     }
   });
-
 
   async function getIndexPatterns(req) {
 
@@ -224,8 +223,6 @@ export function initRoutes(server) {
       return defaultValue;
     }
   }
-
-
 }
 
 
