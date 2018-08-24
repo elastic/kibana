@@ -50,14 +50,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeInspector();
     });
 
-    it('should display request stats when with no results', async () => {
+    it('should display request stats with no results', async () => {
       await PageObjects.visualize.openInspector();
       const requestStats = await PageObjects.visualize.getInspectorTableData();
 
       expect(getHitCount(requestStats)).to.be('0');
     });
 
-    it('should display request stats when with results', async () => {
+    it('should display request stats with results', async () => {
       await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
 
       await PageObjects.visualize.openInspector();
