@@ -25,14 +25,14 @@ import { getRouterLinkProps } from '../../services';
 import { Navigation } from './navigation';
 import { StepIndices } from './step_indices';
 
-const STEP_INDICES = 'STEP_INDICES';
+const STEP_LOGISTICS = 'STEP_LOGISTICS';
 const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
 const STEP_GROUPS = 'STEP_GROUPS';
 const STEP_METRICS = 'STEP_METRICS';
 const STEP_REVIEW = 'STEP_REVIEW';
 
 const stepIds = [
-  STEP_INDICES,
+  STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
   STEP_GROUPS,
   STEP_METRICS,
@@ -40,7 +40,7 @@ const stepIds = [
 ];
 
 const stepIdToStepMap = {
-  [STEP_INDICES]: {
+  [STEP_LOGISTICS]: {
     defaultFields: {
       id: '',
       indexPattern: '',
@@ -113,7 +113,7 @@ const stepIdToStepMap = {
 };
 
 const stepIdToTitleMap = {
-  [STEP_INDICES]: 'Indices',
+  [STEP_LOGISTICS]: 'Logistics',
   [STEP_DATE_HISTOGRAM]: 'Date histogram',
   [STEP_GROUPS]: 'Groups',
   [STEP_METRICS]: 'Metrics',
@@ -236,7 +236,7 @@ export class JobCreate extends Component {
   getAllFields() {
     const {
       stepsFields: {
-        [STEP_INDICES]: {
+        [STEP_LOGISTICS]: {
           id,
           indexPattern,
           rollupIndex,
@@ -325,7 +325,7 @@ export class JobCreate extends Component {
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
 
     switch (currentStepId) {
-      case STEP_INDICES:
+      case STEP_LOGISTICS:
         return (
           <StepIndices
             fields={currentStepFields}

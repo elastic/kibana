@@ -5,14 +5,17 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormHelpText,
   EuiFormRow,
   EuiIcon,
   EuiSpacer,
@@ -20,7 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-export class StepIndices extends Component {
+import { logisticalDetailsUrl } from '../../../services';
+
+export class StepIndicesUi extends Component {
   render() {
     const {
       fields,
@@ -45,13 +50,46 @@ export class StepIndices extends Component {
       rollupPageSize: errorRollupPageSize,
     } = fieldErrors;
 
+    const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|'].join(', ');
+
     return (
       <Fragment>
-        <EuiTitle>
-          <h3>
-            Indices
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h3>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepLogistical.title"
+                  defaultMessage="Logistics"
+                />
+              </h3>
+            </EuiTitle>
+
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepLogistical.description"
+                  defaultMessage="Define the manner in which data will be rolled up."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={logisticalDetailsUrl}
+              target="_blank"
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.readDocsButton.label"
+                defaultMessage="Read the docs"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 
@@ -59,7 +97,12 @@ export class StepIndices extends Component {
 
         <EuiForm>
           <EuiFormRow
-            label="Rollup job name"
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.fieldName.label"
+                defaultMessage="Rollup job name"
+              />
+            )}
             error={errorId}
             isInvalid={Boolean(showStepErrors && errorId)}
           >
@@ -72,13 +115,18 @@ export class StepIndices extends Component {
 
           <EuiTitle size="s">
             <h4>
-              Data flow
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.title"
+                defaultMessage="Data flow"
+              />
             </h4>
           </EuiTitle>
 
           <EuiText>
-            Where should data to be pulled from and where should it be stored when
-            it&rsquo; rolled up?
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.description"
+              defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
+            />
           </EuiText>
 
           <EuiSpacer size="l" />
@@ -86,11 +134,17 @@ export class StepIndices extends Component {
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiFormRow
-                label="Index pattern"
+                label={(
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.label"
+                    defaultMessage="Index pattern"
+                  />
+                )}
                 error={errorIndexPattern}
                 isInvalid={Boolean(showStepErrors && errorIndexPattern)}
               >
                 <EuiFieldText
+                  aria-labelledby="indexPatternHelp"
                   value={indexPattern}
                   onChange={e => onFieldsChange({ indexPattern: e.target.value })}
                   isInvalid={Boolean(showStepErrors && errorIndexPattern)}
@@ -106,11 +160,17 @@ export class StepIndices extends Component {
 
             <EuiFlexItem grow={false}>
               <EuiFormRow
-                label="Rollup index"
+                label={(
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.label"
+                    defaultMessage="Rollup index"
+                  />
+                )}
                 error={errorRollupIndex}
                 isInvalid={Boolean(showStepErrors && errorRollupIndex)}
               >
                 <EuiFieldText
+                  aria-labelledby="indexPatternHelp"
                   value={rollupIndex}
                   onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
                   isInvalid={Boolean(showStepErrors && errorRollupIndex)}
@@ -119,22 +179,53 @@ export class StepIndices extends Component {
             </EuiFlexItem>
           </EuiFlexGroup>
 
+          <EuiFormHelpText id="indexPatternHelp">
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.allowLabel"
+                defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                values={{ asterisk: <strong>*</strong> }}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.disallowLabel"
+                defaultMessage="You can't use spaces or the characters {characterList}"
+                values={{ characterList: <strong>{illegalCharacters}</strong> }}
+              />
+            </p>
+          </EuiFormHelpText>
+
           <EuiSpacer size="l" />
 
           <EuiTitle size="s">
             <h4>
-              Schedule
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.title"
+                defaultMessage="Schedule"
+              />
             </h4>
           </EuiTitle>
 
           <EuiText>
-            How often should data be rolled up and how many results should be indexed at a time?
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.description"
+              defaultMessage={`
+                How often should data be rolled up and how many results should be indexed at a time?
+                A larger value will tend to execute faster, but will require more memory during processing.
+              `}
+            />
           </EuiText>
 
           <EuiSpacer size="l" />
 
           <EuiFormRow
-            label="Cron"
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.stepCron.label"
+                defaultMessage="Cron"
+              />
+            )}
             error={errorRollupCron}
             isInvalid={Boolean(showStepErrors && errorRollupCron)}
           >
@@ -146,7 +237,12 @@ export class StepIndices extends Component {
           </EuiFormRow>
 
           <EuiFormRow
-            label="Page size"
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistical.stepPageSize.label"
+                defaultMessage="Page size"
+              />
+            )}
             error={errorRollupPageSize}
             isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
           >
@@ -171,7 +267,12 @@ export class StepIndices extends Component {
     return (
       <Fragment>
         <EuiCallOut
-          title="Fix errors before going to next step"
+          title={(
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistical.stepError.title"
+              defaultMessage="Fix errors before going to next step"
+            />
+          )}
           color="danger"
           iconType="cross"
         />
@@ -180,3 +281,5 @@ export class StepIndices extends Component {
     );
   }
 }
+
+export const StepIndices = injectI18n(StepIndicesUi);

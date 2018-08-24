@@ -28,3 +28,7 @@ export {
   getRouter,
   getRouterLinkProps,
 } from './routing';
+
+export {
+  logisticalDetailsUrl,
+} from './documentation_links';
