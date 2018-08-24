@@ -34,7 +34,12 @@ export class SpacesSavedObjectsClient {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.create(type, attributes, options, this._getNamespace(this._spaceId));
+    try {
+      return await this._client.create(type, attributes, options, this._getNamespace(this._spaceId));
+    } catch (err) {
+      console.log("WE KNOW THE ERROR", err);
+      throw err;
+    }
   }
 
   /**
@@ -87,14 +92,13 @@ export class SpacesSavedObjectsClient {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.find({ ...options }, this._getNamespace(this._spaceId));
+    return await this._client.find(options, this._getNamespace(this._spaceId));
   }
 
   /**
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options = {}]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -103,12 +107,12 @@ export class SpacesSavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], options = {}, namespace) {
+  async bulkGet(objects = [], namespace) {
     if (namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.bulkGet(objects, options, this._getNamespace(this._spaceId));
+    return await this._client.bulkGet(objects, this._getNamespace(this._spaceId));
   }
 
   /**
@@ -116,15 +120,14 @@ export class SpacesSavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {object} [options = {}]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, options = {}, namespace) {
+  async get(type, id, namespace) {
     if (namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.get(type, id, options, this._getNamespace(this._spaceId));
+    return await this._client.get(type, id, this._getNamespace(this._spaceId));
   }
 
   /**

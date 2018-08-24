@@ -60,33 +60,69 @@ function getFieldsForTypes(searchFields, types) {
 }
 
 /**
+ *  Gets the clause that will filter for the type in the namespace.
+ *  Some types are namespace agnostic, so they must be treated differently.
+ *  @param  {SavedObjectsSchema} schema
+ *  @param  {string} namespace
+ *  @param  {string} type
+ *  @return {Object}
+ */
+function getClauseForType(schema, namespace, type) {
+  const bool = {
+    must: []
+  };
+
+  if (!type) {
+    throw new Error(`type is required to build filter clause`);
+  }
+
+  bool.must.push({
+    term: {
+      type
+    }
+  });
+
+  if (namespace && !schema.isNamespaceAgnostic(type)) {
+    bool.must.push({
+      term: {
+        namespace
+      }
+    });
+  } else {
+    bool.must_not = [{
+      exists: {
+        field: 'namespace'
+      }
+    }];
+  }
+
+  return {
+    bool
+  };
+}
+
+/**
  *  Get the "query" related keys for the search body
  *  @param  {EsMapping} mapping mappings from Ui
+ * *@param  {SavedObjectsSchema} schema
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
  *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, namespace, type, search, searchFields, filters = []) {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields, filters = []) {
   const types = getTypes(mappings, type);
   const bool = {
     filter: [...filters],
   };
 
-  if (namespace) {
-    bool.filter.push({ 'term': { namespace } });
-  } else {
-    bool.must_not = [{
-      exists: {
-        field: 'namespace',
-      }
-    }];
-  }
-
-  if (type) {
-    bool.filter.push({ [Array.isArray(type) ? 'terms' : 'term']: { type } });
-  }
+  bool.filter.push({
+    bool: {
+      should: types.map(type => getClauseForType(schema, namespace, type)),
+      minimum_should_match: 1
+    }
+  });
 
   if (search) {
     bool.must = [
@@ -100,11 +136,6 @@ export function getQueryParams(mappings, namespace, type, search, searchFields, 
         }
       }
     ];
-  }
-
-  // Don't construct a query if there is nothing to search on.
-  if (bool.filter.length === 0 && !search) {
-    return {};
   }
 
   return { query: { bool } };

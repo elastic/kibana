@@ -156,7 +156,6 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options = {}]
    * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
@@ -166,8 +165,8 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], options = {}, namespace) {
-    return this._repository.bulkGet(objects, options, namespace);
+  async bulkGet(objects = [], namespace) {
+    return this._repository.bulkGet(objects, namespace);
   }
 
   /**
@@ -175,12 +174,11 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {object} [options = {}]
    * @param {string} [namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, options = {}, namespace) {
-    return this._repository.get(type, id, options, namespace);
+  async get(type, id, namespace) {
+    return this._repository.get(type, id, namespace);
   }
 
   /**

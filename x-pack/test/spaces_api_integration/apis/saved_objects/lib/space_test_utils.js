@@ -14,11 +14,11 @@ export function getIdPrefix(spaceId) {
   return spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 }
 
-export function getExpectedSpaceIdProperty(spaceId) {
+export function getExpectedNamespaceProperty(spaceId) {
   if (spaceId === DEFAULT_SPACE_ID) {
     return {};
   }
   return {
-    spaceId
+    namespace: spaceId
   };
 }

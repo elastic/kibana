@@ -68,6 +68,8 @@ export const spaces = (kibana) => new kibana.Plugin({
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
 
+    server.savedObjects.schema.addNamespaceAgnosticType('space');
+
     watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
       await createDefaultSpace(server);
     });

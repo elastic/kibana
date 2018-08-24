@@ -27,10 +27,12 @@ export class SavedObjectsRepositoryProvider {
   constructor({
     index,
     mappings,
+    schema,
     onBeforeWrite
   }) {
     this._index = index;
     this._mappings = mappings;
+    this._schema = schema;
     this._onBeforeWrite = onBeforeWrite;
   }
 
@@ -43,6 +45,7 @@ export class SavedObjectsRepositoryProvider {
     return new SavedObjectsRepository({
       index: this._index,
       mappings: this._mappings,
+      schema: this._schema,
       onBeforeWrite: this._onBeforeWrite,
       callCluster
     });

@@ -7,7 +7,6 @@
 import expect from 'expect.js';
 import { SPACES } from './lib/spaces';
 import { getUrlPrefix, getIdPrefix } from './lib/space_test_utils';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -92,7 +91,7 @@ export default function ({ getService }) {
               }
             })
             .expect(tests.inOtherSpace.statusCode)
-            .then(tests.inOtherSpace.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}${id}`));
+            .then(tests.inOtherSpace.response(`visualization`, `${id}`));
         });
 
         describe('unknown id', () => {
@@ -105,7 +104,7 @@ export default function ({ getService }) {
                 }
               })
               .expect(tests.doesntExist.statusCode)
-              .then(tests.doesntExist.response(`visualization`, `${spaceId === DEFAULT_SPACE_ID ? '' : (spaceId + ':')}not an id`));
+              .then(tests.doesntExist.response(`visualization`, `not an id`));
           });
         });
       });

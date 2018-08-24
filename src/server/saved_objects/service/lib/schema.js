@@ -17,36 +17,14 @@
  * under the License.
  */
 
-import Boom from 'boom';
+export class SavedObjectsSchema {
+  _namespaceAgnosticTypes = [];
 
-import { getQueryParams } from './query_params';
-import { getSortingParams } from './sorting_params';
-
-export function getSearchDsl(mappings, schema, options = {}) {
-  const {
-    namespace,
-    type,
-    search,
-    searchFields,
-    sortField,
-    sortOrder,
-    filters,
-  } = options;
-
-  if (!type && sortField) {
-    throw Boom.notAcceptable('Cannot sort without filtering by type');
+  addNamespaceAgnosticType(type) {
+    this._namespaceAgnosticTypes.push(type);
   }
 
-  if (sortOrder && !sortField) {
-    throw Boom.notAcceptable('sortOrder requires a sortField');
+  isNamespaceAgnostic(type) {
+    return this._namespaceAgnosticTypes.includes(type);
   }
-
-  if (filters && !Array.isArray(filters)) {
-    throw Boom.notAcceptable('filters must be an array');
-  }
-
-  return {
-    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, filters),
-    ...getSortingParams(mappings, type, sortField, sortOrder),
-  };
 }

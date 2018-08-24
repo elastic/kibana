@@ -30,14 +30,15 @@ function assertNonEmptyString(value, name) {
  *  @param  {string} type
  *  @return {string}
  */
-export function trimId(id, namespace, type) {
+export function trimId(schema, id, namespace, type) {
   assertNonEmptyString(id, 'document id');
   assertNonEmptyString(type, 'saved object type');
 
-  const namespacePrefix = namespace ? `${namespace}:` : '';
+  const namespacePrefix = namespace && !schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
   const prefix = `${namespacePrefix}${type}:`;
 
   if (!id.startsWith(prefix)) {
+    console.log({ id, namespace, type });
     throw new Error('Unable to trim id');
   }
 

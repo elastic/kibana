@@ -18,7 +18,7 @@
  */
 
 import { getRootPropertiesObjects } from '../../mappings';
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
+import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider, SavedObjectsSchema } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export function createSavedObjectsService(server) {
@@ -59,10 +59,13 @@ export function createSavedObjectsService(server) {
     }
   };
 
+  const schema = new SavedObjectsSchema();
+
   const mappings = server.getKibanaIndexMappingsDsl();
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     mappings,
+    schema,
     onBeforeWrite,
   });
 
@@ -86,6 +89,7 @@ export function createSavedObjectsService(server) {
     types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
     SavedObjectsRepository,
+    schema,
     getSavedObjectsRepository: (...args) =>
       repositoryProvider.getRepository(...args),
     getScopedSavedObjectsClient: (...args) =>

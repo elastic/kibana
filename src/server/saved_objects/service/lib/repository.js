@@ -35,12 +35,14 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
+      schema,
       callCluster,
       onBeforeWrite = () => { },
     } = options;
 
     this._index = index;
     this._mappings = mappings;
+    this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
@@ -73,7 +75,7 @@ export class SavedObjectsRepository {
         index: this._index,
         refresh: 'wait_for',
         body: {
-          ...namespace && { namespace },
+          ...namespace && !this._schema.isNamespaceAgnostic(type) && { namespace },
           type,
           updated_at: time,
           [type]: attributes,
@@ -81,7 +83,7 @@ export class SavedObjectsRepository {
       });
 
       return {
-        id: trimId(response._id, namespace, type),
+        id: trimId(this._schema, response._id, namespace, type),
         type,
         updated_at: time,
         version: response._version,
@@ -122,7 +124,7 @@ export class SavedObjectsRepository {
           }
         },
         {
-          ... namespace && { namespace },
+          ... namespace && !this._schema.isNamespaceAgnostic(object.type) && { namespace },
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes,
@@ -190,7 +192,6 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, namespace) {
-    console.log('delete', this._generateEsId(namespace, type, id));
     const response = await this._writeToCluster('delete', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
@@ -264,7 +265,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         version: true,
-        ...getSearchDsl(this._mappings, {
+        ...getSearchDsl(this._mappings, this._schema, {
           namespace,
           search,
           searchFields,
@@ -296,7 +297,7 @@ export class SavedObjectsRepository {
       saved_objects: response.hits.hits.map(hit => {
         const { type, updated_at: updatedAt } = hit._source;
         return {
-          id: trimId(hit._id, namespace, type),
+          id: trimId(this._schema, hit._id, namespace, type),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
@@ -320,6 +321,7 @@ export class SavedObjectsRepository {
    * ])
    */
   async bulkGet(objects = [], namespace) {
+    console.log('repository.bulkGet', { objects, namespace });
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -424,7 +426,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         doc: {
-          ...namespace && { namespace },
+          ...namespace && !this._schema.isNamespaceAgnostic(type) && { namespace },
           updated_at: time,
           [type]: attributes,
         }
@@ -463,7 +465,7 @@ export class SavedObjectsRepository {
   }
 
   _generateEsId(namespace, type, id) {
-    const namespacePrefix = namespace ? `${namespace}:` : '';
+    const namespacePrefix = namespace && !this._schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 

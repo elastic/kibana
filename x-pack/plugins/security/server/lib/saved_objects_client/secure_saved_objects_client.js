@@ -32,7 +32,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       type,
       'create',
-      { type, attributes, options },
+      { type, attributes, options, namespace },
       repository => repository.create(type, attributes, options, namespace),
     );
   }
@@ -42,7 +42,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       types,
       'bulk_create',
-      { objects, options },
+      { objects, options, namespace },
       repository => repository.bulkCreate(objects, options, namespace),
     );
   }
@@ -51,7 +51,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       type,
       'delete',
-      { type, id },
+      { type, id, namespace },
       repository => repository.delete(type, id, namespace),
     );
   }
@@ -64,22 +64,22 @@ export class SecureSavedObjectsClient {
     return await this._findAcrossAllTypes(options, namespace);
   }
 
-  async bulkGet(objects = [], options = {}, namespace) {
+  async bulkGet(objects = [], namespace) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_get',
-      { objects, options },
-      repository => repository.bulkGet(objects, options, namespace)
+      { objects, namespace },
+      repository => repository.bulkGet(objects, namespace)
     );
   }
 
-  async get(type, id, options = {}, namespace) {
+  async get(type, id, namespace) {
     return await this._execute(
       type,
       'get',
-      { type, id, options },
-      repository => repository.get(type, id, options, namespace)
+      { type, id, namespace },
+      repository => repository.get(type, id, namespace)
     );
   }
 
@@ -87,7 +87,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       type,
       'update',
-      { type, id, attributes, options },
+      { type, id, attributes, options, namespace },
       repository => repository.update(type, id, attributes, options, namespace)
     );
   }
@@ -130,7 +130,7 @@ export class SecureSavedObjectsClient {
     const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
     if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
-      return await this._callWithRequestRepository.find(options);
+      return await this._callWithRequestRepository.find(options, namespace);
     }
 
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
@@ -150,11 +150,12 @@ export class SecureSavedObjectsClient {
 
     this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
 
-    return await this._internalRepository.find({
-      ...options,
-      type: authorizedTypes,
-      namespace
-    });
+    return await this._internalRepository.find(
+      {
+        ...options,
+        type: authorizedTypes,
+      },
+      namespace);
   }
 
   async _findWithTypes(options, namespace) {
