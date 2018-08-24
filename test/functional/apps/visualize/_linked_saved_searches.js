@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 9,109', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          expect(data.trim()).to.be('9,109');
+          console.log(`======================== ${data}`);
+          return data.trim() === '9,109';
         });
       });
 
@@ -58,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 3,950', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          expect(data.trim()).to.be('3,950');
+          return data.trim() === '3,950';
         });
       });
 
@@ -67,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 707', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          expect(data.trim()).to.be('707');
+          return data.trim() === '707';
         });
       });
 
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickUnlinkSavedSearch();
         await retry.waitFor('wait for count to equal 707', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          expect(data.trim()).to.be('707');
+          return data.trim() === '707';
         });
         // The filter on the saved search should now be in the editor
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
           const unfilteredData = await PageObjects.visualize.getTableVisData();
-          expect(unfilteredData.trim()).to.be('1,293');
+          return unfilteredData.trim() === '1,293';
         });
       });
 
@@ -95,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
           const data = await PageObjects.visualize.getTableVisData();
-          expect(data.trim()).to.be('1,293');
+          return data.trim() === '1,293';
         });
       });
     });
