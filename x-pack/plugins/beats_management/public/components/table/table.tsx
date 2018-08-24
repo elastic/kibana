@@ -15,7 +15,7 @@ import { TABLE_CONFIG } from '../../../common/constants';
 import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
-interface BeatsTableProps {
+interface TableProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
   renderAssignmentOptions?: (item: any) => any;
@@ -25,7 +25,7 @@ interface BeatsTableProps {
   actionHandler(action: string, payload?: any): void;
 }
 
-interface BeatsTableState {
+interface TableState {
   selection: any[];
 }
 
@@ -33,8 +33,8 @@ const TableContainer = styled.div`
   padding: 16px;
 `;
 
-export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
-  constructor(props: BeatsTableProps) {
+export class Table extends React.Component<TableProps, TableState> {
+  constructor(props: TableProps) {
     super(props);
 
     this.state = {
@@ -47,7 +47,6 @@ export class Table extends React.Component<BeatsTableProps, BeatsTableState> {
   };
 
   public render() {
-
     const {
       actionHandler,
       assignmentOptions,
