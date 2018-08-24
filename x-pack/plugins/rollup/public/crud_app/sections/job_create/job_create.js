@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, mapValues, cloneDeep } from 'lodash';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiPage,
@@ -60,23 +61,48 @@ const stepIdToStepMap = {
       const errors = {};
 
       if (!id || !id.trim()) {
-        errors.id = 'You must provide a name';
+        errors.id = (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.name"
+            defaultMessage="You must provide a name"
+          />
+        );
       }
 
       if (!indexPattern || !indexPattern.trim()) {
-        errors.indexPattern = 'You must provide an index pattern';
+        errors.indexPattern = (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPattern"
+            defaultMessage="You must provide an index pattern"
+          />
+        );
       }
 
       if (!rollupIndex || !rollupIndex.trim()) {
-        errors.rollupIndex = 'You must provide a rollup index';
+        errors.rollupIndex = (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.rollupIndex"
+            defaultMessage="You must provide a rollup index"
+          />
+        );
       }
 
       if (!rollupCron || !rollupCron.trim()) {
-        errors.rollupCron = 'You must provide an interval';
+        errors.rollupCron = (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.rollupCron"
+            defaultMessage="You must provide an interval"
+          />
+        );
       }
 
       if (!rollupPageSize) {
-        errors.rollupPageSize = 'You must provide a page size';
+        errors.rollupPageSize = (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.rollupPageSize"
+            defaultMessage="You must provide a page size"
+          />
+        );
       }
 
       return errors;
@@ -120,7 +146,7 @@ const stepIdToTitleMap = {
   [STEP_REVIEW]: 'Review and save',
 };
 
-export class JobCreate extends Component {
+export class JobCreateUi extends Component {
   static propTypes = {
     createJob: PropTypes.func,
     isSaving: PropTypes.bool,
@@ -285,22 +311,40 @@ export class JobCreate extends Component {
 
   render() {
     const breadcrumbs = [{
-      text: 'Rollup jobs',
+      text: (
+        <FormattedMessage
+          id="xpack.rollupJobs.create.breadcrumbs.jobs"
+          defaultMessage="Rollup jobs"
+        />
+      ),
       ...getRouterLinkProps(CRUD_APP_BASE_PATH),
     }, {
-      text: 'Create',
+      text: (
+        <FormattedMessage
+          id="xpack.rollupJobs.create.breadcrumbs.create"
+          defaultMessage="Create"
+        />
+      ),
     }];
 
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent horizontalPosition="center" style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}>
+          <EuiPageContent
+            horizontalPosition="center"
+            style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}
+          >
             <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
             <EuiSpacer size="xs" />
 
             <EuiPageContentHeader>
               <EuiTitle size="l">
-                <h1>Create rollup job</h1>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.title"
+                    defaultMessage=" Create rollup job"
+                  />
+                </h1>
               </EuiTitle>
             </EuiPageContentHeader>
 
@@ -356,3 +400,5 @@ export class JobCreate extends Component {
     );
   }
 }
+
+export const JobCreate = injectI18n(JobCreateUi);
