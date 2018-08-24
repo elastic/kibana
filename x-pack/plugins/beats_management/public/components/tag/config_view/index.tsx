@@ -66,7 +66,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2>Add Configuration</h2>
+            <h2>{this.editMode ? 'Edit Configuration' : 'Add Configuration'}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

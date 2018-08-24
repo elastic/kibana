@@ -124,14 +124,17 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               <ConfigList
                 configs={tag.configurations}
                 onConfigClick={(action: string, config: ClientSideConfigurationBlock) => {
+                  const selectedIndex = tag.configurations.findIndex(c => {
+                    return isEqual(config, c);
+                  });
                   if (action === 'delete') {
-                    // TODO delete
+                    const configs = [...tag.configurations];
+                    configs.splice(selectedIndex, 1);
+                    this.updateTag('configurations', configs);
                   } else {
                     this.setState({
                       showFlyout: true,
-                      selectedConfigIndex: tag.configurations.findIndex(c => {
-                        return isEqual(config, c);
-                      }),
+                      selectedConfigIndex: selectedIndex,
                     });
                   }
                 }}

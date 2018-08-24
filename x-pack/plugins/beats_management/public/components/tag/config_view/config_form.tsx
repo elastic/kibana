@@ -6,12 +6,14 @@
 // @ts-ignore
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
+import { get } from 'lodash';
 import React from 'react';
 import { ClientSideConfigurationBlock, YamlConfigSchema } from '../../../lib/lib';
 import { FormsyEuiCodeEditor } from '../../inputs/code';
 import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
 import { FormsyEuiSelect } from '../../inputs/select';
+
 addValidationRule('isHost', (values: FormData, value: FieldValue) => {
   return value && value.length > 0;
 });
@@ -112,7 +114,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiFieldText
                     key={schema.id}
                     id={schema.id}
-                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
+                    defaultValue={get(this.props, `values.block_obj.${schema.id}`)}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
@@ -126,7 +128,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiMultiFieldText
                     key={schema.id}
                     id={schema.id}
-                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
+                    defaultValue={get(this.props, `values.block_obj.${schema.id}`)}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
@@ -141,7 +143,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={schema.id}
                     id={schema.id}
                     name={schema.id}
-                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
+                    defaultValue={get(this.props, `values.block_obj.${schema.id}`)}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     options={[{ value: '', text: 'Please Select An Option' }].concat(
@@ -158,7 +160,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={`${schema.id}-${this.props.id}`}
                     mode="yaml"
                     id={schema.id}
-                    defaultValue={(this.props.values.block_obj as any)[schema.id]}
+                    defaultValue={get(this.props, `values.block_obj.${schema.id}`)}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
