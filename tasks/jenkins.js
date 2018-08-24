@@ -42,6 +42,7 @@ module.exports = function (grunt) {
   grunt.registerTask('jenkins:selenium', [
     'checkPlugins',
     'run:functionalTestsReleaseDashboard',
+    'run:functionalTestsReleaseVisualize',
     'run:functionalTestsReleaseNonDashboard',
     'run:pluginFunctionalTestsRelease',
   ]);

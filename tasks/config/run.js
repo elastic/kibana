@@ -215,6 +215,19 @@ module.exports = function (grunt) {
         '--server.maxPayloadBytes=1648576',
       ],
     },
+    functionalTestsReleaseVisualize: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/functional/config_visualize.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
+      ],
+    },
     functionalTestsReleaseNonDashboard: {
       cmd: process.execPath,
       args: [
