@@ -39,9 +39,8 @@ export class SearchEmbeddable extends Embeddable {
     this.$rootScope = $rootScope;
     this.$compile = $compile;
     this.customization = {};
-    const requestsAdapter = new RequestAdapter();
     this.inspectorAdaptors = {
-      requests: requestsAdapter
+      requests: new RequestAdapter()
     };
   }
 

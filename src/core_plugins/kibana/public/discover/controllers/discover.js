@@ -54,6 +54,9 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { Inspector } from 'ui/inspector';
+import { RequestAdapter } from 'ui/inspector/adapters';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -158,6 +161,10 @@ function discoverController(
     location: 'Discover'
   });
 
+  const inspectorAdapters = {
+    requests: new RequestAdapter()
+  };
+
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
@@ -166,6 +173,10 @@ function discoverController(
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
   };
+
+  // the saved savedSearch
+  const savedSearch = $route.current.locals.savedSearch;
+  $scope.$on('$destroy', savedSearch.destroy);
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -187,11 +198,16 @@ function discoverController(
     description: 'Share Search',
     template: require('plugins/kibana/discover/partials/share_search.html'),
     testId: 'discoverShareButton',
+  }, {
+    key: 'inspect',
+    description: 'Open Inspector for search',
+    testId: 'openInspectorButton',
+    run() {
+      Inspector.open(inspectorAdapters, {
+        title: savedSearch.title
+      });
+    }
   }];
-
-  // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
-  $scope.$on('$destroy', savedSearch.destroy);
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
@@ -500,6 +516,7 @@ function discoverController(
 
   function handleSegmentedFetch(segmented) {
     function flushResponseData() {
+      inspectorAdapters.requests.reset();
       $scope.fetchError = undefined;
       $scope.hits = 0;
       $scope.failures = [];
@@ -565,6 +582,17 @@ function discoverController(
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
 
+      const inspectorRequest = inspectorAdapters.requests.start('Data', {
+        description: `This request queries Elasticsearch to fetch the data for the search.`,
+      });
+      inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+      $scope.searchSource.getSearchRequestBody().then(body => {
+        inspectorRequest.json(body);
+      });
+      inspectorRequest
+        .stats(getResponseInspectorStats($scope.searchSource, merged))
+        .ok({ json: merged });
+
       if ($scope.opts.timefield) {
         $scope.searchSource.rawResponse = merged;
         Promise
@@ -617,6 +645,7 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
+
     $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
       .catch((error) => {
         const fetchError = getPainlessError(error);
