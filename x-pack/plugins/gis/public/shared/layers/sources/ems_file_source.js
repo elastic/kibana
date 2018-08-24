@@ -54,6 +54,7 @@ export class EMSFileSource extends ASource {
         <Fragment>
           <EuiSpacer size="m"/>
           <EuiSelect
+            hasNoInitialSelection
             options={emsVectorOptions}
             onChange={onChange}
             aria-label="Use aria labels when no actual label is in use"

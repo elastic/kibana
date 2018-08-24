@@ -53,6 +53,7 @@ export class KibanaRegionmapSource extends ASource {
         <Fragment>
           <EuiSpacer size="m"/>
           <EuiSelect
+            hasNoInitialSelection
             options={regionmapOptions}
             onChange={onChange}
             aria-label="Use aria labels when no actual label is in use"
