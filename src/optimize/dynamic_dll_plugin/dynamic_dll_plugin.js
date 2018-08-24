@@ -37,11 +37,16 @@ function inNodeModules(checkPath) {
   return checkPath.includes(`${path.sep}node_modules${path.sep}`);
 }
 
+function inPluginNodeModules(checkPath) {
+  return checkPath.match(/(\/|\\)plugins.*(\/|\\)node_modules/);
+}
+
 export class DynamicDllPlugin {
-  constructor({ dllConfig, log }) {
+  constructor({ dllConfig }) {
     this.dllConfig = dllConfig;
-    this.log = log || (() => {});
+    this.log = this.dllConfig.isDistributable ? (data) => process.stdout.write(data + '\n') : console.log;
     this.entryPath = this.dllConfig.ub.resolvePath('vendor.entry.dll.js');
+    this.dllPath = this.dllConfig.ub.resolvePath('vendor.dll.js');
     this.manifestPath = this.dllConfig.ub.resolvePath('vendor.manifest.dll.json');
     this.entryPaths = '';
     this.newCompilationEntryPaths = '';
@@ -75,6 +80,14 @@ export class DynamicDllPlugin {
     return await readFileAsync(this.entryPath, 'utf8');
   }
 
+  mustCheckDllCompilationNeed() {
+    if (!this.dllConfig.isDistributable) {
+      return true;
+    }
+
+    return !fs.existsSync(this.dllPath);
+  }
+
   apply(compiler) {
     this.bindToCompiler(compiler);
 
@@ -86,13 +99,13 @@ export class DynamicDllPlugin {
 
   bindToCompiler(compiler) {
     compiler.hooks.run.tapPromise('DynamicDllPlugin', async () => {
-      console.log('starting compile');
+      this.log('starting compile');
       await this.ensureManifestExists();
       this.entryPaths = await this.readEnsureEntry();
     });
 
     compiler.hooks.watchRun.tapPromise('DynamicDllPlugin', async () => {
-      console.log('starting compile');
+      this.log('starting compile');
       await this.ensureManifestExists();
       this.entryPaths = await this.readEnsureEntry();
     });
@@ -123,12 +136,22 @@ export class DynamicDllPlugin {
 
     compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
+        // Verify if we must check if a dll compilation is needed
+        // In case we are in distributable environment and we already
+        // have on dll bundle, we don't need to check it
+        // TODO: completely remove the DLL logic on distributable env when we already have the DLL created
+        if (!this.mustCheckDllCompilationNeed()) {
+          return compilation.needsDLLCompilation = false;
+        }
+
+        // Run the procedures in order to decide if we need
+        // a Dll compilation
         const requires = [];
 
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
-            const absoluteResource = path.resolve(this.dllConfig.context, module.request);
+            const absoluteResource = path.resolve(this.dllConfig.context, module.userRequest);
             requires.push(`require('${path.relative(this.dllConfig.outputPath, absoluteResource)}');`);
           }
 
@@ -142,7 +165,7 @@ export class DynamicDllPlugin {
         compilation.needsDLLCompilation = (this.newCompilationEntryPaths !== this.entryPaths);
         this.entryPaths = this.newCompilationEntryPaths;
 
-        console.log(
+        this.log(
           compilation.needsDLLCompilation
             ? '... need additional pass, dll needs to rebuild'
             : '... no need for additional pass'
@@ -155,11 +178,11 @@ export class DynamicDllPlugin {
 
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        console.log('writing new bundler entry file');
+        this.log('writing new bundler entry file');
         await this.runDLLsCompiler(compiler);
       }
 
-      console.log('done');
+      this.log('done');
     });
   }
 
@@ -201,6 +224,11 @@ export class DynamicDllPlugin {
 
     // ignore webpack loader modules
     if (nodeModuleName.endsWith('-loader')) {
+      return;
+    }
+
+    // ignore modules from plugins
+    if (inPluginNodeModules(module.resource)) {
       return;
     }
 

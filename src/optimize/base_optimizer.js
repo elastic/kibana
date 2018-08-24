@@ -25,7 +25,7 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
-import { DLLBundlerPlugin } from './dll_bundler';
+import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
 import { defaults } from 'lodash';
 
@@ -223,7 +223,7 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        new DLLBundlerPlugin({
+        new DynamicDllPlugin({
           dllConfig: this.getDLLConfig(),
           log: this.log
         }),
