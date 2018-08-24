@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { Space } from '../../../common/model/space';
-import { SpaceAvatar } from './space_avatar';
+import { SpaceAvatar } from '../../components';
 import './space_card.less';
 
 interface Props {
