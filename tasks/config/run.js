@@ -202,11 +202,11 @@ module.exports = function (grunt) {
       ],
     },
 
-    functionalTestsRelease: {
+    functionalTestsReleaseDashboard: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
+        '--config', 'test/functional/config_dashboard.js',
         '--esFrom', 'source',
         '--bail',
         '--debug',
@@ -215,5 +215,19 @@ module.exports = function (grunt) {
         '--server.maxPayloadBytes=1648576',
       ],
     },
+    functionalTestsReleaseNonDashboard: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/functional/config_non_dashboard.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
+      ],
+    },
+
   };
 };
