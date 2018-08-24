@@ -5,15 +5,15 @@
 
   .mgtAdvancedSettings__field {
     + * {
-      margin-top: $euiSizeL;
+      margin-top: $euiSize;
     }
 
     &Wrapper {
-      width: 720px;
+      width: 640px;
     }
 
     &Actions {
-      padding-top: $euiSizeL;
+      padding-top: $euiSizeM;
     }
   }
 }

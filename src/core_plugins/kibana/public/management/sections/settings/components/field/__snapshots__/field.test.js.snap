@@ -16,7 +16,7 @@ exports[`Field for array setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -117,7 +117,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -200,7 +200,7 @@ exports[`Field for array setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -278,7 +278,7 @@ exports[`Field for array setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -387,7 +387,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -486,7 +486,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -567,7 +567,7 @@ exports[`Field for boolean setting should render default value if there is no us
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -643,7 +643,7 @@ exports[`Field for boolean setting should render user value if there is user val
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -750,7 +750,7 @@ exports[`Field for image setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -848,7 +848,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -930,7 +930,7 @@ exports[`Field for image setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1007,7 +1007,7 @@ exports[`Field for image setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1124,7 +1124,7 @@ exports[`Field for json setting should render as read only with help text if ove
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1245,7 +1245,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1344,7 +1344,7 @@ exports[`Field for json setting should render default value if there is no user 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1473,7 +1473,7 @@ exports[`Field for json setting should render user value if there is user value 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1602,7 +1602,7 @@ exports[`Field for markdown setting should render as read only with help text if
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1719,7 +1719,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1818,7 +1818,7 @@ exports[`Field for markdown setting should render default value if there is no u
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -1912,7 +1912,7 @@ exports[`Field for markdown setting should render user value if there is user va
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2037,7 +2037,7 @@ exports[`Field for number setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2138,7 +2138,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2221,7 +2221,7 @@ exports[`Field for number setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2299,7 +2299,7 @@ exports[`Field for number setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2408,7 +2408,7 @@ exports[`Field for select setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2526,7 +2526,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2626,7 +2626,7 @@ exports[`Field for select setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2721,7 +2721,7 @@ exports[`Field for select setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2847,7 +2847,7 @@ exports[`Field for string setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -2948,7 +2948,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -3031,7 +3031,7 @@ exports[`Field for string setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
@@ -3109,7 +3109,7 @@ exports[`Field for string setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="mgtAdvancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <UNDEFINED>
           <div
