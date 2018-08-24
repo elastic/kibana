@@ -6,18 +6,20 @@
 
 import { connect } from 'react-redux';
 import { OLMapContainer } from './view';
-import { getOlMapAndLayers } from "../../selectors/ol_map_selectors";
-import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { setSelectedLayer } from '../../actions/store_actions';
-
-const mapDispatchToProps = {
-  showLayerDetails: layer =>
-    updateFlyout(FLYOUT_STATE.LAYER_PANEL) && setSelectedLayer(layer)
-};
+import { syncOLState } from "../../selectors/ol_map_selectors";
+import { mapExtentChanged } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    olMap: getOlMapAndLayers(state)
+    olMap: syncOLState(state)
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    extentChanged: (e) => {
+      dispatch(mapExtentChanged(e));
+    }
   };
 }
 

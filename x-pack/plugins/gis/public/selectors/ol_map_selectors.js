@@ -7,11 +7,12 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
 import { LAYER_TYPE } from "../shared/layers/layer";
-import { FEATURE_PROJECTION, getOlLayerStyle } from './ol_layer_defaults';
+import { WEBMERCATOR, getOlLayerStyle, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
+import _ from 'lodash';
 
 const OL_GEOJSON_FORMAT = new ol.format.GeoJSON({
-  featureProjection: FEATURE_PROJECTION
+  featureProjection: WEBMERCATOR
 });
 
 // Layer-specific logic
@@ -68,7 +69,6 @@ function createCorrespondingOLLayer(layer) {
       break;
     default:
       throw new Error('Cannot create corresponding OL layer');
-      break;
   }
   olLayer.set('id', layer.getId());
   return olLayer;
@@ -117,27 +117,45 @@ function updateFillAndOutlineStyle(olLayer, layer) {
   olLayer.setStyle && olLayer.setStyle(appliedStyle);
 }
 
+const OL_VIEW = new ol.View({
+  center: ol.proj.fromLonLat([0, 0]),
+  zoom: 0
+});
+const OL_MAP = new ol.Map({
+  layers: [],
+  view: OL_VIEW
+});
+function getOLImplementation() {
+  return OL_MAP;
+}
+
 // Selectors
-const getOlMap = createSelector(
+const syncOLMap = createSelector(
+  getOLImplementation,
   getMapConstants,
-  mapConstants => {
-    const olView = new ol.View({
-      center: ol.proj.fromLonLat(mapConstants.mapCenter),
-      zoom: mapConstants.mapInitZoomLevel
-    });
-    return new ol.Map({
-      layers: [],
-      view: olView
-    });
+  (olMap, mapConstants) => {
+    const olView = olMap.getView();
+    const center = olView.getCenter();
+    const zoom = olView.getZoom();
+    const centerInLonLat = ol.proj.transform(center, WEBMERCATOR, WGS_84);
+    //make comparison in lon-lat, to avoid precision errors when projecting in the other direction.
+    //this could trigger infinite loops of dispatching extent-changed actions
+    if (typeof mapConstants.zoom === 'number' && mapConstants.zoom !== zoom) {
+      olView.setZoom(mapConstants.zoom);
+    }
+    if (mapConstants.center && !_.isEqual(mapConstants.center, centerInLonLat)) {
+      const centerInWorldRef = ol.proj.transform(mapConstants.center, WGS_84, WEBMERCATOR);
+      olView.setCenter(centerInWorldRef);
+    }
+    return olMap;
   }
 );
 
-const getLayersWithOl = createSelector(
-  getOlMap,
+const syncLayerInitialization = createSelector(
+  syncOLMap,
   getLayerList,
   (olMap, layerList) => {
     return layerList.map(layer => {
-      // const descriptor = layer.toLayerDescriptor();
       const layerTuple = {  layer: layer };
       const olLayerArray = olMap.getLayers().getArray();
       const olLayer = olLayerArray.find(olLayer => olLayer.get('id') === layer.getId());
@@ -151,9 +169,9 @@ const getLayersWithOl = createSelector(
   }
 );
 
-export const getOlMapAndLayers = createSelector(
-  getOlMap,
-  getLayersWithOl,
+export const syncOLState = createSelector(
+  syncOLMap,
+  syncLayerInitialization,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates
@@ -172,7 +190,7 @@ export const getOlMapAndLayers = createSelector(
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     // Update layers order
     const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
-    if (oldLayerIdsOrder !== newLayerIdsOrder) {
+    if (oldLayerIdsOrder !== newLayerIdsOrder) {//todo: evaluates to true always
       updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
     }
     return olMap;

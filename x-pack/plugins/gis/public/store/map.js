@@ -7,7 +7,7 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE
+  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -32,8 +32,8 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 
 const INITIAL_STATE = {
   mapConstants: {
-    mapCenter: [37.41, 8.82],
-    mapInitZoomLevel: 4
+    zoom: 4,
+    center: [37.41, 8.82]
   },
   selectedLayerId: null,
   layerList: [],
@@ -42,6 +42,8 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case MAP_EXTENT_CHANGED:
+      return { ...state, mapConstants: action.mapConstants };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };

@@ -17,6 +17,7 @@ export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
+export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -69,6 +70,13 @@ export function promoteTemporaryLayers() {
 export function clearTemporaryLayers() {
   return {
     type: CLEAR_TEMPORARY_LAYERS
+  };
+}
+
+export function mapExtentChanged(mapConstants) {
+  return {
+    type: MAP_EXTENT_CHANGED,
+    mapConstants: mapConstants
   };
 }
 

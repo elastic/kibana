@@ -6,7 +6,8 @@
 
 import * as ol from 'openlayers';
 
-export const FEATURE_PROJECTION = 'EPSG:3857';
+export const WEBMERCATOR = 'EPSG:3857';
+export const WGS_84 = 'EPSG:4326';
 
 const defaultColor = '#e6194b';
 const tempFillOpacity = '05';

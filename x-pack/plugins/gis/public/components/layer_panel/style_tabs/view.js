@@ -38,6 +38,8 @@ export class StyleTabs extends React.Component {
           currentStyle
         };
       }
+    } else {
+      return {};
     }
   }
 

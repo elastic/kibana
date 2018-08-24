@@ -45,7 +45,7 @@ export class ESGeohashGridSource extends ASource {
             onPreviewSource(source);
           }}
         >
-          Show some dummy data.
+          Show dummy heatmap.
         </EuiButton>
       </Fragment>
     );

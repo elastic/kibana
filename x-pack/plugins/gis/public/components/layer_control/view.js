@@ -19,10 +19,6 @@ import { LayerPanel } from '../layer_panel';
 
 export class LayerControl extends React.Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   _renderLayerFlyout() {
     const {
       layerDetailsVisible,
@@ -66,10 +62,7 @@ export class LayerControl extends React.Component {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <LayerTOC
-                layerOrderChange={this._onLayerOrderChange}
-                showLayerDetails={this._showLayerDetails}
-              />
+              <LayerTOC />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
