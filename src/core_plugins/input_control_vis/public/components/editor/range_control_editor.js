@@ -27,6 +27,8 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 function filterField(field) {
   return field.type === 'number';
 }
@@ -62,7 +64,10 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={stepSizeId}
-        label="Step Size"
+        label={<FormattedMessage
+          id="inputControl.editor.rangeControl.stepSizeLabel"
+          defaultMessage="Step Size"
+        />}
       >
         <EuiFieldNumber
           value={props.controlParams.options.step}
@@ -73,7 +78,10 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={decimalPlacesId}
-        label="Decimal Places"
+        label={<FormattedMessage
+          id="inputControl.editor.rangeControl.decimalPlacesLabel"
+          defaultMessage="Decimal Places"
+        />}
       >
         <EuiFieldNumber
           min={0}

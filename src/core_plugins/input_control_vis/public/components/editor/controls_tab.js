@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -33,7 +34,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-export class ControlsTab extends Component {
+export class ControlsTabUi extends Component {
 
   state = {
     type: 'list'
@@ -138,6 +139,24 @@ export class ControlsTab extends Component {
   }
 
   render() {
+    const { intl } = this.props;
+    const rangeSliderOption = intl.formatMessage({
+      id: 'inputControl.editor.select.rangeDropDown',
+      defaultMessage: 'Range slider'
+    });
+    const optionsListOption = intl.formatMessage({
+      id: 'inputControl.editor.select.listDropDown',
+      defaultMessage: 'Options list'
+    });
+    const selectAriaLabel = intl.formatMessage({
+      id: 'inputControl.editor.select.controlTypeAria',
+      defaultMessage: 'Select control type'
+    });
+    const addControlAriaLabel = intl.formatMessage({
+      id: 'inputControl.editor.select.addControlAria',
+      defaultMessage: 'Add control'
+    });
+
     return (
       <div>
 
@@ -151,12 +170,12 @@ export class ControlsTab extends Component {
               >
                 <EuiSelect
                   options={[
-                    { value: 'range', text: 'Range slider' },
-                    { value: 'list', text: 'Options list' },
+                    { value: 'range', text: rangeSliderOption },
+                    { value: 'list', text: optionsListOption },
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
-                  aria-label="Select control type"
+                  aria-label={selectAriaLabel}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -169,9 +188,9 @@ export class ControlsTab extends Component {
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
-                  aria-label="Add control"
+                  aria-label={addControlAriaLabel}
                 >
-                  Add
+                  <FormattedMessage id="inputControl.editor.addButtonLabel" defaultMessage="Add"/>
                 </EuiButton>
               </EuiFormRow>
             </EuiFlexItem>
@@ -183,7 +202,9 @@ export class ControlsTab extends Component {
   }
 }
 
-ControlsTab.propTypes = {
+ControlsTabUi.propTypes = {
   scope: PropTypes.object.isRequired,
   stageEditorParams: PropTypes.func.isRequired
 };
+
+export const ControlsTab = injectI18n(ControlsTabUi);

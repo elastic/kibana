@@ -19,10 +19,10 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
-  ListControl,
+  ListControlUi,
 } from './list_control';
 
 const options = [
@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 
 test('renders ListControl', () => {
-  const component = shallow(<ListControl
+  const component = shallowWithIntl(<ListControlUi
     id="mock-list-control"
     label="list control"
     options={options}
@@ -50,7 +50,7 @@ test('renders ListControl', () => {
 });
 
 test('disableMsg', () => {
-  const component = shallow(<ListControl
+  const component = shallowWithIntl(<ListControlUi
     id="mock-list-control"
     label="list control"
     multiselect={true}

@@ -3,7 +3,8 @@
     "kbn": "src/core_plugins/kibana",
     "common.server": "src/server",
     "common.ui": "src/ui",
-    "xpack.idxMgmt": "xpack/plugins/index_management"
+    "xpack.idxMgmt": "xpack/plugins/index_management",
+    "inputControl":"src/core_plugins/input_control_vis"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

@@ -27,16 +27,29 @@ import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import image from './images/icon-input-control.svg';
 import { Status } from 'ui/vis/update_status';
+import { i18n } from '@kbn/i18n';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const controlsTitle = i18n.translate('inputControl.register.controlsTitle', {
+    defaultMessage: 'Controls'
+  });
+  const controlsDescription = i18n.translate('inputControl.register.controlsDescription', {
+    defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
+  });
+  const tabControls = i18n.translate('inputControl.register.tabs.controlsTitle', {
+    defaultMessage: 'Controls'
+  });
+  const tabOptions = i18n.translate('inputControl.register.tabs.optionsTitle', {
+    defaultMessage: 'Options'
+  });
 
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
   return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
-    title: 'Controls',
+    title: controlsTitle,
     image,
-    description: 'Create interactive controls for easy dashboard manipulation.',
+    description: controlsDescription,
     category: CATEGORY.OTHER,
     stage: 'lab',
     requiresUpdateStatus: [Status.PARAMS, Status.TIME],
@@ -55,12 +68,12 @@ function InputControlVisProvider(Private) {
       optionTabs: [
         {
           name: 'controls',
-          title: 'Controls',
+          title: tabControls,
           editor: ControlsTab
         },
         {
           name: 'options',
-          title: 'Options',
+          title: tabOptions,
           editor: OptionsTab
         }
       ]

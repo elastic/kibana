@@ -11,7 +11,13 @@ exports[`renders OptionsTab 1`] = `
     <EuiSwitch
       checked={false}
       data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-      label="Update Kibana filters on each change"
+      label={
+        <FormattedMessage
+          defaultMessage="Update Kibana filters on each change"
+          id="inputControl.editor.optionsTab.updateFilterLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -24,7 +30,13 @@ exports[`renders OptionsTab 1`] = `
     <EuiSwitch
       checked={false}
       data-test-subj="inputControlEditorUseTimeFilterCheckbox"
-      label="Use time filter"
+      label={
+        <FormattedMessage
+          defaultMessage="Use time filter"
+          id="inputControl.editor.optionsTab.useTimeFielterLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -36,7 +48,13 @@ exports[`renders OptionsTab 1`] = `
   >
     <EuiSwitch
       data-test-subj="inputControlEditorPinFiltersCheckbox"
-      label="Pin filters to global state"
+      label={
+        <FormattedMessage
+          defaultMessage="Pin filters to global state"
+          id="inputControl.editor.optionsTab.pinFieltersLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>

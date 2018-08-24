@@ -20,13 +20,14 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
 
-export class FieldSelect extends Component {
+export class FieldSelectUi extends Component {
   constructor(props) {
     super(props);
 
@@ -136,13 +137,22 @@ export class FieldSelect extends Component {
       selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
     }
 
+    const formLabel = this.props.intl.formatMessage({
+      id: 'inputControl.editor.fieldLabel',
+      defaultMessage: 'Field'
+    });
+    const formPlaceholder = this.props.intl.formatMessage({
+      id: 'inputControl.editor.selectFieldPlaceholder',
+      defaultMessage: 'Select field...'
+    });
+
     return (
       <EuiFormRow
         id={selectId}
-        label="Field"
+        label={formLabel}
       >
         <EuiComboBox
-          placeholder="Select field..."
+          placeholder={formPlaceholder}
           singleSelection={true}
           isLoading={this.state.isLoading}
           options={this.state.fields}
@@ -155,7 +165,7 @@ export class FieldSelect extends Component {
   }
 }
 
-FieldSelect.propTypes = {
+FieldSelectUi.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
@@ -163,3 +173,5 @@ FieldSelect.propTypes = {
   filterField: PropTypes.func,
   controlIndex: PropTypes.number.isRequired,
 };
+
+export const FieldSelect = injectI18n(FieldSelectUi);

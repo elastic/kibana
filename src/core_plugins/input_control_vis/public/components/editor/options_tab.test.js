@@ -19,7 +19,8 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   OptionsTab,
@@ -49,7 +50,7 @@ test('renders OptionsTab', () => {
 });
 
 test('updateFiltersOnChange', () => {
-  const component = mount(<OptionsTab
+  const component = mountWithIntl(<OptionsTab
     scope={scopeMock}
     editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
@@ -64,7 +65,7 @@ test('updateFiltersOnChange', () => {
 });
 
 test('useTimeFilter', () => {
-  const component = mount(<OptionsTab
+  const component = mountWithIntl(<OptionsTab
     scope={scopeMock}
     editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
@@ -79,7 +80,7 @@ test('useTimeFilter', () => {
 });
 
 test('pinFilters', () => {
-  const component = mount(<OptionsTab
+  const component = mountWithIntl(<OptionsTab
     scope={scopeMock}
     editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}

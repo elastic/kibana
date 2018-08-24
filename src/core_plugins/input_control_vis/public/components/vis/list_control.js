@@ -21,13 +21,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { FormRow } from './form_row';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFieldText,
   EuiComboBox,
 } from '@elastic/eui';
 
-export class ListControl extends Component {
+export class ListControlUi extends Component {
 
   state = {
     isLoading: false
@@ -62,10 +63,16 @@ export class ListControl extends Component {
   }
 
   renderControl() {
+    const { intl } = this.props;
+
     if (this.props.disableMsg) {
+      const listControlTextPlaceholder = intl.formatMessage({
+        id: 'inputControl.vis.listControl.selectTextPlaceholder',
+        defaultMessage: 'Select...'
+      });
       return (
         <EuiFieldText
-          placeholder="Select..."
+          placeholder={listControlTextPlaceholder}
           disabled={true}
         />
       );
@@ -78,10 +85,14 @@ export class ListControl extends Component {
         ['data-test-subj']: `option_${option.value.replace(' ', '_')}`
       };
     });
+    const listControlPlaceholder = intl.formatMessage({
+      id: 'inputControl.vis.listControl.selectPlaceholder',
+      defaultMessage: 'Select...'
+    });
 
     return (
       <EuiComboBox
-        placeholder="Select..."
+        placeholder={listControlPlaceholder}
         options={options}
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}
@@ -113,7 +124,7 @@ const comboBoxOptionShape = PropTypes.shape({
   value: PropTypes.string.isRequired,
 });
 
-ListControl.propTypes = {
+ListControlUi.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
@@ -126,12 +137,14 @@ ListControl.propTypes = {
   fetchOptions: PropTypes.func,
 };
 
-ListControl.defaultProps = {
+ListControlUi.defaultProps = {
   dynamicOptions: false,
   multiselect: true,
 };
 
-ListControl.defaultProps = {
+ListControlUi.defaultProps = {
   selectedOptions: [],
   options: [],
 };
+
+export const ListControl = injectI18n(ListControlUi);

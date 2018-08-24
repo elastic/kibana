@@ -22,6 +22,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from '../../../modules';
 import visOptionsTemplate from './vis_options.html';
+import { I18nProvider } from '@kbn/i18n/react';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -53,7 +54,10 @@ uiModules
         };
         const renderReactComponent = () => {
           const Component = $scope.editor;
-          render(<Component scope={$scope} editorState={$scope.editorState} stageEditorParams={stageEditorParams} />, $el[0]);
+          render(
+            <I18nProvider>
+              <Component scope={$scope} editorState={$scope.editorState} stageEditorParams={stageEditorParams} />
+            </I18nProvider>, $el[0]);
         };
         // Bind the `editor` template with the scope.
         if (reactOptionsComponent) {
