@@ -5,6 +5,7 @@
  */
 
 import { KIBANA_SPACES_MONITORING_TYPE } from '../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 
 /**
  *
@@ -50,6 +51,25 @@ export function getSpacesUsageCollector(server) {
         enabled: spacesAvailableAndEnabled, // similar behavior as _xpack API in ES
         ...usageStats,
       };
+    },
+
+    /*
+     * Format the response data into a model for internal upload
+     * 1. Make this data part of the "kibana_stats" type
+     * 2. Organize the payload in the usage.xpack.spaces namespace of the data payload
+     */
+    formatForBulkUpload: result => {
+      return {
+        type: KIBANA_STATS_TYPE_MONITORING,
+        payload: {
+          usage: {
+            xpacl: {
+              spaces: result
+            }
+          }
+        }
+      };
+
     }
   });
 }
