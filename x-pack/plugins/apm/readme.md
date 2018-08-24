@@ -17,10 +17,9 @@ node scripts/jest.js plugins/apm --watch
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
 
-
-### Lint code
+### Run ESLint (run from kibana root)
 ```
-npx eslint ./plugins/apm
+./node_modules/.bin/eslint ./x-pack/plugins/apm
 ```
 
 ### Ensure everything from master has been backported to 6.x

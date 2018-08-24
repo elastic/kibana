@@ -125,6 +125,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                     </EuiButtonEmpty>
                   }
                   closePopover={[Function]}
+                  hasArrow={true}
                   id="inspectorViewChooser"
                   isOpen={false}
                   ownFocus={true}

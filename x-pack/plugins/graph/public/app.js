@@ -101,7 +101,7 @@ uiRoutes
         return savedGraphWorkspaces.get($route.current.params.id)
           .catch(
             function () {
-              notify.error('Missing workspace');
+              toastNotifications.addDanger('Missing workspace');
             }
           );
 
@@ -830,7 +830,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       }
     });
     if(!savedObjectIndexPattern) {
-      notify.error('Missing index pattern:' + wsObj.indexPattern);
+      toastNotifications.addDanger(`'Missing index pattern ${wsObj.indexPattern}`);
       return;
     }
 
