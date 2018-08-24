@@ -15,7 +15,7 @@ const path = require('path');
 const del = require('del');
 const runSequence = require('run-sequence');
 const pluginHelpers = require('@kbn/plugin-helpers');
-const { createToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 
 const logger = require('./gulp_helpers/logger');
 const buildVersion = require('./gulp_helpers/build_version')();
@@ -76,8 +76,10 @@ gulp.task('build', ['clean', 'report', 'prepare'], async () => {
   });
 
   const buildRoot = path.resolve(buildTarget, 'kibana/x-pack');
-  const log = createToolingLog('info');
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout
+  });
 
   writeFileSync(
     path.resolve(buildRoot, 'NOTICE.txt'),

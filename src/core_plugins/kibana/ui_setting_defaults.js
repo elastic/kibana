@@ -510,5 +510,13 @@ export function getUiSettingDefaults() {
         is present and sortable in the current index pattern is used.`,
       category: ['discover'],
     },
+    'accessibility:disableAnimations': {
+      name: 'Disable Animations',
+      value: false,
+      description: `
+        Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
+      `,
+      category: ['accessibility'],
+    },
   };
 }

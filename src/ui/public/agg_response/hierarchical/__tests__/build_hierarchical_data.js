@@ -23,6 +23,7 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import { toastNotifications } from 'ui/notify';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { BuildHierarchicalDataProvider } from '../build_hierarchical_data';
@@ -276,6 +277,9 @@ describe('buildHierarchicalData', function () {
     let results;
 
     beforeEach(function () {
+      // Clear existing toasts.
+      toastNotifications.list.splice(0);
+
       let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
@@ -299,10 +303,11 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the hits attribute for the results', function () {
-      const errCall = Notifier.prototype.error.getCall(0);
-      expect(errCall).to.be.ok();
-      expect(errCall.args[0]).to.contain('not supported');
-
+      // Ideally, buildHierarchicalData shouldn't be tightly coupled to toastNotifications. Instead,
+      // it should notify its consumer of this error and the consumer should be responsible for
+      // notifying the user. This test verifies the side effect of the error until we can remove
+      // this coupling.
+      expect(toastNotifications.list).to.have.length(1);
       expect(results).to.have.property('slices');
       expect(results).to.have.property('names');
       expect(results.names).to.have.length(2);

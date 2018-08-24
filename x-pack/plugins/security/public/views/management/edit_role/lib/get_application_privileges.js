@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
-
 export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPrivileges) {
   const viewModel = applicationPrivileges.reduce((acc, applicationPrivilege) => {
     acc[applicationPrivilege.name] = false;
@@ -15,7 +13,7 @@ export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPr
     return viewModel;
   }
 
-  const assignedPrivileges = _.uniq(_.flatten(_.pluck(roleKibanaPrivileges, 'privileges')));
+  const assignedPrivileges = roleKibanaPrivileges.global;
   assignedPrivileges.forEach(assignedPrivilege => {
     // we don't want to display privileges that aren't in our expected list of privileges
     if (assignedPrivilege in viewModel) {
@@ -24,19 +22,4 @@ export function getKibanaPrivilegesViewModel(applicationPrivileges, roleKibanaPr
   });
 
   return viewModel;
-}
-
-export function getKibanaPrivileges(kibanaPrivilegesViewModel) {
-  const selectedPrivileges = Object.keys(kibanaPrivilegesViewModel).filter(key => kibanaPrivilegesViewModel[key]);
-
-  // if we have any selected privileges, add a single application entry
-  if (selectedPrivileges.length > 0) {
-    return [
-      {
-        privileges: selectedPrivileges
-      }
-    ];
-  }
-
-  return [];
 }

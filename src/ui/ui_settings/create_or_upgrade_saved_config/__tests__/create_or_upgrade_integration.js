@@ -22,7 +22,7 @@ import expect from 'expect.js';
 
 import { createEsTestCluster } from '@kbn/test';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
@@ -31,8 +31,10 @@ describe('createOrUpgradeSavedConfig()', () => {
   const cleanup = [];
 
   before(async function () {
-    const log = createToolingLog('debug');
-    log.pipe(process.stdout);
+    const log = new ToolingLog({
+      level: 'debug',
+      writeTo: process.stdout
+    });
     log.indent(6);
 
     log.info('starting elasticsearch');
