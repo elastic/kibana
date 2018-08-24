@@ -46,11 +46,13 @@ function renderSpaceDescription(space: Space) {
     description = <span title={description}>{description.substr(0, 120) + '…'}</span>;
   }
 
+  // FIXME: workaround for missing typedefs
+  // @ts-ignore
+  const TextColorCmp: ComponentClass = EuiTextColor;
+
   return (
-    // @ts-ignore
-    <EuiTextColor className="eui-textBreakWord" color={'subdued'}>
+    <TextColorCmp className="eui-textBreakWord" color={'subdued'}>
       {description}
-      // @ts-ignore
-    </EuiTextColor>
+    </TextColorCmp>
   );
 }
