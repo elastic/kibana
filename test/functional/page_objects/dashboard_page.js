@@ -179,7 +179,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.waitFor('not in view mode', async () => (
         !await this.getIsInViewMode()
       ));
-      await this.waitForRenderComplete();
     }
 
     async getIsInViewMode() {
