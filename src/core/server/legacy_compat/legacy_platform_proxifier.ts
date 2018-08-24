@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { Server } from 'net';
 
-import { Server as HapiServer, ServerOptions as HapiServerOptions } from 'hapi-latest';
+import { Server as HapiServer, ServerOptions as HapiServerOptions } from 'hapi';
 import { Env } from '../config';
 import { Logger } from '../logging';
 import { Root } from '../root';

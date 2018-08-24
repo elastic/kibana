@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server as HapiServer } from 'hapi-latest';
+import { Server as HapiServer } from 'hapi';
 import { Server } from 'net';
 import { LegacyPlatformProxifier } from '..';
 import { Env } from '../../config';
