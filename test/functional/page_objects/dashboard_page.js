@@ -179,6 +179,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.waitFor('not in view mode', async () => (
         !await this.getIsInViewMode()
       ));
+      // Lee.Dr the above code still isn't fixing the failure that comes after this
+      // Adding 1s sleep until we understand how to check when switching to edit mode is complete.
+      await PageObjects.common.sleep(1011);
     }
 
     async getIsInViewMode() {
