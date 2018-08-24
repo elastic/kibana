@@ -27,6 +27,7 @@ export class SpacesSavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @param {string} [namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}, namespace) {
@@ -40,9 +41,10 @@ export class SpacesSavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, namespace }]
+   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}, namespace) {
@@ -58,6 +60,7 @@ export class SpacesSavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {string} [namespace]
    * @returns {promise}
    */
   async delete(type, id, namespace) {
@@ -80,6 +83,7 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}, namespace) {
@@ -94,6 +98,7 @@ export class SpacesSavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {string} [namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -115,6 +120,7 @@ export class SpacesSavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {string} [namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, namespace) {
@@ -132,6 +138,7 @@ export class SpacesSavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
+   * @param {string} [namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}, namespace) {
