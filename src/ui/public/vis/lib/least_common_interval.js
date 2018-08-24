@@ -19,7 +19,7 @@
 
 import dateMath from '@kbn/datemath';
 import { leastCommonMultiple } from '../../utils/math';
-import { parseEsInterval } from '../../utils/parse_interval';
+import { parseEsInterval } from '../../utils/parse_es_interval';
 
 /**
  * Finds the lowest common interval between two given ES date histogram intervals
