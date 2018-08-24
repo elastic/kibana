@@ -21,6 +21,7 @@ import { TimeIntervalParam } from 'ui/vis/editors/config/types';
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
 import { IndexPattern } from '../../../index_patterns';
+import { leastCommonMultiple } from '../../../utils/math';
 import { parseEsInterval } from '../../../utils/parse_interval';
 import { leastCommonInterval } from '../../lib/least_common_interval';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
@@ -128,6 +129,10 @@ class EditorConfigProviderRegistry {
     merged: EditorParamConfig,
     paramName: string
   ): { timeBase?: string; default?: string } {
+    if (current.default !== current.timeBase) {
+      throw new Error(`Tried to provide differing default and timeBase values for ${paramName}.`);
+    }
+
     if (this.isTimeBaseParam(current) && this.isTimeBaseParam(merged)) {
       // In case both had where interval values, just use the least common multiple between both interval
       try {
@@ -160,15 +165,16 @@ class EditorConfigProviderRegistry {
     return configs.reduce((output, conf) => {
       Object.entries(conf).forEach(([paramName, paramConfig]) => {
         if (!output[paramName]) {
-          output[paramName] = { ...paramConfig };
-        } else {
-          output[paramName] = {
-            hidden: this.mergeHidden(paramConfig, output[paramName]),
-            help: this.mergeHelp(paramConfig, output[paramName]),
-            ...this.mergeFixedAndBase(paramConfig, output[paramName], paramName),
-            ...this.mergeTimeBase(paramConfig, output[paramName], paramName),
-          };
+          output[paramName] = {};
         }
+
+        output[paramName] = {
+          hidden: this.mergeHidden(paramConfig, output[paramName]),
+          help: this.mergeHelp(paramConfig, output[paramName]),
+          ...(this.isTimeBaseParam(paramConfig)
+            ? this.mergeTimeBase(paramConfig, output[paramName], paramName)
+            : this.mergeFixedAndBase(paramConfig, output[paramName], paramName)),
+        };
       });
       return output;
     }, {});
