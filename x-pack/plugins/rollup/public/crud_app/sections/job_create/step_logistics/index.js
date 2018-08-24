@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StepIndices } from './step_indices';
+export { StepLogistics } from './step_logistics';

@@ -25,7 +25,7 @@ import {
 
 import { logisticalDetailsUrl } from '../../../services';
 
-export class StepIndicesUi extends Component {
+export class StepLogisticsUi extends Component {
   render() {
     const {
       fields,
@@ -282,4 +282,4 @@ export class StepIndicesUi extends Component {
   }
 }
 
-export const StepIndices = injectI18n(StepIndicesUi);
+export const StepLogistics = injectI18n(StepLogisticsUi);

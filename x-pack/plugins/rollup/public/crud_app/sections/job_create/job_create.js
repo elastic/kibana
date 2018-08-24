@@ -23,7 +23,7 @@ import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
 import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
-import { StepIndices } from './step_indices';
+import { StepLogistics } from './step_logistics';
 
 const STEP_LOGISTICS = 'STEP_LOGISTICS';
 const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
@@ -327,7 +327,7 @@ export class JobCreate extends Component {
     switch (currentStepId) {
       case STEP_LOGISTICS:
         return (
-          <StepIndices
+          <StepLogistics
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
