@@ -19,7 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../../common/constants';
-import { OptInExampleFlyout } from '../../../hacks/welcome_banner/opt_in_details_component';
+import { OptInExampleFlyout } from '../../../components';
 import './manage_telemetry_page.less';
 
 export class ManageTelemetryPage extends Component {

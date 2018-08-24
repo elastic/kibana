@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
-import { OptInExampleFlyout } from './opt_in_details_component';
+import { OptInExampleFlyout } from '../../components';
 
 /**
  * React component for displaying the Telemetry opt-in banner.
