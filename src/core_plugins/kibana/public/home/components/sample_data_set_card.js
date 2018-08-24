@@ -28,8 +28,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-const INSTALLED_STATUS = 'installed';
-const UNINSTALLED_STATUS = 'not_installed';
+export const INSTALLED_STATUS = 'installed';
+export const UNINSTALLED_STATUS = 'not_installed';
 
 export class SampleDataSetCard extends React.Component {
 
