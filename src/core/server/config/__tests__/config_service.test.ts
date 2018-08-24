@@ -18,8 +18,13 @@
  */
 
 /* tslint:disable max-classes-per-file */
+
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../utils/package_json', () => ({ pkg: mockPackage }));
+
 import { schema, Type, TypeOf } from '../schema';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
@@ -161,21 +166,19 @@ test('tracks unhandled paths', async () => {
 });
 
 test('correctly passes context', async () => {
+  mockPackage.raw = {
+    branch: 'feature-v1',
+    version: 'v1',
+    build: {
+      distributable: true,
+      number: 100,
+      sha: 'feature-v1-build-sha',
+    },
+  };
+
+  const env = new Env('/kibana', getEnvOptions());
+
   const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ foo: {} }));
-
-  const env = new Env(
-    '/kibana',
-    getEnvOptions({
-      mode: 'development',
-      packageInfo: {
-        branch: 'feature-v1',
-        buildNum: 100,
-        buildSha: 'feature-v1-build-sha',
-        version: 'v1',
-      },
-    })
-  );
-
   const configService = new ConfigService(config$, env, logger);
   const configs = configService.atPath(
     'foo',
