@@ -77,7 +77,6 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]

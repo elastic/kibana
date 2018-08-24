@@ -652,19 +652,7 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('requires filters to be an array if defined', async () => {
-      callAdminCluster.returns(noNamespaceSearchResults);
-      try {
-        await savedObjectsRepository.find({ filters: 'string' });
-        throw new Error('expected find() to reject');
-      } catch (error) {
-        sinon.assert.notCalled(callAdminCluster);
-        sinon.assert.notCalled(onBeforeWrite);
-        expect(error.message).toMatch('must be an array');
-      }
-    });
-
-    it('passes mappings, schema, namespace, search, searchFields, type, sortField, filters, and sortOrder to getSearchDsl', async () => {
+    it('passes mappings, schema, namespace, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
       callAdminCluster.returns(namespacedSearchResults);
       const relevantOpts = {
         namespace: 'foo-namespace',
@@ -673,7 +661,6 @@ describe('SavedObjectsRepository', () => {
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        filters: [{ bool: {} }],
       };
 
       await savedObjectsRepository.find(relevantOpts, 'foo-namespace');

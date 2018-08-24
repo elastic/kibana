@@ -108,21 +108,18 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
- *  @param {Array<object>} filters additional query filters
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields, filters = []) {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields) {
   const types = getTypes(mappings, type);
   const bool = {
-    filter: [...filters],
+    filter: [{
+      bool: {
+        should: types.map(type => getClauseForType(schema, namespace, type)),
+        minimum_should_match: 1
+      }
+    }],
   };
-
-  bool.filter.push({
-    bool: {
-      should: types.map(type => getClauseForType(schema, namespace, type)),
-      minimum_should_match: 1
-    }
-  });
 
   if (search) {
     bool.must = [
@@ -140,5 +137,3 @@ export function getQueryParams(mappings, schema, namespace, type, search, search
 
   return { query: { bool } };
 }
-
-

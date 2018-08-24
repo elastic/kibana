@@ -223,7 +223,6 @@ export class SavedObjectsRepository {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]
@@ -242,7 +241,6 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
-      filters,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -251,10 +249,6 @@ export class SavedObjectsRepository {
 
     if (fields && !Array.isArray(fields)) {
       throw new TypeError('options.searchFields must be an array');
-    }
-
-    if (filters && !Array.isArray(filters)) {
-      throw new TypeError('options.filters must be an array');
     }
 
     const esOptions = {
@@ -272,7 +266,6 @@ export class SavedObjectsRepository {
           type,
           sortField,
           sortOrder,
-          filters
         })
       }
     };
