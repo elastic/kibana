@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import moment from 'moment';
-import { noop, random, get, find } from 'lodash';
+import { noop, random, get, find, identity } from 'lodash';
 import { ClientMock } from './fixtures/elasticsearch';
 import { QueueMock } from './fixtures/queue';
 import { Worker } from '../worker';
@@ -514,54 +514,34 @@ describe('Worker class', function () {
   });
 
   describe('find a pending job to claim', function () {
-    let updateSpy;
-    let jobs;
+    const getMockJobs = (status = 'pending') => ([{
+      _index: 'myIndex',
+      _type: 'test',
+      _id: 12345,
+      _version: 3,
+      found: true,
+      _source: {
+        jobtype: 'jobtype',
+        created_by: false,
+        payload: { id: 'sample-job-1', now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)' },
+        priority: 10,
+        timeout: 10000,
+        created_at: '2016-04-25T21:13:04.738Z',
+        attempts: 0,
+        max_attempts: 3,
+        status
+      },
+    }]);
 
     beforeEach(function () {
-      anchorMoment = moment(anchor);
-      clock = sinon.useFakeTimers(anchorMoment.valueOf());
-
-      updateSpy = sinon.spy(mockQueue.client, 'update');
-
-      jobs = [{
-        _index: 'myIndex',
-        _type: 'test',
-        _id: 12345,
-        _version: 3,
-        found: true,
-        _source: {
-          jobtype: 'jobtype',
-          created_by: false,
-          payload: { id: 'sample-job-1', now: 'Mon Apr 25 2016 14:13:04 GMT-0700 (MST)' },
-          priority: 10,
-          timeout: 10000,
-          created_at: '2016-04-25T21:13:04.738Z',
-          attempts: 0,
-          max_attempts: 3,
-          status: 'pending',
-        },
-      }];
+      worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
     });
 
     afterEach(() => {
-      clock.restore();
-    });
-
-    it('should use version on update', function () {
       mockQueue.client.update.restore();
-      return worker._claimPendingJobs(jobs)
-        .then(() => {
-          const [ job ] = jobs;
-          const query = updateSpy.firstCall.args[0];
-          expect(query).to.have.property('index', job._index);
-          expect(query).to.have.property('type', job._type);
-          expect(query).to.have.property('id', job._id);
-          expect(query).to.have.property('version', job._version);
-        });
     });
 
     it('should emit for errors from claiming job', function (done) {
-      mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
 
       worker.once(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
@@ -576,15 +556,28 @@ describe('Worker class', function () {
         }
       });
 
-      worker._claimPendingJobs(jobs);
+      worker._claimPendingJobs(getMockJobs());
     });
 
     it('should reject the promise if an error claiming the job', function () {
-      mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
-      return worker._claimPendingJobs(jobs)
+      return worker._claimPendingJobs(getMockJobs())
         .catch(err => {
           expect(err).to.eql({ statusCode: 409 });
+        });
+    });
+
+    it('should get the pending job', function () {
+      sinon.stub(mockQueue.client, 'update').returns(Promise.resolve({ test: 'cool' }));
+      sinon.stub(worker, '_performJob').callsFake(identity);
+      return worker._claimPendingJobs(getMockJobs())
+        .then(claimedJob => {
+          expect(claimedJob._index).to.be('myIndex');
+          expect(claimedJob._type).to.be('test');
+          expect(claimedJob._source.jobtype).to.be('jobtype');
+          expect(claimedJob._source.status).to.be('processing');
+          expect(claimedJob.test).to.be('cool');
+          worker._performJob.restore();
         });
     });
   });

@@ -338,6 +338,7 @@ export class Worker extends events.EventEmitter {
       })
       .catch((err) => {
         this.warn('Error claiming jobs', err);
+        return Promise.reject(err);
       });
   }
 
