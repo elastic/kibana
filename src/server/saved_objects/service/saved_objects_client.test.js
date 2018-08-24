@@ -26,12 +26,13 @@ test(`#create`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const attributes = {};
-  const options = {};
-  const result = await client.create(type, attributes, options);
+  const type = Symbol();
+  const attributes = Symbol();
+  const options = Symbol();
+  const namespace = Symbol();
+  const result = await client.create(type, attributes, options, namespace);
 
-  expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
+  expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -42,11 +43,12 @@ test(`#bulkCreate`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const objects = [];
-  const options = {};
-  const result = await client.bulkCreate(objects, options);
+  const objects = Symbol();
+  const options = Symbol();
+  const namespace = Symbol();
+  const result = await client.bulkCreate(objects, options, namespace);
 
-  expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
+  expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -57,11 +59,12 @@ test(`#delete`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const result = await client.delete(type, id);
+  const type = Symbol();
+  const id = Symbol();
+  const namespace = Symbol();
+  const result = await client.delete(type, id, namespace);
 
-  expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.delete).toHaveBeenCalledWith(type, id, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -72,10 +75,11 @@ test(`#find`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const options = {};
-  const result = await client.find(options);
+  const options = Symbol();
+  const namespace = Symbol();
+  const result = await client.find(options, namespace);
 
-  expect(mockRepository.find).toHaveBeenCalledWith(options);
+  expect(mockRepository.find).toHaveBeenCalledWith(options, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -86,11 +90,11 @@ test(`#bulkGet`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const objects = {};
-  const options = Symbol();
-  const result = await client.bulkGet(objects, options);
+  const objects = Symbol();
+  const namespace = Symbol();
+  const result = await client.bulkGet(objects, namespace);
 
-  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
+  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -101,12 +105,12 @@ test(`#get`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const options = Symbol();
-  const result = await client.get(type, id, options);
+  const type = Symbol();
+  const id = Symbol();
+  const namespace = Symbol();
+  const result = await client.get(type, id, namespace);
 
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, namespace);
   expect(result).toBe(returnValue);
 });
 
@@ -117,12 +121,13 @@ test(`#update`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const attributes = {};
-  const options = {};
-  const result = await client.update(type, id, attributes, options);
+  const type = Symbol();
+  const id = Symbol();
+  const attributes = Symbol();
+  const options = Symbol();
+  const namespace = Symbol();
+  const result = await client.update(type, id, attributes, options, namespace);
 
-  expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options, namespace);
   expect(result).toBe(returnValue);
 });
