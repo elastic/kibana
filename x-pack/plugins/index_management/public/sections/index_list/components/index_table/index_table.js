@@ -68,6 +68,24 @@ const HEADERS = {
 };
 
 export class IndexTableUi extends Component {
+  static getDerivedStateFromProps(props, state) {
+    // Deselct any indices which no longer exist, e.g. they've been deleted.
+    const { selectedIndicesMap } = state;
+    const indexNames = props.indices.map(index => index.name);
+    const selectedIndexNames = Object.keys(selectedIndicesMap);
+    const missingIndexNames = selectedIndexNames.filter(selectedIndexName => {
+      return !indexNames.includes(selectedIndexName);
+    });
+
+    if (missingIndexNames.length) {
+      const newMap = { ...selectedIndicesMap };
+      missingIndexNames.forEach(missingIndexName => delete newMap[missingIndexName]);
+      return { selectedIndicesMap: newMap };
+    }
+
+    return null;
+  }
+
   constructor(props) {
     super(props);
 
@@ -82,6 +100,7 @@ export class IndexTableUi extends Component {
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     sortChanged(column, newIsSortAscending);
   };
+
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     if (allSelected) {
@@ -96,6 +115,7 @@ export class IndexTableUi extends Component {
       selectedIndicesMap
     });
   };
+
   toggleItem = name => {
     this.setState(({ selectedIndicesMap }) => {
       const newMap = { ...selectedIndicesMap };
@@ -109,6 +129,7 @@ export class IndexTableUi extends Component {
       };
     });
   };
+
   isItemSelected = name => {
     return !!this.state.selectedIndicesMap[name];
   };
@@ -159,6 +180,7 @@ export class IndexTableUi extends Component {
     }
     return value;
   }
+
   buildRowCells(index) {
     return Object.keys(HEADERS).map(fieldName => {
       const { name } = index;
@@ -174,6 +196,7 @@ export class IndexTableUi extends Component {
       );
     });
   }
+
   buildRows() {
     const { indices = [], detailPanelIndexName } = this.props;
     return indices.map(index => {
@@ -221,7 +244,6 @@ export class IndexTableUi extends Component {
   };
 
   render() {
-
     const {
       filterChanged,
       filter,
