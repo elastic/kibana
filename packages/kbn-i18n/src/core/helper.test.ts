@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject, hasValues, unique, mergeAll } from './helper';
+import { hasValues, isObject, isString, mergeAll, unique } from './helper';
 
 describe('I18n helper', () => {
   describe('isString', () => {
@@ -26,6 +26,7 @@ describe('I18n helper', () => {
     });
 
     test('should return false for string object', () => {
+      // tslint:disable-next-line:no-construct
       expect(isString(new String('test'))).toBe(false);
     });
 

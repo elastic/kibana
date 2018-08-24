@@ -23,9 +23,9 @@ export const isObject = (value: any) => typeof value === 'object' && value !== n
 
 export const hasValues = (values: any) => Object.keys(values).length > 0;
 
-export const unique = (arr: string[] = []) => [...new Set(arr)];
+export const unique = <T>(arr: T[] = []): T[] => [...new Set(arr)];
 
-const merge = (a, b) =>
+const merge = (a: any, b: any): any =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {
     if (isObject(a[key]) && isObject(b[key]) && !Array.isArray(a[key]) && !Array.isArray(b[key])) {
       return {
@@ -40,5 +40,5 @@ const merge = (a, b) =>
     };
   }, {});
 
-export const mergeAll = (...sources) =>
+export const mergeAll = (...sources: any[]) =>
   sources.filter(isObject).reduce((acc, source) => merge(acc, source));

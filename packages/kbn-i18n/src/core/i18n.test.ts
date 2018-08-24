@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import * as i18nModule from './i18n';
+
 describe('I18n engine', () => {
-  let i18n;
+  let i18n = i18nModule;
 
   beforeEach(() => {
-    i18n = require('./i18n');
+    i18n = require.requireActual('./i18n');
   });
 
   afterEach(() => {
@@ -181,11 +183,11 @@ describe('I18n engine', () => {
 
   describe('setLocale', () => {
     test('should throw error if locale is not a non-empty string', () => {
-      expect(() => i18n.setLocale(undefined)).toThrow();
-      expect(() => i18n.setLocale(null)).toThrow();
-      expect(() => i18n.setLocale(true)).toThrow();
-      expect(() => i18n.setLocale(5)).toThrow();
-      expect(() => i18n.setLocale({})).toThrow();
+      expect(() => i18n.setLocale(undefined as any)).toThrow();
+      expect(() => i18n.setLocale(null as any)).toThrow();
+      expect(() => i18n.setLocale(true as any)).toThrow();
+      expect(() => i18n.setLocale(5 as any)).toThrow();
+      expect(() => i18n.setLocale({} as any)).toThrow();
       expect(() => i18n.setLocale('')).toThrow();
     });
 
@@ -214,11 +216,11 @@ describe('I18n engine', () => {
 
   describe('setDefaultLocale', () => {
     test('should throw error if locale is not a non-empty string', () => {
-      expect(() => i18n.setDefaultLocale(undefined)).toThrow();
-      expect(() => i18n.setDefaultLocale(null)).toThrow();
-      expect(() => i18n.setDefaultLocale(true)).toThrow();
-      expect(() => i18n.setDefaultLocale(5)).toThrow();
-      expect(() => i18n.setDefaultLocale({})).toThrow();
+      expect(() => i18n.setDefaultLocale(undefined as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(null as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(true as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(5 as any)).toThrow();
+      expect(() => i18n.setDefaultLocale({} as any)).toThrow();
       expect(() => i18n.setDefaultLocale('')).toThrow();
     });
 
@@ -349,14 +351,17 @@ describe('I18n engine', () => {
         locale: 'ru',
       });
 
-      expect(i18n.getRegisteredLocales()).toContain('en', 'ru');
+      expect(i18n.getRegisteredLocales()).toContain('en');
+      expect(i18n.getRegisteredLocales()).toContain('ru');
       expect(i18n.getRegisteredLocales().length).toBe(2);
 
       i18n.addMessages({
         locale: 'fr',
       });
 
-      expect(i18n.getRegisteredLocales()).toContain('en', 'ru', 'fr');
+      expect(i18n.getRegisteredLocales()).toContain('en');
+      expect(i18n.getRegisteredLocales()).toContain('fr');
+      expect(i18n.getRegisteredLocales()).toContain('ru');
       expect(i18n.getRegisteredLocales().length).toBe(3);
     });
   });

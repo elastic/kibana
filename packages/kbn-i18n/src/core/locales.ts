@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 
 // TODO: Get rid of this file once https://github.com/elastic/kibana/pull/20105
 // is merged and use dynamic import for asynchronous loading of specific locale data
