@@ -72,6 +72,13 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async byClassName(selector, timeout = defaultFindTimeout) {
+      log.debug(`findByCssSelector ${selector}`);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByClassName(selector);
+      });
+    }
+
     async setValue(selector, text) {
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
