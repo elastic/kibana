@@ -33,7 +33,12 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
       if (key === 'telemetryOptedIn') {
         return enabled;
       }
-      throw new Error(`unexpected injector usage for ${key}`);
+      if (key === 'notifier') {
+        return function mockNotifier() {
+          this.notify = sinon.stub();
+        };
+      }
+      throw new Error(`unexpected mock injector usage for ${key}`);
     }
   };
 

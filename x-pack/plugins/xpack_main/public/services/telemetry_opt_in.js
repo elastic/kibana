@@ -8,14 +8,22 @@ import moment from 'moment';
 
 export function TelemetryOptInProvider($injector, chrome) {
 
+  const Notifier = $injector.get('notifier');
+  const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
 
   return {
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
       const $http = $injector.get('$http');
-      await $http.post(chrome.addBasePath('/api/telemetry/v1/optIn'), { enabled });
-      currentOptInStatus = enabled;
+
+      try {
+        await $http.post(chrome.addBasePath('/api/telemetry/v1/optIn'), { enabled });
+        currentOptInStatus = enabled;
+      } catch (error) {
+        notify.error(error);
+        return false;
+      }
 
       return true;
     },
