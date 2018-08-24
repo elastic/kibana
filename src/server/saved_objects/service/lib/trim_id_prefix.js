@@ -30,7 +30,7 @@ function assertNonEmptyString(value, name) {
  *  @param  {string} type
  *  @return {string}
  */
-export function trimId(schema, id, namespace, type) {
+export function trimIdPrefix(schema, id, namespace, type) {
   assertNonEmptyString(id, 'document id');
   assertNonEmptyString(type, 'saved object type');
 

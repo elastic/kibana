@@ -21,7 +21,7 @@ import uuid from 'uuid';
 
 import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
-import { trimId } from './trim_id_prefix';
+import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
@@ -83,7 +83,7 @@ export class SavedObjectsRepository {
       });
 
       return {
-        id: trimId(this._schema, response._id, namespace, type),
+        id: trimIdPrefix(this._schema, response._id, namespace, type),
         type,
         updated_at: time,
         version: response._version,
@@ -297,7 +297,7 @@ export class SavedObjectsRepository {
       saved_objects: response.hits.hits.map(hit => {
         const { type, updated_at: updatedAt } = hit._source;
         return {
-          id: trimId(this._schema, hit._id, namespace, type),
+          id: trimIdPrefix(this._schema, hit._id, namespace, type),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
