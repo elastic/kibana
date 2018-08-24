@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AdvancedSettings should render normally 1`] = `
+exports[`mgtAdvancedSettings should render normally 1`] = `
 <div
-  className="advancedSettings"
+  className="mgtAdvancedSettings"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -328,9 +328,9 @@ exports[`AdvancedSettings should render normally 1`] = `
 </div>
 `;
 
-exports[`AdvancedSettings should render specific setting if given setting key 1`] = `
+exports[`mgtAdvancedSettings should render specific setting if given setting key 1`] = `
 <div
-  className="advancedSettings"
+  className="mgtAdvancedSettings"
 >
   <EuiFlexGroup
     alignItems="stretch"

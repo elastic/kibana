@@ -566,7 +566,7 @@ export class Field extends PureComponent {
     }
 
     return (
-      <EuiFormRow className="advancedSettings__field__actions">
+      <EuiFormRow className="mgtAdvancedSettings__fieldActions" hasEmptyLabelSpace>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -574,7 +574,7 @@ export class Field extends PureComponent {
               aria-label={`Save ${ariaName}`}
               onClick={this.saveEdit}
               disabled={isDisabled || isInvalid}
-              data-test-subj={`advancedSetting-saveEditField-${name}`}
+              data-test-subj={`mgtAdvancedSetting__saveEditField--${name}`}
             >
               Save
             </EuiButton>
@@ -584,7 +584,7 @@ export class Field extends PureComponent {
               aria-label={`Cancel editing ${ariaName}`}
               onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
               disabled={isDisabled}
-              data-test-subj={`advancedSetting-cancelEditField-${name}`}
+              data-test-subj={`mgtAdvancedSetting__cancelEditField--${name}`}
             >
               Cancel
             </EuiButtonEmpty>
@@ -599,10 +599,10 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return (
-      <EuiFlexGroup className="advancedSettings__field">
+      <EuiFlexGroup className="mgtAdvancedSettings__field">
         <EuiFlexItem grow={false}>
           <EuiDescribedFormGroup
-            className="advancedSettings__field__wrapper"
+            className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
             idAria={`${setting.name}-aria`}
