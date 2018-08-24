@@ -321,7 +321,6 @@ export class SavedObjectsRepository {
    * ])
    */
   async bulkGet(objects = [], namespace) {
-    console.log('repository.bulkGet', { objects, namespace });
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
