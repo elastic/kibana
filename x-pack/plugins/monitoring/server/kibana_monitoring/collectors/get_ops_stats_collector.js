@@ -11,6 +11,7 @@ import {
 } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import Oppsy from 'oppsy';
+import { cloneDeep } from 'lodash';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
@@ -25,6 +26,9 @@ class OpsMonitor {
 
   start = () => {
     this._oppsy.on('ops', (event) => {
+      // Oppsy has a bad race condition that will modify this data before
+      // we ship it off to the buffer. Let's create our copy first.
+      event = cloneDeep(event);
       // Oppsy used to provide this, but doesn't anymore. Grab it ourselves.
       this._server.listener.getConnections((_, count) => {
         event.concurrent_connections = count;
