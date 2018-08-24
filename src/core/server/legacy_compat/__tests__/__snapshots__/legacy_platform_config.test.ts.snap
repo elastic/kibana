@@ -6,6 +6,40 @@ exports[`#get correctly handles paths that do not exist in legacy config. 2`] = 
 
 exports[`#get correctly handles paths that do not exist in legacy config. 3`] = `"Unknown schema key: one.three"`;
 
+exports[`#get correctly handles silent logging config. 1`] = `
+Object {
+  "appenders": Object {
+    "default": Object {
+      "kind": "legacy-appender",
+      "legacyLoggingConfig": Object {
+        "silent": true,
+      },
+    },
+  },
+  "root": Object {
+    "level": "off",
+  },
+}
+`;
+
+exports[`#get correctly handles verbose file logging config with json format. 1`] = `
+Object {
+  "appenders": Object {
+    "default": Object {
+      "kind": "legacy-appender",
+      "legacyLoggingConfig": Object {
+        "dest": "/some/path.log",
+        "json": true,
+        "verbose": true,
+      },
+    },
+  },
+  "root": Object {
+    "level": "all",
+  },
+}
+`;
+
 exports[`#set correctly sets values for new platform config. 1`] = `
 Object {
   "plugins": Object {

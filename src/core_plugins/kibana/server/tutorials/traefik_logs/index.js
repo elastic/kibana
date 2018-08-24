@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
@@ -27,17 +28,29 @@ export function traefikLogsSpecProvider() {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'traefikLogs',
-    name: 'Traefik logs',
+    name: i18n.translate('kbn.server.tutorials.traefikLogs.nameTitle', {
+      defaultMessage: 'Traefik logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse access logs created by the Traefik Proxy.',
-    longDescription: 'The `traefik` Filebeat module parses access logs created by Traefik.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-traefik.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.traefikLogs.shortDescription', {
+      defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `traefik` Filebeat module parses access logs created by Traefik. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
+      },
+    }),
     //euiIconType: 'logoTraefik',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-Traefik-Dashboard',
-          linkLabel: 'Traefik logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Traefik logs dashboard',
+          }),
           isOverview: true
         }
       ],

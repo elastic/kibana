@@ -52,11 +52,11 @@ exports[`apmUiEnabled 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="APM automatically collects in-depth performance metrics and errors from inside your applications."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial/apm"
@@ -68,7 +68,7 @@ exports[`apmUiEnabled 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="apmApp"
           />
@@ -84,11 +84,11 @@ exports[`apmUiEnabled 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
@@ -100,7 +100,7 @@ exports[`apmUiEnabled 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="loggingApp"
           />
@@ -116,11 +116,11 @@ exports[`apmUiEnabled 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
@@ -132,7 +132,7 @@ exports[`apmUiEnabled 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="monitoringApp"
           />
@@ -148,11 +148,11 @@ exports[`apmUiEnabled 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
@@ -164,7 +164,7 @@ exports[`apmUiEnabled 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="securityApp"
           />
@@ -190,7 +190,7 @@ exports[`apmUiEnabled 1`] = `
     wrap={false}
   >
     <EuiFlexItem
-      className="addDataFooterItem"
+      className="homAddData__footerItem"
       component="div"
       grow={true}
     >
@@ -221,7 +221,7 @@ exports[`apmUiEnabled 1`] = `
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      className="addDataFooterItem"
+      className="homAddData__footerItem"
       component="div"
       grow={true}
     >
@@ -307,11 +307,11 @@ exports[`isNewKibanaInstance 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
@@ -323,7 +323,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="loggingApp"
           />
@@ -339,11 +339,11 @@ exports[`isNewKibanaInstance 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
@@ -355,7 +355,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="monitoringApp"
           />
@@ -371,11 +371,11 @@ exports[`isNewKibanaInstance 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
@@ -387,7 +387,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="securityApp"
           />
@@ -413,7 +413,7 @@ exports[`isNewKibanaInstance 1`] = `
     wrap={false}
   >
     <EuiFlexItem
-      className="addDataFooterItem addDataFooterItem_highlight"
+      className="homAddData__footerItem homAddData__footerItem--highlight"
       component="div"
       grow={true}
     >
@@ -444,7 +444,7 @@ exports[`isNewKibanaInstance 1`] = `
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      className="addDataFooterItem addDataFooterItem_highlight"
+      className="homAddData__footerItem homAddData__footerItem--highlight"
       component="div"
       grow={true}
     >
@@ -530,11 +530,11 @@ exports[`render 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
@@ -546,7 +546,7 @@ exports[`render 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="loggingApp"
           />
@@ -562,11 +562,11 @@ exports[`render 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
@@ -578,7 +578,7 @@ exports[`render 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="monitoringApp"
           />
@@ -594,11 +594,11 @@ exports[`render 1`] = `
       grow={true}
     >
       <EuiCard
-        className="addDataCard"
+        className="homAddData__card"
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
-            className="addDataButton"
+            className="homAddData__button"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
@@ -610,7 +610,7 @@ exports[`render 1`] = `
         }
         icon={
           <EuiIcon
-            className="addDataIcon"
+            className="homAddData__icon"
             size="m"
             type="securityApp"
           />
@@ -636,7 +636,7 @@ exports[`render 1`] = `
     wrap={false}
   >
     <EuiFlexItem
-      className="addDataFooterItem"
+      className="homAddData__footerItem"
       component="div"
       grow={true}
     >
@@ -667,7 +667,7 @@ exports[`render 1`] = `
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      className="addDataFooterItem"
+      className="homAddData__footerItem"
       component="div"
       grow={true}
     >

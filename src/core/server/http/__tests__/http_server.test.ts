@@ -24,7 +24,6 @@ jest.mock('fs', () => ({
 }));
 
 import Chance from 'chance';
-import http from 'http';
 import supertest from 'supertest';
 
 import { Env } from '../../config';
@@ -36,6 +35,7 @@ import { Router } from '../router';
 
 const chance = new Chance();
 
+let env: Env;
 let server: HttpServer;
 let config: HttpConfig;
 
@@ -51,7 +51,8 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get(), new Env('/kibana', getEnvOptions()));
+  env = new Env('/kibana', getEnvOptions());
+  server = new HttpServer(logger.get(), env);
 });
 
 afterEach(async () => {
@@ -563,99 +564,21 @@ describe('with defined `redirectHttpFromPort`', () => {
   });
 });
 
-describe('when run within legacy platform', () => {
-  let newPlatformProxyListenerMock: any;
-  beforeEach(() => {
-    newPlatformProxyListenerMock = {
-      bind: jest.fn(),
-      proxy: jest.fn(),
-    };
+test('broadcasts server and connection options to the legacy "channel"', async () => {
+  const onConnectionListener = jest.fn();
+  env.legacy.on('connection', onConnectionListener);
 
-    const kbnServerMock = {
-      newPlatformProxyListener: newPlatformProxyListenerMock,
-    };
+  expect(onConnectionListener).not.toHaveBeenCalled();
 
-    server = new HttpServer(
-      logger.get(),
-      new Env('/kibana', getEnvOptions({ kbnServer: kbnServerMock }))
-    );
-
-    const router = new Router('/new');
-    router.get({ path: '/', validate: false }, async (req, res) => {
-      return res.ok({ key: 'new-platform' });
-    });
-
-    server.registerRouter(router);
-
-    newPlatformProxyListenerMock.proxy.mockImplementation(
-      (req: http.IncomingMessage, res: http.ServerResponse) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ key: `legacy-platform:${req.url}` }));
-      }
-    );
+  await server.start({
+    ...config,
+    port: 12345,
   });
 
-  test('binds proxy listener to server.', async () => {
-    expect(newPlatformProxyListenerMock.bind).not.toHaveBeenCalled();
+  expect(onConnectionListener).toHaveBeenCalledTimes(1);
 
-    await server.start(config);
-
-    expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledTimes(1);
-    expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledWith(
-      expect.any((http as any).Server)
-    );
-    expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(getServerListener(server));
-  });
-
-  test('forwards request to legacy platform if new one cannot handle it', async () => {
-    await server.start(config);
-
-    await supertest(getServerListener(server))
-      .get('/legacy')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
-          expect.any((http as any).IncomingMessage),
-          expect.any((http as any).ServerResponse)
-        );
-      });
-  });
-
-  test('forwards request to legacy platform and rewrites base path if needed', async () => {
-    await server.start({
-      ...config,
-      basePath: '/bar',
-      rewriteBasePath: true,
-    });
-
-    await supertest(getServerListener(server))
-      .get('/legacy')
-      .expect(404);
-
-    await supertest(getServerListener(server))
-      .get('/bar/legacy')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
-          expect.any((http as any).IncomingMessage),
-          expect.any((http as any).ServerResponse)
-        );
-      });
-  });
-
-  test('do not forward request to legacy platform if new one can handle it', async () => {
-    await server.start(config);
-
-    await supertest(getServerListener(server))
-      .get('/new/')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'new-platform' });
-        expect(newPlatformProxyListenerMock.proxy).not.toHaveBeenCalled();
-      });
-  });
+  const [[{ options, server: rawServer }]] = onConnectionListener.mock.calls;
+  expect(rawServer).toBeDefined();
+  expect(rawServer).toBe((server as any).server);
+  expect(options).toMatchSnapshot();
 });
