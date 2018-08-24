@@ -27,6 +27,7 @@ import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from '../render_complete';
 import { uiModules } from '../modules';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../courier/utils/courier_inspector_utils';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
@@ -49,6 +50,7 @@ uiModules.get('kibana')
         onChangeSortOrder: '=?',
         onMoveColumn: '=?',
         onRemoveColumn: '=?',
+        inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
         const notify = new Notifier();
@@ -132,7 +134,26 @@ uiModules.get('kibana')
           }
 
           function startSearching() {
+            let inspectorRequest = undefined;
+            if (_.has($scope, 'inspectorAdapters.requests')) {
+              $scope.inspectorAdapters.requests.reset();
+              inspectorRequest = $scope.inspectorAdapters.requests.start('Data', {
+                description: `This request queries Elasticsearch to fetch the data for the search.`,
+              });
+              inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+              $scope.searchSource.getSearchRequestBody().then(body => {
+                inspectorRequest.json(body);
+              });
+            }
             $scope.searchSource.onResults()
+              .then(resp => {
+                if (inspectorRequest) {
+                  inspectorRequest
+                    .stats(getResponseInspectorStats($scope.searchSource, resp))
+                    .ok({ json: resp });
+                }
+                return resp;
+              })
               .then(onResults)
               .catch(error => {
                 notify.error(error);
