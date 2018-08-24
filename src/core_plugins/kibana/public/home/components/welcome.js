@@ -70,7 +70,7 @@ export class Welcome extends React.Component {
             </span>
             <EuiTitle size="l" className="homWelcome__title">
               <h1>
-                <FormattedMessage id="kbn.home.welcomeHeader" defaultMessage="Welcome to Kibana"/>
+                <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana"/>
               </h1>
             </EuiTitle>
             <EuiText size="s" color="subdued" className="homWelcome__subtitle">
@@ -101,14 +101,14 @@ You can try our sample data and dashboards or jump in with your own data."
                       className="homWelcome__footerAction"
                       href="#/home/tutorial_directory/sampleData"
                     >
-                      <FormattedMessage id="kbn.home.tryButton" defaultMessage="Try our sample data"/>
+                      <FormattedMessage id="kbn.home.tryButtonLabel" defaultMessage="Try our sample data"/>
                     </EuiButton>
                     <EuiButtonEmpty
                       className="homWelcome__footerAction"
                       onClick={onSkip}
                       data-test-subj="skipWelcomeScreen"
                     >
-                      <FormattedMessage id="kbn.home.exploreButton" defaultMessage="Explore on my own"/>
+                      <FormattedMessage id="kbn.home.exploreButtonLabel" defaultMessage="Explore on my own"/>
                     </EuiButtonEmpty>
                   </footer>
                 }

@@ -200,7 +200,7 @@ export class RecentlyAccessed extends Component {
           <h3>
             <EuiTextColor color="subdued">
               <FormattedMessage
-                id="kbn.home.recentlyAccessed.recentlyViewedHeader"
+                id="kbn.home.recentlyAccessed.recentlyViewedTitle"
                 defaultMessage="Recently viewed"
               />
             </EuiTextColor>

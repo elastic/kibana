@@ -25,7 +25,7 @@ exports[`apmUiEnabled 1`] = `
         <h3>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaButton"
+            id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
         </h3>
@@ -73,7 +73,7 @@ exports[`apmUiEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add APM"
-              id="kbn.home.addData.apm.addApmButton"
+              id="kbn.home.addData.apm.addApmButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -109,7 +109,7 @@ exports[`apmUiEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButton"
+              id="kbn.home.addData.logging.addLogDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -145,7 +145,7 @@ exports[`apmUiEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButton"
+              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -181,7 +181,7 @@ exports[`apmUiEnabled 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButton"
+              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -320,7 +320,7 @@ exports[`isNewKibanaInstance 1`] = `
         <h3>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaButton"
+            id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
         </h3>
@@ -368,7 +368,7 @@ exports[`isNewKibanaInstance 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButton"
+              id="kbn.home.addData.logging.addLogDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -404,7 +404,7 @@ exports[`isNewKibanaInstance 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButton"
+              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -440,7 +440,7 @@ exports[`isNewKibanaInstance 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButton"
+              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -579,7 +579,7 @@ exports[`render 1`] = `
         <h3>
           <FormattedMessage
             defaultMessage="Add Data to Kibana"
-            id="kbn.home.addData.addDataToKibanaButton"
+            id="kbn.home.addData.addDataToKibanaTitle"
             values={Object {}}
           />
         </h3>
@@ -627,7 +627,7 @@ exports[`render 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add log data"
-              id="kbn.home.addData.logging.addLogDataButton"
+              id="kbn.home.addData.logging.addLogDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -663,7 +663,7 @@ exports[`render 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add metric data"
-              id="kbn.home.addData.metrics.addMetricsDataButton"
+              id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -699,7 +699,7 @@ exports[`render 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButton"
+              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>

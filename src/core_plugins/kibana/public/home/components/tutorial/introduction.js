@@ -57,7 +57,7 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
           target="_blank"
           rel="noopener noreferrer"
         >
-          <FormattedMessage id="kbn.home.tutorial.introduction.viewButton" defaultMessage="View exported fields"/>
+          <FormattedMessage id="kbn.home.tutorial.introduction.viewButtonLabel" defaultMessage="View exported fields"/>
         </EuiButton>
       </div>
     );

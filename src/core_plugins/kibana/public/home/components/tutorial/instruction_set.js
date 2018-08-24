@@ -42,7 +42,7 @@ import * as StatusCheckStates from './status_check_states';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export class InstructionSetComponent extends React.Component {
+export class InstructionSetUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -154,7 +154,7 @@ export class InstructionSetComponent extends React.Component {
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
               {statusCheckConfig.btnLabel || <FormattedMessage
-                id="kbn.home.tutorial.instractionSet.checkStatusButton"
+                id="kbn.home.tutorial.instractionSet.checkStatusButtonLabel"
                 defaultMessage="Check status"
               />}
             </EuiButton>
@@ -310,7 +310,7 @@ const statusCheckConfigShape = PropTypes.shape({
   btnLabel: PropTypes.string,
 });
 
-InstructionSetComponent.propTypes = {
+InstructionSetUi.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheckConfig: statusCheckConfigShape,
@@ -329,4 +329,4 @@ InstructionSetComponent.propTypes = {
   replaceTemplateStrings: PropTypes.func.isRequired,
 };
 
-export const InstructionSet = injectI18n(InstructionSetComponent);
+export const InstructionSet = injectI18n(InstructionSetUi);

@@ -159,7 +159,7 @@ export class Home extends Component {
                 <EuiTitle>
                   <h3>
                     <FormattedMessage
-                      id="kbn.home.directories.visualize.nameHeader"
+                      id="kbn.home.directories.visualize.nameTitle"
                       defaultMessage="Visualize and Explore Data"
                     />
                   </h3>
@@ -175,7 +175,7 @@ export class Home extends Component {
                 <EuiTitle>
                   <h3>
                     <FormattedMessage
-                      id="kbn.home.directories.manage.nameHeader"
+                      id="kbn.home.directories.manage.nameTitle"
                       defaultMessage="Manage and Administer the Elastic Stack"
                     />
                   </h3>
@@ -203,7 +203,7 @@ export class Home extends Component {
               <EuiSpacer size="s" />
               <EuiButton href="#/home/feature_directory">
                 <FormattedMessage
-                  id="kbn.home.directories.viewFullButton"
+                  id="kbn.home.directories.viewFullButtonLabel"
                   defaultMessage="View full directory of Kibana plugins"
                 />
               </EuiButton>

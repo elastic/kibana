@@ -188,9 +188,9 @@ export class TutorialComponent extends React.Component {
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
-      const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButton',
+      const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButtonLabel',
         defaultMessage: 'Self managed' });
-      const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButton',
+      const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButtonLabel',
         defaultMessage: 'Elastic Cloud' });
       const radioButtons = [
         {

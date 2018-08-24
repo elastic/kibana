@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`bulkCreate should display error message when bulkCreate request fails 1`] = `
-<SavedObjectsInstallerComponent
+<SavedObjectsInstallerUi
   bulkCreate={[Function]}
   intl={
     Object {
@@ -12,7 +12,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           Array [
             Object {
               "defaultMessage": "Load Kibana objects",
-              "id": "kbn.home.tutorial.savedObject.defaultButton",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
             },
           ],
           Array [
@@ -30,7 +30,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           Array [
             Object {
               "defaultMessage": "Load Kibana objects",
-              "id": "kbn.home.tutorial.savedObject.defaultButton",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
             },
           ],
           Array [
@@ -81,7 +81,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           Array [
             Object {
               "defaultMessage": "Load Kibana objects",
-              "id": "kbn.home.tutorial.savedObject.defaultButton",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
             },
           ],
           Array [
@@ -357,11 +357,11 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       </EuiStep>
     </div>
   </EuiSteps>
-</SavedObjectsInstallerComponent>
+</SavedObjectsInstallerUi>
 `;
 
 exports[`bulkCreate should display success message when bulkCreate is successful 1`] = `
-<SavedObjectsInstallerComponent
+<SavedObjectsInstallerUi
   bulkCreate={[Function]}
   intl={
     Object {
@@ -372,7 +372,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           Array [
             Object {
               "defaultMessage": "Load Kibana objects",
-              "id": "kbn.home.tutorial.savedObject.defaultButton",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
             },
           ],
           Array [
@@ -390,7 +390,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           Array [
             Object {
               "defaultMessage": "Load Kibana objects",
-              "id": "kbn.home.tutorial.savedObject.defaultButton",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
             },
           ],
           Array [
@@ -706,7 +706,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       </EuiStep>
     </div>
   </EuiSteps>
-</SavedObjectsInstallerComponent>
+</SavedObjectsInstallerUi>
 `;
 
 exports[`renders 1`] = `

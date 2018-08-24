@@ -34,9 +34,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-export class SavedObjectsInstallerComponent extends React.Component {
+export class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
-    id: 'kbn.home.tutorial.savedObject.defaultButton',
+    id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
     defaultMessage: 'Load Kibana objects'
   });
 
@@ -101,7 +101,7 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
           { overwriteErrorsLength: overwriteErrors.length, savedObjectsLength: this.props.savedObjects.length }),
         isInstalled: false,
         overwrite: true,
-        buttonLabel: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.confirmButton',
+        buttonLabel: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.confirmButtonLabel',
           defaultMessage: 'Confirm overwrite' })
       });
       return;
@@ -198,10 +198,10 @@ const savedObjectShape = PropTypes.shape({
   attributes: PropTypes.object.isRequired,
 });
 
-SavedObjectsInstallerComponent.propTypes = {
+SavedObjectsInstallerUi.propTypes = {
   bulkCreate: PropTypes.func.isRequired,
   savedObjects: PropTypes.arrayOf(savedObjectShape).isRequired,
   installMsg: PropTypes.string,
 };
 
-export const SavedObjectsInstaller = injectI18n(SavedObjectsInstallerComponent);
+export const SavedObjectsInstaller = injectI18n(SavedObjectsInstallerUi);

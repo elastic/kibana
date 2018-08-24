@@ -95,11 +95,11 @@ export class SampleDataSetCard extends React.Component {
               >
                 {this.state.isProcessingRequest
                   ? <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.removingButton"
+                    id="kbn.home.sampleDataSetCard.removingButtonLabel"
                     defaultMessage="Removing"
                   />
                   : <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.removeButton"
+                    id="kbn.home.sampleDataSetCard.removeButtonLabel"
                     defaultMessage="Remove"
                   />}
               </EuiButtonEmpty>
@@ -110,7 +110,7 @@ export class SampleDataSetCard extends React.Component {
                 data-test-subj={`launchSampleDataSet${this.props.id}`}
               >
                 <FormattedMessage
-                  id="kbn.home.sampleDataSetCard.viewDataButton"
+                  id="kbn.home.sampleDataSetCard.viewDataButtonLabel"
                   defaultMessage="View data"
                 />
               </EuiButton>
@@ -129,11 +129,11 @@ export class SampleDataSetCard extends React.Component {
               >
                 {this.state.isProcessingRequest
                   ? <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.addingButton"
+                    id="kbn.home.sampleDataSetCard.addingButtonLabel"
                     defaultMessage="Adding"
                   />
                   : <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.addButton"
+                    id="kbn.home.sampleDataSetCard.addButtonLabel"
                     defaultMessage="Add"
                   />
                 }
@@ -163,7 +163,7 @@ export class SampleDataSetCard extends React.Component {
                   data-test-subj={`addSampleDataSet${this.props.id}`}
                 >
                   <FormattedMessage
-                    id="kbn.home.sampleDataSetCard.default.addButton"
+                    id="kbn.home.sampleDataSetCard.default.addButtonLabel"
                     defaultMessage="Add"
                   />
                 </EuiButton>

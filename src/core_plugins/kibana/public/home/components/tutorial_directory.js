@@ -43,7 +43,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-export class TutorialDirectoryComponent extends React.Component {
+export class TutorialDirectoryUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -62,7 +62,6 @@ export class TutorialDirectoryComponent extends React.Component {
       name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security Analytics' }),
     }, {
       id: SAMPLE_DATA_TAB_ID,
-      name: 'Sample Data',
       name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample Data' }),
     }];
 
@@ -231,7 +230,7 @@ export class TutorialDirectoryComponent extends React.Component {
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="kbn.home.tutorial.addDataHeader"
+                id="kbn.home.tutorial.addDataTitle"
                 defaultMessage="Add Data to Kibana"
               />
             </h1>
@@ -253,7 +252,7 @@ export class TutorialDirectoryComponent extends React.Component {
   }
 }
 
-TutorialDirectoryComponent.propTypes = {
+TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
@@ -262,4 +261,4 @@ TutorialDirectoryComponent.propTypes = {
   clearIndexPatternsCache: PropTypes.func.isRequired,
 };
 
-export const TutorialDirectory = injectI18n(TutorialDirectoryComponent);
+export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

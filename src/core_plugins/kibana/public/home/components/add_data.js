@@ -36,7 +36,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
+export const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
   const renderCards = () => {
     const apmTitle = intl.formatMessage({
@@ -81,7 +81,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
               href="#/home/tutorial/apm"
             >
               <FormattedMessage
-                id="kbn.home.addData.apm.addApmButton"
+                id="kbn.home.addData.apm.addApmButtonLabel"
                 defaultMessage="Add APM"
               />
             </EuiButton>
@@ -107,7 +107,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage
-                  id="kbn.home.addData.logging.addLogDataButton"
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
                   defaultMessage="Add log data"
                 />
               </EuiButton>
@@ -127,7 +127,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
                 href="#/home/tutorial_directory/metrics"
               >
                 <FormattedMessage
-                  id="kbn.home.addData.metrics.addMetricsDataButton"
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
                   defaultMessage="Add metric data"
                 />
               </EuiButton>
@@ -147,7 +147,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
                 href="#/home/tutorial_directory/security"
               >
                 <FormattedMessage
-                  id="kbn.home.addData.security.addSecurityEventsButton"
+                  id="kbn.home.addData.security.addSecurityEventsButtonLabel"
                   defaultMessage="Add security events"
                 />
               </EuiButton>
@@ -167,7 +167,7 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
           <EuiTitle>
             <h3>
               <FormattedMessage
-                id="kbn.home.addData.addDataToKibanaButton"
+                id="kbn.home.addData.addDataToKibanaTitle"
                 defaultMessage="Add Data to Kibana"
               />
             </h3>
@@ -236,9 +236,9 @@ export const AddDataComponent = ({ apmUiEnabled, isNewKibanaInstance, intl }) =>
   );
 };
 
-AddDataComponent.propTypes = {
+AddDataUi.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
   isNewKibanaInstance: PropTypes.bool.isRequired,
 };
 
-export const AddData = injectI18n(AddDataComponent);
+export const AddData = injectI18n(AddDataUi);

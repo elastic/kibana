@@ -121,7 +121,7 @@ export class FeatureDirectory extends React.Component {
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
-                id="kbn.home.directory.directoryHeader"
+                id="kbn.home.directory.directoryTitle"
                 defaultMessage="Directory"
               />
             </h1>
