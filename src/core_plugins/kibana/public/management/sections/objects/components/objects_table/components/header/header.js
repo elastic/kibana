@@ -18,6 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiSpacer,
@@ -33,24 +34,16 @@ export const Header = ({
   onExportAll,
   onImport,
   onRefresh,
-  totalCount,
+  filteredCount,
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>Saved Objects</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTextColor color="subdued">
-              <p>{totalCount} in total</p>
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1>Saved Objects</h1>
+        </EuiTitle>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -60,7 +53,7 @@ export const Header = ({
               data-test-subj="exportAllObjects"
               onClick={onExportAll}
             >
-              Export Everything
+              Export {filteredCount} {filteredCount === 1 ? 'object' : 'objects'}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -99,3 +92,10 @@ export const Header = ({
     <EuiSpacer size="m"/>
   </Fragment>
 );
+
+Header.propTypes = {
+  onExportAll: PropTypes.func.isRequired,
+  onImport: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  filteredCount: PropTypes.number.isRequired,
+};

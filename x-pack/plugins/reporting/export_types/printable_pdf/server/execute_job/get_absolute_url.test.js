@@ -92,6 +92,14 @@ test(`uses the provided hash with queryString`, () => {
   expect(absoluteUrl).toBe(`http://something:8080/tst/app/kibana#${hash}`);
 });
 
+test(`uses the provided basePath`, () => {
+  const mockServer = createMockServer();
+
+  const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
+  const absoluteUrl = getAbsoluteUrl({ basePath: '/s/marketing' });
+  expect(absoluteUrl).toBe(`http://something:8080/s/marketing/app/kibana`);
+});
+
 test(`uses the path`, () => {
   const mockServer = createMockServer();
 
@@ -109,3 +117,5 @@ test(`uses the search`, () => {
   const absoluteUrl = getAbsoluteUrl({ search });
   expect(absoluteUrl).toBe(`http://something:8080/tst/app/kibana?${search}`);
 });
+
+

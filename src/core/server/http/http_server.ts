@@ -45,7 +45,10 @@ export class HttpServer {
   }
 
   public async start(config: HttpConfig) {
-    this.server = createServer(getServerOptions(config));
+    this.log.debug('starting http server');
+
+    const serverOptions = getServerOptions(config);
+    this.server = createServer(serverOptions);
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -59,29 +62,13 @@ export class HttpServer {
       }
     }
 
-    const legacyKbnServer = this.env.getLegacyKbnServer();
-    if (legacyKbnServer !== undefined) {
-      legacyKbnServer.newPlatformProxyListener.bind(this.server.listener);
-
-      // We register Kibana proxy middleware right before we start server to allow
-      // all new platform plugins register their routes, so that `legacyKbnServer`
-      // handles only requests that aren't handled by the new platform.
-      this.server.route({
-        handler: ({ raw: { req, res } }, responseToolkit) => {
-          legacyKbnServer.newPlatformProxyListener.proxy(req, res);
-          return responseToolkit.abandon;
-        },
-        method: '*',
-        options: {
-          payload: {
-            output: 'stream',
-            parse: false,
-            timeout: false,
-          },
-        },
-        path: '/{p*}',
-      });
-    }
+    // Notify legacy compatibility layer about HTTP(S) connection providing server
+    // instance with connection options so that we can properly bridge core and
+    // the "legacy" Kibana internally.
+    this.env.legacy.emit('connection', {
+      options: serverOptions,
+      server: this.server,
+    });
 
     await this.server.start();
 
@@ -93,12 +80,13 @@ export class HttpServer {
   }
 
   public async stop() {
-    this.log.info('stopping http server');
-
-    if (this.server !== undefined) {
-      await this.server.stop();
-      this.server = undefined;
+    if (this.server === undefined) {
+      return;
     }
+
+    this.log.debug('stopping http server');
+    await this.server.stop();
+    this.server = undefined;
   }
 
   private setupBasePathRewrite(server: Server, config: HttpConfig) {

@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }) {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
     });
 
+    loadTestFile(require.resolve('./_embedding_chart'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_chart_types'));
     loadTestFile(require.resolve('./_experimental_vis'));
@@ -39,11 +40,13 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_area_chart'));
     loadTestFile(require.resolve('./_line_chart'));
     loadTestFile(require.resolve('./_data_table'));
+    loadTestFile(require.resolve('./_data_table_nontimeindex'));
     loadTestFile(require.resolve('./_pie_chart'));
     loadTestFile(require.resolve('./_tag_cloud'));
     loadTestFile(require.resolve('./_tile_map'));
     loadTestFile(require.resolve('./_region_map'));
     loadTestFile(require.resolve('./_vertical_bar_chart'));
+    loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
     loadTestFile(require.resolve('./_heatmap_chart'));
     loadTestFile(require.resolve('./_point_series_options'));
     loadTestFile(require.resolve('./_markdown_vis'));

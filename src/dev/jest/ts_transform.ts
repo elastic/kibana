@@ -22,19 +22,29 @@ import { JestConfig, TransformOptions } from 'ts-jest/dist/jest-types';
 
 import { getTsProjectForAbsolutePath } from '../typescript';
 
+const DEFAULT_TS_CONFIG_PATH = require.resolve('../../../tsconfig.json');
+const DEFAULT_BROWSER_TS_CONFIG_PATH = require.resolve('../../../tsconfig.browser.json');
+
 function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
   const jestConfig = JSON.parse(jestConfigJSON) as JestConfig;
   return JSON.stringify(extendJestConfig(jestConfig, filePath));
 }
 
 function extendJestConfig(jestConfig: JestConfig, filePath: string) {
+  let tsConfigFile = getTsProjectForAbsolutePath(filePath).tsConfigPath;
+
+  // swap ts config file for jest tests
+  if (tsConfigFile === DEFAULT_BROWSER_TS_CONFIG_PATH) {
+    tsConfigFile = DEFAULT_TS_CONFIG_PATH;
+  }
+
   return {
     ...jestConfig,
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
         skipBabel: true,
-        tsConfigFile: getTsProjectForAbsolutePath(filePath).tsConfigPath,
+        tsConfigFile,
       },
     },
   };

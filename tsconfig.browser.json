@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+  },
+  "include": [
+    // in the build we populate this to include **/public/**/* but
+    // if we did that when running from source IDEs won't properly map
+    // public files to this config file and instead just use the defaults, ie. "strict": false,
+    // **/public/**/*
+  ],
+  "exclude": [
+    "src/**/__fixtures__/**/*"
+  ]
+}

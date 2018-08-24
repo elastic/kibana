@@ -121,7 +121,7 @@ export class UiApp {
     // replace the extension of relativePath to be .css
     relativePath = relativePath.slice(0, -path.extname(relativePath).length) + '.css';
 
-    return `plugins/${this.getId()}/${relativePath}`;
+    return `plugins/${plugin.id}/${relativePath}`;
   }
 
   _getPlugin() {

@@ -19,12 +19,11 @@
 
 import typeDetect from 'type-detect';
 import { AnySchema, internals } from '../internals';
-import { AnyType } from './any_type';
 import { Type, TypeOptions } from './type';
 
-export type Props = Record<string, AnyType>;
+export type Props = Record<string, Type<any>>;
 
-export type TypeOf<RT extends AnyType> = RT['type'];
+export type TypeOf<RT extends Type<any>> = RT['type'];
 
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.

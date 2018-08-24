@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { toastNotifications } from 'ui/notify';
 import { extractBuckets } from './_extract_buckets';
 import { createRawData } from './_create_raw_data';
 import { arrayToLinkedList } from './_array_to_linked_list';
@@ -25,14 +26,9 @@ import AggConfigResult from '../../vis/agg_config_result';
 import { AggResponseHierarchicalBuildSplitProvider } from './_build_split';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
 
-export function BuildHierarchicalDataProvider(Private, Notifier) {
+export function BuildHierarchicalDataProvider(Private) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
-
-
-  const notify = new Notifier({
-    location: 'Pie chart response converter'
-  });
 
   return function (vis, resp) {
     // Create a reference to the buckets
@@ -73,7 +69,10 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
     const aggData = resp.aggregations ? resp.aggregations[firstAgg.id] : null;
 
     if (!firstAgg._next && firstAgg.schema.name === 'split') {
-      notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');
+      toastNotifications.addDanger({
+        title: 'Splitting charts without splitting slices is not supported',
+        text: 'Pretending that we are just splitting slices.'
+      });
     }
 
     // start with splitting slices
