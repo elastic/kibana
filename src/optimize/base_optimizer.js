@@ -58,6 +58,7 @@ export default class BaseOptimizer {
         this.sourceMaps = opts.sourceMaps || false;
         break;
     }
+
   }
 
   async init() {
@@ -214,7 +215,7 @@ export default class BaseOptimizer {
               name: 'commons',
               chunks: 'initial',
               minChunks: 2,
-              reuseExistingChunk: true,
+              reuseExistingChunk: true, // check this again
             }
           }
         },
