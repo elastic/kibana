@@ -26,7 +26,10 @@ export function settingsRoute(server, kbnServer) {
         const { collectorSet } = server.usage;
         const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
-        const settings = await settingsCollector.fetch(callCluster);
+        let settings = await settingsCollector.fetch(callCluster);
+        if (!settings) {
+          settings = settingsCollector.getEmailValueStructure(null);
+        }
         const uuid = await getClusterUuid(callCluster);
 
         const kibana = getKibanaInfoForStats(server, kbnServer);

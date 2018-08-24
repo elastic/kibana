@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
@@ -27,17 +28,29 @@ export function kafkaLogsSpecProvider() {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'kafkaLogs',
-    name: 'Kafka logs',
+    name: i18n.translate('kbn.server.tutorials.kafkaLogs.nameTitle', {
+      defaultMessage: 'Kafka logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse logs created by Kafka.',
-    longDescription: 'The `kafka` Filebeat module parses logs created by Kafka.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-kafka.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.kafkaLogs.shortDescription', {
+      defaultMessage: 'Collect and parse logs created by Kafka.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.kafkaLogs.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `kafka` Filebeat module parses logs created by Kafka. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-kafka.html',
+      },
+    }),
     //euiIconType: 'logoKafka',
     artifacts: {
       dashboards: [
         {
           id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3',
-          linkLabel: 'Kafka logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.kafkaLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Kafka logs dashboard',
+          }),
           isOverview: true
         }
       ],
