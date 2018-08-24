@@ -39,6 +39,10 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   public async getAll() {
     return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
   }
+  public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
+    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+  }
+
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
     return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']))[0];
   }

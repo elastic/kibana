@@ -45,7 +45,7 @@ export class CMBeatsDomain {
   }
 
   public async getAllWithTag(user: FrameworkUser, tagId: string) {
-    return (await this.adapter.getAllWithTag(user, tagId)).filter(
+    return (await this.adapter.getAllWithTags(user, [tagId])).filter(
       (beat: CMBeat) => beat.active === true
     );
   }

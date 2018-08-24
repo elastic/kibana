@@ -32,6 +32,7 @@ import { BeatsTableType } from '../table';
 import { ConfigView } from './config_view';
 
 interface TagEditProps {
+  mode: 'edit' | 'create';
   tag: Pick<ClientSideBeatTag, Exclude<keyof ClientSideBeatTag, 'last_updated'>>;
   onTagChange: (field: keyof ClientSideBeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
@@ -85,13 +86,16 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   name="name"
                   isInvalid={!!this.getNameError(tag.id)}
                   onChange={this.updateTag('id')}
+                  disabled={this.props.mode === 'edit'}
                   value={tag.id}
                   placeholder="Tag name (required)"
                 />
               </EuiFormRow>
-              <EuiFormRow label="Color">
-                <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
-              </EuiFormRow>
+              {this.props.mode === 'create' && (
+                <EuiFormRow label="Color">
+                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
+                </EuiFormRow>
+              )}
             </EuiForm>
           </EuiFlexItem>
         </EuiFlexGroup>

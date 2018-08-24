@@ -9,6 +9,7 @@ import 'brace/mode/yaml';
 
 import 'brace/theme/github';
 import React from 'react';
+import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
 import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
@@ -21,14 +22,17 @@ interface TagPageProps {
 
 interface TagPageState {
   showFlyout: boolean;
+  attachedBeats: CMPopulatedBeat[] | null;
   tag: ClientSideBeatTag;
 }
 
 export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
+  private mode: 'edit' | 'create' = 'create';
   constructor(props: TagPageProps) {
     super(props);
     this.state = {
       showFlyout: false,
+      attachedBeats: null,
       tag: {
         id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
         color: '#DD0A73',
@@ -38,16 +42,21 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
     };
 
     if (props.match.params.action !== 'create') {
+      this.mode = 'edit';
       this.loadTag();
+      this.loadAttachedBeats();
     }
   }
 
   public render() {
     return (
-      <PrimaryLayout title="Create Tag">
+      <PrimaryLayout
+        title={this.mode === 'create' ? 'Create Tag' : `Update Tag: ${this.state.tag.id}`}
+      >
         <div>
           <TagEdit
             tag={this.state.tag}
+            mode={this.mode}
             onTagChange={(field: string, value: string | number) =>
               this.setState(oldState => {
                 let newValue;
@@ -62,7 +71,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
                 };
               })
             }
-            attachedBeats={[]}
+            attachedBeats={this.state.attachedBeats}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup>
@@ -94,6 +103,14 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
     }
     this.setState({
       tag: tags[0],
+    });
+  };
+
+  private loadAttachedBeats = async () => {
+    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
+
+    this.setState({
+      attachedBeats: beats,
     });
   };
   private saveTag = async () => {
