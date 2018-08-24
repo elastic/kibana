@@ -392,17 +392,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName) {
+    async clickBucket(bucketName, type = 'bucket') {
+      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
       await retry.try(async () => {
         const chartTypes = await retry.try(
-          async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
+          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
         log.debug('found bucket types ' + chartTypes.length);
 
         async function getChartType(chart) {
           const chartString = await chart.getVisibleText();
           if (chartString === bucketName) {
             await chart.click();
-            await PageObjects.common.sleep(500);
             return true;
           }
         }
