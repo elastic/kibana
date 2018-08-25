@@ -17,38 +17,39 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 
 /**
  *
- * todo: this should be the only place where there is any type-checking.
  * Everywhere else in the code, transformations of the state should happen by method-call on the object.
  * Polymorphism will resolve the correct implementation.
  */
 function createLayerInstance(layerDescriptor) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor);
-  if (layerDescriptor.type === TileLayer.type) {
-    return new TileLayer({ layerDescriptor, source });
-  } else if (layerDescriptor.type === VectorLayer.type) {
-    return new VectorLayer({ layerDescriptor, source });
-  } else if (layerDescriptor.type === GeohashGridLayer.type) {
-    return new GeohashGridLayer({ layerDescriptor, source });
-  } else {
-    throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+  switch (layerDescriptor.type) {
+    case TileLayer.type:
+      return new TileLayer({ layerDescriptor, source });
+    case VectorLayer.type:
+      return new VectorLayer({ layerDescriptor, source });
+    case GeohashGridLayer.type:
+      return new GeohashGridLayer({ layerDescriptor, source });
+    default:
+      throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
 }
 
 function createSourceInstance(sourceDescriptor) {
-  if (sourceDescriptor.type === XYZTMSSource.type) {
-    return new XYZTMSSource(sourceDescriptor);
-  } else if (sourceDescriptor.type === EMSTMSSource.type) {
-    return new EMSTMSSource(sourceDescriptor);
-  } else if (sourceDescriptor.type === KibanaTilemapSource.type) {
-    return new KibanaTilemapSource(sourceDescriptor);
-  } else if (sourceDescriptor.type === EMSFileSource.type) {
-    return new EMSFileSource(sourceDescriptor);
-  } else if (sourceDescriptor.type === KibanaRegionmapSource.type) {
-    return new KibanaRegionmapSource(sourceDescriptor);
-  } else if (sourceDescriptor.type === ESGeohashGridSource.type) {
-    return new ESGeohashGridSource(sourceDescriptor);
-  } else {
-    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
+  switch (sourceDescriptor.type) {
+    case XYZTMSSource.type:
+      return new XYZTMSSource(sourceDescriptor);
+    case EMSTMSSource.type:
+      return new EMSTMSSource(sourceDescriptor);
+    case KibanaTilemapSource.type:
+      return new KibanaTilemapSource(sourceDescriptor);
+    case EMSFileSource.type:
+      return new EMSFileSource(sourceDescriptor);
+    case KibanaRegionmapSource.type:
+      return new KibanaRegionmapSource(sourceDescriptor);
+    case ESGeohashGridSource.type:
+      return new ESGeohashGridSource(sourceDescriptor);
+    default:
+      throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
 }
 
@@ -63,7 +64,7 @@ export const getSelectedLayerInstance = ({ map }) => {
 };
 
 
-export const getLayerListRaw = createSelector(({ map }) => {
+const getLayerListRaw = createSelector(({ map }) => {
   return map.layerList ?  map.layerList : [];
 }, x => x);
 

@@ -54,7 +54,9 @@ export class XYZTMSSource extends ASource {
   }
 
   async createDefaultLayerDescriptor(options) {
-    const service = await XYZTMSSource.getTMSOptions(this._descriptor);
+    const service = {
+      url: this._descriptor.urlTemplate
+    };
     return TileLayer.createDescriptor({
       source: service.url,
       sourceDescriptor: this._descriptor,
