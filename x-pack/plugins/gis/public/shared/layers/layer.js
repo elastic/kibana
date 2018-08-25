@@ -79,5 +79,9 @@ export class ALayer {
     throw new Error('Should implement Layer#createCorrespondingOLLayer');
   }
 
+  syncOLStyle() {
+    //no-op
+  }
+
 }
 

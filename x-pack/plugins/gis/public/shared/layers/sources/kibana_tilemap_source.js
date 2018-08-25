@@ -29,7 +29,6 @@ export class KibanaTilemapSource extends  ASource {
   }
 
   static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    console.log(dataSourcesMeta);
     const { url } = dataSourcesMeta.kibana.tilemap;
     const previewTilemap = (urlTemplate) => {
       const sourceDescriptor = KibanaTilemapSource.createDescriptor(urlTemplate);

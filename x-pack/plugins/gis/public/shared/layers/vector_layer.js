@@ -61,4 +61,9 @@ export class VectorLayer extends ALayer {
     return vectorLayer;
   }
 
+  syncOLStyle(olLayer) {
+    const style = this.getCurrentStyle();
+    const appliedStyle = getOlLayerStyle(style, this.isTemporary());
+    olLayer.setStyle(appliedStyle);
+  }
 }

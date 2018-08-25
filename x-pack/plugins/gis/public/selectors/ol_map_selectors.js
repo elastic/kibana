@@ -6,8 +6,7 @@
 
 import { createSelector } from 'reselect';
 import { getLayerList, getMapConstants } from "./map_selectors";
-import { LAYER_TYPE } from "../shared/layers/layer";
-import { WEBMERCATOR, getOlLayerStyle, WGS_84 } from '../shared/ol_layer_defaults';
+import { WEBMERCATOR, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
 
@@ -52,12 +51,6 @@ function removeLayers(map, existingMapLayers, updatedLayersIds) {
     }
   });
   layersToRemove.forEach(layerIdx => existingMapLayers.removeAt(layerIdx));
-}
-
-function updateFillAndOutlineStyle(olLayer, layer) {
-  const style = layer.getCurrentStyle();
-  const appliedStyle = getOlLayerStyle(style, layer.isTemporary());
-  olLayer.setStyle && olLayer.setStyle(appliedStyle);
 }
 
 const OL_VIEW = new ol.View({
@@ -121,12 +114,7 @@ export const syncOLState = createSelector(
     layersWithOl.forEach(({ olLayer, layer }) => {
       addLayers(olMap, olLayer, layersIds);
       olLayer.setVisible(layer.isVisible());
-      if (layer.getType() === LAYER_TYPE.VECTOR) {
-        //todo: this function is NOT universally applicable
-        //hence the if-branch is just hack to not silently fail on tile and heatmaplayers
-        //needs to be factored into the class
-        updateFillAndOutlineStyle(olLayer, layer);
-      }
+      layer.syncOLStyle(olLayer);
     });
     const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.getId());
     // Deletes
