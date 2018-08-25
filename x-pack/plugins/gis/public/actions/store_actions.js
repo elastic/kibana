@@ -8,6 +8,7 @@ import { EMSTMSSource } from "../shared/layers/sources/ems_tms_source";
 // import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
 import { KibanaRegionmapSource } from "../shared/layers/sources/kibana_regionmap_source";
 import { GIS_API_PATH } from '../../common/constants';
+import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -130,5 +131,11 @@ export async function loadMapResources(dispatch) {
   // await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
 
   const worldCountrySource = new KibanaRegionmapSource(KibanaRegionmapSource.createDescriptor('../api/gis/junk'));
-  await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
+  await dispatch(addLayerFromSource(worldCountrySource, {}, 0));
+
+  const heatmapsource = new ESGeohashGridSource(ESGeohashGridSource.createDescriptor({
+    esIndexPattern: 'foo',
+    pointField: 'bar'
+  }));
+  await dispatch(addLayerFromSource(heatmapsource, {}, 1));
 }

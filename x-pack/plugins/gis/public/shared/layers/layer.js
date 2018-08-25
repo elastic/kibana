@@ -22,7 +22,6 @@ export class ALayer {
   }
 
   getDisplayName() {
-    // return this._descriptor.name || `Layer ${this._descriptor.id}`;
     return this._source.getDisplayName() || `Layer ${this._descriptor.id}`;
   }
 
