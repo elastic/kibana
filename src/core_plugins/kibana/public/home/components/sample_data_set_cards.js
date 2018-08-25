@@ -105,7 +105,7 @@ export class SampleDataSetCards extends React.Component {
     } catch (fetchError) {
       if (this._isMounted) {
         this.setState((prevState) => ({
-          processingStatus: { ...prevState.processingStatus, [id]: true }
+          processingStatus: { ...prevState.processingStatus, [id]: false }
         }));
       }
       toastNotifications.addDanger({
