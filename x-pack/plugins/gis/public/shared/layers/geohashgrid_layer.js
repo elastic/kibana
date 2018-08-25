@@ -29,9 +29,7 @@ export class GeohashGridLayer extends ALayer {
   }
 
   _createCorrespondingOLLayer() {
-    const vectorModel = new ol.source.Vector({
-      // features: olFeatures
-    });
+    const vectorModel = new ol.source.Vector({});
     const placeHolderLayer = new ol.layer.Heatmap({
       source: vectorModel,
     });
@@ -43,8 +41,15 @@ export class GeohashGridLayer extends ALayer {
     if (!this._descriptor.data) {
       return;
     }
-    //todo: currently refactoring but we're somewhat regressing here.
-    //shouldn't update if data remains the same
+    //ugly, but it's what we have now
+    //think about stateful-shim that mirrors OL (or Mb) that can keep these links
+    //but for now, the OpenLayers object model remains our source of truth
+    if (this._descriptor.data === olLayer.__kbn_data__) {
+      return;
+    } else {
+      olLayer.__kbn_data__ = this._descriptor.data;
+    }
+
     const olSource = olLayer.getSource();
     olSource.clear();
     const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.data);

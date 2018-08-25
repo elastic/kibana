@@ -72,9 +72,7 @@ export class ESGeohashGridSource extends ASource {
   }
 
   async _createDefaultLayerDescriptor(options) {
-    // const geojson = await this._getGeoJsonPoints();
     return GeohashGridLayer.createDescriptor({
-      // source: geojson,
       sourceDescriptor: this._descriptor,
       ...options
     });
