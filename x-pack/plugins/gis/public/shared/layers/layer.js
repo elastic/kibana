@@ -73,6 +73,18 @@ export class ALayer {
     throw new Error('Should implement Layer#createCorrespondingOLLayer');
   }
 
+  syncLayerWithOL(olMap) {
+    const olLayerArray = olMap.getLayers().getArray();
+    let olLayer = olLayerArray.find(olLayer => olLayer.get('id') === this.getId());
+    if (!olLayer) {
+      olLayer = this.createCorrespondingOLLayer();
+    }
+    olLayer.set('id', this.getId());
+    olLayer.setVisible(this.isVisible());
+    this.syncOLStyle(olLayer);
+    return olLayer;
+  }
+
   syncOLStyle() {
     //no-op
   }

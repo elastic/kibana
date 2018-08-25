@@ -87,18 +87,10 @@ const syncLayers = createSelector(
   getLayerList,
   (olMap, layerList) => {
     return layerList.map(layer => {
-      const layerTuple = {  layer: layer };
-      const olLayerArray = olMap.getLayers().getArray();
-      const olLayer = olLayerArray.find(olLayer => olLayer.get('id') === layer.getId());
-      if (olLayer) {
-        layerTuple.olLayer = olLayer;
-      } else {
-        layerTuple.olLayer = layer.createCorrespondingOLLayer();
-      }
-      layerTuple.olLayer.set('id', layer.getId());
-      layerTuple.olLayer.setVisible(layer.isVisible());
-      layer.syncOLStyle(layerTuple.olLayer);
-      return layerTuple;
+      return {
+        layer: layer,
+        olLayer: layer.syncLayerWithOL(olMap)
+      };
     });
   }
 );
