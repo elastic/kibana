@@ -5,7 +5,8 @@
  */
 
 import { EMSTMSSource } from "../shared/layers/sources/ems_tms_source";
-import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
+// import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
+import { KibanaRegionmapSource } from "../shared/layers/sources/kibana_regionmap_source";
 import { GIS_API_PATH } from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
@@ -122,9 +123,12 @@ export async function loadMapResources(dispatch) {
   await dispatch(setMeta(metaJson));
 
   // Add initial layers
-  const roadMapEms = EMSTMSSource.createDescriptor('road_map');
-  await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
+  // const roadMapEms = EMSTMSSource.createDescriptor('road_map');
+  // await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
 
-  const worldCountrySource = new EMSFileSource(EMSFileSource.createDescriptor('World Countries'));
+  // const worldCountrySource = new EMSFileSource(EMSFileSource.createDescriptor('World Countries'));
+  // await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
+
+  const worldCountrySource = new KibanaRegionmapSource(KibanaRegionmapSource.createDescriptor('../api/gis/junk'));
   await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
 }

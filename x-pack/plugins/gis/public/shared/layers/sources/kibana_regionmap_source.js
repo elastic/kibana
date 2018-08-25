@@ -17,6 +17,10 @@ export class KibanaRegionmapSource extends ASource {
 
   static type = 'REGIONMAP_FILE';
 
+  /**
+   * todo: needs to use name of the layer, not URL
+   * similar to EMS-file source
+   */
   static createDescriptor(url) {
     return {
       type: KibanaRegionmapSource.type,
