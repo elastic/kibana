@@ -25,16 +25,6 @@ export class EMSFileSource extends ASource {
     };
   }
 
-  static async getGeoJson(descriptor) {
-    try {
-      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(descriptor.name)}`);
-      return await vectorFetch.json();
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-  }
-
   static renderEditor({ dataSourcesMeta, onPreviewSource }) {
 
     const emsVectorOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.ems.file : [];
@@ -64,6 +54,17 @@ export class EMSFileSource extends ASource {
     );
   }
 
+
+  async _getGeoJson() {
+    try {
+      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`);
+      return await vectorFetch.json();
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
   renderDetails() {
     return (
       <Fragment>
@@ -84,7 +85,7 @@ export class EMSFileSource extends ASource {
   }
 
   async createDefaultLayerDescriptor(options) {
-    const geojson = await EMSFileSource.getGeoJson(this._descriptor);
+    const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
       source: geojson,
       sourceDescriptor: this._descriptor,
