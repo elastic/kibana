@@ -18,20 +18,12 @@ export class ALayer {
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
-    layerDescriptor.name = this._setName(options, layerDescriptor.id);
+    layerDescriptor.name = options.name;
     return layerDescriptor;
   }
 
-  static _setName({ nameList, name }, id) {
-    const layerName = name || `Layer ${id}`;
-    const duplicateCount = (nameList ? nameList : []).filter((listName) => listName === layerName
-      || listName.match(new RegExp(`${layerName} \\d`)))
-      .length;
-    return duplicateCount ? `${layerName} ${duplicateCount}` : layerName;
-  }
-
   getDisplayName() {
-    return this._descriptor.name;
+    return this._descriptor.name || `Layer ${this._descriptor.id}`;
   }
 
   getId() {
