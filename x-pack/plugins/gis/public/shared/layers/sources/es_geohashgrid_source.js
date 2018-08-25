@@ -78,7 +78,7 @@ export class ESGeohashGridSource extends ASource {
     });
   }
 
-  async createDefaultLayer(options) {
+  createDefaultLayer(options) {
     return new GeohashGridLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
