@@ -6,13 +6,13 @@
 
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
-import { getSelectedLayerInstance } from '../../selectors/map_selectors';
+import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
 import { clearTemporaryStyles } from '../../actions/style_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    selectedLayer: getSelectedLayerInstance(state)
+    selectedLayer: getSelectedLayer(state)
   };
 }
 

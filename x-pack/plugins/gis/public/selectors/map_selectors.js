@@ -50,19 +50,20 @@ function createSourceInstance(sourceDescriptor) {
 
 export const getMapConstants = ({ map }) => map && map.mapConstants;
 
-export const getSelectedLayerInstance = ({ map }) => {
-  if (!map.selectedLayerId || !map.layerList) {
-    return null;
-  }
-  const selectedLayer = map.layerList.find(layerDescriptor => layerDescriptor.id === map.selectedLayerId);
-  return createLayerInstance(selectedLayer);
-};
 
+const getSelectedLayerId = createSelector(({ map }) => {
+  return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
+}, x => x);
 
 const getLayerListRaw = createSelector(({ map }) => {
   return map.layerList ?  map.layerList : [];
 }, x => x);
 
+
+export const getSelectedLayer = createSelector(getSelectedLayerId, getLayerListRaw, (selectedLayerId, layerList) => {
+  const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
+  return createLayerInstance(selectedLayer);
+});
 
 export const getLayerList = createSelector(getLayerListRaw, (layerList) => {
   return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor));
