@@ -27,5 +27,10 @@ export class ASource {
   async createDefaultLayerDescriptor() {
     throw new Error(`Source#createDefaultLayerDescriptor not implemented`);
   }
+
+  getDisplayName() {
+    console.warn('Source should implement Source#getDisplayName');
+    return '';
+  }
 }
 

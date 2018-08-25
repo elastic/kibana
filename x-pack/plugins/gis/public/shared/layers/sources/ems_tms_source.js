@@ -45,9 +45,12 @@ export class EMSTMSSource extends ASource {
     return TileLayer.createDescriptor({
       source: service.url,
       sourceDescriptor: this._descriptor,
-      name: this._descriptor.id,
       ...options
     });
+  }
+
+  getDisplayName() {
+    return this._descriptor.id;
   }
 
 

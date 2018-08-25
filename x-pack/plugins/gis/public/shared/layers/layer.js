@@ -18,12 +18,12 @@ export class ALayer {
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
-    layerDescriptor.name = options.name;
     return layerDescriptor;
   }
 
   getDisplayName() {
-    return this._descriptor.name || `Layer ${this._descriptor.id}`;
+    // return this._descriptor.name || `Layer ${this._descriptor.id}`;
+    return this._source.getDisplayName() || `Layer ${this._descriptor.id}`;
   }
 
   getId() {

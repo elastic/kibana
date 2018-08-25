@@ -72,9 +72,13 @@ export class ESGeohashGridSource extends ASource {
     return GeohashGridLayer.createDescriptor({
       source: geojson,
       sourceDescriptor: this._descriptor,
-      name: this._descriptor.name || this._descriptor.id,
       ...options
     });
   }
+
+  getDisplayName() {
+    return this._descriptor.esIndexPattern + ' grid';
+  }
+
 
 }

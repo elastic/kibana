@@ -54,9 +54,13 @@ export class XYZTMSSource extends ASource {
     return TileLayer.createDescriptor({
       source: service.url,
       sourceDescriptor: this._descriptor,
-      name: service.url,
       ...options
     });
+  }
+
+
+  getDisplayName() {
+    return this._descriptor.urlTemplate;
   }
 }
 

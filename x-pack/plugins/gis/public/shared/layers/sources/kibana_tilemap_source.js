@@ -52,7 +52,6 @@ export class KibanaTilemapSource extends  ASource {
     return TileLayer.createDescriptor({
       source: this._descriptor.url,
       sourceDescriptor: this._descriptor,
-      name: this._descriptor.id,
       ...options
     });
   }

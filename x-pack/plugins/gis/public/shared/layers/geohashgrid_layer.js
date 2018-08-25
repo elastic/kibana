@@ -19,10 +19,6 @@ export class GeohashGridLayer extends ALayer {
     return heatmapLayerDescriptor;
   }
 
-  getDisplayName() {
-    return `todo geohash grid layer ${this._descriptor.id}`;
-  }
-
   getSupportedStyles() {
     return [HeatmapStyle];
   }

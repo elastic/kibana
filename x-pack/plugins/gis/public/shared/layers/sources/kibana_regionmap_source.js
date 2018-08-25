@@ -89,9 +89,12 @@ export class KibanaRegionmapSource extends ASource {
     return VectorLayer.createDescriptor({
       source: geojson,
       sourceDescriptor: this._descriptor,
-      name: this._descriptor.name || this._descriptor.id,
       ...options
     });
+  }
+
+  getDisplayName() {
+    return this._descriptor.url + ' todo should use name from config instead';
   }
 
 }
