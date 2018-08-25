@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
 
-/**
- * Represents a wrapper around legacy `kbnServer` instance that exposes only
- * a subset of `kbnServer` APIs used by the new platform.
- * @internal
- */
-export class LegacyKbnServer {
-  constructor(private readonly rawKbnServer: any) {}
+import { PageTitle } from './page_title';
 
-  /**
-   * Custom HTTP Listener used by HapiJS server in the legacy platform.
-   */
-  get newPlatformProxyListener() {
-    return this.rawKbnServer.newPlatform.proxyListener;
-  }
-}
+describe('PageTitle', () => {
+  it('should render normally', () => {
+    expect(shallow(<PageTitle />)).toMatchSnapshot();
+  });
+});

@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { LegacyKbnServer } from '..';
+import React from 'react';
 
-test('correctly returns `newPlatformProxyListener`.', () => {
-  const rawKbnServer = {
-    newPlatform: {
-      proxyListener: {},
-    },
-  };
+export interface PanelErrorProps {
+  error: string | React.ReactNode;
+}
 
-  const legacyKbnServer = new LegacyKbnServer(rawKbnServer);
-  expect(legacyKbnServer.newPlatformProxyListener).toBe(rawKbnServer.newPlatform.proxyListener);
-});
+export function PanelError({ error }: PanelErrorProps) {
+  return (
+    <div className="dshPanel__error panel-content">
+      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle" />
+      <span>{error}</span>
+    </div>
+  );
+}
