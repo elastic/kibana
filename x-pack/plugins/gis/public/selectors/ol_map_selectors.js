@@ -12,8 +12,7 @@ import _ from 'lodash';
 
 
 // OpenLayers helper function
-const getLayersIds = mapLayers => mapLayers
-  && mapLayers.getArray().map(layer => layer.get('id') || []);
+const getLayersIds = mapLayers => mapLayers.getArray().map(layer => layer.get('id'));
 
 
 function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
@@ -56,6 +55,7 @@ const OL_MAP = new ol.Map({
   layers: [],
   view: OL_VIEW
 });
+
 function getOLImplementation() {
   return OL_MAP;
 }
@@ -109,9 +109,8 @@ export const syncOLState = createSelector(
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     // Update layers order
     const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
-    if (oldLayerIdsOrder !== newLayerIdsOrder) {//todo: evaluates to true always
-      updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
-    }
+    updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
+
     return olMap;
   }
 );
