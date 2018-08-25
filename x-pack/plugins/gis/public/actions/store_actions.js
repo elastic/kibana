@@ -55,7 +55,7 @@ export function addLayer(layer, position = -1) {
   };
 }
 
-
+//todo: should be on per-layer basis iso global?
 export function layerLoading(loadingBool) {
   return {
     type: LAYER_LOADING,
@@ -76,12 +76,12 @@ export function clearTemporaryLayers() {
 }
 
 export function mapExtentChanged(mapConstants) {
+  console.log('should check for every layer if it needs data');
   return {
     type: MAP_EXTENT_CHANGED,
     mapConstants: mapConstants
   };
 }
-
 
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch) => {

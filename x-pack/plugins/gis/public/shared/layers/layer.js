@@ -76,5 +76,9 @@ export class ALayer {
     //no-op
   }
 
+  isLayerLoading() {
+    return false;
+  }
+
 }
 

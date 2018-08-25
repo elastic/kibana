@@ -36,8 +36,7 @@ const INITIAL_STATE = {
     center: [37.41, 8.82]
   },
   selectedLayerId: null,
-  layerList: [],
-  layerLoading: false
+  layerList: []
 };
 
 export function map(state = INITIAL_STATE, action) {
