@@ -8,6 +8,7 @@ import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
 import { getOlLayerStyle, OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
 import * as ol from 'openlayers';
+import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
 export class VectorLayer extends ALayer {
 
@@ -91,13 +92,10 @@ export class VectorLayer extends ALayer {
   }
 
 
-  async initializeData() {
-    try {
-      return this._source.getGeoJson();
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
+  async initializeData(mapState, requestToken, dispatch) {
+    dispatch(startDataLoad(this.getId(), mapState, requestToken));
+    const data = await this._source.getGeoJson();
+    dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
 }

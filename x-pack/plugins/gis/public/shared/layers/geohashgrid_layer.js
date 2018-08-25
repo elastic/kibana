@@ -8,7 +8,7 @@ import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
 import * as ol from 'openlayers';
 import { OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
-import {  } from '../../actions/store_actions';
+import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 window.__ol = ol;
 
 export class GeohashGridLayer extends ALayer {
@@ -59,8 +59,10 @@ export class GeohashGridLayer extends ALayer {
   }
 
   //temporary API method until decoupled data loading falls fully into place
-  async initializeData() {
-    return await this._source.getGeoJsonPoints();
+  async initializeData(mapState, requestToken, dispatch) {
+    dispatch(startDataLoad(this.getId(), mapState, requestToken));
+    const data = await this._source.getGeoJsonPoints();
+    dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
   isLayerLoading() {

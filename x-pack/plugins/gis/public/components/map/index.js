@@ -19,6 +19,9 @@ function mapDispatchToProps(dispatch) {
   return {
     extentChanged: (e) => {
       dispatch(mapExtentChanged(e));
+    },
+    initialize: (e) => {
+      dispatch(mapExtentChanged(e));
     }
   };
 }

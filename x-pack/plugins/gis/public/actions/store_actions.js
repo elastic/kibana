@@ -67,7 +67,6 @@ export function clearTemporaryLayers() {
 }
 
 export function mapExtentChanged(newMapConstants) {
-  //todo should check if every layer needs more data
   return async (dispatch, getState) => {
     window._gs = getState;
     dispatch({
@@ -77,7 +76,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(getState());
     layerList.forEach((layer) => {
-      layer.syncDataToExtent(newMapConstants.extent, dispatch);
+      layer.syncDataToExtent(newMapConstants, Symbol('data_request_sync_extentchange'), dispatch);
     });
   };
 }
@@ -86,7 +85,7 @@ export function startDataLoad(layerId, dataMeta, requestToken) {
   return ({
     type: LAYER_DATA_LOAD_STARTED,
     layerId: layerId,
-    dataMetaAtStart: dataMeta,
+    dataMeta: dataMeta,
     requestToken: requestToken
   });
 }
@@ -104,11 +103,8 @@ export function endDataLoad(layerId, data, requestToken) {
 
 export function addInitialData(layer) {
   return async (dispatch, getState) => {
-    const mapExtent = getMapState(getState());
-    const requestToken = Symbol('requesttoken');//not sure about this
-    dispatch(startDataLoad(layer.getId(), mapExtent, requestToken));
-    const data = await layer.initializeData();
-    dispatch(endDataLoad(layer.getId(), data, requestToken));
+    const mapState = getMapState(getState());
+    layer.initializeData(mapState, Symbol('data_request'), dispatch);
   };
 }
 
@@ -167,4 +163,5 @@ export async function loadMapResources(dispatch) {
     pointField: 'bar'
   }));
   await dispatch(addLayerFromSource(heatmapsource, {}, 1));
+
 }

@@ -13,7 +13,6 @@ export class ALayer {
   static createDescriptor(options) {
     const layerDescriptor = {};
     layerDescriptor.data = options.data || null;
-    layerDescriptor.dataExtent = options.dataExtent || null;
     layerDescriptor.dataMeta = options.dataMeta || {};
     layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);

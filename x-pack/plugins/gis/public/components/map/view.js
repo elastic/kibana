@@ -11,21 +11,29 @@ import { WEBMERCATOR, WGS_84 } from '../../shared/ol_layer_defaults';
 
 export class OLMapContainer extends React.Component {
 
+
+  _getMapState() {
+    const olView = this.props.olMap.getView();
+    const center = olView.getCenter();
+    const zoom = olView.getZoom();
+    const extentInWorldReference = olView.calculateExtent(this.props.olMap.getSize());
+    const extentInLonLat = ol.proj.transformExtent(extentInWorldReference, WEBMERCATOR, WGS_84);
+    const centerInLonLat = ol.proj.transform(center, WEBMERCATOR, WGS_84);
+    return {
+      zoom: zoom,
+      extent: extentInLonLat,
+      center: centerInLonLat
+    };
+  }
+
   componentDidMount() {
     this.props.olMap.setTarget(this.refs.mapContainer);
     this.props.olMap.on('moveend', () => {
-      const olView = this.props.olMap.getView();
-      const center = olView.getCenter();
-      const zoom = olView.getZoom();
-      const extentInWorldReference = olView.calculateExtent(this.props.olMap.getSize());
-      const extentInLonLat = ol.proj.transformExtent(extentInWorldReference, WEBMERCATOR, WGS_84);
-      const centerInLonLat = ol.proj.transform(center, WEBMERCATOR, WGS_84);
-      this.props.extentChanged({
-        zoom: zoom,
-        extent: extentInLonLat,
-        center: centerInLonLat
-      });
+      const mapState = this._getMapState();
+      this.props.extentChanged(mapState);
     });
+    const mapState = this._getMapState();
+    this.props.initialize(mapState);
   }
 
   render() {
