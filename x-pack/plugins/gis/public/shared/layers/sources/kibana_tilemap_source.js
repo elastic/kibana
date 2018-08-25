@@ -67,13 +67,6 @@ class KibanaTilemapEditor extends React.Component {
     };
   }
 
-  _handleTMSInputChange(e) {
-    this.setState({
-      tmsInput: e.target.value,
-      tmsCanPreview: (e.target.value.indexOf('{x}') >= 0 && e.target.value.indexOf('{y}') >= 0 && e.target.value.indexOf('{z}') >= 0)
-    });
-  }
-
   render() {
     return (
       <Fragment>
