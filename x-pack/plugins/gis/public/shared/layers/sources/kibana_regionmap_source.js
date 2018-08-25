@@ -24,16 +24,6 @@ export class KibanaRegionmapSource extends ASource {
     };
   }
 
-  static async getGeoJson({ url }) {
-    try {
-      const vectorFetch = await fetch(url);
-      return await vectorFetch.json();
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-  }
-
   static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
     const regionmapOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.kibana.regionmap : [];
     const regionmapOptions = regionmapOptionsRaw ? regionmapOptionsRaw.map((file) => ({
@@ -79,8 +69,19 @@ export class KibanaRegionmapSource extends ASource {
     );
   }
 
+
+  async _getGeoJson() {
+    try {
+      const vectorFetch = await fetch(this._descriptor.url);
+      return await vectorFetch.json();
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
   async createDefaultLayerDescriptor(options) {
-    const geojson = await KibanaRegionmapSource.getGeoJson(this._descriptor);
+    const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
       source: geojson,
       sourceDescriptor: this._descriptor,
