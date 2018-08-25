@@ -62,9 +62,15 @@ export const getSelectedLayerInstance = ({ map }) => {
   return createLayerInstance(selectedLayer);
 };
 
-export const getLayerList = ({ map }) => {
-  return map.layerList ?  map.layerList.map(layerDescriptor => createLayerInstance(layerDescriptor)) : [];
-};
+
+export const getLayerListRaw = createSelector(({ map }) => {
+  return map.layerList ?  map.layerList : [];
+}, x => x);
+
+
+export const getLayerList = createSelector(getLayerListRaw, (layerList) => {
+  return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor));
+});
 
 export const getLayerLoading = ({ map }) => map && map.layerLoading;
 
