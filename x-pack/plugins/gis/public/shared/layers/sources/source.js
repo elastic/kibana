@@ -34,3 +34,9 @@ export class ASource {
   }
 }
 
+export class TMSSource extends ASource {
+  getUrlTemplate() {
+    throw new Error('Should implement TMSSource#getUrlTemplate');
+  }
+}
+

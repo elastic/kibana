@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { ASource } from './source';
+import { TMSSource } from './source';
 import { TileLayer } from '../tile_layer';
 
-export class EMSTMSSource extends ASource {
+export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
 
@@ -40,10 +40,8 @@ export class EMSTMSSource extends ASource {
     });
   }
 
-  async createDefaultLayerDescriptor(options, dataSourceMeta = {}) {
-    const service = this._getTMSOptions(dataSourceMeta.ems.tms);
+  async createDefaultLayerDescriptor(options) {
     return TileLayer.createDescriptor({
-      source: service.url,
       sourceDescriptor: this._descriptor,
       ...options
     });
@@ -51,6 +49,11 @@ export class EMSTMSSource extends ASource {
 
   getDisplayName() {
     return this._descriptor.id;
+  }
+
+  getUrlTemplate(dataSourceMeta) {
+    const service = this._getTMSOptions(dataSourceMeta.ems.tms);
+    return service.url;
   }
 
 

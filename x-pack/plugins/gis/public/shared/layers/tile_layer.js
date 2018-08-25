@@ -24,7 +24,7 @@ export class TileLayer extends ALayer {
   _createCorrespondingOLLayer() {
     const tileLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
-        url: this._descriptor.source
+        url: this._source.getUrlTemplate()
       })
     });
     tileLayer.setVisible(this.isVisible());

@@ -11,10 +11,10 @@ import {
   EuiButton
 } from '@elastic/eui';
 
-import { ASource } from './source';
+import { TMSSource } from './source';
 import { TileLayer } from '../tile_layer';
 
-export class XYZTMSSource extends ASource {
+export class XYZTMSSource extends TMSSource {
 
   static type = 'EMS_XYZ';
 
@@ -48,18 +48,17 @@ export class XYZTMSSource extends ASource {
   }
 
   async createDefaultLayerDescriptor(options) {
-    const service = {
-      url: this._descriptor.urlTemplate
-    };
     return TileLayer.createDescriptor({
-      source: service.url,
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
-
   getDisplayName() {
+    return this._descriptor.urlTemplate;
+  }
+
+  getUrlTemplate() {
     return this._descriptor.urlTemplate;
   }
 }
