@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../../../common/constants';
-import { ASource } from './source';
+import { VectorSource } from './source';
 import React, { Fragment } from 'react';
 import {
   EuiText,
@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { VectorLayer } from '../vector_layer';
 
-export class EMSFileSource extends ASource {
+export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
 
@@ -54,8 +54,7 @@ export class EMSFileSource extends ASource {
     );
   }
 
-
-  async _getGeoJson() {
+  async getGeoJson() {
     try {
       const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`);
       return await vectorFetch.json();
@@ -85,9 +84,7 @@ export class EMSFileSource extends ASource {
   }
 
   async _createDefaultLayerDescriptor(options) {
-    const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
-      source: geojson,
       sourceDescriptor: this._descriptor,
       ...options
     });

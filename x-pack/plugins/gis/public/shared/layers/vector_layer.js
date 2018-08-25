@@ -48,10 +48,9 @@ export class VectorLayer extends ALayer {
   }
 
   _createCorrespondingOLLayer() {
-    const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.source);
     const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
-        features: olFeatures
+        features: []
       }),
       renderMode: 'image'
     });
@@ -66,4 +65,39 @@ export class VectorLayer extends ALayer {
     const appliedStyle = getOlLayerStyle(style, this.isTemporary());
     olLayer.setStyle(appliedStyle);
   }
+
+  _syncOLData(olLayer) {
+
+    if (!this._descriptor.data) {
+      return;
+    }
+    //ugly, but it's what we have now
+    //think about stateful-shim that mirrors OL (or Mb) that can keep these links
+    //but for now, the OpenLayers object model remains our source of truth
+    if (this._descriptor.data === olLayer.__kbn_data__) {
+      return;
+    } else {
+      olLayer.__kbn_data__ = this._descriptor.data;
+    }
+
+    const olSource = olLayer.getSource();
+    olSource.clear();
+    const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.data);
+    olSource.addFeatures(olFeatures);
+  }
+
+  isLayerLoading() {
+    return !!this._descriptor.dataDirty;
+  }
+
+
+  async updateData() {
+    try {
+      return this._source.getGeoJson();
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
 }

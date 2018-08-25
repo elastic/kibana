@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ASource } from './source';
+import { VectorSource } from './source';
 import React, { Fragment } from 'react';
 import {
   EuiText,
@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { VectorLayer } from '../vector_layer';
 
-export class KibanaRegionmapSource extends ASource {
+export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
 
@@ -74,7 +74,7 @@ export class KibanaRegionmapSource extends ASource {
   }
 
 
-  async _getGeoJson() {
+  async getGeoJson() {
     try {
       const vectorFetch = await fetch(this._descriptor.url);
       return await vectorFetch.json();
@@ -85,9 +85,7 @@ export class KibanaRegionmapSource extends ASource {
   }
 
   async _createDefaultLayerDescriptor(options) {
-    const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
-      source: geojson,
       sourceDescriptor: this._descriptor,
       ...options
     });
@@ -99,7 +97,6 @@ export class KibanaRegionmapSource extends ASource {
       source: this
     });
   }
-
 
   getDisplayName() {
     return this._descriptor.url + ' todo should use name from config instead';

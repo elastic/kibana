@@ -43,3 +43,9 @@ export class TMSSource extends ASource {
     throw new Error('Should implement TMSSource#getUrlTemplate');
   }
 }
+
+export class VectorSource extends ASource {
+  getGeoJson() {
+    throw new Error('Should implement VectorSource#getGeoJson');
+  }
+}
