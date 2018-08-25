@@ -17,31 +17,11 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
+import { tryRegisterSettingsComponent } from './component_registry';
+import { PageTitle } from './page_title';
 
-export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
+export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
 
-export const management = new ManagementSection('management', {
-  display: 'Management'
-});
-
-// TODO: where should this live?
-management.register('data', {
-  display: 'Connect Data',
-  order: 0
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-});
+export function registerDefaultComponents() {
+  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
+}
