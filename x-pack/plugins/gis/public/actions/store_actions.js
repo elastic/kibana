@@ -91,7 +91,7 @@ export function addInitialData(layer) {
 
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch) => {
-    const layer = await source.createDefaultLayer(layerOptions);
+    const layer = source.createDefaultLayer(layerOptions);
     const layerDescriptor = layer.toLayerDescriptor();
     await dispatch(addLayer(layerDescriptor, position));
     dispatch(addInitialData(layer));

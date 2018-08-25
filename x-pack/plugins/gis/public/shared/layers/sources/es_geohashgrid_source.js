@@ -71,7 +71,7 @@ export class ESGeohashGridSource extends ASource {
     });
   }
 
-  async _createDefaultLayerDescriptor(options) {
+  _createDefaultLayerDescriptor(options) {
     return GeohashGridLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
@@ -80,7 +80,7 @@ export class ESGeohashGridSource extends ASource {
 
   async createDefaultLayer(options) {
     return new GeohashGridLayer({
-      layerDescriptor: await this._createDefaultLayerDescriptor(options),
+      layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
   }

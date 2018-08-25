@@ -83,16 +83,16 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  async _createDefaultLayerDescriptor(options) {
+  _createDefaultLayerDescriptor(options) {
     return VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
-  async createDefaultLayer(options) {
+  createDefaultLayer(options) {
     return new VectorLayer({
-      layerDescriptor: await this._createDefaultLayerDescriptor(options),
+      layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
   }
