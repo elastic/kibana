@@ -16,32 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallow } from 'enzyme';
 
-import { ManagementSection } from './section';
+import { PageTitle } from './page_title';
 
-export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
-
-export const management = new ManagementSection('management', {
-  display: 'Management'
-});
-
-// TODO: where should this live?
-management.register('data', {
-  display: 'Connect Data',
-  order: 0
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
+describe('PageTitle', () => {
+  it('should render normally', () => {
+    expect(shallow(<PageTitle />)).toMatchSnapshot();
+  });
 });
