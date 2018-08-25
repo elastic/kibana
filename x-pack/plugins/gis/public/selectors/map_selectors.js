@@ -15,11 +15,6 @@ import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 
-/**
- *
- * Everywhere else in the code, transformations of the state should happen by method-call on the object.
- * Polymorphism will resolve the correct implementation.
- */
 function createLayerInstance(layerDescriptor) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor);
   switch (layerDescriptor.type) {
