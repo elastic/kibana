@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSettingsComponent should throw an error when requesting a component that does not exist 1`] = `"Component not found with id does not exist"`;
+
+exports[`registerSettingsComponent should disallow registering a component with a duplicate id 1`] = `"Component with id test2 is already registered."`;
