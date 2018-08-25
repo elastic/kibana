@@ -22,12 +22,6 @@ export class KibanaTilemapSource extends  ASource {
     };
   }
 
-  static async getTilemapOptions(sourceDescriptor, services) {
-    return services.find(service => {
-      return service.id === sourceDescriptor.id;
-    });
-  }
-
   static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
     const { url } = dataSourcesMeta.kibana.tilemap;
     const previewTilemap = (urlTemplate) => {
