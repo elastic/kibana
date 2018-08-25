@@ -8,8 +8,9 @@
 import { EMS_V2 } from '../common/ems_v2';
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-import  *  as elasticsearch from 'elasticsearch';
+import *  as elasticsearch from 'elasticsearch';
 import _ from 'lodash';
+import WORLD_COUNTRIES from './junk/world_countries';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -24,6 +25,14 @@ export function initRoutes(server) {
     license: server.plugins.xpack_main.info.license.getUid(),
     manifestServiceUrl: mapConfig.manifestServiceUrl,
     emsLandingPageUrl: mapConfig.emsLandingPageUrl
+  });
+
+  server.route({
+    method: 'get',
+    path: `${ROOT}/junk`,
+    handler: async (request, reply) => {
+      reply(WORLD_COUNTRIES);
+    }
   });
 
   server.route({
@@ -140,8 +149,26 @@ export function initRoutes(server) {
     path: `${ROOT}/meta`,
     handler: async (request, reply) => {
 
-      const ems = await getEMSResources();
-      const indexPatterns = await getIndexPatterns(request);
+      let ems;
+      try {
+        ems = await getEMSResources();
+      } catch (e) {
+        console.error('Cannot connect to EMS');
+        console.error(e);
+        ems = {
+          fileLayers: [],
+          tmsServices: []
+        };
+      }
+
+      let indexPatterns;
+      try {
+        indexPatterns = await getIndexPatterns(request);
+      } catch (e) {
+        console.error('Cannot connect to ES');
+        console.error(e);
+        indexPatterns = [];
+      }
 
       reply({
         data_sources: {
