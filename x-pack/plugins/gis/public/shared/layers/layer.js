@@ -12,12 +12,12 @@ export class ALayer {
 
   static createDescriptor(options) {
     const layerDescriptor = {};
+    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
-    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.name = this._setName(options, layerDescriptor.id);
     return layerDescriptor;
   }

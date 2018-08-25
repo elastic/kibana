@@ -37,7 +37,7 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   });
 }
 
-function addLayers(map, newLayer, currentLayersIds) {
+function addLayerIfNotPresent(map, newLayer, currentLayersIds) {
   if (!currentLayersIds.find(layerId => layerId === newLayer.get('id'))) {
     map.addLayer(newLayer);
   }
@@ -100,6 +100,8 @@ const syncLayerInitialization = createSelector(
       } else {
         layerTuple.olLayer = createCorrespondingOLLayer(layer);
       }
+      layerTuple.olLayer.setVisible(layer.isVisible());
+      layer.syncOLStyle(layerTuple.olLayer);
       return layerTuple;
     });
   }
@@ -111,10 +113,8 @@ export const syncOLState = createSelector(
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates
-    layersWithOl.forEach(({ olLayer, layer }) => {
-      addLayers(olMap, olLayer, layersIds);
-      olLayer.setVisible(layer.isVisible());
-      layer.syncOLStyle(olLayer);
+    layersWithOl.forEach(({ olLayer }) => {
+      addLayerIfNotPresent(olMap, olLayer, layersIds);
     });
     const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.getId());
     // Deletes
