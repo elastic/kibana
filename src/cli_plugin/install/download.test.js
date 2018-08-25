@@ -27,6 +27,7 @@ import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
 import { join } from 'path';
 import http from 'http';
+import { CHECKSUM_TYPES } from './downloaders/http';
 
 describe('kibana cli', function () {
 
@@ -60,6 +61,14 @@ describe('kibana cli', function () {
       throw new Error('expected the promise to reject');
     }
 
+    function set404ChecksumResponses(host, path) {
+      for (const sumType of CHECKSUM_TYPES) {
+        nock(host)
+          .get(`${path}.${sumType}`)
+          .reply(404);
+      }
+    }
+
     beforeEach(function () {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
@@ -84,6 +93,7 @@ describe('kibana cli', function () {
           nock('http://example.com')
             .get('/plugin.tar.gz')
             .reply(404);
+          set404ChecksumResponses('http://example.com', '/plugin.tar.gz');
 
           const sourceUrl = 'http://example.com/plugin.tar.gz';
 
@@ -114,12 +124,78 @@ describe('kibana cli', function () {
             })
             .get('/plugin.zip')
             .replyWithFile(200, filePath);
+          set404ChecksumResponses('http://example.com', '/plugin.zip');
 
           const sourceUrl = 'http://example.com/plugin.zip';
 
           return _downloadSingle(settings, logger, sourceUrl)
             .then(function () {
               expectWorkingPathNotEmpty();
+            });
+        });
+
+        it('should allow valid checksums', () => {
+          const filePath = join(__dirname, '__fixtures__/replies/banana.jpg');
+
+          nock('http://example.com')
+            .defaultReplyHeaders({
+              'content-length': '341965',
+              'content-type': 'application/zip'
+            })
+            .get('/plugin.zip')
+            .replyWithFile(200, filePath);
+
+          // Setup a matching sha512 file
+          nock('http://example.com')
+            .get('/plugin.zip.sha512')
+            .reply(
+              200,
+              'd27d3a4e5aab8a1b32697dfb24b23be3847b9c849963354bcbf17f9f7df41d44cc7979b2646c3803314874c51e084aa2a9a00' +
+              'bcfc33125c0bf09a022356792b9'
+            );
+          nock('http://example.com')
+            .get('/plugin.zip.sha1')
+            .reply(404);
+          nock('http://example.com')
+            .get('/plugin.zip.md5')
+            .reply(404);
+
+          const sourceUrl = 'http://example.com/plugin.zip';
+
+          return _downloadSingle(settings, logger, sourceUrl)
+            .then(function () {
+              expectWorkingPathNotEmpty();
+            });
+        });
+
+        it('should reject invalid checksums', () => {
+          const filePath = join(__dirname, '__fixtures__/replies/banana.jpg');
+
+          nock('http://example.com')
+            .defaultReplyHeaders({
+              'content-length': '341965',
+              'content-type': 'application/zip'
+            })
+            .get('/plugin.zip')
+            .replyWithFile(200, filePath);
+
+          // Setup a mismatching sha512 file
+          nock('http://example.com')
+            .get('/plugin.zip.sha512')
+            .reply(200, 'trash');
+          nock('http://example.com')
+            .get('/plugin.zip.sha1')
+            .reply(404);
+          nock('http://example.com')
+            .get('/plugin.zip.md5')
+            .reply(404);
+
+          const sourceUrl = 'http://example.com/plugin.zip';
+
+          return _downloadSingle(settings, logger, sourceUrl)
+            .then(shouldReject, function (err) {
+              expect(err.message).toMatch(/checksum does not match/);
+              expectWorkingPathEmpty();
             });
         });
 
@@ -281,29 +357,9 @@ describe('kibana cli', function () {
       const proxyPort = 2626;
       const proxyUrl = `http://localhost:${proxyPort}`;
 
-      let proxyHit = false;
-      let proxyConnectHit = false;
-
-      const proxy = http.createServer(function (req, res) {
-        proxyHit = true;
-        // Our test proxy simply returns an empty 200 response, since we only
-        // care about the download promise being resolved.
-        res.writeHead(200);
-        res.end();
-      });
-
-      proxy.on('connect', (req, socket) => {
-        // When the proxy is hit with a HTTPS request instead of a HTTP request,
-        // the above call handler will never be triggered. Instead the client
-        // sends a CONNECT request to the proxy, so that the proxy can setup
-        // a HTTPS connection between the client and the upstream server.
-        // We just intercept this CONNECT call here, write it an empty response
-        // and close the socket, which will fail the actual request, but we know
-        // that it tried to use the proxy.
-        proxyConnectHit = true;
-        socket.write('\r\n\r\n');
-        socket.end();
-      });
+      let proxyHit;
+      let proxyConnectHit;
+      let proxy;
 
       function expectProxyHit() {
         expect(proxyHit).toBe(true);
@@ -320,19 +376,49 @@ describe('kibana cli', function () {
           .replyWithFile(200, join(__dirname, '__fixtures__/replies/test_plugin.zip'));
       }
 
-      beforeAll(function (done) {
+      beforeEach(function (done) {
+        proxyHit = false;
+        proxyConnectHit = false;
+
+        proxy = http.createServer(function (req, res) {
+          // Return 404s for checksum files
+          for (const sumType of CHECKSUM_TYPES) {
+            if (req.url.endsWith(sumType)) {
+              res.writeHead(404);
+              res.end();
+              return;
+            }
+          }
+
+          proxyHit = true;
+          // Our test proxy simply returns an empty 200 response, since we only
+          // care about the download promise being resolved.
+          res.writeHead(200);
+          res.end();
+        });
+
+        proxy.on('connect', (req, socket) => {
+          // When the proxy is hit with a HTTPS request instead of a HTTP request,
+          // the above call handler will never be triggered. Instead the client
+          // sends a CONNECT request to the proxy, so that the proxy can setup
+          // a HTTPS connection between the client and the upstream server.
+          // We just intercept this CONNECT call here, write it an empty response
+          // and close the socket, which will fail the actual request, but we know
+          // that it tried to use the proxy.
+          proxyConnectHit = true;
+          socket.write('\r\n\r\n');
+          socket.end();
+        });
+
         proxy.listen(proxyPort, done);
       });
 
-      beforeEach(function () {
-        proxyHit = false;
-        proxyConnectHit = false;
-      });
-
-      afterEach(function () {
+      afterEach(function (done) {
         delete process.env.http_proxy;
         delete process.env.https_proxy;
         delete process.env.no_proxy;
+        nock.cleanAll();
+        proxy.close(done);
       });
 
       it('should use http_proxy env variable', function () {

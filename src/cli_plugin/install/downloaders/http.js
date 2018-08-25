@@ -20,10 +20,22 @@
 import Wreck from 'wreck';
 import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
-import { createWriteStream } from 'fs';
+import { createWriteStream, unlink } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';
+import crypto from 'crypto';
+
+/**
+ * List of supported checksum extensions in order of preference
+ * This downloader will check to see if these sibling files exist
+ * and if they do, verify the downloaded file matches the checksum.
+ */
+export const CHECKSUM_TYPES = [
+  'sha512',
+  'sha1',
+  'md5'
+];
 
 function getProxyAgent(sourceUrl, logger) {
   const proxy = getProxyForUrl(sourceUrl);
@@ -69,9 +81,14 @@ function sendRequest({ sourceUrl, timeout }, logger) {
   });
 }
 
-function downloadResponse({ resp, targetPath, progress }) {
+function downloadResponse({ resp, targetPath, progress, checksumDetails }, logger) {
   return new Promise((resolve, reject) => {
     const writeStream = createWriteStream(targetPath);
+    // if we have available checksum, calculate a hash
+    let hash;
+    if (checksumDetails) {
+      hash = crypto.createHash(checksumDetails.sumType);
+    }
 
     // if either stream errors, fail quickly
     resp.on('error', reject);
@@ -80,29 +97,91 @@ function downloadResponse({ resp, targetPath, progress }) {
     // report progress as we download
     resp.on('data', (chunk) => {
       progress.progress(chunk.length);
+      if (hash) {
+        hash.update(chunk);
+      }
     });
 
     // write the download to the file system
     resp.pipe(writeStream);
 
     // when the write is done, we are done
-    writeStream.on('finish', resolve);
+    writeStream.on('finish', () => {
+      // verify the checksum, if none exists, accept the download anyway
+      const digest = hash ? hash.digest('hex') : null;
+
+      if (digest === null) {
+        logger.log(`No checksums found, skipping verfication`);
+        resolve();
+      } else if (digest === checksumDetails.checksum) {
+        logger.log(`${checksumDetails.sumType} checksum matched downloaded file`);
+        resolve();
+      } else {
+        // delete the file and reject the promise
+        unlink(targetPath, () => {
+          reject(new Error(`${checksumDetails.sumType} checksum does not match downloaded file`));
+        });
+      }
+    });
   });
 }
 
-/*
-Responsible for managing http transfers
-*/
+
+/**
+ * Reads a readable stream to a string
+ */
+function readStreamToString(stream) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+
+    stream.on('data', function (chunk) {
+      data += chunk;
+    });
+
+    stream.on('end', function () {
+      resolve(data);
+    });
+
+    stream.on('error', reject);
+  });
+}
+
+
+/**
+ * Finds the first matching checksum on the server, if any. Returns the
+ * checksum itself and the type found.
+ */
+async function getChecksumDetails({ sourceUrl, timeout }, logger) {
+  for (const sumType of CHECKSUM_TYPES) {
+    try {
+      const url = `${sourceUrl}.${sumType}`;
+      const { resp } = await sendRequest({ sourceUrl: url, timeout }, logger);
+
+      // We got a match, return the payload and matching type.
+      const checksum = await readStreamToString(resp);
+      return { checksum, sumType };
+    } catch (_) {
+      // ignore and move on
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Responsible for managing http transfers
+ */
 export default async function downloadUrl(logger, sourceUrl, targetPath, timeout) {
   try {
     const { req, resp } = await sendRequest({ sourceUrl, timeout }, logger);
+    const checksumDetails = await getChecksumDetails({ sourceUrl, timeout }, logger);
 
     try {
       const totalSize = parseFloat(resp.headers['content-length']) || 0;
       const progress = new Progress(logger);
       progress.init(totalSize);
 
-      await downloadResponse({ resp, targetPath, progress });
+      await downloadResponse({ resp, targetPath, progress, checksumDetails }, logger);
 
       progress.complete();
     } catch (err) {
