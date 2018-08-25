@@ -20,7 +20,6 @@ export class ALayer {
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
-    layerDescriptor.dataIsSynced = true;
     return layerDescriptor;
   }
 

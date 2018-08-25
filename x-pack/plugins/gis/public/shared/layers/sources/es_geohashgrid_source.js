@@ -67,7 +67,7 @@ export class ESGeohashGridSource extends ASource {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(DUMMY_GEOJSON);
-      }, 3000);
+      }, 200);
     });
   }
 
