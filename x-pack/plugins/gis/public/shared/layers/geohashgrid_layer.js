@@ -35,20 +35,20 @@ export class GeohashGridLayer extends ALayer {
     const placeHolderLayer = new ol.layer.Heatmap({
       source: vectorModel,
     });
-    window._phl = placeHolderLayer;
     placeHolderLayer.setVisible(this.isVisible());
     return placeHolderLayer;
   }
 
   _syncOLData(olLayer) {
-    if (!this._descriptor.dataDirty) {
+    if (!this._descriptor.data) {
       return;
     }
+    //todo: currently refactoring but we're somewhat regressing here.
+    //shouldn't update if data remains the same
     const olSource = olLayer.getSource();
     olSource.clear();
     const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.data);
     olSource.addFeatures(olFeatures);
-    this._descriptor.dataDirty = false;
   }
 
   //temporary API method until decoupled data loading falls fully into place
@@ -57,7 +57,6 @@ export class GeohashGridLayer extends ALayer {
   }
 
   isLayerLoading() {
-    console.log('ch', this._descriptor, this._descriptor.dataDirty);
     return !!this._descriptor.dataDirty;
   }
 

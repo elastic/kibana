@@ -5,9 +5,9 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, DATA_LOADED,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED, LAYER_DATA_LOAD_ENDED
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -41,11 +41,20 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case DATA_LOADED:
-      const layer = state.layerList.find(layer => layer.id === action.layerId);
-      if (layer) {
-        layer.data = action.data;
-        layer.dataDirty = true;//needs to be synced to OL/MB
+    case LAYER_DATA_LOAD_STARTED:
+      const layerRequestingData = findLayerById(state, action.layerId);
+      if (layerRequestingData) {
+        layerRequestingData.dataDirty = true;//needs to be synced to OL/MB
+        const layerList = [...state.layerList];
+        return { ...state, layerList };
+      } else {
+        return state;
+      }
+    case LAYER_DATA_LOAD_ENDED:
+      const layerReceivingData = findLayerById(state, action.layerId);
+      if (layerReceivingData) {
+        layerReceivingData.data = action.data;
+        layerReceivingData.dataDirty = false;
         const layerList = [...state.layerList];
         return { ...state, layerList };
       } else {
@@ -116,4 +125,9 @@ export function map(state = INITIAL_STATE, action) {
     default:
       return state;
   }
+}
+
+
+function findLayerById(state, id) {
+  return state.layerList.find(layer => layer.id === id);
 }

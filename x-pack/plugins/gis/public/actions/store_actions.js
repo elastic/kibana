@@ -17,7 +17,8 @@ export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
-export const DATA_LOADED = 'DATA_LOADED';
+export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
+export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -49,17 +50,8 @@ export function addLayer(layer, position = -1) {
       layer,
       position
     });
-    // dispatch(layerLoading(false));
   };
 }
-
-// //todo: should be on per-layer basis iso global?
-// export function layerLoading(loadingBool) {
-//   return {
-//     type: LAYER_LOADING,
-//     loadingBool
-//   };
-// }
 
 export function promoteTemporaryLayers() {
   return {
@@ -84,9 +76,13 @@ export function mapExtentChanged(mapConstants) {
 
 export function addInitialData(layer) {
   return async (dispatch) => {
+    dispatch({
+      type: LAYER_DATA_LOAD_STARTED,
+      layerId: layer.getId(),
+    });
     const data = await layer.updateData();
     dispatch({
-      type: DATA_LOADED,
+      type: LAYER_DATA_LOAD_ENDED,
       layerId: layer.getId(),
       data: data
     });
@@ -96,9 +92,9 @@ export function addInitialData(layer) {
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch) => {
     const layer = await source.createDefaultLayer(layerOptions);
-    dispatch(addInitialData(layer));
     const layerDescriptor = layer.toLayerDescriptor();
-    dispatch(addLayer(layerDescriptor, position));
+    await dispatch(addLayer(layerDescriptor, position));
+    dispatch(addInitialData(layer));
   };
 }
 

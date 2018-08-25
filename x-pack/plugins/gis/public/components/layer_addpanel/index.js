@@ -16,10 +16,7 @@ function mapStateToProps(state = {}) {
   const dataSourceMeta = (state.config.meta && state.config.meta.data_sources) ? state.config.meta.data_sources : null;
   function isLoading() {
     const tmp = getTemporaryLayers(state);
-    console.log('tmp', tmp);
-    const areTheyLoading = tmp.some((layer) => layer.isLayerLoading());
-    console.log('load', areTheyLoading);
-    return areTheyLoading;
+    return tmp.some((layer) => layer.isLayerLoading());
   }
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
