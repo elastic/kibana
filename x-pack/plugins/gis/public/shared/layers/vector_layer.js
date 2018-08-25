@@ -6,7 +6,7 @@
 
 import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
-import { getOlLayerStyle, OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
+import { getOlLayerStyle } from '../ol_layer_defaults';
 import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
@@ -68,23 +68,7 @@ export class VectorLayer extends ALayer {
   }
 
   _syncOLData(olLayer) {
-
-    if (!this._descriptor.data) {
-      return;
-    }
-    //ugly, but it's what we have now
-    //think about stateful-shim that mirrors OL (or Mb) that can keep these links
-    //but for now, the OpenLayers object model remains our source of truth
-    if (this._descriptor.data === olLayer.__kbn_data__) {
-      return;
-    } else {
-      olLayer.__kbn_data__ = this._descriptor.data;
-    }
-
-    const olSource = olLayer.getSource();
-    olSource.clear();
-    const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.data);
-    olSource.addFeatures(olFeatures);
+    return this._syncWithCurrentDataAsVectors(olLayer);
   }
 
   isLayerLoading() {
