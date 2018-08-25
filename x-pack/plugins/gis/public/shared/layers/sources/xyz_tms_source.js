@@ -25,12 +25,6 @@ export class XYZTMSSource extends ASource {
     };
   }
 
-  static async getTMSOptions(descriptor) {
-    return {
-      url: descriptor.urlTemplate
-    };
-  }
-
   static renderEditor({  onPreviewSource }) {
     const previewTMS = (urlTemplate) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);

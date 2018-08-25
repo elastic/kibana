@@ -61,7 +61,7 @@ export class KibanaRegionmapSource extends ASource {
         </Fragment>
       </EuiText>
     );
-  }
+  };
 
   renderDetails() {
     return (

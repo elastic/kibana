@@ -30,7 +30,7 @@ export class KibanaTilemapSource extends  ASource {
       onPreviewSource(source);
     };
     return (<KibanaTilemapEditor previewTilemap={previewTilemap} url={url} />);
-  }
+  };
 
   renderDetails() {
     return (
