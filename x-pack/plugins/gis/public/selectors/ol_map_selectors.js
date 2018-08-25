@@ -10,11 +10,6 @@ import { WEBMERCATOR, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
 
-function createCorrespondingOLLayer(layer) {
-  const olLayer = layer.createCorrespondingOLLayer();
-  olLayer.set('id', layer.getId());
-  return olLayer;
-}
 
 // OpenLayers helper function
 const getLayersIds = mapLayers => mapLayers
@@ -87,7 +82,7 @@ const syncOLMap = createSelector(
   }
 );
 
-const syncLayerInitialization = createSelector(
+const syncLayers = createSelector(
   syncOLMap,
   getLayerList,
   (olMap, layerList) => {
@@ -98,8 +93,9 @@ const syncLayerInitialization = createSelector(
       if (olLayer) {
         layerTuple.olLayer = olLayer;
       } else {
-        layerTuple.olLayer = createCorrespondingOLLayer(layer);
+        layerTuple.olLayer = layer.createCorrespondingOLLayer();
       }
+      layerTuple.olLayer.set('id', layer.getId());
       layerTuple.olLayer.setVisible(layer.isVisible());
       layer.syncOLStyle(layerTuple.olLayer);
       return layerTuple;
@@ -109,7 +105,7 @@ const syncLayerInitialization = createSelector(
 
 export const syncOLState = createSelector(
   syncOLMap,
-  syncLayerInitialization,
+  syncLayers,
   (olMap, layersWithOl) => {
     const layersIds = getLayersIds(olMap.getLayers());
     // Adds & updates
