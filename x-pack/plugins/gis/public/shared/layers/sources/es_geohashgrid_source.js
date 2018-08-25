@@ -62,7 +62,7 @@ export class ESGeohashGridSource extends ASource {
     );
   }
 
-  _getGeoJsonPoints({}) {
+  _getGeoJsonPoints() {
     //todo: placeholder now, obviously
     return DUMMY_GEOJSON;
   }
