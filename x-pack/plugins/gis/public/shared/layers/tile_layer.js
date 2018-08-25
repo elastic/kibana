@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer, LAYER_TYPE } from './layer';
+import { ALayer } from './layer';
 import * as ol from 'openlayers';
 
 export class TileLayer extends ALayer {
 
-  static type = LAYER_TYPE.TILE;
+  static type = "TILE";
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = LAYER_TYPE.TILE;
+    tileLayerDescriptor.type = TileLayer.type;
     return tileLayerDescriptor;
   }
 

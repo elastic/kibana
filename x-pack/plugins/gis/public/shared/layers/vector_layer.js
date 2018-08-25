@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer, LAYER_TYPE } from './layer';
+import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
 import { getOlLayerStyle, OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
 import * as ol from 'openlayers';
 
 export class VectorLayer extends ALayer {
 
-  static type = LAYER_TYPE.VECTOR;
+  static type = 'VECTOR';
 
   static createDescriptor(options) {
     const vectorLayerDescriptor = super.createDescriptor(options);
-    vectorLayerDescriptor.type = LAYER_TYPE.VECTOR;
+    vectorLayerDescriptor.type = VectorLayer.type;
     vectorLayerDescriptor.style = {
       ...vectorLayerDescriptor.style,
       ...this._applyDefaultStyle()

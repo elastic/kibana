@@ -3,12 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export const LAYER_TYPE = {
-  TILE: 'TILE',
-  VECTOR: 'VECTOR',
-  GEOHASH_GRID: 'GEOHASH_GRID'
-};
-
 export class ALayer {
 
   constructor({ layerDescriptor, source }) {

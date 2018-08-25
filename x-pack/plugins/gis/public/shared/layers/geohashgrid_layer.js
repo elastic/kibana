@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer, LAYER_TYPE } from './layer';
+import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
 import * as ol from 'openlayers';
 import { OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
 
 export class GeohashGridLayer extends ALayer {
 
-  static type = LAYER_TYPE.GEOHASH_GRID;
+  static type = "GEOHASH_GRID";
 
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
-    heatmapLayerDescriptor.type = LAYER_TYPE.GEOHASH_GRID;
+    heatmapLayerDescriptor.type = GeohashGridLayer.type;
     return heatmapLayerDescriptor;
   }
 
