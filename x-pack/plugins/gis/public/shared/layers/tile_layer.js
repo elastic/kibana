@@ -21,7 +21,7 @@ export class TileLayer extends ALayer {
     return null;
   }
 
-  createCorrespondingOLLayer() {
+  _createCorrespondingOLLayer() {
     const tileLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: this._descriptor.source

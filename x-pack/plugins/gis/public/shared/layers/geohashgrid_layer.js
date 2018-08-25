@@ -32,7 +32,7 @@ export class GeohashGridLayer extends ALayer {
     return new HeatmapStyle(this._descriptor.style);
   }
 
-  createCorrespondingOLLayer() {
+  _createCorrespondingOLLayer() {
     const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.source);
     const vectorModel = new ol.source.Vector({
       features: olFeatures

@@ -69,7 +69,7 @@ export class ALayer {
   /**
    * this is a temp method, in progress of refactoring this.
    */
-  createCorrespondingOLLayer() {
+  _createCorrespondingOLLayer() {
     throw new Error('Should implement Layer#createCorrespondingOLLayer');
   }
 
@@ -77,15 +77,15 @@ export class ALayer {
     const olLayerArray = olMap.getLayers().getArray();
     let olLayer = olLayerArray.find(olLayer => olLayer.get('id') === this.getId());
     if (!olLayer) {
-      olLayer = this.createCorrespondingOLLayer();
+      olLayer = this._createCorrespondingOLLayer();
     }
     olLayer.set('id', this.getId());
     olLayer.setVisible(this.isVisible());
-    this.syncOLStyle(olLayer);
+    this._syncOLStyle(olLayer);
     return olLayer;
   }
 
-  syncOLStyle() {
+  _syncOLStyle() {
     //no-op
   }
 

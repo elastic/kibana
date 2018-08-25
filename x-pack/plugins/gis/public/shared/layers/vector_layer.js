@@ -47,7 +47,7 @@ export class VectorLayer extends ALayer {
     }
   }
 
-  createCorrespondingOLLayer() {
+  _createCorrespondingOLLayer() {
     const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.source);
     const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
@@ -61,7 +61,7 @@ export class VectorLayer extends ALayer {
     return vectorLayer;
   }
 
-  syncOLStyle(olLayer) {
+  _syncOLStyle(olLayer) {
     const style = this.getCurrentStyle();
     const appliedStyle = getOlLayerStyle(style, this.isTemporary());
     olLayer.setStyle(appliedStyle);
