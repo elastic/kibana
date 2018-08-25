@@ -24,8 +24,12 @@ export class ASource {
     return (<div>{`Here be details for source`}</div>);
   }
 
-  async createDefaultLayerDescriptor() {
+  async _createDefaultLayerDescriptor() {
     throw new Error(`Source#createDefaultLayerDescriptor not implemented`);
+  }
+
+  async createDefaultLayer() {
+    throw new Error(`Source#createDefaultLayer not implemented`);
   }
 
   getDisplayName() {

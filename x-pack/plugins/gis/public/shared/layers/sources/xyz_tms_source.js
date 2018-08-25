@@ -47,10 +47,17 @@ export class XYZTMSSource extends TMSSource {
     );
   }
 
-  async createDefaultLayerDescriptor(options) {
+  async _createDefaultLayerDescriptor(options) {
     return TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
+    });
+  }
+
+  async createDefaultLayer(options) {
+    return new TileLayer({
+      layerDescriptor: await this._createDefaultLayerDescriptor(options),
+      source: this
     });
   }
 

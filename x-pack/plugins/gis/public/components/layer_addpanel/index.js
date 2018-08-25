@@ -14,10 +14,17 @@ import _ from 'lodash';
 function mapStateToProps(state = {}) {
 
   const dataSourceMeta = (state.config.meta && state.config.meta.data_sources) ? state.config.meta.data_sources : null;
+  function isLoading() {
+    const tmp = getTemporaryLayers(state);
+    console.log('tmp', tmp);
+    const areTheyLoading = tmp.some((layer) => layer.isLayerLoading());
+    console.log('load', areTheyLoading);
+    return areTheyLoading;
+  }
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     dataSourcesMeta: dataSourceMeta,
-    layerLoading: getTemporaryLayers(state).some((layer) => layer.isLayerLoading()),
+    layerLoading: isLoading(),
     temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
   };
 }

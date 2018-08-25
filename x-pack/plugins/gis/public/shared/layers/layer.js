@@ -18,6 +18,7 @@ export class ALayer {
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
+    layerDescriptor.dataIsSynced = true;
     return layerDescriptor;
   }
 
@@ -69,15 +70,31 @@ export class ALayer {
     olLayer.set('id', this.getId());
     olLayer.setVisible(this.isVisible());
     this._syncOLStyle(olLayer);
+    this._syncOLData(olLayer);
     return olLayer;
   }
 
   _syncOLStyle() {
-    //no-op
+    //no-op by default
+  }
+
+  _syncOLData() {
+    //no-op by default
   }
 
   isLayerLoading() {
     return false;
+  }
+
+  toLayerDescriptor() {
+    return this._descriptor;
+  }
+
+  //temp method until decoupled data-loading starts to fall into place
+  //but this will already allow us to do some refactors
+  // (e.g. initialize with json, async layer-loading, ...)
+  async updateData() {
+    return null;
   }
 
 }

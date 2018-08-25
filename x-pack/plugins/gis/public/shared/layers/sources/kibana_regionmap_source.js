@@ -84,7 +84,7 @@ export class KibanaRegionmapSource extends ASource {
     }
   }
 
-  async createDefaultLayerDescriptor(options) {
+  async _createDefaultLayerDescriptor(options) {
     const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
       source: geojson,
@@ -92,6 +92,14 @@ export class KibanaRegionmapSource extends ASource {
       ...options
     });
   }
+
+  async createDefaultLayer(options) {
+    return new VectorLayer({
+      layerDescriptor: await this._createDefaultLayerDescriptor(options),
+      source: this
+    });
+  }
+
 
   getDisplayName() {
     return this._descriptor.url + ' todo should use name from config instead';

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EMSTMSSource } from "../shared/layers/sources/ems_tms_source";
-// import { EMSFileSource } from "../shared/layers/sources/ems_file_source";
 import { KibanaRegionmapSource } from "../shared/layers/sources/kibana_regionmap_source";
 import { GIS_API_PATH } from '../../common/constants';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
@@ -13,13 +11,13 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
-export const LAYER_LOADING = 'LAYER_LOADING';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
 export const PROMOTE_TEMPORARY_LAYERS = 'PROMOTE_TEMPORARY_LAYERS';
 export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
+export const DATA_LOADED = 'DATA_LOADED';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -51,17 +49,17 @@ export function addLayer(layer, position = -1) {
       layer,
       position
     });
-    dispatch(layerLoading(false));
+    // dispatch(layerLoading(false));
   };
 }
 
-//todo: should be on per-layer basis iso global?
-export function layerLoading(loadingBool) {
-  return {
-    type: LAYER_LOADING,
-    loadingBool
-  };
-}
+// //todo: should be on per-layer basis iso global?
+// export function layerLoading(loadingBool) {
+//   return {
+//     type: LAYER_LOADING,
+//     loadingBool
+//   };
+// }
 
 export function promoteTemporaryLayers() {
   return {
@@ -76,30 +74,42 @@ export function clearTemporaryLayers() {
 }
 
 export function mapExtentChanged(mapConstants) {
-  console.log('should check for every layer if it needs data');
+  //todo should check if every layer needs more data
   return {
     type: MAP_EXTENT_CHANGED,
     mapConstants: mapConstants
   };
 }
 
+
+export function addInitialData(layer) {
+  return async (dispatch) => {
+    const data = await layer.updateData();
+    dispatch({
+      type: DATA_LOADED,
+      layerId: layer.getId(),
+      data: data
+    });
+  };
+}
+
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch) => {
-    dispatch(layerLoading(true));
-    //todo: remove this asyncyness. data loading will get a lot more flexible..
-    const layerDescriptor = await source.createDefaultLayerDescriptor(layerOptions);
+    const layer = await source.createDefaultLayer(layerOptions);
+    dispatch(addInitialData(layer));
+    const layerDescriptor = layer.toLayerDescriptor();
     dispatch(addLayer(layerDescriptor, position));
   };
 }
 
-export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
-  return async (dispatch, getState) => {
-    dispatch(layerLoading(true));
-    const source = new EMSTMSSource(sourceDescriptor);
-    const layer = await source.createDefaultLayerDescriptor(options, getState().config.meta.data_sources);
-    dispatch(addLayer(layer, position));
-  };
-}
+// export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
+//   return async (dispatch, getState) => {
+//     dispatch(layerLoading(true));
+//     const source = new EMSTMSSource(sourceDescriptor);
+//     const layer = await source.createDefaultLayerDescriptor(options, getState().config.meta.data_sources);
+//     dispatch(addLayer(layer, position));
+//   };
+// }
 
 export function removeLayer(id) {
   return {

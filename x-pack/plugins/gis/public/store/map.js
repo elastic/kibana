@@ -5,9 +5,9 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER,
+  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, DATA_LOADED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, LAYER_LOADING, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -20,7 +20,7 @@ const updateLayerInList = (state, id, attribute, newValue) => {
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
-    [ attribute ]: newValue || !layerList[layerIdx][attribute]
+    [attribute]: newValue || !layerList[layerIdx][attribute]
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),
@@ -41,6 +41,16 @@ const INITIAL_STATE = {
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case DATA_LOADED:
+      const layer = state.layerList.find(layer => layer.id === action.layerId);
+      if (layer) {
+        layer.data = action.data;
+        layer.dataDirty = true;//needs to be synced to OL/MB
+        const layerList = [...state.layerList];
+        return { ...state, layerList };
+      } else {
+        return state;
+      }
     case MAP_EXTENT_CHANGED:
       return { ...state, mapConstants: action.mapConstants };
     case SET_SELECTED_LAYER:
@@ -57,7 +67,7 @@ export function map(state = INITIAL_STATE, action) {
         action.position === -1 ||
         action.position > state.layerList.length
       ) {
-        postAddLayerList = [ ...preAddLayerList, action.layer ];
+        postAddLayerList = [...preAddLayerList, action.layer];
       } else {
         state.layerList.splice(action.position, 0, action.layer);
         postAddLayerList = state.layerList.slice();
@@ -65,8 +75,10 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: postAddLayerList };
     case REMOVE_LAYER:
       const removeId = action.id || state.selectedLayerId;
-      return { ...state, layerList: [ ...state.layerList.filter(
-        ({ id }) => id !== removeId) ] };
+      return {
+        ...state, layerList: [...state.layerList.filter(
+          ({ id }) => id !== removeId)]
+      };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:
       const tempLayer = state.layerList.find(({ temporary }) => temporary);
@@ -74,10 +86,12 @@ export function map(state = INITIAL_STATE, action) {
         ? updateLayerInList(state, tempLayer.id, 'temporary', false)
         : state;
     case CLEAR_TEMPORARY_LAYERS:
-      return { ...state, layerList: [ ...state.layerList.filter(
-        ({ temporary }) => !temporary) ] };
-    case LAYER_LOADING:
-      return { ...state, layerLoading: action.loadingBool };
+      return {
+        ...state, layerList: [...state.layerList.filter(
+          ({ temporary }) => !temporary)]
+      };
+    // case LAYER_LOADING:
+    //   return { ...state, layerLoading: action.loadingBool };
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');

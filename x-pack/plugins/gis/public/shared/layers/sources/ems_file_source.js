@@ -84,12 +84,19 @@ export class EMSFileSource extends ASource {
     );
   }
 
-  async createDefaultLayerDescriptor(options) {
+  async _createDefaultLayerDescriptor(options) {
     const geojson = await this._getGeoJson();
     return VectorLayer.createDescriptor({
       source: geojson,
       sourceDescriptor: this._descriptor,
       ...options
+    });
+  }
+
+  async createDefaultLayer(options) {
+    return new VectorLayer({
+      layerDescriptor: await this._createDefaultLayerDescriptor(options),
+      source: this
     });
   }
 
