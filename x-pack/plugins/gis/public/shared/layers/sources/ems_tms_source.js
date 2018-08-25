@@ -18,12 +18,6 @@ export class EMSTMSSource extends ASource {
     };
   }
 
-  static async getTMSOptions(sourceDescriptor, services) {
-    return services.find(service => {
-      return service.id === sourceDescriptor.id;
-    });
-  }
-
   renderDetails() {
     return (
       <Fragment>
@@ -40,9 +34,14 @@ export class EMSTMSSource extends ASource {
     );
   }
 
+  _getTMSOptions(allServices) {
+    return allServices.find(service => {
+      return service.id === this._descriptor.id;
+    });
+  }
+
   async createDefaultLayerDescriptor(options, dataSourceMeta = {}) {
-    const allServices = dataSourceMeta.ems.tms;
-    const service = await EMSTMSSource.getTMSOptions(this._descriptor, allServices);
+    const service = this._getTMSOptions(dataSourceMeta.ems.tms);
     return TileLayer.createDescriptor({
       source: service.url,
       sourceDescriptor: this._descriptor,
