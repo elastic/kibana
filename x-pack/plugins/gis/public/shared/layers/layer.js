@@ -13,6 +13,8 @@ export class ALayer {
   static createDescriptor(options) {
     const layerDescriptor = {};
     layerDescriptor.data = options.data || null;
+    layerDescriptor.dataExtent = options.dataExtent || null;
+    layerDescriptor.dataMeta = options.dataMeta || {};
     layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.source = options.source;
@@ -94,8 +96,12 @@ export class ALayer {
   //temp method until decoupled data-loading starts to fall into place
   //but this will already allow us to do some refactors
   // (e.g. initialize with json, async layer-loading, ...)
-  async updateData() {
+  async initializeData() {
     return null;
+  }
+
+  syncDataToExtent() {
+    //no-op by default
   }
 
 }

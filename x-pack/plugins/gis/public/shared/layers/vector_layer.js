@@ -91,7 +91,7 @@ export class VectorLayer extends ALayer {
   }
 
 
-  async updateData() {
+  async initializeData() {
     try {
       return this._source.getGeoJson();
     } catch (e) {

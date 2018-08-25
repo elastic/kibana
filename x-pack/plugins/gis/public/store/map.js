@@ -31,7 +31,7 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 };
 
 const INITIAL_STATE = {
-  mapConstants: {
+  mapState: {
     zoom: 4,
     center: [37.41, 8.82]
   },
@@ -40,28 +40,14 @@ const INITIAL_STATE = {
 };
 
 export function map(state = INITIAL_STATE, action) {
+  //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case LAYER_DATA_LOAD_STARTED:
-      const layerRequestingData = findLayerById(state, action.layerId);
-      if (layerRequestingData) {
-        layerRequestingData.dataDirty = true;//needs to be synced to OL/MB
-        const layerList = [...state.layerList];
-        return { ...state, layerList };
-      } else {
-        return state;
-      }
+      return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
-      const layerReceivingData = findLayerById(state, action.layerId);
-      if (layerReceivingData) {
-        layerReceivingData.data = action.data;
-        layerReceivingData.dataDirty = false;
-        const layerList = [...state.layerList];
-        return { ...state, layerList };
-      } else {
-        return state;
-      }
+      return updateWithDataResponse(state, action);
     case MAP_EXTENT_CHANGED:
-      return { ...state, mapConstants: action.mapConstants };
+      return { ...state, mapState: { ...action.mapState } };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
@@ -127,6 +113,39 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+
+function updateWithDataRequest(state, action) {
+  const layerRequestingData = findLayerById(state, action.layerId);
+  if (layerRequestingData) {
+    layerRequestingData.dataDirty = true;//needs to be synced to OL/MB
+    layerRequestingData.dataMetaAtStart = action.dataMeta ? action.dataMetaAtStart.extent : null;
+    layerRequestingData.dataRequestToken = action.requestToken;
+    const layerList = [...state.layerList];
+    return { ...state, layerList };
+  } else {
+    return state;
+  }
+}
+
+function updateWithDataResponse(state, action) {
+  const layerReceivingData = findLayerById(state, action.layerId);
+  if (layerReceivingData) {
+    if (
+      layerReceivingData.dataRequestToken &&
+      layerReceivingData.dataRequestToken !== action.requestToken
+    ) {
+      console.warn('Implementation needs to deal with race conditions in request/response cycle');
+    }
+    layerReceivingData.data = action.data;
+    layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
+    layerReceivingData.dataDirty = false;
+    layerReceivingData.dataRequestToken = null;
+    const layerList = [...state.layerList];
+    return { ...state, layerList };
+  } else {
+    return state;
+  }
+}
 
 function findLayerById(state, id) {
   return state.layerList.find(layer => layer.id === id);

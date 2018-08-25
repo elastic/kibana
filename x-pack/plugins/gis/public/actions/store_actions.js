@@ -7,6 +7,8 @@
 import { KibanaRegionmapSource } from "../shared/layers/sources/kibana_regionmap_source";
 import { GIS_API_PATH } from '../../common/constants';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
+import { getLayerList, getMapState } from '../selectors/map_selectors';
+
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -26,8 +28,7 @@ export function toggleLayerVisible(layerId) {
   return {
     type: TOGGLE_LAYER_VISIBLE,
     layerId
-  };
-}
+  };}
 
 export function setSelectedLayer(layerId) {
   return {
@@ -65,27 +66,49 @@ export function clearTemporaryLayers() {
   };
 }
 
-export function mapExtentChanged(mapConstants) {
+export function mapExtentChanged(newMapConstants) {
   //todo should check if every layer needs more data
-  return {
-    type: MAP_EXTENT_CHANGED,
-    mapConstants: mapConstants
+  return async (dispatch, getState) => {
+    window._gs = getState;
+    dispatch({
+      type: MAP_EXTENT_CHANGED,
+      mapState: newMapConstants
+    });
+
+    const layerList = getLayerList(getState());
+    layerList.forEach((layer) => {
+      layer.syncDataToExtent(newMapConstants.extent, dispatch);
+    });
   };
+}
+
+export function startDataLoad(layerId, dataMeta, requestToken) {
+  return ({
+    type: LAYER_DATA_LOAD_STARTED,
+    layerId: layerId,
+    dataMetaAtStart: dataMeta,
+    requestToken: requestToken
+  });
+}
+
+//todo: should link start and end data load with some sort of token
+export function endDataLoad(layerId, data, requestToken) {
+  return ({
+    type: LAYER_DATA_LOAD_ENDED,
+    layerId: layerId,
+    data: data,
+    requestToken: requestToken
+  });
 }
 
 
 export function addInitialData(layer) {
-  return async (dispatch) => {
-    dispatch({
-      type: LAYER_DATA_LOAD_STARTED,
-      layerId: layer.getId(),
-    });
-    const data = await layer.updateData();
-    dispatch({
-      type: LAYER_DATA_LOAD_ENDED,
-      layerId: layer.getId(),
-      data: data
-    });
+  return async (dispatch, getState) => {
+    const mapExtent = getMapState(getState());
+    const requestToken = Symbol('requesttoken');//not sure about this
+    dispatch(startDataLoad(layer.getId(), mapExtent, requestToken));
+    const data = await layer.initializeData();
+    dispatch(endDataLoad(layer.getId(), data, requestToken));
   };
 }
 

@@ -48,7 +48,7 @@ function createSourceInstance(sourceDescriptor) {
   }
 }
 
-export const getMapConstants = ({ map }) => map && map.mapConstants;
+export const getMapState = ({ map }) => map && map.mapState;
 
 
 const getSelectedLayerId = createSelector(({ map }) => {

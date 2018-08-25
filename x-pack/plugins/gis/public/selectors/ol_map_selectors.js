@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList, getMapConstants } from "./map_selectors";
+import { getLayerList, getMapState } from "./map_selectors";
 import { WEBMERCATOR, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
@@ -63,19 +63,19 @@ function getOLImplementation() {
 // Selectors
 const syncOLMap = createSelector(
   getOLImplementation,
-  getMapConstants,
-  (olMap, mapConstants) => {
+  getMapState,
+  (olMap, mapState) => {
     const olView = olMap.getView();
     const center = olView.getCenter();
     const zoom = olView.getZoom();
     const centerInLonLat = ol.proj.transform(center, WEBMERCATOR, WGS_84);
     //make comparison in lon-lat, to avoid precision errors when projecting in the other direction.
     //this could trigger infinite loops of dispatching extent-changed actions
-    if (typeof mapConstants.zoom === 'number' && mapConstants.zoom !== zoom) {
-      olView.setZoom(mapConstants.zoom);
+    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
+      olView.setZoom(mapState.zoom);
     }
-    if (mapConstants.center && !_.isEqual(mapConstants.center, centerInLonLat)) {
-      const centerInWorldRef = ol.proj.transform(mapConstants.center, WGS_84, WEBMERCATOR);
+    if (mapState.center && !_.isEqual(mapState.center, centerInLonLat)) {
+      const centerInWorldRef = ol.proj.transform(mapState.center, WGS_84, WEBMERCATOR);
       olView.setCenter(centerInWorldRef);
     }
     return olMap;
