@@ -62,10 +62,6 @@ export class ALayer {
     return this._source.renderDetails();
   }
 
-  toLayerDescriptor() {
-    return this._descriptor;
-  }
-
   /**
    * this is a temp method, in progress of refactoring this.
    */
