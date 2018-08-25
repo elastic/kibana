@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { ASource } from './source';
+import { TMSSource } from './source';
 import { TileLayer } from '../tile_layer';
 import {
   EuiFieldText,
   EuiButton
 } from '@elastic/eui';
 
-export class KibanaTilemapSource extends  ASource {
+export class KibanaTilemapSource extends  TMSSource {
 
   static type = 'KIBANA_TILEMAP';
 
@@ -50,10 +50,13 @@ export class KibanaTilemapSource extends  ASource {
 
   async createDefaultLayerDescriptor(options) {
     return TileLayer.createDescriptor({
-      source: this._descriptor.url,
       sourceDescriptor: this._descriptor,
       ...options
     });
+  }
+
+  getUrlTemplate() {
+    return this._descriptor.url;
   }
 }
 
