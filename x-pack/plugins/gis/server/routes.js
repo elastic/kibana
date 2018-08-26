@@ -74,6 +74,7 @@ export function initRoutes(server) {
           host: elasticsearchHost,
           log: 'info'
         });
+
         const resp = await esClient.search({
           index: indexPattern,
           body: {

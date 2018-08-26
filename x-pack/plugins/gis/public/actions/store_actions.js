@@ -75,7 +75,7 @@ export function clearTemporaryLayers() {
 
 export function mapExtentChanged(newMapConstants) {
   return async (dispatch, getState) => {
-    window._gs = getState;
+
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: newMapConstants
@@ -149,23 +149,23 @@ export async function loadMapResources(dispatch) {
 
   await dispatch(wipeLayerList(
     [
-      {
-        "dataDirty": false,
-        "id": "0hmz5",
-        "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
-        "visible": true,
-        "temporary": false,
-        "style": {},
-        "type": "TILE"
-      },
-      {
-        "id": "0pmk0",
-        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-        "visible": false,
-        "temporary": false,
-        "style": {},
-        "type": "TILE"
-      },
+      // {
+      //   "dataDirty": false,
+      //   "id": "0hmz5",
+      //   "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {},
+      //   "type": "TILE"
+      // },
+      // {
+      //   "id": "0pmk0",
+      //   "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+      //   "visible": false,
+      //   "temporary": false,
+      //   "style": {},
+      //   "type": "TILE"
+      // },
       {
         "id": "hqoqo",
         "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },

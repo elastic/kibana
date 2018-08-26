@@ -69,11 +69,11 @@ export class ALayer {
     const olLayerArray = olMap.getLayers().getArray();
     let olLayer = olLayerArray.find(olLayer => olLayer.get('id') === this.getId());
     if (!olLayer) {
-      olLayer = this._createCorrespondingOLLayer(dataSources);
+      olLayer = this._createCorrespondingOLLayer(dataSources, olMap);
     }
     olLayer.set('id', this.getId());
     olLayer.setVisible(this.isVisible());
-    this._syncOLStyle(olLayer);
+    this._syncOLStyle(olLayer, olMap);
     this._syncOLData(olLayer);
     return olLayer;
   }
