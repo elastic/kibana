@@ -7,7 +7,7 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED, LAYER_DATA_LOAD_ENDED
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -36,38 +36,15 @@ const INITIAL_STATE = {
     center: [37.41, 8.82]
   },
   selectedLayerId: null,
-  layerList: [
-    {
-      "id": "0pmk0",
-      "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-      "visible": true,
-      "temporary": false,
-      "style": {},
-      "type": "TILE"
-    },
-    {
-      "id": "hqoqo",
-      "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
-      "visible": true,
-      "temporary": false,
-      "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
-      "type": "VECTOR"
-    },
-    {
-      "id": "dx9uf",
-      "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
-      "visible": true,
-      "temporary": false,
-      "style": {},
-      "type": "GEOHASH_GRID"
-    }
-  ]
+  layerList: []
 };
 
 export function map(state = INITIAL_STATE, action) {
   window._gs = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
+    case REPLACE_LAYERLIST:
+      return { ...state, layerList: [ ...action.layerList] };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:

@@ -19,14 +19,24 @@ export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
+export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
+
+
+export function wipeLayerList(layerList) {
+  return {
+    type: REPLACE_LAYERLIST,
+    layerList: layerList
+  };
+}
 
 export function toggleLayerVisible(layerId) {
   return {
     type: TOGGLE_LAYER_VISIBLE,
     layerId
-  };}
+  };
+}
 
 export function setSelectedLayer(layerId) {
   return {
@@ -144,9 +154,43 @@ export async function loadMapResources(dispatch) {
   const metaJson = await meta.json();
   await dispatch(setMeta(metaJson));
 
-  // Add initial layers
-  //todo: ensure we can declaritively add this (even when meta data isn't available yet)
-  const roadMapEms = EMSTMSSource.createDescriptor('road_map');
-  await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
+
+  await dispatch(wipeLayerList(
+    [
+      {
+        "dataDirty": false,
+        "id": "0hmz5",
+        "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
+        "visible": true,
+        "temporary": false,
+        "style": {},
+        "type": "TILE"
+      },
+      {
+        "id": "0pmk0",
+        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+        "visible": false,
+        "temporary": false,
+        "style": {},
+        "type": "TILE"
+      },
+      {
+        "id": "hqoqo",
+        "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
+        "visible": true,
+        "temporary": false,
+        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+        "type": "VECTOR"
+      },
+      {
+        "id": "dx9uf",
+        "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
+        "visible": true,
+        "temporary": false,
+        "style": {},
+        "type": "GEOHASH_GRID"
+      }
+    ]
+  ));
 
 }
