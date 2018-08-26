@@ -75,8 +75,10 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-
-  async initializeData(mapState, requestToken, dispatch) {
+  async syncDataToMapState(mapState, requestToken, dispatch) {
+    if (this._descriptor.data || this._descriptor.dataRequestToken) {
+      return;
+    }
     dispatch(startDataLoad(this.getId(), mapState, requestToken));
     const data = await this._source.getGeoJson();
     dispatch(endDataLoad(this.getId(), data, requestToken));

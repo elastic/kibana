@@ -114,14 +114,7 @@ export class ALayer {
     return this._descriptor;
   }
 
-  //temp method until decoupled data-loading starts to fall into place
-  //but this will already allow us to do some refactors
-  // (e.g. initialize with json, async layer-loading, ...)
-  async initializeData() {
-    return null;
-  }
-
-  syncDataToExtent() {
+  async syncDataToMapState() {
     //no-op by default
   }
 

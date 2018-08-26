@@ -76,7 +76,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(getState());
     layerList.forEach((layer) => {
-      layer.syncDataToExtent(newMapConstants, Symbol('data_request_sync_extentchange'), dispatch);
+      layer.syncDataToMapState(newMapConstants, Symbol('data_request_sync_extentchange'), dispatch);
     });
   };
 }
@@ -104,7 +104,7 @@ export function endDataLoad(layerId, data, requestToken) {
 export function addInitialData(layer) {
   return async (dispatch, getState) => {
     const mapState = getMapState(getState());
-    layer.initializeData(mapState, Symbol('data_request'), dispatch);
+    layer.syncDataToMapState(mapState, Symbol('data_request'), dispatch);
   };
 }
 

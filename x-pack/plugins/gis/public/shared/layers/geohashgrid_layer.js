@@ -92,17 +92,11 @@ export class GeohashGridLayer extends ALayer {
     dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
-  //temporary API method until decoupled data loading falls fully into place
-  async initializeData(mapState, requestToken, dispatch) {
-    const precision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
-    return await this._fetchNewData(mapState, requestToken, precision, dispatch);
-  }
-
   isLayerLoading() {
     return !!this._descriptor.dataDirty;
   }
 
-  syncDataToExtent(mapState, requestToken, dispatch) {
+  async syncDataToMapState(mapState, requestToken, dispatch) {
     //todo: use "collar" around map extent, so small pans dont trigger new request
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
