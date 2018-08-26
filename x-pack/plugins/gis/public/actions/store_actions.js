@@ -6,7 +6,6 @@
 
 import { GIS_API_PATH } from '../../common/constants';
 import { getLayerList, getMapState } from '../selectors/map_selectors';
-import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -122,13 +121,6 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
     const layerDescriptor = layer.toLayerDescriptor();
     await dispatch(addLayer(layerDescriptor, position));
     dispatch(addInitialData(layer));
-  };
-}
-
-export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
-  return async (dispatch) => {
-    const source = new EMSTMSSource(sourceDescriptor);
-    dispatch(addLayerFromSource(source, options, position));
   };
 }
 
