@@ -149,39 +149,40 @@ export async function loadMapResources(dispatch) {
 
   await dispatch(wipeLayerList(
     [
-      // {
-      //   "dataDirty": false,
-      //   "id": "0hmz5",
-      //   "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {},
-      //   "type": "TILE"
-      // },
-      // {
-      //   "id": "0pmk0",
-      //   "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-      //   "visible": false,
-      //   "temporary": false,
-      //   "style": {},
-      //   "type": "TILE"
-      // },
       {
-        "id": "hqoqo",
-        "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
-        "visible": true,
-        "temporary": false,
-        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
-        "type": "VECTOR"
-      },
-      {
-        "id": "dx9uf",
-        "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
+        "dataDirty": false,
+        "id": "0hmz5",
+        "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
         "visible": true,
         "temporary": false,
         "style": {},
-        "type": "GEOHASH_GRID"
+        "type": "TILE"
+      },
+      {
+        "id": "0pmk0",
+        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+        "visible": false,
+        "temporary": false,
+        "style": {},
+        "type": "TILE"
       }
+      //,
+      // {
+      //   "id": "hqoqo",
+      //   "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+      //   "type": "VECTOR"
+      // },
+      // {
+      //   "id": "dx9uf",
+      //   "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {},
+      //   "type": "GEOHASH_GRID"
+      // }
     ]
   ));
 
