@@ -106,7 +106,6 @@ export class GeohashGridLayer extends ALayer {
   }
 
   async syncDataToMapState(mapState, requestToken, dispatch) {
-    //todo: use "collar" around map extent, so small pans dont trigger new request
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
