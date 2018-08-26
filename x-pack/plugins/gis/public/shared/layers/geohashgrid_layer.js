@@ -10,8 +10,6 @@ import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
 
-
-
 const ZOOM_TO_PRECISION = {
   "0": 1,
   "1": 2,
@@ -83,12 +81,23 @@ export class GeohashGridLayer extends ALayer {
   }
 
   async _fetchNewData(mapState, requestToken, precision, dispatch) {
+
+    const scaleFactor = 0.5;
+    const width = mapState.extent[2] - mapState.extent[0];
+    const height = mapState.extent[3] - mapState.extent[1];
+    const expandExtent = [
+      mapState.extent[0] - width * scaleFactor,
+      mapState.extent[1] - height * scaleFactor,
+      mapState.extent[2] + width * scaleFactor,
+      mapState.extent[3] + height * scaleFactor
+    ];
+
     dispatch(startDataLoad(this.getId(), {
       mapState: mapState,
       precision: precision,
-      extent: mapState.extent
+      extent: expandExtent
     }, requestToken));
-    const data = await this._source.getGeoJsonPoints(precision, mapState.extent);
+    const data = await this._source.getGeoJsonPoints(precision, expandExtent);
     dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
