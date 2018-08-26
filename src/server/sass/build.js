@@ -66,6 +66,10 @@ export class Build {
       outFile,
       sourceMap: true,
       sourceMapEmbed: true,
+      includePaths: [
+        path.resolve(__dirname, '../..'),
+        path.resolve(__dirname, '../../../node_modules')
+      ]
     });
 
 
