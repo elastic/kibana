@@ -68,8 +68,11 @@ export class GeohashGridLayer extends ALayer {
 
   _createCorrespondingOLLayer() {
     const vectorModel = new ol.source.Vector({});
+    //todo: needs to use the right "weight" parameter
+    //must be based on data selection
+    //could probably use styling settings or something too
     const placeHolderLayer = new ol.layer.Heatmap({
-      source: vectorModel,
+      source: vectorModel
     });
     placeHolderLayer.setVisible(this.isVisible());
     return placeHolderLayer;

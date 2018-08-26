@@ -134,7 +134,9 @@ function updateWithDataResponse(state, action) {
       layerReceivingData.dataRequestToken &&
       layerReceivingData.dataRequestToken !== action.requestToken
     ) {
-      console.warn('Implementation needs to deal with race conditions in request/response cycle');
+      //hackyest way to deal with race conditions
+      //just pick response of last request
+      return state;
     }
     layerReceivingData.data = action.data;
     layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
