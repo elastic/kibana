@@ -115,7 +115,8 @@ export function initRoutes(server) {
         reply(featureCollection);
 
       } catch (e) {
-        throw e;
+        console.error(e);
+        reply({ type: 'FeatureCollection', features: [] });
       }
 
     }

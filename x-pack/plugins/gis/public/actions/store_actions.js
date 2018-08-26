@@ -159,8 +159,8 @@ export async function loadMapResources(dispatch) {
   await dispatch(addLayerFromSource(worldCountrySource, {}, 0));
 
   const heatmapsource = new ESGeohashGridSource(ESGeohashGridSource.createDescriptor({
-    esIndexPattern: 'foo',
-    pointField: 'bar'
+    esIndexPattern: 'log*',
+    pointField: 'geo.coordinates'
   }));
   await dispatch(addLayerFromSource(heatmapsource, {}, 1));
 
