@@ -36,10 +36,28 @@ const INITIAL_STATE = {
     center: [37.41, 8.82]
   },
   selectedLayerId: null,
-  layerList: []
+  layerList: [
+    {
+      "id": "hqoqo",
+      "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
+      "visible": true,
+      "temporary": false,
+      "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+      "type": "VECTOR"
+    },
+    {
+      "id": "dx9uf",
+      "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
+      "visible": true,
+      "temporary": false,
+      "style": {},
+      "type": "GEOHASH_GRID"
+    }
+  ]
 };
 
 export function map(state = INITIAL_STATE, action) {
+  window._gs = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case LAYER_DATA_LOAD_STARTED:
@@ -140,6 +158,7 @@ function updateWithDataResponse(state, action) {
     }
     layerReceivingData.data = action.data;
     layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
+    layerReceivingData.dataMetaAtStart = null;
     layerReceivingData.dataDirty = false;
     layerReceivingData.dataRequestToken = null;
     const layerList = [...state.layerList];

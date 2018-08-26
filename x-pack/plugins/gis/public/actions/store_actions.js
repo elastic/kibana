@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRegionmapSource } from "../shared/layers/sources/kibana_regionmap_source";
 import { GIS_API_PATH } from '../../common/constants';
-import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 import { getLayerList, getMapState } from '../selectors/map_selectors';
-
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -154,14 +151,5 @@ export async function loadMapResources(dispatch) {
 
   // const worldCountrySource = new EMSFileSource(EMSFileSource.createDescriptor('World Countries'));
   // await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
-
-  const worldCountrySource = new KibanaRegionmapSource(KibanaRegionmapSource.createDescriptor('../api/gis/junk'));
-  await dispatch(addLayerFromSource(worldCountrySource, {}, 0));
-
-  const heatmapsource = new ESGeohashGridSource(ESGeohashGridSource.createDescriptor({
-    esIndexPattern: 'log*',
-    pointField: 'geo.coordinates'
-  }));
-  await dispatch(addLayerFromSource(heatmapsource, {}, 1));
 
 }
