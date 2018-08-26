@@ -38,6 +38,14 @@ const INITIAL_STATE = {
   selectedLayerId: null,
   layerList: [
     {
+      "id": "0pmk0",
+      "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+      "visible": true,
+      "temporary": false,
+      "style": {},
+      "type": "TILE"
+    },
+    {
       "id": "hqoqo",
       "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
       "visible": true,

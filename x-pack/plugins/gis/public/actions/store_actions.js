@@ -6,6 +6,7 @@
 
 import { GIS_API_PATH } from '../../common/constants';
 import { getLayerList, getMapState } from '../selectors/map_selectors';
+import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -106,22 +107,20 @@ export function addInitialData(layer) {
 }
 
 export function addLayerFromSource(source, layerOptions = {}, position) {
-  return async (dispatch) => {
-    const layer = source.createDefaultLayer(layerOptions);
+  return async (dispatch, getState) => {
+    const layer = source.createDefaultLayer(layerOptions, getState().config.meta.data_sources);
     const layerDescriptor = layer.toLayerDescriptor();
     await dispatch(addLayer(layerDescriptor, position));
     dispatch(addInitialData(layer));
   };
 }
 
-// export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
-//   return async (dispatch, getState) => {
-//     dispatch(layerLoading(true));
-//     const source = new EMSTMSSource(sourceDescriptor);
-//     const layer = await source.createDefaultLayerDescriptor(options, getState().config.meta.data_sources);
-//     dispatch(addLayer(layer, position));
-//   };
-// }
+export function addEMSTMSFromSource(sourceDescriptor, options = {}, position) {
+  return async (dispatch) => {
+    const source = new EMSTMSSource(sourceDescriptor);
+    dispatch(addLayerFromSource(source, options, position));
+  };
+}
 
 export function removeLayer(id) {
   return {
@@ -146,10 +145,8 @@ export async function loadMapResources(dispatch) {
   await dispatch(setMeta(metaJson));
 
   // Add initial layers
-  // const roadMapEms = EMSTMSSource.createDescriptor('road_map');
-  // await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
-
-  // const worldCountrySource = new EMSFileSource(EMSFileSource.createDescriptor('World Countries'));
-  // await dispatch(addLayerFromSource(worldCountrySource, {}, 1));
+  //todo: ensure we can declaritively add this (even when meta data isn't available yet)
+  const roadMapEms = EMSTMSSource.createDescriptor('road_map');
+  await dispatch(addEMSTMSFromSource(roadMapEms, {}, 0));
 
 }

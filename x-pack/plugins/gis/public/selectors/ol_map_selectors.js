@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList, getMapState } from "./map_selectors";
+import { getLayerList, getMapState, getDataSources } from "./map_selectors";
 import { WEBMERCATOR, WGS_84 } from '../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
@@ -85,11 +85,12 @@ const syncOLMap = createSelector(
 const syncLayers = createSelector(
   syncOLMap,
   getLayerList,
-  (olMap, layerList) => {
+  getDataSources,
+  (olMap, layerList, dataSources) => {
     return layerList.map(layer => {
       return {
         layer: layer,
-        olLayer: layer.syncLayerWithOL(olMap)
+        olLayer: layer.syncLayerWithOL(olMap, dataSources)
       };
     });
   }

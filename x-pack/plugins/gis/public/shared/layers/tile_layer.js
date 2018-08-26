@@ -21,10 +21,10 @@ export class TileLayer extends ALayer {
     return null;
   }
 
-  _createCorrespondingOLLayer() {
+  _createCorrespondingOLLayer(dataSources) {
     const tileLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
-        url: this._source.getUrlTemplate()
+        url: this._source.getUrlTemplate(dataSources)
       })
     });
     tileLayer.setVisible(this.isVisible());
