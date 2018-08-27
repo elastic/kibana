@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,17 +25,29 @@ export function kubernetesMetricsSpecProvider() {
   const moduleName = 'kubernetes';
   return {
     id: 'kubernetesMetrics',
-    name: 'Kubernetes metrics',
+    name: i18n.translate('kbn.server.tutorials.kubernetesMetrics.nameTitle', {
+      defaultMessage: 'Kubernetes metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics from your Kubernetes installation.',
-    longDescription: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.shortDescription', {
+      defaultMessage: 'Fetch metrics from your Kubernetes installation.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html',
+      },
+    }),
     euiIconType: 'logoKubernetes',
     artifacts: {
       dashboards: [
         {
           id: 'AV4RGUqo5NkDleZmzKuZ',
-          linkLabel: 'Kubernetes metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Kubernetes metrics dashboard',
+          }),
           isOverview: true
         }
       ],

@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { dirname } from 'path';
+import React from 'react';
+import {
+  EuiText
+} from '@elastic/eui';
 
-export const pkg = {
-  __filename: require.resolve('../../package.json'),
-  __dirname: dirname(require.resolve('../../package.json')),
-  ...require('../../package.json')
+export const PageTitle = () => {
+  return (
+    <EuiText>
+      <h1 data-test-subj="managementSettingsTitle">Settings</h1>
+    </EuiText>
+  );
 };
