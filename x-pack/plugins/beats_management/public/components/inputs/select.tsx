@@ -74,7 +74,7 @@ class FieldSelect extends Component<
       required,
       label,
       options,
-      value,
+      getValue,
       isValid,
       isPristine,
       getErrorMessage,
@@ -98,7 +98,7 @@ class FieldSelect extends Component<
         <EuiSelect
           id={id}
           name={name}
-          value={value}
+          value={getValue}
           options={options}
           isInvalid={!disabled && error}
           onChange={this.handleChange}

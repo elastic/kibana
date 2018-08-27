@@ -61,8 +61,9 @@ interface ComponentProps {
 
 export class ConfigForm extends React.Component<ComponentProps, any> {
   private form = React.createRef<HTMLButtonElement>();
-  constructor(props: any) {
+  constructor(props: ComponentProps) {
     super(props);
+
     this.state = {
       canSubmit: false,
     };

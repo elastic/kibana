@@ -35,6 +35,7 @@ class MultiFieldText extends Component<
 
   public componentDidMount() {
     const { defaultValue, setValue } = this.props;
+
     if (defaultValue) {
       setValue(defaultValue);
     }
@@ -71,7 +72,7 @@ class MultiFieldText extends Component<
       id,
       required,
       label,
-      value,
+      getValue,
       isValid,
       isPristine,
       getErrorMessage,
@@ -95,7 +96,7 @@ class MultiFieldText extends Component<
         <EuiTextArea
           id={id}
           name={name}
-          value={value}
+          value={getValue() || ''}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

@@ -70,7 +70,7 @@ class FieldText extends Component<
       id,
       required,
       label,
-      value,
+      getValue,
       isValid,
       isPristine,
       getErrorMessage,
@@ -94,7 +94,7 @@ class FieldText extends Component<
         <EuiFieldText
           id={id}
           name={name}
-          value={value}
+          value={getValue()}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

@@ -24,7 +24,6 @@ interface ComponentProps extends FormsyInputProps, CommonProps, EuiCodeEditorPro
 
 interface ComponentState {
   allowError: boolean;
-  value: string;
 }
 
 class CodeEditor extends Component<
@@ -35,7 +34,7 @@ class CodeEditor extends Component<
     passRequiredToField: true,
   };
 
-  public state = { allowError: false, value: '' };
+  public state = { allowError: false };
 
   public componentDidMount() {
     const { defaultValue, setValue } = this.props;
@@ -51,7 +50,6 @@ class CodeEditor extends Component<
   }
 
   public handleChange = (value: string) => {
-    this.setState({ value });
     this.props.setValue(value);
     if (this.props.onChange) {
       this.props.onChange(value);
@@ -76,6 +74,7 @@ class CodeEditor extends Component<
       label,
       isReadOnly,
       isValid,
+      getValue,
       isPristine,
       getErrorMessage,
       mode,
@@ -100,7 +99,7 @@ class CodeEditor extends Component<
           name={name}
           mode={mode}
           theme="github"
-          value={this.state.value}
+          value={getValue()}
           isReadOnly={isReadOnly || false}
           isInvalid={error}
           onChange={this.handleChange}
