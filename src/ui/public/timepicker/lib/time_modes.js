@@ -47,10 +47,6 @@ export function toAbsoluteString(value, roundUp) {
 
 
 export function toRelativeString(value) {
-  if (value === 'now') {
-    return 'now-15m';
-  }
-
   return toRelativeStringFromParts(parseRelativeString(value));
 }
 

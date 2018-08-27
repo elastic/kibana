@@ -21,13 +21,19 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import dateMath from '@kbn/datemath';
+
 import { QuickForm } from './quick_form';
 import { TimeInput } from './time_input';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiText,
   EuiFormControlLayout,
-  EuiButtonIcon,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export class Timepicker extends Component {
@@ -38,6 +44,8 @@ export class Timepicker extends Component {
     this.state = {
       from: this.props.from,
       to: this.props.to,
+      isInvalid: false,
+      hasChanged: false,
     };
   }
 
@@ -45,28 +53,40 @@ export class Timepicker extends Component {
     return {
       from: nextProps.from,
       to: nextProps.to,
+      isInvalid: false,
+      hasChanged: false,
     };
   }
 
   setTime = ({ from, to }) => {
+    if (this.lastToast) {
+      toastNotifications.remove(this.lastToast);
+    }
+
+    const fromMoment = dateMath.parse(from);
+    const toMoment = dateMath.parse(to, { roundUp: true });
+    const isInvalid = fromMoment.isAfter(toMoment);
+    if (isInvalid) {
+      this.lastToast = toastNotifications.addDanger({
+        title: `Invalid time range`,
+        text: `From must occur before To`,
+      });
+    }
+
     this.setState({
       from,
       to,
+      isInvalid,
+      hasChanged: true,
     });
   }
 
   setFrom = (from) => {
-    this.setState((prevState) => ({
-      from: from,
-      to: prevState.to,
-    }));
+    this.setTime({ from, to: this.state.to });
   }
 
   setTo = (to) => {
-    this.setState((prevState) => ({
-      from: prevState.from,
-      to: to,
-    }));
+    this.setTime({ from: this.state.from, to });
   }
 
   applyTimeChanges = () => {
@@ -82,41 +102,45 @@ export class Timepicker extends Component {
   }
 
   render() {
-    let applyButton;
-    if (this.state.from !== this.props.from || this.state.to !== this.props.to) {
-      applyButton = (
-        <EuiButtonIcon
-          size="s"
-          onClick={this.applyTimeChanges}
-          iconType="play"
-          aria-label="Apply time changes"
-        />
-      );
-    }
     return (
-      <EuiFormControlLayout
-        prepend={(
-          <QuickForm
-            setTime={this.setTime}
-          />
-        )}
-        append={applyButton}
-      >
-        <div
-          className="euiDatePickerRange"
-        >
-          <TimeInput
-            value={this.toTimeString(this.state.from)}
-            onChange={this.setFrom}
-          />
-          <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
-          <TimeInput
-            value={this.toTimeString(this.state.to)}
-            onChange={this.setTo}
-            roundUp={true}
-          />
-        </div>
-      </EuiFormControlLayout>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow isInvalid={this.state.isInvalid}>
+            <EuiFormControlLayout
+              prepend={(
+                <QuickForm
+                  setTime={this.setTime}
+                />
+              )}
+            >
+              <div
+                className="euiDatePickerRange"
+              >
+                <TimeInput
+                  value={this.toTimeString(this.state.from)}
+                  onChange={this.setFrom}
+                />
+                <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
+                <TimeInput
+                  value={this.toTimeString(this.state.to)}
+                  onChange={this.setTo}
+                  roundUp={true}
+                />
+              </div>
+            </EuiFormControlLayout>
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={this.applyTimeChanges}
+            fill
+            disabled={this.state.isInvalid || !this.state.hasChanged}
+          >
+            Update
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
