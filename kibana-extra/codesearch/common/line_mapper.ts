@@ -30,4 +30,8 @@ export class LineMapper {
     const column = offset - this.acc[line];
     return { line, column, offset };
   }
+
+  public getLines(): string[] {
+    return this.lines;
+  }
 }

@@ -17,6 +17,8 @@ interface Props {
   language?: string;
   highlightRanges?: IRange[];
   onClick?: (event: IPosition) => void;
+  folding: boolean;
+  lineNumbersFunc: (line: number) => string;
 }
 
 export class CodeBlock extends React.PureComponent<Props> {
@@ -31,8 +33,9 @@ export class CodeBlock extends React.PureComponent<Props> {
         this.ed = monaco.editor.create(this.el!, {
           value: this.props.code,
           language: this.props.language,
-          lineNumbers: this.lineNumbersFunc,
+          lineNumbers: this.lineNumbersFunc.bind(this),
           readOnly: true,
+          folding: this.props.folding,
           minimap: {
             enabled: false,
           },
@@ -126,6 +129,9 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   private lineNumbersFunc = (line: number) => {
+    if (this.props.lineNumbersFunc) {
+      return this.props.lineNumbersFunc(line);
+    }
     return `${(this.props.startLine || 0) + line}`;
   };
 }

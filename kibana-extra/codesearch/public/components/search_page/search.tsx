@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSearchBar, EuiSpacer } from '@elastic/eui';
-import { IRange } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -78,20 +77,12 @@ class SearchPage extends React.PureComponent<Props, State> {
         </div>
       );
 
-      const resultComp = result.map((item, index) => {
-        const highlightRanges = item.highlights.map(h => {
-          const range: IRange = {
-            startLineNumber: h.range.startLoc.line + 1,
-            startColumn: h.range.startLoc.column + 1,
-            endLineNumber: h.range.endLoc.line + 1,
-            endColumn: h.range.endLoc.column + 1,
-          };
-          return range;
-        });
-        const repoLinkUrl = `/${item.uri}/tree/master/`;
-        const fileLinkUrl = `/${item.uri}/blob/master/${item.filePath}`;
+      const resultComp = result.map(item => {
+        const repoLinkUrl = `/${item.uri}/tree/HEAD/`;
+        const fileLinkUrl = `/${item.uri}/blob/HEAD/${item.filePath}`;
+        const key = `${query}${item.uri}${item.filePath}`;
         return (
-          <div key={`resultitem${index}`}>
+          <div key={`resultitem${key}`}>
             <p>
               <Link to={repoLinkUrl}>
                 <strong>{RepositoryUtils.repoFullNameFromUri(item.uri)}</strong>
@@ -103,11 +94,13 @@ class SearchPage extends React.PureComponent<Props, State> {
               <Link to={fileLinkUrl}>{item.filePath}</Link>
             </p>
             <CodeBlock
-              key={`code${index}`}
+              key={`code${key}`}
               language={item.language}
               startLine={0}
-              code={item.content}
-              highlightRanges={highlightRanges}
+              code={item.processedResult.getSearchResultContent()}
+              highlightRanges={item.processedResult.getHighlightRanges()}
+              folding={false}
+              lineNumbersFunc={item.processedResult.getLineNumberFunc()}
             />
             <EuiSpacer />
           </div>

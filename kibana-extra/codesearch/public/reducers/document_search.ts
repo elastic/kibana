@@ -5,6 +5,7 @@
  */
 
 import produce from 'immer';
+
 import { Action, handleActions } from 'redux-actions';
 
 import { RepositoryUtils } from '../../common/repository_utils';
@@ -15,6 +16,7 @@ import {
   DocumentSearchPayload,
   documentSearchSuccess,
 } from '../actions';
+import { CompositeSearchResult } from '../utils/composite_search_result';
 
 export interface DocumentSearchState {
   query: string;
@@ -72,12 +74,12 @@ export const documentSearch = handleActions(
         const result = Array.from(documents).map((document, index) => {
           const { repoUri, path, content, language } = document;
           const fileHighlights = highlights[index];
+          const processedResult = new CompositeSearchResult(fileHighlights, content);
           return {
             uri: repoUri,
             hits: fileHighlights.length,
             filePath: path,
-            content,
-            highlights: fileHighlights,
+            processedResult,
             language,
           };
         });
