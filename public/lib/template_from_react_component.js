@@ -18,7 +18,7 @@ export const templateFromReactComponent = Component => {
   );
 
   WrappedComponent.propTypes = {
-    renderError: PropTypes.func.isRequired,
+    renderError: PropTypes.func,
   };
 
   return (domNode, config, handlers) => {

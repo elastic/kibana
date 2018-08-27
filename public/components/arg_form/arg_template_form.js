@@ -15,6 +15,7 @@ class ArgTemplateFormComponent extends React.Component {
       setExpand: PropTypes.func,
       onValueRemove: PropTypes.func,
       resetErrorState: PropTypes.func.isRequired,
+      renderError: PropTypes.func.isRequired,
     }),
     handlers: PropTypes.object.isRequired,
     error: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
