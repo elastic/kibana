@@ -19,30 +19,48 @@
 
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
-// import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
+import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 
-function generateDLLS({ context, entries, output }) {
-  const finalEntries = {};
+function generateDLL(dllConfig) {
+  const dllContext = dllConfig.context;
+  const dllEntryName = dllConfig.entryName;
+  const dllName = dllConfig.dllName;
+  const dllManifestName = dllConfig.dllName;
+  const dllStyleName = dllConfig.styleName;
+  const dllOutputPath = dllConfig.outputPath;
+  const dllPublicPath = dllConfig.publicPath;
+  const dllEntry = {};
 
-  entries.forEach((entry) => {
-    finalEntries[entry.name] = [`${output.path}/${entry.name}.entry.dll.js`];
-  });
+  // Create webpack entry object key with the provided dllEntryName
+  dllEntry[dllEntryName] = `${dllOutputPath}/${dllEntryName}.entry.dll.js`;
+
+  const dllFilename = `${dllName}.bundle.dll.js`;
+  const dllManifestPath = `${dllOutputPath}/${dllManifestName}.manifest.dll.json`;
+  const dllStyleFilename = `${dllStyleName}.style.dll.css`;
+
 
   return {
-    entry: finalEntries,
-    context,
+    entry: dllEntry,
+    dllContext,
     output: {
-      filename: `${output.dllName}.dll.js`,
-      path: output.path,
-      publicPath: output.publicPath,
-      library: output.dllName
+      filename: dllFilename,
+      path: dllOutputPath,
+      publicPath: dllPublicPath,
+      library: dllName
+    },
+    node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
+    resolve: {
+      extensions: ['.js', '.json'],
+      mainFields: ['browser', 'browserify', 'main']
     },
     module: {
       rules: [
         {
           test: /\.css$/,
           use: [
-            // MiniCssExtractPlugin.loader,
+            MiniCssExtractPlugin.loader,
             'css-loader',
           ],
         },
@@ -58,27 +76,20 @@ function generateDLLS({ context, entries, output }) {
     },
     plugins: [
       new webpack.DllPlugin({
-        context,
-        name: output.dllName,
-        path: `${output.path}/${output.manifestName}.manifest.dll.json`
+        context: dllContext,
+        name: dllName,
+        path: dllManifestPath
       }),
-      // new MiniCssExtractPlugin()
+      new MiniCssExtractPlugin({
+        filename: dllStyleFilename
+      })
     ]
   };
 }
 
-function common(options) {
+function common(dllConfig) {
   return webpackMerge(
-    generateDLLS({
-      context: options.context,
-      entries: options.dllEntries,
-      output: {
-        manifestName: '[name]',
-        dllName: '[name]',
-        path: options.outputPath,
-        publicPath: options.publicPath
-      }
-    })
+    generateDLL(dllConfig)
   );
 }
 
@@ -98,10 +109,24 @@ function unoptimized() {
   );
 }
 
-export default (options = {}) => {
-  if (options.isDistributable) {
-    return webpackMerge(common(options), optimized(), options.mergeConfig);
+function getDllConfig(outputPath) {
+  return {
+    context: fromRoot('.'),
+    entryName: 'vendors',
+    dllName: '[name]',
+    manifestName: '[name]',
+    styleName: '[name]',
+    path: outputPath,
+    publicPath: PUBLIC_PATH_PLACEHOLDER
+  };
+}
+
+export default (outputPath) => {
+  const dllConfig = getDllConfig(outputPath);
+
+  if (IS_KIBANA_DISTRIBUTABLE) {
+    return webpackMerge(common(dllConfig), optimized());
   }
 
-  return webpackMerge(common(options), unoptimized(), options.mergeConfig);
+  return webpackMerge(common(dllConfig), unoptimized());
 };

@@ -96,28 +96,6 @@ export default class BaseOptimizer {
     });
   }
 
-  getDLLConfig() {
-    return {
-      dllEntries: [
-        {
-          name: 'vendor'
-        }
-      ],
-      context: fromRoot('.'),
-      isDistributable: IS_KIBANA_DISTRIBUTABLE,
-      outputPath: `${this.uiBundles.getWorkingDir()}`,
-      ub: this.uiBundles,
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
-      mergeConfig: {
-        node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
-        resolve: {
-          extensions: ['.js', '.json'],
-          mainFields: ['browser', 'browserify', 'main']
-        },
-      }
-    };
-  }
-
   getConfig() {
     function getStyleLoaderExtractor() {
       return [
@@ -224,7 +202,7 @@ export default class BaseOptimizer {
 
       plugins: [
         new DynamicDllPlugin({
-          dllConfig: this.getDLLConfig(),
+          uiBundles: this.uiBundles,
           log: this.log
         }),
 
