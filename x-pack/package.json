@@ -60,6 +60,7 @@
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
     "pdf-image": "2.0.0",
+    "pdfjs-dist": "^2.0.489",
     "pixelmatch": "4.0.2",
     "proxyquire": "1.7.11",
     "react-test-renderer": "^16.2.0",

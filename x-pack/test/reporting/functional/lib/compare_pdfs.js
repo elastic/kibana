@@ -12,9 +12,9 @@ import mkdirp from 'mkdirp';
 
 import { PNG } from 'pngjs';
 import { PDFImage } from 'pdf-image';
+import PDFJS from 'pdfjs-dist';
 
 const mkdirAsync = promisify(mkdirp);
-const writeFileAsync = promisify(fs.writeFile);
 
 function comparePngs(actualPath, expectedPath, diffPath, log) {
   log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
@@ -73,12 +73,14 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   // don't want to start causing failures for other devs working on OS's which are lacking snapshots.  We have
   // mac and linux covered which is better than nothing for now.
   try {
-    await writeFileAsync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
+    log.debug(`writeFileSync: ${baselineCopyPath}`);
+    fs.writeFileSync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
   } catch (error) {
     log.error(`No baseline pdf found at ${baselinePdfPath}`);
     return 0;
   }
-  await writeFileAsync(actualCopyPath, fs.readFileSync(actualPdfPath));
+  log.debug(`writeFileSync: ${actualCopyPath}`);
+  fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
     '-density': '300',
@@ -86,10 +88,12 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
-  const [actualPages, expectedPages] = await Promise.all([
-    actualPdfImage.numberOfPages(),
-    expectedPdfImage.numberOfPages(),
-  ]);
+  log.debug(`Calculating numberOfPages`);
+
+  const actualDoc = await PDFJS.getDocument(actualCopyPath);
+  const expectedDoc = await PDFJS.getDocument(baselineCopyPath);
+  const actualPages = actualDoc.numPages;
+  const expectedPages = expectedDoc.numPages;
 
   if (actualPages !== expectedPages) {
     throw new Error(
@@ -111,4 +115,3 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
 
   return diffTotal;
 }
-
