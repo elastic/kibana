@@ -22,7 +22,8 @@ export class App extends Component {
     }).isRequired
   }
 
-  componentWillMount() {
+  constructor(...args) {
+    super(...args);
     this.registerRouter();
   }
 
