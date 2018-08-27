@@ -84,8 +84,10 @@ export class ContentHoverWidget extends ContentWidget {
       let markdown: string;
       if (typeof markedString === 'string') {
         markdown = markedString;
-      } else {
+      } else if (markedString.language) {
         markdown = '```' + markedString.language + '\n' + markedString.value + '\n```';
+      } else {
+        markdown = markedString.value;
       }
       const renderedContents = window.monaco.renderer.renderMarkdown(
         { value: markdown },

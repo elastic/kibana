@@ -9,9 +9,10 @@ import fs from 'fs';
 import { Clone, Commit, Error, Repository, Reset } from 'nodegit';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
+import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
 import { Full } from '@codesearch/lsp-extension';
+import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 import { parseLspUrl } from '../../common/uri_util';
 import { LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -85,6 +86,11 @@ export class WorkspaceHandler {
   public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
     const { method } = request;
     switch (method) {
+      case 'textDocument/hover': {
+        const result = response.result as Hover;
+        this.handleHoverContents(result);
+        return response;
+      }
       case 'textDocument/definition': {
         const result = response.result;
         if (result) {
@@ -107,6 +113,9 @@ export class WorkspaceHandler {
               if (parsedLocation) {
                 symbol.repoUri = parsedLocation.repoUri;
                 symbol.revision = parsedLocation.revision;
+              }
+              if (symbol.contents) {
+                this.handleHoverContents(symbol);
               }
             }
           }
@@ -136,6 +145,16 @@ export class WorkspaceHandler {
       }
       default:
         return response;
+    }
+  }
+
+  private handleHoverContents(result: Hover | DetailSymbolInformation) {
+    if (!Array.isArray(result.contents)) {
+      if (typeof result.contents === 'string') {
+        result.contents = [{ language: '', value: result.contents }];
+      } else {
+        result.contents = [result.contents as { language: string; value: string }];
+      }
     }
   }
 
