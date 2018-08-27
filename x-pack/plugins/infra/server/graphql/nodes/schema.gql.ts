@@ -21,13 +21,6 @@ export const nodesSchema: any = gql`
     metrics(metrics: [InfraMetricInput!]): [InfraNodeMetric!]!
   }
 
-  input InfraIndexPatternInput {
-    "The index pattern to use, defaults to '*'"
-    pattern: String!
-    "The timefield to use, defaults to @timestamp"
-    timeFieldName: String!
-  }
-
   input InfraTimerangeInput {
     "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
     interval: String!

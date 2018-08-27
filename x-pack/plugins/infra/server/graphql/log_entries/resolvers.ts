@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UserInputError } from 'apollo-server-errors';
+
 import {
   InfraLogMessageConstantSegment,
   InfraLogMessageFieldSegment,
@@ -58,7 +60,7 @@ export const createLogEntriesResolvers = (libs: {
         args.key,
         countBefore + 1,
         countAfter + 1,
-        args.filterQuery || undefined,
+        parseFilterQuery(args.filterQuery),
         args.highlightQuery || undefined
       );
 
@@ -86,7 +88,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        args.filterQuery || undefined,
+        parseFilterQuery(args.filterQuery),
         args.highlightQuery || undefined
       );
 
@@ -107,7 +109,7 @@ export const createLogEntriesResolvers = (libs: {
         args.start,
         args.end,
         args.bucketSize,
-        args.filterQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       return {
@@ -138,3 +140,14 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
+
+const parseFilterQuery = (filterQuery: string | null | undefined) => {
+  try {
+    return filterQuery ? JSON.parse(filterQuery) : undefined;
+  } catch (err) {
+    throw new UserInputError(`Failed to parse query: ${err}`, {
+      query: filterQuery,
+      originalError: err,
+    });
+  }
+};

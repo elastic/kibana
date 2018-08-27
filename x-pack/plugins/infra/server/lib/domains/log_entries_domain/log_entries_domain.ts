@@ -27,7 +27,7 @@ export class InfraLogEntriesDomain {
     key: TimeKey,
     maxCountBefore: number,
     maxCountAfter: number,
-    filterQuery?: string,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<{ entriesBefore: InfraLogEntry[]; entriesAfter: InfraLogEntry[] }> {
     if (maxCountBefore <= 0 && maxCountAfter <= 0) {
@@ -82,7 +82,7 @@ export class InfraLogEntriesDomain {
     sourceId: string,
     startKey: TimeKey,
     endKey: TimeKey,
-    filterQuery?: string,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
@@ -106,7 +106,7 @@ export class InfraLogEntriesDomain {
     start: number,
     end: number,
     bucketSize: number,
-    filterQuery?: string
+    filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryBucket[]> {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
@@ -130,7 +130,7 @@ export interface LogEntriesAdapter {
     start: TimeKey,
     direction: 'asc' | 'desc',
     maxCount: number,
-    filterQuery?: string,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<LogEntryDocument[]>;
 
@@ -140,7 +140,7 @@ export interface LogEntriesAdapter {
     fields: string[],
     start: TimeKey,
     end: TimeKey,
-    filterQuery?: string,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<LogEntryDocument[]>;
 
@@ -150,8 +150,12 @@ export interface LogEntriesAdapter {
     start: number,
     end: number,
     bucketSize: number,
-    filterQuery?: string
+    filterQuery?: LogEntryQuery
   ): Promise<InfraDateRangeAggregationBucket[]>;
+}
+
+export interface LogEntryQuery {
+  [key: string]: any;
 }
 
 export interface LogEntryDocument {

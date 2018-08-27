@@ -7,22 +7,12 @@
 import { InfraFrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {
-  getFieldCaps(
-    req: InfraFrameworkRequest,
-    indexPattern: string | string[]
-  ): Promise<FieldCapsResponse>;
+  getIndexFields(req: InfraFrameworkRequest, indices: string[]): Promise<IndexFieldDescriptor[]>;
 }
 
-export interface FieldCapsResponse {
-  fields: {
-    [fieldName: string]: {
-      [fieldType: string]: {
-        searchable: boolean;
-        aggregatable: boolean;
-        indices?: string[];
-        non_aggregatable_indices?: string[];
-        non_searchable_indices?: string[];
-      };
-    };
-  };
+export interface IndexFieldDescriptor {
+  name: string;
+  type: string;
+  searchable: boolean;
+  aggregatable: boolean;
 }

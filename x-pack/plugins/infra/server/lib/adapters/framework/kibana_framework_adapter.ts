@@ -9,6 +9,7 @@ import { IStrictReply, Request, Server } from 'hapi';
 
 import {
   InfraBackendFrameworkAdapter,
+  InfraFrameworkIndexPatternsService,
   InfraFrameworkRequest,
   InfraFrameworkRouteOptions,
   InfraWrappableRequest,
@@ -81,6 +82,18 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const fields = await callWithRequest(internalRequest, ...rest);
     return fields;
   }
+
+  public getIndexPatternsService(
+    request: InfraFrameworkRequest<Request>
+  ): InfraFrameworkIndexPatternsService {
+    if (!isServerWithIndexPatternsServiceFactory(this.server)) {
+      throw new Error('Failed to access indexPatternsService for the request');
+    }
+
+    return this.server.indexPatternsServiceFactory({
+      callCluster: (...args) => this.callWithRequest(request, ...args),
+    });
+  }
 }
 
 export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
@@ -95,3 +108,14 @@ export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
     query,
   };
 }
+
+interface ServerWithIndexPatternsServiceFactory extends Server {
+  indexPatternsServiceFactory(options: {
+    callCluster: (...args: any[]) => any;
+  }): InfraFrameworkIndexPatternsService;
+}
+
+const isServerWithIndexPatternsServiceFactory = (
+  server: Server
+): server is ServerWithIndexPatternsServiceFactory =>
+  typeof (server as any).indexPatternsServiceFactory === 'function';

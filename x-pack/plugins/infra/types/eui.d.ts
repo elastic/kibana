@@ -84,4 +84,11 @@ declare module '@elastic/eui' {
     type?: string;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
+
+  interface EuiOutsideClickDetectorProps {
+    children: React.ReactNode;
+    isDisabled?: boolean;
+    onOutsideClick: React.MouseEventHandler;
+  }
+  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 }

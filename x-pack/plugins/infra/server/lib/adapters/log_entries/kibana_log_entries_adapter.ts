@@ -16,7 +16,11 @@ import {
   InfraFrameworkRequest,
   SortedSearchHit,
 } from '../../adapters/framework';
-import { LogEntriesAdapter, LogEntryDocument } from '../../domains/log_entries_domain';
+import {
+  LogEntriesAdapter,
+  LogEntryDocument,
+  LogEntryQuery,
+} from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraBackendFrameworkAdapter } from '../framework';
 
@@ -33,7 +37,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     start: TimeKey,
     direction: 'asc' | 'desc',
     maxCount: number,
-    filterQuery: string,
+    filterQuery: LogEntryQuery,
     highlightQuery: string
   ): Promise<LogEntryDocument[]> {
     if (maxCount <= 0) {
@@ -72,7 +76,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     start: TimeKey,
     end: TimeKey,
-    filterQuery: string,
+    filterQuery: LogEntryQuery,
     highlightQuery: string
   ): Promise<LogEntryDocument[]> {
     const documents = await this.getLogEntryDocumentsBetween(
@@ -96,7 +100,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     start: number,
     end: number,
     bucketSize: number,
-    filterQuery: string
+    filterQuery: LogEntryQuery
   ): Promise<InfraDateRangeAggregationBucket[]> {
     const bucketIntervalStarts = timeMilliseconds(new Date(start), new Date(end), bucketSize);
 
@@ -153,7 +157,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     end: number,
     after: TimeKey | null,
     maxCount: number,
-    filterQuery?: string,
+    filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<LogEntryDocument[]> {
     if (maxCount <= 0) {
@@ -270,14 +274,5 @@ const convertHitToLogEntryDocument = (fields: string[]) => (
   },
 });
 
-const createQueryFilterClauses = (filterQuery: string | undefined) =>
-  filterQuery
-    ? [
-        {
-          query_string: {
-            default_operator: 'AND',
-            query: filterQuery,
-          },
-        },
-      ]
-    : [];
+const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
+  filterQuery ? [filterQuery] : [];

@@ -17,6 +17,9 @@ export const sourcesSchema = gql`
     status: InfraSourceStatus!
   }
 
+  "The status of an infrastructure data source"
+  type InfraSourceStatus
+
   "A set of configuration options for an infrastructure data source"
   type InfraSourceConfiguration {
     "The alias to read metric data from"
@@ -41,18 +44,6 @@ export const sourcesSchema = gql`
     tiebreaker: String!
     "The field to use as a timestamp for metrics and logs"
     timestamp: String!
-  }
-
-  "The status of an infrastructure data source"
-  type InfraSourceStatus {
-    "Whether the configured metric alias exists"
-    metricAliasExists: Boolean!
-    "Whether the configured log alias exists"
-    logAliasExists: Boolean!
-    "The list of indices in the metric alias"
-    metricIndices: [String!]!
-    "The list of indices in the log alias"
-    logIndices: [String!]!
   }
 
   extend type Query {

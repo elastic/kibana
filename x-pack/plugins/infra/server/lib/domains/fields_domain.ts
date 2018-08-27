@@ -4,43 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
-
-import { InfraField, InfraIndexPatternInput } from '../../../common/graphql/types';
+import { InfraIndexField, InfraIndexType } from '../../../common/graphql/types';
 import { FieldsAdapter } from '../adapters/fields';
 import { InfraFrameworkRequest } from '../adapters/framework';
+import { InfraSources } from '../sources';
 
 export class InfraFieldsDomain {
-  private adapter: FieldsAdapter;
-  constructor(adapter: FieldsAdapter) {
-    this.adapter = adapter;
-  }
+  constructor(
+    private readonly adapter: FieldsAdapter,
+    private readonly libs: { sources: InfraSources }
+  ) {}
 
   public async getFields(
-    req: InfraFrameworkRequest,
-    indexPattern: InfraIndexPatternInput = {
-      pattern: '*',
-      timeFieldName: '@timestamp',
-    }
-  ): Promise<InfraField[]> {
-    const fieldCaps: any = await this.adapter.getFieldCaps(req, indexPattern.pattern);
+    request: InfraFrameworkRequest,
+    sourceId: string,
+    indexType: InfraIndexType
+  ): Promise<InfraIndexField[]> {
+    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);
+    const includeLogIndices = [InfraIndexType.ANY, InfraIndexType.LOGS].includes(indexType);
 
-    const fields: any = get(fieldCaps, 'fields');
-    const results: any = fields
-      ? Object.keys(fields).map(
-          (name: keyof typeof fields): InfraField => {
-            const fieldData: any = fields[name];
-            const [type]: any = Object.keys(fieldData);
-            const def: any = fieldData[type];
-            return {
-              aggregatable: def.aggregatable,
-              name: String(name),
-              searchable: def.searchable,
-              type,
-            };
-          }
-        )
-      : [];
-    return sortBy(results, 'name');
+    const fields = await this.adapter.getIndexFields(request, [
+      ...(includeMetricIndices ? [sourceConfiguration.metricAlias] : []),
+      ...(includeLogIndices ? [sourceConfiguration.logAlias] : []),
+    ]);
+
+    return fields;
   }
 }
