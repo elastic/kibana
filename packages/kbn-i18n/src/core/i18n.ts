@@ -223,7 +223,7 @@ export function translate(id: string, { values = {}, defaultMessage = '' } = {})
  * Initializes the engine
  * @param {Messages} newMessages
  */
-export function init(newMessages?: any) {
+export function init(newMessages?: Messages) {
   if (!newMessages) {
     return;
   }
