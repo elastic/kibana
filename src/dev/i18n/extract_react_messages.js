@@ -112,7 +112,7 @@ export function extractFormattedMessages(node) {
     : undefined;
 
   if (!message) {
-    throw new Error(`Default message in <FormattedMessage> is not allowed ("${messageId}").`);
+    throw new Error(`Empty default message in <FormattedMessage> is not allowed ("${messageId}").`);
   }
 
   const context = contextProperty

@@ -72,7 +72,6 @@ module.exports = function (grunt) {
         'run:checkFileCasing',
         'licenses',
         'test:quick',
-        'verifyTranslations',
       ])
     );
   });
