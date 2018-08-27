@@ -18,8 +18,9 @@ export class SymbolSearchClient extends AbstractSearchClient {
   }
 
   public async search(req: SymbolSearchRequest): Promise<SymbolSearchResult> {
-    const from = (req.page - 1) * req.resultsPerPage;
-    const size = req.resultsPerPage;
+    const resultsPerPage = this.getResultsPerPage(req);
+    const from = (req.page - 1) * resultsPerPage;
+    const size = resultsPerPage;
     const rawRes = await this.client.search({
       index: `${SymbolIndexNamePrefix}*`,
       body: {

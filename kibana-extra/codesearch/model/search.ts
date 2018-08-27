@@ -39,7 +39,7 @@ export interface RepositoryIndexRequest extends IndexRequest {
 export interface SearchRequest {
   query: string;
   page: number;
-  resultsPerPage: number;
+  resultsPerPage?: number;
 }
 
 export interface RepositorySearchRequest extends SearchRequest {
@@ -88,6 +88,7 @@ export interface SearchResultStats {
   from: number; // The beginning of the result range
   to: number; // The end of the result range
   page: number; // The page number
+  totalPage: number; // The total number of pages
   repoStats: SearchResultStatsItem[];
   languageStats: SearchResultStatsItem[];
 }

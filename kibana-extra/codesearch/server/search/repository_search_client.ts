@@ -17,8 +17,9 @@ export class RepositorySearchClient extends AbstractSearchClient {
   }
 
   public async search(req: RepositorySearchRequest): Promise<RepositorySearchResult> {
-    const from = (req.page - 1) * req.resultsPerPage;
-    const size = req.resultsPerPage;
+    const resultsPerPage = this.getResultsPerPage(req);
+    const from = (req.page - 1) * resultsPerPage;
+    const size = resultsPerPage;
     const rawRes = await this.client.search({
       index: `${RepositoryIndexNamePrefix}*`,
       body: {

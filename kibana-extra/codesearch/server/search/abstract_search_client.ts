@@ -11,6 +11,8 @@ import { Log } from '../log';
 import { SearchClient } from './search_client';
 
 export abstract class AbstractSearchClient implements SearchClient {
+  protected RESULTS_PER_PAGE = 20;
+
   constructor(protected readonly client: EsClient, protected readonly log: Log) {}
 
   public async search(req: SearchRequest): Promise<SearchResult> {
@@ -18,5 +20,13 @@ export abstract class AbstractSearchClient implements SearchClient {
     return new Promise<SearchResult>((resolve, reject) => {
       resolve();
     });
+  }
+
+  public getResultsPerPage(req: SearchRequest): number {
+    let resultsPerPage = this.RESULTS_PER_PAGE;
+    if (req.resultsPerPage !== undefined) {
+      resultsPerPage = req.resultsPerPage;
+    }
+    return resultsPerPage;
   }
 }

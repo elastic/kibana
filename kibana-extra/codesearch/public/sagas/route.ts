@@ -41,8 +41,8 @@ function* handleLocationChange(action: any) {
       .map(_.partial(_.split, _, '=', 2))
       .fromPairs()
       .value();
-    const { q } = queryParams;
-    yield put(documentSearch(q));
+    const { q, p } = queryParams;
+    yield put(documentSearch({ query: q, page: p }));
   }
 }
 

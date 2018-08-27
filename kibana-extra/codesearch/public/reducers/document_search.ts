@@ -12,11 +12,13 @@ import { DocumentSearchResult } from '../../model';
 import {
   documentSearch as documentSearchQuery,
   documentSearchFailed,
+  DocumentSearchPayload,
   documentSearchSuccess,
 } from '../actions';
 
 export interface DocumentSearchState {
   query: string;
+  page?: number;
   isLoading: boolean;
   error?: Error;
   searchResult?: DocumentSearchResult;
@@ -29,15 +31,28 @@ const initialState: DocumentSearchState = {
 
 export const documentSearch = handleActions(
   {
-    [String(documentSearchQuery)]: (state: DocumentSearchState, action: Action<any>) =>
+    [String(documentSearchQuery)]: (
+      state: DocumentSearchState,
+      action: Action<DocumentSearchPayload>
+    ) =>
       produce<DocumentSearchState>(state, draft => {
-        draft.query = action.payload;
+        draft.query = action.payload!.query;
+        draft.page = action.payload!.page;
         draft.isLoading = true;
         draft.error = undefined;
       }),
     [String(documentSearchSuccess)]: (state: DocumentSearchState, action: Action<any>) =>
       produce<DocumentSearchState>(state, draft => {
-        const { documents, highlights, total, repoAggregations, langAggregations } = action.payload;
+        const {
+          from,
+          page,
+          totalPage,
+          documents,
+          highlights,
+          total,
+          repoAggregations,
+          langAggregations,
+        } = action.payload;
         draft.isLoading = false;
 
         const repoStats = repoAggregations.map(agg => {
@@ -71,9 +86,10 @@ export const documentSearch = handleActions(
           query: state.query,
           stats: {
             total,
-            from: 1,
-            to: documents.length,
-            page: 1,
+            from: from + 1,
+            to: from + documents.length,
+            page,
+            totalPage,
             repoStats,
             languageStats,
           },

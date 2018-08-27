@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { IRange } from 'monaco-editor';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -19,10 +19,11 @@ import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
   query: string;
+  page?: number;
   isLoading: boolean;
   error?: Error;
   searchResult?: DocumentSearchResult;
-  documentSearch: (q: string) => void;
+  documentSearch: (q: string, p: number) => void;
 }
 
 interface State {
@@ -35,9 +36,14 @@ class SearchPage extends React.PureComponent<Props, State> {
   };
 
   public onSearchChanged = ({ query }) => {
-    this.props.documentSearch(query.text);
+    this.props.documentSearch(query.text, 1);
     // Update the url and push to history as well.
-    history.push(`/search?q=${query.text}`);
+    history.push(`/search?q=${query.text}&p=1`);
+  };
+
+  public onPageClicked = (page: number) => {
+    const { query } = this.props;
+    history.push(`/search?q=${query}&p=${page + 1}`);
   };
 
   public render() {
@@ -45,7 +51,7 @@ class SearchPage extends React.PureComponent<Props, State> {
 
     if (searchResult) {
       const { stats, result } = searchResult!;
-      const { total, from, to, repoStats, languageStats } = stats;
+      const { total, from, to, page, totalPage, repoStats, languageStats } = stats;
 
       const repoStatsComp = repoStats.map((item, index) => {
         return (
@@ -141,6 +147,16 @@ class SearchPage extends React.PureComponent<Props, State> {
           </EuiFlexGroup>
           <EuiSpacer />
           {mainComp}
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                pageCount={totalPage}
+                activePage={page - 1}
+                onPageClick={this.onPageClicked}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       );
     } else {

@@ -6,8 +6,13 @@
 
 import { createAction } from 'redux-actions';
 
+export interface DocumentSearchPayload {
+  query: string;
+  page?: number;
+}
+
 // For document search page
-export const documentSearch = createAction<string>('DOCUMENT SEARCH');
+export const documentSearch = createAction<DocumentSearchPayload>('DOCUMENT SEARCH');
 export const documentSearchSuccess = createAction<string>('DOCUMENT SEARCH SUCCESS');
 export const documentSearchFailed = createAction<string>('DOCUMENT SEARCH FAILED');
 

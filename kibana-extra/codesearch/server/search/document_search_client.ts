@@ -26,8 +26,9 @@ export class DocumentSearchClient extends AbstractSearchClient {
   }
 
   public async search(req: DocumentSearchRequest): Promise<DocumentSearchResult> {
-    const from = (req.page - 1) * req.resultsPerPage;
-    const size = req.resultsPerPage;
+    const resultsPerPage = this.getResultsPerPage(req);
+    const from = (req.page - 1) * resultsPerPage;
+    const size = resultsPerPage;
     const rawRes = await this.client.search({
       index: `${DocumentIndexNamePrefix}*`,
       body: {
@@ -124,7 +125,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
           },
         },
         highlight: {
-          // TODO: we might need to improve the highlightin separator.
+          // TODO: we might need to improve the highlighting separator.
           pre_tags: [this.HIGHLIGHT_TAG],
           post_tags: [this.HIGHLIGHT_TAG],
           fields: {
@@ -160,6 +161,9 @@ export class DocumentSearchClient extends AbstractSearchClient {
       return [];
     });
     const result: DocumentSearchResult = {
+      from,
+      page: req.page,
+      totalPage: Math.ceil(rawRes.hits.total / resultsPerPage),
       documents: docs,
       highlights,
       repoAggregations: aggregations.repoUri.buckets,

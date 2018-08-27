@@ -15,10 +15,13 @@ export function repositorySearchRoute(server: Server, repoSearchClient: Reposito
     path: '/api/cs/search/repo',
     method: 'GET',
     async handler(req, reply) {
+      let page = 1;
+      if (req.query.p) {
+        page = parseInt(req.query.p, 10);
+      }
       const searchReq: RepositorySearchRequest = {
         query: req.query.q,
-        page: 1,
-        resultsPerPage: 50,
+        page,
       };
       try {
         const res = await repoSearchClient.search(searchReq);
@@ -35,10 +38,13 @@ export function documentSearchRoute(server: Server, docSearchClient: DocumentSea
     path: '/api/cs/search/doc',
     method: 'GET',
     async handler(req, reply) {
+      let page = 1;
+      if (req.query.p) {
+        page = parseInt(req.query.p, 10);
+      }
       const searchReq: DocumentSearchRequest = {
         query: req.query.q,
-        page: 1,
-        resultsPerPage: 50,
+        page,
       };
       try {
         const res = await docSearchClient.search(searchReq);
@@ -55,10 +61,13 @@ export function symbolSearchRoute(server: Server, symbolSearchClient: SymbolSear
     path: '/api/cs/search/symbol',
     method: 'GET',
     async handler(req, reply) {
+      let page = 1;
+      if (req.query.p) {
+        page = parseInt(req.query.p, 10);
+      }
       const searchReq: SymbolSearchRequest = {
         query: req.query.q,
-        page: 1,
-        resultsPerPage: 50,
+        page,
       };
       try {
         const res = await symbolSearchClient.search(searchReq);
