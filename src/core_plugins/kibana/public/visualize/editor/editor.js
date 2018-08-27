@@ -27,7 +27,7 @@ import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -115,10 +115,6 @@ function VisEditor(
 ) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-
-  const notify = new Notifier({
-    location: 'Visualization Editor'
-  });
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -377,7 +373,13 @@ function VisEditor(
             kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
           }
         }
-      }, notify.error);
+      }, (err) => {
+        toastNotifications.addDanger({
+          title: `Error on saving '${savedVis.title}'`,
+          text: err.message,
+          'data-test-subj': 'saveVisualizationError',
+        });
+      });
   };
 
   $scope.unlink = function () {
