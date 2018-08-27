@@ -88,10 +88,19 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
   log.debug(`Calculating numberOfPages`);
-  const [actualPages, expectedPages] = await Promise.all([
-    actualPdfImage.numberOfPages(),
-    expectedPdfImage.numberOfPages(),
-  ]);
+
+  let actualPages;
+  let expectedPages;
+  try {
+    [actualPages, expectedPages] = await Promise.all([
+      actualPdfImage.numberOfPages(),
+      expectedPdfImage.numberOfPages(),
+    ]);
+  } catch (error) {
+    log.debug(`PDF generation failed with error: ${error.message}`);
+    log.error(JSON.stringify(error.error));
+    throw error;
+  }
 
   if (actualPages !== expectedPages) {
     throw new Error(
