@@ -47,12 +47,6 @@ export class RelativeForm extends Component {
     };
   }
 
-  static getDerivedStateFromProps = (nextProps) => {
-    return {
-      ...parseRelativeString(nextProps.value)
-    };
-  }
-
   onCountChange = (evt) => {
     const sanitizedValue = parseInt(evt.target.value, 10);
     this.setState({
@@ -113,7 +107,7 @@ export class RelativeForm extends Component {
         </EuiFormRow>
         <EuiFormRow>
           <EuiSwitch
-            label={`Round to the ${timeUnits[this.state.unit]}`}
+            label={`Round to the ${timeUnits[this.state.unit.substring(0, 1)]}`}
             checked={this.state.round}
             onChange={this.onRoundChange}
           />
