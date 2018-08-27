@@ -6,6 +6,9 @@
 // Home styles
 @import './home/index';
 
+// Management styles
+@import './management/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';

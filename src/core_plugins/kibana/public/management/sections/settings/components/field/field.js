@@ -554,7 +554,7 @@ export class Field extends PureComponent {
     }
 
     return (
-      <EuiFormRow className="advancedSettings__field__actions" hasEmptyLabelSpace>
+      <EuiFormRow className="mgtAdvancedSettings__fieldActions" hasEmptyLabelSpace>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -587,10 +587,10 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return (
-      <EuiFlexGroup className="advancedSettings__field">
+      <EuiFlexGroup className="mgtAdvancedSettings__field">
         <EuiFlexItem grow={false}>
           <EuiDescribedFormGroup
-            className="advancedSettings__field__wrapper"
+            className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
             idAria={`${setting.name}-aria`}
