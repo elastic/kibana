@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   const fromTime = '2015-09-19 06:31:44.000';
@@ -130,7 +129,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.visualize.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
@@ -150,7 +148,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -160,9 +157,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
+      const beforeRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
+      await retry.try(async () => {
+        const currentRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${beforeRenderingCount} ${currentRenderingCount}`);
+        expect(currentRenderingCount).to.be(beforeRenderingCount + 2); // currently there are 2 rendering phase
+      });
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -170,9 +171,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should correctly filter for pinned filters', async () => {
+      const beforeRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       await filterBar.toggleFilterPinned('@timestamp');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
+      await retry.try(async () => {
+        const currentRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${beforeRenderingCount} ${currentRenderingCount}`);
+        expect(currentRenderingCount).to.be(beforeRenderingCount + 1);
+      });
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',

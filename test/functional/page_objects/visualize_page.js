@@ -20,6 +20,7 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
+import expect from 'expect.js';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -29,7 +30,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const flyout = getService('flyout');
-  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -598,11 +598,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
+      const prevRenderingCount = await this.getVisualizationRenderingCount();
+      log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.click('visualizeEditorRenderButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
-      const countOfDataCompleteFlags = 2;
-      await renderable.waitForRender(countOfDataCompleteFlags);
+      await this.waitForRenderingCount(prevRenderingCount);
+    }
+
+    async waitForRenderingCount(previousCount, increment = 1) {
+      await retry.try(async () => {
+        const currentRenderingCount = await this.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
+        expect(currentRenderingCount).to.be(previousCount + increment);
+      });
     }
 
     async clickReset() {
@@ -950,6 +957,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async waitForVisualizationSavedToastGone() {
       return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+    }
+
+    async getVisualizationRenderingCount() {
+      const visualizationLoader = await testSubjects.find('visualizationLoader');
+      const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
+      return Number(renderingCount);
     }
 
     async getZoomSelectors(zoomSelector) {

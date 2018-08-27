@@ -279,6 +279,15 @@ describe('visualize loader', () => {
         expect(spy.callCount).to.be(3);
       });
 
+      it('should update render complete counts once per renderComplete event', async () => {
+        const container = newContainer();
+        loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
+        dispatchRenderComplete(container.find('[data-test-subj="visualizationLoader"]')[0]);
+        expect(container.find('[data-rendering-count="3"]').length).to.be(1);
+      });
+
       it('should successfully remove listeners from render complete', async () => {
         const container = newContainer();
         const handler = loader.embedVisualizationWithSavedObject(container[0], createSavedObject(), {});
