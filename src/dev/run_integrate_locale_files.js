@@ -17,20 +17,13 @@
  * under the License.
  */
 
-import yargs from 'yargs';
-
 import { run } from './run';
 import { integrateLocaleFiles } from './i18n/integrate_locale_files';
-import { getDefaultMessagesMap } from './i18n/extract_default_translations';
 
-run(async () => {
-  const { argv } = yargs.option('path', {
-    demandOption: true,
-    describe: 'Path to locale files directory',
-    type: 'string',
-  });
+run(async ({ flags: { path } }) => {
+  if (!path) {
+    throw new Error(`--path option isn't provided.`);
+  }
 
-  const defaultMessagesMap = await getDefaultMessagesMap(['.']);
-
-  await integrateLocaleFiles(argv.path, defaultMessagesMap);
+  await integrateLocaleFiles(path);
 });

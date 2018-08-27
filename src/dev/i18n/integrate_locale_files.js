@@ -21,15 +21,16 @@ import path from 'path';
 
 import { difference, globAsync, normalizePath, readFileAsync, writeFileAsync } from './utils';
 import { paths } from '../../../.i18nrc.json';
+import { getDefaultMessagesMap } from './extract_default_translations';
 
-export function verifyMessages(localeMessages, defaultMessagesMap) {
+export function verifyMessages(localizedMessagesMap, defaultMessagesMap, filePath) {
   let errorMessage = '';
 
   const defaultMessagesIds = [...defaultMessagesMap.keys()];
-  const localeMessagesIds = Object.keys(localeMessages).filter(id => id !== 'formats');
+  const localizedMessagesIds = [...localizedMessagesMap.keys()];
 
-  const unusedTranslations = difference(localeMessagesIds, defaultMessagesIds);
-  const missingTranslations = difference(defaultMessagesIds, localeMessagesIds);
+  const unusedTranslations = difference(localizedMessagesIds, defaultMessagesIds);
+  const missingTranslations = difference(defaultMessagesIds, localizedMessagesIds);
 
   if (unusedTranslations.length > 0) {
     errorMessage += `\nUnused translations:\n${unusedTranslations.join(', ')}`;
@@ -40,57 +41,58 @@ export function verifyMessages(localeMessages, defaultMessagesMap) {
   }
 
   if (errorMessage) {
-    throw new Error(errorMessage);
+    throw new Error(`Error in ${filePath}:${errorMessage}.`);
   }
 }
 
-export async function integrateLocaleFiles(localesPath, defaultMessagesMap) {
+export async function integrateLocaleFiles(localesPath) {
+  const defaultMessagesMap = await getDefaultMessagesMap(['.']);
   const globOptions = {
     cwd: path.resolve(localesPath),
   };
 
-  const localeEntries = await globAsync('./*.json', globOptions);
+  const filePaths = (await globAsync('./*.json', globOptions)).map(filePath =>
+    path.resolve(localesPath, filePath)
+  );
 
-  for (const entry of localeEntries.map(entry => path.resolve(localesPath, entry))) {
-    const localeMessages = JSON.parse((await readFileAsync(entry)).toString());
+  for (const filePath of filePaths) {
+    const normalizedFilePath = normalizePath(filePath);
+    const localizedMessages = JSON.parse((await readFileAsync(filePath)).toString());
 
-    if (!localeMessages.formats) {
-      throw 'Locale file should contain formats object.';
+    if (!localizedMessages.formats) {
+      throw new Error(
+        `Error in ${normalizedFilePath}:\nLocale file should contain formats object.`
+      );
     }
 
-    try {
-      verifyMessages(localeMessages, defaultMessagesMap);
-    } catch (error) {
-      throw new Error(`Error in ${normalizePath(entry)}:
-${error.message || error}`);
-    }
+    const localizedMessagesMap = new Map(
+      Object.entries(localizedMessages).filter(([key]) => key !== 'formats')
+    );
 
-    const fileName = path.basename(entry);
-    const messagesByPluginMap = new Map();
-    const messagesEntries = Object.entries(localeMessages).filter(([id]) => id !== 'formats');
+    verifyMessages(localizedMessagesMap, defaultMessagesMap, normalizedFilePath);
 
-    for (const [messageId, messageValue] of messagesEntries) {
-      const namespace = Object.keys(paths).find(key => messageId.startsWith(`${key}.`));
+    const localizedMessagesByNamespace = new Map();
+    const knownPaths = Object.keys(paths);
+
+    for (const [messageId, messageValue] of localizedMessagesMap) {
+      const namespace = knownPaths.find(key => messageId.startsWith(`${key}.`));
 
       if (!namespace) {
-        throw new Error(`Unknown namespace in id ${messageId} in ${normalizePath(entry)}.`);
+        throw new Error(`Error in ${normalizedFilePath}:\nUnknown namespace in id ${messageId}.`);
       }
 
-      if (messagesByPluginMap.has(namespace)) {
-        messagesByPluginMap.get(namespace)[messageId] = messageValue;
-      } else {
-        messagesByPluginMap.set(namespace, {
-          formats: localeMessages.formats,
-          [messageId]: messageValue,
+      if (!localizedMessagesByNamespace.has(namespace)) {
+        localizedMessagesByNamespace.set(namespace, {
+          formats: localizedMessages.formats,
         });
       }
+
+      localizedMessagesByNamespace.get(namespace)[messageId] = messageValue;
     }
 
-    for (const [namespace, messages] of messagesByPluginMap) {
-      const pluginPath = paths[namespace];
-
+    for (const [namespace, messages] of localizedMessagesByNamespace) {
       await writeFileAsync(
-        path.resolve(pluginPath, 'translations', fileName),
+        path.resolve(paths[namespace], 'translations', path.basename(filePath)),
         JSON.stringify(messages, undefined, 2)
       );
     }

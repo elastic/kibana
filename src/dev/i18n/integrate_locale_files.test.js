@@ -24,11 +24,18 @@ import { normalizePath } from './utils';
 
 const localesPath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files');
 
-const defaultMessagesMap = new Map([
-  ['plugin-1.message-id-1', 'Message text 1'],
-  ['plugin-1.message-id-2', 'Message text 2'],
-  ['plugin-2.message-id', 'Message text'],
-]);
+jest.mock('./extract_default_translations.js', () => ({
+  getDefaultMessagesMap: () => {
+    return new Map([
+      ['plugin-1.message-id-1', 'Message text 1'],
+      ['plugin-1.message-id-2', 'Message text 2'],
+      ['plugin-2.message-id', 'Message text'],
+    ]);
+  },
+}));
+
+const { getDefaultMessagesMap } = require('./extract_default_translations.js');
+const defaultMessagesMap = getDefaultMessagesMap();
 
 jest.mock('../../../.i18nrc.json', () => ({
   paths: {
@@ -41,46 +48,62 @@ jest.mock('../../../.i18nrc.json', () => ({
 const utils = require('./utils');
 utils.writeFileAsync = jest.fn();
 
-describe('dev/i18n/check_locale_files', () => {
+describe('dev/i18n/integrate_locale_files', () => {
   describe('verifyMessages', () => {
-    it('validates locale messages object', () => {
-      const localeMessages = {
-        formats: {},
-        'plugin-1.message-id-1': 'Translated text 1',
-        'plugin-1.message-id-2': 'Translated text 2',
-        'plugin-2.message-id': 'Translated text',
-      };
+    test('validates locale messages object', () => {
+      const localizedMessagesMap = new Map([
+        ['plugin-1.message-id-1', 'Translated text 1'],
+        ['plugin-1.message-id-2', 'Translated text 2'],
+        ['plugin-2.message-id', 'Translated text'],
+      ]);
 
-      expect(() => verifyMessages(localeMessages, defaultMessagesMap)).not.toThrow();
+      expect(() =>
+        verifyMessages(localizedMessagesMap, defaultMessagesMap, 'translations/fr.json')
+      ).not.toThrow();
     });
 
-    it('throws an error for unused id and missing id', () => {
-      const localeMessagesWithMissingMessage = {
-        formats: {},
-        'plugin-1.message-id-1': 'Translated text 1',
-        'plugin-2.message-id': 'Translated text',
-      };
+    test('throws an error for unused id and missing id', () => {
+      const localizedMessagesMapWithMissingMessage = new Map([
+        ['plugin-1.message-id-1', 'Translated text 1'],
+        ['plugin-2.message-id', 'Translated text'],
+      ]);
 
-      const localeMessagesWithUnusedMessage = {
-        formats: {},
-        'plugin-1.message-id-1': 'Translated text 1',
-        'plugin-1.message-id-2': 'Translated text 2',
-        'plugin-1.message-id-3': 'Translated text 3',
-        'plugin-2.message-id': 'Translated text',
-      };
+      const localizedMessagesMapWithUnusedMessage = new Map([
+        ['plugin-1.message-id-1', 'Translated text 1'],
+        ['plugin-1.message-id-2', 'Translated text 2'],
+        ['plugin-1.message-id-3', 'Translated text 3'],
+        ['plugin-2.message-id', 'Translated text'],
+      ]);
+
+      const localizedMessagesMapWithIdTypo = new Map([
+        ['plugin-1.message-id-1', 'Message text 1'],
+        ['plugin-1.message-id-2', 'Message text 2'],
+        ['plugin-2.message', 'Message text'],
+      ]);
 
       expect(() =>
-        verifyMessages(localeMessagesWithMissingMessage, defaultMessagesMap)
+        verifyMessages(
+          localizedMessagesMapWithMissingMessage,
+          defaultMessagesMap,
+          'translations/fr.json'
+        )
       ).toThrowErrorMatchingSnapshot();
       expect(() =>
-        verifyMessages(localeMessagesWithUnusedMessage, defaultMessagesMap)
+        verifyMessages(
+          localizedMessagesMapWithUnusedMessage,
+          defaultMessagesMap,
+          'translations/fr.json'
+        )
+      ).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        verifyMessages(localizedMessagesMapWithIdTypo, defaultMessagesMap, 'translations/fr.json')
       ).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('integrateLocaleFiles', () => {
-    it('splits locale file by plugins and moves it to plugins folders', async () => {
-      await integrateLocaleFiles(localesPath, defaultMessagesMap);
+    test('splits locale file by plugins and writes them into the right folders', async () => {
+      await integrateLocaleFiles(localesPath);
 
       const [[path1, json1], [path2, json2]] = utils.writeFileAsync.mock.calls;
 
