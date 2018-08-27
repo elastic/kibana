@@ -97,14 +97,8 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     const { size: after, units: afterUnits } = splitSizeAndUnits(
       phase.after
     );
-    // If the after is set to 0s, it effectively means we are moving
-    // to the warm phase after rollover from the hot phase
-    if (phaseName === PHASE_WARM && after === 0) {
-      policy[PHASE_ROLLOVER_ENABLED] = true;
-    } else {
-      policy[PHASE_ROLLOVER_AFTER] = after;
-      policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
-    }
+    policy[PHASE_ROLLOVER_AFTER] = after;
+    policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
   }
 
   if (phase.actions) {
