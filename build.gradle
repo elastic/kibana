@@ -38,6 +38,6 @@ idea {
   }
 }
 
-task wrapper(type: Wrapper) {
-  distributionUrl = "https://services.gradle.org/distributions/gradle-4.9-all.zip"
+wrapper {
+  distributionUrl = "https://services.gradle.org/distributions/gradle-4.10-all.zip"
 }
