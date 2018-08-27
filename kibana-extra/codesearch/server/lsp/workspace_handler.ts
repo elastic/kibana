@@ -155,6 +155,14 @@ export class WorkspaceHandler {
       } else {
         result.contents = [result.contents as { language: string; value: string }];
       }
+    } else {
+      result.contents = Array.from(result.contents).map(c => {
+        if (typeof c === 'string') {
+          return { language: '', value: c };
+        } else {
+          return c;
+        }
+      });
     }
   }
 

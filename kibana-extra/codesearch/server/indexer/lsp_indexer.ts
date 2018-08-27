@@ -105,12 +105,7 @@ export class LspIndexer extends AbstractIndexer {
         index: SymbolIndexName(repoUri),
         type: SymbolTypeName,
         id: `${repoUri}:${revision}:${filePath}:${symbol.symbolInformation.name}`,
-        body: {
-          ...symbol,
-          // Reset contents field since it could be either object or array.
-          // TODO: pending on discussion.
-          contents: {},
-        },
+        body: symbol,
       });
       symbolNames.add(symbol.symbolInformation.name);
     }
