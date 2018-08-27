@@ -21,8 +21,6 @@ import _ from 'lodash';
 import dateMath from '@kbn/datemath';
 import { parseRelativeString } from '../parse_relative_parts';
 
-const ISO8601_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSS';
-
 export const TIME_MODES = {
   ABSOLUTE: 'absolute',
   RELATIVE: 'relative',

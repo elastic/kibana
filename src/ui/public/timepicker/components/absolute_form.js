@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import moment from 'moment';
 
@@ -26,10 +26,18 @@ import dateMath from '@kbn/datemath';
 
 import {
   EuiDatePicker,
+  EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 
+const INPUT_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
+
 const toMoment = (value, roundUp) => {
-  return dateMath.parse(value, { roundUp });
+  const valueAsMoment = dateMath.parse(value, { roundUp });
+  return {
+    value: valueAsMoment,
+    textInputValue: valueAsMoment.format(INPUT_DATE_FORMAT)
+  };
 };
 
 export class AbsoluteForm extends Component {
@@ -38,13 +46,15 @@ export class AbsoluteForm extends Component {
     super(props);
 
     this.state = {
-      value: toMoment(this.props.value, this.props.roundUp),
+      ...toMoment(this.props.value, this.props.roundUp),
+      isTextInvalid: false,
     };
   }
 
   static getDerivedStateFromProps = (nextProps) => {
     return {
-      value: toMoment(nextProps.value, nextProps.roundUp),
+      ...toMoment(nextProps.value, nextProps.roundUp),
+      isTextInvalid: false,
     };
   }
 
@@ -52,15 +62,39 @@ export class AbsoluteForm extends Component {
     this.props.onChange(date.toISOString());
   }
 
+  handleTextChange = (evt) => {
+    const date = moment(evt.target.value, INPUT_DATE_FORMAT, true);
+    if (date.isValid()) {
+      this.props.onChange(date.toISOString());
+    }
+
+    this.setState({
+      textInputValue: evt.target.value,
+      isTextInvalid: !date.isValid()
+    });
+  }
+
   render() {
     return (
-      <EuiDatePicker
-        selected={this.state.value}
-        onChange={this.handleChange}
-        inline
-        showTimeSelect
-        shadow={false}
-      />
+      <Fragment>
+        <EuiFormRow
+          isInvalid={this.state.isTextInvalid}
+          error={this.state.isTextInvalid ? `Expected format ${INPUT_DATE_FORMAT}` : undefined}
+        >
+          <EuiFieldText
+            isInvalid={this.state.isTextInvalid}
+            value={this.state.textInputValue}
+            onChange={this.handleTextChange}
+          />
+        </EuiFormRow>
+        <EuiDatePicker
+          selected={this.state.value}
+          onChange={this.handleChange}
+          inline
+          showTimeSelect
+          shadow={false}
+        />
+      </Fragment>
     );
   }
 }
