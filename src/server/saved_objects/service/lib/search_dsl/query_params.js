@@ -68,36 +68,26 @@ function getFieldsForTypes(searchFields, types) {
  *  @return {Object}
  */
 function getClauseForType(schema, namespace, type) {
-  const bool = {
-    must: []
-  };
-
   if (!type) {
     throw new Error(`type is required to build filter clause`);
   }
 
-  bool.must.push({
-    term: {
-      type
-    }
-  });
-
   if (namespace && !schema.isNamespaceAgnostic(type)) {
-    bool.must.push({
-      term: {
-        namespace
+    return {
+      bool: {
+        must: [
+          { term: { type } },
+          { term: { namespace } },
+        ]
       }
-    });
-  } else {
-    bool.must_not = [{
-      exists: {
-        field: 'namespace'
-      }
-    }];
+    };
   }
 
   return {
-    bool
+    bool: {
+      must: [{ term: { type } }],
+      must_not: [{ exists: { field: 'namespace' } }]
+    }
   };
 }
 
