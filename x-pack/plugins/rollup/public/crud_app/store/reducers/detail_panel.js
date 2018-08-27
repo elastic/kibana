@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const initialState = {};
+const initialState = {
+  panelType: undefined,
+  jobId: undefined,
+};
 
 export function detailPanel(state = initialState, action) {
   const { type, payload } = action;

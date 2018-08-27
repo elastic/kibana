@@ -8,8 +8,20 @@ import { connect } from 'react-redux';
 import { JobCreate as JobCreateView } from './job_create';
 
 import {
+  isSaving,
+  getCreateJobError,
+} from '../../store/selectors';
+
+import {
   createJob,
 } from '../../store/actions';
+
+const mapStateToProps = (state) => {
+  return {
+    isSaving: isSaving(state),
+    saveError: getCreateJobError(state),
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -19,4 +31,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const JobCreate = connect(null, mapDispatchToProps)(JobCreateView);
+export const JobCreate = connect(mapStateToProps, mapDispatchToProps)(JobCreateView);

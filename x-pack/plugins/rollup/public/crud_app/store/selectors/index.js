@@ -19,6 +19,9 @@ export const getDetailPanelType = (state) => state.detailPanel.panelType;
 export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
 export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPanel.jobId);
 
+export const isSaving = (state) => state.createJob.isSaving;
+export const getCreateJobError = (state) => state.createJob.error;
+
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);
   const { status } = jobs[jobName] || {};

@@ -93,8 +93,6 @@ export class StepLogisticsUi extends Component {
 
         <EuiSpacer size="l" />
 
-        {this.renderErrors()}
-
         <EuiForm>
           <EuiFormRow
             label={(
@@ -253,6 +251,8 @@ export class StepLogisticsUi extends Component {
             />
           </EuiFormRow>
         </EuiForm>
+
+        {this.renderErrors()}
       </Fragment>
     );
   }
@@ -266,6 +266,7 @@ export class StepLogisticsUi extends Component {
 
     return (
       <Fragment>
+        <EuiSpacer size="m" />
         <EuiCallOut
           title={(
             <FormattedMessage
@@ -276,7 +277,6 @@ export class StepLogisticsUi extends Component {
           color="danger"
           iconType="cross"
         />
-        <EuiSpacer size="m" />
       </Fragment>
     );
   }

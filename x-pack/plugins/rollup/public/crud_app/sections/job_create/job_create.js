@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, mapValues, cloneDeep } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiBreadcrumbs,
+  EuiCallOut,
+  EuiLoadingKibana,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
-  EuiTitle,
   EuiStepsHorizontal,
-  EuiBreadcrumbs,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
@@ -150,6 +153,7 @@ export class JobCreateUi extends Component {
   static propTypes = {
     createJob: PropTypes.func,
     isSaving: PropTypes.bool,
+    createJobError: PropTypes.node,
   }
 
   constructor(props) {
@@ -210,6 +214,7 @@ export class JobCreateUi extends Component {
       nextStepId: stepIds[currentStepIndex + 1],
       previousStepId: stepIds[currentStepIndex - 1],
       showStepErrors: false,
+      isSaving: false,
     });
 
     if (stepIds.indexOf(stepId) > stepIds.indexOf(this.state.checkpointStepId)) {
@@ -306,10 +311,13 @@ export class JobCreateUi extends Component {
   save = () => {
     const { createJob } = this.props;
     const jobConfig = this.getAllFields();
+
     createJob(jobConfig);
   };
 
   render() {
+    const { isSaving, saveError } = this.props;
+
     const breadcrumbs = [{
       text: (
         <FormattedMessage
@@ -327,39 +335,71 @@ export class JobCreateUi extends Component {
       ),
     }];
 
+    let savingFeedback;
+
+    if (isSaving) {
+      savingFeedback = (
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
+      );
+    }
+
+    let saveErrorFeedback;
+
+    if (saveError) {
+      saveErrorFeedback = (
+        <Fragment>
+          <EuiCallOut
+            title={saveError}
+            icon="cross"
+            color="danger"
+          />
+
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent
-            horizontalPosition="center"
-            style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}
-          >
-            <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-            <EuiSpacer size="xs" />
+      <Fragment>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageContent
+              horizontalPosition="center"
+              style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}
+            >
+              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
+              <EuiSpacer size="xs" />
 
-            <EuiPageContentHeader>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.create.title"
-                    defaultMessage=" Create rollup job"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeader>
+              <EuiPageContentHeader>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.title"
+                      defaultMessage=" Create rollup job"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiPageContentHeader>
 
-            <EuiStepsHorizontal steps={this.getSteps()} />
+              {saveErrorFeedback}
 
-            <EuiSpacer />
+              <EuiStepsHorizontal steps={this.getSteps()} />
 
-            {this.renderCurrentStep()}
+              <EuiSpacer />
 
-            <EuiSpacer size="l" />
+              {this.renderCurrentStep()}
 
-            {this.renderNavigation()}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+              <EuiSpacer size="l" />
+
+              {this.renderNavigation()}
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+
+        {savingFeedback}
+      </Fragment>
     );
   }
 
