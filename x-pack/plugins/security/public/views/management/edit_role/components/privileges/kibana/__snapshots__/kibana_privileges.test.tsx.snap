@@ -9,8 +9,9 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     editable={true}
     kibanaAppPrivileges={
       Array [
-        "all",
-        "read",
+        Object {
+          "name": "all",
+        },
       ]
     }
     onChange={[MockFunction]}
