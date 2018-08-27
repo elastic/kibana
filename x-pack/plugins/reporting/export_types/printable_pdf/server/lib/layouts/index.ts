@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
+export { getlayout } from './layout_factory';
+export { Optimizedlayout } from './optimized_layout';
+export { Preservelayout } from './preserve_layout';
