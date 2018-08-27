@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -61,7 +62,9 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.addFilter('bytes', 'is between', '100', '3000');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTableVisData();
-        expect(data.trim()).to.be('707');
+        retry.waitFor('wait for count to change to 707', async () => {
+          expect(data.trim()).to.be('707');
+        });
       });
 
       it('should allow unlinking from a linked search', async () => {
@@ -76,7 +79,9 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.toggleFilterEnabled('extension.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const unfilteredData = await PageObjects.visualize.getTableVisData();
-        expect(unfilteredData.trim()).to.be('1,293');
+        retry.waitFor('wait for count to change to 1,293', async () => {
+          expect(unfilteredData.trim()).to.be('1,293');
+        });
       });
 
       it('should not break when saving after unlinking', async () => {
