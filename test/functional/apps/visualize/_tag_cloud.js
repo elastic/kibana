@@ -41,10 +41,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.common.sleep(1000);
       log.debug('select Tags');
       await PageObjects.visualize.clickBucket('Tags');
-      await PageObjects.common.sleep(1000);
       log.debug('Click aggregation Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Click field machine.ram');
