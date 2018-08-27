@@ -5,10 +5,16 @@
  */
 
 import { globalizeSelectors } from '../../utils/typed_redux';
+import { logFilterSelectors as innerLogFilterSelectors } from './log_filter';
 import { logMinimapSelectors as innerLogMinimapSelectors } from './log_minimap';
 import { logPositionSelectors as innerLogPositionSelectors } from './log_position';
 import { logTextviewSelectors as innerLogTextviewSelectors } from './log_textview';
 import { LocalState } from './reducer';
+
+export const logFilterSelectors = globalizeSelectors(
+  (state: LocalState) => state.logFilter,
+  innerLogFilterSelectors
+);
 
 export const logMinimapSelectors = globalizeSelectors(
   (state: LocalState) => state.logMinimap,
