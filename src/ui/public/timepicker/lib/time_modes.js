@@ -45,12 +45,16 @@ export function toAbsoluteString(value, roundUp) {
   return dateMath.parse(value, { roundUp }).toISOString();
 }
 
+
 export function toRelativeString(value) {
   if (value === 'now') {
     return 'now-15m';
   }
 
-  const relativeParts = parseRelativeString(value);
+  return toRelativeStringFromParts(parseRelativeString(value));
+}
+
+export function toRelativeStringFromParts(relativeParts) {
   const count = _.get(relativeParts, `count`, 0);
   const round = _.get(relativeParts, `round`, false);
   const matches = _.get(relativeParts, `unit`, 's').match(/([smhdwMy])(\+)?/);

@@ -21,6 +21,7 @@ import chrome from 'ui/chrome';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { AbsoluteForm } from './absolute_form';
+import { RelativeForm } from './relative_form';
 
 import {
   EuiPopover,
@@ -70,7 +71,7 @@ export class TimeInput extends Component {
   }
 
   togglePopover = () => {
-    const timeMode = getTimeMode(this.props.value)
+    const timeMode = getTimeMode(this.props.value);
     this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
       selectedTab: this.renderTabs().find(tab => {
@@ -96,9 +97,12 @@ export class TimeInput extends Component {
         id: TIME_MODES.RELATIVE,
         name: 'Relative',
         content: (
-          <div>
-            Relative time stuff goes here
-          </div>
+          <RelativeForm
+            dateFormat={chrome.getUiSettingsClient().get('dateFormat')}
+            value={this.props.value}
+            onChange={this.props.onChange}
+            roundUp={this.props.roundUp}
+          />
         ),
       },
       {
