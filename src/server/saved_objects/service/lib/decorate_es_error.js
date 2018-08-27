@@ -48,7 +48,6 @@ export function decorateEsError(error) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
-  console.log({ errorStatus: error.status, errorCode: error.statusCode });
 
   const { reason } = get(error, 'body.error', {});
   if (
