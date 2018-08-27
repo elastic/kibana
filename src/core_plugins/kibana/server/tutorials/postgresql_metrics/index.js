@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,12 +25,22 @@ export function postgresqlMetricsSpecProvider() {
   const moduleName = 'postgresql';
   return {
     id: 'postgresqlMetrics',
-    name: 'PostgreSQL metrics',
+    name: i18n.translate('kbn.server.tutorials.postgresqlMetrics.nameTitle', {
+      defaultMessage: 'PostgreSQL metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
     isBeta: true,
-    shortDescription: 'Fetch internal metrics from PostgreSQL.',
-    longDescription: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-postgresql.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from PostgreSQL.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',
+      },
+    }),
     //euiIconType: 'logoPostgreSQL',
     artifacts: {
       dashboards: [
