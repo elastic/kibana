@@ -6,8 +6,8 @@
 
 import { pick, identity } from 'lodash';
 import Joi from 'joi';
-import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
+import { ALL_RESOURCE } from '../../../../../common/constants';
 
 const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
   const kibanaApplicationPrivileges = [];
@@ -20,7 +20,7 @@ const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
   }
 
   if (kibanaPrivileges.space) {
-    for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
+    for (const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
       kibanaApplicationPrivileges.push({
         privileges: privileges,
         application,

@@ -5,8 +5,8 @@
  */
 import _ from 'lodash';
 import Boom from 'boom';
-import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
+import { ALL_RESOURCE } from '../../../../../common/constants';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
@@ -91,7 +91,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         }
 
         return reply(Boom.notFound());
-      } catch(error) {
+      } catch (error) {
         reply(wrapError(error));
       }
     },

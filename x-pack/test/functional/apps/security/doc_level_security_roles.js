@@ -34,12 +34,16 @@ export default function ({ getService, getPageObjects }) {
 
     it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
-
-        "indices": [{
-          "names": [ "dlstest" ],
-          "privileges": [ "read", "view_index_metadata" ],
-          "query": "{\"match\": {\"region\": \"EAST\"}}"
-        }]
+        elasticsearch: {
+          "indices": [{
+            "names": ["dlstest"],
+            "privileges": ["read", "view_index_metadata"],
+            "query": "{\"match\": {\"region\": \"EAST\"}}"
+          }]
+        },
+        kibana: {
+          global: ['all']
+        }
       });
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
@@ -50,9 +54,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('should add new user userEAST ', async function () {
       await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({ username: 'userEast', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'userEast', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'dls EAST',
-        email: 'dlstest@elastic.com', save: true, roles: ['kibana_user', 'myroleEast'] });
+        email: 'dlstest@elastic.com', save: true, roles: ['kibana_user', 'myroleEast']
+      });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.userEast.roles).to.eql(['kibana_user', 'myroleEast']);

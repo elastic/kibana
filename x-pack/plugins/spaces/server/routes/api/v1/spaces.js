@@ -123,7 +123,8 @@ export function initSpacesApi(server) {
         return reply(wrapError(error));
       }
 
-      return reply(convertSavedObjectToSpace(result));
+      const updatedSpace = convertSavedObjectToSpace(result);
+      return reply(updatedSpace);
     },
     config: {
       validate: {

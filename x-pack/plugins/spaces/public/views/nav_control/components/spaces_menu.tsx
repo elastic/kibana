@@ -8,7 +8,7 @@ import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from
 import React, { Component } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
-import { ManageSpacesButton, SpaceAvatar } from '../../components';
+import { ManageSpacesButton, SpaceAvatar } from '../../../components';
 import './spaces_menu.less';
 
 interface Props {

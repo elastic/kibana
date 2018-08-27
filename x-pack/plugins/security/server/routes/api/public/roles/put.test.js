@@ -155,7 +155,7 @@ describe('PUT role', () => {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -189,7 +189,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -207,7 +207,7 @@ describe('PUT role', () => {
         },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => {}],
+      callWithRequestImpls: [async () => ({}), async () => { }],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -247,7 +247,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -280,7 +280,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                except: ['test-field-security-except-1', 'test-field-security-except-2']
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -312,7 +312,7 @@ describe('PUT role', () => {
               {
                 field_security: {
                   grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
-                  except: [ 'old-field-security-except-1', 'old-field-security-except-2' ]
+                  except: ['old-field-security-except-1', 'old-field-security-except-2']
                 },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
@@ -329,7 +329,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
+        async () => { },
       ],
       asserts: {
         callWithRequests: [
@@ -370,7 +370,7 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: [ 'test-field-security-except-1', 'test-field-security-except-2' ]
+                      except: ['test-field-security-except-1', 'test-field-security-except-2']
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: [
@@ -457,7 +457,7 @@ describe('PUT role', () => {
               ],
             },
           }),
-          async () => {},
+          async () => { },
         ],
         asserts: {
           callWithRequests: [

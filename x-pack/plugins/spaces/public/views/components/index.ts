@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpaceAvatar } from './space_avatar';
 export { SpaceCards } from './space_cards';
-export { ManageSpacesButton } from './manage_spaces_button';
