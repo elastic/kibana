@@ -97,7 +97,6 @@ export function startDataLoad(layerId, dataMeta, requestToken) {
   });
 }
 
-//todo: should link start and end data load with some sort of token
 export function endDataLoad(layerId, data, requestToken) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
