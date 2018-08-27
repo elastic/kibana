@@ -99,7 +99,7 @@ export class TemplateSelection extends Component {
         />
         <EuiSpacer/>
         <ErrableFormRow
-          label="Your existing templates"
+          label="Your existing index templates"
           errorKey={STRUCTURE_TEMPLATE_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -134,7 +134,7 @@ export class TemplateSelection extends Component {
                 style={{ maxWidth: '100%' }}
                 checked={bootstrapEnabled}
                 onChange={e => setBootstrapEnabled(e.target.checked)}
-                label={<span>Create an index for this template</span>}
+                label={<span>Create an index with this index template</span>}
               />
             </EuiFormRow>
             {bootstrapEnabled ? (

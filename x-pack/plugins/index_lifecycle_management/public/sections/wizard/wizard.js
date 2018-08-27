@@ -145,8 +145,8 @@ export class Wizard extends Component {
       );
     }
     const steps = [
-      this.createStep('Select a template', STEP_INDEX_TEMPLATE),
-      this.createStep('Configure a policy', STEP_POLICY_CONFIGURATION),
+      this.createStep('Select an index template', STEP_INDEX_TEMPLATE),
+      this.createStep('Configure a lifecycle policy', STEP_POLICY_CONFIGURATION),
       this.createStep('Review and save', STEP_REVIEW),
     ];
 

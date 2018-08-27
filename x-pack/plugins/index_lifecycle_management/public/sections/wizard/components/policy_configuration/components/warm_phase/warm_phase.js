@@ -203,7 +203,7 @@ export class WarmPhase extends PureComponent {
               <EuiSpacer />
 
               <ErrableFormRow
-                label="Where would you like to allocate these indices?"
+                label="Choose where to allocate indices by node attribute"
                 errorKey={PHASE_NODE_ATTRS}
                 isShowingErrors={isShowingErrors}
                 errors={errors}

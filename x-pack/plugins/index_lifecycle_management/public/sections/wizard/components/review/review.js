@@ -145,7 +145,7 @@ export class Review extends Component {
         <EuiSpacer />
 
         <EuiCallOut
-          title="Your changes affect these template configurations"
+          title="Your changes affect these index template configurations"
           color="warning"
         >
           <h4>{`${affectedIndexTemplates.length} Index ${affectedIndexTemplates.length === 1 ? 'template' : 'templates'}`}</h4>
@@ -182,7 +182,7 @@ export class Review extends Component {
           <Fragment>
             <EuiTitle>
               <h4>
-                <EuiCode>{selectedIndexTemplateName}</EuiCode> template changes
+                <EuiCode>{selectedIndexTemplateName}</EuiCode> index template changes
               </h4>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -206,7 +206,7 @@ export class Review extends Component {
                     <p>
                       <strong>You are editing an existing policy</strong>. Any changes you make
                   will also change index templates that this policy is attached to. Alternately, you can save
-                  these changes in a new policy and only change the template you
+                  these changes in a new policy and only change the index template you
                   selected.
                     </p>
                   </EuiText>

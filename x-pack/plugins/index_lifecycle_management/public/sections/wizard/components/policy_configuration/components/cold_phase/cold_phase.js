@@ -88,8 +88,8 @@ export class ColdPhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              Your index is queried less frequently
-              and no longer needs to be on the most performant hardware.
+              A cold index is queried less frequently
+              and thus no longer needs to be on the most performant hardware.
             </p>
             {isShowingErrors ? (
               <EuiTextColor color="danger">
@@ -156,7 +156,7 @@ export class ColdPhase extends PureComponent {
             <EuiSpacer />
 
             <ErrableFormRow
-              label="Where would you like to allocate these indices?"
+              label="Choose where to allocate indices by node attribute"
               errorKey={PHASE_NODE_ATTRS}
               isShowingErrors={isShowingErrors}
               errors={errors}
