@@ -118,7 +118,7 @@ export const metrics = {
   }),
   apm_responses_failure: new ApmFailureResponseMetric({
     field: 'beats_stats.metrics.apm-server.server.response.count',
-    title: 'Failure',
+    title: 'Success Rate',
     label: 'Failure',
     description: 'PLZ FILL ME IN'
   }),

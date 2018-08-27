@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, sum } from 'lodash';
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
@@ -12,8 +12,8 @@ import { calculateAvailability } from '../calculate_availability';
 import { ApmMetric } from '../metrics';
 
 /*
- * Get detailed info for Kibanas in the cluster
- * for Kibana listing page
+ * Get detailed info for APMs in the cluster
+ * for APM listing page
  * For each instance:
  *  - name
  *  - status
@@ -56,20 +56,11 @@ export function getApms(req, apmIndexPattern, { clusterUuid }) {
       sort: [
         { timestamp: { order: 'desc' } }
       ],
-      // _source: [
-      //   'timestamp',
-      //   'kibana_stats.process.memory.resident_set_size_in_bytes',
-      //   'kibana_stats.os.load.1m',
-      //   'kibana_stats.response_times.average',
-      //   'kibana_stats.response_times.max',
-      //   'kibana_stats.requests.total',
-      //   'kibana_stats.kibana.transport_address',
-      //   'kibana_stats.kibana.name',
-      //   'kibana_stats.kibana.host',
-      //   'kibana_stats.kibana.uuid',
-      //   'kibana_stats.kibana.status',
-      //   'kibana_stats.concurrent_connections'
-      // ]
+      _source: [
+        'timestamp',
+        'beats_stats.beat.*',
+        'beats_stats.metrics.apm-server.server.response.errors.*',
+      ]
     }
   };
 
@@ -79,8 +70,11 @@ export function getApms(req, apmIndexPattern, { clusterUuid }) {
       const instances = get(resp, 'hits.hits', []);
 
       return instances.map(hit => {
+        const beatStats = get(hit, '_source.beats_stats');
+        const errorCount = sum(Object.values(get(beatStats, 'metrics.apm-server.server.response.errors')));
         return {
-          ...get(hit, '_source.beats_stats'),
+          ...beatStats,
+          errorCount,
           availability: calculateAvailability(get(hit, '_source.timestamp'))
         };
       });

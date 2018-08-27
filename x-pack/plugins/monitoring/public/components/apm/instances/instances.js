@@ -11,7 +11,7 @@ import {
   KuiTableRowCell,
   KuiTableRow
 } from '@kbn/ui-framework/components';
-import { SORT_ASCENDING } from '../../../../common/constants';
+import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
 import { EuiLink } from '@elastic/eui';
 import { Status } from './status';
 
@@ -20,7 +20,7 @@ const filterFields = [ 'beat.name', 'beat.version' ];
 const columns = [
   { title: 'Name', sortKey: 'beat.name', sortOrder: SORT_ASCENDING },
   { title: 'Version', sortKey: 'beat.version', sortOrder: SORT_ASCENDING },
-  // { title: 'Status', sortKey: 'kibana.status' },
+  { title: 'Error Count', sortKey: 'errorCount', sortOrder: SORT_DESCENDING },
   // { title: 'Load Average', sortKey: 'os.load.1m' },
   // { title: 'Memory Size', sortKey: 'process.memory.resident_set_size_in_bytes' },
   // { title: 'Requests', sortKey: 'requests.total' },
@@ -47,6 +47,16 @@ const instanceRowFactory = (goToInstance) => {
               data-test-subj={`apmLink-${props.beat.version}`}
             >
               { props.beat.version }
+            </EuiLink>
+          </div>
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          <div className="monitoringTableCell__number">
+            <EuiLink
+              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
+              data-test-subj={`apmLink-errors`}
+            >
+              { props.errorCount }
             </EuiLink>
           </div>
         </KuiTableRowCell>
