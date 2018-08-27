@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "exclude": [
-    "./target"
-  ],
   "include": [
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "src/core/locales.ts",
   ]
 }

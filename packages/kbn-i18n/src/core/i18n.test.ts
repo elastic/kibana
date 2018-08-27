@@ -368,11 +368,11 @@ describe('I18n engine', () => {
 
   describe('translate', () => {
     test('should throw error if id is not a non-empty string', () => {
-      expect(() => i18n.translate(undefined)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(null)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(true)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(5)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate({})).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(undefined as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(null as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(true as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(5 as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate({} as any)).toThrowErrorMatchingSnapshot();
       expect(() => i18n.translate('')).toThrowErrorMatchingSnapshot();
     });
 
@@ -769,7 +769,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.custom).toEqual({
+      expect((i18n.getFormats().date as any).custom).toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',

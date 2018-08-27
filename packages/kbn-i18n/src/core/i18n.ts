@@ -19,9 +19,8 @@
 
 /**
  * @typedef Messages - messages tree, where leafs are translated strings
- * @type {object<string, object>}
- * @property {string} [locale] - locale of the messages
- * @property {object} [formats] - set of options to the underlying formatter
+ * @property [locale] - locale of the messages
+ * @property [formats] - set of options to the underlying formatter
  */
 
 import memoizeIntlConstructor from 'intl-format-cache';
@@ -31,11 +30,15 @@ import { formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 
 // Add all locale data to `IntlMessageFormat`.
-import './locales';
+import './locales.js';
+
+interface Messages {
+  [key: string]: any;
+}
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages = {};
+const messages: { [key: string]: any } = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
@@ -47,8 +50,8 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
  * Returns message by the given message id.
- * @param {string} id - path to the message
- * @returns {string} message - translated message from messages tree
+ * @param id - path to the message
+ * @returns message - translated message from messages tree
  */
 function getMessageById(id: string) {
   return getMessages()[id];
@@ -56,8 +59,8 @@ function getMessageById(id: string) {
 
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
- * @param {string} locale
- * @returns {string} normalizedLocale
+ * @param locale
+ * @returns normalizedLocale
  */
 function normalizeLocale(locale: string) {
   return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
@@ -66,9 +69,9 @@ function normalizeLocale(locale: string) {
 /**
  * Provides a way to register translations with the engine
  * @param {Messages} newMessages
- * @param {string} [locale = messages.locale]
+ * @param [locale = messages.locale]
  */
-export function addMessages(newMessages = {}, locale = newMessages.locale) {
+export function addMessages(newMessages: Messages = {}, locale = newMessages.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
@@ -97,7 +100,7 @@ export function getMessages() {
 
 /**
  * Tells the engine which language to use by given language key
- * @param {string} locale
+ * @param locale
  */
 export function setLocale(locale: string) {
   if (!locale || !isString(locale)) {
@@ -109,7 +112,7 @@ export function setLocale(locale: string) {
 
 /**
  * Returns the current locale
- * @returns {string} locale
+ * @returns locale
  */
 export function getLocale() {
   return currentLocale;
@@ -117,7 +120,7 @@ export function getLocale() {
 
 /**
  * Tells the library which language to fallback when missing translations
- * @param {string} locale
+ * @param locale
  */
 export function setDefaultLocale(locale: string) {
   if (!locale || !isString(locale)) {
@@ -131,7 +134,7 @@ export function setDefaultLocale(locale: string) {
 
 /**
  * Returns the default locale
- * @returns {string} defaultLocale
+ * @returns defaultLocale
  */
 export function getDefaultLocale() {
   return defaultLocale;
@@ -143,12 +146,12 @@ export function getDefaultLocale() {
  * {@link https://github.com/yahoo/intl-messageformat/blob/master/src/core.js#L62}
  * These are used when constructing the internal Intl.NumberFormat
  * and Intl.DateTimeFormat instances.
- * @param {object} newFormats
- * @param {object} [newFormats.number]
- * @param {object} [newFormats.date]
- * @param {object} [newFormats.time]
+ * @param newFormats
+ * @param [newFormats.number]
+ * @param [newFormats.date]
+ * @param [newFormats.time]
  */
-export function setFormats(newFormats) {
+export function setFormats(newFormats: any) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
@@ -158,7 +161,7 @@ export function setFormats(newFormats) {
 
 /**
  * Returns current formats
- * @returns {object} formats
+ * @returns formats
  */
 export function getFormats() {
   return formats;
@@ -174,13 +177,13 @@ export function getRegisteredLocales() {
 
 /**
  * Translate message by id
- * @param {string} id - translation id to be translated
- * @param {object} [options]
- * @param {object} [options.values] - values to pass into translation
- * @param {string} [options.defaultMessage] - will be used unless translation was successful
- * @returns {string}
+ * @param id - translation id to be translated
+ * @param [options]
+ * @param [options.values] - values to pass into translation
+ * @param [options.defaultMessage] - will be used unless translation was successful
+ * @returns
  */
-export function translate(id, { values = {}, defaultMessage = '' } = {}) {
+export function translate(id: string, { values = {}, defaultMessage = '' } = {}) {
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }

@@ -211,6 +211,7 @@
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/test": "link:packages/kbn-test",
     "@types/angular": "^1.6.45",
+    "@types/angular-mocks": "^1.7.0",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",
     "@types/chance": "^1.0.0",

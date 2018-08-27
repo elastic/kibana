@@ -1,0 +1,5 @@
+extends:
+  - ../../tslint.yaml
+
+rules:
+  ordered-imports: false

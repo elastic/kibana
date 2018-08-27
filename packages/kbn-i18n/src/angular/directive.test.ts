@@ -17,26 +17,28 @@
  * under the License.
  */
 
-import * as angular from 'angular';
 import 'angular-mocks';
+import angular from 'angular';
 import { i18nDirective } from './directive';
 import { i18nProvider } from './provider';
 
 angular
   .module('app', [])
-  .provider('i18n', i18nProvider)
+  .provider('i18n', (i18nProvider as any) as angular.IServiceProvider)
   .directive('i18nId', i18nDirective);
 
 describe('i18nDirective', () => {
-  let compile;
-  let scope;
+  let compile: angular.ICompileService;
+  let scope: angular.IRootScopeService;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.inject(($compile, $rootScope) => {
-      compile = $compile;
-      scope = $rootScope.$new();
-    })
+    angular.mock.inject(
+      ($compile: angular.ICompileService, $rootScope: angular.IRootScopeService) => {
+        compile = $compile;
+        scope = $rootScope.$new();
+      }
+    )
   );
 
   it('inserts correct translation html content', () => {
