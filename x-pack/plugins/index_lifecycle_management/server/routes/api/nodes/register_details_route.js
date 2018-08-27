@@ -48,7 +48,7 @@ export function registerDetailsRoute(server) {
 
       try {
         const stats = await fetchNodeStats(callWithRequest);
-        const response = findMatchingNodes  (stats, request.params.nodeAttrs);
+        const response = findMatchingNodes(stats, request.params.nodeAttrs);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {
