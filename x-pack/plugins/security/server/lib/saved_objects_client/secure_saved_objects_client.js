@@ -143,12 +143,12 @@ export class SecureSavedObjectsClient {
         action,
         types,
         missing,
-        { options }
+        { options, namespace }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
 
-    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
+    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options, namespace });
 
     return await this._internalRepository.find(
       {
@@ -162,7 +162,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       options.type,
       'find',
-      { options },
+      { options, namespace },
       repository => repository.find(options, namespace)
     );
   }
