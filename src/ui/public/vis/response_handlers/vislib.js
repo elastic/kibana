@@ -40,9 +40,6 @@ const VislibResponseHandlerProvider = function (Private) {
     }
 
     if (!tables.length) return;
-    if (tables.length === 1) {
-      return convertTable(vis, tables[0]);
-    }
 
     const out = {};
     let outList;
