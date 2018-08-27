@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import _ from 'lodash';
-import { format as formatUrl, parse as parseUrl } from 'url';
+import { modifyUrl } from 'ui/url';
 
 import { uiModules } from '../../modules';
 import { toastNotifications } from '../../notify';
@@ -97,10 +97,11 @@ export function initAngularApi(chrome, internals) {
               });
             }
           } catch (e) {
-            const { host, path, search, protocol } = parseUrl(window.location.href);
-            // rewrite the entire url to force the browser to reload and
-            // discard any potentially unstable state from before
-            window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
+            window.location.href = modifyUrl(window.location.href, parts => {
+              parts.hash = '#/error/url-overflow';
+            });
+            // force the browser to reload to that Kibana's potentially unstable state is unloaded
+            window.location.reload();
           }
         };
 
