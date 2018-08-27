@@ -19,26 +19,28 @@
 
 import angular from 'angular';
 import 'angular-mocks';
-import * as i18n from '../core/i18n';
 import { I18nProvider, I18nServiceType } from './provider';
+import * as i18n from '../core/i18n';
 
 angular.module('app', []).provider('i18n', I18nProvider);
 
-describe('I18nProvider', () => {
+describe('i18nProvider', () => {
   let provider: I18nProvider;
   let service: I18nServiceType;
 
   beforeEach(
     angular.mock.module('app', [
-      'I18nProvider',
-      (i18nService: I18nProvider) => {
-        provider = i18nService;
+      'i18nProvider',
+      // tslint:disable-next-line:no-shadowed-variable
+      (i18n: I18nProvider) => {
+        provider = i18n;
       },
     ])
   );
   beforeEach(
-    angular.mock.inject((i18nService: I18nServiceType) => {
-      service = i18nService;
+    // tslint:disable-next-line:no-shadowed-variable
+    angular.mock.inject((i18n: I18nServiceType) => {
+      service = i18n;
     })
   );
 

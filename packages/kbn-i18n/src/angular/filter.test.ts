@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import angular from 'angular';
-import 'angular-mocks';
-import * as i18n from '../core/i18n';
-import { i18nFilter } from './filter';
-import { I18nProvider, I18nServiceType } from './provider';
-
 jest.mock('../core/i18n', () => ({
   translate: jest.fn().mockImplementation(() => 'translation'),
 }));
+
+import angular from 'angular';
+import 'angular-mocks';
+import { I18nProvider, I18nServiceType } from './provider';
+import { i18nFilter } from './filter';
+import * as i18n from '../core/i18n';
 
 angular
   .module('app', [])
@@ -37,7 +37,8 @@ describe('i18nFilter', () => {
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.inject((i18nFilter: I18nServiceType) => {
+    // tslint:disable-next-line:no-shadowed-variable
+    angular.mock.inject(i18nFilter => {
       filter = i18nFilter;
     })
   );
@@ -52,8 +53,8 @@ describe('i18nFilter', () => {
 
     const result = filter(id, { defaultMessage, values });
 
+    expect(result).toEqual('translation');
     expect(i18n.translate).toHaveBeenCalledTimes(1);
     expect(i18n.translate).toHaveBeenCalledWith(id, { defaultMessage, values });
-    expect(result).toEqual('translation');
   });
 });
