@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualization('new viz panel');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 

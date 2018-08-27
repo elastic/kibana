@@ -18,8 +18,9 @@
  */
 
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
-import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
+import expect from 'expect.js';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -718,7 +719,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('saveVisualizationButton');
-      await testSubjects.existOrFail('saveVisualizationSuccess', defaultFindTimeout);
+      return await testSubjects.exist('saveVisualizationSuccess', defaultFindTimeout);
+    }
+
+    async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const successToast = await testSubjects.exist('saveVisualizationSuccess', defaultFindTimeout);
+      expect(successToast).to.be(true);
+    }
+
+    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const errorToast = await testSubjects.exist('saveVisualizationError', defaultFindTimeout);
+      expect(errorToast).to.be(true);
     }
 
     async clickLoadSavedVisButton() {

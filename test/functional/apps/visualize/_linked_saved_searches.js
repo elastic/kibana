@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not break when saving after unlinking', async () => {
-        await PageObjects.visualize.saveVisualization('Unlinked before saved');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Unlinked before saved');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
           const data = await PageObjects.visualize.getTableVisData();
