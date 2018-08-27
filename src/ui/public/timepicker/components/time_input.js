@@ -63,7 +63,6 @@ export class TimeInput extends Component {
         this.props.onChange('now');
         break;
     }
-    this.setState({ selectedTab });
   };
 
   closePopover = () => {
@@ -71,12 +70,8 @@ export class TimeInput extends Component {
   }
 
   togglePopover = () => {
-    const timeMode = getTimeMode(this.props.value);
     this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
-      selectedTab: this.renderTabs().find(tab => {
-        return tab.id === timeMode;
-      }),
     }));
   }
 
@@ -137,7 +132,7 @@ export class TimeInput extends Component {
       >
         <EuiTabbedContent
           tabs={this.renderTabs()}
-          selectedTab={this.state.selectedTab}
+          initialSelectedTab={{ id: getTimeMode(this.props.value) }}
           onTabClick={this.onTabClick}
           expand
         />
