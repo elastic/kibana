@@ -21,7 +21,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
-import { SampleDataSetCard } from './sample_data_set_card';
+import { SampleDataSetCards } from './sample_data_set_cards';
 
 import {
   EuiPage,
@@ -36,7 +36,6 @@ import {
 
 
 import { getTutorials } from '../load_tutorials';
-import { listSampleDataSets } from '../sample_data_sets';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -70,7 +69,6 @@ export class TutorialDirectory extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
-      sampleDataSets: [],
     };
   }
 
@@ -80,8 +78,6 @@ export class TutorialDirectory extends React.Component {
 
   async componentDidMount() {
     this._isMounted = true;
-
-    this.loadSampleDataSets();
 
     const tutorialConfigs = await getTutorials();
 
@@ -126,20 +122,6 @@ export class TutorialDirectory extends React.Component {
     });
   }
 
-  loadSampleDataSets = async () => {
-    const sampleDataSets = await listSampleDataSets();
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.setState({
-      sampleDataSets: sampleDataSets.sort((a, b) => {
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      }),
-    });
-  }
-
   onSelectedTabChanged = id => {
     this.setState({
       selectedTabId: id,
@@ -158,57 +140,43 @@ export class TutorialDirectory extends React.Component {
     ));
   }
 
-  renderTab = () => {
+  renderTabContent = () => {
     if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
-      return this.renderSampleDataSetsTab();
+      return (
+        <SampleDataSetCards
+          getConfig={this.props.getConfig}
+          setConfig={this.props.setConfig}
+          clearIndexPatternsCache={this.props.clearIndexPatternsCache}
+          addBasePath={this.props.addBasePath}
+        />
+      );
     }
 
-    return this.renderTutorialsTab();
-  }
-
-  renderTutorialsTab = () => {
-    return this.state.tutorialCards
-      .filter((tutorial) => {
-        return this.state.selectedTabId === ALL_TAB_ID || this.state.selectedTabId === tutorial.category;
-      })
-      .map((tutorial) => {
-        return (
-          <EuiFlexItem key={tutorial.name}>
-            <Synopsis
-              iconType={tutorial.icon}
-              description={tutorial.description}
-              title={tutorial.name}
-              wrapInPanel
-              url={tutorial.url}
-              onClick={tutorial.onClick}
-              isBeta={tutorial.isBeta}
-            />
-          </EuiFlexItem>
-        );
-      });
-  };
-
-  renderSampleDataSetsTab = () => {
-    return this.state.sampleDataSets.map(sampleDataSet => {
-      return (
-        <EuiFlexItem key={sampleDataSet.id}>
-          <SampleDataSetCard
-            id={sampleDataSet.id}
-            description={sampleDataSet.description}
-            name={sampleDataSet.name}
-            launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
-            status={sampleDataSet.status}
-            statusMsg={sampleDataSet.statusMsg}
-            onRequestComplete={this.loadSampleDataSets}
-            getConfig={this.props.getConfig}
-            setConfig={this.props.setConfig}
-            clearIndexPatternsCache={this.props.clearIndexPatternsCache}
-            defaultIndex={sampleDataSet.defaultIndex}
-            previewUrl={this.props.addBasePath(sampleDataSet.previewImagePath)}
-          />
-        </EuiFlexItem>
-      );
-    });
+    return (
+      <EuiFlexGrid columns={4}>
+        {
+          this.state.tutorialCards
+            .filter((tutorial) => {
+              return this.state.selectedTabId === ALL_TAB_ID || this.state.selectedTabId === tutorial.category;
+            })
+            .map((tutorial) => {
+              return (
+                <EuiFlexItem key={tutorial.name}>
+                  <Synopsis
+                    iconType={tutorial.icon}
+                    description={tutorial.description}
+                    title={tutorial.name}
+                    wrapInPanel
+                    url={tutorial.url}
+                    onClick={tutorial.onClick}
+                    isBeta={tutorial.isBeta}
+                  />
+                </EuiFlexItem>
+              );
+            })
+        }
+      </EuiFlexGrid>
+    );
   }
 
   render() {
@@ -230,9 +198,7 @@ export class TutorialDirectory extends React.Component {
             {this.renderTabs()}
           </EuiTabs>
           <EuiSpacer />
-          <EuiFlexGrid columns={4}>
-            { this.renderTab() }
-          </EuiFlexGrid>
+          {this.renderTabContent()}
 
         </EuiPageBody>
       </EuiPage>
