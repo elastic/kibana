@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizNamewithSpecialChars);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
     });
 
     it('should save and load with non-ascii characters', async function () {
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Saved viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
       return PageObjects.common.sleep(2000);
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }) {
       expect(sideEditorExists).to.be(false);
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initAreaChart);
       const axisId = 'ValueAxis-1';
 

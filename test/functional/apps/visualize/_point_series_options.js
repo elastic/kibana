@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Add Metric');
       await PageObjects.visualize.clickAddMetric();
       log.debug('Metric = Value Axis');
-      await PageObjects.visualize.clickBucket('Y-Axis');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
       log.debug('Aggregation = Average');
       await PageObjects.visualize.selectAggregation('Average', 'metrics');
       log.debug('Field = memory');

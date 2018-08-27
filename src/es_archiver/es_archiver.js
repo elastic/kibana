@@ -95,7 +95,7 @@ export class EsArchiver {
    *  @return Promise<Stats>
    */
   async rebuildAll() {
-    return rebuildAllAction({
+    return await rebuildAllAction({
       client: this.client,
       dataDir: this.dataDir,
       log: this.log
@@ -109,6 +109,6 @@ export class EsArchiver {
    *  @return Promise<Stats>
    */
   async loadIfNeeded(name) {
-    return this.load(name, { skipExisting: true });
+    return await this.load(name, { skipExisting: true });
   }
 }

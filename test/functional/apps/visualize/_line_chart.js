@@ -118,12 +118,12 @@ export default function ({ getService, getPageObjects }) {
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 

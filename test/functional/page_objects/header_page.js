@@ -236,11 +236,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return messageText;
     }
 
-    async waitForToastMessageGone() {
-      remote.setFindTimeout(defaultFindTimeout);
-      await remote.waitForDeletedByCssSelector('kbn-truncated.toast-message');
-    }
-
     async clickToastOK() {
       log.debug('clickToastOK');
       await retry.try(async () => {
@@ -271,6 +266,16 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async awaitGlobalLoadingIndicatorHidden() {
       log.debug('awaitGlobalLoadingIndicatorHidden');
       await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+    }
+
+    async getGlobalNavigationLink(linkText) {
+      const nav = await testSubjects.find('globalNav');
+      return await nav.findByPartialLinkText(linkText);
+    }
+
+    async clickGlobalNavigationLink(appTitle) {
+      const link = await this.getGlobalNavigationLink(appTitle);
+      await link.click();
     }
 
     async getPrettyDuration() {

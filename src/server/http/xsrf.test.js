@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../test_utils/kbn_server';
 
@@ -31,12 +30,8 @@ const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const actualVersion = require(src('../package.json')).version;
 
 describe('xsrf request filter', function () {
-  function inject(kbnServer, opts) {
-    return fn(cb => {
-      kbnTestServer.makeRequest(kbnServer, opts, (resp) => {
-        cb(null, resp);
-      });
-    });
+  async function inject(kbnServer, opts) {
+    return await kbnTestServer.makeRequest(kbnServer, opts);
   }
 
   const makeServer = async function () {
@@ -186,7 +181,7 @@ describe('xsrf request filter', function () {
         });
 
         expect(resp.statusCode).toBe(400);
-        expect(resp.result.message).toBe('Request must contain a kbn-xsrf header.');
+        expect(resp.result).toMatchSnapshot(`${method} reject response`);
       });
 
       it('accepts whitelisted requests without either an xsrf or version header', async function () {

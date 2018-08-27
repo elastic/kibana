@@ -99,7 +99,9 @@ jest.mock('../../saved_objects', () => {
       update: async (type, id, body, { version }) => {
         if (object._version !== version) {
           throw {
-            statusCode: 409
+            res: {
+              status: 409
+            }
           };
         }
 
@@ -158,6 +160,6 @@ describe('IndexPattern', () => {
       result = err;
     }
 
-    expect(result.statusCode).toBe(409);
+    expect(result.res.status).toBe(409);
   });
 });

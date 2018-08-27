@@ -25,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   Query,
 } from '@elastic/eui';
 
@@ -36,6 +35,8 @@ import { Form } from './components/form';
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import './advanced_settings.less';
+import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './components/default_component_registry';
+import { getSettingsComponent } from './components/component_registry';
 
 export class AdvancedSettings extends Component {
   static propTypes = {
@@ -52,6 +53,8 @@ export class AdvancedSettings extends Component {
       query: parsedQuery,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
     };
+
+    registerDefaultComponents();
   }
 
   init(config) {
@@ -59,9 +62,9 @@ export class AdvancedSettings extends Component {
     this.groupedSettings = this.mapSettings(this.settings);
 
     this.categories = Object.keys(this.groupedSettings).sort((a, b) => {
-      if(a === DEFAULT_CATEGORY) return -1;
-      if(b === DEFAULT_CATEGORY) return 1;
-      if(a > b) return 1;
+      if (a === DEFAULT_CATEGORY) return -1;
+      if (b === DEFAULT_CATEGORY) return 1;
+      if (a > b) return 1;
       return a === b ? 0 : -1;
     });
 
@@ -90,6 +93,7 @@ export class AdvancedSettings extends Component {
           name: setting[0],
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
+          isOverridden: config.isOverridden(setting[0]),
         });
       })
       .filter((c) => !c.readonly)
@@ -132,13 +136,13 @@ export class AdvancedSettings extends Component {
   render() {
     const { filteredSettings, query } = this.state;
 
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+
     return (
       <div className="advancedSettings">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
-            <EuiText>
-              <h1 data-test-subj="managementSettingsTitle">Settings</h1>
-            </EuiText>
+            <PageTitle />
           </EuiFlexItem>
           <EuiFlexItem>
             <Search
@@ -149,7 +153,7 @@ export class AdvancedSettings extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <CallOuts/>
+        <CallOuts />
         <EuiSpacer size="m" />
         <Form
           settings={filteredSettings}

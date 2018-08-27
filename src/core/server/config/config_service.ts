@@ -18,13 +18,14 @@
  */
 
 import { isEqual } from 'lodash';
-import { first, k$, map, Observable, skipRepeats, toPromise } from '../../lib/kbn_observable';
+import { Observable } from 'rxjs';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Logger, LoggerFactory } from '../logging';
 import { ConfigWithSchema } from './config_with_schema';
 import { Env } from './env';
 import { RawConfig } from './raw_config';
-import { AnyType } from './schema';
+import { Type } from './schema';
 
 export type ConfigPath = string | string[];
 
@@ -61,11 +62,11 @@ export class ConfigService {
    * @param ConfigClass A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<Schema extends AnyType, Config>(
+  public atPath<Schema extends Type<any>, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return k$(this.getDistinctRawConfig(path))(
+    return this.getDistinctRawConfig(path).pipe(
       map(rawConfig => this.createConfig(path, rawConfig, ConfigClass))
     );
   }
@@ -76,11 +77,11 @@ export class ConfigService {
    *
    * @see atPath
    */
-  public optionalAtPath<Schema extends AnyType, Config>(
+  public optionalAtPath<Schema extends Type<any>, Config>(
     path: ConfigPath,
     ConfigClass: ConfigWithSchema<Schema, Config>
   ) {
-    return k$(this.getDistinctRawConfig(path))(
+    return this.getDistinctRawConfig(path).pipe(
       map(
         rawConfig =>
           rawConfig === undefined ? undefined : this.createConfig(path, rawConfig, ConfigClass)
@@ -91,7 +92,7 @@ export class ConfigService {
   public async isEnabledAtPath(path: ConfigPath) {
     const enabledPath = createPluginEnabledPath(path);
 
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await this.config$.pipe(first()).toPromise();
 
     if (!config.has(enabledPath)) {
       return true;
@@ -114,13 +115,13 @@ export class ConfigService {
   }
 
   public async getUnusedPaths(): Promise<string[]> {
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
   }
 
-  private createConfig<Schema extends AnyType, Config>(
+  private createConfig<Schema extends Type<any>, Config>(
     path: ConfigPath,
     rawConfig: {},
     ConfigClass: ConfigWithSchema<Schema, Config>
@@ -137,13 +138,12 @@ export class ConfigService {
       );
     }
 
-    const environmentMode = this.env.getMode();
     const config = ConfigClass.schema.validate(
       rawConfig,
       {
-        dev: environmentMode.dev,
-        prod: environmentMode.prod,
-        ...this.env.getPackageInfo(),
+        dev: this.env.mode.dev,
+        prod: this.env.mode.prod,
+        ...this.env.packageInfo,
       },
       namespace
     );
@@ -153,7 +153,7 @@ export class ConfigService {
   private getDistinctRawConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return k$(this.config$)(map(config => config.get(path)), skipRepeats(isEqual));
+    return this.config$.pipe(map(config => config.get(path)), distinctUntilChanged(isEqual));
   }
 
   private markAsHandled(path: ConfigPath) {
