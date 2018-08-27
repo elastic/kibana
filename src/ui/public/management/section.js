@@ -31,6 +31,7 @@ export class ManagementSection {
    * @param {boolean|null} options.visible - defaults to true
    * @param {boolean|null} options.disabled - defaults to false
    * @param {string|null} options.tooltip - defaults to ''
+   * @param {string|null} options.icon - defaults to ''
    * @returns {ManagementSection}
    */
 
@@ -44,6 +45,7 @@ export class ManagementSection {
     this.visible = true;
     this.disabled = false;
     this.tooltip = '';
+    this.icon = '';
     this.url = '';
 
     assign(this, options);
