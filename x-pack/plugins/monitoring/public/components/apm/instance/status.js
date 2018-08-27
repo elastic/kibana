@@ -5,18 +5,12 @@
  */
 
 import React, { Fragment } from 'react';
-import moment from 'moment';
 import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
-import { formatMetric } from '../../../lib/format_number';
 
 export function Status({ stats }) {
   const {
     name,
-    output,
-    version,
-    uptime,
-    timeOfLastEvent
   } = stats;
 
   const metrics = [
@@ -25,26 +19,6 @@ export function Status({ stats }) {
       value: name,
       dataTestSubj: 'name'
     },
-    {
-      label: 'Output',
-      value: output,
-      dataTestSubj: 'output'
-    },
-    {
-      label: 'Version',
-      value: version,
-      dataTestSubj: 'version'
-    },
-    {
-      label: 'Uptime',
-      value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
-    },
-    {
-      label: 'Last Event',
-      value: formatMetric(+moment(timeOfLastEvent), 'time_since2', 'ago'),
-      dataTestSubj: 'timeOfLastEvent',
-    }
   ];
 
   const IconComponent = ({ status }) => (

@@ -5,12 +5,6 @@
  */
 
 import Joi from 'joi';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { getApmClusterStatus } from './_get_apm_cluster_status';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { metricSet } from './metric_set_overview';
-import { handleError } from '../../../../lib/errors';
-import { apmFilter } from '../../../../lib/apm/create_apm_query';
 
 export function apmOverviewRoute(server) {
   /**
@@ -33,25 +27,8 @@ export function apmOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
-      const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+    async handler() {
 
-      try {
-        const [ clusterStatus, metrics ] = await Promise.all([
-          getApmClusterStatus(req, apmIndexPattern, { clusterUuid }),
-          getMetrics(req, apmIndexPattern, metricSet, [apmFilter]),
-        ]);
-
-        reply({
-          clusterStatus,
-          metrics,
-        });
-      } catch(err) {
-        reply(handleError(err, req));
-      }
     }
   });
 }

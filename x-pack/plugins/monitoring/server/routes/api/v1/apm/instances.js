@@ -5,10 +5,6 @@
  */
 
 import Joi from 'joi';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { getApmClusterStatus } from './_get_apm_cluster_status';
-import { getApms } from '../../../../lib/apm/get_apms';
-import { handleError } from '../../../../lib/errors';
 
 export function apmInstancesRoute(server) {
   /**
@@ -31,25 +27,8 @@ export function apmInstancesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
-      const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+    async handler() {
 
-      try {
-        const [ clusterStatus, apms ] = await Promise.all([
-          getApmClusterStatus(req, apmIndexPattern, { clusterUuid }),
-          getApms(req, apmIndexPattern, { clusterUuid }),
-        ]);
-
-        reply({
-          clusterStatus,
-          apms,
-        });
-      } catch(err) {
-        reply(handleError(err, req));
-      }
     }
   });
 }

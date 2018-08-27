@@ -11,20 +11,12 @@ import {
   KuiTableRowCell,
   KuiTableRow
 } from '@kbn/ui-framework/components';
-import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
 import { EuiLink } from '@elastic/eui';
 import { Status } from './status';
 
 
-const filterFields = [ 'beat.name', 'beat.version' ];
+const filterFields = [ 'beat.name' ];
 const columns = [
-  { title: 'Name', sortKey: 'beat.name', sortOrder: SORT_ASCENDING },
-  { title: 'Version', sortKey: 'beat.version', sortOrder: SORT_ASCENDING },
-  { title: 'Error Count', sortKey: 'errorCount', sortOrder: SORT_DESCENDING },
-  // { title: 'Load Average', sortKey: 'os.load.1m' },
-  // { title: 'Memory Size', sortKey: 'process.memory.resident_set_size_in_bytes' },
-  // { title: 'Requests', sortKey: 'requests.total' },
-  // { title: 'Response Times', sortKey: 'response_times.average' }
 ];
 const instanceRowFactory = (goToInstance) => {
   return function KibanaRow(props) {
@@ -40,55 +32,6 @@ const instanceRowFactory = (goToInstance) => {
             </EuiLink>
           </div>
         </KuiTableRowCell>
-        <KuiTableRowCell>
-          <div className="monitoringTableCell__version">
-            <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-${props.beat.version}`}
-            >
-              { props.beat.version }
-            </EuiLink>
-          </div>
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
-            <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-errors`}
-            >
-              { props.errorCount }
-            </EuiLink>
-          </div>
-        </KuiTableRowCell>
-        {/* <KuiTableRowCell>
-          <div title={`Instance status: ${props.kibana.status}`} className="monitoringTableCell__status">
-            <KibanaStatusIcon status={props.kibana.status} availability={props.availability} />&nbsp;
-            { !props.availability ? 'Offline' : capitalize(props.kibana.status) }
-          </div>
-        </KuiTableRowCell> */}
-        {/* <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
-            { formatMetric(get(props, 'os.load["1m"]'), '0.00') }
-          </div>
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
-            { formatNumber(props.process.memory.resident_set_size_in_bytes, 'byte') }
-          </div>
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
-            { formatNumber(props.requests.total, 'int_commas') }
-          </div>
-        </KuiTableRowCell>
-        <KuiTableRowCell>
-          <div className="monitoringTableCell__splitNumber">
-            { props.response_times.average && (formatNumber(props.response_times.average, 'int_commas') + ' ms avg') }
-          </div>
-          <div className="monitoringTableCell__splitNumber">
-            { formatNumber(props.response_times.max, 'int_commas') } ms max
-          </div>
-        </KuiTableRowCell> */}
       </KuiTableRow>
     );
   };

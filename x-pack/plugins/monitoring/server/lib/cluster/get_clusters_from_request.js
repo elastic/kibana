@@ -13,7 +13,6 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getPipelines } from '../logstash/get_pipelines';
 import { getBeatsForClusters } from '../beats';
-import { getApmsForClusters } from '../apm';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
@@ -105,13 +104,6 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   beatsByCluster.forEach(beats => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: beats.clusterUuid });
     set(clusters[clusterIndex], 'beats', beats.stats);
-  });
-
-  // add beats data
-  const apmByCluster = await getApmsForClusters(req, beatsIndexPattern, clusters);
-  apmByCluster.forEach(apm => {
-    const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
-    set(clusters[clusterIndex], 'apm', apm.stats);
   });
 
   const config = req.server.config();

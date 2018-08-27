@@ -5,11 +5,6 @@
  */
 
 import Joi from 'joi';
-import { getApmInfo } from '../../../../lib/apm/get_apm_info';
-import { handleError } from '../../../../lib/errors';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { metricSet } from './metric_set_instance';
 
 /**
  * Kibana instance: This will fetch all data required to display a Kibana
@@ -36,26 +31,7 @@ export function apmInstanceRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
-      const clusterUuid = req.params.clusterUuid;
-      const apmUuid = req.params.apmUuid;
-      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
-
-      try {
-        const [ metrics, apmSummary ] = await Promise.all([
-          getMetrics(req, apmIndexPattern, metricSet),
-          getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
-        ]);
-
-        reply({
-          metrics,
-          apmSummary,
-        });
-      } catch (err) {
-        reply(handleError(err, req));
-      }
+    async handler() {
     }
   });
 }
