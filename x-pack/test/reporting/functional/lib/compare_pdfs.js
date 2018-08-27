@@ -81,6 +81,8 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   log.debug(`writeFileSync: ${actualCopyPath}`);
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
+  log.debug(`PDF size expected: ${fs.statSync(baselineCopyPath).size}, actual : ${fs.statSync(actualCopyPath).size}`);
+
   const convertOptions = {
     '-density': '300',
   };
