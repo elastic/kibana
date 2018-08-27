@@ -4,8 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceState } from './reducer';
+import { createSelector } from 'reselect';
 
-export const selectSourceCoreFields = (state: SourceState) => state.coreFields;
+import { createGraphqlStateSelectors } from '../../../utils/remote_state/remote_graphql_state';
+import { SourceRemoteState } from './state';
 
-export const selectSourceIndices = (state: SourceState) => state.indices;
+const sourceStatusGraphqlStateSelectors = createGraphqlStateSelectors<SourceRemoteState>();
+
+export const selectSource = sourceStatusGraphqlStateSelectors.selectData;
+
+export const selectSourceConfiguration = createSelector(
+  selectSource,
+  source => (source ? source.configuration : null)
+);
+
+export const selectSourceLogAlias = createSelector(
+  selectSourceConfiguration,
+  configuration => (configuration ? configuration.logAlias : null)
+);
+
+export const selectSourceMetricAlias = createSelector(
+  selectSourceConfiguration,
+  configuration => (configuration ? configuration.metricAlias : null)
+);
+
+export const selectSourceStatus = createSelector(
+  selectSource,
+  source => (source ? source.status : null)
+);
+
+export const selectSourceIndexFields = createSelector(
+  selectSourceStatus,
+  sourceStatus => (sourceStatus ? sourceStatus.indexFields : [])
+);
+
+export const selectDerivedIndexPattern = createSelector(
+  selectSourceIndexFields,
+  selectSourceLogAlias,
+  selectSourceMetricAlias,
+  (indexFields, logAlias, metricAlias) => ({
+    fields: indexFields,
+    title: `${logAlias},${metricAlias}`,
+  })
+);

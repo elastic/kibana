@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { logEntriesActions } from './log_entries';
-export { logSummaryActions } from './log_summary';
-export { sourceActions } from './source';
+import { loadSourceActionCreators } from './operations/load';
+
+export const loadSource = loadSourceActionCreators.resolve;

@@ -651,6 +651,41 @@ export namespace LogSummary {
     entriesCount: number;
   };
 }
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    configuration: Configuration;
+    status: Status;
+  };
+
+  export type Configuration = {
+    __typename?: 'InfraSourceConfiguration';
+    metricAlias: string;
+    logAlias: string;
+  };
+
+  export type Status = {
+    __typename?: 'InfraSourceStatus';
+    indexFields: IndexFields[];
+  };
+
+  export type IndexFields = {
+    __typename?: 'InfraIndexField';
+    name: string;
+    type: string;
+    searchable: boolean;
+    aggregatable: boolean;
+  };
+}
 
 export namespace InfraTimeKeyFields {
   export type Fragment = {

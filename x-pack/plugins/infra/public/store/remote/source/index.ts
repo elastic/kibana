@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as sourceActions from './actions';
 import * as sourceSelectors from './selectors';
 
-export { sourceSelectors };
+export { sourceActions, sourceSelectors };
+export * from './epic';
 export * from './reducer';
+export { initialSourceState, SourceState } from './state';

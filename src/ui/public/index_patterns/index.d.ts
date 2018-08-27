@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IndexPattern } from './_index_pattern';
+export { IndexPattern, StaticIndexPattern } from './_index_pattern';
