@@ -32,7 +32,7 @@ export function recordLog(suite, chunk) {
 }
 
 /**
- * recursively walk up from a runnable to collect
+ * Recursively walk up from a runnable to collect
  * the cached log for its suite and all its parents
  * @param {Mocha.Suite} suite
  */
