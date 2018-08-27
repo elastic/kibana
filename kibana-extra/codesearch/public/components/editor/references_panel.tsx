@@ -86,6 +86,6 @@ export class ReferencesPanel extends React.Component<Props> {
 
   private onCodeClick(url: string, pos: IPosition) {
     const { uri } = parseSchema(url)!;
-    history.push(`/${uri}!L${pos.lineNumber}:0`);
+    history.push(`${uri}!L${pos.lineNumber}:0`);
   }
 }
