@@ -19,6 +19,8 @@
 
 import { ManagementSection } from './section';
 
+export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
+
 export const management = new ManagementSection('management', {
   display: 'Management'
 });
