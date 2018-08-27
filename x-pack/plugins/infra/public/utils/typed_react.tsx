@@ -8,8 +8,8 @@ import omit from 'lodash/fp/omit';
 import React from 'react';
 import { InferableComponentEnhancerWithProps } from 'react-redux';
 
-type RendererResult = React.ReactElement<any> | null;
-type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
+export type RendererResult = React.ReactElement<any> | null;
+export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
 
 export type ChildFunctionRendererProps<RenderArgs> = {
   children: RendererFunction<RenderArgs>;
@@ -53,3 +53,13 @@ export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
         >;
     }
   );
+
+export type StateUpdater<State, Props = {}> = (
+  prevState: Readonly<State>,
+  prevProps: Readonly<Props>
+) => State | null;
+
+export function composeStateUpdaters<State, Props>(...updaters: Array<StateUpdater<State, Props>>) {
+  return (state: State, props: Props) =>
+    updaters.reduce((currentState, updater) => updater(currentState, props) || currentState, state);
+}
