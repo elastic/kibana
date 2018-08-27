@@ -28,67 +28,67 @@ export class SecureSavedObjectsClient {
     this._actions = actions;
   }
 
-  async create(type, attributes = {}, options = {}, namespace) {
+  async create(type, attributes = {}, options = {}) {
     return await this._execute(
       type,
       'create',
-      { type, attributes, options, namespace },
-      repository => repository.create(type, attributes, options, namespace),
+      { type, attributes, options },
+      repository => repository.create(type, attributes, options),
     );
   }
 
-  async bulkCreate(objects, options = {}, namespace) {
+  async bulkCreate(objects, options = {}) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_create',
-      { objects, options, namespace },
-      repository => repository.bulkCreate(objects, options, namespace),
+      { objects, options },
+      repository => repository.bulkCreate(objects, options),
     );
   }
 
-  async delete(type, id, namespace) {
+  async delete(type, id, options = {}) {
     return await this._execute(
       type,
       'delete',
-      { type, id, namespace },
-      repository => repository.delete(type, id, namespace),
+      { type, id, options },
+      repository => repository.delete(type, id, options),
     );
   }
 
-  async find(options = {}, namespace) {
+  async find(options = {}) {
     if (options.type) {
-      return await this._findWithTypes(options, namespace);
+      return await this._findWithTypes(options);
     }
 
-    return await this._findAcrossAllTypes(options, namespace);
+    return await this._findAcrossAllTypes(options);
   }
 
-  async bulkGet(objects = [], namespace) {
+  async bulkGet(objects = [], options = {}) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_get',
-      { objects, namespace },
-      repository => repository.bulkGet(objects, namespace)
+      { objects, options },
+      repository => repository.bulkGet(objects, options)
     );
   }
 
-  async get(type, id, namespace) {
+  async get(type, id, options = {}) {
     return await this._execute(
       type,
       'get',
-      { type, id, namespace },
-      repository => repository.get(type, id, namespace)
+      { type, id, options },
+      repository => repository.get(type, id, options)
     );
   }
 
-  async update(type, id, attributes, options = {}, namespace) {
+  async update(type, id, attributes, options = {}) {
     return await this._execute(
       type,
       'update',
-      { type, id, attributes, options, namespace },
-      repository => repository.update(type, id, attributes, options, namespace)
+      { type, id, attributes, options },
+      repository => repository.update(type, id, attributes, options)
     );
   }
 
@@ -121,7 +121,7 @@ export class SecureSavedObjectsClient {
     }
   }
 
-  async _findAcrossAllTypes(options, namespace) {
+  async _findAcrossAllTypes(options) {
     const action = 'find';
 
     // we have to filter for only their authorized types
@@ -130,7 +130,7 @@ export class SecureSavedObjectsClient {
     const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 
     if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
-      return await this._callWithRequestRepository.find(options, namespace);
+      return await this._callWithRequestRepository.find(options);
     }
 
     const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
@@ -143,27 +143,26 @@ export class SecureSavedObjectsClient {
         action,
         types,
         missing,
-        { options, namespace }
+        { options }
       );
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
 
-    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options, namespace });
+    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
 
     return await this._internalRepository.find(
       {
         ...options,
         type: authorizedTypes,
-      },
-      namespace);
+      });
   }
 
-  async _findWithTypes(options, namespace) {
+  async _findWithTypes(options) {
     return await this._execute(
       options.type,
       'find',
-      { options, namespace },
-      repository => repository.find(options, namespace)
+      { options },
+      repository => repository.find(options)
     );
   }
 }

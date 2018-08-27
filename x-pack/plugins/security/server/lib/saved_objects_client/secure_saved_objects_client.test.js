@@ -87,9 +87,8 @@ describe('#create', () => {
     });
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    await expect(client.create(type, attributes, options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.create(type, attributes, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'create')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -102,7 +101,6 @@ describe('#create', () => {
         type,
         attributes,
         options,
-        namespace,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -128,18 +126,16 @@ describe('#create', () => {
     });
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.create(type, attributes, options, namespace);
+    const result = await client.create(type, attributes, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options, namespace);
+    expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'create', [type], {
       type,
       attributes,
       options,
-      namespace,
     });
   });
 
@@ -164,12 +160,11 @@ describe('#create', () => {
     });
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.create(type, attributes, options, namespace);
+    const result = await client.create(type, attributes, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options, namespace);
+    expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
   });
@@ -225,9 +220,8 @@ describe('#bulkCreate', () => {
       { type: type2 },
     ];
     const options = Symbol();
-    const namespace = Symbol();
 
-    await expect(client.bulkCreate(objects, options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.bulkCreate(objects, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([
       mockActions.getSavedObjectAction(type1, 'bulk_create'),
@@ -242,7 +236,6 @@ describe('#bulkCreate', () => {
       {
         objects,
         options,
-        namespace,
       }
     );
   });
@@ -271,17 +264,15 @@ describe('#bulkCreate', () => {
       { type: type2, otherThing: 'everyone' },
     ];
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.bulkCreate(objects, options, namespace);
+    const result = await client.bulkCreate(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options, namespace);
+    expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_create', [type1, type2], {
       objects,
       options,
-      namespace,
     });
   });
 
@@ -310,12 +301,11 @@ describe('#bulkCreate', () => {
       { type: type2, otherThing: 'everyone' },
     ];
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.bulkCreate(objects, options, namespace);
+    const result = await client.bulkCreate(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options, namespace);
+    expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -363,9 +353,9 @@ describe('#delete', () => {
       actions: mockActions,
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    await expect(client.delete(type, id, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -377,7 +367,7 @@ describe('#delete', () => {
       {
         type,
         id,
-        namespace,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -402,17 +392,17 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id, namespace);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, namespace);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
       type,
       id,
-      namespace,
+      options,
     });
   });
 
@@ -436,12 +426,12 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id, namespace);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, namespace);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -492,9 +482,8 @@ describe('#find', () => {
         actions: mockActions,
       });
       const options = { type };
-      const namespace = Symbol();
 
-      await expect(client.find(options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -505,7 +494,6 @@ describe('#find', () => {
         [mockActions.getSavedObjectAction(type, 'find')],
         {
           options,
-          namespace,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -535,9 +523,8 @@ describe('#find', () => {
         actions: mockActions,
       });
       const options = { type: [type1, type2] };
-      const namespace = Symbol();
 
-      await expect(client.find(options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivileges).toHaveBeenCalledWith([
         mockActions.getSavedObjectAction(type1, 'find'),
@@ -551,7 +538,6 @@ describe('#find', () => {
         [mockActions.getSavedObjectAction(type1, 'find')],
         {
           options,
-          namespace,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -576,16 +562,14 @@ describe('#find', () => {
         actions: createMockActions(),
       });
       const options = { type };
-      const namespace = Symbol();
 
-      const result = await client.find(options, namespace);
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
-      expect(mockRepository.find).toHaveBeenCalledWith({ type }, namespace);
+      expect(mockRepository.find).toHaveBeenCalledWith({ type });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
         options,
-        namespace,
       });
     });
 
@@ -609,12 +593,11 @@ describe('#find', () => {
         actions: createMockActions(),
       });
       const options = { type };
-      const namespace = Symbol();
 
-      const result = await client.find(options, namespace);
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
-      expect(mockRepository.find).toHaveBeenCalledWith({ type }, namespace);
+      expect(mockRepository.find).toHaveBeenCalledWith({ type });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
@@ -674,9 +657,8 @@ describe('#find', () => {
         actions: mockActions,
       });
       const options = Symbol();
-      const namespace = Symbol();
 
-      await expect(client.find(options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -687,7 +669,6 @@ describe('#find', () => {
         [mockActions.getSavedObjectAction(type, 'find')],
         {
           options,
-          namespace,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -717,13 +698,12 @@ describe('#find', () => {
         actions: mockActions,
       });
       const options = Symbol();
-      const namespace = Symbol();
 
-      const result = await client.find(options, namespace);
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-      expect(mockRepository.find).toHaveBeenCalledWith(options, namespace);
+      expect(mockRepository.find).toHaveBeenCalledWith(options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
@@ -751,9 +731,8 @@ describe('#find', () => {
         savedObjectTypes: [type1, type2],
         actions: mockActions,
       });
-      const namespace = Symbol();
 
-      await client.find({}, namespace);
+      await client.find({});
 
       expect(mockCheckPrivileges).toHaveBeenCalledWith([
         mockActions.getSavedObjectAction(type1, 'find'),
@@ -761,7 +740,7 @@ describe('#find', () => {
       ]);
       expect(mockRepository.find).toHaveBeenCalledWith(expect.objectContaining({
         type: [type2],
-      }), namespace);
+      }));
     });
 
     test(`returns result of repository.find`, async () => {
@@ -785,16 +764,14 @@ describe('#find', () => {
         actions: createMockActions(),
       });
       const options = Symbol();
-      const namespace = Symbol();
 
-      const result = await client.find(options, namespace);
+      const result = await client.find(options);
 
       expect(result).toBe(returnValue);
-      expect(mockRepository.find).toHaveBeenCalledWith({ type: [type] }, namespace);
+      expect(mockRepository.find).toHaveBeenCalledWith({ type: [type] });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
         options,
-        namespace,
       });
     });
   });
@@ -849,9 +826,9 @@ describe('#bulkGet', () => {
       { type: type1 },
       { type: type2 },
     ];
-    const namespace = Symbol();
+    const options = Symbol();
 
-    await expect(client.bulkGet(objects, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.bulkGet(objects, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([
       mockActions.getSavedObjectAction(type1, 'bulk_get'),
@@ -865,7 +842,7 @@ describe('#bulkGet', () => {
       [mockActions.getSavedObjectAction(type1, 'bulk_get')],
       {
         objects,
-        namespace,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -894,16 +871,16 @@ describe('#bulkGet', () => {
       { type: type1, id: 'foo-id' },
       { type: type2, id: 'bar-id' },
     ];
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.bulkGet(objects, namespace);
+    const result = await client.bulkGet(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, namespace);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_get', [type1, type2], {
       objects,
-      namespace,
+      options,
     });
   });
 
@@ -931,12 +908,12 @@ describe('#bulkGet', () => {
       { type: type1, id: 'foo-id' },
       { type: type2, id: 'bar-id' },
     ];
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.bulkGet(objects, namespace);
+    const result = await client.bulkGet(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, namespace);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -984,9 +961,9 @@ describe('#get', () => {
       actions: mockActions,
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    await expect(client.get(type, id, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'get')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -998,7 +975,7 @@ describe('#get', () => {
       {
         type,
         id,
-        namespace,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1023,17 +1000,17 @@ describe('#get', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.get(type, id, namespace);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id, namespace);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
       type,
       id,
-      namespace,
+      options,
     });
   });
 
@@ -1057,12 +1034,12 @@ describe('#get', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
-    const namespace = Symbol();
+    const options = Symbol();
 
-    const result = await client.get(type, id, namespace);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id, namespace);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -1112,9 +1089,8 @@ describe('#update', () => {
     const id = Symbol();
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    await expect(client.update(type, id, attributes, options, namespace)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.update(type, id, attributes, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'update')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -1128,7 +1104,6 @@ describe('#update', () => {
         id,
         attributes,
         options,
-        namespace,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1155,19 +1130,17 @@ describe('#update', () => {
     const id = Symbol();
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.update(type, id, attributes, options, namespace);
+    const result = await client.update(type, id, attributes, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options, namespace);
+    expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'update', [type], {
       type,
       id,
       attributes,
       options,
-      namespace,
     });
   });
 
@@ -1193,12 +1166,11 @@ describe('#update', () => {
     const id = Symbol();
     const attributes = Symbol();
     const options = Symbol();
-    const namespace = Symbol();
 
-    const result = await client.update(type, id, attributes, options, namespace);
+    const result = await client.update(type, id, attributes, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options, namespace);
+    expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });

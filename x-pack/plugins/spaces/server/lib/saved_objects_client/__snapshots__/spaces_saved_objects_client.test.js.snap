@@ -1,37 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`current space (space_1) #bulk_create throws when the base client returns a malformed document id 1`] = `"Saved object [foo/mock-id] is missing its expected space identifier."`;
+exports[`default space #bulkCreate throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #bulk_get throws when base client returns documents with malformed ids 1`] = `"Saved object [foo/object_1] is missing its expected space identifier."`;
+exports[`default space #bulkGet throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #create throws when the base client returns a malformed document id 1`] = `"Saved object [foo/mock-id] is missing its expected space identifier."`;
+exports[`default space #create throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #delete does not allow an object to be deleted via a different space 1`] = `"not found: foo space_1:object_2"`;
+exports[`default space #delete throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #find throws when base client returns documents with malformed ids 1`] = `"Saved object [foo/object_1] is missing its expected space identifier."`;
+exports[`default space #find throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #get returns error when the object belongs to a different space 1`] = `"not found: foo space_1:object_2"`;
+exports[`default space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #get returns error when the object has a malformed identifier 1`] = `"Saved object [foo/object_1] is missing its expected space identifier."`;
+exports[`default space #update throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #update does not allow an object to be updated via a different space 1`] = `"not found: foo space_1:object_2"`;
+exports[`space_1 space #bulkCreate throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`current space (space_1) #update throws when the base client returns a malformed document id 1`] = `"Saved object [foo/object_1] is missing its expected space identifier."`;
+exports[`space_1 space #bulkGet throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`default space #bulk_create throws when the base client returns a malformed document id 1`] = `"Saved object [foo/default:default] has an unexpected space identifier [default]."`;
+exports[`space_1 space #create throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`default space #bulk_get throws when the base client returns a malformed document id 1`] = `"Saved object [foo/default:default] has an unexpected space identifier [default]."`;
+exports[`space_1 space #delete throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`default space #create throws when the base client returns a malformed document id 1`] = `"Saved object [foo/default:default] has an unexpected space identifier [default]."`;
+exports[`space_1 space #find throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`default space #delete does not allow an object to be deleted via a different space 1`] = `"not found: foo object_2"`;
+exports[`space_1 space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
-exports[`default space #find throws when the base client returns a malformed document id 1`] = `"Saved object [foo/default:default] has an unexpected space identifier [default]."`;
-
-exports[`default space #get returns error when the object belongs to a different space 1`] = `"not found: foo object_2"`;
-
-exports[`default space #get throws when the base client returns a malformed document id 1`] = `"Saved object [foo/default:default] has an unexpected space identifier [default]."`;
-
-exports[`default space #update does not allow an object to be updated via a different space 1`] = `"not found: foo object_2"`;
-
-exports[`default space #update throws when the base client returns a malformed document id 1`] = `"Saved object [space/default:default] has an unexpected space identifier [default]."`;
+exports[`space_1 space #update throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;

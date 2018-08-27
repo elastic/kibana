@@ -102,11 +102,11 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = {}, namespace) {
-    return this._repository.create(type, attributes, options, namespace);
+  async create(type, attributes = {}, options = {}) {
+    return this._repository.create(type, attributes, options);
   }
 
   /**
@@ -115,11 +115,11 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
-  async bulkCreate(objects, options = {}, namespace) {
-    return this._repository.bulkCreate(objects, options, namespace);
+  async bulkCreate(objects, options = {}) {
+    return this._repository.bulkCreate(objects, options);
   }
 
   /**
@@ -127,11 +127,12 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id, namespace) {
-    return this._repository.delete(type, id, namespace);
+  async delete(type, id, options = {}) {
+    return this._repository.delete(type, id, options);
   }
 
   /**
@@ -145,18 +146,19 @@ export class SavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}, namespace) {
-    return this._repository.find(options, namespace);
+  async find(options = {}) {
+    return this._repository.find(options);
   }
 
   /**
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -165,8 +167,8 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], namespace) {
-    return this._repository.bulkGet(objects, namespace);
+  async bulkGet(objects = [], options = {}) {
+    return this._repository.bulkGet(objects, options);
   }
 
   /**
@@ -174,11 +176,12 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, namespace) {
-    return this._repository.get(type, id, namespace);
+  async get(type, id, options = {}) {
+    return this._repository.get(type, id, options);
   }
 
   /**
@@ -188,10 +191,10 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}, namespace) {
-    return this._repository.update(type, id, attributes, options, namespace);
+  async update(type, id, attributes, options = {}) {
+    return this._repository.update(type, id, attributes, options);
   }
 }

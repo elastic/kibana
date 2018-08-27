@@ -56,13 +56,14 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
-  async create(type, attributes = {}, options = {}, namespace) {
+  async create(type, attributes = {}, options = {}) {
     const {
       id,
-      overwrite = false
+      overwrite = false,
+      namespace,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -104,13 +105,14 @@ export class SavedObjectsRepository {
    *
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
-   * @param {string} [namespace]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
    */
-  async bulkCreate(objects, options = {}, namespace) {
+  async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      overwrite = false,
+      namespace
     } = options;
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
@@ -188,10 +190,15 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id, namespace) {
+  async delete(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._writeToCluster('delete', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
@@ -228,10 +235,10 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}, namespace) {
+  async find(options = {}) {
     const {
       type,
       search,
@@ -241,6 +248,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
+      namespace,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -304,7 +312,8 @@ export class SavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -313,7 +322,11 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], namespace) {
+  async bulkGet(objects = [], options = {}) {
+    const {
+      namespace
+    } = options;
+
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -363,10 +376,15 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
-   * @param {string} [namespace]
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, namespace) {
+  async get(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._callCluster('get', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
@@ -401,17 +419,21 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
-   * @param {string} [namespace]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}, namespace) {
+  async update(type, id, attributes, options = {}) {
+    const {
+      version,
+      namespace
+    } = options;
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version: options.version,
+      version,
       refresh: 'wait_for',
       ignore: [404],
       body: {

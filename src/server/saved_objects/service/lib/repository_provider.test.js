@@ -55,7 +55,7 @@ test('creates a valid Repository', async () => {
 
   const repository = provider.getRepository(callCluster);
 
-  await repository.create('foo', {}, {}, 'ns');
+  await repository.create('foo', {}, { namespace: 'ns' });
 
   expect(callCluster).toHaveBeenCalledTimes(1);
   expect(properties.schema.isNamespaceAgnostic).toHaveBeenCalled();

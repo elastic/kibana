@@ -282,9 +282,9 @@ describe('SavedObjectsRepository', () => {
           title: 'Logstash'
         },
         {
-          id: 'foo-id'
+          id: 'foo-id',
+          namespace: 'foo-namespace',
         },
-        'foo-namespace',
       );
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -330,7 +330,8 @@ describe('SavedObjectsRepository', () => {
           title: 'Logstash'
         },
         {
-          id: 'foo-id'
+          id: 'foo-id',
+          namespace: 'foo-namespace',
         }
       );
 
@@ -493,8 +494,9 @@ describe('SavedObjectsRepository', () => {
           { type: 'config', id: 'one', attributes: { title: 'Test One' } },
           { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
         ],
-        {},
-        'foo-namespace'
+        {
+          namespace: 'foo-namespace',
+        },
       );
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -513,13 +515,10 @@ describe('SavedObjectsRepository', () => {
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
       callAdminCluster.returns({ items: [] });
 
-      await savedObjectsRepository.bulkCreate(
-        [
-          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-        ],
-        {}
-      );
+      await savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
@@ -541,8 +540,9 @@ describe('SavedObjectsRepository', () => {
         [
           { type: 'no-ns-type', id: 'one', attributes: { title: 'Test One' } },
         ],
-        {},
-        'foo-namespace'
+        {
+          namespace: 'foo-namespace',
+        },
       );
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -576,7 +576,9 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns({
         result: 'deleted'
       });
-      await savedObjectsRepository.delete('index-pattern', 'logstash-*', 'foo-namespace');
+      await savedObjectsRepository.delete('index-pattern', 'logstash-*', {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
@@ -612,7 +614,9 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns({
         result: 'deleted'
       });
-      await savedObjectsRepository.delete('no-ns-type', 'logstash-*', 'foo-namespace');
+      await savedObjectsRepository.delete('no-ns-type', 'logstash-*', {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
@@ -663,7 +667,7 @@ describe('SavedObjectsRepository', () => {
         sortOrder: 'desc',
       };
 
-      await savedObjectsRepository.find(relevantOpts, 'foo-namespace');
+      await savedObjectsRepository.find(relevantOpts);
       sinon.assert.calledOnce(getSearchDsl);
       sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, relevantOpts);
     });
@@ -706,7 +710,9 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns(namespacedSearchResults);
       const count = namespacedSearchResults.hits.hits.length;
 
-      const response = await savedObjectsRepository.find({}, 'foo-namespace');
+      const response = await savedObjectsRepository.find({
+        namespace: 'foo-namespace',
+      });
 
       expect(response.total).toBe(count);
       expect(response.saved_objects).toHaveLength(count);
@@ -796,7 +802,9 @@ describe('SavedObjectsRepository', () => {
 
     it('prepends namespace and type to the id when providing namespace for namespaced type', async () => {
       callAdminCluster.returns(Promise.resolve(namespacedResult));
-      await savedObjectsRepository.get('index-pattern', 'logstash-*', 'foo-namespace');
+      await savedObjectsRepository.get('index-pattern', 'logstash-*', {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledOnce(callAdminCluster);
@@ -820,7 +828,9 @@ describe('SavedObjectsRepository', () => {
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.returns(Promise.resolve(namespacedResult));
-      await savedObjectsRepository.get('no-ns-type', 'logstash-*', 'foo-namespace');
+      await savedObjectsRepository.get('no-ns-type', 'logstash-*', {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledOnce(callAdminCluster);
@@ -858,11 +868,15 @@ describe('SavedObjectsRepository', () => {
     it('prepends namespace and type appropriately to id when getting objects when there is a namespace', async () => {
       callAdminCluster.returns({ docs: [] });
 
-      await savedObjectsRepository.bulkGet([
-        { id: 'one', type: 'config' },
-        { id: 'two', type: 'index-pattern' },
-        { id: 'three', type: 'no-ns-type' },
-      ], 'foo-namespace');
+      await savedObjectsRepository.bulkGet(
+        [
+          { id: 'one', type: 'config' },
+          { id: 'two', type: 'index-pattern' },
+          { id: 'three', type: 'no-ns-type' },
+        ], {
+          namespace: 'foo-namespace',
+        }
+      );
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -967,15 +981,19 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
-      await savedObjectsRepository.update('index-pattern', 'logstash-*', { title: 'Testing' }, 'foo-namespace');
+      await savedObjectsRepository.update('index-pattern', 'logstash-*', {
+        title: 'Testing',
+      }, {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: 'doc',
-        id: 'index-pattern:logstash-*',
+        id: 'foo-namespace:index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: { namespace: 'foo-namespace', updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1005,7 +1023,11 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      await savedObjectsRepository.update('no-ns-type', 'foo', { name: 'bar' }, 'foo-namespace');
+      await savedObjectsRepository.update('no-ns-type', 'foo', {
+        name: 'bar',
+      }, {
+        namespace: 'foo-namespace',
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {

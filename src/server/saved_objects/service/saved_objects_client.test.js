@@ -29,10 +29,9 @@ test(`#create`, async () => {
   const type = Symbol();
   const attributes = Symbol();
   const options = Symbol();
-  const namespace = Symbol();
-  const result = await client.create(type, attributes, options, namespace);
+  const result = await client.create(type, attributes, options);
 
-  expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options, namespace);
+  expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
   expect(result).toBe(returnValue);
 });
 
@@ -45,10 +44,9 @@ test(`#bulkCreate`, async () => {
 
   const objects = Symbol();
   const options = Symbol();
-  const namespace = Symbol();
-  const result = await client.bulkCreate(objects, options, namespace);
+  const result = await client.bulkCreate(objects, options);
 
-  expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options, namespace);
+  expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
@@ -61,10 +59,10 @@ test(`#delete`, async () => {
 
   const type = Symbol();
   const id = Symbol();
-  const namespace = Symbol();
-  const result = await client.delete(type, id, namespace);
+  const options = Symbol();
+  const result = await client.delete(type, id, options);
 
-  expect(mockRepository.delete).toHaveBeenCalledWith(type, id, namespace);
+  expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });
 
@@ -76,10 +74,9 @@ test(`#find`, async () => {
   const client = new SavedObjectsClient(mockRepository);
 
   const options = Symbol();
-  const namespace = Symbol();
-  const result = await client.find(options, namespace);
+  const result = await client.find(options);
 
-  expect(mockRepository.find).toHaveBeenCalledWith(options, namespace);
+  expect(mockRepository.find).toHaveBeenCalledWith(options);
   expect(result).toBe(returnValue);
 });
 
@@ -91,10 +88,10 @@ test(`#bulkGet`, async () => {
   const client = new SavedObjectsClient(mockRepository);
 
   const objects = Symbol();
-  const namespace = Symbol();
-  const result = await client.bulkGet(objects, namespace);
+  const options = Symbol();
+  const result = await client.bulkGet(objects, options);
 
-  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, namespace);
+  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
@@ -107,10 +104,10 @@ test(`#get`, async () => {
 
   const type = Symbol();
   const id = Symbol();
-  const namespace = Symbol();
-  const result = await client.get(type, id, namespace);
+  const options = Symbol();
+  const result = await client.get(type, id, options);
 
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id, namespace);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });
 
@@ -125,9 +122,8 @@ test(`#update`, async () => {
   const id = Symbol();
   const attributes = Symbol();
   const options = Symbol();
-  const namespace = Symbol();
-  const result = await client.update(type, id, attributes, options, namespace);
+  const result = await client.update(type, id, attributes, options);
 
-  expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options, namespace);
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
   expect(result).toBe(returnValue);
 });
