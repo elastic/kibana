@@ -79,7 +79,7 @@ export class TemplateSelection extends Component {
 
     return (
       <EuiDescribedFormGroup
-        title={<h4>Select a template</h4>}
+        title={<h4>Select an index template</h4>}
         fullWidth
         titleSize="s"
         description={
