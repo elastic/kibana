@@ -6,6 +6,7 @@
 import {
   // @ts-ignore
   EuiButtonIcon,
+  // @ts-ignore
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
+// @ts-ignore
 import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
 

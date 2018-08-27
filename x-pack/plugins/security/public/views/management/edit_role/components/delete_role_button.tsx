@@ -6,6 +6,7 @@
 
 import {
   EuiButtonEmpty,
+  // @ts-ignore
   EuiConfirmModal,
   // @ts-ignore
   EuiOverlayMask,

@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import { Role } from '../../../../../../../common/model/role';
+// @ts-ignore
 import { documentationLinks } from '../../../../../../documentation_links';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';

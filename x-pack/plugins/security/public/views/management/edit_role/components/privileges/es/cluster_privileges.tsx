@@ -13,11 +13,12 @@ import {
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
+// @ts-ignore
 import { getClusterPrivileges } from '../../../../../../services/role_privileges';
 
 interface Props {
   role: Role;
-  onChange: (role: Role) => void;
+  onChange: (privs: string[]) => void;
 }
 
 export class ClusterPrivileges extends Component<Props, {}> {

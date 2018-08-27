@@ -285,7 +285,7 @@ describe('validateInProgressSpacePrivileges', () => {
       },
     ]);
 
-    expect(validator.validateInProgressSpacePrivileges(role)).toMatchObject({
+    expect(validator.validateInProgressSpacePrivileges(role as Role)).toMatchObject({
       isInvalid: false,
     });
   });
@@ -327,7 +327,7 @@ describe('validateSpacePrivileges', () => {
       },
     };
 
-    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+    expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
   });
 
   it('should validate when a space privilege is defined', () => {
@@ -346,7 +346,7 @@ describe('validateSpacePrivileges', () => {
       },
     };
 
-    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+    expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
   });
 
   it('should validate when both global and space privileges are defined', () => {
@@ -366,7 +366,7 @@ describe('validateSpacePrivileges', () => {
       },
     };
 
-    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: false });
+    expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: false });
   });
 
   it('should invalidate when in-progress space privileges are not valid', () => {
@@ -392,6 +392,6 @@ describe('validateSpacePrivileges', () => {
       },
     ]);
 
-    expect(validator.validateSpacePrivileges(role)).toEqual({ isInvalid: true });
+    expect(validator.validateSpacePrivileges(role as Role)).toEqual({ isInvalid: true });
   });
 });

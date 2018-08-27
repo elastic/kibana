@@ -24,6 +24,7 @@ import React, { ChangeEvent, Component, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
+import { KibanaApplicationPrivilege } from '../../../../../common/model/kibana_application_privilege';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
@@ -41,7 +42,7 @@ interface Props {
   rbacEnabled: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  kibanaAppPrivileges: string[];
+  kibanaAppPrivileges: KibanaApplicationPrivilege[];
   notifier: any;
   spaces?: Space[];
   spacesEnabled: boolean;

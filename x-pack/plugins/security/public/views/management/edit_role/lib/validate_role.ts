@@ -10,7 +10,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPrivilege } from '../../../../../common/model/IndexPrivilege';
+import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 

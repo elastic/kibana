@@ -10,6 +10,7 @@ import { copyRole } from './copy_role';
 describe('copyRole', () => {
   it('should perform a deep copy', () => {
     const role: Role = {
+      name: '',
       elasticsearch: {
         cluster: ['all'],
         indices: [{ names: ['index*'], privileges: ['all'] }],

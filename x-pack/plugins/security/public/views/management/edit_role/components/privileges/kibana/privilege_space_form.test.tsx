@@ -6,10 +6,14 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 
 const buildProps = (customProps = {}) => {
+  const availablePrivileges: KibanaPrivilege[] = ['all', 'read'];
+  const selectedPrivilege: KibanaPrivilege = 'none';
+
   return {
     availableSpaces: [
       {
@@ -25,8 +29,8 @@ const buildProps = (customProps = {}) => {
       },
     ],
     selectedSpaceIds: [],
-    availablePrivileges: ['all', 'read'],
-    selectedPrivilege: 'none',
+    availablePrivileges,
+    selectedPrivilege,
     onChange: jest.fn(),
     onDelete: jest.fn(),
     validator: new RoleValidator(),
