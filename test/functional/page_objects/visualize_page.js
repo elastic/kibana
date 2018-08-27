@@ -719,7 +719,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('saveVisualizationButton');
-      return await testSubjects.exist('saveVisualizationSuccess', defaultFindTimeout);
+      return await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
