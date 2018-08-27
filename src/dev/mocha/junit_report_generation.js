@@ -37,25 +37,12 @@ const validXmlCharsRE = new RegExp(
       .addRange(0xE000, 0xFFFD)
       .addRange(0x10000, 0x10FFFF)
       .toString()
-  })+`,
+  })*`,
   'g'
 );
 
 function escapeCdata(string) {
-  const colorless = stripAnsi(string);
-  let validXmlChars = '';
-  while (true) {
-    const match = validXmlCharsRE.exec(colorless);
-
-    if (match) {
-      // if the regex matched add the valid characters
-      // to the result and try again
-      validXmlChars += match[0];
-      continue;
-    }
-
-    return validXmlChars;
-  }
+  return stripAnsi(string).match(validXmlCharsRE).join('');
 }
 
 export function setupJUnitReportGeneration(runner, options = {}) {
