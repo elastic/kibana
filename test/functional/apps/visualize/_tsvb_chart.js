@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
   describe('visual builder', function describeIndexTests() {
@@ -73,13 +74,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', async function () {
-        const expectedMetricValue =  '157';
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${JSON.stringify(value)}`);
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
+        const expectedMetricValue = '157';
+        const value = PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${JSON.stringify(await value)}`);
+        log.debug(`metric value: ${await value}`);
+        await retry.try(async () => {
+          expect(await value).to.eql(expectedMetricValue);
+        });
       });
-
     });
 
     describe('metric', () => {
@@ -94,12 +96,13 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', async function () {
-        const expectedMetricValue =  '156';
-        const value = await PageObjects.visualBuilder.getMetricValue();
+        const expectedMetricValue = '156';
+        const value = PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
+        retry.try(async () => {
+          expect(await value).to.eql(expectedMetricValue);
+        });
       });
-
     });
 
     // add a gauge test
@@ -111,10 +114,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify gauge label and count display', async function () {
-        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
-        expect(labelString).to.be('Count');
-        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+        const labelString = PageObjects.visualBuilder.getGaugeLabel();
+        await retry.try(async () => {
+          expect(await labelString).to.be('Count');
+        });
+        const gaugeCount = PageObjects.visualBuilder.getGaugeCount();
+        await retry.try(async () => {
+          expect(await gaugeCount).to.be('156');
+        });
       });
     });
 
@@ -127,10 +134,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify topN label and count display', async function () {
-        const labelString = await PageObjects.visualBuilder.getTopNLabel();
-        expect(labelString).to.be('Count');
-        const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-        expect(gaugeCount).to.be('156');
+        const labelString = PageObjects.visualBuilder.getTopNLabel();
+        await retry.try(async () => {
+          expect(await labelString).to.be('Count');
+        });
+        const gaugeCount = PageObjects.visualBuilder.getTopNCount();
+        await retry.try(async () => {
+          expect(await gaugeCount).to.be('156');
+        });
       });
     });
 
@@ -181,7 +192,6 @@ export default function ({ getService, getPageObjects }) {
           expect(value).to.be('23');
         });
       });
-
     });
     // add a table sanity timestamp
     describe('table', () => {
@@ -205,11 +215,6 @@ export default function ({ getService, getPageObjects }) {
         const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
         expect(tableData).to.be(expectedData);
       });
-
-
-
     });
-
-
   });
 }
