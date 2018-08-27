@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import dateMath from '@kbn/datemath';
 
@@ -33,8 +34,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
 } from '@elastic/eui';
+
+import {
+  getTimeMode,
+  TIME_MODES,
+} from '../lib/time_modes';
+
+import { prettyDuration } from '../pretty_duration';
 
 export class Timepicker extends Component {
 
@@ -46,6 +53,7 @@ export class Timepicker extends Component {
       to: this.props.to,
       isInvalid: false,
       hasChanged: false,
+      displayPrettyDuration: true,
     };
   }
 
@@ -55,6 +63,7 @@ export class Timepicker extends Component {
       to: nextProps.to,
       isInvalid: false,
       hasChanged: false,
+      displayPrettyDuration: true,
     };
   }
 
@@ -101,34 +110,61 @@ export class Timepicker extends Component {
     return timeValue;
   }
 
+  displayTimeInputs = () => {
+    this.setState({
+      displayPrettyDuration: false
+    });
+  }
+
+  renderTime = () => {
+    const from = this.toTimeString(this.state.from);
+    const to = this.toTimeString(this.state.to);
+    if (!this.state.displayPrettyDuration ||
+      getTimeMode(from) === TIME_MODES.ABSOLUTE && getTimeMode(to) === TIME_MODES.ABSOLUTE) {
+      return (
+        <Fragment>
+          <TimeInput
+            value={from}
+            onChange={this.setFrom}
+          />
+          <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
+          <TimeInput
+            value={to}
+            onChange={this.setTo}
+            roundUp={true}
+          />
+        </Fragment>
+      );
+    }
+
+    const getConfig = (...args) => chrome.getUiSettingsClient().get(...args);
+    return (
+      <span
+        onClick={this.displayTimeInputs}
+      >
+        {prettyDuration(from, to, getConfig)}
+      </span>
+    );
+  }
+
   render() {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFormRow isInvalid={this.state.isInvalid}>
-            <EuiFormControlLayout
-              prepend={(
-                <QuickForm
-                  setTime={this.setTime}
-                />
-              )}
+          <EuiFormControlLayout
+            prepend={(
+              <QuickForm
+                setTime={this.setTime}
+              />
+            )}
+          >
+            <div
+              className="euiDatePickerRange"
+              style={this.state.isInvalid ? { background: 'red' } : undefined}
             >
-              <div
-                className="euiDatePickerRange"
-              >
-                <TimeInput
-                  value={this.toTimeString(this.state.from)}
-                  onChange={this.setFrom}
-                />
-                <EuiText className="euiDatePickerRange__delimeter" size="s" color="subdued">→</EuiText>
-                <TimeInput
-                  value={this.toTimeString(this.state.to)}
-                  onChange={this.setTo}
-                  roundUp={true}
-                />
-              </div>
-            </EuiFormControlLayout>
-          </EuiFormRow>
+              {this.renderTime()}
+            </div>
+          </EuiFormControlLayout>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

@@ -26,6 +26,7 @@ import { RelativeForm } from './relative_form';
 import {
   EuiPopover,
   EuiTabbedContent,
+  EuiText,
 } from '@elastic/eui';
 
 import { formatTimeString } from '../pretty_duration';
@@ -104,9 +105,7 @@ export class TimeInput extends Component {
         id: TIME_MODES.NOW,
         name: 'Now',
         content: (
-          <div>
-            now time stuff goes here
-          </div>
+          <EuiText textAlign="center" style={{ width: 390, padding: 16 }} />
         ),
       }
     ];
