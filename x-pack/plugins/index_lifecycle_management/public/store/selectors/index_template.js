@@ -8,7 +8,7 @@
 
 
 import { createSelector } from 'reselect';
-import { merge, cloneDeep } from 'lodash';
+import { get, merge, cloneDeep } from 'lodash';
 import {
   getSaveAsNewPolicy,
   getSelectedPolicyName,
@@ -19,7 +19,7 @@ import {
 } from '.';
 import { getAliasName } from './general';
 
-export const getIndexTemplates = state => state.indexTemplate.indexTemplates;
+export const getIndexTemplates = state => { return state.indexTemplate.indexTemplates || []; };
 export const getIndexTemplateOptions = createSelector(
   [state => getIndexTemplates(state)],
   templates => {
@@ -63,14 +63,7 @@ export const getFullSelectedIndexTemplate = state => state.indexTemplate.fullSel
 
 export const getAlias = state => {
   const indexTemplate = getSelectedIndexTemplate(state);
-  if (!indexTemplate) {
-    return undefined;
-  }
-  const { settings = {} } = indexTemplate;
-  if (settings.indexlifecycle) {
-    return settings.indexlifecycle.rollover_alias;
-  }
-  return undefined;
+  return get(indexTemplate, 'settings.indexlifecycle.rollover_alias');
 };
 
 // TODO: add createSelector

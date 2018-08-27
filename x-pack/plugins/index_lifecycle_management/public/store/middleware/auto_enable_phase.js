@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  setPhaseData
-} from '../actions';
+import { setPhaseData } from '../actions';
 import { getPhaseData } from '../selectors';
-import { PHASE_ENABLED } from '../constants';
+import { SET_PHASE_DATA, PHASE_ENABLED } from '../constants';
 
 const setsPerPhase = {};
 
 export const autoEnablePhase = store => next => action => {
   const state = store.getState();
 
-  if (action.type === setPhaseData().type) {
+  if (action.type === SET_PHASE_DATA) {
     const { phase } = action.payload;
     setsPerPhase[phase] = setsPerPhase[phase] || 0;
     setsPerPhase[phase]++;

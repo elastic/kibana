@@ -40,9 +40,6 @@ export class PolicyConfiguration extends Component {
     done: PropTypes.func.isRequired,
     back: PropTypes.func.isRequired,
     validate: PropTypes.func.isRequired,
-
-    affectedIndexTemplates: PropTypes.array.isRequired,
-    selectedIndexTemplateName: PropTypes.string.isRequired,
     selectedPolicyName: PropTypes.string.isRequired,
     saveAsNewPolicy: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,

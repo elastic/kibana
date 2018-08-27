@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
+export const SET_PHASE_DATA = 'SET_PHASE_DATA';
+export const SET_SELECTED_NODE_ATTRS = 'SET_SELECTED_NODE_ATTRS';
 export const PHASE_HOT = 'hot';
 export const PHASE_WARM = 'warm';
 export const PHASE_COLD = 'cold';

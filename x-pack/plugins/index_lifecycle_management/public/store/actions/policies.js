@@ -10,7 +10,7 @@
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { loadPolicies } from '../../api';
-
+import { SET_PHASE_DATA } from '../constants';
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
 export const fetchPolicies = () => async dispatch => {
   let policies;
@@ -29,4 +29,4 @@ export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');
 export const setSelectedPolicyName = createAction('SET_SELECTED_POLICY_NAME');
 export const setSaveAsNewPolicy = createAction('SET_SAVE_AS_NEW_POLICY');
 
-export const setPhaseData = createAction('SET_PHASE_DATA', (phase, key, value) => ({ phase, key, value }));
+export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({ phase, key, value }));

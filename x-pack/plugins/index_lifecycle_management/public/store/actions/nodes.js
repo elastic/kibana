@@ -7,8 +7,9 @@
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { loadNodes, loadNodeDetails } from '../../api';
+import { SET_SELECTED_NODE_ATTRS } from '../constants';
 
-export const setSelectedNodeAttrs = createAction('SET_SELECTED_NODE_ATTRS');
+export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);
 export const setSelectedPrimaryShardCount = createAction(
   'SET_SELECTED_PRIMARY_SHARED_COUNT'
 );

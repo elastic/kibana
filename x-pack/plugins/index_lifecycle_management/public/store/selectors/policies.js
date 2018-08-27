@@ -8,11 +8,11 @@
 
 
 import {
+  defaultColdPhase,
+  defaultDeletePhase,
   defaultHotPhase,
   defaultWarmPhase,
-  defaultColdPhase,
-  defaultDeletePhase
-} from '../reducers/policies';
+} from '../defaults';
 import {
   PHASE_HOT,
   PHASE_WARM,
