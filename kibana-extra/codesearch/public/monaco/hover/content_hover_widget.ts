@@ -65,7 +65,7 @@ export class ContentHoverWidget extends ContentWidget {
       // pass the result to redux
       this.hoverResultAction(result);
     }
-    if (this.lastRange && result) {
+    if (this.lastRange && result && result.contents) {
       this.renderMessages(this.lastRange, result);
     } else if (complete) {
       this.hide();
@@ -79,6 +79,10 @@ export class ContentHoverWidget extends ContentWidget {
       contents = result.contents;
     } else {
       contents = [result.contents as MarkedString];
+    }
+    if (contents.length === 0) {
+      this.hide();
+      return;
     }
     contents.filter(content => !!content).forEach(markedString => {
       let markdown: string;
