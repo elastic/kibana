@@ -47,3 +47,5 @@ export const selectVisibleTimeInterval = createSelector(
         }
       : null
 );
+
+export const selectVisibleSummary = (state: LogPositionState) => state.visibleSummary;
