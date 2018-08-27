@@ -44,18 +44,11 @@ interface PluginRegisterParams {
 export class LegacyLoggingServer {
   public connections = [];
   // Emulates Hapi's usage of the podium event bus.
-  public events: Podium = new Podium();
-  private onPreStartCallbacks: Array<() => void> = [];
-  private onPostStopCallbacks: Array<() => void> = [];
+  public events: Podium = new Podium(['log', 'request', 'response']);
+
+  private onPostStopCallback?: () => void;
 
   constructor(legacyLoggingConfig: Readonly<Record<string, any>>) {
-    // Tell our podium instance about the events we'll be using.
-    this.events.registerEvent('log');
-    // We don't actually forward these events, but we have to register them with Podium
-    // in order for the plugin to be able to setup.
-    this.events.registerEvent('response');
-    this.events.registerEvent('request');
-
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
@@ -70,10 +63,7 @@ export class LegacyLoggingServer {
       ops: { interval: 2147483647 },
     };
 
-    setupLogging(this, Config.withDefaultSchema(transformDeprecations(config))).then(() => {
-      // Tell the plugin we're starting.
-      this.onPreStartCallbacks.forEach(callback => callback());
-    });
+    setupLogging(this, Config.withDefaultSchema(transformDeprecations(config)));
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
@@ -90,18 +80,17 @@ export class LegacyLoggingServer {
 
   public stop() {
     // Tell the plugin we're stopping.
-    this.onPostStopCallbacks.forEach(callback => callback());
+    if (this.onPostStopCallback !== undefined) {
+      this.onPostStopCallback();
+    }
   }
 
   public ext(eventName: ServerExtType, callback: () => void) {
     // method is called by plugin that's being registered.
-    if (eventName === 'onPreStart') {
-      this.onPreStartCallbacks.push(callback);
-    } else if (eventName === 'onPostStop') {
+    if (eventName === 'onPostStop') {
       this.onPostStopCallbacks.push(callback);
-    } else {
-      // We don't care about any others the plugin resgisters
     }
+    // We don't care about any others the plugin resgisters
   }
 
   public expose() {
