@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import 'angular-mocks';
 import angular from 'angular';
+import 'angular-mocks';
 import * as i18n from '../core/i18n';
 import { i18nFilter } from './filter';
-import { i18nProvider } from './provider';
+import { I18nProvider, I18nServiceType } from './provider';
 
 jest.mock('../core/i18n', () => ({
   translate: jest.fn().mockImplementation(() => 'translation'),
@@ -29,15 +29,15 @@ jest.mock('../core/i18n', () => ({
 
 angular
   .module('app', [])
-  .provider('i18n', i18nProvider)
+  .provider('i18n', I18nProvider)
   .filter('i18n', i18nFilter);
 
 describe('i18nFilter', () => {
-  let filter;
+  let filter: I18nServiceType;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.inject(i18nFilter => {
+    angular.mock.inject((i18nFilter: I18nServiceType) => {
       filter = i18nFilter;
     })
   );

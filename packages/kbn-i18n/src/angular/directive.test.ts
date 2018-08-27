@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import 'angular-mocks';
 import angular from 'angular';
+import 'angular-mocks';
 import { i18nDirective } from './directive';
-import { i18nProvider } from './provider';
+import { I18nProvider } from './provider';
 
 angular
   .module('app', [])
-  .provider('i18n', (i18nProvider as any) as angular.IServiceProvider)
+  .provider('i18n', I18nProvider)
   .directive('i18nId', i18nDirective);
 
 describe('i18nDirective', () => {

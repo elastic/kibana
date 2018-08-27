@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function i18nDirective(i18n) {
+import { I18nServiceType } from './provider';
+
+export function i18nDirective(i18n: I18nServiceType) {
   return {
     restrict: 'A',
     scope: {
@@ -25,19 +27,18 @@ export function i18nDirective(i18n) {
       defaultMessage: '@i18nDefaultMessage',
       values: '=i18nValues',
     },
-    link: function($scope, $element) {
-      $scope.$watchGroup(['id', 'defaultMessage', 'values'], function([
-        id,
-        defaultMessage = '',
-        values = {},
-      ]) {
-        $element.html(
-          i18n(id, {
-            values,
-            defaultMessage,
-          })
-        );
-      });
+    link($scope: angular.IScope, $element: angular.IRootElementService) {
+      $scope.$watchGroup(
+        ['id', 'defaultMessage', 'values'],
+        ([id, defaultMessage = '', values = {}]) => {
+          $element.html(
+            i18n(id, {
+              values,
+              defaultMessage,
+            })
+          );
+        }
+      );
     },
   };
 }

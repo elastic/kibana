@@ -17,37 +17,37 @@
  * under the License.
  */
 
-import 'angular-mocks';
 import angular from 'angular';
+import 'angular-mocks';
 import * as i18n from '../core/i18n';
-import { i18nProvider } from './provider';
+import { I18nProvider, I18nServiceType } from './provider';
 
-angular.module('app', []).provider('i18n', i18nProvider);
+angular.module('app', []).provider('i18n', I18nProvider);
 
-describe('i18nProvider', () => {
-  let provider;
-  let service;
+describe('I18nProvider', () => {
+  let provider: I18nProvider;
+  let service: I18nServiceType;
 
   beforeEach(
     angular.mock.module('app', [
-      'i18nProvider',
-      i18n => {
-        service = i18n;
+      'I18nProvider',
+      (i18nService: I18nProvider) => {
+        provider = i18nService;
       },
     ])
   );
   beforeEach(
-    angular.mock.inject(i18n => {
-      provider = i18n;
+    angular.mock.inject((i18nService: I18nServiceType) => {
+      service = i18nService;
     })
   );
 
   it('provides wrapper around i18n engine', () => {
-    expect(provider).toEqual(i18n.translate);
+    expect(service).toEqual(i18n.translate);
   });
 
   it('provides service wrapper around i18n engine', () => {
-    const serviceMethodNames = Object.keys(service);
+    const serviceMethodNames = Object.keys(provider);
     const pluginMethodNames = Object.keys(i18n);
 
     expect([...serviceMethodNames, 'translate'].sort()).toEqual(

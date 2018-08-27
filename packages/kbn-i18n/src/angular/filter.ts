@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function i18nFilter(i18n) {
+import { I18nServiceType } from './provider';
+
+export function i18nFilter(i18n: I18nServiceType) {
   return (id: string, { defaultMessage = '', values = {} } = {}) => {
     return i18n(id, {
       values,

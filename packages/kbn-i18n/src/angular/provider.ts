@@ -19,16 +19,24 @@
 
 import * as i18n from '../core';
 
-export function i18nProvider() {
-  this.addMessages = i18n.addMessages;
-  this.getMessages = i18n.getMessages;
-  this.setLocale = i18n.setLocale;
-  this.getLocale = i18n.getLocale;
-  this.setDefaultLocale = i18n.setDefaultLocale;
-  this.getDefaultLocale = i18n.getDefaultLocale;
-  this.setFormats = i18n.setFormats;
-  this.getFormats = i18n.getFormats;
-  this.getRegisteredLocales = i18n.getRegisteredLocales;
-  this.init = i18n.init;
-  this.$get = () => i18n.translate;
+export type I18nServiceType = (
+  id: string,
+  options: { values: { [key: string]: string }; defaultMessage: string }
+) => string;
+
+export class I18nProvider implements angular.IServiceProvider {
+  public addMessages = i18n.addMessages;
+  public getMessages = i18n.getMessages;
+  public setLocale = i18n.setLocale;
+  public getLocale = i18n.getLocale;
+  public setDefaultLocale = i18n.setDefaultLocale;
+  public getDefaultLocale = i18n.getDefaultLocale;
+  public setFormats = i18n.setFormats;
+  public getFormats = i18n.getFormats;
+  public getRegisteredLocales = i18n.getRegisteredLocales;
+  public init = i18n.init;
+
+  public $get(): I18nServiceType {
+    return i18n.translate;
+  }
 }
