@@ -17,27 +17,23 @@
  * under the License.
  */
 
-export function createEditConfig() {
-  return {
-    title: 'Edit the configuration',
-    textPre:
-      `If you're using an X-Pack secured version of Elastic Stack, you must specify` +
-      ' credentials in the `apm-server.yml` config file.',
-    commands: [
-      'output.elasticsearch:',
-      '    hosts: ["<es_url>"]',
-      '    username: <username>',
-      '    password: <password>',
-    ],
-  };
-}
+export const createEditConfig = () => ({
+  title: 'Edit the configuration',
+  textPre:
+    `If you're using an X-Pack secured version of Elastic Stack, you must specify` +
+    ' credentials in the `apm-server.yml` config file.',
+  commands: [
+    'output.elasticsearch:',
+    '    hosts: ["<es_url>"]',
+    '    username: <username>',
+    '    password: <password>',
+  ],
+});
 
-function createStartServer() {
-  return {
-    title: 'Start APM Server',
-    textPre: 'The server processes and stores application performance metrics in Elasticsearch.',
-  };
-}
+const createStartServer = () => ({
+  title: 'Start APM Server',
+  textPre: 'The server processes and stores application performance metrics in Elasticsearch.',
+});
 
 export function createStartServerUnix() {
   const START_SERVER = createStartServer();
@@ -49,44 +45,36 @@ export function createStartServerUnix() {
   };
 }
 
-function createDownloadServerTitle() {
-  return 'Download and unpack APM Server';
-}
+const createDownloadServerTitle = () => 'Download and unpack APM Server';
 
-export function createDownloadServerOsx() {
-  return {
-    title: createDownloadServerTitle(),
-    commands: [
-      'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
-      'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
-      'cd apm-server-{config.kibana.version}-darwin-x86_64/',
-    ],
-  };
-}
+export const createDownloadServerOsx = () => ({
+  title: createDownloadServerTitle(),
+  commands: [
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
+    'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
+    'cd apm-server-{config.kibana.version}-darwin-x86_64/',
+  ],
+});
 
-export function createDownloadServerDeb() {
-  return {
-    title: createDownloadServerTitle(),
-    commands: [
-      'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
-      'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
-    ],
-    textPost:
-      'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
-  };
-}
+export const createDownloadServerDeb = () => ({
+  title: createDownloadServerTitle(),
+  commands: [
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
+    'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
+  ],
+  textPost:
+    'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
+});
 
-export function createDownloadServerRpm() {
-  return {
-    title: createDownloadServerTitle(),
-    commands: [
-      'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
-      'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
-    ],
-    textPost:
-      'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
-  };
-}
+export const createDownloadServerRpm = () => ({
+  title: createDownloadServerTitle(),
+  commands: [
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
+    'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
+  ],
+  textPost:
+    'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
+});
 
 export function createWindowsServerInstructions() {
   const START_SERVER = createStartServer();

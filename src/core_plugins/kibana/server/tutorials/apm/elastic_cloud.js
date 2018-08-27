@@ -30,13 +30,11 @@ import {
   createJavaClientInstructions,
 } from './apm_client_instructions';
 
-function createServerUrlInstruction() {
-  return {
-    title: 'APM Server endpoint',
-    textPre: `Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard.
+const createServerUrlInstruction = () => ({
+  title: 'APM Server endpoint',
+  textPre: `Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard.
     You will also need the APM Server secret token, which was generated on deployment.`,
-  };
-}
+});
 
 export function createElasticCloudInstructions() {
   const SERVER_URL_INSTRUCTION = createServerUrlInstruction();
