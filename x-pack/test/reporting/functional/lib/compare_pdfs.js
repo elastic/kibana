@@ -86,39 +86,29 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
-  let pageNum = 0;
-  let diffTotal = 0;
-  // Ran across an instance where the page conversion failed with `Failed to convert page to image` for no known
-  // reason. Seeing if a loop will resolve these flaky errors.
-  let failCount = 0;
-  while (true) {
-    let expectedPagePng;
-    let actualPagePng;
-    try {
-      log.debug(`Converting expected pdf page ${pageNum} to png`);
-      expectedPagePng = await expectedPdfImage.convertPage(pageNum);
-      log.debug(`Converting actual pdf page ${pageNum} to png`);
-      actualPagePng = await actualPdfImage.convertPage(pageNum);
-    } catch (e) {
-      log.error(`Error caught while converting pdf page ${pageNum} to png: ${e.message}`);
-      if (JSON.stringify(e).indexOf('Requested FirstPage is greater than the number of pages in the file') >= 0) {
-        break;
-      } else {
-        if (failCount < 3) {
-          log.error(`${failCount}: Will try conversion again...`);
-          failCount++;
-          continue;
-        } else {
-          log.error(`Failed ${failCount} times, throwing error`);
-          throw e;
-        }
-      }
-    }
+  const [actualPages, expectedPages] = await Promise.all([
+    actualPdfImage.numberOfPages(),
+    expectedPdfImage.numberOfPages(),
+  ]);
 
+  if (actualPages !== expectedPages) {
+    throw new Error(
+      `Expected ${expectedPages} pages but got ${actualPages} in PDFs expected: "${baselineCopyPath}" actual: "${actualCopyPath}".`
+    );
+  }
+
+  let diffTotal = 0;
+
+  for (let pageNum = 0; pageNum <= expectedPages; ++pageNum) {
+    log.debug(`Converting expected pdf page ${pageNum} to png`);
+    const expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+    log.debug(`Converting actual pdf page ${pageNum} to png`);
+    const actualPagePng = await actualPdfImage.convertPage(pageNum);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
     diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
     pageNum++;
   }
+
   return diffTotal;
 }
 
