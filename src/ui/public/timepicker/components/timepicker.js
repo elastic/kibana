@@ -36,12 +36,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import {
-  getTimeMode,
-  TIME_MODES,
-} from '../lib/time_modes';
-
 import { prettyDuration } from '../pretty_duration';
+import { timeNavigation } from '../time_navigation';
+import { calculateBounds } from 'ui/timefilter/get_time';
 
 export class Timepicker extends Component {
 
@@ -53,7 +50,7 @@ export class Timepicker extends Component {
       to: this.props.to,
       isInvalid: false,
       hasChanged: false,
-      displayPrettyDuration: true,
+      isEditMode: false,
     };
   }
 
@@ -63,7 +60,7 @@ export class Timepicker extends Component {
       to: nextProps.to,
       isInvalid: false,
       hasChanged: false,
-      displayPrettyDuration: true,
+      isEditMode: false,
     };
   }
 
@@ -98,6 +95,18 @@ export class Timepicker extends Component {
     this.setTime({ from: this.state.from, to });
   }
 
+  getBounds = () => {
+    return calculateBounds({ from: this.state.from, to: this.state.to });
+  }
+
+  stepForward = () => {
+    this.setTime(timeNavigation.stepForward(this.getBounds()));
+  }
+
+  stepBackward = () => {
+    this.setTime(timeNavigation.stepBackward(this.getBounds()));
+  }
+
   applyTimeChanges = () => {
     this.props.setTime(this.state.from, this.state.to);
   }
@@ -110,17 +119,16 @@ export class Timepicker extends Component {
     return timeValue;
   }
 
-  displayTimeInputs = () => {
+  editMode = () => {
     this.setState({
-      displayPrettyDuration: false
+      isEditMode: true
     });
   }
 
   renderTime = () => {
     const from = this.toTimeString(this.state.from);
     const to = this.toTimeString(this.state.to);
-    if (!this.state.displayPrettyDuration ||
-      getTimeMode(from) === TIME_MODES.ABSOLUTE && getTimeMode(to) === TIME_MODES.ABSOLUTE) {
+    if (this.state.isEditMode || this.state.hasChanged) {
       return (
         <Fragment>
           <TimeInput
@@ -140,7 +148,8 @@ export class Timepicker extends Component {
     const getConfig = (...args) => chrome.getUiSettingsClient().get(...args);
     return (
       <span
-        onClick={this.displayTimeInputs}
+        className="kuiLocalMenuItem"
+        onClick={this.editMode}
       >
         {prettyDuration(from, to, getConfig)}
       </span>
@@ -148,6 +157,20 @@ export class Timepicker extends Component {
   }
 
   render() {
+    let updateButton;
+    if (this.state.isEditMode || this.state.hasChanged) {
+      updateButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={this.applyTimeChanges}
+            fill
+            disabled={this.state.isInvalid || !this.state.hasChanged}
+          >
+            Go
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -155,6 +178,8 @@ export class Timepicker extends Component {
             prepend={(
               <QuickForm
                 setTime={this.setTime}
+                stepForward={this.stepForward}
+                stepBackward={this.stepBackward}
               />
             )}
           >
@@ -167,15 +192,8 @@ export class Timepicker extends Component {
           </EuiFormControlLayout>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.applyTimeChanges}
-            fill
-            disabled={this.state.isInvalid || !this.state.hasChanged}
-          >
-            Update
-          </EuiButton>
-        </EuiFlexItem>
+        {updateButton}
+
       </EuiFlexGroup>
     );
   }

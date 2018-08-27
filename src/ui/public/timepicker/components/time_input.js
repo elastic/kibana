@@ -114,6 +114,7 @@ export class TimeInput extends Component {
   render() {
     const input = (
       <span
+        className="kuiLocalMenuItem"
         onClick={this.togglePopover}
       >
         {formatTimeString(this.props.value, chrome.getUiSettingsClient().get('dateFormat'))}

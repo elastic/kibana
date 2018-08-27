@@ -42,6 +42,7 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiLink,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 const LAST = 'last';
@@ -120,6 +121,23 @@ export class QuickForm extends Component {
       to: to
     });
     this.closePopover();
+  }
+
+  renderTimeNavigation = () => {
+    return (
+      <Fragment>
+        <EuiButtonIcon
+          onClick={this.props.stepBackward}
+          iconType="arrowLeft"
+          aria-label="Move backward in time"
+        />
+        <EuiButtonIcon
+          onClick={this.props.stepForward}
+          iconType="arrowRight"
+          aria-label="Move forward in time"
+        />
+      </Fragment>
+    );
   }
 
   renderQuickSelect = () => {
@@ -270,6 +288,8 @@ export class QuickForm extends Component {
         ownFocus
       >
         <div style={{ width: '400px' }}>
+          {this.renderTimeNavigation()}
+          <EuiHorizontalRule />
           {this.renderQuickSelect()}
           <EuiHorizontalRule />
           {this.renderCommonlyUsed()}
@@ -283,4 +303,6 @@ export class QuickForm extends Component {
 
 QuickForm.propTypes = {
   setTime: PropTypes.func.isRequired,
+  stepForward: PropTypes.func.isRequired,
+  stepBackward: PropTypes.func.isRequired,
 };

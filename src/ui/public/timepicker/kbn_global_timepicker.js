@@ -20,7 +20,6 @@
 import { uiModules } from '../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
-import { timeNavigation } from './time_navigation';
 import { timefilter } from 'ui/timefilter';
 import { prettyDuration } from './pretty_duration';
 import { prettyInterval } from './pretty_interval';
@@ -68,14 +67,6 @@ uiModules
 
         $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
-        };
-
-        $scope.forward = function () {
-          timefilter.setTime(timeNavigation.stepForward(timefilter.getBounds()));
-        };
-
-        $scope.back = function () {
-          timefilter.setTime(timeNavigation.stepBackward(timefilter.getBounds()));
         };
 
         $scope.updateFilter = function (from, to, mode) {

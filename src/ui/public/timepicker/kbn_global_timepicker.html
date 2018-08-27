@@ -38,50 +38,6 @@
     </span>
   </button>
 
-  <button
-    ng-show="timefilterValues.isTimeRangeSelectorEnabled"
-    class="kuiLocalMenuItem"
-    ng-click="back()"
-    aria-label="Move backward in time"
-  >
-    <span
-      class="kuiIcon fa-chevron-left"
-      aria-hidden="true"
-      tooltip="Move backward in time"
-    ></span>
-  </button>
-
-  <button
-    ng-show="timefilterValues.isTimeRangeSelectorEnabled"
-    data-test-subj="globalTimepickerButton"
-    class="kuiLocalMenuItem navbar-timepicker-time-desc"
-    ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('filter')}"
-    ng-click="kbnTopNav.toggle('filter')"
-    aria-label="Open time range picker"
-    aria-haspopup="true"
-  >
-    <span aria-hidden="true" class="kuiIcon fa-clock-o"></span>
-    <span
-      aria-label="Current time range is {{timefilterValues.display.time}}"
-      data-test-subj="globalTimepickerRange"
-    >
-      {{timefilterValues.display.time}}
-    </span>
-  </button>
-
-  <button
-    ng-show="timefilterValues.isTimeRangeSelectorEnabled"
-    class="kuiLocalMenuItem"
-    ng-click="forward()"
-    aria-label="Move forward in time"
-  >
-    <span
-      aria-hidden="true"
-      class="kuiIcon fa-chevron-right"
-      tooltip="Move forward in time"
-    ></span>
-  </button>
-
   <new-kbn-timepicker
     from="timefilterValues.time.from"
     to="timefilterValues.time.to"
