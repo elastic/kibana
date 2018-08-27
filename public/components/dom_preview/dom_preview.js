@@ -10,7 +10,6 @@ export class DomPreview extends React.Component {
   static propTypes = {
     elementId: PropTypes.string.isRequired,
     height: PropTypes.number.isRequired,
-    setPagePreviewWidth: PropTypes.func,
   };
 
   componentDidMount() {
@@ -22,7 +21,7 @@ export class DomPreview extends React.Component {
     const slowUpdate = debounce(update, 250);
 
     this.observer = new MutationObserver(slowUpdate);
-    // configuration of the observer:
+    // configuration of the observer
     const config = { attributes: true, childList: true, subtree: true };
     // pass in the target node, as well as the observer options
     this.observer.observe(original, config);
@@ -47,6 +46,7 @@ export class DomPreview extends React.Component {
       if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
       this.content.appendChild(thumb);
     }
+
     // Copy canvas data
     const originalCanvas = original.querySelectorAll('canvas');
     const thumbCanvas = thumb.querySelectorAll('canvas');
@@ -58,13 +58,8 @@ export class DomPreview extends React.Component {
       );
     }
 
-    this.props.setPagePreviewWidth(thumbWidth + 2);
-
-    this.container.style.cssText = `width: ${thumbWidth}; height: ${thumbHeight}; overflow: 'hidden',`;
-
-    this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left; height: ${originalHeight}; width: ${originalWidth};`;
-
-    thumb.style.cssText = 'visibility: inherit;';
+    this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
+    this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
   };
 
   render() {

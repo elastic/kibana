@@ -1,11 +1,6 @@
 .canvasPageManager {
-  white-space: nowrap;
-  max-width: 100%;
-
   .canvasPageManager__pages {
     position: relative;
-    overflow-y: hidden;
-    height: 144px;
   }
 
   .canvasPageManager__pageList {
@@ -48,9 +43,6 @@
 
   .canvasPageManager__page {
     padding: $euiSize $euiSize $euiSize $euiSizeS;
-    color: inherit;
-    min-height: 100px;
-    max-height: 144px;
 
     &:focus,
     &-isActive {
@@ -86,13 +78,6 @@
         outline-color: $euiColorDarkShade;
       }
     }
-
-    // layout overrides
-    .canvasInteractable-actions,
-    .canvasInteractable-resize,
-    .canvasRenderEl--remove-icon {
-      display: none;
-    }
   }
 
   .canvasPageManager__pageNumber {
@@ -101,16 +86,8 @@
 
   .canvasPageManager__pagePreview {
     @include euiBottomShadowSmall;
-
-    height: ($euiSizeXXL + $euiSizeS) * 2;
     position: relative;
-    white-space: initial;
-    position: relative;
-    vertical-align: top;
-    width: ($euiSizeXL * 2);
-    height: ($euiSizeXXL + $euiSizeS) * 2;
     overflow: hidden;
-    margin: 0 auto;
 
     .canvasPositionable {
       position: absolute;
