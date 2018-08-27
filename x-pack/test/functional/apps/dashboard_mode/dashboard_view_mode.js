@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
         expect(collapseLinkExists).to.be(true);
 
         const navLinks = await find.allByCssSelector('.global-nav-link');
-        expect(navLinks.length).to.equal(4);
+        expect(navLinks.length).to.equal(5);
       });
 
       it('shows the dashboard landing page by default', async () => {
