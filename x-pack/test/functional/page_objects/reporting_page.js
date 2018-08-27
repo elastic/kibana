@@ -136,6 +136,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clickDownloadReportButton(timeout) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
+      await testSubjects.click('toastCloseButton');
     }
 
     async getUnsavedChangesWarningExists() {
