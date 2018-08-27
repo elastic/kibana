@@ -35,7 +35,7 @@ import { Form } from './components/form';
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import './advanced_settings.less';
-import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './components/default_component_registry';
+import { registerDefaultComponents, PAGE_TITLE_COMPONENT, PAGE_FOOTER_COMPONENT } from './components/default_component_registry';
 import { getSettingsComponent } from './components/component_registry';
 
 export class AdvancedSettings extends Component {
@@ -137,6 +137,7 @@ export class AdvancedSettings extends Component {
     const { filteredSettings, query } = this.state;
 
     const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
       <div className="advancedSettings">
@@ -163,6 +164,7 @@ export class AdvancedSettings extends Component {
           save={this.saveConfig}
           clear={this.clearConfig}
         />
+        <PageFooter />
       </div>
     );
   }

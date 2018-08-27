@@ -3,26 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import 'plugins/xpack_main/views/management/telemetry';
 import routes from 'ui/routes';
 
-import { management } from 'ui/management';
+import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
+import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
+import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function () {
-      const kibanaManagementSection = management.getSection('kibana');
+    telemetryManagementSection: function (Private) {
+      const telemetryOptInProvider = Private(TelemetryOptInProvider);
+      const Component = () => <TelemetryForm telemetryOptInProvider={telemetryOptInProvider} />;
 
-      if (kibanaManagementSection.hasItem('telemetry')) {
-        kibanaManagementSection.deregister('telemetry');
-      }
-
-      kibanaManagementSection.register('telemetry', {
-        order: 25,
-        display: 'Usage Data',
-        url: '#/management/kibana/usageData'
-      });
+      registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
     }
   }
 });

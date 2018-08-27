@@ -8,7 +8,7 @@ import moment from 'moment';
 
 export function TelemetryOptInProvider($injector, chrome) {
 
-  const Notifier = $injector.get('notifier');
+  const Notifier = $injector.get('Notifier');
   const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
 

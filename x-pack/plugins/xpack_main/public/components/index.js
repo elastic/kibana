@@ -12,4 +12,5 @@ export { AddLicense } from '../../../license_management/public/sections/license_
  */
 export { BASE_PATH as MANAGEMENT_BASE_PATH } from '../../../license_management/common/constants';
 
-export { OptInExampleFlyout } from './opt_in_details_component';
+export { TelemetryForm } from './telemetry/telemetry_form';
+export { OptInExampleFlyout } from './telemetry/opt_in_details_component';

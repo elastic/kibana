@@ -19,6 +19,11 @@
 
 import { ManagementSection } from './section';
 
+export {
+  PAGE_TITLE_COMPONENT,
+  PAGE_FOOTER_COMPONENT,
+} from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
+
 export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
 
 export const management = new ManagementSection('management', {
