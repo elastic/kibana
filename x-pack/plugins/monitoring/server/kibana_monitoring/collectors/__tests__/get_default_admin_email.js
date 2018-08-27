@@ -10,7 +10,7 @@ import { set } from 'lodash';
 
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../../server/lib/constants';
 import { getDefaultAdminEmail, resetDeprecationWarning } from '../get_settings_collector';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../../lib/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../../../common/constants';
 
 describe('getSettingsCollector / getDefaultAdminEmail', () => {
   function setup({ enabled = true, docExists = true, defaultAdminEmail = 'default-admin@email.com', adminEmail = null }) {

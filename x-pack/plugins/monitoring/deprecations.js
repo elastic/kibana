@@ -5,7 +5,7 @@
  */
 
 import { get, has, set } from 'lodash';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './server/lib/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**
  * Re-writes deprecated user-defined config settings and logs warnings as a

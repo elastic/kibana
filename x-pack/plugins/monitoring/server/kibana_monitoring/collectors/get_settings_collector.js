@@ -6,8 +6,7 @@
 
 import { get } from 'lodash';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
-import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../lib/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 
 let loggedDeprecationWarning = false;
 
