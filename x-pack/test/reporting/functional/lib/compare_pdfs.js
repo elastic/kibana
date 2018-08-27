@@ -12,6 +12,7 @@ import mkdirp from 'mkdirp';
 
 import { PNG } from 'pngjs';
 import { PDFImage } from 'pdf-image';
+import PDFJS from 'pdfjs-dist';
 
 const mkdirAsync = promisify(mkdirp);
 
@@ -81,8 +82,6 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   log.debug(`writeFileSync: ${actualCopyPath}`);
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
-  log.debug(`PDF size expected: ${fs.statSync(baselineCopyPath).size}, actual : ${fs.statSync(actualCopyPath).size}`);
-
   const convertOptions = {
     '-density': '300',
   };
@@ -91,18 +90,10 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
 
   log.debug(`Calculating numberOfPages`);
 
-  let actualPages;
-  let expectedPages;
-  try {
-    [actualPages, expectedPages] = await Promise.all([
-      actualPdfImage.numberOfPages(),
-      expectedPdfImage.numberOfPages(),
-    ]);
-  } catch (error) {
-    log.debug(`PDF generation failed with error: ${error.message}`);
-    log.error(JSON.stringify(error.error));
-    throw error;
-  }
+  const actualDoc = await PDFJS.getDocument(actualCopyPath);
+  const expectedDoc = await PDFJS.getDocument(baselineCopyPath);
+  const actualPages = actualDoc.numPages;
+  const expectedPages = expectedDoc.numPages;
 
   if (actualPages !== expectedPages) {
     throw new Error(
@@ -124,4 +115,3 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
 
   return diffTotal;
 }
-
