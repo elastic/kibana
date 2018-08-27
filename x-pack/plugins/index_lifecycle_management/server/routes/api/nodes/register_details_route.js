@@ -12,7 +12,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
-function formatStats(stats, nodeAttrs) {
+function findMatchingNodes(stats, nodeAttrs) {
   return Object.entries(stats.nodes).reduce((accum, [nodeId, stats]) => {
     const attributes = stats.attributes || {};
     for (const [key, value] of Object.entries(attributes)) {
@@ -48,7 +48,7 @@ export function registerDetailsRoute(server) {
 
       try {
         const stats = await fetchNodeStats(callWithRequest);
-        const response = formatStats(stats, request.params.nodeAttrs);
+        const response = findMatchingNodes  (stats, request.params.nodeAttrs);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {

@@ -27,25 +27,26 @@ async function getAffectedIndices(
 ) {
   const templates = await fetchTemplates(callWithRequest);
 
-  if (!templates || Object.keys(templates).length === 0 | templates.status === 404) {
+  if (!templates || Object.keys(templates).length === 0 || templates.status === 404) {
     return [];
   }
 
   const indexPatterns = Object.entries(templates).reduce((accum, [templateName, template]) => {
-    if (templateName === indexTemplateName) {
-      accum.push(...template.index_patterns);
-    } else if (
+    const isMatchingTemplate = templateName === indexTemplateName;
+    const isMatchingPolicy = (
+      policyName &&
       template.settings &&
       template.settings.index &&
       template.settings.index.lifecycle &&
-      (policyName && template.settings.index.lifecycle.name === policyName)
-    ) {
+      template.settings.index.lifecycle.name === policyName
+    );
+    if (isMatchingTemplate || isMatchingPolicy) {
       accum.push(...template.index_patterns);
     }
     return accum;
   }, []);
 
-  if (!indexPatterns || indexPatterns.length === 0) {
+  if (indexPatterns.length === 0) {
     return [];
   }
   const indexParams = {

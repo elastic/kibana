@@ -13,7 +13,7 @@ import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 import { NODE_ATTRS_KEYS_TO_IGNORE } from './constants';
 
-function formatStats(stats) {
+function convertStatsIntoList(stats) {
   return Object.entries(stats.nodes).reduce((accum, [nodeId, stats]) => {
     const attributes = stats.attributes || {};
     for (const [key, value] of Object.entries(attributes)) {
@@ -47,7 +47,7 @@ export function registerListRoute(server) {
 
       try {
         const stats = await fetchNodeStats(callWithRequest);
-        const response = formatStats(stats);
+        const response = convertStatsIntoList(stats);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {
