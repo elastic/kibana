@@ -51,6 +51,7 @@ export class AdvancedSettings extends Component {
     this.init(config);
     this.state = {
       query: parsedQuery,
+      footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
     };
 
@@ -129,12 +130,19 @@ export class AdvancedSettings extends Component {
   clearQuery = () => {
     this.setState({
       query: Query.parse(''),
+      footerQueryMatched: false,
       filteredSettings: this.groupedSettings,
     });
   }
 
+  onFooterQueryMatchChange = (matched) => {
+    this.setState({
+      footerQueryMatched: matched
+    });
+  }
+
   render() {
-    const { filteredSettings, query } = this.state;
+    const { filteredSettings, query, footerQueryMatched } = this.state;
 
     const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
     const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
@@ -163,8 +171,9 @@ export class AdvancedSettings extends Component {
           clearQuery={this.clearQuery}
           save={this.saveConfig}
           clear={this.clearConfig}
+          showNoResultsMessage={!footerQueryMatched}
         />
-        <PageFooter />
+        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
       </div>
     );
   }

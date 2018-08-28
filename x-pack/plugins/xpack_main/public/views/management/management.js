@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import 'plugins/xpack_main/views/management/telemetry';
 import routes from 'ui/routes';
 
 import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
@@ -15,7 +14,7 @@ routes.defaults(/\/management/, {
   resolve: {
     telemetryManagementSection: function (Private) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
-      const Component = () => <TelemetryForm telemetryOptInProvider={telemetryOptInProvider} />;
+      const Component = (props) => <TelemetryForm telemetryOptInProvider={telemetryOptInProvider} {...props} />;
 
       registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
     }

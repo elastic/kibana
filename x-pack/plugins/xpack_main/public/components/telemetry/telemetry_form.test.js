@@ -40,6 +40,8 @@ const buildTelemetryOptInProvider = () => {
 
 describe('TelemetryForm', () => {
   it('renders as expected', () => {
-    expect(shallow(<TelemetryForm telemetryOptInProvider={buildTelemetryOptInProvider()} />)).toMatchSnapshot();
+    expect(shallow(
+      <TelemetryForm query={{ text: '' }} onQueryMatchChange={jest.fn()} telemetryOptInProvider={buildTelemetryOptInProvider()} />)
+    ).toMatchSnapshot();
   });
 });
