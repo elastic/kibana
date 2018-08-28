@@ -77,6 +77,7 @@ This section summarizes the changes in each release.
 
 [[release-notes-6.4.0]]
 == {kib} 6.4.0
+
 [float]
 [[breaking-6.4.0]]
 === Breaking Changes
@@ -96,12 +97,14 @@ were handled. This change removes the original fetch method and renames
 the constructor of `SearchRequest` and throws an error when not provided.
 
 [float]
+[[features-6.4.0]]
 === New Features
 
 For an overview of the features that were added in 6.4.0 and how the user experience
 improved, see <<release-highlights-6.4.0, 6.4.0 Release Highlights>>.
 
 [float]
+[[enhancements-6.4.0]]
 === Enhancements
 
 APM::
@@ -171,7 +174,6 @@ Machine Learning::
 * [Fixes #19068] Provides more helpful job validation success messages {pull}21079[#21079]
 * [Fixes #18689] Makes script_fields available in field dropdowns of the advanced wizard's detectors modal {pull}21205[#21205]
 * Improves job validation messages {pull}21191[#21191]
-
 
 Management::
 * [Fixes #19741] Modifies the logic for showing the *Extend Trial* pane {pull}20211[#20211]
@@ -269,6 +271,7 @@ You can now define multiple aggregations to split your chart on multiple fields.
 * Replaces spy panels with an Inspector {pull}16387[#16387]
 
 [float]
+[[bugs-6.4.0]]
 === Bug Fixes
 
 APM::
@@ -434,6 +437,7 @@ Operations::
 * Converts `ResizeChecker` and `render-complete` tools to TypeScript {pull}20531[#20531]
 * Solves a problem where the `toApiFieldNames` method in the Stats API was converting 
 arrays in the data to objects. {pull}21053[#21053]
+* Returns keystore data as a structured object. {pull}22022[#22022]
 
 Platform::
 * [Fixes #20573] Removes unnecessary`kbn-version` header on all HTTP responses {pull}20551[#20551]

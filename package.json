@@ -75,7 +75,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "3.6.1",
+    "@elastic/eui": "3.7.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -332,6 +332,7 @@
     "postcss": "^7.0.2",
     "prettier": "^1.14.0",
     "proxyquire": "1.7.11",
+    "regenerate": "^1.4.0",
     "simple-git": "1.37.0",
     "sinon": "^5.0.7",
     "strip-ansi": "^3.0.1",
