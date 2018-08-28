@@ -26,7 +26,9 @@ export const TranspileScssTask = {
 
   async run(config, log, build) {
     const scanDirs = [ build.resolvePath('src/core_plugins') ];
-    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths: [] } });
+    const paths = [ build.resolvePath('node_modules/x-pack') ];
+
+    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
     const enabledPlugins = await spec$.pipe(toArray()).toPromise();
 
     try {
