@@ -9,37 +9,37 @@ import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
+const serializePrivileges = (application, privilegeMap) => {
+  return {
+    [application]: {
+      ...Object.entries(privilegeMap.global).reduce((acc, [privilegeName, privilegeActions]) => {
+        acc[privilegeName] = {
+          application,
+          name: privilegeName,
+          actions: privilegeActions,
+          metadata: {},
+        };
+        return acc;
+      }, {}),
+      ...Object.entries(privilegeMap.space).reduce((acc, [privilegeName, privilegeActions]) => {
+        const name = spaceApplicationPrivilegesSerializer.privilege.serialize(privilegeName);
+        acc[name] = {
+          application,
+          name,
+          actions: privilegeActions,
+          metadata: {},
+        };
+        return acc;
+      }, {})
+    }
+  };
+};
+
 export async function registerPrivilegesWithCluster(server) {
 
   const { authorization } = server.plugins.security;
   const { types: savedObjectTypes } = server.savedObjects;
   const { actions, application } = authorization;
-
-  const buildPrivileges = (privilegeMap) => {
-    return {
-      [application]: {
-        ...Object.entries(privilegeMap.global).reduce((acc, [privilegeName, privilegeActions]) => {
-          acc[privilegeName] = {
-            application,
-            name: privilegeName,
-            actions: privilegeActions,
-            metadata: {},
-          };
-          return acc;
-        }, {}),
-        ...Object.entries(privilegeMap.space).reduce((acc, [privilegeName, privilegeActions]) => {
-          const name = spaceApplicationPrivilegesSerializer.privilege.serialize(privilegeName);
-          acc[name] = {
-            application,
-            name,
-            actions: privilegeActions,
-            metadata: {},
-          };
-          return acc;
-        }, {})
-      }
-    };
-  };
 
   const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
     // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
@@ -59,7 +59,8 @@ export async function registerPrivilegesWithCluster(server) {
     return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
   };
 
-  const expectedPrivileges = buildPrivileges(buildPrivilegeMap(savedObjectTypes, actions));
+  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions);
+  const expectedPrivileges = serializePrivileges(application, privilegeMap);
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
 
