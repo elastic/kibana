@@ -8,14 +8,14 @@ import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
 interface ComponentProps extends FormsyInputProps, CommonProps, EuiFieldTextProps {
-  instantValidation: boolean;
+  instantValidation?: boolean;
   label: string;
   errorText: string;
   fullWidth: boolean;
   helpText: React.ReactElement<any>;
   compressed: boolean;
-  onChange(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
-  onBlur(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
+  onChange?(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
+  onBlur?(e: React.ChangeEvent<HTMLInputElement>, value: any): void;
 }
 
 interface ComponentState {

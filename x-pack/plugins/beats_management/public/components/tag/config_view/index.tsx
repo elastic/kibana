@@ -86,7 +86,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             />
           </EuiFormRow>
           <h3>
-            Config for{' '}
+            Config for&nbsp;
             {
               (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
                 .text

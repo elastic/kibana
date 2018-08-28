@@ -9,7 +9,7 @@ import yaml from 'js-yaml';
 import { get } from 'lodash';
 import React from 'react';
 import { ClientSideConfigurationBlock, YamlConfigSchema } from '../../../lib/lib';
-import { FormsyEuiCodeEditor } from '../../inputs/code';
+import { FormsyEuiCodeEditor } from '../../inputs/code_editor';
 import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
 import { FormsyEuiSelect } from '../../inputs/select';
