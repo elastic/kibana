@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { LegacyObjectToRawConfigAdapter } from '../legacy_object_to_raw_config_adapter';
+import { LegacyObjectToConfigAdapter } from '../legacy_object_to_config_adapter';
 
 describe('#get', () => {
   test('correctly handles paths that do not exist.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({});
+    const configAdapter = new LegacyObjectToConfigAdapter({});
 
     expect(configAdapter.get('one')).not.toBeDefined();
     expect(configAdapter.get(['one', 'two'])).not.toBeDefined();
@@ -29,7 +29,7 @@ describe('#get', () => {
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       one: 'value-one',
       two: {
         sub: 'value-two-sub',
@@ -46,7 +46,7 @@ describe('#get', () => {
   });
 
   test('correctly handles silent logging config.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       logging: { silent: true },
     });
 
@@ -54,7 +54,7 @@ describe('#get', () => {
   });
 
   test('correctly handles verbose file logging config with json format.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       logging: { verbose: true, json: true, dest: '/some/path.log' },
     });
 
@@ -62,7 +62,7 @@ describe('#get', () => {
   });
 
   test('correctly handles server config.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       server: {
         autoListen: true,
         basePath: '/abc',
@@ -86,7 +86,7 @@ describe('#get', () => {
 
 describe('#set', () => {
   test('correctly sets values for paths that do not exist.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({});
+    const configAdapter = new LegacyObjectToConfigAdapter({});
 
     configAdapter.set('unknown', 'value');
     configAdapter.set(['unknown', 'sub1'], 'sub-value-1');
@@ -96,7 +96,7 @@ describe('#set', () => {
   });
 
   test('correctly sets values for existing paths.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       known: '',
       knownContainer: {
         sub1: 'sub-1',
@@ -114,7 +114,7 @@ describe('#set', () => {
 
 describe('#has', () => {
   test('returns false if config is not set', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({});
+    const configAdapter = new LegacyObjectToConfigAdapter({});
 
     expect(configAdapter.has('unknown')).toBe(false);
     expect(configAdapter.has(['unknown', 'sub1'])).toBe(false);
@@ -122,7 +122,7 @@ describe('#has', () => {
   });
 
   test('returns true if config is set.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       known: 'foo',
       knownContainer: {
         sub1: 'bar',
@@ -138,7 +138,7 @@ describe('#has', () => {
 
 describe('#toRaw', () => {
   test('returns a deep copy of the underlying raw config object.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       known: 'foo',
       knownContainer: {
         sub1: 'bar',
@@ -164,7 +164,7 @@ describe('#toRaw', () => {
 
 describe('#getFlattenedPaths', () => {
   test('returns all paths of the underlying object.', () => {
-    const configAdapter = new LegacyObjectToRawConfigAdapter({
+    const configAdapter = new LegacyObjectToConfigAdapter({
       known: 'foo',
       knownContainer: {
         sub1: 'bar',

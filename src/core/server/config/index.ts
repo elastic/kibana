@@ -19,9 +19,9 @@
 
 export { ConfigService } from './config_service';
 export { RawConfigService } from './raw_config_service';
-export { RawConfig, ConfigPath } from './raw_config';
+export { Config, ConfigPath } from './config';
 /** @internal */
-export { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
+export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { Env } from './env';
 export { ConfigWithSchema } from './config_with_schema';
 export { getConfigFromFiles } from './read_config';

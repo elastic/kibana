@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ConfigPath, ObjectToRawConfigAdapter } from '../../config';
+import { ConfigPath, ObjectToConfigAdapter } from '../../config';
 
 /**
  * Represents logging config supported by the legacy platform.
@@ -35,7 +35,7 @@ interface LegacyLoggingConfig {
  * Represents adapter between config provided by legacy platform and `RawConfig`
  * supported by the current platform.
  */
-export class LegacyObjectToRawConfigAdapter extends ObjectToRawConfigAdapter {
+export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
   private static transformLogging(configValue: LegacyLoggingConfig = {}) {
     const loggingConfig = {
       appenders: {
@@ -73,9 +73,9 @@ export class LegacyObjectToRawConfigAdapter extends ObjectToRawConfigAdapter {
     const configValue = super.get(configPath);
     switch (configPath) {
       case 'logging':
-        return LegacyObjectToRawConfigAdapter.transformLogging(configValue);
+        return LegacyObjectToConfigAdapter.transformLogging(configValue);
       case 'server':
-        return LegacyObjectToRawConfigAdapter.transformServer(configValue);
+        return LegacyObjectToConfigAdapter.transformServer(configValue);
       default:
         return configValue;
     }

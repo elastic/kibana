@@ -23,9 +23,9 @@ import { map } from 'rxjs/operators';
 /** @internal */
 export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
 /** @internal */
-export { LegacyObjectToRawConfigAdapter } from './config/legacy_object_to_raw_config_adapter';
+export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
 
-import { LegacyObjectToRawConfigAdapter, LegacyPlatformProxifier } from '.';
+import { LegacyObjectToConfigAdapter, LegacyPlatformProxifier } from '.';
 import { Env } from '../config';
 import { Root } from '../root';
 import { BasePathProxyRoot } from '../root/base_path_proxy_root';
@@ -42,9 +42,7 @@ function initEnvironment(rawKbnServer: any, isDevClusterMaster = false) {
 
   const legacyConfig$ = new BehaviorSubject<Record<string, any>>(rawKbnServer.config.get());
   return {
-    config$: legacyConfig$.pipe(
-      map(legacyConfig => new LegacyObjectToRawConfigAdapter(legacyConfig))
-    ),
+    config$: legacyConfig$.pipe(map(legacyConfig => new LegacyObjectToConfigAdapter(legacyConfig))),
     env,
     // Propagates legacy config updates to the new platform.
     updateConfig(legacyConfig: Record<string, any>) {

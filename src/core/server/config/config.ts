@@ -20,9 +20,9 @@
 export type ConfigPath = string | string[];
 
 /**
- * Represents raw config store.
+ * Represents config store.
  */
-export interface RawConfig {
+export interface Config {
   /**
    * Returns whether or not there is a config value located at the specified path.
    * @param configPath Path to locate value at.

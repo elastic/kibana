@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectToRawConfigAdapter, RawConfig } from '..';
+import { Config, ObjectToConfigAdapter } from '..';
 
 /**
  * Overrides some config values with ones from argv.
@@ -25,7 +25,7 @@ import { ObjectToRawConfigAdapter, RawConfig } from '..';
  * @param config `RawConfig` instance to update config values for.
  * @param argv Argv object with key/value pairs.
  */
-export function overrideConfigWithArgv(config: RawConfig, argv: { [key: string]: any }) {
+export function overrideConfigWithArgv(config: Config, argv: { [key: string]: any }) {
   if (argv.port != null) {
     config.set(['server', 'port'], argv.port);
   }
@@ -42,7 +42,7 @@ test('port', () => {
     port: 123,
   };
 
-  const config = new ObjectToRawConfigAdapter({
+  const config = new ObjectToConfigAdapter({
     server: { port: 456 },
   });
 
@@ -56,7 +56,7 @@ test('host', () => {
     host: 'example.org',
   };
 
-  const config = new ObjectToRawConfigAdapter({
+  const config = new ObjectToConfigAdapter({
     server: { host: 'org.example' },
   });
 
@@ -70,7 +70,7 @@ test('ignores unknown', () => {
     unknown: 'some value',
   };
 
-  const config = new ObjectToRawConfigAdapter({});
+  const config = new ObjectToConfigAdapter({});
   jest.spyOn(config, 'set');
 
   overrideConfigWithArgv(config, argv);

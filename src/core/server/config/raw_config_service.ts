@@ -22,8 +22,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
-import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
-import { RawConfig } from './raw_config';
+import { Config } from './config';
+import { ObjectToConfigAdapter } from './object_to_config_adapter';
 import { getConfigFromFiles } from './read_config';
 
 // Used to indicate that no config has been received yet
@@ -42,12 +42,12 @@ export class RawConfigService {
    */
   private readonly rawConfigFromFile$ = new BehaviorSubject<any>(notRead);
 
-  private readonly config$: Observable<RawConfig>;
+  private readonly config$: Observable<Config>;
 
   constructor(
     readonly configFiles: ReadonlyArray<string>,
-    configAdapter: (rawValue: Record<string, any>) => RawConfig = rawValue =>
-      new ObjectToRawConfigAdapter(rawValue)
+    configAdapter: (rawConfig: Record<string, any>) => Config = rawConfig =>
+      new ObjectToConfigAdapter(rawConfig)
   ) {
     this.config$ = this.rawConfigFromFile$.pipe(
       filter(rawConfig => rawConfig !== notRead),

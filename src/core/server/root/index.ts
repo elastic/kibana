@@ -21,7 +21,7 @@ import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { catchError, first, map, publishReplay } from 'rxjs/operators';
 
 import { Server } from '..';
-import { ConfigService, Env, RawConfig } from '../config';
+import { Config, ConfigService, Env } from '../config';
 
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 
@@ -39,7 +39,7 @@ export class Root {
   private loggingConfigSubscription?: Subscription;
 
   constructor(
-    rawConfig$: Observable<RawConfig>,
+    config$: Observable<Config>,
     private readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {
       // noop
@@ -49,7 +49,7 @@ export class Root {
     this.logger = this.loggingService.asLoggerFactory();
 
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(rawConfig$, env, this.logger);
+    this.configService = new ConfigService(config$, env, this.logger);
   }
 
   public async start() {

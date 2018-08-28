@@ -19,34 +19,33 @@
 
 import { cloneDeep, get, has, set } from 'lodash';
 
-import { ConfigPath } from './';
-import { RawConfig } from './raw_config';
+import { Config, ConfigPath } from './';
 
 /**
  * Allows plain javascript object to behave like `RawConfig` instance.
  * @internal
  */
-export class ObjectToRawConfigAdapter implements RawConfig {
-  constructor(private readonly rawValue: Record<string, any>) {}
+export class ObjectToConfigAdapter implements Config {
+  constructor(private readonly rawConfig: Record<string, any>) {}
 
   public has(configPath: ConfigPath) {
-    return has(this.rawValue, configPath);
+    return has(this.rawConfig, configPath);
   }
 
   public get(configPath: ConfigPath) {
-    return get(this.rawValue, configPath);
+    return get(this.rawConfig, configPath);
   }
 
   public set(configPath: ConfigPath, value: any) {
-    set(this.rawValue, configPath, value);
+    set(this.rawConfig, configPath, value);
   }
 
   public getFlattenedPaths() {
-    return [...flattenObjectKeys(this.rawValue)];
+    return [...flattenObjectKeys(this.rawConfig)];
   }
 
   public toRaw() {
-    return cloneDeep(this.rawValue);
+    return cloneDeep(this.rawConfig);
   }
 }
 
