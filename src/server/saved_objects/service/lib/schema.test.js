@@ -49,13 +49,6 @@ describe('#addNamespaceAgnosticType', () => {
     const schema = new SavedObjectsSchema();
     expect(() => schema.addNamespaceAgnosticType(Symbol())).toThrowErrorMatchingSnapshot();
   });
-
-  it(`returns true for namespace agnostic registered types`, () => {
-    const schema = new SavedObjectsSchema();
-    schema.addNamespaceAgnosticType('foo');
-    const result = schema.isNamespaceAgnostic('foo');
-    expect(result).toBe(true);
-  });
 });
 
 describe('#isNamespaceAgnostic', () => {
