@@ -17,26 +17,27 @@
  * under the License.
  */
 
-import { ToolingLog } from '../../tooling_log';
-import { withProcRunner } from '../with_proc_runner';
+import { kfetch } from 'ui/kfetch';
+import url from 'url';
+import chrome from '../../chrome';
 
-describe('proc runner', () => {
-  function runProc({ thing = '', procs }) {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        procs.run('proc', {
-          cmd: './proc',
-          args: ['these', 'are', 'words'],
-        });
-        resolve(thing);
-      }, 500);
-    });
+export async function shortenUrl(absoluteUrl: string) {
+  const basePath = chrome.getBasePath();
+
+  const parsedUrl = url.parse(absoluteUrl);
+  if (!parsedUrl || !parsedUrl.path) {
+    return;
   }
+  const path = parsedUrl.path.replace(basePath, '');
+  const hash = parsedUrl.hash ? parsedUrl.hash : '';
+  const relativeUrl = path + hash;
 
-  it('passes procs to a function', async () => {
-    await withProcRunner(new ToolingLog(), async procs => {
-      await runProc({ procs });
-      await procs.stop('proc');
-    });
+  const body = JSON.stringify({ url: relativeUrl });
+
+  const resp = await kfetch({ method: 'POST', pathname: '/api/shorten_url', body });
+  return url.format({
+    protocol: parsedUrl.protocol,
+    host: parsedUrl.host,
+    pathname: `${basePath}/goto/${resp.urlId}`,
   });
-});
+}

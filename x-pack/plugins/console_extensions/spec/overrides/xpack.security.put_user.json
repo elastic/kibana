@@ -6,6 +6,6 @@
       "fullname": "",
       "roles": []
     },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html#security-api-put-user"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html"
   }
 }
