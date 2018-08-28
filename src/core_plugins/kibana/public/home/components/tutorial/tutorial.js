@@ -44,7 +44,7 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
 
-export class TutorialComponent extends React.Component {
+export class TutorialUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -365,7 +365,7 @@ export class TutorialComponent extends React.Component {
   }
 }
 
-TutorialComponent.propTypes = {
+TutorialUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   isCloudEnabled: PropTypes.bool.isRequired,
   getTutorial: PropTypes.func.isRequired,
@@ -374,4 +374,4 @@ TutorialComponent.propTypes = {
   bulkCreate: PropTypes.func.isRequired,
 };
 
-export const Tutorial = injectI18n(TutorialComponent);
+export const Tutorial = injectI18n(TutorialUi);
