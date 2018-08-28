@@ -36,7 +36,7 @@ export class SpaceIdentifier extends Component {
             placeholder={
               this.state.editing || !this.props.editable
                 ? null
-                : 'The URL Identifier is automatically generated from the space name'
+                : 'The URL Identifier is generated from the space name'
             }
             value={id}
             onChange={this.onChange}
@@ -57,7 +57,7 @@ export class SpaceIdentifier extends Component {
   };
 
   getHelpText = () => {
-    return (<p>The identifier becomes part of the Kibana URL when you are inside this space.</p>);
+    return (<p>If the identifier is <strong>engineering</strong>, the Kibana URL is <br /> https://my-kibana.example<strong>/s/engineering/</strong>app/kibana</p>);
   };
 
   onEditClick = () => {

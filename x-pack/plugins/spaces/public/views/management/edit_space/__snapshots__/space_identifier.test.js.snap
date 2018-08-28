@@ -8,7 +8,17 @@ exports[`renders without crashing 1`] = `
     hasEmptyLabelSpace={false}
     helpText={
       <p>
-        The identifier becomes part of the Kibana URL when you are inside this space.
+        If the identifier is 
+        <strong>
+          engineering
+        </strong>
+        , the Kibana URL is 
+        <br />
+         https://my-kibana.example
+        <strong>
+          /s/engineering/
+        </strong>
+        app/kibana
       </p>
     }
     isInvalid={false}
@@ -31,7 +41,7 @@ exports[`renders without crashing 1`] = `
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}
-      placeholder="The URL Identifier is automatically generated from the space name"
+      placeholder="The URL Identifier is generated from the space name"
       readOnly={true}
       value=""
     />
