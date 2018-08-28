@@ -7,13 +7,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import _ from 'lodash';
-import PROP_CONFIG, { indexedPropertyConfig } from './propertyConfig';
+import { PROPERTY_CONFIG } from './propertyConfig';
 import { colors, units, px, unit, fontSize } from '../../../style/variables';
 import { EuiIcon } from '@elastic/eui';
 
 import { getFeatureDocs } from '../../../utils/documentation';
 import { ExternalLink } from '../../../utils/url';
 import { NestedKeyValueTable } from './NestedKeyValueTable';
+
+const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -27,13 +29,13 @@ const TableInfo = styled.div`
   line-height: 1.5;
 `;
 
-export function getLevelOneProps(dynamicProps) {
-  return PROP_CONFIG.filter(
-    ({ key, required }) => required || dynamicProps.includes(key)
+export function getLevelOneProps(selected) {
+  return PROPERTY_CONFIG.filter(
+    ({ key, required }) => required || selected.includes(key)
   ).map(({ key }) => key);
 }
 
-function AgentFeatureTipMessage({ featureName, agentName }) {
+export function AgentFeatureTipMessage({ featureName, agentName }) {
   const docs = getFeatureDocs(featureName, agentName);
 
   if (!docs) {
@@ -53,7 +55,7 @@ function AgentFeatureTipMessage({ featureName, agentName }) {
   );
 }
 
-function sortKeysByConfig(object, currentKey) {
+export function sortKeysByConfig(object, currentKey) {
   const presorted = _.get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
@@ -62,10 +64,8 @@ function sortKeysByConfig(object, currentKey) {
   return _.uniq([...presorted, ...Object.keys(object).sort()]);
 }
 
-// TODO: if propData defaults to an empty object, the if (!propData)
-// will never be truthy unless propData is explicitly null or false...
 export function PropertiesTable({ propData, propKey, agentName }) {
-  if (!propData) {
+  if (!propData || Object.keys(propData).length === 0) {
     return (
       <TableContainer>
         <TableInfo>

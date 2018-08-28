@@ -56,24 +56,30 @@ const EmptyValue = styled.span`
   color: ${colors.gray3};
 `;
 
-function formatValue(value: any): JSX.Element {
+export function FormattedKey({
+  k,
+  value
+}: {
+  k: string;
+  value: any;
+}): JSX.Element {
+  if (value == null) {
+    return <EmptyValue>{k}</EmptyValue>;
+  }
+
+  return <React.Fragment>{k}</React.Fragment>;
+}
+
+export function FormattedValue({ value }: { value: any }): JSX.Element {
   if (_.isObject(value)) {
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
   } else if (_.isBoolean(value) || _.isNumber(value)) {
-    return <React.Fragment>{String(value)}</React.Fragment>;
+    value = String(value);
   } else if (!value) {
     return <EmptyValue>N/A</EmptyValue>;
   }
 
-  return value;
-}
-
-function formatKey(key: string, value: any): string | JSX.Element {
-  if (value == null) {
-    return <EmptyValue>{key}</EmptyValue>;
-  }
-
-  return key;
+  return <React.Fragment>{value}</React.Fragment>;
 }
 
 export function NestedValue({
@@ -82,10 +88,10 @@ export function NestedValue({
   depth,
   keySorter
 }: {
-  parentKey: string;
   value: any;
   depth: number;
-  keySorter: KeySorter;
+  parentKey?: string;
+  keySorter?: KeySorter;
 }): JSX.Element {
   if (depth > 0 && _.isObject(value)) {
     return (
@@ -98,7 +104,7 @@ export function NestedValue({
     );
   }
 
-  return formatValue(value);
+  return <FormattedValue value={value} />;
 }
 
 export function NestedKeyValueTable({
@@ -108,7 +114,7 @@ export function NestedKeyValueTable({
   depth = 0
 }: {
   data: StringMap<any>;
-  parentKey: string;
+  parentKey?: string;
   keySorter?: KeySorter;
   depth?: number;
 }): JSX.Element {
@@ -117,7 +123,9 @@ export function NestedKeyValueTable({
       <tbody>
         {keySorter(data, parentKey).map((key: string) => (
           <Row key={key}>
-            <Cell>{formatKey(key, data[key])}</Cell>
+            <Cell>
+              <FormattedKey k={key} value={data[key]} />
+            </Cell>
             <Cell>
               <NestedValue
                 parentKey={key}

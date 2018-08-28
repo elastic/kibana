@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { indexBy } from 'lodash';
-
-const propertyConfig = [
+export const PROPERTY_CONFIG = [
   {
     key: 'request',
     required: false,
@@ -43,7 +40,3 @@ const propertyConfig = [
   { key: 'tags', required: true, presortedKeys: [] },
   { key: 'custom', required: true, presortedKeys: [] }
 ];
-
-export default propertyConfig;
-
-export const indexedPropertyConfig = indexBy(propertyConfig, 'key');
