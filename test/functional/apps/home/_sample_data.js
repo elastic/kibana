@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('dashboard', () => {
-      after(async () => {
+      afterEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
