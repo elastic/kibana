@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 
 function generateDLL(config) {
   const {

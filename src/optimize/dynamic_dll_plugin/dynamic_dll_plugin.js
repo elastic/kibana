@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { promisify } from 'util';
 import { DllCompiler } from './dll_compiler';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
+import { promisify } from 'util';
 
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';

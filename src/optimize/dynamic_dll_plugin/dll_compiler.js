@@ -120,9 +120,10 @@ export class DllCompiler {
     return configModel.bind(this, dllConfig);
   }
 
-  // TODO: REFACT LOGS AND CALLS
   async runWebpack(config) {
     return new Promise((resolve) => {
+      this.log(['info', 'optimize'], 'Start compiling client vendors dll');
+
       webpack(config, (err, stats) => {
         if (err) {
           console.error(err.stack || err);
