@@ -96,6 +96,10 @@ export const schema = Joi.object().keys({
     rootDirectory: Joi.string(),
   }).default(),
 
+  mochaReporter: Joi.object().keys({
+    captureLogOutput: Joi.boolean().default(!!process.env.CI),
+  }).default(),
+
   users: Joi.object().pattern(
     ID_PATTERN,
     Joi.object().keys({
