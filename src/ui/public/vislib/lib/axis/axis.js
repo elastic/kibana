@@ -209,6 +209,7 @@ export function VislibLibAxisProvider(Private) {
 
           if (config.get('show')) {
             const svg = div.append('svg')
+              .attr('focusable', 'false')
               .attr('width', width)
               .attr('height', height);
 

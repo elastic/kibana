@@ -22,9 +22,9 @@
 import { i18n } from '@kbn/i18n';
 
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { ON_PREM_INSTRUCTIONS } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
-import { ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS } from './on_prem_elastic_cloud';
+import { createOnPremInstructions } from './on_prem';
+import { createElasticCloudInstructions } from './elastic_cloud';
+import { createOnPremElasticCloudInstructions } from './on_prem_elastic_cloud';
 
 export function netflowSpecProvider() {
   return {
@@ -45,8 +45,8 @@ This module support Netflow Version 5 and 9. [Learn more]({linkUrl}).',
     }),
     completionTimeMinutes: 10,
     //previewImagePath: 'kibana-apache.png', TODO
-    onPrem: ON_PREM_INSTRUCTIONS,
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
-    onPremElasticCloud: ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS,
+    onPrem: createOnPremInstructions(),
+    elasticCloud: createElasticCloudInstructions(),
+    onPremElasticCloud: createOnPremElasticCloudInstructions(),
   };
 }

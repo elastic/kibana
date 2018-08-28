@@ -18,7 +18,7 @@
  */
 
 import { createEsTestCluster } from '@kbn/test';
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
@@ -26,8 +26,10 @@ let services;
 let es;
 
 export async function startServers() {
-  const log = createToolingLog('debug');
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: 'debug',
+    writeTo: process.stdout
+  });
   log.indent(6);
 
   log.info('starting elasticsearch');
