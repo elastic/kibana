@@ -96,11 +96,13 @@ app.directive('discoverField', function ($compile) {
           detailsElem = $(detailsHtml);
           $compile(detailsElem)(detailScope);
           $elem.append(detailsElem).addClass('active');
+          $elem.find('.dscSidebarItem').addClass('dscSidebarItem--active');
         } else {
           delete field.details;
           detailScope.$destroy();
           detailsElem.remove();
           $elem.removeClass('active');
+          $elem.find('.dscSidebarItem').removeClass('dscSidebarItem--active');
         }
       };
 

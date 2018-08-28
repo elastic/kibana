@@ -74,7 +74,7 @@ export class StatementList extends React.PureComponent {
     const { elements } = this.props;
 
     return (
-      <ul className="pipelineViewer__list">
+      <ul className="monPipelineViewer__list">
         {elements.map(this.renderStatement)}
       </ul>
     );

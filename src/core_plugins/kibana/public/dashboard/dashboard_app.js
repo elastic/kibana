@@ -42,6 +42,7 @@ import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
+import { showOptionsPopover } from './top_nav/show_options_popover';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -116,9 +117,6 @@ app.directive('dashboardApp', function ($injector) {
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
           query: dashboardStateManager.getQuery(),
-          useMargins: dashboardStateManager.getUseMargins(),
-          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-          darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
@@ -201,16 +199,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.refresh();
       };
 
-      $scope.$watch('model.hidePanelTitles', () => {
-        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
-      });
-      $scope.$watch('model.useMargins', () => {
-        dashboardStateManager.setUseMargins($scope.model.useMargins);
-      });
-      $scope.$watch('model.darkTheme', () => {
-        dashboardStateManager.setDarkTheme($scope.model.darkTheme);
-        updateTheme();
-      });
+      updateTheme();
+
       $scope.indexPatterns = [];
 
       $scope.onPanelRemoved = (panelIndex) => {
@@ -390,6 +380,24 @@ app.directive('dashboardApp', function ($injector) {
         const listingLimit = config.get('savedObjects:listingLimit');
 
         showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+      };
+      navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
+        showOptionsPopover({
+          anchorElement,
+          darkTheme: dashboardStateManager.getDarkTheme(),
+          onDarkThemeChange: (isChecked) => {
+            dashboardStateManager.setDarkTheme(isChecked);
+            updateTheme();
+          },
+          useMargins: dashboardStateManager.getUseMargins(),
+          onUseMarginsChange: (isChecked) => {
+            dashboardStateManager.setUseMargins(isChecked);
+          },
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+          onHidePanelTitlesChange: (isChecked) => {
+            dashboardStateManager.setHidePanelTitles(isChecked);
+          },
+        });
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

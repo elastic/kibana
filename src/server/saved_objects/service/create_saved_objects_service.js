@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects } from '../../mappings';
+import { getRootPropertiesObjects } from '../..//mappings';
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 

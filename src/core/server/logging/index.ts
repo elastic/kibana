@@ -19,3 +19,5 @@
 
 export { Logger } from './logger';
 export { LoggerFactory } from './logger_factory';
+export { LoggingConfig } from './logging_config';
+export { LoggingService } from './logging_service';

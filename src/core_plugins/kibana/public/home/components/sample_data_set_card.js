@@ -28,70 +28,40 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import {
-  installSampleDataSet,
-  uninstallSampleDataSet
-} from '../sample_data_sets';
+export const INSTALLED_STATUS = 'installed';
+export const UNINSTALLED_STATUS = 'not_installed';
 
 export class SampleDataSetCard extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isProcessingRequest: false,
-    };
-  }
-
-  startRequest = async () => {
-    const {
-      getConfig,
-      setConfig,
-      id,
-      name,
-      onRequestComplete,
-      defaultIndex,
-      clearIndexPatternsCache,
-    } = this.props;
-
-    this.setState({
-      isProcessingRequest: true,
-    });
-
-    if (this.isInstalled()) {
-      await uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
-    } else {
-      await installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
-    }
-
-    onRequestComplete();
-
-    this.setState({
-      isProcessingRequest: false,
-    });
-  }
-
   isInstalled = () => {
-    if (this.props.status === 'installed') {
+    if (this.props.status === INSTALLED_STATUS) {
       return true;
     }
 
     return false;
   }
 
+  install = () => {
+    this.props.onInstall(this.props.id);
+  }
+
+  uninstall = () => {
+    this.props.onUninstall(this.props.id);
+  }
+
   renderBtn = () => {
     switch (this.props.status) {
-      case 'installed':
+      case INSTALLED_STATUS:
         return (
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isLoading={this.state.isProcessingRequest}
-                onClick={this.startRequest}
+                isLoading={this.props.isProcessing}
+                onClick={this.uninstall}
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
               >
-                {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
+                {this.props.isProcessing ? 'Removing' : 'Remove'}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -105,16 +75,16 @@ export class SampleDataSetCard extends React.Component {
           </EuiFlexGroup>
         );
 
-      case 'not_installed':
+      case UNINSTALLED_STATUS:
         return (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
-                isLoading={this.state.isProcessingRequest}
-                onClick={this.startRequest}
+                isLoading={this.props.isProcessing}
+                onClick={this.install}
                 data-test-subj={`addSampleDataSet${this.props.id}`}
               >
-                {this.state.isProcessingRequest ? 'Adding' : 'Add'}
+                {this.props.isProcessing ? 'Adding' : 'Add'}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -145,7 +115,7 @@ export class SampleDataSetCard extends React.Component {
   render() {
     return (
       <EuiCard
-        className="sampleDataSetCard"
+        className="homSampleDataSetCard"
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}
@@ -163,15 +133,13 @@ SampleDataSetCard.propTypes = {
   name: PropTypes.string.isRequired,
   launchUrl: PropTypes.string.isRequired,
   status: PropTypes.oneOf([
-    'installed',
-    'not_installed',
+    INSTALLED_STATUS,
+    UNINSTALLED_STATUS,
     'unknown',
   ]).isRequired,
+  isProcessing: PropTypes.bool.isRequired,
   statusMsg: PropTypes.string,
-  onRequestComplete: PropTypes.func.isRequired,
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
-  defaultIndex: PropTypes.string.isRequired,
   previewUrl: PropTypes.string.isRequired,
+  onInstall: PropTypes.func.isRequired,
+  onUninstall: PropTypes.func.isRequired,
 };

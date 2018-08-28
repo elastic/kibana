@@ -12,16 +12,10 @@ import { callWithInternalUserFactory } from '../client/call_with_internal_user_f
 import { wrapError } from '../client/errors';
 import Boom from 'boom';
 
+import { isSecurityDisabled } from '../lib/security_utils';
+
 export function systemRoutes(server, commonRouteConfig) {
   const callWithInternalUser = callWithInternalUserFactory(server);
-
-  function isSecurityDisabled() {
-    const xpackMainPlugin = server.plugins.xpack_main;
-    const xpackInfo = xpackMainPlugin && xpackMainPlugin.info;
-    const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
-
-    return (securityInfo && securityInfo.isEnabled() === false);
-  }
 
   function getNodeCount() {
     const filterPath = 'nodes.*.attributes';
@@ -46,7 +40,7 @@ export function systemRoutes(server, commonRouteConfig) {
     path: '/api/ml/_has_privileges',
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
-      if (isSecurityDisabled()) {
+      if (isSecurityDisabled(server)) {
         // if xpack.security.enabled has been explicitly set to false
         // return that security is disabled and don't call the privilegeCheck endpoint
         reply({ securityDisabled: true });
@@ -68,7 +62,7 @@ export function systemRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       return new Promise((resolve, reject) => {
-        if (isSecurityDisabled()) {
+        if (isSecurityDisabled(server)) {
           getNodeCount()
             .then(resolve)
             .catch(reject);

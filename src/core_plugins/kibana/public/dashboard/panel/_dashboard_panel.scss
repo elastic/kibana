@@ -1,0 +1,177 @@
+.dshPanel {
+  z-index: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+
+  // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
+  .panel-content {
+    display: flex;
+    flex: 1 1 100%;
+    height: auto;
+    z-index: 1;
+    background-color: inherit;
+  }
+
+  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
+  // but it MIGHT be fixing IE
+  .panel-content--fullWidth {
+    width: 100%;
+  }
+
+  /**
+   * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
+   * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
+   */
+  .doc-table-container {
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
+  }
+
+  .visualization .vis-container {
+    overflow: visible; /* 2 */
+  }
+}
+
+// CONTENT
+
+.dshPanel__panel {
+  background-color: $euiColorEmptyShade;
+  border: 1px solid $euiColorEmptyShade;
+  overflow: hidden;
+
+  // maintain the 100% height of the panel
+  height: 100%;
+  flex: 1;
+
+  // flex layout allows us to define the visualize element as "fill available space"
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dshPanel__panel--editing {
+  // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
+  border-color: $euiColorLightShade;
+
+  &:hover {
+    border-color: $euiColorPrimary;
+  }
+}
+
+// Adjust borders/margin/etc... for spaced out panels
+.dshLayout-withMargins {
+  .dshPanel__panel {
+    @include euiBottomShadowSmall;
+    // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
+    border-color: $euiColorLightShade;
+    border-radius: $euiBorderRadius;
+  }
+
+  .dshPanel__panel--editing {
+    transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+
+    &:hover,
+    &:focus {
+      border-color: $euiColorPrimary;
+      @include euiSlightShadowHover;
+    }
+  }
+}
+
+
+// HEADER
+
+.dshPanel__header {
+  padding: $euiSizeS;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  display: flex;
+  border: none;
+  transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  // Add a rounded corner to stay within the bordered panel
+  .dshLayout-withMargins & {
+    border-top-left-radius: $euiBorderRadius - 1px;
+    border-top-right-radius: $euiBorderRadius - 1px;
+  }
+}
+
+.dshPanel__title {
+  font-size: inherit;
+  color: $euiColorDarkShade;
+  transition: color $euiAnimSpeedFast $euiAnimSlightResistance;
+  flex: 1 1 auto;
+  @include euiTextTruncate;
+
+  // flexbox fix for IE10
+  // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
+  display: inline-block;
+}
+
+.dshPanel__panel--editing:hover {
+  .dshPanel__header {
+    background-color: rgba($euiColorFullShade,.05) !important;
+    cursor: move;
+  }
+
+  .dshPanel__title:hover {
+    color: $euiColorPrimary;
+  }
+}
+
+/**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+.dshPanel__header--floater {
+  opacity: 0; /* 1 */
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  background-color: $euiColorEmptyShade;
+  z-index: $euiZLevel1;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:focus { /* 2 */
+    opacity: 1;
+  }
+}
+
+.dshPanel:hover .dshPanel__header--floater {
+  opacity: 1;
+}
+
+// OPTIONS MENU
+
+/**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+.dshPanel_optionsMenuButton {
+  opacity: 0; /* 1 */
+
+  &:focus { /* 2 */
+    opacity: 1;
+  }
+}
+
+.dshPanel:hover .dshPanel_optionsMenuButton {
+  opacity: 1;
+}
+
+// ERROR
+
+.dshPanel__error {
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+
+  .fa-exclamation-triangle {
+    font-size: $euiFontSizeXL;
+    color: $euiColorDanger;
+  }
+}

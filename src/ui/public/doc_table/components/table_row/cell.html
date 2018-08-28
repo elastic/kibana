@@ -1,11 +1,11 @@
 <%
 var attributes = '';
 if (timefield) {
-  attributes='class="discover-table-timefield" width="1%"';
+  attributes='class="eui-textNoWrap" width="1%"';
 } else if (sourcefield) {
-  attributes='class="discover-table-sourcefield"';
+  attributes='class="eui-textBreakAll eui-textBreakWord"';
 } else {
-  attributes='class="discover-table-datafield"';
+  attributes='class="discover-table-datafield eui-textBreakAll eui-textBreakWord"';
 }
 %>
 <td <%= attributes %> data-test-subj="docTableField">

@@ -57,18 +57,17 @@ export class ExitFullScreenButton extends PureComponent {
           </p>
         </EuiScreenReaderOnly>
         <div
-          className="exitFullScreenButton"
+          className="dshExitFullScreenButton"
         >
           <KuiButton
             type="hollow"
             aria-label="Exit full screen mode"
-            className="exitFullScreenMode"
+            className="dshExitFullScreenButton__mode"
             onClick={this.props.onExitFullScreenMode}
           >
-            <span className="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"/>
-            <span className="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
-              Exit full screen
-              <span className="kuiIcon fa fa-angle-left"/>
+            <span className="dshExitFullScreenButton__logo" data-test-subj="exitFullScreenModeLogo"/>
+            <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
+              Exit full screen <span className="kuiIcon fa fa-angle-left"/>
             </span>
           </KuiButton>
         </div>

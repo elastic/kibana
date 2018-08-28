@@ -69,6 +69,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
 
   return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
     'data-test-subj': 'inspectorPanel',
+    closeButtonAriaLabel: 'Close Inspector',
   });
 }
 

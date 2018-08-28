@@ -109,7 +109,7 @@ export class JobsList extends Component {
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-            aria-label={this.state.itemIdToExpandedRowMap[item.id] ? 'Hide details' : 'Show details'}
+            aria-label={`${this.state.itemIdToExpandedRowMap[item.id] ? 'Hide' : 'Show'} details for ${item.id}`}
             data-row-id={item.id}
           />
         )

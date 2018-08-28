@@ -29,7 +29,7 @@ import { intl } from './mocks/intl';
  *  @param  options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
+export function shallowWithIntl(node, { context = {}, childContextTypes = {}, ...props } = {}) {
   if (!node) {
     throw new Error(`First argument should be cheerio object or React element, not ${node}`);
   }

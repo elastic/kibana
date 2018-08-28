@@ -5,6 +5,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
   closeButtonAriaLabel="Closes this dialog"
   data-test-subj="scriptedFieldsHelpFlyout"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[Function]}
   ownFocus={false}
   size="m"

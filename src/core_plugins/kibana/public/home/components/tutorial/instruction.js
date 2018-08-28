@@ -20,13 +20,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-import { CopyButton } from './copy_button';
 
 import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiCopy,
+  EuiButton,
 } from '@elastic/eui';
 
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
@@ -56,9 +57,18 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   if (commands) {
     const cmdText = commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n');
     copyButton = (
-      <CopyButton
+      <EuiCopy
         textToCopy={cmdText}
-      />
+      >
+        {(copy) => (
+          <EuiButton
+            size="s"
+            onClick={copy}
+          >
+            Copy snippet
+          </EuiButton>
+        )}
+      </EuiCopy>
     );
     commandBlock = (
       <div>
@@ -71,7 +81,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   }
 
   return (
-    <div className="instruction">
+    <div>
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>

@@ -19,9 +19,6 @@ Array [
 
 exports[`kbn-pm production builds and copies projects for production: packages/bar/package.json 1`] = `
 Object {
-  "dependencies": Object {
-    "lodash": "4.17.4",
-  },
   "devDependencies": Object {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
@@ -48,7 +45,6 @@ exports[`kbn-pm production builds and copies projects for production: packages/f
 Object {
   "dependencies": Object {
     "@elastic/bar": "file:../bar",
-    "lodash": "4.17.4",
   },
   "devDependencies": Object {
     "babel-cli": "^6.26.0",

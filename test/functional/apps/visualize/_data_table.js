@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const visualization = getService('visualization');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   const fromTime = '2015-09-19 06:31:44.000';
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       expect(isApplyButtonEnabled).to.be(true);
     });
 
-    it('should allow resseting changed params', async () => {
+    it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
       const interval = await PageObjects.visualize.getInputTypeParam('interval');
       expect(interval).to.be('2000');
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
       await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }) {
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await visualization.waitForRender();
+      await renderable.waitForRender();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }) {
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await visualization.waitForRender();
+      await renderable.waitForRender();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',

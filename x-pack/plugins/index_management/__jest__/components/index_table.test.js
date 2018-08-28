@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/store/actions';
 import { indexManagementStore } from '../../public/store';
 import { BASE_PATH } from '../../common/constants';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import { setHttpClient } from '../../public/services/api';
@@ -88,13 +88,13 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
   contextMenuButtons.at(buttonIndex).simulate('click');
 };
 const testEditor = (buttonIndex, rowIndex = 0) => {
-  const rendered = mount(component);
+  const rendered = mountWithIntl(component);
   openMenuAndClickButton(rendered, rowIndex, buttonIndex);
   rendered.update();
   snapshot(findTestSubject(rendered, 'detailPanelTabSelected').text());
 };
 const testAction = (buttonIndex, done, rowIndex = 0) => {
-  const rendered = mount(component);
+  const rendered = mountWithIntl(component);
   let count = 0;
   store.subscribe(() => {
     if (count > 1) {
@@ -148,7 +148,7 @@ describe('index table', () => {
   });
 
   test('should change pages when a pagination link is clicked on', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     snapshot(namesText(rendered));
     const pagingButtons = rendered.find('.euiPaginationButton');
     pagingButtons.at(2).simulate('click');
@@ -156,7 +156,7 @@ describe('index table', () => {
     snapshot(namesText(rendered));
   });
   test('should show more when per page value is increased', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const perPageButton = rendered.find('span[children="Rows per page: 10"]');
     perPageButton.simulate('click');
     rendered.update();
@@ -166,7 +166,7 @@ describe('index table', () => {
     expect(namesText(rendered).length).toBe(50);
   });
   test('should show the Actions menu button only when at least one row is selected', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     let button = findTestSubject(rendered, 'indexTableContextMenuButton');
     expect(button.length).toEqual(0);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
@@ -176,7 +176,7 @@ describe('index table', () => {
     expect(button.length).toEqual(1);
   });
   test('should show system indices only when the switch is turned on', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     snapshot(
       rendered
         .find(
@@ -195,14 +195,14 @@ describe('index table', () => {
     );
   });
   test('should filter based on content of search input', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const searchInput = findTestSubject(rendered, 'indexTableFilterInput');
     searchInput.simulate('change', { target: { value: 'testy0' } });
     rendered.update();
     snapshot(namesText(rendered));
   });
   test('should sort when header is clicked', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const nameHeader = findTestSubject(
       rendered,
       'indexTableHeaderCell-name'
@@ -215,7 +215,7 @@ describe('index table', () => {
     snapshot(namesText(rendered));
   });
   test('should open the index detail slideout when the index name is clicked', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(0);
     const indexNameLink = names(rendered).at(0);
     indexNameLink.simulate('click');
@@ -223,7 +223,7 @@ describe('index table', () => {
     expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(1);
   });
   test('should show the right context menu options when one index is selected and open', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     rendered.update();
@@ -240,7 +240,7 @@ describe('index table', () => {
     );
   });
   test('should show the right context menu options when one index is selected and closed', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     rendered.update();
@@ -257,7 +257,7 @@ describe('index table', () => {
     );
   });
   test('should show the right context menu options when one open and one closed index is selected', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(1).simulate('change', { target: { checked: true } });
@@ -275,7 +275,7 @@ describe('index table', () => {
     );
   });
   test('should show the right context menu options when more than one open index is selected', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(2).simulate('change', { target: { checked: true } });
@@ -293,7 +293,7 @@ describe('index table', () => {
     );
   });
   test('should show the right context menu options when more than one closed index is selected', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     checkboxes.at(3).simulate('change', { target: { checked: true } });
@@ -320,7 +320,7 @@ describe('index table', () => {
     testAction(6, done);
   });
   test('force merge button works from context menu', done => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 5);
     snapshot(status(rendered, rowIndex));

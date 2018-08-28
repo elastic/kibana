@@ -9,7 +9,7 @@ Array [
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
     >
       <div
         class="euiCallOut euiCallOut--warning"
@@ -212,7 +212,7 @@ Array [
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
     >
       <div
         class="euiCallOut euiCallOut--warning"
@@ -263,7 +263,7 @@ Array [
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
     >
       <div
         class="euiCallOut euiCallOut--warning"
@@ -382,7 +382,7 @@ Array [
     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
     >
       <div
         class="euiCallOut euiCallOut--warning"

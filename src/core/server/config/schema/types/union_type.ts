@@ -20,10 +20,9 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { AnyType } from './any_type';
 import { Type, TypeOptions } from './type';
 
-export class UnionType<RTS extends AnyType[], T> extends Type<T> {
+export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   constructor(types: RTS, options?: TypeOptions<T>) {
     const schema = internals.alternatives(types.map(type => type.getSchema()));
 
