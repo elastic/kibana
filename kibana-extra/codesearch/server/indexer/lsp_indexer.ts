@@ -23,6 +23,9 @@ import {
   DocumentIndexName,
   DocumentSchema,
   DocumentTypeName,
+  ReferenceIndexName,
+  ReferenceSchema,
+  ReferenceTypeName,
   SymbolAnalysisSettings,
   SymbolIndexName,
   SymbolSchema,
@@ -62,7 +65,16 @@ export class LspIndexer extends AbstractIndexer {
       },
       schema: SymbolSchema,
     };
-    return [contentIndexCreationReq, symbolIndexCreationReq];
+    const referenceIndexCreationReq: IndexCreationRequest = {
+      index: ReferenceIndexName(repoUri),
+      type: ReferenceTypeName,
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+      },
+      schema: ReferenceSchema,
+    };
+    return [contentIndexCreationReq, symbolIndexCreationReq, referenceIndexCreationReq];
   }
 
   protected async prepareRequests(repoUri: RepositoryUri) {
@@ -98,7 +110,7 @@ export class LspIndexer extends AbstractIndexer {
       },
     });
 
-    const symbols = response.result[0].symbols;
+    const { symbols, references } = response.result[0];
     const symbolNames = new Set<string>();
     for (const symbol of symbols) {
       await this.client.index({
@@ -108,6 +120,17 @@ export class LspIndexer extends AbstractIndexer {
         body: symbol,
       });
       symbolNames.add(symbol.symbolInformation.name);
+    }
+
+    for (const ref of references) {
+      await this.client.index({
+        index: ReferenceIndexName(repoUri),
+        type: ReferenceTypeName,
+        id: `${repoUri}:${revision}:${filePath}:${ref.location.uri}:${
+          ref.location.range.start.line
+        }:${ref.location.range.start.character}`,
+        body: ref,
+      });
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;

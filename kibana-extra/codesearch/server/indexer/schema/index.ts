@@ -5,5 +5,6 @@
  */
 
 export * from './document';
+export * from './reference';
 export * from './repository';
 export * from './symbol';

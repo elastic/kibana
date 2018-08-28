@@ -12,8 +12,9 @@ import {
   REPOSITORY_INDEX_STATUS_INDEX_TYPE,
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
+import { RepositoryUri } from '../../model';
 import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
-import { DocumentIndexName, SymbolIndexName } from '../indexer/schema';
+import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
@@ -36,60 +37,53 @@ export class DeleteWorker extends AbstractWorker {
 
     // 1. Delete repository on local fs.
     const repoService = new RepositoryService(dataPath, this.log);
-    const deleteRepoPromise = repoService
-      .remove(uri)
-      .then(() => {
-        this.log.info(`Delete git repository ${uri} done.`);
-      })
-      .catch(error => {
-        this.log.error(`Delete git repository ${uri} error: ${error}`);
-      });
+    const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     // 2. Delete repository status in ES.
-    const deleteCloneStatusPromise = this.objectsClient
-      .delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri)
-      .then(() => {
-        this.log.info(`Delete clone status of repository ${uri} done.`);
-      })
-      .catch((error: Error) => {
-        this.log.error(`Delete clone status of repository ${uri} error: ${error}`);
-      });
+    const deleteCloneStatusPromise = this.deletePromiseWrapper(
+      this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri),
+      'clone status',
+      uri
+    );
 
-    const deleteLspIndexStatusPromise = this.objectsClient
-      .delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri)
-      .then(() => {
-        this.log.info(`Delete LSP index status of repository ${uri} done.`);
-      })
-      .catch((error: Error) => {
-        this.log.error(`Delete LSP index status of repository ${uri} error: ${error}`);
-      });
+    const deleteLspIndexStatusPromise = this.deletePromiseWrapper(
+      this.objectsClient.delete(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri),
+      'LSP index status',
+      uri
+    );
 
-    const deleteIndexStatusPromise = this.objectsClient
-      .delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri)
-      .then(() => {
-        this.log.info(`Delete index status of repository ${uri} done.`);
-      })
-      .catch((error: Error) => {
-        this.log.error(`Delete index status of repository ${uri} error: ${error}`);
-      });
+    const deleteIndexStatusPromise = this.deletePromiseWrapper(
+      this.objectsClient.delete(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri),
+      'index status',
+      uri
+    );
 
     // 3. Delete ES indices.
-    const deleteSymbolESIndexPromise = this.client.indices
-      .delete({ index: SymbolIndexName(uri) })
-      .then(() => {
-        this.log.info(`Delete symbol es index of repository ${uri} done.`);
-      })
-      .catch((error: Error) => {
-        this.log.error(`Delete symbol es index of repository ${uri} error: ${error}`);
-      });
+    const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
+      this.client.indices.delete({ index: SymbolIndexName(uri) }),
+      'symbol ES index',
+      uri
+    );
 
-    // Excecute all the promises above in parallel.
+    const deleteReferenceESIndexPromise = this.deletePromiseWrapper(
+      this.client.indices.delete({ index: ReferenceIndexName(uri) }),
+      'reference ES index',
+      uri
+    );
+
+    const deleteDocumentESIndexPromise = this.deletePromiseWrapper(
+      this.client.indices.delete({ index: DocumentIndexName(uri) }),
+      'document ES index',
+      uri
+    );
+
     await Promise.all([
       deleteRepoPromise,
       deleteCloneStatusPromise,
       deleteLspIndexStatusPromise,
       deleteIndexStatusPromise,
       deleteSymbolESIndexPromise,
+      deleteReferenceESIndexPromise,
     ]);
 
     // 4. Delete the document index where the repository document resides, so
@@ -132,5 +126,19 @@ export class DeleteWorker extends AbstractWorker {
       timestamp: new Date(),
     };
     return await this.objectsClient.update(REPOSITORY_DELETE_STATUS_INDEX_TYPE, p.uri, p);
+  }
+
+  private deletePromiseWrapper(
+    promise: Promise<any>,
+    type: string,
+    repoUri: RepositoryUri
+  ): Promise<any> {
+    return promise
+      .then(() => {
+        this.log.info(`Delete ${type} of repository ${repoUri} done.`);
+      })
+      .catch((error: Error) => {
+        this.log.error(`Delete ${type} of repository ${repoUri} error: ${error}`);
+      });
   }
 }
