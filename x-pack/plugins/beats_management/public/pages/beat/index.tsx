@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore types for EuiTab and EuiTabs not currently available
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiText, EuiTextColor } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -49,9 +49,9 @@ export class BeatDetailsPage extends React.PureComponent<
 
   public render() {
     const { beat } = this.state;
+    const lastUpdated: string | undefined;
     let id;
     let version: string | undefined;
-    let lastUpdated: string | undefined;
 
     if (beat) {
       id = beat.id;
@@ -67,7 +67,7 @@ export class BeatDetailsPage extends React.PureComponent<
       },
       {
         id: `/beat/${id}/activity`,
-        name: 'Activity',
+        name: 'Beat Activity',
         disabled: false,
       },
       {
@@ -87,15 +87,19 @@ export class BeatDetailsPage extends React.PureComponent<
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
                     Version:&nbsp;
-                    {version}.
+                    <strong>{version}</strong>.
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {/* TODO: What field is used to populate this value? */}
-                  <EuiText size="xs">Uptime: 12min.</EuiText>
+                  <EuiText size="xs">
+                    Uptime: <strong>12min.</strong>
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">Last Config Update: {moment(lastUpdated).fromNow()}</EuiText>
+                  <EuiText size="xs">
+                    Last Config Update: <strong>{moment(lastUpdated).fromNow()}</strong>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -118,6 +122,7 @@ export class BeatDetailsPage extends React.PureComponent<
             </EuiTab>
           ))}
         </EuiTabs>
+        <EuiSpacer size="l" />
         <Switch>
           <Route path="/beat/:beatId/activity" render={(props: any) => <BeatActivityView />} />
           <Route path="/beat/:beatId/tags" render={(props: any) => <BeatTagsView />} />

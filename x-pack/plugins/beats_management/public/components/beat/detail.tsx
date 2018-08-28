@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   // @ts-ignore EuiInMemoryTable typings not yet available
   EuiInMemoryTable,
+  EuiLink,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -17,6 +18,7 @@ import { flatten } from 'lodash';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { ClientSideBeatTag } from '../../lib/lib';
+import { ConnectedLink } from '../connected_link';
 
 interface BeatDetailProps {
   beat: CMPopulatedBeat | undefined;
@@ -31,8 +33,10 @@ export const BeatDetailView = (props: BeatDetailProps) => {
     beat.full_tags.map((tag: ClientSideBeatTag) => {
       return tag.configurations.map(configuration => ({
         ...configuration,
+        module: configuration.block_obj.module || null,
         tagId: tag.id,
         tagColor: tag.color,
+        ...beat,
       }));
     })
   );
@@ -41,6 +45,12 @@ export const BeatDetailView = (props: BeatDetailProps) => {
     {
       field: 'type',
       name: 'Type',
+      sortable: true,
+      render: (type: string) => <EuiLink href="#">{type}</EuiLink>,
+    },
+    {
+      field: 'module',
+      name: 'Module',
       sortable: true,
     },
     {
@@ -51,9 +61,11 @@ export const BeatDetailView = (props: BeatDetailProps) => {
     {
       field: 'tagId',
       name: 'Tag',
-      render: (id: string, block: any) => {
-        return <EuiBadge color={block.tagColor}>{id}</EuiBadge>;
-      },
+      render: (id: string, block: any) => (
+        <ConnectedLink path={`/tag/edit/${id}`}>
+          <EuiBadge color={block.tagColor}>{id}</EuiBadge>
+        </ConnectedLink>
+      ),
       sortable: true,
     },
   ];

@@ -122,6 +122,32 @@ export const BeatsTableType: TableType = {
   }),
 };
 
+// export const BeatsDetailTableType: TableType = {
+//   columnDefinitions: [
+//     {
+//       field: 'id',
+//       name: 'Tag name',
+//       render: (ids: string) => <EuiBadge
+//       sortable: true,
+//     },
+//   ],
+//   controlDefinitions: (data: any) => ({
+//     actions: [
+//       {
+//         name: 'Add Tag',
+//         action: 'add',
+//         danger: false,
+//       },
+//       {
+//         name: 'Remove Selected',
+//         action: 'remove',
+//         danger: true,
+//       },
+//     ],
+//     filters: [],
+//   }),
+// };
+
 export const TagsTableType: TableType = {
   columnDefinitions: [
     {
