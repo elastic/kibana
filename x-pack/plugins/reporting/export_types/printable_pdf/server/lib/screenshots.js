@@ -265,20 +265,20 @@ export function screenshotsObservableFactory(server) {
             browser => getNumberOfItems(browser, layout),
             (browser, itemsCount) => ({ browser, itemsCount })
           ),
+          tap(() => logger.debug('setting viewport')),
+          mergeMap(
+            ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
+            ({ browser, itemsCount }) => ({ browser, itemsCount }),
+          ),
           tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
           mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
-          tap(() => logger.debug('setting viewport')),
-          mergeMap(
-            ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
-            ({ browser }) => browser
-          ),
           tap(() => logger.debug('positioning elements')),
           mergeMap(
-            browser => positionElements(browser, layout),
-            browser => browser
+            ({ browser }) => positionElements(browser, layout),
+            ({ browser }) => browser
           ),
           tap(() => logger.debug('waiting for rendering to complete')),
           mergeMap(
