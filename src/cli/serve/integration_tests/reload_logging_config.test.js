@@ -22,7 +22,7 @@ import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
-import { readYamlConfig } from '../read_yaml_config';
+import { getConfigFromFiles } from '../../../core/server/config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
@@ -32,7 +32,7 @@ function follow(file) {
 }
 
 function setLoggingJson(enabled) {
-  const conf = readYamlConfig(testConfigFile);
+  const conf = getConfigFromFiles([testConfigFile]);
   conf.logging = conf.logging || {};
   conf.logging.json = enabled;
 

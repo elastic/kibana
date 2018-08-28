@@ -22,6 +22,22 @@ function formatJobObject(job) {
   };
 }
 
+function getLogger(opts, id, logLevel) {
+  return (msg, err) => {
+    const logger = opts.logger || function () {};
+
+    const message = `${id} - ${msg}`;
+    const tags = ['worker', logLevel];
+
+    if (err) {
+      logger(`${message}: ${err.stack  ? err.stack : err }`, tags);
+      return;
+    }
+
+    logger(message, tags);
+  };
+}
+
 export class Worker extends events.EventEmitter {
   constructor(queue, type, workerFn, opts) {
     if (typeof type !== 'string') throw new Error('type must be a string');
@@ -40,19 +56,8 @@ export class Worker extends events.EventEmitter {
     this.checkSize = opts.size || 10;
     this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
-    this.debug = (msg, err) => {
-      const logger = opts.logger || function () {};
-
-      const message = `${this.id} - ${msg}`;
-      const tags = ['worker', 'debug'];
-
-      if (err) {
-        logger(`${message}: ${err.stack  ? err.stack : err }`, tags);
-        return;
-      }
-
-      logger(message, tags);
-    };
+    this.debug = getLogger(opts, this.id, 'debug');
+    this.warn = getLogger(opts, this.id, 'warn');
 
     this._running = true;
     this.debug(`Created worker for job type ${this.jobtype}`);
@@ -134,17 +139,11 @@ export class Worker extends events.EventEmitter {
           ...doc
         };
         return updatedJob;
-      })
-      .catch((err) => {
-        if (err.statusCode === 409) return true;
-        this.debug(`_claimJob failed on job ${job._id}`, err);
-        this.emit(constants.EVENT_WORKER_JOB_CLAIM_ERROR, this._formatErrorParams(err, job));
-        return false;
       });
   }
 
   _failJob(job, output = false) {
-    this.debug(`Failing job ${job._id}`);
+    this.warn(`Failing job ${job._id}`);
 
     const completedTime = moment().toISOString();
     const docOutput = this._formatOutput(output);
@@ -170,7 +169,7 @@ export class Worker extends events.EventEmitter {
       .then(() => true)
       .catch((err) => {
         if (err.statusCode === 409) return true;
-        this.debug(`_failJob failed to update job ${job._id}`, err);
+        this.warn(`_failJob failed to update job ${job._id}`, err);
         this.emit(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, this._formatErrorParams(err, job));
         return false;
       });
@@ -215,7 +214,7 @@ export class Worker extends events.EventEmitter {
         if (isResolved) return;
 
         cancellationToken.cancel();
-        this.debug(`Timeout processing job ${job._id}`);
+        this.warn(`Timeout processing job ${job._id}`);
         reject(new WorkerTimeoutError(`Worker timed out, timeout = ${job._source.timeout}`, {
           timeout: job._source.timeout,
           jobId: job._id,
@@ -253,7 +252,7 @@ export class Worker extends events.EventEmitter {
         })
         .catch((err) => {
           if (err.statusCode === 409) return false;
-          this.debug(`Failure saving job output ${job._id}`, err);
+          this.warn(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
         });
     }, (jobErr) => {
@@ -265,7 +264,7 @@ export class Worker extends events.EventEmitter {
 
       // job execution failed
       if (jobErr.name === 'WorkerTimeoutError') {
-        this.debug(`Timeout on job ${job._id}`);
+        this.warn(`Timeout on job ${job._id}`);
         this.emit(constants.EVENT_WORKER_JOB_TIMEOUT, this._formatErrorParams(jobErr, job));
         return;
 
@@ -278,7 +277,7 @@ export class Worker extends events.EventEmitter {
         }
       }
 
-      this.debug(`Failure occurred on job ${job._id}`, jobErr);
+      this.warn(`Failure occurred on job ${job._id}`, jobErr);
       this.emit(constants.EVENT_WORKER_JOB_EXECUTION_ERROR, this._formatErrorParams(jobErr, job));
       return this._failJob(job, (jobErr.toString) ? jobErr.toString() : false);
     });
@@ -316,23 +315,30 @@ export class Worker extends events.EventEmitter {
 
         return this._claimJob(job)
           .then((claimResult) => {
-            if (claimResult !== false) {
-              claimed = true;
-              return claimResult;
+            claimed = true;
+            return claimResult;
+          })
+          .catch((err) => {
+            if (err.statusCode === 409) {
+              this.warn(`_claimPendingJobs encountered a version conflict on updating pending job ${job._id}`, err);
+              return; // continue reducing and looking for a different job to claim
             }
+            this.emit(constants.EVENT_WORKER_JOB_CLAIM_ERROR, this._formatErrorParams(err, job));
+            return Promise.reject(err);
           });
       });
     }, Promise.resolve())
       .then((claimedJob) => {
         if (!claimedJob) {
-          this.debug(`All ${jobs.length} jobs already claimed`);
+          this.debug(`Found no claimable jobs out of ${jobs.length} total`);
           return;
         }
         this.debug(`Claimed job ${claimedJob._id}`);
         return this._performJob(claimedJob);
       })
       .catch((err) => {
-        this.debug('Error claiming jobs', err);
+        this.warn('Error claiming jobs', err);
+        return Promise.reject(err);
       });
   }
 
@@ -384,7 +390,7 @@ export class Worker extends events.EventEmitter {
       // ignore missing indices errors
         if (err && err.status === 404) return [];
 
-        this.debug('job querying failed', err);
+        this.warn('job querying failed', err);
         this.emit(constants.EVENT_WORKER_JOB_SEARCH_ERROR, this._formatErrorParams(err));
         throw err;
       });
