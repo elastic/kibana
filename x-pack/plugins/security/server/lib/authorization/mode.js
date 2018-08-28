@@ -51,14 +51,16 @@ export function authorizationModeFactory(
     return hasAnyResourcePrivileges(resourcePrivileges);
   };
 
+  const isRbacEnabled = () => xpackInfoFeature.getLicenseCheckResults().allowRbac;
+
   return {
     async initialize(request) {
       if (useRbacForRequestWeakMap.has(request)) {
         throw new Error('Authorization mode is already intitialized');
       }
 
-      if (!this.isRbacEnabled()) {
-        useRbacForRequestWeakMap.set(request, false);
+      if (!isRbacEnabled()) {
+        useRbacForRequestWeakMap.set(request, true);
         return;
       }
 
@@ -67,11 +69,11 @@ export function authorizationModeFactory(
     },
 
     useRbacForRequest(request) {
-      return useRbacForRequestWeakMap.get(request);
-    },
+      if (!useRbacForRequestWeakMap.has(request)) {
+        throw new Error(`Authorization mode is not initialized`);
+      }
 
-    isRbacEnabled() {
-      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
+      return useRbacForRequestWeakMap.get(request);
     },
   };
 }
