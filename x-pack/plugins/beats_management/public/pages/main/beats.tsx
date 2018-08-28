@@ -11,10 +11,10 @@ import {
 } from '@elastic/eui';
 
 import React from 'react';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
-import { FrontendLibs } from '../../lib/lib';
+import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
@@ -23,19 +23,19 @@ interface BeatsPageProps {
 }
 
 interface BeatsPageState {
-  beats: CMPopulatedBeat[];
+  beats: CMBeat[];
+  tableRef: any;
   tags: any[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = BeatsActionArea;
-  private tableRef = React.createRef<Table>();
-
   constructor(props: BeatsPageProps) {
     super(props);
 
     this.state = {
       beats: [],
+      tableRef: React.createRef(),
       tags: null,
     };
 
@@ -51,7 +51,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       <Table
         actionHandler={this.handleBeatsActions}
         assignmentOptions={this.state.tags}
-        renderAssignmentOptions={(tag: BeatTag) => {
+        assignmentTitle="Set tags"
+        items={this.state.beats || []}
+        ref={this.state.tableRef}
+        showAssignmentOptions={true}
+        renderAssignmentOptions={(tag: ClientSideBeatTag) => {
           const selectedBeats = this.getSelectedBeats();
           const hasMatches = selectedBeats.some((beat: any) =>
             (beat.tags || []).some((t: string) => t === tag.id)
@@ -74,10 +78,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
             </EuiFlexItem>
           );
         }}
-        assignmentTitle="Set tags"
-        items={this.state.beats || []}
-        ref={this.tableRef}
-        showAssignmentOptions={true}
         type={BeatsTableType}
       />
     );
@@ -111,9 +111,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     // the max race condition time is really 10ms but doing 100 to be safe
     setTimeout(async () => {
       await this.loadBeats();
-      if (this.tableRef && this.tableRef.current) {
-        this.tableRef.current.resetSelection();
-      }
     }, 100);
   };
 
@@ -124,7 +121,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     });
   }
 
-  // TODO: add reference to ES filter endpoint
+  // todo: add reference to ES filter endpoint
   private handleSearchQuery = (query: any) => {
     // await this.props.libs.beats.searach(query);
   };
@@ -139,26 +136,22 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private createBeatTagAssignments = (
     beats: CMPopulatedBeat[],
-    tag: BeatTag
+    tag: ClientSideBeatTag
   ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
 
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
+  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.removeTagsFromBeats(this.createBeatTagAssignments(beats, tag));
-    this.loadBeats();
+    await this.loadBeats();
+    await this.loadTags();
   };
 
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
+  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
     await this.loadBeats();
     await this.loadTags();
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {
-    if (this.tableRef && this.tableRef.current) {
-      return this.tableRef.current.state.selection.map(
-        (beat: CMPopulatedBeat) => this.state.beats.find(b => b.id === beat.id) || beat
-      );
-    }
-    return [];
+    return this.state.tableRef.current.state.selection;
   };
 }

@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import beatsIndexTemplate from './beats_template.json';
-export { beatsIndexTemplate };
+export const INDEX_NAMES = {
+  PIPELINES: '.logstash',
+};

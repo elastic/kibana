@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ClientSideBeatTag } from '../public/lib/lib';
 import { ConfigurationBlockTypes } from './constants';
 
 export interface ConfigurationBlock {
   type: ConfigurationBlockTypes;
+  description: string;
   block_yml: string;
 }
 
@@ -30,7 +32,7 @@ export interface CMBeat {
 }
 
 export interface CMPopulatedBeat extends CMBeat {
-  full_tags: BeatTag[];
+  full_tags: ClientSideBeatTag[];
 }
 
 export interface BeatTag {

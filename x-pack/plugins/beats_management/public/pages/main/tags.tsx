@@ -17,7 +17,7 @@ import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { Table, TagsTableType } from '../../components/table';
-import { FrontendLibs } from '../../lib/lib';
+import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
 
 interface TagsPageProps {
   libs: FrontendLibs;
@@ -25,7 +25,7 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
-  tags: BeatTag[];
+  tags: ClientSideBeatTag[];
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
@@ -37,10 +37,11 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         history.push(`/tag/create`);
       }}
     >
-      Create Tag
+      Add Tag
     </EuiButton>
   );
-  public tableRef = React.createRef<Table>();
+  private tableRef = React.createRef<Table>();
+
   constructor(props: TagsPageProps) {
     super(props);
 
@@ -57,7 +58,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       <Table
         actionHandler={this.handleTagsAction}
         assignmentOptions={this.state.beats}
-        assignmentTitle={null}
+        assignmentTitle={'Assign Beats'}
         items={this.state.tags}
         ref={this.tableRef}
         showAssignmentOptions={true}
@@ -66,7 +67,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     );
   }
 
-  private handleTagsAction = async (action: string) => {
+  private handleTagsAction = async (action: string, payload: any) => {
     switch (action) {
       case 'loadAssignmentOptions':
         this.loadBeats();
@@ -166,10 +167,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     await this.props.libs.beats.assignTagsToBeats(assignments);
   };
 
-  private getSelectedTags = (): BeatTag[] => {
-    if (this.tableRef && this.tableRef.current) {
-      return this.tableRef.current.state.selection;
-    }
-    return [];
+  private getSelectedTags = () => {
+    return this.tableRef.current ? this.tableRef.current.state.selection : [];
   };
 }

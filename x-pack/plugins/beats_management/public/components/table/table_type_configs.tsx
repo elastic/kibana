@@ -128,11 +128,13 @@ export const TagsTableType: TableType = {
       field: 'id',
       name: 'Tag name',
       render: (id: string, tag: BeatTag) => (
-        <EuiBadge color={tag.color ? tag.color : 'primary'}>
-          {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
-            ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
-            : tag.id}
-        </EuiBadge>
+        <ConnectedLink path={`/tag/edit/${tag.id}`}>
+          <EuiBadge color={tag.color ? tag.color : 'primary'}>
+            {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
+              ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
+              : tag.id}
+          </EuiBadge>
+        </ConnectedLink>
       ),
       sortable: true,
       width: '45%',

@@ -42,6 +42,9 @@
                 "type": {
                   "type": "keyword"
                 },
+                "description": {
+                  "type": "text"
+                },
                 "block_yml": {
                   "type": "text"
                 }

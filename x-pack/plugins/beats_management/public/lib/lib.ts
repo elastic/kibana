@@ -7,18 +7,89 @@
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { CMTagsAdapter } from './adapters/tags/adapter_types';
+import { ConfigurationBlock } from '../../common/domain_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './domains/beats';
+import { TagsLib } from './domains/tags';
 
 export interface FrontendDomainLibs {
   beats: BeatsLib;
-  tags: CMTagsAdapter;
+  tags: TagsLib;
   tokens: CMTokensAdapter;
 }
 
 export interface FrontendLibs extends FrontendDomainLibs {
   framework: FrameworkAdapter;
+}
+
+export enum FilebeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum MetricbeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum OutputType {
+  elasticsearch = 'elasticsearch',
+  logstash = 'logstash',
+  kafka = 'kafka',
+  console = 'console',
+}
+
+export type ClientConfigContent =
+  | FilebeatInputsConfig
+  | FilebeatModuleConfig
+  | MetricbeatModuleConfig;
+
+export interface YamlConfigSchema {
+  id: string;
+  ui: {
+    label: string;
+    type: 'input' | 'multi-input' | 'select' | 'code';
+    helpText?: string;
+  };
+  options?: Array<{ value: string; text: string }>;
+  validations?: 'isHost' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
+  error: string;
+  defaultValue?: string;
+  required?: boolean;
+  parseValidResult?: (value: any) => any;
+}
+
+export interface ClientSideBeatTag {
+  id: string;
+  configurations: ClientSideConfigurationBlock[];
+  color?: string;
+  last_updated: Date;
+}
+
+export interface ClientSideConfigurationBlock
+  extends Pick<ConfigurationBlock, Exclude<keyof ConfigurationBlock, 'block_yml'>> {
+  block_obj: ClientConfigContent;
+}
+
+export interface FilebeatInputsConfig {
+  paths: string[];
+  other: string;
+}
+export interface FilebeatModuleConfig {
+  module: FilebeatModuleName;
+  other: string;
+}
+export interface MetricbeatModuleConfig {
+  module: MetricbeatModuleName;
+  hosts: string[];
+  period: string;
+  other: string;
 }
 
 export interface FrameworkAdapter {
