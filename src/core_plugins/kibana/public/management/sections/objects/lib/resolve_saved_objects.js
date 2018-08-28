@@ -163,6 +163,7 @@ export async function resolveSavedObjects(
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
+  // Keep a record of any objects which fail to import for unknown reasons.
   const failedImports = [];
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(
@@ -199,13 +200,15 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, searchDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        if (err.savedObjectType === 'index-pattern') {
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
         } else {
           conflictedSearchDocs.push(searchDoc);
         }
+      } else {
+        failedImports.push({ obj, error });
       }
     }
   });
@@ -217,15 +220,20 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, otherDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        if (err.savedObjectType === 'index-pattern') {
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
+        if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);
           } else {
             conflictedIndexPatterns.push({ obj, doc: otherDoc });
           }
         }
+      } else {
+        failedImports.push({ obj, error });
       }
     }
   });
@@ -235,5 +243,6 @@ export async function resolveSavedObjects(
     conflictedSavedObjectsLinkedToSavedSearches,
     conflictedSearchDocs,
     importedObjectCount,
+    failedImports,
   };
 }
