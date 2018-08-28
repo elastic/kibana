@@ -55,7 +55,7 @@ Create the build folder:
 Copy the `x-pack/build-chromium` folder to each. Replace `you@your-machine` with the correct username and VM name:
 
 - Mac: `cp -r ~/dev/elastic/kibana/x-pack/build_chromium ~/chromium/build_chromium`
-- Linux: `gcloud compute scp --recurse ~/dev/build_chromium/ you@your-machine:~/chromium --zone=us-east1-b`
+- Linux: `gcloud compute scp --recurse ~/dev/elastic/kibana/x-pack/build_chromium you@your-machine:~/chromium --zone=us-east1-b`
 - Windows: Copy the `build_chromium` folder via the RDP GUI into `c:\chromium\build_chromium`
 
 There is an init script for each platform. This downloads and installs the necessary prerequisites, sets environment variables, etc.
