@@ -17,6 +17,7 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
+  capabilitiesByNode: (InfraNodeCapability | null)[] /** A hierarchy of capabilities available on nodes */;
   logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
@@ -51,6 +52,11 @@ export interface InfraIndexField {
   type: string /** The type of the field's values as recognized by Kibana */;
   searchable: boolean /** Whether the field's values can be efficiently searched for */;
   aggregatable: boolean /** Whether the field's values can be aggregated */;
+}
+/** One specific capability available on a node. A capability corresponds to a fileset or metricset */
+export interface InfraNodeCapability {
+  name: string;
+  source: string;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -139,6 +145,7 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
+    capabilitiesByNode?: CapabilitiesByNodeResolver /** A hierarchy of capabilities available on nodes */;
     logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
@@ -148,6 +155,14 @@ export namespace InfraSourceResolvers {
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
   export type StatusResolver = Resolver<InfraSourceStatus>;
+  export type CapabilitiesByNodeResolver = Resolver<
+    (InfraNodeCapability | null)[],
+    CapabilitiesByNodeArgs
+  >;
+  export interface CapabilitiesByNodeArgs {
+    nodeName: string;
+  }
+
   export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
   export interface LogEntriesAroundArgs {
     key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
@@ -241,6 +256,16 @@ export namespace InfraIndexFieldResolvers {
   export type TypeResolver = Resolver<string>;
   export type SearchableResolver = Resolver<boolean>;
   export type AggregatableResolver = Resolver<boolean>;
+}
+/** One specific capability available on a node. A capability corresponds to a fileset or metricset */
+export namespace InfraNodeCapabilityResolvers {
+  export interface Resolvers {
+    name?: NameResolver;
+    source?: SourceResolver;
+  }
+
+  export type NameResolver = Resolver<string>;
+  export type SourceResolver = Resolver<string>;
 }
 /** A consecutive sequence of log entries */
 export namespace InfraLogEntryIntervalResolvers {
@@ -423,6 +448,9 @@ export interface InfraMetricAggInput {
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
+}
+export interface CapabilitiesByNodeInfraSourceArgs {
+  nodeName: string;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
