@@ -6,7 +6,7 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { ManageSpacesButton } from '../../components';
+import { ManageSpacesButton } from '../../../components';
 import './spaces_description.less';
 
 export const SpacesDescription: SFC = () => {

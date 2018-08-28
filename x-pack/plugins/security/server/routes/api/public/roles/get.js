@@ -90,7 +90,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         }
 
         return reply(Boom.notFound());
-      } catch(error) {
+      } catch (error) {
         reply(wrapError(error));
       }
     },

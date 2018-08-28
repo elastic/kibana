@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
       async function () {
         await PageObjects.dashboard.selectDashboard(dashboardName);
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
     );
 
     it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
 
       const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Warns when case is different', async function () {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
 
       // We expect isWarningDisplayed to be open, hence the retry if not found.

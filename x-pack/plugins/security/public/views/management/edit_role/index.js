@@ -19,6 +19,7 @@ import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { SpacesManager } from 'plugins/spaces/lib';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 
@@ -79,10 +80,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     indexPatterns(Private) {
       const indexPatterns = Private(IndexPatternsProvider);
       return indexPatterns.getTitles();
+    },
+    spaces($http, chrome) {
+      return new SpacesManager($http, chrome).getSpaces();
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
@@ -96,9 +100,29 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');
 
+    if (role.elasticsearch.indices.length === 0) {
+      const emptyOption = {
+        names: [],
+        privileges: []
+      };
+
+      if (allowFieldLevelSecurity) {
+        emptyOption.field_security = {
+          grant: ['*']
+        };
+      }
+
+      if (allowDocumentLevelSecurity) {
+        emptyOption.query = '';
+      }
+
+      role.elasticsearch.indices.push(emptyOption);
+    }
+
     const {
       users,
       indexPatterns,
+      spaces,
     } = $route.current.locals;
 
     $scope.$$postDigest(() => {
@@ -115,6 +139,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         allowDocumentLevelSecurity={allowDocumentLevelSecurity}
         allowFieldLevelSecurity={allowFieldLevelSecurity}
         notifier={Notifier}
+        spaces={spaces}
+        spacesEnabled={enableSpaceAwarePrivileges}
       />, domNode);
 
       // unmount react on controller destroy
