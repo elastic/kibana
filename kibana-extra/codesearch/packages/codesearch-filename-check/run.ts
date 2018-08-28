@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createToolingLog, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
-const log = createToolingLog('info');
-
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
 
 export async function run(checker: (log: ToolingLog) => boolean | Promise<boolean>) {
   try {
