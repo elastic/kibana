@@ -20,35 +20,28 @@
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
-import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 
-function generateDLL(dllConfig) {
-  const dllContext = dllConfig.context;
-  const dllEntryName = dllConfig.entryName;
-  const dllName = dllConfig.dllName;
-  const dllManifestName = dllConfig.dllName;
-  const dllStyleName = dllConfig.styleName;
-  const dllOutputPath = dllConfig.outputPath;
-  const dllPublicPath = dllConfig.publicPath;
-  const dllEntry = {};
-
-  // Create webpack entry object key with the provided dllEntryName
-  dllEntry[dllEntryName] = `${dllOutputPath}/${dllEntryName}.entry.dll.js`;
-
-  const dllFilename = `${dllName}.bundle.dll.js`;
-  const dllManifestPath = `${dllOutputPath}/${dllManifestName}.manifest.dll.json`;
-  const dllStyleFilename = `${dllStyleName}.style.dll.css`;
-
+function generateDLL(config) {
+  const {
+    dllContext,
+    dllEntry,
+    dllOutputPath,
+    dllPublicPath,
+    dllBundleName,
+    dllBundleFilename,
+    dllStyleFilename,
+    dllManifestPath
+  } = config;
 
   return {
     entry: dllEntry,
-    dllContext,
+    context: dllContext,
     output: {
-      filename: dllFilename,
+      filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
-      library: dllName
+      library: dllBundleName
     },
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
@@ -77,7 +70,7 @@ function generateDLL(dllConfig) {
     plugins: [
       new webpack.DllPlugin({
         context: dllContext,
-        name: dllName,
+        name: dllBundleName,
         path: dllManifestPath
       }),
       new MiniCssExtractPlugin({
@@ -87,9 +80,43 @@ function generateDLL(dllConfig) {
   };
 }
 
-function common(dllConfig) {
+function extendRawConfig(rawConfig) {
+  // Build all extended configs from raw config
+  const dllContext = rawConfig.context;
+  const dllEntry = {};
+  const dllEntryName = rawConfig.entryName;
+  const dllBundleName = rawConfig.dllName;
+  const dllManifestName = rawConfig.dllName;
+  const dllStyleName = rawConfig.styleName;
+  const dllEntryExt = rawConfig.entryExt;
+  const dllBundleExt = rawConfig.dllExt;
+  const dllManifestExt = rawConfig.manifestExt;
+  const dllStyleExt = rawConfig.styleExt;
+  const dllOutputPath = rawConfig.outputPath;
+  const dllPublicPath = rawConfig.publicPath;
+  const dllBundleFilename = `${dllBundleName}${dllBundleExt}`;
+  const dllManifestPath = `${dllOutputPath}/${dllManifestName}${dllManifestExt}`;
+  const dllStyleFilename = `${dllStyleName}${dllStyleExt}`;
+
+  // Create webpack entry object key with the provided dllEntryName
+  dllEntry[dllEntryName] = `${dllOutputPath}/${dllEntryName}${dllEntryExt}`;
+
+  // Export dll config map
+  return {
+    dllContext,
+    dllEntry,
+    dllOutputPath,
+    dllPublicPath,
+    dllBundleName,
+    dllBundleFilename,
+    dllStyleFilename,
+    dllManifestPath
+  };
+}
+
+function common(rawConfig) {
   return webpackMerge(
-    generateDLL(dllConfig)
+    generateDLL(extendRawConfig(rawConfig))
   );
 }
 
@@ -109,24 +136,10 @@ function unoptimized() {
   );
 }
 
-function getDllConfig(outputPath) {
-  return {
-    context: fromRoot('.'),
-    entryName: 'vendors',
-    dllName: '[name]',
-    manifestName: '[name]',
-    styleName: '[name]',
-    path: outputPath,
-    publicPath: PUBLIC_PATH_PLACEHOLDER
-  };
-}
-
-export default (outputPath) => {
-  const dllConfig = getDllConfig(outputPath);
-
+export function configModel(rawConfig = {}) {
   if (IS_KIBANA_DISTRIBUTABLE) {
-    return webpackMerge(common(dllConfig), optimized());
+    return webpackMerge(common(rawConfig), optimized());
   }
 
-  return webpackMerge(common(dllConfig), unoptimized());
-};
+  return webpackMerge(common(rawConfig), unoptimized());
+}

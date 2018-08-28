@@ -17,20 +17,15 @@
  * under the License.
  */
 
-import RawModule from 'webpack/lib/RawModule';
+import { promisify } from 'util';
 import { DllCompiler } from './dll_compiler';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
-import { promisify } from 'util';
-import mkdirp from 'mkdirp';
 
-const readFileAsync = promisify(fs.readFile);
 const realPathAsync = promisify(fs.realpath);
-const mkdirpAsync = promisify(mkdirp);
-const existsAsync = promisify(fs.exists);
-const writeFileAsync = promisify(fs.writeFile);
-
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
 function inNodeModules(checkPath) {
@@ -38,78 +33,58 @@ function inNodeModules(checkPath) {
 }
 
 function inPluginNodeModules(checkPath) {
-  return checkPath.match(/(\/|\\)plugins.*(\/|\\)node_modules/);
+  return checkPath.match(/[\/\\]plugins.*[\/\\]node_modules/);
 }
 
 export class DynamicDllPlugin {
-  constructor({ dllConfig }) {
-    this.dllConfig = dllConfig;
-    this.log = this.dllConfig.isDistributable ? (data) => process.stdout.write(data + '\n') : console.log;
-    this.entryPath = this.dllConfig.ub.resolvePath('vendor.entry.dll.js');
-    this.dllPath = this.dllConfig.ub.resolvePath('vendor.dll.js');
-    this.manifestPath = this.dllConfig.ub.resolvePath('vendor.manifest.dll.json');
+  constructor({ uiBundles, log }) {
+    this.log = log || (() => {});
+    this.dllCompiler = new DllCompiler(uiBundles, log);
     this.entryPaths = '';
-    this.newCompilationEntryPaths = '';
+    this.afterCompilationEntryPaths = '';
   }
 
-  async ensureManifestExists() {
-    const exists = await existsAsync(this.manifestPath);
-    if (!exists) {
-      await mkdirpAsync(path.dirname(this.manifestPath));
-      await writeFileAsync(
-        this.manifestPath,
-        JSON.stringify({
-          name: 'vendor',
-          content: {},
-        }),
-        'utf8'
-      );
-    }
-  }
-
-  async ensureEntryExists() {
-    const exists = await existsAsync(this.entryPath);
-    if (!exists) {
-      await mkdirpAsync(path.dirname(this.entryPath));
-      await writeFileAsync(this.entryPath, '', 'utf8');
-    }
-  }
-
-  async readEnsureEntry() {
-    await this.ensureEntryExists();
-    return await readFileAsync(this.entryPath, 'utf8');
-  }
-
-  mustCheckDllCompilationNeed() {
-    if (!this.dllConfig.isDistributable) {
-      return true;
-    }
-
-    return !fs.existsSync(this.dllPath);
+  async init() {
+    await this.dllCompiler.init();
+    this.entryPaths = await this.dllCompiler.readEntryFile();
+    this.log(['info', 'optimize'], 'Start dynamic dll plugin tasks');
   }
 
   apply(compiler) {
-    this.bindToCompiler(compiler);
+    this.registerHooks(compiler);
+    this.bindDllReferencePlugin(compiler);
+  }
+
+  bindDllReferencePlugin(compiler) {
+    const rawDllConfig = this.dllCompiler.rawDllConfig;
 
     new webpack.DllReferencePlugin({
-      context: this.dllConfig.context,
-      manifest: this.manifestPath,
+      context: rawDllConfig.context,
+      manifest: rawDllConfig.manifestPath,
     }).apply(compiler);
   }
 
-  bindToCompiler(compiler) {
+  registerHooks(compiler) {
+    this.registerRunHook(compiler);
+    this.registerWatchRunHook(compiler);
+    this.registerBeforeCompileHook(compiler);
+    this.registerCompilationHook(compiler);
+    this.registerDoneHook(compiler);
+  }
+
+  registerRunHook(compiler) {
     compiler.hooks.run.tapPromise('DynamicDllPlugin', async () => {
-      this.log('starting compile');
-      await this.ensureManifestExists();
-      this.entryPaths = await this.readEnsureEntry();
+      await this.init();
     });
+  }
 
+  registerWatchRunHook(compiler) {
     compiler.hooks.watchRun.tapPromise('DynamicDllPlugin', async () => {
-      this.log('starting compile');
-      await this.ensureManifestExists();
-      this.entryPaths = await this.readEnsureEntry();
+      await this.init();
     });
+  }
 
+  registerBeforeCompileHook(compiler) {
     compiler.hooks.beforeCompile.tapPromise('DynamicDllPlugin', async ({ normalModuleFactory }) => {
       normalModuleFactory.hooks.factory.tap(
         'DynamicDllPlugin',
@@ -133,68 +108,72 @@ export class DynamicDllPlugin {
         }
       );
     });
+  }
 
+  registerCompilationHook(compiler) {
     compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
-        // Verify if we must check if a dll compilation is needed
-        // In case we are in distributable environment and we already
-        // have on dll bundle, we don't need to check it
-        // TODO: completely remove the DLL logic on distributable env when we already have the DLL created
-        if (!this.mustCheckDllCompilationNeed()) {
+        // Verify if we must proceed and check if a dll compilation is needed.
+        // In case we are under a distributable environment we can just discard
+        // the dllCompilation (and the subsequent additional compilation)
+        // and return false right away.
+        if (IS_KIBANA_DISTRIBUTABLE) {
           return compilation.needsDLLCompilation = false;
         }
 
         // Run the procedures in order to decide if we need
         // a Dll compilation
         const requires = [];
+        const rawDllConfig = this.dllCompiler.rawDllConfig;
+        const dllContext = rawDllConfig.context;
+        const dllOutputPath = rawDllConfig.outputPath;
 
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
-            const absoluteResource = path.resolve(this.dllConfig.context, module.userRequest);
-            requires.push(`require('${path.relative(this.dllConfig.outputPath, absoluteResource)}');`);
+            const absoluteResource = path.resolve(dllContext, module.userRequest);
+            requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requires.push(`require('${path.relative(this.dllConfig.outputPath, module.stubResource)}');`);
+            requires.push(`require('${path.relative(dllOutputPath, module.stubResource)}');`);
           }
         }
 
-        this.newCompilationEntryPaths = requires.sort().join('\n');
-        compilation.needsDLLCompilation = (this.newCompilationEntryPaths !== this.entryPaths);
-        this.entryPaths = this.newCompilationEntryPaths;
+        this.afterCompilationEntryPaths = requires.sort().join('\n');
+        compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths);
+        this.entryPaths = this.afterCompilationEntryPaths;
 
         this.log(
+          ['info', 'optimize'],
           compilation.needsDLLCompilation
-            ? '... need additional pass, dll needs to rebuild'
-            : '... no need for additional pass'
+            ? 'Need to compile the client vendors dll'
+            : 'No need to compile client vendors dll'
         );
 
         return compilation.needsDLLCompilation;
       });
     });
+  }
 
-
+  registerDoneHook(compiler) {
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        this.log('writing new bundler entry file');
-        await this.runDLLsCompiler(compiler);
+        await this.runDLLCompiler(compiler);
       }
 
-      this.log('done');
+      this.log(['info', 'optimize'], 'All dynamic dll plugin tasks finished');
     });
   }
 
-  async runDLLsCompiler(mainCompiler) {
-    this.dllCompiler = new DllCompiler(this.dllConfig, this.log);
-    this.dllCompiler.upsertDllEntryFile(this.entryPaths);
-    await this.dllCompiler.run();
+  async runDLLCompiler(mainCompiler) {
+    await this.dllCompiler.run(this.entryPaths);
 
     // We need to purge the cache into the inputFileSystem
     // for every single built in previous compilation
     // that we rely in next ones.
-    mainCompiler.inputFileSystem.purge(this.manifestPath);
+    mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
   }
 
   async mapNormalModule(module) {

@@ -17,74 +17,110 @@
  * under the License.
  */
 
-import configModel from './dll_config_model';
+import { configModel } from './dll_config_model';
+import { fromRoot } from '../../utils';
+import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
+import mkdirp from 'mkdirp';
 import webpack from 'webpack';
 import supportsColor from 'supports-color';
+import { promisify } from 'util';
+import path from 'path';
+
+const readFileAsync = promisify(fs.readFile);
+const mkdirpAsync = promisify(mkdirp);
+const existsAsync = promisify(fs.exists);
+const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  static existsDLLsFromConfig({ dllEntries, outputPath }) {
-    return dllEntries.reduce(
-      (accumulator, currentValue) => {
-        const dllEntryFile = `${outputPath}/${currentValue.name}.entry.dll.js`;
-        const dllManifestFile = `${outputPath}/${currentValue.name}.manifest.dll.json`;
-        const dllFile = `${outputPath}/${currentValue.name}.dll.js`;
-
-        return fs.existsSync(dllEntryFile) && fs.existsSync(dllManifestFile) && fs.existsSync(dllFile);
-      },
-      true);
+  constructor(uiBundles, log) {
+    this.rawDllConfig = this.createRawDllConfig(uiBundles);
+    this.log = log || (() => {});
   }
 
-  constructor(options, log) {
-    this.dllEntries = options.dllEntries;
-    this.isDistributable = options.isDistributable;
-    this.outputPath = options.outputPath;
-    this.dllsConfigs = this.createDLLsConfigs(options);
-    this.log =  log;
+  createRawDllConfig(uiBundles) {
+    return {
+      context: fromRoot('.'),
+      entryName: 'vendors',
+      dllName: '[name]',
+      manifestName: '[name]',
+      styleName: '[name]',
+      entryExt: '.entry.dll.js',
+      dllExt: '.bundle.dll.js',
+      manifestExt: '.manifest.dll.json',
+      styleExt: '.style.dll.css',
+      outputPath: `${uiBundles.getWorkingDir()}`,
+      publicPath: PUBLIC_PATH_PLACEHOLDER
+    };
+  }
 
-    if (!this.existsDLLs()) {
-      // this.upsertDllEntryFile();
-      // this.touchDllManifests();
+  async init() {
+    await this.upsertEntryFile();
+    await this.upsertManifestFile(
+      JSON.stringify({
+        name: this.rawDllConfig.entryName,
+        content: {},
+      })
+    );
+  }
+
+  async upsertEntryFile(content) {
+    await this.upsertFile(this.getEntryPath(), content);
+  }
+
+  async upsertManifestFile(content) {
+    await this.upsertFile(this.getManifestPath(), content);
+  }
+
+  async upsertFile(filePath, content = '') {
+    await this.ensurePathExists();
+    await writeFileAsync(filePath, content, 'utf8');
+  }
+
+  getEntryPath() {
+    return this.resolvePath(
+      `${this.rawDllConfig.entryName}${this.rawDllConfig.entryExt}`
+    );
+  }
+
+  getManifestPath() {
+    return this.resolvePath(
+      `${this.rawDllConfig.entryName}${this.rawDllConfig.manifestExt}`
+    );
+  }
+
+  async ensurePathExists(filePath) {
+    const exists = await existsAsync(filePath);
+
+    if (!exists) {
+      await mkdirpAsync(path.dirname(filePath));
     }
   }
 
-  createDLLsConfigs(options) {
-    return options.dllEntries.map((dllEntry) => this.dllConfigGenerator({
-      dllEntry,
-      ...options
-    }));
+  resolvePath() {
+    return path.resolve(this.rawDllConfig.outputPath, ...arguments);
+  }
+
+  async readEntryFile(filePath) {
+    return await this.readFile(filePath);
+  }
+
+  async readFile(filePath, content) {
+    await this.upsertEntryFile(filePath, content);
+    return await readFileAsync(filePath, 'utf8');
+  }
+
+  async run(dllEntries) {
+    const dllConfig = this.dllConfigGenerator(this.rawDllConfig);
+    await this.upsertEntryFile(dllEntries);
+    await this.runWebpack(dllConfig);
   }
 
   dllConfigGenerator(dllConfig) {
     return configModel.bind(this, dllConfig);
   }
 
-  upsertDllEntryFile(entryPaths = '', entryName = 'vendor') {
-    const dllEntry = this.dllEntries.find((entry) => {
-      return entry.name === entryName;
-    });
-
-    if (!dllEntry) {
-      return;
-    }
-
-    const entryFileName = `${this.outputPath}/${entryName}.entry.dll.js`;
-    fs.writeFileSync(entryFileName, entryPaths);
-  }
-
-  touchDllManifests() {
-    this.dllEntries.forEach((dllEntry) => {
-      fs.writeFileSync(
-        `${this.outputPath}/${dllEntry.name}.json`,
-        '{}'
-      );
-    });
-  }
-
-  existsDLLs() {
-    return DllCompiler.existsDLLsFromConfig({ dllEntries: this.dllEntries, outputPath: this.outputPath });
-  }
-
+  // TODO: REFACT LOGS AND CALLS
   async runWebpack(config) {
     return new Promise((resolve) => {
       webpack(config, (err, stats) => {
@@ -106,11 +142,5 @@ export class DllCompiler {
         resolve();
       });
     });
-  }
-
-  async run() {
-    for (const dllConfig of this.dllsConfigs) {
-      await this.runWebpack(dllConfig());
-    }
   }
 }
