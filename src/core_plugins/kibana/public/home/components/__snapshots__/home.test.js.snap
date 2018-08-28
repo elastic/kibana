@@ -107,7 +107,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -124,7 +124,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -260,7 +260,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -277,7 +277,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -413,7 +413,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -430,7 +430,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -547,7 +547,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -564,7 +564,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -681,7 +681,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -698,7 +698,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -815,7 +815,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -832,7 +832,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -949,7 +949,7 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -966,7 +966,7 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -1099,7 +1099,7 @@ exports[`home should render home component 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -1116,7 +1116,7 @@ exports[`home should render home component 1`] = `
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -1233,7 +1233,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -1250,7 +1250,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -1367,7 +1367,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -1384,7 +1384,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -1508,7 +1508,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Didn’t find what you were looking for?"
-              id="kbn.home.directories.notFound.nameTitle"
+              id="kbn.home.directories.notFound.description"
               values={Object {}}
             />
           </p>
@@ -1525,7 +1525,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <FormattedMessage
             defaultMessage="View full directory of Kibana plugins"
-            id="kbn.home.directories.viewFullButtonLabel"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
             values={Object {}}
           />
         </EuiButton>
