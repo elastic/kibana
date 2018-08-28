@@ -37,10 +37,10 @@ export function registerUpdateRoute(server) {
         return response;
       } catch (err) {
         if (isEsError(err)) {
-          return wrapEsError(err);
+          throw wrapEsError(err);
         }
 
-        return wrapUnknownError(err);
+        throw wrapUnknownError(err);
       }
     },
     config: {

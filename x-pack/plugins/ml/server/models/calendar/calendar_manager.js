@@ -26,10 +26,10 @@ export class CalendarManager {
         calendar.events = await this.eventManager.getCalendarEvents(calendarId);
         return calendar;
       } else {
-        return Boom.notFound(`Calendar with the id "${calendarId}" not found`);
+        throw Boom.notFound(`Calendar with the id "${calendarId}" not found`);
       }
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -49,7 +49,7 @@ export class CalendarManager {
       });
       return calendars;
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -67,7 +67,7 @@ export class CalendarManager {
       // return the newly created calendar
       return await this.getCalendar(calendarId);
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -115,7 +115,7 @@ export class CalendarManager {
       }));
 
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
 
     // return the updated calendar

@@ -78,25 +78,29 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       authenticateStub.throws(unhandledException);
 
-      const response = await loginRoute.handler(request, hStub);
-
-      expect(response.isBoom).to.be(true);
-      expect(response.output.payload).to.eql({
-        statusCode: 500,
-        error: 'Internal Server Error',
-        message: 'An internal server error occurred'
-      });
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.output.payload).to.eql({
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'An internal server error occurred'
+          });
+        });
     });
 
     it('returns 401 if authentication fails.', async () => {
       const failureReason = new Error('Something went wrong.');
       authenticateStub.returns(Promise.resolve(AuthenticationResult.failed(failureReason)));
 
-      const response = await loginRoute.handler(request, hStub);
-
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be(failureReason.message);
-      expect(response.output.statusCode).to.be(401);
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be(failureReason.message);
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -104,11 +108,13 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      const response = await loginRoute.handler(request, hStub);
-
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be('Unauthorized');
-      expect(response.output.statusCode).to.be(401);
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Unauthorized');
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     describe('authentication succeeds', () => {
@@ -195,10 +201,12 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.reject(unhandledException));
 
-      const response = await logoutRoute.handler(request, hStub);
-
-      expect(response).to.be(Boom.boomify(unhandledException));
-      sinon.assert.notCalled(hStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response).to.be(Boom.boomify(unhandledException));
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('returns 500 if authenticator fails to deauthenticate.', async () => {
@@ -209,21 +217,25 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.resolve(DeauthenticationResult.failed(failureReason)));
 
-      const response = await logoutRoute.handler(request, hStub);
-
-      expect(response).to.be(Boom.boomify(failureReason));
-      sinon.assert.notCalled(hStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response).to.be(Boom.boomify(failureReason));
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('returns 400 for AJAX requests that can not handle redirect.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
 
-      const response = await logoutRoute.handler(request, hStub);
-
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be('Client should be able to process redirect response.');
-      expect(response.output.statusCode).to.be(400);
-      sinon.assert.notCalled(hStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Client should be able to process redirect response.');
+          expect(response.output.statusCode).to.be(400);
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('redirects user to the URL returned by authenticator.', async () => {
@@ -325,15 +337,17 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       serverStub.plugins.security.authenticate.throws(unhandledException);
 
-      const response = await samlAcsRoute.handler(request, hStub);
-
-      sinon.assert.notCalled(hStub.redirect);
-      expect(response.isBoom).to.be(true);
-      expect(response.output.payload).to.eql({
-        statusCode: 500,
-        error: 'Internal Server Error',
-        message: 'An internal server error occurred'
-      });
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.output.payload).to.eql({
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'An internal server error occurred'
+          });
+        });
     });
 
     it('returns 401 if authentication fails.', async () => {
@@ -342,12 +356,14 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.failed(failureReason))
       );
 
-      const response = await samlAcsRoute.handler(request, hStub);
-
-      sinon.assert.notCalled(hStub.redirect);
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be(failureReason.message);
-      expect(response.output.statusCode).to.be(401);
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be(failureReason.message);
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -355,12 +371,14 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      const response = await samlAcsRoute.handler(request, hStub);
-
-      sinon.assert.notCalled(hStub.redirect);
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be('Unauthorized');
-      expect(response.output.statusCode).to.be(401);
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Unauthorized');
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 403 if there an active session exists.', async () => {
@@ -368,13 +386,15 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.succeeded({}))
       );
 
-      const response = await samlAcsRoute.handler(request, hStub);
-
-      sinon.assert.notCalled(hStub.redirect);
-      expect(response.isBoom).to.be(true);
-      expect(response.message).to.be('Sorry, you already have an active Kibana session. ' +
-            'If you want to start a new one, please logout from the existing session first.');
-      expect(response.output.statusCode).to.be(403);
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Sorry, you already have an active Kibana session. ' +
+                'If you want to start a new one, please logout from the existing session first.');
+          expect(response.output.statusCode).to.be(403);
+        });
     });
 
     it('redirects if required by the authentication process.', async () => {

@@ -18,7 +18,7 @@ function reportingFeaturePreRoutingFn(server) {
       const reportingFeatureId = getReportingFeatureId(request);
       const reportingFeature = licenseCheckResults[reportingFeatureId];
       if (!reportingFeature.showLinks || !reportingFeature.enableLinks) {
-        return Boom.forbidden(reportingFeature.message);
+        throw Boom.forbidden(reportingFeature.message);
       } else {
         return reportingFeature;
       }

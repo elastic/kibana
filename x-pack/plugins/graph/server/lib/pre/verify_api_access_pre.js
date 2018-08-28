@@ -14,6 +14,6 @@ export function verifyApiAccessPre(request, h) {
   if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
     return null;
   } else {
-    return Boom.forbidden(licenseCheckResults.message);
+    throw Boom.forbidden(licenseCheckResults.message);
   }
 }

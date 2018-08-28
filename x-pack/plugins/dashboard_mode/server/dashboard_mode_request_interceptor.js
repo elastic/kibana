@@ -37,7 +37,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
           return response.takeover();
         }
 
-        return Boom.notFound();
+        throw Boom.notFound();
       }
 
       return h.continue;

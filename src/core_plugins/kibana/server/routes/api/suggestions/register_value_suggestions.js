@@ -35,7 +35,7 @@ export function registerValueSuggestions(server) {
         const suggestions = map(buckets, 'key');
         return suggestions;
       } catch (error) {
-        return handleESError(error);
+        throw handleESError(error);
       }
     }
   });

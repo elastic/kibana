@@ -22,7 +22,7 @@ export function setCollectionIntervalRoute(server) {
         const response = await setCollectionInterval(req);
         return response;
       } catch (err) {
-        return handleSettingsError(err);
+        throw handleSettingsError(err);
       }
     }
   });

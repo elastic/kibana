@@ -71,7 +71,7 @@ export function main(server) {
             queryString
           }, request, h);
         } catch (err) {
-          return handleError(exportTypeId, err);
+          throw handleError(exportTypeId, err);
         }
       },
       config: getStaticFeatureConfig(exportTypeId),
@@ -102,7 +102,7 @@ export function main(server) {
         const jobParams = rison.decode(request.query.jobParams);
         return handler(exportType, jobParams, request, h);
       } catch (err) {
-        return handleError(exportType, err);
+        throw handleError(exportType, err);
       }
     },
     config: getRouteConfig(request => request.params.exportType),

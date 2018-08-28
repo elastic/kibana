@@ -14,7 +14,7 @@ const ROOT = '/api/apm/status';
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const defaultErrorHandler = err => {
   console.error(err.stack);
-  return Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initStatusApi(server) {

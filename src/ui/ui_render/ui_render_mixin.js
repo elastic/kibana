@@ -58,7 +58,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       const { id } = request.params;
       const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
       if (!app) {
-        return Boom.notFound(`Unknown app: ${id}`);
+        throw Boom.notFound(`Unknown app: ${id}`);
       }
 
       const basePath = config.get('server.basePath');
@@ -87,7 +87,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-      if (!app) return Boom.notFound('Unknown app ' + id);
+      if (!app) throw Boom.notFound('Unknown app ' + id);
 
       try {
         if (kbnServer.status.isGreen()) {
@@ -96,7 +96,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           return h.renderStatusPage();
         }
       } catch (err) {
-        return Boom.boomify(err);
+        throw Boom.boomify(err);
       }
     }
   });

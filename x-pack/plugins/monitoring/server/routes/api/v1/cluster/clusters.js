@@ -49,7 +49,7 @@ export function clustersRoute(server) {
 
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
 
       return clusters;

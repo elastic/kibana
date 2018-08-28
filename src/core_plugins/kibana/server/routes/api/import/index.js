@@ -43,7 +43,7 @@ export function importApi(server) {
       try {
         return await importDashboards(req);
       } catch (err) {
-        return Boom.boomify(err, { statusCode: 400 });
+        throw Boom.boomify(err, { statusCode: 400 });
       }
     }
   });

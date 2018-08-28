@@ -37,7 +37,7 @@ export function scrollSearchApi(server) {
       try {
         return callWithRequest(req, 'search', params);
       } catch (err) {
-        return handleESError(err);
+        throw handleESError(err);
       }
     }
   });
@@ -51,7 +51,7 @@ export function scrollSearchApi(server) {
       try {
         return await callWithRequest(req, 'scroll', { scrollId, scroll: '1m' });
       } catch (err) {
-        return handleESError(err);
+        throw handleESError(err);
       }
     }
   });

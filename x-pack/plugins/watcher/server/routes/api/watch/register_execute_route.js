@@ -55,7 +55,7 @@ export function registerExecuteRoute(server) {
 
         // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return wrapEsError(err);
+            throw wrapEsError(err);
           }
 
           // Case: default

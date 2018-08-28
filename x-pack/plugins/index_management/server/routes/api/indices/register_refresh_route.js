@@ -40,10 +40,10 @@ export function registerRefreshRoute(server) {
         return h.response();
       } catch (err) {
         if (isEsError(err)) {
-          return wrapEsError(err);
+          throw wrapEsError(err);
         }
 
-        return wrapUnknownError(err);
+        throw wrapUnknownError(err);
       }
     },
     config: {

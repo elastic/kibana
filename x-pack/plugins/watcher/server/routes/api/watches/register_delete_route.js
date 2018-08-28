@@ -43,7 +43,7 @@ export function registerDeleteRoute(server) {
         const results = deleteWatches(callWithRequest, request.payload.watchIds);
         return { results };
       } catch (err) {
-        return wrapUnknownError(err);
+        throw wrapUnknownError(err);
       }
     },
     config: {

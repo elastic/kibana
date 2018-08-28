@@ -39,7 +39,7 @@ export function initUsersApi(server) {
       return callWithRequest(request, 'shield.getUser', { username }).then(
         (response) => {
           if (response[username]) return response[username];
-          return Boom.notFound();
+          throw Boom.notFound();
         },
         wrapError);
     },
@@ -95,7 +95,7 @@ export function initUsersApi(server) {
             BasicCredentials.decorateRequest(request, username, password)
           );
         } catch(err) {
-          return Boom.unauthorized(err);
+          throw Boom.unauthorized(err);
         }
       }
 
@@ -110,11 +110,11 @@ export function initUsersApi(server) {
           );
 
           if (!authenticationResult.succeeded()) {
-            return Boom.unauthorized((authenticationResult.error));
+            throw Boom.unauthorized((authenticationResult.error));
           }
         }
       } catch(err) {
-        return wrapError(err);
+        throw wrapError(err);
       }
 
       return h.response().code(204);

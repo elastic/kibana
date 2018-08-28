@@ -19,7 +19,7 @@ export class EventManager {
       const resp = await this.callWithRequest('ml.events', { calendarId });
       return resp.events;
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -30,7 +30,7 @@ export class EventManager {
       const resp = await this.callWithRequest('ml.events', { calendarId, jobId });
       return resp.events;
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -40,7 +40,7 @@ export class EventManager {
     try {
       return await this.callWithRequest('ml.addEvent', { calendarId, body });
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 

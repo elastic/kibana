@@ -20,7 +20,7 @@ const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
 const defaultErrorHandler = err => {
   console.error(err.stack);
-  return Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initTransactionsApi(server) {

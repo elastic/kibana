@@ -49,7 +49,7 @@ export function kibanaOverviewRoute(server) {
           metrics,
         };
       } catch(err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

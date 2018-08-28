@@ -36,11 +36,11 @@ export function registerDeleteRoute(server) {
             const statusCodeToMessageMap = {
               404: `Watch with id = ${watchId} not found`
             };
-            return wrapEsError(err, statusCodeToMessageMap);
+            throw wrapEsError(err, statusCodeToMessageMap);
           }
 
           // Case: default
-          return wrapUnknownError(err);
+          throw wrapUnknownError(err);
         });
     },
     config: {

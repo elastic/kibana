@@ -59,7 +59,7 @@ export function logstashOverviewRoute(server) {
           clusterStatus,
         };
       } catch(err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

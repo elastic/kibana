@@ -66,7 +66,7 @@ export async function createDynamicAssetResponse(options) {
 
     // prevent path traversal, only process paths that resolve within bundlesPath
     if (!path.startsWith(bundlesPath)) {
-      return Boom.forbidden(null, 'EACCES');
+      throw Boom.forbidden(null, 'EACCES');
     }
 
     // we use and manage a file descriptor mostly because
@@ -101,9 +101,9 @@ export async function createDynamicAssetResponse(options) {
     }
 
     if (error.code === 'ENOENT') {
-      return Boom.notFound();
+      throw Boom.notFound();
     }
 
-    return Boom.boomify(error);
+    throw Boom.boomify(error);
   }
 }

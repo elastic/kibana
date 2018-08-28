@@ -36,7 +36,7 @@ export default function registerCount(server) {
 
         return { count: res.count };
       } catch (err) {
-        return handleESError(err);
+        throw handleESError(err);
       }
     }
   });

@@ -21,7 +21,7 @@ export function checkAccessRoute(server) {
         await verifyMonitoringAuth(req);
         response.has_access = true; // response data is ignored
       } catch (err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
       return response;
     }

@@ -136,7 +136,7 @@ export default async function (kbnServer, server, config) {
     handler: function (req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
-        return Boom.notFound();
+        throw Boom.notFound();
       }
       const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return h

@@ -89,7 +89,7 @@ export function initPutRolesApi(
         await callWithRequest(request, 'shield.putRole', { name, body });
         return h.response().code(204);
       } catch (err) {
-        return wrapError(err);
+        throw wrapError(err);
       }
     },
     options: {

@@ -48,7 +48,7 @@ export function exportApi(server) {
           .header('Content-Type', 'application/json')
           .header('Content-Length', json.length);
       } catch (err) {
-        return Boom.boomify(err, { statusCode: 400 });
+        throw Boom.boomify(err, { statusCode: 400 });
       }
     }
   });

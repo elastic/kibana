@@ -58,11 +58,11 @@ export function registerListRoute(server) {
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return wrapEsError(err);
+            throw wrapEsError(err);
           }
 
           // Case: default
-          return wrapUnknownError(err);
+          throw wrapUnknownError(err);
         });
     },
     config: {

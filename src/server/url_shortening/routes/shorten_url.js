@@ -29,7 +29,7 @@ export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
       const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
       return { urlId };
     } catch (err) {
-      return handleShortUrlError(err);
+      throw handleShortUrlError(err);
     }
   }
 });

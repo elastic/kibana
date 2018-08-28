@@ -14,7 +14,7 @@ export const licensePreRoutingFactory = (server) => {
   function licensePreRouting() {
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
     if (!licenseCheckResults.enableAPIRoute) {
-      return Boom.forbidden(licenseCheckResults.message);
+      throw Boom.forbidden(licenseCheckResults.message);
     }
 
     return null;

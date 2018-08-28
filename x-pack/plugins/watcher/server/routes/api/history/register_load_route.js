@@ -42,7 +42,7 @@ export function registerLoadRoute(server) {
         .then((responseFromES) => {
           const hit = get(responseFromES, 'hits.hits[0]');
           if (!hit) {
-            return wrapCustomError(
+            throw wrapCustomError(
               new Error(`Watch History Item with id = ${id} not found`), 404
             );
           }
@@ -64,7 +64,7 @@ export function registerLoadRoute(server) {
         .catch(err => {
         // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return wrapEsError(err);
+            throw wrapEsError(err);
           }
 
           // Case: default

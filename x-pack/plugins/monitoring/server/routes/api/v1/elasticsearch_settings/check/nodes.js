@@ -22,7 +22,7 @@ export function nodesSettingsCheckRoute(server) {
         const response = await checkNodesSettings(req); // needs to be try/catch to handle privilege error
         return response;
       } catch (err) {
-        return handleSettingsError(err);
+        throw handleSettingsError(err);
       }
     }
   });

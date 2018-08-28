@@ -79,7 +79,7 @@ export function logstashNodeRoute(server) {
           nodeSummary,
         };
       } catch(err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

@@ -30,7 +30,7 @@ export function registerLoadRoute(server) {
           if (e.status === 403) {
             return h.response();
           }
-          return Boom.internal(e);
+          throw Boom.internal(e);
         });
     },
     config: {

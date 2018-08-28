@@ -67,7 +67,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       return callWithRequest(request, 'shield.getRole', { name }).then(
         (response) => {
           if (response[name]) return transformRoleFromEs(response[name], name);
-          return Boom.notFound();
+          throw Boom.notFound();
         },
         wrapError
       );

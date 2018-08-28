@@ -97,7 +97,7 @@ export function esNodeRoute(server) {
           ...shardAllocation
         };
       } catch (err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

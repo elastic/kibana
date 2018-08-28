@@ -38,13 +38,13 @@ export function registerLoadRoute(server) {
       return fetchPipeline(callWithRequest, pipelineId)
         .then((pipelineResponseFromES) => {
           if (!pipelineResponseFromES.found) {
-            return Boom.notFound();
+            throw Boom.notFound();
           }
 
           const pipeline = Pipeline.fromUpstreamJSON(pipelineResponseFromES);
           return pipeline.downstreamJSON;
         })
-        .catch((e) => Boom.internal(e));
+        .catch((e) => Boom.boomify(e));
     },
     config: {
       pre: [ licensePreRouting ]

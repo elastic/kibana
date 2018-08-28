@@ -37,7 +37,7 @@ export function initAuthenticateApi(server) {
         );
 
         if (!authenticationResult.succeeded()) {
-          return Boom.unauthorized(authenticationResult.error);
+          throw Boom.unauthorized(authenticationResult.error);
         }
 
         const { authorization } = server.plugins.security;
@@ -50,7 +50,7 @@ export function initAuthenticateApi(server) {
 
         return h.response();
       } catch(err) {
-        return wrapError(err);
+        throw wrapError(err);
       }
     }
   });
@@ -94,7 +94,7 @@ export function initAuthenticateApi(server) {
         // although it might not be the ideal UX in the long term.
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (authenticationResult.succeeded()) {
-          return Boom.forbidden(
+          throw Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
             'If you want to start a new one, please logout from the existing session first.'
           );
@@ -104,9 +104,9 @@ export function initAuthenticateApi(server) {
           return h.redirect(authenticationResult.redirectURL);
         }
 
-        return Boom.unauthorized(authenticationResult.error);
+        throw Boom.unauthorized(authenticationResult.error);
       } catch (err) {
-        return wrapError(err);
+        throw wrapError(err);
       }
     }
   });
@@ -119,20 +119,20 @@ export function initAuthenticateApi(server) {
     },
     async handler(request, h) {
       if (!canRedirectRequest(request)) {
-        return Boom.badRequest('Client should be able to process redirect response.');
+        throw Boom.badRequest('Client should be able to process redirect response.');
       }
 
       try {
         const deauthenticationResult = await server.plugins.security.deauthenticate(request);
         if (deauthenticationResult.failed()) {
-          return wrapError(deauthenticationResult.error);
+          throw wrapError(deauthenticationResult.error);
         }
 
         return h.redirect(
           deauthenticationResult.redirectURL || `${server.config().get('server.basePath')}/`
         );
       } catch (err) {
-        return wrapError(err);
+        throw wrapError(err);
       }
     }
   });

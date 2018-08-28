@@ -118,7 +118,7 @@ export function registerStatsApi(kbnServer, server, config) {
               });
             }
           } catch (e) {
-            return boomify(e);
+            throw boomify(e);
           }
         }
 

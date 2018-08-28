@@ -116,7 +116,7 @@ export default function (kibana) {
         handler: function (req, h) {
           const { sense_version: version, apis } = req.query;
           if (!apis) {
-            return Boom.badRequest('"apis" is a required param.');
+            throw Boom.badRequest('"apis" is a required param.');
           }
 
           return resolveApi(version, apis.split(','), h);

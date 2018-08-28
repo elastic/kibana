@@ -12,7 +12,7 @@ export function routePreCheckLicense(server) {
   return function forbidApiAccess() {
     const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
     if (!licenseCheckResults.showLinks) {
-      return Boom.forbidden(licenseCheckResults.linksMessage);
+      throw Boom.forbidden(licenseCheckResults.linksMessage);
     } else {
       return null;
     }

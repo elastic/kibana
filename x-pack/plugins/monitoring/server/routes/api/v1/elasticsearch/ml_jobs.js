@@ -46,7 +46,7 @@ export function mlJobRoute(server) {
           rows
         };
       } catch(err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

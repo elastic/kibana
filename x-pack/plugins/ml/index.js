@@ -62,7 +62,7 @@ export const ml = (kibana) => {
             if (licenseCheckResults.isAvailable) {
               return null;
             } else {
-              return Boom.forbidden(licenseCheckResults.message);
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]

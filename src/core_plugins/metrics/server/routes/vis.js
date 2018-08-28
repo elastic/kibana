@@ -32,7 +32,7 @@ export default (server) => {
           return err;
         }
 
-        return Boom.boomify(err, { statusCode: 500 });
+        throw Boom.boomify(err, { statusCode: 500 });
       }
     }
   });

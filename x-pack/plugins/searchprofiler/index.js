@@ -43,7 +43,7 @@ export const searchprofiler = (kibana) => {
             if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
               return null;
             } else {
-              return Boom.forbidden(licenseCheckResults.message);
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]

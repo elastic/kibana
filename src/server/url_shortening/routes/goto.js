@@ -39,7 +39,7 @@ export const createGotoRoute = ({ server, config, shortUrlLookup }) => ({
         redirectUrl: url,
       });
     } catch (err) {
-      return handleShortUrlError(err);
+      throw handleShortUrlError(err);
     }
   }
 });

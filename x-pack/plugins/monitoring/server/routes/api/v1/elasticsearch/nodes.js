@@ -44,7 +44,7 @@ export function esNodesRoute(server) {
 
         return { clusterStatus, nodes, };
       } catch(err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
     }
   });

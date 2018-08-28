@@ -22,7 +22,7 @@ export function setCollectionEnabledRoute(server) {
         const response = await setCollectionEnabled(req);
         return response;
       } catch (err) {
-        return handleSettingsError(err);
+        throw handleSettingsError(err);
       }
     }
   });

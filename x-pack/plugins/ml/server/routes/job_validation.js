@@ -57,7 +57,7 @@ export function jobValidationRoutes(server, commonRouteConfig) {
       // this catch gets triggered when an actual error gets thrown when running
       // the estimation code, for example when the request payload is malformed
       } catch(error) {
-        return Boom.badRequest(error);
+        throw Boom.badRequest(error);
       }
     },
     config: {

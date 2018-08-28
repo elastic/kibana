@@ -47,10 +47,10 @@ export function registerRelationships(server) {
         return await findRelationships(type, id, size, req.getSavedObjectsClient());
       } catch (err) {
         if (isNotFoundError(err)) {
-          return Boom.boomify(new Error('Resource not found'), { statusCode: 404 });
+          throw Boom.boomify(new Error('Resource not found'), { statusCode: 404 });
         }
 
-        return Boom.boomify(err, { statusCode: 500 });
+        throw Boom.boomify(err, { statusCode: 500 });
       }
     },
   });

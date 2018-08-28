@@ -48,7 +48,7 @@ export function registerExecuteRoute(server) {
         await executeUpgrade(callWithRequest);
         return { is_upgraded: true };
       } catch(err) {
-        return wrapUnknownError(err);
+        throw wrapUnknownError(err);
       }
     },
     config: {

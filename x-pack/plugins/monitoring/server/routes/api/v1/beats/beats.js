@@ -47,7 +47,7 @@ export function beatsListingRoute(server) {
         };
 
       } catch (err) {
-        return handleError(err, req);
+        throw handleError(err, req);
       }
 
     }
