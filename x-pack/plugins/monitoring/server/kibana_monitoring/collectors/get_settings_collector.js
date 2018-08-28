@@ -33,7 +33,7 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   // DEPRECATED (Remove below in 7.0): If an email address is not configured in kibana.yml, then fallback to xpack:defaultAdminEmail
   if (!loggedDeprecationWarning) {
     const message = (
-      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications,` +
+      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications, ` +
       `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
     );
 
