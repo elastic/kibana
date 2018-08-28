@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutTypes } from '../../../png/common/constants';
-
-export const print = {
-  getJobParams() {
-    return {
-      id: LayoutTypes.PRINT
-    };
-  }
+export const metadata = {
+  id: 'png',
+  name: 'PNG'
 };

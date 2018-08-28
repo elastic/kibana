@@ -10,8 +10,8 @@ import moment from 'moment';
 import { pdf } from './pdf';
 import { groupBy } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { screenshotsObservableFactory } from './screenshots';
-import { getLayoutFactory } from './layouts';
+import { screenshotsObservableFactory } from '../../../png/server/lib/screenshots';
+import { getLayoutFactory } from '../../../png/server/lib/layouts';
 
 const getTimeRange = (urlScreenshots) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
@@ -65,7 +65,6 @@ function generatePdfObservableFn(server) {
     const buffer = await pdfOutput.getBuffer();
     return buffer;
   };
-
 
   return function generatePdfObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
     const layout = getLayout(layoutParams);

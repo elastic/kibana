@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutTypes } from '../../../png/common/constants';
+import { JobParamsProvider } from './job_params_provider';
+import { metadata } from '../metadata';
 
-export const print = {
-  getJobParams() {
-    return {
-      id: LayoutTypes.PRINT
-    };
-  }
-};
+export function register(registry) {
+  registry.register({
+    ...metadata,
+    JobParamsProvider,
+  });
+}
