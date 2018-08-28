@@ -17,32 +17,27 @@
  * under the License.
  */
 
-import chrome from '../../chrome';
-import url from 'url';
 import { kfetch } from 'ui/kfetch';
-import { toastNotifications } from 'ui/notify';
+import url from 'url';
+import chrome from '../../chrome';
 
-export async function shortenUrl(absoluteUrl) {
+export async function shortenUrl(absoluteUrl: string) {
   const basePath = chrome.getBasePath();
 
   const parsedUrl = url.parse(absoluteUrl);
+  if (!parsedUrl || !parsedUrl.path) {
+    return;
+  }
   const path = parsedUrl.path.replace(basePath, '');
   const hash = parsedUrl.hash ? parsedUrl.hash : '';
   const relativeUrl = path + hash;
 
   const body = JSON.stringify({ url: relativeUrl });
 
-  try {
-    const resp = await kfetch({ method: 'POST', 'pathname': '/api/shorten_url', body });
-    return url.format({
-      protocol: parsedUrl.protocol,
-      host: parsedUrl.host,
-      pathname: `${basePath}/goto/${resp.urlId}`
-    });
-  } catch (fetchError) {
-    toastNotifications.addDanger({
-      title: `Unable to create short URL. Error: ${fetchError.message}`,
-      'data-test-subj': 'shortenUrlFailure',
-    });
-  }
+  const resp = await kfetch({ method: 'POST', pathname: '/api/shorten_url', body });
+  return url.format({
+    protocol: parsedUrl.protocol,
+    host: parsedUrl.host,
+    pathname: `${basePath}/goto/${resp.urlId}`,
+  });
 }
