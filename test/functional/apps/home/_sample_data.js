@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('dashboard', () => {
-      afterEach(async () => {
+      after(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
         expect(tsvb).to.be(true);
       });
 
-      it('should launch sample logs data set dashboard', async ()=> {
+      it.skip('should launch sample logs data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const today = new Date();
