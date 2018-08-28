@@ -112,7 +112,7 @@ export class Timepicker extends Component {
   }
 
   toTimeString = (timeValue) => {
-    if (moment.isMoment()) {
+    if (moment.isMoment(timeValue)) {
       return timeValue.toISOString();
     }
 
