@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
+import {
+  ConfigEntry,
+  configObject,
+  kbn_server,
+  ViewWidth,
+  ViewWidthHeight,
+  ViewZoomWidthHeight,
+} from '../../../../../../../../src/server/index';
 import { Layout } from './layout';
 
 type EvalArgs = any[];
@@ -20,7 +28,7 @@ interface BrowserClient {
 }
 
 export class Optimizedlayout extends Layout {
-  public groupCount = 2;
+  public groupCount: number = 2;
 
   public selectors = {
     screenshot: '[data-shared-item]',
@@ -30,31 +38,31 @@ export class Optimizedlayout extends Layout {
     timefilterToAttribute: 'data-shared-timefilter-to',
   };
 
-  constructor(server: string, id: string) {
+  constructor(server: kbn_server, id: string) {
     super(id, server);
   }
 
-  get config() {
+  get config(): configObject {
     return this.server.config();
   }
 
-  get captureConfig() {
+  get captureConfig(): ConfigEntry {
     return this.config.get('xpack.reporting.capture');
   }
 
-  public getCssOverridesPath() {
+  public getCssOverridesPath(): string {
     return path.join(__dirname, 'print.css');
   }
 
-  public getBrowserViewport() {
+  public getBrowserViewport(): ViewWidthHeight {
     return this.captureConfig.viewport;
   }
 
-  public getBrowserZoom() {
+  public getBrowserZoom(): number {
     return this.captureConfig.zoom;
   }
 
-  public getViewport(itemsCount: number) {
+  public getViewport(itemsCount: number): ViewZoomWidthHeight {
     return {
       zoom: this.captureConfig.zoom,
       width: this.captureConfig.viewport.width,
@@ -62,12 +70,12 @@ export class Optimizedlayout extends Layout {
     };
   }
 
-  public async positionElements(browser: BrowserClient) {
-    const elementSize = {
+  public async positionElements(browser: BrowserClient): Promise<void> {
+    const elementSize: ViewWidthHeight = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
     };
-    const evalOptions = {
+    const evalOptions: EvaluateOptions = {
       fn: `function(selector, height, width) {
       const visualizations = document.querySelectorAll(selector);
       const visualizationsLength = visualizations.length;
@@ -90,17 +98,17 @@ export class Optimizedlayout extends Layout {
     await browser.evaluate(evalOptions);
   }
 
-  public getPdfImageSize() {
+  public getPdfImageSize(): ViewWidth {
     return {
       width: 500,
     };
   }
 
-  public getPdfPageOrientation() {
+  public getPdfPageOrientation(): string {
     return 'portrait';
   }
 
-  public getPdfPageSize() {
+  public getPdfPageSize(): string {
     return 'A4';
   }
 }

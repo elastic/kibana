@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { kbn_server } from '../../../../../../../../src/server/index';
 import { LayoutTypes } from '../../../common/constants';
 import { Layout } from './layout';
 import { Optimizedlayout } from './optimized_layout';
@@ -21,7 +22,11 @@ interface Layoutparams {
   };
 }
 
-export function getlayout(server: string, LayoutParamsin: Layoutparams, zoom: number = 2): Layout {
+export function getlayout(
+  server: kbn_server,
+  LayoutParamsin: Layoutparams,
+  zoom: number = 2
+): Layout {
   if (LayoutParamsin && LayoutParamsin.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new Preservelayout(
       server,

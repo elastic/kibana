@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
+import {
+  kbn_server,
+  ViewWidthHeight,
+  ViewZoomWidthHeight,
+} from '../../../../../../../../src/server/index';
 import { Layout } from './layout';
 
 interface Pagesizeparams {
@@ -16,7 +21,7 @@ interface Pagesizeparams {
 }
 
 export class Preservelayout extends Layout {
-  public groupCount = 1;
+  public groupCount: number = 1;
 
   public selectors = {
     screenshot: '[data-shared-items-container]',
@@ -30,37 +35,37 @@ export class Preservelayout extends Layout {
   public width: number = 0;
   public zoom: number = 0;
 
-  constructor(server: string, id: string, height: number, width: number, zoom: number) {
+  constructor(server: kbn_server, id: string, height: number, width: number, zoom: number) {
     super(id, server);
     this.height = height;
     this.width = width;
     this.zoom = zoom;
   }
 
-  get scaledHeight() {
+  get scaledHeight(): number {
     return this.height * this.zoom;
   }
 
-  get scaledWidth() {
+  get scaledWidth(): number {
     return this.width * this.zoom;
   }
 
-  public getCssOverridesPath() {
+  public getCssOverridesPath(): string {
     return path.join(__dirname, 'preserve_layout.css');
   }
 
-  public getBrowserViewport() {
+  public getBrowserViewport(): ViewWidthHeight {
     return {
       height: this.scaledHeight,
       width: this.scaledWidth,
     };
   }
 
-  public getBrowserZoom() {
+  public getBrowserZoom(): number {
     return this.zoom;
   }
 
-  public getViewport() {
+  public getViewport(): ViewZoomWidthHeight {
     return {
       height: this.scaledHeight,
       width: this.scaledWidth,
@@ -68,18 +73,18 @@ export class Preservelayout extends Layout {
     };
   }
 
-  public getPdfImageSize() {
+  public getPdfImageSize(): ViewWidthHeight {
     return {
       height: this.height,
       width: this.width,
     };
   }
 
-  public getPdfPageOrientation() {
+  public getPdfPageOrientation(): undefined {
     return undefined;
   }
 
-  public getPdfPageSize(pagesizeparams: Pagesizeparams) {
+  public getPdfPageSize(pagesizeparams: Pagesizeparams): ViewWidthHeight {
     return {
       height:
         this.height +
