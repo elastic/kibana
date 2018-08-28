@@ -163,7 +163,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     getUserProvider(server);
 
-    await initAuthenticator(server, authorization);
+    await initAuthenticator(server, authorization.mode);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);
