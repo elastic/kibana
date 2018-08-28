@@ -9,6 +9,7 @@ import moment from 'moment';
 import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { formatTimestampToDuration } from '../../../../common';
 
 export function Status({ stats }) {
   const {
@@ -38,7 +39,7 @@ export function Status({ stats }) {
     },
     {
       label: 'Last Event',
-      value: formatMetric(+moment(timeOfLastEvent), 'time_since_time', 'ago'),
+      value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
       dataTestSubj: 'timeOfLastEvent',
     }
   ];
