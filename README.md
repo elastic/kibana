@@ -66,26 +66,4 @@ Follow the steps. You can use the `arrow keys` to choose options, `<space>` to s
 
 ## Contributing
 
-**Run from source**
-
-```
-npx ts-node ./src/cli/index.ts --branch 6.1 --upstream sqren/backport-demo --all
-```
-
-**Run from build**
-
-```
-node dist/cli/index.js --branch 6.1 --upstream sqren/backport-demo --all
-```
-
-**Compile typecscript**
-
-```
-yarn build
-```
-
-**Test**
-
-```
-yarn test
-```
+See https://github.com/sqren/backport/blob/master/CONTRIBUTING.md
