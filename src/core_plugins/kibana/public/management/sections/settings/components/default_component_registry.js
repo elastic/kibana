@@ -17,26 +17,11 @@
  * under the License.
  */
 
-import { ToolingLog } from '../../tooling_log';
-import { withProcRunner } from '../with_proc_runner';
+import { tryRegisterSettingsComponent } from './component_registry';
+import { PageTitle } from './page_title';
 
-describe('proc runner', () => {
-  function runProc({ thing = '', procs }) {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        procs.run('proc', {
-          cmd: './proc',
-          args: ['these', 'are', 'words'],
-        });
-        resolve(thing);
-      }, 500);
-    });
-  }
+export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
 
-  it('passes procs to a function', async () => {
-    await withProcRunner(new ToolingLog(), async procs => {
-      await runProc({ procs });
-      await procs.stop('proc');
-    });
-  });
-});
+export function registerDefaultComponents() {
+  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
+}
