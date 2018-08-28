@@ -32,7 +32,7 @@ export class RawConfigService {
    *
    * This is the _raw_ config before any overrides are applied.
    */
-  private readonly rawConfigFromFile$ = new ReplaySubject(1);
+  private readonly rawConfigFromFile$: ReplaySubject<Record<string, any>> = new ReplaySubject(1);
 
   private readonly config$: Observable<Config>;
 
