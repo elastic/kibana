@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createlayout } from './layout_factory';
+export { createLayout } from './layout_factory';
 export { PrintLayout } from './print_layout';
 export { PreserveLayout } from './preserve_layout';
