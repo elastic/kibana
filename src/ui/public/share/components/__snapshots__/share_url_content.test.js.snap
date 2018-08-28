@@ -18,6 +18,7 @@ exports[`render 1`] = `
       options={
         Array [
           Object {
+            "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
             "label": <EuiFlexGroup
               alignItems="stretch"
@@ -49,6 +50,7 @@ exports[`render 1`] = `
             </EuiFlexGroup>,
           },
           Object {
+            "data-test-subj": "exportAsSavedObject",
             "disabled": true,
             "id": "savedObject",
             "label": <EuiFlexGroup
@@ -148,6 +150,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       options={
         Array [
           Object {
+            "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
             "label": <EuiFlexGroup
               alignItems="stretch"
@@ -179,6 +182,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             </EuiFlexGroup>,
           },
           Object {
+            "data-test-subj": "exportAsSavedObject",
             "disabled": false,
             "id": "savedObject",
             "label": <EuiFlexGroup

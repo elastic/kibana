@@ -31,10 +31,13 @@ export function SharePageProvider({ getService, getPageObjects }) {
     }
 
     async checkShortenUrl() {
-      await PageObjects.visualize.checkCheckbox('useShortUrl');
-
       const shareForm = await testSubjects.find('shareUrlForm');
+      await PageObjects.visualize.checkCheckbox('useShortUrl');
       await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+    }
+
+    async exportAsSavedObject() {
+      return await testSubjects.click('exportAsSavedObject');
     }
 
   }

@@ -271,6 +271,7 @@ export class ShareUrlContent extends Component<Props, State> {
           `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
             Edits to the saved ${this.props.objectType} won't be visible via this URL.`
         ),
+        ['data-test-subj']: 'exportAsSnapshot',
       },
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
@@ -281,6 +282,7 @@ export class ShareUrlContent extends Component<Props, State> {
             this.props.objectType
           }.`
         ),
+        ['data-test-subj']: 'exportAsSavedObject',
       },
     ];
   };

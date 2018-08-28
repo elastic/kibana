@@ -75,7 +75,6 @@ export default function ({ getService, getPageObjects }) {
           '*\',interval:auto,query:(language:lucene,query:\'\')' +
           ',sort:!(\'@timestamp\',desc))';
         const actualUrl = await PageObjects.share.getSharedUrl();
-        log.debug('actualUrl', actualUrl);
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
           expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
@@ -89,6 +88,22 @@ export default function ({ getService, getPageObjects }) {
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.match(re);
         });
+      });
+
+      it('should allow for copying the saved object URL', async function () {
+        const expectedUrl =
+          baseUrl +
+          '/app/kibana#' +
+          '/discover/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
+          '?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
+          '%2Ctime%3A(from%3A\'2015-09-19T06%3A31%3A44.000Z\'%2C' +
+          'mode%3Aabsolute%2Cto%3A\'2015-09-23T18%3A31%3A44.000Z\'))';
+        await PageObjects.discover.loadSavedSearch('A Saved Search');
+        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.exportAsSavedObject();
+        const actualUrl = await PageObjects.share.getSharedUrl();
+        // strip the timestamp out of each URL
+        expect(actualUrl).to.be(expectedUrl);
       });
     });
   });
