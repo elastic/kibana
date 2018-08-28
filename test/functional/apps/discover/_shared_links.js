@@ -102,7 +102,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.exportAsSavedObject();
         const actualUrl = await PageObjects.share.getSharedUrl();
-        // strip the timestamp out of each URL
         expect(actualUrl).to.be(expectedUrl);
       });
     });
