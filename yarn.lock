@@ -5683,7 +5683,7 @@ good-squeeze@2.1.0:
     hoek "2.x.x"
     json-stringify-safe "5.0.x"
 
-"good@github:elastic/good#17.5.3-kibana1":
+"good@github:elastic/good#v8.1.1-kibana1":
   version "8.1.1"
   resolved "https://codeload.github.com/elastic/good/tar.gz/f0fc68722eac1ed59a0cbd991c9e37079a631019"
   dependencies:
