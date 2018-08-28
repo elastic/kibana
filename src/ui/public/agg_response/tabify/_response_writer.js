@@ -40,6 +40,10 @@ function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows
   this.rows = [];
 }
 
+TabbedAggResponseWriter.prototype.isPartialRow = function (row) {
+  return !this.columns.map(column => row.hasOwnProperty(column.id)).every(c => (c === true));
+};
+
 /**
  * Create a new row by reading the row buffer and bucketBuffer
  */
@@ -48,7 +52,7 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[bucket.id] = bucket.value;
   });
 
-  if (!toArray(this.rowBuffer).length) {
+  if (!toArray(this.rowBuffer).length || (!this.partialRows && this.isPartialRow(this.rowBuffer))) {
     return;
   }
 

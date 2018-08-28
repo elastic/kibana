@@ -30,7 +30,8 @@ const LegacyResponseHandlerProvider = function () {
       return new Promise((resolve) => {
         const converted = { tables: [] };
         const table = tabifyAggResponse(vis.getAggConfig(), response, {
-          metricsAtAllLevels: vis.isHierarchical()
+          metricsAtAllLevels: vis.isHierarchical(),
+          partialRows: vis.params.showPartialRows,
         });
 
         const asAggConfigResults = _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false);

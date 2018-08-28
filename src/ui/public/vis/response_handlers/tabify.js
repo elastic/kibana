@@ -29,7 +29,8 @@ const TabifyResponseHandlerProvider = function (Private) {
       return new Promise((resolve) => {
 
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
-          metricsAtAllLevels: vis.isHierarchical()
+          metricsAtAllLevels: vis.isHierarchical(),
+          partialRows: vis.params.showPartialRows,
         });
 
         resolve(tableGroup);
