@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { By } from 'selenium-webdriver';
 export function FlyoutProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -33,7 +34,7 @@ export function FlyoutProvider({ getService }) {
 
     async close(panelTestSubj) {
       const panelElement = await this.getFlyout(panelTestSubj);
-      const closeBtn = await panelElement.findByCssSelector('[aria-label*="Close"]');
+      const closeBtn = await panelElement.findElement(By.css('[aria-label*="Close"]'));
       await closeBtn.click();
     }
 

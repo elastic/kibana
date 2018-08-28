@@ -123,7 +123,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         return await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .getProperty('value');
+          .getCssValue('value');
       });
     }
 
@@ -134,7 +134,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         return await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-          .getProperty('value');
+          .getCssValue('value');
       });
     }
 
@@ -145,7 +145,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .clearValue()
+          .clear()
           .type(timeString);
       });
     }
@@ -252,6 +252,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         if (exception.name === 'ElementNotVisible') {
           // selenium might just have been too slow to catch it
         } else {
+          log.debug(exception.name);
           throw exception;
         }
       }
@@ -265,7 +266,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async awaitGlobalLoadingIndicatorHidden() {
       log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      retry.waitFor('waiting for global loading indicator', async () => {
+        return await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10) !== null;
+      });
     }
 
     async getGlobalNavigationLink(linkText) {

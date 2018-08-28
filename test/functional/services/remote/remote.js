@@ -121,6 +121,11 @@ export async function RemoteProvider({ getService }) {
         return await driver.findElement(By.partialLinkText(text));
       },
 
+      async findByClassName(className) {
+        await updateFindTimeout();
+        return await driver.findElement(By.className(className));
+      },
+
       async setWindowSize(x, y) {
         await driver.manage().window().setRect(x, y);
       },
@@ -165,18 +170,18 @@ export async function RemoteProvider({ getService }) {
       },
 
       //TODO: Implement Slow Type For Firefox to use (50ms)
-      async slowType(element, text) {
+      async type(element, text) {
         const textArray = text.split('');
         for (let i = 0; i < textArray.length; i++) {
-          driver.sleep(50);
-          element.sendKeys(textArray[i]);
+          await driver.sleep(50);
+          await element.sendKeys(textArray[i]);
         }
       },
 
-      async sendKeysToElement(element, text) {
+      async slowType(element, text, interval) {
         const textArray = text.split('');
         for (let i = 0; i < textArray.length; i++) {
-          this.sleep(50);
+          await this.sleep(interval);
           await element.sendKeys(textArray[i]);
         }
       },

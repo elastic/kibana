@@ -34,26 +34,20 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickNavigation() {
       find.clickByCssSelector('.app-link:nth-child(5) a');
     }
-    async clickLinkText(text) {
-      await retry.try(async () => {
-        const element = await find.byLinkText(text);
-        await element.click();
-      });
-    }
     async clickKibanaSettings() {
-      await find.clickByLinkText('Advanced Settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByLinkText('Saved Objects');
+      await testSubjects.click('objects');
     }
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await find.clickByLinkText('Index Patterns');
+      await testSubjects.click('indices');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -275,15 +269,19 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await PageObjects.common.sleep(2001);
         await this.clickOptionalAddNewButton();
+        await PageObjects.common.sleep(2002);
         await this.setIndexPatternField(indexPatternName);
-        await PageObjects.common.sleep(2000);
-        await (await this.getCreateIndexPatternGoToStep2Button()).click();
-        await PageObjects.common.sleep(2000);
+        await PageObjects.common.sleep(2003);
+        const step2Button = await this.getCreateIndexPatternGoToStep2Button();
+        step2Button.click();
+        await PageObjects.common.sleep(2004);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        const createIndexPatternButton = await this.getCreateIndexPatternCreateButton();
+        createIndexPatternButton.click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -303,6 +301,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async clickOptionalAddNewButton() {
       const buttonParent = await testSubjects.find('createIndexPatternParent');
+      await PageObjects.common.sleep(2005);
       const buttonVisible = (await buttonParent.getAttribute('innerHTML')).includes(
         'createIndexPatternButton'
       );

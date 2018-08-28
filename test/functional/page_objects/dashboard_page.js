@@ -252,7 +252,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isDarkThemeOn');
       await this.openOptions();
       const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
+      return await darkThemeCheckbox.getCssValue('checked');
     }
 
     async useDarkTheme(on) {
@@ -268,7 +268,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isMarginsOn');
       await this.openOptions();
       const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await marginsCheckbox.getCssValue('checked');
     }
 
     async useMargins(on = true) {
@@ -395,10 +395,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
-        await searchFilter.clearValue();
+        await searchFilter.clear();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-', ' '));
+        await searchFilter.sendKeys(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
       });
 

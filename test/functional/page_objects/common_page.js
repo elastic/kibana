@@ -262,7 +262,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async pressEnterKey() {
-      await remote.sendKeys('\uE007');
+      await remote.pressKeys('\uE007');
     }
 
     // pass in true if your test will show multiple modals

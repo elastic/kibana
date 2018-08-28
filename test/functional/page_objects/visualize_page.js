@@ -392,29 +392,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName, type = 'bucket') {
-      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
+    async clickBucket(bucketName) {
       await retry.try(async () => {
-        const chartTypes = await retry.try(
-          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
-        log.debug('found bucket types ' + chartTypes.length);
-
-        async function getChartType(chart) {
-          const chartString = await chart.getVisibleText();
-          if (chartString === bucketName) {
-            await chart.click();
-            return true;
-          }
-        }
-        const getChartTypesPromises = chartTypes.map(getChartType);
-        const clickResult = await Promise.all(getChartTypesPromises);
-        if (!clickResult.some(result => result === true)) {
-          throw new Error(`bucket ${bucketName} not found`);
-        }
+        await find.clickByCssSelector(`[data-test-subj="${bucketName}"]`);
       });
     }
 
-    async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
+    async selectAggregation(aggName, groupName = 'buckets', childAggregationType = null) {
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
@@ -424,9 +408,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.sendKeys(myString);
-        await remote.pressKeys('\uE006');
+        await find.clickByCssSelector(`[data-test-subj="${aggName}"]`);
       });
       await PageObjects.common.sleep(500);
     }
@@ -484,14 +466,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       const advancedLinkState = await advancedLink.getAttribute('class');
       if (advancedLinkState.includes('fa-caret-right')) {
-        await advancedLink.session.moveMouseTo(advancedLink);
         log.debug('click advancedLink');
         await advancedLink.click();
       }
       const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
       const checkboxState = await checkbox.getAttribute('class');
       if (checkboxState.includes('ng-empty')) {
-        await checkbox.session.moveMouseTo(checkbox);
         await checkbox.click();
       }
       const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
@@ -517,9 +497,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.sendKeys(fieldValue);
-        await remote.pressKeys('\uE006');
+        await find.clickByCssSelector(`[data-test-subj="${fieldValue}"]`);
       });
       await PageObjects.common.sleep(500);
     }
