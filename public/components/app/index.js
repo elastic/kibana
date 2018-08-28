@@ -1,6 +1,8 @@
 import { connect } from 'react-redux';
+import { compose, withProps } from 'recompose';
 import { getAppReady } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
+import { trackRouteChange } from './track_route_change';
 import { App as Component } from './app';
 
 const mapStateToProps = state => {
@@ -17,4 +19,9 @@ const mapDispatchToProps = {
   setAppError: appError,
 };
 
-export const App = connect(mapStateToProps, mapDispatchToProps)(Component);
+export const App = compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  withProps(() => ({
+    onRouteChange: trackRouteChange,
+  }))
+)(Component);

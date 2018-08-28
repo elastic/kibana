@@ -12,7 +12,6 @@ export class Router extends React.PureComponent {
     showLoading: PropTypes.bool.isRequired,
     onLoad: PropTypes.func.isRequired,
     onError: PropTypes.func.isRequired,
-    restoreRoute: PropTypes.string,
     routes: PropTypes.array.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
@@ -30,24 +29,13 @@ export class Router extends React.PureComponent {
 
   componentWillMount() {
     // routerProvider is a singleton, and will only ever return one instance
-    const { routes, restoreRoute, onRouteChange, onLoad, onError } = this.props;
+    const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
 
     // when the component in the route changes, render it
     router.onPathChange(route => {
       const { pathname } = route.location;
       const firstLoad = !this.state;
-
-      // if component has no state, this is the first load of the router
-      // redirect to last app if trying to load /
-      if (firstLoad && pathname === '/') {
-        if (restoreRoute && restoreRoute !== pathname) {
-          router.redirectTo(this.props.restoreRoute);
-          onLoad();
-          return;
-        }
-      }
-
       const { component } = route.meta;
 
       if (!component) {
