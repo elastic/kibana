@@ -7,6 +7,7 @@
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
 import { ManageSpacesButton } from '../../../components';
+import { SPACES_FEATURE_DESCRIPTION } from '../../../lib/constants';
 import './spaces_description.less';
 
 export const SpacesDescription: SFC = () => {
@@ -18,10 +19,7 @@ export const SpacesDescription: SFC = () => {
   return (
     <EuiContextMenuPanel {...panelProps}>
       <EuiText className="spacesDescription__text">
-        <p>
-          Use Spaces within Kibana to organize your Dashboards, Visualizations, and other saved
-          objects.
-        </p>
+        <p>{SPACES_FEATURE_DESCRIPTION}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spacesDescription__manageButtonWrapper">
         <ManageSpacesButton size="s" style={{ width: `100%` }} />

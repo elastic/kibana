@@ -12,7 +12,7 @@ exports[`SpacesDescription renders without crashing 1`] = `
     grow={true}
   >
     <p>
-      Use Spaces within Kibana to organize your Dashboards, Visualizations, and other saved objects.
+      Organize your dashboards and other saved objects into topic-specific spaces.
     </p>
   </EuiText>
   <div
