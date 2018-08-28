@@ -5,13 +5,11 @@
  */
 
 import Joi from 'joi';
+import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { metricSet } from './metric_set_overview';
+import { handleError } from '../../../../lib/errors';
 
-/**
- * Kibana instance: This will fetch all data required to display a Kibana
- * instance's page. The current details returned are:
- * - Kibana Instance Summary (Status)
- * - Metrics
- */
 export function apmInstanceRoute(server) {
   server.route({
     method: 'POST',
@@ -31,7 +29,23 @@ export function apmInstanceRoute(server) {
         })
       }
     },
-    async handler() {
+    async handler(req, reply) {
+      const beatUuid = req.params.beatUuid;
+      const config = server.config();
+      const ccs = req.payload.ccs;
+      const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+
+      try {
+        const [ metrics ] = await Promise.all([
+          getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
+        ]);
+
+        reply({
+          metrics,
+        });
+      } catch (err) {
+        reply(handleError(err, req));
+      }
     }
   });
 }
