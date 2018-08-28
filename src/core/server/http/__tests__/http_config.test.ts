@@ -25,6 +25,14 @@ test('has defaults for config', () => {
   expect(httpSchema.validate(obj)).toMatchSnapshot();
 });
 
+test('accepts valid hostnames', () => {
+  const { host: host1 } = HttpConfig.schema.validate({ host: 'www.example.com' });
+  const { host: host2 } = HttpConfig.schema.validate({ host: '8.8.8.8' });
+  const { host: host3 } = HttpConfig.schema.validate({ host: '::1' });
+
+  expect({ host1, host2, host3 }).toMatchSnapshot('valid host names');
+});
+
 test('throws if invalid hostname', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {

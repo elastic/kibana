@@ -24,6 +24,7 @@ import { Type, TypeOptions } from './type';
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
+  hostname?: boolean;
 };
 
 export class StringType extends Type<string> {
@@ -38,6 +39,10 @@ export class StringType extends Type<string> {
       schema = schema.max(options.maxLength);
     }
 
+    if (options.hostname === true) {
+      schema = schema.hostname();
+    }
+
     super(schema, options);
   }
 
@@ -50,6 +55,8 @@ export class StringType extends Type<string> {
         return `value is [${value}] but it must have a minimum length of [${limit}].`;
       case 'string.max':
         return `value is [${value}] but it must have a maximum length of [${limit}].`;
+      case 'string.hostname':
+        return `value is [${value}] but it must be a valid hostname.`;
     }
   }
 }

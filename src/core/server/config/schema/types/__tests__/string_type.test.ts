@@ -53,6 +53,42 @@ describe('#maxLength', () => {
   });
 });
 
+describe('#hostname', () => {
+  test('returns value for valid hostname as per RFC1123', () => {
+    const hostNameSchema = schema.string({ hostname: true });
+
+    expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
+    expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
+    expect(hostNameSchema.validate('hostname')).toBe('hostname');
+    expect(hostNameSchema.validate('2387628')).toBe('2387628');
+    expect(hostNameSchema.validate('::1')).toBe('::1');
+    expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
+    expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
+      'xn----ascii-7gg5ei7b1i.xn--90a3a'
+    );
+
+    const hostNameWithMaxAllowedLength = Array(255)
+      .fill('a')
+      .join('');
+    expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
+      hostNameWithMaxAllowedLength
+    );
+  });
+
+  test('returns error when value is not a valid hostname', () => {
+    const hostNameSchema = schema.string({ hostname: true });
+
+    expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingSnapshot();
+    expect(() => hostNameSchema.validate('-')).toThrowErrorMatchingSnapshot();
+    expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingSnapshot();
+
+    const tooLongHostName = Array(256)
+      .fill('a')
+      .join('');
+    expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingSnapshot();
+  });
+});
+
 describe('#defaultValue', () => {
   test('returns default when string is undefined', () => {
     expect(schema.string({ defaultValue: 'foo' }).validate(undefined)).toBe('foo');
