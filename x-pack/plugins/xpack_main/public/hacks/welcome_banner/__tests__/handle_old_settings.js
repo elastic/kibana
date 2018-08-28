@@ -33,7 +33,7 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
       if (key === 'telemetryOptedIn') {
         return enabled;
       }
-      if (key === 'notifier') {
+      if (key === 'Notifier') {
         return function mockNotifier() {
           this.notify = sinon.stub();
         };

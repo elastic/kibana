@@ -15,7 +15,7 @@ const getMockInjector = ({ telemetryEnabled }) => {
   const get = sinon.stub();
 
   get.withArgs('telemetryOptedIn').returns(telemetryEnabled);
-  get.withArgs('notifier').returns(function mockNotifier() { this.notify = sinon.stub(); });
+  get.withArgs('Notifier').returns(function mockNotifier() { this.notify = sinon.stub(); });
 
   const mockHttp = {
     post: sinon.stub()
