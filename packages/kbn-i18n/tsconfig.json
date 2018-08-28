@@ -5,6 +5,15 @@
     "src/**/*.tsx"
   ],
   "exclude": [
-    "src/core/locales.ts",
-  ]
+    "target"
+  ],
+  "compileOnSave": true,
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "./target/types",
+    "declarationDir": "./target/types",
+    "typeRoots": [
+      "./node_modules/@types",
+    ]
+  }
 }
