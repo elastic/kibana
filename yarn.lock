@@ -2059,7 +2059,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@7.2.0, boom@7.x.x, boom@^7.2.0:
+boom@7.x.x, boom@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.0.tgz#2bff24a55565767fde869ec808317eb10c48e966"
   dependencies:
@@ -5926,7 +5926,7 @@ handlebars@^4.0.1, handlebars@^4.0.3:
   optionalDependencies:
     uglify-js "^2.6"
 
-hapi-auth-cookie@9.0.0:
+hapi-auth-cookie@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/hapi-auth-cookie/-/hapi-auth-cookie-9.0.0.tgz#3b0af443334e2bd92490ddb17bed16e3e9edfd01"
   dependencies:
@@ -7411,14 +7411,6 @@ jimp@0.2.28:
 jit-grunt@~0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/jit-grunt/-/jit-grunt-0.10.0.tgz#008c3a7fe1e96bd0d84e260ea1fa1783457f79c2"
-
-joi@13.5.2:
-  version "13.5.2"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-13.5.2.tgz#32207c85fa76d889f1e971c7eaaf69b232259a91"
-  dependencies:
-    hoek "5.x.x"
-    isemail "3.x.x"
-    topo "3.x.x"
 
 joi@13.x.x, joi@^13.4.0:
   version "13.4.0"
