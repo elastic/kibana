@@ -95,6 +95,8 @@ After the build completes, there will be a .zip file and a .md5 file in `~/chrom
 
 The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename` and `baseUrl`.
 
+*If you're building in the cloud, don't forget to turn off your VM after retrieving the build artifacts!*
+
 ## Diagnosing runtime failures
 
 After getting the build to pass, the resulting binaries often failed to run or would hang.
