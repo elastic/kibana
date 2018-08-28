@@ -46,7 +46,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 0 },
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
-              indices: 1
+              indices: 1,
+              plugins: {}
             }
           };
 
@@ -83,7 +84,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 1 },
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
-              indices: 1
+              indices: 1,
+              plugins: {}
             }
           };
 
@@ -154,7 +156,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 1 },
               graph_workspace: { total: 2 },
               timelion_sheet: { total: 2 },
-              indices: 2
+              indices: 2,
+              plugins: {}
             }
           };
 
@@ -223,7 +226,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 4 },
               graph_workspace: { total: 2 },
               timelion_sheet: { total: 2 },
-              indices: 2
+              indices: 2,
+              plugins: {}
             }
           };
 
@@ -312,7 +316,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 4 },
               graph_workspace: { total: 6 },
               timelion_sheet: { total: 8 },
-              indices: 2
+              indices: 2,
+              plugins: {}
             },
             clustertwo: {
               dashboard: { total: 300 },
@@ -321,7 +326,8 @@ describe('Get Kibana Stats', () => {
               index_pattern: { total: 300 },
               graph_workspace: { total: 3 },
               timelion_sheet: { total: 4 },
-              indices: 1
+              indices: 1,
+              plugins: {}
             }
           };
 
@@ -353,7 +359,10 @@ describe('Get Kibana Stats', () => {
             index_pattern: { total: 3 },
             indices: 2,
             search: { total: 1 },
-            visualization: { total: 7 }
+            visualization: { total: 7 },
+            plugins: {
+              foo: { available: true }
+            }
           }
         };
 
@@ -365,7 +374,10 @@ describe('Get Kibana Stats', () => {
             indices: 2,
             search: { total: 1 },
             versions: [ { count: 2, version: '7.0.0-alpha1-test12' } ],
-            visualization: { total: 7 }
+            visualization: { total: 7 },
+            plugins: {
+              foo: { available: true }
+            }
           }
         });
       });
@@ -387,14 +399,20 @@ describe('Get Kibana Stats', () => {
             index_pattern: { total: 3 },
             indices: 2,
             search: { total: 1 },
-            visualization: { total: 7 }
+            visualization: { total: 7 },
+            plugins: {
+              bar: { available: false }
+            }
           },
           clustertwo: {
             dashboard: { total: 3 },
             index_pattern: { total: 5 },
             indices: 1,
             search: { total: 3 },
-            visualization: { total: 15 }
+            visualization: { total: 15 },
+            plugins: {
+              bear: { enabled: true }
+            }
           }
         };
 
@@ -406,7 +424,10 @@ describe('Get Kibana Stats', () => {
             indices: 2,
             search: { total: 1 },
             versions: [ { count: 2, version: '7.0.0-alpha1-test13' } ],
-            visualization: { total: 7 }
+            visualization: { total: 7 },
+            plugins: {
+              bar: { available: false }
+            }
           },
           clustertwo: {
             count: 1,
@@ -415,7 +436,10 @@ describe('Get Kibana Stats', () => {
             indices: 1,
             search: { total: 3 },
             versions: [ { count: 1, version: '7.0.0-alpha1-test14' } ],
-            visualization: { total: 15 }
+            visualization: { total: 15 },
+            plugins: {
+              bear: { enabled: true }
+            }
           }
         });
       });
