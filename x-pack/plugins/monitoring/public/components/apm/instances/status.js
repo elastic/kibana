@@ -38,7 +38,7 @@ export function Status({ stats }) {
     },
     {
       label: 'Last Event',
-      value: formatMetric(+moment(timeOfLastEvent), 'time_since2', 'ago'),
+      value: formatMetric(+moment(timeOfLastEvent), 'time_since_time', 'ago'),
       dataTestSubj: 'timeOfLastEvent',
     }
   ];
