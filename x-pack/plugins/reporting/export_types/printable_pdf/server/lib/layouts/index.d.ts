@@ -8,7 +8,7 @@ import { Size } from '../../../../../types';
 export interface CaptureConfig {
   zoom: number;
   viewport: Size;
-  }
+}
   
 export interface ViewZoomWidthHeight {
   zoom: number;

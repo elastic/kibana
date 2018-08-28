@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export interface KbnServer {
-  config: () => configObject;
+  config: () => ConfigObject;
 }
   
-export interface configObject {
+export interface ConfigObject {
   get: (path: string) => any;
 }
