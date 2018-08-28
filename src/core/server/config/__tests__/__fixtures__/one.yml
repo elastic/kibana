@@ -1,0 +1,7 @@
+foo: 1
+bar: true
+xyz: ['1', '2']
+abc:
+  def: test
+  qwe: 1
+pom.bom: 3

@@ -31,7 +31,6 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/share';
 import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
@@ -54,6 +53,8 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { showShareContextMenu } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
@@ -160,7 +161,7 @@ function discoverController(
   const notify = new Notifier({
     location: 'Discover'
   });
-
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const inspectorAdapters = {
     requests: new RequestAdapter()
   };
@@ -196,8 +197,16 @@ function discoverController(
   }, {
     key: 'share',
     description: 'Share Search',
-    template: require('plugins/kibana/discover/partials/share_search.html'),
-    testId: 'discoverShareButton',
+    testId: 'shareTopNavButton',
+    run: (menuItem, navController, anchorElement) => {
+      showShareContextMenu({
+        anchorElement,
+        allowEmbed: false,
+        getUnhashableStates,
+        objectId: savedSearch.id,
+        objectType: 'search',
+      });
+    }
   }, {
     key: 'inspect',
     description: 'Open Inspector for search',
@@ -589,13 +598,13 @@ function discoverController(
     });
 
     segmented.on('segment', (resp) => {
+      logRequestInInspector(resp);
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
-      logRequestInInspector(resp);
     });
 
     segmented.on('emptySegment', function (resp) {

@@ -17,29 +17,30 @@
  * under the License.
  */
 
-/**
- * This is a partial mock of src/server/config/config.js.
- */
-export class LegacyConfigMock {
-  public readonly set = jest.fn((key, value) => {
-    // Real legacy config throws error if key is not presented in the schema.
-    if (!this.rawData.has(key)) {
-      throw new TypeError(`Unknown schema key: ${key}`);
+export function SharePageProvider({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['visualize']);
+
+  class SharePage {
+    async clickShareTopNavButton() {
+      return testSubjects.click('shareTopNavButton');
     }
 
-    this.rawData.set(key, value);
-  });
-
-  public readonly get = jest.fn(key => {
-    // Real legacy config throws error if key is not presented in the schema.
-    if (!this.rawData.has(key)) {
-      throw new TypeError(`Unknown schema key: ${key}`);
+    async getSharedUrl() {
+      return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
     }
 
-    return this.rawData.get(key);
-  });
+    async checkShortenUrl() {
+      const shareForm = await testSubjects.find('shareUrlForm');
+      await PageObjects.visualize.checkCheckbox('useShortUrl');
+      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+    }
 
-  public readonly has = jest.fn(key => this.rawData.has(key));
+    async exportAsSavedObject() {
+      return await testSubjects.click('exportAsSavedObject');
+    }
 
-  constructor(public rawData: Map<string, any> = new Map()) {}
+  }
+
+  return new SharePage();
 }

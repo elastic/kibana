@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
+export function unhashUrl(url: string, kbnStates: any[]): any;
