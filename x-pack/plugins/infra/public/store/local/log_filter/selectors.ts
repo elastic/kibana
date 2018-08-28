@@ -16,7 +16,7 @@ export const selectIsLogFilterQueryValid = createSelector(selectLogFilterQuery, 
   if (filterQuery && filterQuery.kind === 'kuery') {
     try {
       fromKueryExpression(filterQuery.expression);
-    } catch {
+    } catch (err) {
       return false;
     }
   }

@@ -77,7 +77,7 @@ export const sharedSelectors = {
               toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
             )
           : null;
-      } catch {
+      } catch (err) {
         return null;
       }
     }
