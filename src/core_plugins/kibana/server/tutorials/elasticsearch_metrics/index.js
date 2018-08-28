@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,16 +25,28 @@ export function elasticsearchMetricsSpecProvider() {
   const moduleName = 'elasticsearch';
   return {
     id: 'elasticsearchMetrics',
-    name: 'Elasticsearch metrics',
+    name: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.nameTitle', {
+      defaultMessage: 'Elasticsearch metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from Elasticsearch.',
-    longDescription: 'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from Elasticsearch.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html',
+      },
+    }),
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
