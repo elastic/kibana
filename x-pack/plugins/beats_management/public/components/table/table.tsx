@@ -18,8 +18,8 @@ import { TableType } from './table_type_configs';
 interface TableProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
-  renderAssignmentOptions?: (item: any) => any;
   items: any[];
+  renderAssignmentOptions?: (item: any) => any;
   showAssignmentOptions: boolean;
   type: TableType;
   actionHandler(action: string, payload?: any): void;

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore typings for EuiSearchar not included in EUI
-  EuiSearchBar,
-} from '@elastic/eui';
 import React from 'react';
 import { AssignmentOptions } from './assignment_options';
+import { PrimaryOptions } from './primary_options';
 import { ControlDefinitions } from './table_type_configs';
 
 interface ControlBarProps {
@@ -45,10 +42,11 @@ export function ControlBar(props: ControlBarProps) {
       selectionCount={selectionCount}
     />
   ) : (
-    <EuiSearchBar
-      box={{ incremental: true }}
+    <PrimaryOptions
+      actionHandler={actionHandler}
       filters={filters}
-      onChange={(query: any) => actionHandler('search', query)}
+      onSearchQueryChange={(query: any) => actionHandler('search', query)}
+      primaryActions={controlDefinitions.primaryActions || []}
     />
   );
 }

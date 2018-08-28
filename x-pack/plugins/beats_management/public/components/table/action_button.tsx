@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { ActionDefinition } from './table_type_configs';
 
@@ -16,20 +16,33 @@ interface ActionButtonProps {
   showPopover(): void;
 }
 
+const Action = (props: {
+  action: string;
+  danger?: boolean;
+  name: string;
+  actionHandler(action: string, payload?: any): void;
+}) => {
+  const { action, actionHandler, danger, name } = props;
+  return (
+    <EuiButton color={danger ? 'danger' : 'primary'} onClick={() => actionHandler(action)}>
+      {name}
+    </EuiButton>
+  );
+};
+
 export function ActionButton(props: ActionButtonProps) {
   const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover } = props;
-
   if (actions.length === 0) {
     return null;
-  } else if (actions.length === 1) {
-    const action = actions[0];
+  } else if (actions.length <= 2) {
     return (
-      <EuiButton
-        color={action.danger ? 'danger' : 'primary'}
-        onClick={() => actionHandler(action.action)}
-      >
-        {action.name}
-      </EuiButton>
+      <EuiFlexGroup>
+        {actions.map(({ action, danger, name }) => (
+          <EuiFlexItem key={action} grow={false}>
+            <Action action={action} actionHandler={actionHandler} danger={danger} name={name} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     );
   }
   return (

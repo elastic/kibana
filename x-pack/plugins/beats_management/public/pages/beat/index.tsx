@@ -133,11 +133,17 @@ export class BeatDetailsPage extends React.PureComponent<
         <EuiSpacer size="l" />
         <Switch>
           <Route path="/beat/:beatId/activity" render={(props: any) => <BeatActivityView />} />
-          <Route path="/beat/:beatId/tags" render={(props: any) => <BeatTagsView />} />
           <Route
-            path="/beat/:beatId"
-            render={(props: any) => <BeatDetailView beat={this.state.beat} />}
+            path="/beat/:beatId/tags"
+            render={() => (
+              <BeatTagsView
+                beat={this.state.beat}
+                libs={this.props.libs}
+                reloadBeat={() => this.loadBeat()}
+              />
+            )}
           />
+          <Route path="/beat/:beatId" render={() => <BeatDetailView beat={this.state.beat} />} />
         </Switch>
       </PrimaryLayout>
     );
