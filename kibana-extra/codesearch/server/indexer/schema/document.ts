@@ -11,8 +11,6 @@ import { RepositoryUri } from '../../../model';
 export const DocumentSchema = {
   repoUri: {
     type: 'keyword',
-    index: false,
-    norms: false,
   },
   path: {
     type: 'text',
@@ -34,8 +32,6 @@ export const DocumentSchema = {
   },
   language: {
     type: 'keyword',
-    index: false,
-    norms: false,
   },
   sha1: {
     type: 'text',

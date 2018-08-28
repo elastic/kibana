@@ -29,6 +29,64 @@ export class DocumentSearchClient extends AbstractSearchClient {
     const resultsPerPage = this.getResultsPerPage(req);
     const from = (req.page - 1) * resultsPerPage;
     const size = resultsPerPage;
+
+    // The query to search qname field.
+    const qnameQuery = {
+      constant_score: {
+        filter: {
+          match: {
+            qnames: {
+              query: req.query,
+              operator: 'OR',
+              prefix_length: 0,
+              max_expansions: 50,
+              fuzzy_transpositions: true,
+              lenient: false,
+              zero_terms_query: 'NONE',
+              boost: 1.0,
+            },
+          },
+        },
+        boost: 1.0,
+      },
+    };
+
+    // The query to search content and path filter.
+    const contentAndPathQuery = {
+      simple_query_string: {
+        query: req.query,
+        fields: ['content^1.0', 'path^1.0'],
+        default_operator: 'or',
+        lenient: false,
+        analyze_wildcard: false,
+        boost: 1.0,
+      },
+    };
+
+    // Post filters for repository
+    let repositoryPostFilters: object[] = [];
+    if (req.repoFileters) {
+      repositoryPostFilters = req.repoFileters.map((repoUri: string) => {
+        return {
+          term: {
+            repoUri,
+          },
+        };
+      });
+    }
+
+    // Post filters for language
+    let languagePostFilters: object[] = [];
+    if (req.langFilters) {
+      languagePostFilters = req.langFilters.map((lang: string) => {
+        return {
+          term: {
+            language: lang,
+          },
+        };
+      });
+    }
+
     const rawRes = await this.client.search({
       index: `${DocumentIndexNamePrefix}*`,
       body: {
@@ -36,37 +94,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
         size,
         query: {
           bool: {
-            should: [
-              {
-                constant_score: {
-                  filter: {
-                    match: {
-                      qnames: {
-                        query: req.query,
-                        operator: 'OR',
-                        prefix_length: 0,
-                        max_expansions: 50,
-                        fuzzy_transpositions: true,
-                        lenient: false,
-                        zero_terms_query: 'NONE',
-                        boost: 1.0,
-                      },
-                    },
-                  },
-                  boost: 1.0,
-                },
-              },
-              {
-                simple_query_string: {
-                  query: req.query,
-                  fields: ['content^1.0', 'path^1.0'],
-                  default_operator: 'or',
-                  lenient: false,
-                  analyze_wildcard: false,
-                  boost: 1.0,
-                },
-              },
-            ],
+            should: [qnameQuery, contentAndPathQuery],
             disable_coord: false,
             adjust_pure_negative: true,
             boost: 1.0,
@@ -77,6 +105,15 @@ export class DocumentSearchClient extends AbstractSearchClient {
             must: [
               {
                 bool: {
+                  should: repositoryPostFilters,
+                  disable_coord: false,
+                  adjust_pure_negative: true,
+                  boost: 1.0,
+                },
+              },
+              {
+                bool: {
+                  should: languagePostFilters,
                   disable_coord: false,
                   adjust_pure_negative: true,
                   boost: 1.0,

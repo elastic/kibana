@@ -8,8 +8,7 @@ import produce from 'immer';
 
 import { Action, handleActions } from 'redux-actions';
 
-import { RepositoryUtils } from '../../common/repository_utils';
-import { DocumentSearchResult } from '../../model';
+import { DocumentSearchResult, RepositoryUri } from '../../model';
 import {
   documentSearch as documentSearchQuery,
   documentSearchFailed,
@@ -21,6 +20,8 @@ import { CompositeSearchResult } from '../utils/composite_search_result';
 export interface DocumentSearchState {
   query: string;
   page?: number;
+  languages?: Set<string>;
+  repositories?: Set<RepositoryUri>;
   isLoading: boolean;
   error?: Error;
   searchResult?: DocumentSearchResult;
@@ -38,10 +39,24 @@ export const documentSearch = handleActions(
       action: Action<DocumentSearchPayload>
     ) =>
       produce<DocumentSearchState>(state, draft => {
-        draft.query = action.payload!.query;
-        draft.page = action.payload!.page;
-        draft.isLoading = true;
-        draft.error = undefined;
+        if (action.payload) {
+          draft.query = action.payload.query;
+          draft.page = action.payload.page;
+          if (action.payload.languages) {
+            draft.languages = new Set(decodeURIComponent(action.payload.languages).split(','));
+          } else {
+            draft.languages = new Set();
+          }
+          if (action.payload.repositories) {
+            draft.repositories = new Set(
+              decodeURIComponent(action.payload.repositories).split(',')
+            );
+          } else {
+            draft.repositories = new Set();
+          }
+          draft.isLoading = true;
+          draft.error = undefined;
+        }
       }),
     [String(documentSearchSuccess)]: (state: DocumentSearchState, action: Action<any>) =>
       produce<DocumentSearchState>(state, draft => {
@@ -59,7 +74,7 @@ export const documentSearch = handleActions(
 
         const repoStats = repoAggregations.map(agg => {
           return {
-            name: RepositoryUtils.repoNameFromUri(agg.key),
+            name: agg.key,
             value: agg.doc_count,
           };
         });

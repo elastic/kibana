@@ -15,15 +15,28 @@ import {
 } from '../actions';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
-  const { query, page } = payload;
+  const { query, page, languages, repositories } = payload;
+  const queryParams: { [key: string]: string | number | boolean } = {
+    q: query,
+  };
+
+  if (page) {
+    queryParams.p = page;
+  }
+
+  if (languages) {
+    queryParams.langs = languages;
+  }
+
+  if (repositories) {
+    queryParams.repos = repositories;
+  }
+
   if (query && query.length > 0) {
     return kfetch({
       pathname: `../api/cs/search/doc`,
       method: 'get',
-      query: {
-        q: query,
-        p: page !== undefined ? page : 1,
-      },
+      query: queryParams,
     });
   } else {
     return {

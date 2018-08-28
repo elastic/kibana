@@ -48,6 +48,8 @@ export interface RepositorySearchRequest extends SearchRequest {
 
 export interface DocumentSearchRequest extends SearchRequest {
   query: string;
+  repoFileters?: string[];
+  langFilters?: string[];
 }
 export interface SymbolSearchRequest extends SearchRequest {
   query: string;

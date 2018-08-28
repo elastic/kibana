@@ -83,8 +83,15 @@ function* handleLocationChange(action: any) {
       }
     }
   } else if (ROUTES.searchRegex.test(pathname)) {
-    const { q, p } = queryParams;
-    yield put(documentSearch({ query: q, page: p }));
+    const { q, p, langs, repos } = queryParams;
+    yield put(
+      documentSearch({
+        query: q,
+        page: p,
+        languages: langs,
+        repositories: repos,
+      })
+    );
   }
 }
 

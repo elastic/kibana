@@ -45,6 +45,8 @@ export function documentSearchRoute(server: Server, docSearchClient: DocumentSea
       const searchReq: DocumentSearchRequest = {
         query: req.query.q,
         page,
+        langFilters: req.query.langs ? req.query.langs.split(',') : [],
+        repoFileters: req.query.repos ? decodeURIComponent(req.query.repos).split(',') : [],
       };
       try {
         const res = await docSearchClient.search(searchReq);

@@ -71,12 +71,6 @@ export class DeleteWorker extends AbstractWorker {
       uri
     );
 
-    const deleteDocumentESIndexPromise = this.deletePromiseWrapper(
-      this.client.indices.delete({ index: DocumentIndexName(uri) }),
-      'document ES index',
-      uri
-    );
-
     await Promise.all([
       deleteRepoPromise,
       deleteCloneStatusPromise,
