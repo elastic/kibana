@@ -28,20 +28,24 @@
   max-width: 100%;
 }
 
-// Todo: replace this with EuiToast
-body .window-error {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: red;
-  color: white;
-  display: block;
-  z-index: 2000;
-  padding: 10px;
-  max-width: 500px;
+body {
+  overflow-y: hidden;
 
-  a {
+  // Todo: replace this with EuiToast
+  .window-error {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: red;
     color: white;
-    font-weight: bold;
+    display: block;
+    z-index: 2000;
+    padding: 10px;
+    max-width: 500px;
+
+    a {
+      color: white;
+      font-weight: bold;
+    }
   }
 }
