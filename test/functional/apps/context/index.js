@@ -30,10 +30,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
-    });
-
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
     loadTestFile(require.resolve('./_size'));
