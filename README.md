@@ -66,4 +66,4 @@ Follow the steps. You can use the `arrow keys` to choose options, `<space>` to s
 
 ## Contributing
 
-See https://github.com/sqren/backport/blob/master/CONTRIBUTING.md
+See [CONTRIBUTING.md](https://github.com/sqren/backport/blob/master/CONTRIBUTING.md)
