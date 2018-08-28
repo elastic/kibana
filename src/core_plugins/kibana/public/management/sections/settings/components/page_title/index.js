@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
+export { PageTitle } from './page_title';

@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
+import React from 'react';
+import {
+  EuiText
+} from '@elastic/eui';
+
+export const PageTitle = () => {
+  return (
+    <EuiText>
+      <h1 data-test-subj="managementSettingsTitle">Settings</h1>
+    </EuiText>
+  );
+};

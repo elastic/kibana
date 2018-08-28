@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
+import { tryRegisterSettingsComponent } from './component_registry';
+import { PageTitle } from './page_title';
+
+export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
+
+export function registerDefaultComponents() {
+  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
+}

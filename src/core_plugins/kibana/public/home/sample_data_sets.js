@@ -17,67 +17,16 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
-import { i18n } from '@kbn/i18n';
+import { kfetch } from 'ui/kfetch';
 
-const sampleDataUrl = chrome.addBasePath('/api/sample_data');
-const headers = new Headers({
-  Accept: 'application/json',
-  'Content-Type': 'application/json',
-  'kbn-xsrf': 'kibana',
-});
+const sampleDataUrl = '/api/sample_data';
 
 export async function listSampleDataSets() {
-  try {
-    const response = await fetch(sampleDataUrl, {
-      method: 'get',
-      credentials: 'include',
-      headers: headers,
-    });
-
-    if (response.status >= 300) {
-      throw new Error(i18n.translate('kbn.home.sampleDataSet.getListFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}', values: { status: response.status } }
-      ));
-    }
-
-    return await response.json();
-  } catch (err) {
-    toastNotifications.addDanger({
-      title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
-        defaultMessage: 'Unable to load sample data sets list' }
-      ),
-      text: `${err.message}`,
-    });
-    return [];
-  }
+  return await kfetch({ method: 'GET', pathname: sampleDataUrl });
 }
 
-export async function installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
-  try {
-    const response = await fetch(`${sampleDataUrl}/${id}`, {
-      method: 'post',
-      credentials: 'include',
-      headers: headers,
-    });
-
-    if (response.status >= 300) {
-      const body = await response.text();
-      throw new Error(i18n.translate('kbn.home.sampleDataSet.installfailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}, message: {message}',
-        values: { status: response.status, message: body } }
-      ));
-    }
-  } catch (err) {
-    toastNotifications.addDanger({
-      title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
-        defaultMessage: 'Unable to install sample data set: {name}', values: { name: name } }
-      ),
-      text: `${err.message}`,
-    });
-    return;
-  }
+export async function installSampleDataSet(id, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
+  await kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
 
   const existingDefaultIndex = await getConfig('defaultIndex');
   if (existingDefaultIndex === null) {
@@ -85,37 +34,10 @@ export async function installSampleDataSet(id, name, defaultIndex, getConfig, se
   }
 
   clearIndexPatternsCache();
-
-  toastNotifications.addSuccess({
-    title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
-      defaultMessage: '{name} installed', values: { name: name } }
-    ),
-    ['data-test-subj']: 'sampleDataSetInstallToast'
-  });
 }
 
-export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
-  try {
-    const response = await fetch(`${sampleDataUrl}/${id}`, {
-      method: 'delete',
-      credentials: 'include',
-      headers: headers,
-    });
-    if (response.status >= 300) {
-      const body = await response.text();
-      throw new Error(i18n.translate('kbn.home.sampleDataSet.uninstallFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}, message: {message}',
-        values: { status: response.status, message: body } }
-      ));
-    }
-  } catch (err) {
-    toastNotifications.addDanger({
-      title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
-        defaultMessage: 'Unable to uninstall sample data set' }),
-      text: `${err.message}`,
-    });
-    return;
-  }
+export async function uninstallSampleDataSet(id, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
+  await kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
 
   const existingDefaultIndex = await getConfig('defaultIndex');
   if (existingDefaultIndex && existingDefaultIndex === defaultIndex) {
@@ -123,11 +45,4 @@ export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, 
   }
 
   clearIndexPatternsCache();
-
-  toastNotifications.addSuccess({
-    title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
-      defaultMessage: '{name} uninstalled', values: { name: name } }
-    ),
-    ['data-test-subj']: 'sampleDataSetUninstallToast'
-  });
 }
