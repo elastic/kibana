@@ -41,7 +41,8 @@
   "files": [
     "dist",
     "yarn.lock",
-    "scripts/postinstall.js"
+    "scripts/postinstall.js",
+    "templates/configTemplate.json"
   ],
   "author": "Søren Louv-Jansen",
   "homepage": "https://github.com/sqren/backport/blob/master/README.md",
