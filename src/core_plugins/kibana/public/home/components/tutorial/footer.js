@@ -41,7 +41,7 @@ export function Footer({ url, label }) {
           <EuiText>
             <p>
               <FormattedMessage
-                id="kbn.home.footerLabel"
+                id="kbn.home.exploreYourDataDescription"
                 defaultMessage="When all steps are complete, you're ready to explore your data."
               />
             </p>

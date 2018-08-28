@@ -195,7 +195,7 @@ export class Home extends Component {
               <EuiText>
                 <p>
                   <FormattedMessage
-                    id="kbn.home.directories.notFound.nameTitle"
+                    id="kbn.home.directories.notFound.description"
                     defaultMessage="Didn’t find what you were looking for?"
                   />
                 </p>
@@ -203,7 +203,7 @@ export class Home extends Component {
               <EuiSpacer size="s" />
               <EuiButton href="#/home/feature_directory">
                 <FormattedMessage
-                  id="kbn.home.directories.viewFullButtonLabel"
+                  id="kbn.home.directories.notFound.viewFullButtonLabel"
                   defaultMessage="View full directory of Kibana plugins"
                 />
               </EuiButton>
