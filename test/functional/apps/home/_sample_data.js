@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should uninstall logs sample data set', async ()=> {
-        await PageObjects.home.removeSampleDataSet('flights');
+        await PageObjects.home.removeSampleDataSet('logs');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
         expect(isInstalled).to.be(false);
       });
