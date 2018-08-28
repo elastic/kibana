@@ -583,10 +583,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       throw new Error('no element');
     }
 
-    async waitForRenderComplete() {
+    async waitForRenderComplete(findTimeout) {
       log.debug('waitForRenderComplete');
       const count = await this.getSharedItemsCount();
-      await renderable.waitForRender(parseInt(count));
+      await renderable.waitForRender(parseInt(count), findTimeout);
     }
 
     async getSharedContainerData() {

@@ -49,7 +49,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+
+        // There are so many heavy visualizations on this page that the default find timeout of 10 seconds
+        // expires before the `findAllBy...` command finishes searching through the dom for all relevant
+        // elements.  (at least this is my theory... checking it out...).
+        const findTimeout = 60000;
+        await PageObjects.dashboard.waitForRenderComplete(findTimeout);
       });
 
       it('filters on pie charts', async () => {
