@@ -41,11 +41,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('should install sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('flights');
-      await retry.try(async () => {
-        const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulInstallToastExist();
-        expect(successToastExists).to.be(true);
-      });
-
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(true);
     });
@@ -98,11 +93,6 @@ export default function ({ getService, getPageObjects }) {
     describe('uninstall', () => {
       it('should uninstall sample data set', async ()=> {
         await PageObjects.home.removeSampleDataSet('flights');
-        await retry.try(async () => {
-          const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulUninstallToastExist();
-          expect(successToastExists).to.be(true);
-        });
-
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
         expect(isInstalled).to.be(false);
       });

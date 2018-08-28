@@ -71,6 +71,16 @@ export function isForbiddenError(error) {
 }
 
 
+// 413 - Request Entity Too Large
+const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge';
+export function decorateRequestEntityTooLargeError(error, reason) {
+  return decorate(error, CODE_REQUEST_ENTITY_TOO_LARGE, 413, reason);
+}
+export function isRequestEntityTooLargeError(error) {
+  return error && error[code] === CODE_REQUEST_ENTITY_TOO_LARGE;
+}
+
+
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 export function createGenericNotFoundError(type = null, id = null) {
