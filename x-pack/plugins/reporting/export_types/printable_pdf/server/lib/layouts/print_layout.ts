@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import {
-  ConfigEntry,
-  configObject,
-  kbn_server,
-  ViewWidth,
-  ViewWidthHeight,
-  ViewZoomWidthHeight,
-} from '../../../../../../../../src/server/index';
+import { KbnServer } from '../../../../../../../../src/server/index';
+import { Size } from '../../../../../types';
+import { CaptureConfig } from './index.d';
 import { Layout } from './layout';
 
 type EvalArgs = any[];
@@ -27,9 +22,9 @@ interface BrowserClient {
   evaluate: (evaluateOptions: EvaluateOptions) => void;
 }
 
-export class Optimizedlayout extends Layout {
-  public groupCount: number = 2;
+const groupCount: number = 2;
 
+export class PrintLayout extends Layout {
   public selectors = {
     screenshot: '[data-shared-item]',
     renderComplete: '[data-shared-item]',
@@ -38,31 +33,26 @@ export class Optimizedlayout extends Layout {
     timefilterToAttribute: 'data-shared-timefilter-to',
   };
 
-  constructor(server: kbn_server, id: string) {
-    super(id, server);
+  private captureConfig: CaptureConfig;
+
+  constructor(server: KbnServer, id: string) {
+    super(id);
+    this.captureConfig = server.config().get('xpack.reporting.capture');
   }
 
-  get config(): configObject {
-    return this.server.config();
-  }
-
-  get captureConfig(): ConfigEntry {
-    return this.config.get('xpack.reporting.capture');
-  }
-
-  public getCssOverridesPath(): string {
+  public getCssOverridesPath() {
     return path.join(__dirname, 'print.css');
   }
 
-  public getBrowserViewport(): ViewWidthHeight {
+  public getBrowserViewport() {
     return this.captureConfig.viewport;
   }
 
-  public getBrowserZoom(): number {
+  public getBrowserZoom() {
     return this.captureConfig.zoom;
   }
 
-  public getViewport(itemsCount: number): ViewZoomWidthHeight {
+  public getViewport(itemsCount: number) {
     return {
       zoom: this.captureConfig.zoom,
       width: this.captureConfig.viewport.width,
@@ -71,7 +61,7 @@ export class Optimizedlayout extends Layout {
   }
 
   public async positionElements(browser: BrowserClient): Promise<void> {
-    const elementSize: ViewWidthHeight = {
+    const elementSize: Size = {
       width: this.captureConfig.viewport.width / this.captureConfig.zoom,
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
     };
@@ -98,17 +88,17 @@ export class Optimizedlayout extends Layout {
     await browser.evaluate(evalOptions);
   }
 
-  public getPdfImageSize(): ViewWidth {
+  public getPdfImageSize() {
     return {
       width: 500,
     };
   }
 
-  public getPdfPageOrientation(): string {
+  public getPdfPageOrientation() {
     return 'portrait';
   }
 
-  public getPdfPageSize(): string {
+  public getPdfPageSize() {
     return 'A4';
   }
 }

@@ -11,7 +11,8 @@ import { PNG } from 'pngjs';
 import * as Rx from 'rxjs';
 import { ObservableInput } from 'rxjs';
 import { map, mergeMap, reduce, switchMap, tap, toArray } from 'rxjs/operators';
-import { Logger, Screenshot, Size } from './types';
+import { Logger, Size } from '../../../../../types';
+import { Screenshot } from './types';
 
 export class CapturePngSizeError extends Error {
   constructor(

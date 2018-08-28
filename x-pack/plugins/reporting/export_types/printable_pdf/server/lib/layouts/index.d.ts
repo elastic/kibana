@@ -3,7 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Size } from '../../../../../types';
 
-export { createlayout } from './layout_factory';
-export { PrintLayout } from './print_layout';
-export { PreserveLayout } from './preserve_layout';
+export interface CaptureConfig {
+    zoom: number;
+    viewport: Size;
+  }
+  
+export interface ViewZoomWidthHeight {
+    zoom: number;
+    width: number;
+    height: number;
+  }

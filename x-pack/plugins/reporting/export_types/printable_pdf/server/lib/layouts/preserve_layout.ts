@@ -4,25 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import {
-  kbn_server,
-  ViewWidthHeight,
-  ViewZoomWidthHeight,
-} from '../../../../../../../../src/server/index';
-import { Layout } from './layout';
+import { Size } from '../../../../../types';
+import { Layout, PageSizeParams } from './layout';
 
-interface Pagesizeparams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
+const ZOOM: number = 2;
 
-export class Preservelayout extends Layout {
-  public groupCount: number = 1;
-
+export class PreserveLayout extends Layout {
   public selectors = {
     screenshot: '[data-shared-items-container]',
     renderComplete: '[data-shared-item]',
@@ -31,60 +18,55 @@ export class Preservelayout extends Layout {
     timefilterToAttribute: 'data-shared-timefilter-to',
   };
 
-  public height: number = 0;
-  public width: number = 0;
-  public zoom: number = 0;
+  public readonly groupCount = 1;
+  private readonly height: number;
+  private readonly width: number;
+  private readonly scaledHeight: number;
+  private readonly scaledWidth: number;
 
-  constructor(server: kbn_server, id: string, height: number, width: number, zoom: number) {
-    super(id, server);
-    this.height = height;
-    this.width = width;
-    this.zoom = zoom;
+  constructor(id: string, size: Size) {
+    super(id);
+    this.height = size.height;
+    this.width = size.width;
+    this.scaledHeight = size.height * ZOOM;
+    this.scaledWidth = size.width * ZOOM;
   }
 
-  get scaledHeight(): number {
-    return this.height * this.zoom;
-  }
-
-  get scaledWidth(): number {
-    return this.width * this.zoom;
-  }
-
-  public getCssOverridesPath(): string {
+  public getCssOverridesPath() {
     return path.join(__dirname, 'preserve_layout.css');
   }
 
-  public getBrowserViewport(): ViewWidthHeight {
+  public getBrowserViewport() {
     return {
       height: this.scaledHeight,
       width: this.scaledWidth,
     };
   }
 
-  public getBrowserZoom(): number {
-    return this.zoom;
+  public getBrowserZoom() {
+    return ZOOM;
   }
 
-  public getViewport(): ViewZoomWidthHeight {
+  public getViewport() {
     return {
       height: this.scaledHeight,
       width: this.scaledWidth,
-      zoom: this.zoom,
+      zoom: ZOOM,
     };
   }
 
-  public getPdfImageSize(): ViewWidthHeight {
+  public getPdfImageSize() {
     return {
       height: this.height,
       width: this.width,
     };
   }
 
-  public getPdfPageOrientation(): undefined {
+  public getPdfPageOrientation() {
     return undefined;
   }
 
-  public getPdfPageSize(pagesizeparams: Pagesizeparams): ViewWidthHeight {
+  public getPdfPageSize(pagesizeparams: PageSizeParams) {
     return {
       height:
         this.height +

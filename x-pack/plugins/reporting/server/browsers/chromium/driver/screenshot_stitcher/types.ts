@@ -11,18 +11,7 @@ export interface Rectangle {
   y: number;
 }
 
-export interface Size {
-  width: number;
-  height: number;
-}
-
 export interface Screenshot {
   data: string;
   rectangle: Rectangle;
-}
-
-export interface Logger {
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
 }

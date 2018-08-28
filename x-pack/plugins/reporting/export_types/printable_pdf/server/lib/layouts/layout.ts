@@ -3,15 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Size } from '../../../../../types';
+import { ViewZoomWidthHeight } from './index.d';
 
-import { kbn_server } from '../../../../../../../../src/server/index';
+export interface PageSizeParams {
+  pageMarginTop: number;
+  pageMarginBottom: number;
+  pageMarginWidth: number;
+  tableBorderWidth: number;
+  headingHeight: number;
+  subheadingHeight: number;
+}
 
-export class Layout {
+export interface PdfImageSize {
+  width: number;
+  height?: number;
+}
+
+export abstract class Layout {
   public id: string = '';
-  public server: kbn_server;
 
-  constructor(id: string, server: kbn_server) {
+  constructor(id: string) {
     this.id = id;
-    this.server = server;
   }
+
+  public abstract getPdfImageSize(): PdfImageSize;
+
+  public abstract getPdfPageOrientation(): string | undefined;
+
+  public abstract getPdfPageSize(pageSizeParamsIn: PageSizeParams): string | Size;
+
+  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight;
+
+  public abstract getBrowserZoom(): number;
+
+  public abstract getBrowserViewport(): Size;
+
+  public abstract getCssOverridesPath(): string;
 }
