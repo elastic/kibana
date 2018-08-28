@@ -10,7 +10,8 @@ import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_le
 
 export function rollUpTotals(rolledUp, addOn, field) {
   const rolledUpTotal = get(rolledUp, [field, 'total'], 0);
-  return { total: rolledUpTotal + addOn[field].total };
+  const addOnTotal = get(addOn, [field, 'total'], 0);
+  return { total: rolledUpTotal + addOnTotal };
 }
 export function rollUpIndices(rolledUp) {
   return rolledUp.indices + 1;
