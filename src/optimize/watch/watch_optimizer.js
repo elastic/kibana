@@ -57,6 +57,13 @@ export default class WatchOptimizer extends BaseOptimizer {
     this.initializing = false;
   }
 
+  /**
+   *
+   * Extends the base_optimizer registerCompilerHooks function
+   * calling extended function also adding a new register function
+   *
+   * It gets called by super.init()
+  */
   registerCompilerHooks() {
     super.registerCompilerHooks();
     this.registerCompilerWatchRunHook();

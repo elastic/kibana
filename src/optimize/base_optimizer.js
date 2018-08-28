@@ -69,6 +69,8 @@ export default class BaseOptimizer {
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
+    // register the webpack compiler hooks
+    // for the base optimizer
     this.registerCompilerHooks();
 
     return this;
