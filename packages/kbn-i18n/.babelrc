@@ -1,4 +1,12 @@
 {
+  "plugins": [
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
+  ],
+  "presets": [
+    "@babel/preset-react",
+    "@babel/typescript"
+  ],
   "env": {
     "web": {
       "presets": [
@@ -10,13 +18,7 @@
               "Safari 7"
             ]
           }
-        }],
-        "@babel/typescript",
-        "@babel/preset-react"
-      ],
-      "plugins": [
-        "@babel/proposal-class-properties",
-        "@babel/proposal-object-rest-spread"
+        }]
       ]
     },
     "node": {
@@ -25,13 +27,7 @@
           "targets": {
             "node": "8.11.4"
           }
-        }],
-        "@babel/typescript",
-        "@babel/preset-react"
-      ],
-      "plugins": [
-        "@babel/proposal-class-properties",
-        "@babel/proposal-object-rest-spread"
+        }]
       ]
     }
   },
