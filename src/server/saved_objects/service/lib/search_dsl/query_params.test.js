@@ -157,14 +157,14 @@ describe('searchDsl/queryParams', () => {
 
   describe('type (singular, global)', () => {
     it('includes a terms filter for type and namespace not being specified', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, null, 'saved'))
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, 'global'))
         .toEqual({
           query: {
             bool: {
               filter: [{
                 bool: {
                   should: [
-                    createTypeClause('saved'),
+                    createTypeClause('global'),
                   ],
                   minimum_should_match: 1
                 }
