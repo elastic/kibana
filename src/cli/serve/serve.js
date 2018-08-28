@@ -25,7 +25,7 @@ import { resolve } from 'path';
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import { Config } from '../../server/config/config';
-import { readYamlConfig } from './read_yaml_config';
+import { getConfigFromFiles } from '../../core/server/config';
 import { readKeystore } from './read_keystore';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
 
@@ -78,7 +78,7 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function readServerSettings(opts, extraCliOptions) {
-  const settings = readYamlConfig(opts.config);
+  const settings = getConfigFromFiles([].concat(opts.config || []));
   const set = _.partial(_.set, settings);
   const get = _.partial(_.get, settings);
   const has = _.partial(_.has, settings);
@@ -247,7 +247,7 @@ export default function (program) {
 
         // If new platform config subscription is active, let's notify it with the updated config.
         if (kbnServer.newPlatform) {
-          kbnServer.newPlatform.updateConfig(config);
+          kbnServer.newPlatform.updateConfig(config.get());
         }
       });
 

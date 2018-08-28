@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { catchError, first, map, shareReplay } from 'rxjs/operators';
+import { ConnectableObservable, Observable, Subscription } from 'rxjs';
+import { catchError, first, map, publishReplay } from 'rxjs/operators';
 
 import { Server } from '..';
-import { ConfigService, Env, RawConfig } from '../config';
+import { Config, ConfigService, Env } from '../config';
 
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 
@@ -39,7 +39,7 @@ export class Root {
   private loggingConfigSubscription?: Subscription;
 
   constructor(
-    rawConfig$: Observable<RawConfig>,
+    config$: Observable<Config>,
     private readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {
       // noop
@@ -49,7 +49,7 @@ export class Root {
     this.logger = this.loggingService.asLoggerFactory();
 
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(rawConfig$, env, this.logger);
+    this.configService = new ConfigService(config$, env, this.logger);
   }
 
   public async start() {
@@ -104,15 +104,23 @@ export class Root {
 
         throw err;
       }),
-      shareReplay(1)
-    );
+      publishReplay(1)
+    ) as ConnectableObservable<void>;
 
-    // Wait for the first update to complete and throw if it fails.
+    // Subscription and wait for the first update to complete and throw if it fails.
+    const connectSubscription = update$.connect();
     await update$.pipe(first()).toPromise();
 
     // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
     this.loggingConfigSubscription = update$.subscribe({
-      error: error => this.shutdown(error),
+      error: err => this.shutdown(err),
     });
+
+    // Add subscription we got from `connect` so that we can dispose both of them
+    // at once. We can't inverse this and add consequent updates subscription to
+    // the one we got from `connect` because in the error case the latter will be
+    // automatically disposed before the error is forwarded to the former one so
+    // the shutdown logic won't be called.
+    this.loggingConfigSubscription.add(connectSubscription);
   }
 }
