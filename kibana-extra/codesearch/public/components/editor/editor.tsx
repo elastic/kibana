@@ -70,7 +70,7 @@ export class EditorComponent extends React.Component<Props> {
     if (nextProps.goto && nextProps.goto !== this.props.goto) {
       this.revealPosition(nextProps.goto);
     }
-    if (nextProps.fileContent) {
+    if (nextProps.fileContent !== this.props.fileContent) {
       this.loadText(
         nextProps.fileContent!,
         nextProps.repoUri,
