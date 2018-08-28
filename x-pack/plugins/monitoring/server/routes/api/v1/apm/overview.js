@@ -6,10 +6,10 @@
 
 import Joi from 'joi';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { getStats } from '../../../../lib/beats';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import { getApmClusterStatus } from './_get_apm_cluster_status';
 
 export function apmOverviewRoute(server) {
   server.route({
@@ -40,7 +40,7 @@ export function apmOverviewRoute(server) {
           stats,
           metrics,
         ] = await Promise.all([
-          getStats(req, apmIndexPattern, clusterUuid),
+          getApmClusterStatus(req, apmIndexPattern, { clusterUuid }),
           getMetrics(req, apmIndexPattern, metricSet),
         ]);
 

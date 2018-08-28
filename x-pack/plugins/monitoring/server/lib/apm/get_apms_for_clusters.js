@@ -10,15 +10,14 @@ import { ApmMetric } from '../metrics';
 import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
 
 export function handleResponse(clusterUuid, response) {
-  const { beatTotal, beatTypes, totalEvents, bytesSent } = apmAggResponseHandler(response);
+  const { apmTotal, totalEvents, bytesSent } = apmAggResponseHandler(response);
 
   // combine stats
   const stats = {
     totalEvents,
     bytesSent,
-    beats: {
-      total: beatTotal,
-      types: beatTypes,
+    apms: {
+      total: apmTotal,
     }
   };
 

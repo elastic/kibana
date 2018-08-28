@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { get } from 'lodash';
 
 export const getDiffCalculation = (max, min) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
@@ -102,17 +102,7 @@ export const apmUuidsAgg = maxBucketSize => ({
 });
 
 export const apmAggResponseHandler = response => {
-  const buckets = get(response, 'aggregations.types.buckets', []);
-  const beatTotal = get(response, 'aggregations.total.value', null);
-  const beatTypes = buckets.reduce((types, typeBucket) => {
-    return [
-      ...types,
-      {
-        type: capitalize(typeBucket.key),
-        count: get(typeBucket, 'uuids.buckets.length'),
-      }
-    ];
-  }, []);
+  const apmTotal = get(response, 'aggregations.total.value', null);
 
   const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
   const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
@@ -120,8 +110,7 @@ export const apmAggResponseHandler = response => {
   const bytesSentMin = get(response, 'aggregations.min_bytes_sent_total.value', null);
 
   return {
-    beatTotal,
-    beatTypes,
+    apmTotal,
     totalEvents: getDiffCalculation(eventsTotalMax, eventsTotalMin),
     bytesSent: getDiffCalculation(bytesSentMax, bytesSentMin),
   };
