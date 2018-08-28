@@ -27,7 +27,7 @@ import { RawConfig } from './raw_config';
  * @internal
  */
 export class ObjectToRawConfigAdapter implements RawConfig {
-  constructor(protected readonly rawValue: Record<string, any>) {}
+  constructor(private readonly rawValue: Record<string, any>) {}
 
   public has(configPath: ConfigPath) {
     return has(this.rawValue, configPath);
