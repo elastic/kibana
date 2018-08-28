@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,16 +25,29 @@ export function logstashMetricsSpecProvider() {
   const moduleName = 'logstash';
   return {
     id: moduleName + 'Metrics',
-    name: 'Logstash metrics',
+    name: i18n.translate('kbn.server.tutorials.logstashMetrics.nameTitle', {
+      defaultMessage: 'Logstash metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch interal metrics from a Logstash server.',
-    longDescription: 'The `' + moduleName + '` Metricbeat module fetches internal metrics from a Logstash server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.shortDescription', {
+      defaultMessage: 'Fetch interal metrics from a Logstash server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        moduleName,
+        learnMoreLink: `{config.docs.beats.metricbeat}/metricbeat-module-${moduleName}.html`,
+      },
+    }),
     euiIconType: 'logoLogstash',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.logstashMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],

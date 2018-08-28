@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { EventEmitter } from 'events';
 import { resolve } from 'path';
 import process from 'process';
 
-import { LegacyKbnServer } from '../legacy_compat';
+import { pkg } from '../../../utils/package_json';
 
 interface PackageInfo {
   version: string;
@@ -36,11 +37,9 @@ interface EnvironmentMode {
 }
 
 export interface EnvOptions {
-  config?: string;
-  kbnServer?: any;
-  packageInfo: PackageInfo;
-  mode: EnvironmentMode;
-  [key: string]: any;
+  configs: string[];
+  cliArgs: Record<string, any>;
+  isDevClusterMaster: boolean;
 }
 
 export class Env {
@@ -58,43 +57,63 @@ export class Env {
   public readonly staticFilesDir: string;
 
   /**
+   * Information about Kibana package (version, build number etc.).
+   */
+  public readonly packageInfo: Readonly<PackageInfo>;
+
+  /**
+   * Mode Kibana currently run in (development or production).
+   */
+  public readonly mode: Readonly<EnvironmentMode>;
+
+  /**
    * @internal
    */
-  constructor(readonly homeDir: string, private readonly options: EnvOptions) {
+  public readonly legacy: EventEmitter;
+
+  /**
+   * Arguments provided through command line.
+   */
+  public readonly cliArgs: Readonly<Record<string, any>>;
+
+  /**
+   * Paths to the configuration files.
+   */
+  public readonly configs: ReadonlyArray<string>;
+
+  /**
+   * Indicates that this Kibana instance is run as development Node Cluster master.
+   */
+  public readonly isDevClusterMaster: boolean;
+
+  /**
+   * @internal
+   */
+  constructor(readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
-  }
 
-  public getConfigFile() {
-    const defaultConfigFile = this.getDefaultConfigFile();
-    return this.options.config === undefined ? defaultConfigFile : this.options.config;
-  }
+    this.cliArgs = Object.freeze(options.cliArgs);
+    this.configs = Object.freeze(options.configs);
+    this.isDevClusterMaster = options.isDevClusterMaster;
 
-  /**
-   * @internal
-   */
-  public getLegacyKbnServer(): LegacyKbnServer | undefined {
-    return this.options.kbnServer;
-  }
+    this.mode = Object.freeze<EnvironmentMode>({
+      dev: this.cliArgs.dev,
+      name: this.cliArgs.dev ? 'development' : 'production',
+      prod: !this.cliArgs.dev,
+    });
 
-  /**
-   * Gets information about Kibana package (version, build number etc.).
-   */
-  public getPackageInfo() {
-    return this.options.packageInfo;
-  }
+    const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
+    this.packageInfo = Object.freeze({
+      branch: pkg.branch,
+      buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      version: pkg.version,
+    });
 
-  /**
-   * Gets mode Kibana currently run in (development or production).
-   */
-  public getMode() {
-    return this.options.mode;
-  }
-
-  private getDefaultConfigFile() {
-    return resolve(this.configDir, 'kibana.yml');
+    this.legacy = new EventEmitter();
   }
 }

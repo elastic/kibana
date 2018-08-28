@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { LegacyKbnServer } from '..';
+import { tryRegisterSettingsComponent } from './component_registry';
+import { PageTitle } from './page_title';
 
-test('correctly returns `newPlatformProxyListener`.', () => {
-  const rawKbnServer = {
-    newPlatform: {
-      proxyListener: {},
-    },
-  };
+export const PAGE_TITLE_COMPONENT = 'advanced_settings_page_title';
 
-  const legacyKbnServer = new LegacyKbnServer(rawKbnServer);
-  expect(legacyKbnServer.newPlatformProxyListener).toBe(rawKbnServer.newPlatform.proxyListener);
-});
+export function registerDefaultComponents() {
+  tryRegisterSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle);
+}
