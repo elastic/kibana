@@ -1,13 +1,20 @@
-const path = require('path');
-const isEmpty = require('lodash.isempty');
-const findUp = require('find-up');
-const stripJsonComments = require('strip-json-comments');
-const { HandledError } = require('./errors');
-const env = require('./env');
-const rpc = require('./rpc');
-const schemas = require('./schemas');
+import path from 'path';
+import isEmpty from 'lodash.isempty';
+import isString from 'lodash.isstring';
+import findUp from 'find-up';
+import stripJsonComments from 'strip-json-comments';
+import { HandledError } from './errors';
+import * as env from './env';
+import * as rpc from './rpc';
+import {
+  CombinedConfig,
+  BranchChoice,
+  BackportOptions,
+  ProjectConfig
+} from '../types/types';
+import { validateGlobalConfig, validateProjectConfig } from './schemas';
 
-async function maybeCreateGlobalConfigAndFolder() {
+export async function maybeCreateGlobalConfigAndFolder() {
   const reposPath = env.getReposPath();
   const globalConfigPath = env.getGlobalConfigPath();
   const configTemplate = await getConfigTemplate();
@@ -16,11 +23,14 @@ async function maybeCreateGlobalConfigAndFolder() {
   await ensureCorrectPermissions(globalConfigPath);
 }
 
-function ensureCorrectPermissions(globalConfigPath) {
+function ensureCorrectPermissions(globalConfigPath: string) {
   return rpc.chmod(globalConfigPath, '600');
 }
 
-async function maybeCreateGlobalConfig(globalConfigPath, configTemplate) {
+export async function maybeCreateGlobalConfig(
+  globalConfigPath: string,
+  configTemplate: string
+) {
   try {
     await rpc.writeFile(globalConfigPath, configTemplate, {
       flag: 'wx', // create and write file. Error if it already exists
@@ -34,38 +44,12 @@ async function maybeCreateGlobalConfig(globalConfigPath, configTemplate) {
   }
 }
 
-function getConfigTemplate() {
-  return rpc.readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
+export function getConfigTemplate() {
+  const p = path.join(__dirname, '../../templates/configTemplate.json');
+  return rpc.readFile(p, 'utf8');
 }
 
-function validateGlobalConfig(config, filename) {
-  const { error } = schemas.validate(config, schemas.globalConfig);
-
-  if (error) {
-    throw new HandledError(
-      `The global config file (${filename}) is not valid:\n${schemas.formatError(
-        error
-      )}`
-    );
-  }
-
-  return config;
-}
-
-function validateProjectConfig(config, filepath) {
-  const { error } = schemas.validate(config, schemas.projectConfig);
-
-  if (error) {
-    throw new HandledError(
-      `The project config file (${filepath}) is not valid:\n${schemas.formatError(
-        error
-      )}`
-    );
-  }
-  return config;
-}
-
-async function readConfigFile(filepath) {
+async function readConfigFile(filepath: string) {
   const fileContents = await rpc.readFile(filepath, 'utf8');
   const configWithoutComments = stripJsonComments(fileContents);
 
@@ -78,7 +62,7 @@ async function readConfigFile(filepath) {
   }
 }
 
-async function getGlobalConfig() {
+export async function getGlobalConfig() {
   await maybeCreateGlobalConfigAndFolder();
 
   const globalConfigPath = env.getGlobalConfigPath();
@@ -86,17 +70,34 @@ async function getGlobalConfig() {
   return validateGlobalConfig(config, globalConfigPath);
 }
 
-async function getProjectConfig() {
+export async function getProjectConfig(): Promise<ProjectConfig | null> {
   const filepath = await findUp('.backportrc.json');
   if (!filepath) {
     return null;
   }
 
-  const config = await readConfigFile(filepath);
-  return validateProjectConfig(config, filepath);
+  const config = validateProjectConfig(
+    await readConfigFile(filepath),
+    filepath
+  );
+
+  const { branches, ...configRest } = config;
+  return {
+    ...configRest,
+    branchChoices: config.branches.map(
+      (choice: string | BranchChoice): BranchChoice => {
+        return isString(choice)
+          ? {
+              name: choice,
+              checked: false
+            }
+          : choice;
+      }
+    )
+  };
 }
 
-async function getCombinedConfig() {
+export async function getCombinedConfig(): Promise<CombinedConfig> {
   const [projectConfig, globalConfig] = await Promise.all([
     getProjectConfig(),
     getGlobalConfig()
@@ -108,6 +109,7 @@ async function getCombinedConfig() {
     multipleCommits: false,
     multipleBranches: true,
     all: false,
+    labels: [],
 
     // configs
     ...globalConfig,
@@ -115,27 +117,17 @@ async function getCombinedConfig() {
   };
 }
 
-function validateConfigWithCliArgs(config, options) {
-  if (isEmpty(config.branches) && isEmpty(options.branches)) {
+export function validateOptions(options: Partial<BackportOptions>) {
+  if (isEmpty(options.branches) && isEmpty(options.branchChoices)) {
     throw new Error(
       `Missing branch\n\nYou must either:\n - Add a .backportrc.json. Read more: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration\n - Add branch as CLI argument: "--branch 6.1" `
     );
   }
 
-  if (!config.upstream) {
+  if (!options.upstream) {
     throw new Error(
       `Missing upstream\n\nYou must either:\n - Add a .backportrc.json. Read more: https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration\n - Add upstream as CLI argument: "--upstream elastic/kibana" `
     );
   }
+  return options as BackportOptions;
 }
-
-module.exports = {
-  validateConfigWithCliArgs,
-  getCombinedConfig,
-  getGlobalConfig,
-  getProjectConfig,
-  maybeCreateGlobalConfig,
-  maybeCreateGlobalConfigAndFolder,
-  validateGlobalConfig,
-  validateProjectConfig
-};

@@ -2,3 +2,5 @@
 /coverage
 /.coveralls.yml
 /test/.DS_Store
+/dist
+/yarn-error.log

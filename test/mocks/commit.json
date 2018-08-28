@@ -1,5 +1,5 @@
 {
-  "sha": "f3430595978a6123c65f7501e61386de62b80b6e",
+  "sha": "myCommitSha",
   "commit": {
     "author": {
       "name": "Søren Louv-Jansen",
@@ -18,7 +18,7 @@
         "https://api.github.com/repos/elastic/kibana/git/trees/ce129055d52748ed4d931cbc1591d984d71ec04f"
     },
     "url":
-      "https://api.github.com/repos/elastic/kibana/git/commits/f3430595978a6123c65f7501e61386de62b80b6e",
+      "https://api.github.com/repos/elastic/kibana/git/commits/myCommitSha",
     "comment_count": 0,
     "verification": {
       "verified": true,
@@ -29,12 +29,10 @@
         "tree ce129055d52748ed4d931cbc1591d984d71ec04f\nparent b81fd782c7a63bc231b4678aa4e685c2025fa302\nauthor Søren Louv-Jansen <sorenlouv@gmail.com> 1511894673 +0100\ncommitter GitHub <noreply@github.com> 1511894673 +0100\n\n[Chrome] Bootstrap Angular into document.body (#15158)\n\n"
     }
   },
-  "url":
-    "https://api.github.com/repos/elastic/kibana/commits/f3430595978a6123c65f7501e61386de62b80b6e",
-  "html_url":
-    "https://github.com/elastic/kibana/commit/f3430595978a6123c65f7501e61386de62b80b6e",
+  "url": "https://api.github.com/repos/elastic/kibana/commits/myCommitSha",
+  "html_url": "https://github.com/elastic/kibana/commit/myCommitSha",
   "comments_url":
-    "https://api.github.com/repos/elastic/kibana/commits/f3430595978a6123c65f7501e61386de62b80b6e/comments",
+    "https://api.github.com/repos/elastic/kibana/commits/myCommitSha/comments",
   "author": {
     "login": "sqren",
     "id": 209966,
@@ -100,11 +98,11 @@
       "deletions": 1,
       "changes": 2,
       "blob_url":
-        "https://github.com/elastic/kibana/blob/f3430595978a6123c65f7501e61386de62b80b6e/src/ui/public/chrome/chrome.js",
+        "https://github.com/elastic/kibana/blob/myCommitSha/src/ui/public/chrome/chrome.js",
       "raw_url":
-        "https://github.com/elastic/kibana/raw/f3430595978a6123c65f7501e61386de62b80b6e/src/ui/public/chrome/chrome.js",
+        "https://github.com/elastic/kibana/raw/myCommitSha/src/ui/public/chrome/chrome.js",
       "contents_url":
-        "https://api.github.com/repos/elastic/kibana/contents/src/ui/public/chrome/chrome.js?ref=f3430595978a6123c65f7501e61386de62b80b6e",
+        "https://api.github.com/repos/elastic/kibana/contents/src/ui/public/chrome/chrome.js?ref=myCommitSha",
       "patch":
         "@@ -48,5 +48,5 @@ translationsApi(chrome, internals);\n \n chrome.bootstrap = function () {\n   chrome.setupAngular();\n-  angular.bootstrap(document, ['kibana']);\n+  angular.bootstrap(document.body, ['kibana']);\n };"
     }

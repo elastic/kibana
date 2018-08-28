@@ -63,3 +63,29 @@ Follow the steps. You can use the `arrow keys` to choose options, `<space>` to s
 
 - [Getting started guide](https://github.com/sqren/backport/blob/master/docs/getting-started.md)
 - [Configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md)
+
+## Contributing
+
+**Run from source**
+
+```
+npx ts-node ./src/cli/index.ts --branch 6.1 --upstream sqren/backport-demo --all
+```
+
+**Run from build**
+
+```
+node dist/cli/index.js --branch 6.1 --upstream sqren/backport-demo --all
+```
+
+**Compile typecscript**
+
+```
+yarn build
+```
+
+**Test**
+
+```
+yarn test
+```

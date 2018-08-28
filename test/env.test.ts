@@ -1,9 +1,9 @@
-const {
+import {
   getGlobalConfigPath,
   getReposPath,
   getRepoOwnerPath,
   getRepoPath
-} = require('../src/lib/env');
+} from '../src/lib/env';
 
 describe('env.js', () => {
   test('getGlobalConfigPath', () => {

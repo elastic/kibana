@@ -1,0 +1,13 @@
+{
+  "include": ["../src/types/*", "./**/*"],
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["es2017"],
+    "module": "commonjs",
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true
+  }
+}

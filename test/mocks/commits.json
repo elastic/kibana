@@ -1,6 +1,6 @@
 [
   {
-    "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
+    "sha": "commitSha",
     "commit": {
       "author": {
         "name": "Søren Louv-Jansen",
@@ -19,15 +19,13 @@
           "https://api.github.com/repos/elastic/kibana/git/trees/10e994c1ad6c33e6fd1cdb3f51f03fe0217f9232"
       },
       "url":
-        "https://api.github.com/repos/elastic/kibana/git/commits/7939a98aadb94ead30b54bea7974cd02dc816b02",
+        "https://api.github.com/repos/elastic/kibana/git/commits/commitSha",
       "comment_count": 0
     },
-    "url":
-      "https://api.github.com/repos/elastic/kibana/commits/7939a98aadb94ead30b54bea7974cd02dc816b02",
-    "html_url":
-      "https://github.com/elastic/kibana/commit/7939a98aadb94ead30b54bea7974cd02dc816b02",
+    "url": "https://api.github.com/repos/elastic/kibana/commits/commitSha",
+    "html_url": "https://github.com/elastic/kibana/commit/commitSha",
     "comments_url":
-      "https://api.github.com/repos/elastic/kibana/commits/7939a98aadb94ead30b54bea7974cd02dc816b02/comments",
+      "https://api.github.com/repos/elastic/kibana/commits/commitSha/comments",
     "author": {
       "login": "sqren",
       "id": 209966,
@@ -84,7 +82,7 @@
     ]
   },
   {
-    "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+    "sha": "commitSha2",
     "commit": {
       "author": {
         "name": "Søren Louv-Jansen",
@@ -103,15 +101,13 @@
           "https://api.github.com/repos/elastic/kibana/git/trees/c1e9567c8172535ee7bb7b4db4de241921615f18"
       },
       "url":
-        "https://api.github.com/repos/elastic/kibana/git/commits/52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+        "https://api.github.com/repos/elastic/kibana/git/commits/commitSha2",
       "comment_count": 0
     },
-    "url":
-      "https://api.github.com/repos/elastic/kibana/commits/52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
-    "html_url":
-      "https://github.com/elastic/kibana/commit/52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+    "url": "https://api.github.com/repos/elastic/kibana/commits/commitSha2",
+    "html_url": "https://github.com/elastic/kibana/commit/commitSha2",
     "comments_url":
-      "https://api.github.com/repos/elastic/kibana/commits/52552a93efa5b4038ea57d9cb3d158ba6a1ff71d/comments",
+      "https://api.github.com/repos/elastic/kibana/commits/commitSha2/comments",
     "author": {
       "login": "sqren",
       "id": 209966,
@@ -168,7 +164,7 @@
     ]
   },
   {
-    "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
+    "sha": "commitSha3",
     "commit": {
       "author": {
         "name": "Søren Louv-Jansen",
@@ -187,15 +183,13 @@
           "https://api.github.com/repos/elastic/kibana/git/trees/cc828e040f43b4dd549c1d0bfc0cfde9cac908b8"
       },
       "url":
-        "https://api.github.com/repos/elastic/kibana/git/commits/8cfbb82cfb50aa962410a9682d96335a252d751a",
+        "https://api.github.com/repos/elastic/kibana/git/commits/commitSha3",
       "comment_count": 0
     },
-    "url":
-      "https://api.github.com/repos/elastic/kibana/commits/8cfbb82cfb50aa962410a9682d96335a252d751a",
-    "html_url":
-      "https://github.com/elastic/kibana/commit/8cfbb82cfb50aa962410a9682d96335a252d751a",
+    "url": "https://api.github.com/repos/elastic/kibana/commits/commitSha3",
+    "html_url": "https://github.com/elastic/kibana/commit/commitSha3",
     "comments_url":
-      "https://api.github.com/repos/elastic/kibana/commits/8cfbb82cfb50aa962410a9682d96335a252d751a/comments",
+      "https://api.github.com/repos/elastic/kibana/commits/commitSha3/comments",
     "author": {
       "login": "sqren",
       "id": 209966,

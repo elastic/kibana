@@ -1,31 +1,49 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs');
-const flatten = require('lodash.flatten');
-const initSteps = require('./steps');
-const {
-  getCombinedConfig,
-  validateConfigWithCliArgs
-} = require('../lib/configs');
-const { ERROR_CODES } = require('../lib/errors');
-const logger = require('../lib/logger');
+import yargs from 'yargs';
+import flatten from 'lodash.flatten';
 
-async function initYargs() {
-  let config;
+import { initSteps } from './steps';
+import { getCombinedConfig, validateOptions } from '../lib/configs';
+import * as logger from '../lib/logger';
+import { CombinedConfig } from '../types/types';
+
+async function getConfig() {
   try {
-    config = await getCombinedConfig();
+    return await getCombinedConfig();
   } catch (e) {
-    switch (e.code) {
-      case ERROR_CODES.HANDLED_ERROR_ERROR_CODE:
+    switch (e.name) {
+      case 'HandledError':
         logger.error(e.message);
         break;
       default:
         logger.error(e);
     }
 
-    process.exit(1);
+    return process.exit(1);
   }
+}
 
+function getOptions(config: CombinedConfig, cliArgs: yargs.Arguments) {
+  try {
+    return validateOptions({
+      ...config,
+      branches: flattenBranches(cliArgs.branch),
+      sha: cliArgs.sha,
+      all: cliArgs.all,
+      multiple: cliArgs.multiple,
+      multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
+      multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
+      upstream: cliArgs.upstream
+    });
+  } catch (e) {
+    console.error(e.message);
+    return process.exit(1);
+  }
+}
+
+async function initYargs() {
+  const config = await getConfig();
   const cliArgs = yargs
     .usage('$0 [args]')
     .option('multiple', {
@@ -70,36 +88,17 @@ async function initYargs() {
     .version()
     .help().argv;
 
-  const configWithCliArgs = {
-    ...config,
-    multiple: cliArgs.multiple,
-    multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
-    multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
-    all: cliArgs.all,
-    upstream: cliArgs.upstream
-  };
-
-  const options = {
-    branches: flattenBranches(cliArgs.branch),
-    sha: cliArgs.sha
-  };
-
-  try {
-    validateConfigWithCliArgs(configWithCliArgs, options);
-  } catch (e) {
-    console.log(e.message);
-    process.exit(1);
-  }
+  const options = getOptions(config, cliArgs);
 
   if (cliArgs.showConfig) {
-    logger.log(JSON.stringify(configWithCliArgs, null, 4));
+    logger.log(JSON.stringify(options, null, 4));
     process.exit(0);
   }
 
-  return initSteps(configWithCliArgs, options);
+  return initSteps(options);
 }
 
-function flattenBranches(branches) {
+function flattenBranches(branches: string[]) {
   return flatten(branches.map(b => b.toString().split(','))).filter(b => !!b);
 }
 

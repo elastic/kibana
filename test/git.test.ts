@@ -1,11 +1,19 @@
-const { verifyGithubSshAuth } = require('../src/lib/git');
-const rpc = require('../src/lib/rpc');
+import { verifyGithubSshAuth } from '../src/lib/git';
+import * as rpc from '../src/lib/rpc';
+
+export class CustomError extends Error {
+  public code: number;
+  public stderr: string;
+  constructor(code: number, stderr: string) {
+    super();
+    this.code = code;
+    this.stderr = stderr;
+  }
+}
 
 describe('verifyGithubSshAuth', () => {
   it('github.com is not added to known_hosts file', () => {
-    const err = new Error();
-    err.code = 255;
-    err.stderr = 'Host key verification failed.\r\n';
+    const err = new CustomError(255, 'Host key verification failed.\r\n');
     jest.spyOn(rpc, 'exec').mockRejectedValue(err);
 
     return expect(verifyGithubSshAuth()).rejects.toThrow(
@@ -14,9 +22,11 @@ describe('verifyGithubSshAuth', () => {
   });
 
   it('ssh key rejected', async () => {
-    const err = new Error();
-    err.code = 255;
-    err.stderr = 'git@github.com: Permission denied (publickey).\r\n';
+    const err = new CustomError(
+      255,
+      'git@github.com: Permission denied (publickey).\r\n'
+    );
+
     jest.spyOn(rpc, 'exec').mockRejectedValue(err);
 
     return expect(verifyGithubSshAuth()).rejects.toThrowError(
@@ -25,10 +35,10 @@ describe('verifyGithubSshAuth', () => {
   });
 
   it('user is successfully authenticated', async () => {
-    const err = new Error();
-    err.code = 1;
-    err.stderr =
-      "Hi sqren! You've successfully authenticated, but GitHub does not provide shell access.\n";
+    const err = new CustomError(
+      1,
+      "Hi sqren! You've successfully authenticated, but GitHub does not provide shell access.\n"
+    );
     jest.spyOn(rpc, 'exec').mockRejectedValue(err);
 
     return expect(verifyGithubSshAuth()).resolves.toBe(true);

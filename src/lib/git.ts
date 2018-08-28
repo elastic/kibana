@@ -1,14 +1,12 @@
-const { exec } = require('child_process');
-const rimraf = require('rimraf');
+import childProcess from 'child_process';
+import rimraf from 'rimraf';
+import * as env from './env';
+import { mkdirp, stat, exec } from './rpc';
+import { HandledError } from './errors';
 
-const env = require('./env');
-const rpc = require('./rpc');
-const { HandledError } = require('./errors');
-
-async function folderExists(path) {
+async function folderExists(path: string): Promise<boolean> {
   try {
-    const stats = await rpc.stat(path);
-    return stats.isDirectory();
+    return (await stat(path)).isDirectory();
   } catch (e) {
     if (e.code === 'ENOENT') {
       return false;
@@ -18,31 +16,42 @@ async function folderExists(path) {
   }
 }
 
-function repoExists(owner, repoName) {
+export function repoExists(owner: string, repoName: string): Promise<boolean> {
   return folderExists(env.getRepoPath(owner, repoName));
 }
 
+type CloneProgessHandler = (progress: string) => void;
+
 // Clone repo and add remotes
-async function setupRepo(owner, repoName, username, callback) {
-  await rpc.mkdirp(env.getRepoOwnerPath(owner));
+export async function setupRepo(
+  owner: string,
+  repoName: string,
+  username: string,
+  callback: CloneProgessHandler
+) {
+  await mkdirp(env.getRepoOwnerPath(owner));
   await cloneRepo(owner, repoName, callback);
   return addRemote(owner, repoName, username);
 }
 
-function deleteRepo(owner, repoName) {
+export function deleteRepo(owner: string, repoName: string) {
   return new Promise(resolve => {
     const repoPath = env.getRepoPath(owner, repoName);
     rimraf(repoPath, resolve);
   });
 }
 
-function getRemoteUrl(owner, repoName) {
+function getRemoteUrl(owner: string, repoName: string) {
   return `git@github.com:${owner}/${repoName}`;
 }
 
-function cloneRepo(owner, repoName, callback) {
+function cloneRepo(
+  owner: string,
+  repoName: string,
+  callback: CloneProgessHandler
+) {
   return new Promise((resolve, reject) => {
-    const execProcess = exec(
+    const execProcess = childProcess.exec(
       `git clone ${getRemoteUrl(owner, repoName)} --progress`,
       { cwd: env.getRepoOwnerPath(owner), maxBuffer: 100 * 1024 * 1024 },
       error => {
@@ -55,16 +64,16 @@ function cloneRepo(owner, repoName, callback) {
 
     execProcess.stderr.on('data', data => {
       const regex = /^Receiving objects:\s+(\d+)%/;
-      const [, progress] = data.toString().match(regex) || [];
-      if (callback && progress) {
+      const [, progress]: RegExpMatchArray = data.toString().match(regex) || [];
+      if (progress) {
         callback(progress);
       }
     });
   });
 }
 
-function addRemote(owner, repoName, username) {
-  return rpc.exec(
+function addRemote(owner: string, repoName: string, username: string) {
+  return exec(
     `git remote add ${username} ${getRemoteUrl(username, repoName)}`,
     {
       cwd: env.getRepoPath(owner, repoName)
@@ -72,15 +81,15 @@ function addRemote(owner, repoName, username) {
   );
 }
 
-function cherrypick(owner, repoName, sha) {
-  return rpc.exec(`git cherry-pick ${sha}`, {
+export function cherrypick(owner: string, repoName: string, sha: string) {
+  return exec(`git cherry-pick ${sha}`, {
     cwd: env.getRepoPath(owner, repoName)
   });
 }
 
-async function isIndexDirty(owner, repoName) {
+export async function isIndexDirty(owner: string, repoName: string) {
   try {
-    await rpc.exec(`git diff-index --quiet HEAD --`, {
+    await exec(`git diff-index --quiet HEAD --`, {
       cwd: env.getRepoPath(owner, repoName)
     });
     return false;
@@ -89,14 +98,14 @@ async function isIndexDirty(owner, repoName) {
   }
 }
 
-async function createAndCheckoutBranch(
-  owner,
-  repoName,
-  baseBranch,
-  featureBranch
+export async function createAndCheckoutBranch(
+  owner: string,
+  repoName: string,
+  baseBranch: string,
+  featureBranch: string
 ) {
   try {
-    return await rpc.exec(
+    return await exec(
       `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
       {
         cwd: env.getRepoPath(owner, repoName)
@@ -115,14 +124,19 @@ async function createAndCheckoutBranch(
   }
 }
 
-function push(owner, repoName, username, branchName) {
-  return rpc.exec(`git push ${username} ${branchName}:${branchName} --force`, {
+export function push(
+  owner: string,
+  repoName: string,
+  username: string,
+  branchName: string
+) {
+  return exec(`git push ${username} ${branchName}:${branchName} --force`, {
     cwd: env.getRepoPath(owner, repoName)
   });
 }
 
-async function resetAndPullMaster(owner, repoName) {
-  return rpc.exec(
+export async function resetAndPullMaster(owner: string, repoName: string) {
+  return exec(
     `git reset --hard && git clean -d --force && git checkout master && git pull origin master`,
     {
       cwd: env.getRepoPath(owner, repoName)
@@ -130,9 +144,9 @@ async function resetAndPullMaster(owner, repoName) {
   );
 }
 
-async function verifyGithubSshAuth() {
+export async function verifyGithubSshAuth() {
   try {
-    await rpc.exec(`ssh -oBatchMode=yes -T git@github.com`);
+    await exec(`ssh -oBatchMode=yes -T git@github.com`);
     return true;
   } catch (e) {
     switch (e.code) {
@@ -156,16 +170,3 @@ async function verifyGithubSshAuth() {
     }
   }
 }
-
-module.exports = {
-  verifyGithubSshAuth,
-  cherrypick,
-  cloneRepo,
-  createAndCheckoutBranch,
-  isIndexDirty,
-  push,
-  repoExists,
-  resetAndPullMaster,
-  deleteRepo,
-  setupRepo
-};

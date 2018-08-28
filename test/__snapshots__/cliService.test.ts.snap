@@ -2,28 +2,8 @@
 
 exports[`doBackportVersion with pull request reference 1`] = `
 Object {
-  "adapter": [Function],
-  "data": "{\\"title\\":\\"[6.x] myCommitMessage | myOtherCommitMessage\\",\\"body\\":\\"Backports the following commits to 6.x:\\\\n - myCommitMessage (#myPullRequest)\\\\n - myOtherCommitMessage (#myOtherPullRequest)\\",\\"head\\":\\"sqren:backport/6.x/pr-myPullRequest_pr-myOtherPullRequest\\",\\"base\\":\\"6.x\\"}",
-  "headers": Object {
-    "Accept": "application/json, text/plain, */*",
-    "Content-Length": 269,
-    "Content-Type": "application/json;charset=utf-8",
-    "User-Agent": "axios/0.18.0",
-  },
-  "host": "http://localhost",
-  "maxContentLength": -1,
-  "method": "post",
-  "timeout": 0,
-  "transformRequest": Object {
-    "0": [Function],
-  },
-  "transformResponse": Object {
-    "0": [Function],
-  },
-  "url": "https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined",
-  "validateStatus": [Function],
-  "xsrfCookieName": "XSRF-TOKEN",
-  "xsrfHeaderName": "X-XSRF-TOKEN",
+  "html_url": "myHtmlUrl",
+  "number": 1337,
 }
 `;
 
@@ -38,7 +18,7 @@ Array [
     [Function],
   ],
   Array [
-    "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest_pr-myOtherPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest_pr-myOtherPullRequest ",
+    "git fetch origin 6.x && git branch backport/6.x/pr-1000_pr-2000 origin/6.x --force && git checkout backport/6.x/pr-1000_pr-2000 ",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -62,7 +42,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.x/pr-myPullRequest_pr-myOtherPullRequest:backport/6.x/pr-myPullRequest_pr-myOtherPullRequest --force",
+    "git push sqren backport/6.x/pr-1000_pr-2000:backport/6.x/pr-1000_pr-2000 --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -74,28 +54,8 @@ Array [
 
 exports[`doBackportVersion without pull request reference 1`] = `
 Object {
-  "adapter": [Function],
-  "data": "{\\"title\\":\\"[6.x] myCommitMessage\\",\\"body\\":\\"Backports the following commits to 6.x:\\\\n - myCommitMessage (mySha)\\",\\"head\\":\\"sqren:backport/6.x/commit-mySha\\",\\"base\\":\\"6.x\\"}",
-  "headers": Object {
-    "Accept": "application/json, text/plain, */*",
-    "Content-Length": 164,
-    "Content-Type": "application/json;charset=utf-8",
-    "User-Agent": "axios/0.18.0",
-  },
-  "host": "http://localhost",
-  "maxContentLength": -1,
-  "method": "post",
-  "timeout": 0,
-  "transformRequest": Object {
-    "0": [Function],
-  },
-  "transformResponse": Object {
-    "0": [Function],
-  },
-  "url": "https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined",
-  "validateStatus": [Function],
-  "xsrfCookieName": "XSRF-TOKEN",
-  "xsrfHeaderName": "X-XSRF-TOKEN",
+  "html_url": "myHtmlUrl",
+  "number": 1337,
 }
 `;
 
@@ -110,7 +70,7 @@ Array [
     [Function],
   ],
   Array [
-    "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest_pr-myOtherPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest_pr-myOtherPullRequest ",
+    "git fetch origin 6.x && git branch backport/6.x/pr-1000_pr-2000 origin/6.x --force && git checkout backport/6.x/pr-1000_pr-2000 ",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,
@@ -134,7 +94,7 @@ Array [
     [Function],
   ],
   Array [
-    "git push sqren backport/6.x/pr-myPullRequest_pr-myOtherPullRequest:backport/6.x/pr-myPullRequest_pr-myOtherPullRequest --force",
+    "git push sqren backport/6.x/pr-1000_pr-2000:backport/6.x/pr-1000_pr-2000 --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,

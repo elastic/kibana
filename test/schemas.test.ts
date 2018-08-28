@@ -1,5 +1,5 @@
-const Joi = require('joi');
-const schemas = require('../src/lib/schemas');
+import Joi from 'joi';
+import { projectConfig, globalConfig } from '../src/lib/schemas';
 
 describe('projectConfig', () => {
   it('should not be valid', () => {
@@ -9,7 +9,7 @@ describe('projectConfig', () => {
       { upstream: false },
       { upstream: 1337 }
     ].forEach(config => {
-      const { error } = Joi.validate(config, schemas.projectConfig);
+      const { error } = Joi.validate(config, projectConfig);
       expect(error).toEqual(expect.any(Error));
     });
   });
@@ -29,7 +29,7 @@ describe('projectConfig', () => {
         labels: ['test']
       }
     ].forEach(config => {
-      const { error } = Joi.validate(config, schemas.projectConfig);
+      const { error } = Joi.validate(config, projectConfig);
       expect(error).toBeNull();
     });
   });
@@ -39,7 +39,7 @@ describe('globalConfig', () => {
   it('should be valid if it contains username and accessToken', () => {
     const { error } = Joi.validate(
       { username: 'sqren', accessToken: 'myAccessToken' },
-      schemas.globalConfig
+      globalConfig
     );
 
     expect(error).toBeNull();
@@ -48,7 +48,7 @@ describe('globalConfig', () => {
   it('should be invalid if it does not contains username or accessToken', () => {
     const { error } = Joi.validate(
       { accessToken: 'myAccessToken' },
-      schemas.globalConfig
+      globalConfig
     );
 
     expect(error).toEqual(expect.any(Error));
@@ -66,7 +66,7 @@ describe('globalConfig', () => {
           }
         ]
       },
-      schemas.globalConfig
+      globalConfig
     );
 
     expect(error).toEqual(null);

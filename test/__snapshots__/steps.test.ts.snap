@@ -1,0 +1,241 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`run through steps exec should be called with correct args 1`] = `
+Array [
+  Array [
+    "ssh -oBatchMode=yes -T git@github.com",
+    Object {
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git clone git@github.com:elastic/kibana --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/kibana",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick commitSha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git push sqren backport/6.2/pr-myPullRequest:backport/6.2/pr-myPullRequest --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+]
+`;
+
+exports[`run through steps prompt calls should match snapshot 1`] = `
+Array [
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "1. Update readme: Make ui-framework url a link",
+            "short": "Update readme: Make ui-framework url a link",
+            "value": Object {
+              "message": "Update readme: Make ui-framework url a link",
+              "pullRequest": "PR for commitSha",
+              "sha": "commitSha",
+            },
+          },
+          Object {
+            "name": "2. Update react 15.6.1 (#13672)",
+            "short": "Update react 15.6.1 (#13672)",
+            "value": Object {
+              "message": "Update react 15.6.1 (#13672)",
+              "pullRequest": "PR for commitSha2",
+              "sha": "commitSha2",
+            },
+          },
+          Object {
+            "name": "3. Mock out static files when running in Jest (#13315)",
+            "short": "Mock out static files when running in Jest (#13315)",
+            "value": Object {
+              "message": "Mock out static files when running in Jest (#13315)",
+              "pullRequest": "PR for commitSha3",
+              "sha": "commitSha3",
+            },
+          },
+        ],
+        "message": "Select commit to backport",
+        "name": "promptResult",
+        "pageSize": 3,
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "6.x",
+          },
+          Object {
+            "name": "6.0",
+          },
+          Object {
+            "name": "5.6",
+          },
+          Object {
+            "name": "5.5",
+          },
+          Object {
+            "name": "5.4",
+          },
+        ],
+        "message": "Select branch to backport to",
+        "name": "promptResult",
+        "type": "list",
+      },
+    ],
+  ],
+]
+`;
+
+exports[`run through steps should make correct requests 1`] = `
+Object {
+  "delete": Array [],
+  "get": Array [
+    Object {
+      "data": undefined,
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+      },
+      "maxContentLength": -1,
+      "method": "get",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/repos/elastic/kibana/commits?access_token=myAccessToken&per_page=5&author=sqren",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    Object {
+      "data": undefined,
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+      },
+      "maxContentLength": -1,
+      "method": "get",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/search/issues?q=repo:elastic/kibana+commitSha+base:master&access_token=myAccessToken",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    Object {
+      "data": undefined,
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+      },
+      "maxContentLength": -1,
+      "method": "get",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/search/issues?q=repo:elastic/kibana+commitSha2+base:master&access_token=myAccessToken",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+    Object {
+      "data": undefined,
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+      },
+      "maxContentLength": -1,
+      "method": "get",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/search/issues?q=repo:elastic/kibana+commitSha3+base:master&access_token=myAccessToken",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "head": Array [],
+  "options": Array [],
+  "patch": Array [],
+  "post": Array [
+    Object {
+      "data": "{\\"title\\":\\"[6.2] myCommitMessage\\",\\"body\\":\\"Backports the following commits to 6.2:\\\\n - myCommitMessage (#myPullRequest)\\",\\"head\\":\\"sqren:backport/6.2/pr-myPullRequest\\",\\"base\\":\\"6.2\\"}",
+      "headers": Object {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      "maxContentLength": -1,
+      "method": "post",
+      "timeout": 0,
+      "transformRequest": Object {
+        "0": [Function],
+      },
+      "transformResponse": Object {
+        "0": [Function],
+      },
+      "url": "https://api.github.com/repos/elastic/kibana/pulls?access_token=myAccessToken",
+      "validateStatus": [Function],
+      "xsrfCookieName": "XSRF-TOKEN",
+      "xsrfHeaderName": "X-XSRF-TOKEN",
+    },
+  ],
+  "put": Array [],
+}
+`;

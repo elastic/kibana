@@ -1,0 +1,15 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended", "tslint:latest", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "ordered-imports": false,
+    "max-classes-per-file": false,
+    "object-literal-sort-keys": false,
+    "no-console": false,
+    "interface-name": [true, "never-prefix"],
+    "no-submodule-imports": false,
+    "no-implicit-dependencies": [true, "dev"]
+  },
+  "rulesDirectory": []
+}

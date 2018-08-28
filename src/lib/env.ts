@@ -1,29 +1,22 @@
-const path = require('path');
-const os = require('os');
+import path from 'path';
+import os from 'os';
 
-const getGlobalConfigPath = () => {
+export function getGlobalConfigPath() {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'config.json');
-};
+}
 
-const getReposPath = () => {
+export function getReposPath() {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'repositories');
-};
+}
 
-const getRepoOwnerPath = owner => {
+export function getRepoOwnerPath(owner: string) {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'repositories', owner);
-};
+}
 
-const getRepoPath = (owner, repoName) => {
+export function getRepoPath(owner: string, repoName: string) {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'repositories', owner, repoName);
-};
-
-module.exports = {
-  getGlobalConfigPath,
-  getReposPath,
-  getRepoOwnerPath,
-  getRepoPath
-};
+}

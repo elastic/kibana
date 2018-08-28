@@ -1,13 +1,27 @@
-const configs = require('../src/lib/configs');
-const rpc = require('../src/lib/rpc');
-const findUp = require('find-up');
+import {
+  getCombinedConfig,
+  getGlobalConfig,
+  getProjectConfig,
+  maybeCreateGlobalConfig
+} from '../src/lib/configs';
+import * as rpc from '../src/lib/rpc';
+import findUp from 'find-up';
+import {
+  validateProjectConfig,
+  validateGlobalConfig
+} from '../src/lib/schemas';
+import {
+  CombinedConfig,
+  ProjectConfig,
+  GlobalConfig
+} from '../src/types/types';
 
 describe('config.js', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('getProjectConfig', () => {
     describe('when projectConfig is valid', () => {
-      let projectConfig;
+      let projectConfig: ProjectConfig | null;
       beforeEach(async () => {
         jest
           .spyOn(rpc, 'readFile')
@@ -15,7 +29,7 @@ describe('config.js', () => {
             JSON.stringify({ upstream: 'elastic/kibana', branches: ['6.x'] })
           );
 
-        projectConfig = await configs.getProjectConfig();
+        projectConfig = await getProjectConfig();
       });
 
       it('should call findUp', () => {
@@ -24,8 +38,8 @@ describe('config.js', () => {
 
       it('should return config', () => {
         expect(projectConfig).toEqual({
-          upstream: 'elastic/kibana',
-          branches: ['6.x']
+          branchChoices: [{ checked: false, name: '6.x' }],
+          upstream: 'elastic/kibana'
         });
       });
     });
@@ -35,7 +49,7 @@ describe('config.js', () => {
         jest.spyOn(rpc, 'readFile').mockResolvedValueOnce('{}');
         expect.assertions(1);
 
-        return configs.getProjectConfig().catch(e => {
+        return getProjectConfig().catch(e => {
           expect(e.message).toContain(
             'The project config file (/path/to/project/config) is not valid'
           );
@@ -45,19 +59,19 @@ describe('config.js', () => {
 
     describe('when projectConfig is missing', () => {
       it('should return null', () => {
-        findUp.__setMockPath();
+        (findUp as any).__setMockPath();
         expect.assertions(1);
-        return expect(configs.getProjectConfig()).resolves.toBe(null);
+        return expect(getProjectConfig()).resolves.toBe(null);
       });
     });
   });
 
   describe('getGlobalConfig', () => {
-    let res;
+    let res: GlobalConfig;
     beforeEach(async () => {
-      jest.spyOn(rpc, 'chmod').mockResolvedValue();
-      jest.spyOn(rpc, 'mkdirp').mockResolvedValue();
-      jest.spyOn(rpc, 'writeFile').mockResolvedValue();
+      jest.spyOn(rpc, 'chmod').mockResolvedValue(null);
+      jest.spyOn(rpc, 'mkdirp').mockResolvedValue(null);
+      jest.spyOn(rpc, 'writeFile').mockResolvedValue(null);
       jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
       jest.spyOn(rpc, 'readFile').mockResolvedValue(
         JSON.stringify({
@@ -65,7 +79,7 @@ describe('config.js', () => {
           username: 'sqren'
         })
       );
-      res = await configs.getGlobalConfig();
+      res = await getGlobalConfig();
     });
 
     it("should create config if it doesn't exist", () => {
@@ -84,7 +98,7 @@ describe('config.js', () => {
 
     it('should load configTemplate', () => {
       expect(rpc.readFile).toHaveBeenCalledWith(
-        expect.stringContaining('/src/lib/configTemplate.json'),
+        expect.stringContaining('/templates/configTemplate.json'),
         'utf8'
       );
     });
@@ -106,8 +120,8 @@ describe('config.js', () => {
 
   describe('maybeCreateGlobalConfig', () => {
     it('should create config and succeed', async () => {
-      jest.spyOn(rpc, 'writeFile').mockResolvedValue();
-      await configs.maybeCreateGlobalConfig(
+      jest.spyOn(rpc, 'writeFile').mockResolvedValue(undefined);
+      await maybeCreateGlobalConfig(
         '/path/to/globalConfig',
         'myConfigTemplate'
       );
@@ -119,20 +133,22 @@ describe('config.js', () => {
       );
     });
 
-    it('should not fail if config already exists', () => {
+    it('should not fail if config already exists', async () => {
       const err = new Error();
-      err.code = 'EEXIST';
+      (err as any).code = 'EEXIST';
       jest.spyOn(rpc, 'writeFile').mockRejectedValueOnce(err);
 
-      return configs.maybeCreateGlobalConfig();
+      expect(
+        await maybeCreateGlobalConfig('myPath', 'myConfigTemplate')
+      ).toEqual(undefined);
     });
   });
 
   describe('getCombinedConfig', () => {
-    let res;
+    let res: CombinedConfig;
 
     beforeEach(async () => {
-      jest.spyOn(rpc, 'readFile').mockImplementation(filepath => {
+      jest.spyOn(rpc, 'readFile').mockImplementation((filepath: string) => {
         if (filepath.includes('/configTemplate.json')) {
           return 'myConfigTemplate';
         } else if (filepath === '/path/to/project/config') {
@@ -147,14 +163,18 @@ describe('config.js', () => {
           });
         }
       });
-      res = await configs.getCombinedConfig();
+      res = await getCombinedConfig();
     });
 
     it('should return correct config', () => {
       expect(res).toEqual({
         accessToken: 'myAccessToken',
         all: false,
-        branches: ['6.x', '6.1'],
+        branchChoices: [
+          { checked: false, name: '6.x' },
+          { checked: false, name: '6.1' }
+        ],
+        labels: [],
         multiple: false,
         multipleBranches: true,
         multipleCommits: false,
@@ -167,18 +187,15 @@ describe('config.js', () => {
   describe('validateProjectConfig', () => {
     it('should fail if config is invalid', () => {
       expect(() =>
-        configs.validateProjectConfig(
-          { upstream: 1337 },
-          '/path/to/.backportrc.json'
-        )
+        validateProjectConfig({ upstream: 1337 }, '/path/to/.backportrc.json')
       ).toThrowErrorMatchingSnapshot();
     });
 
     it('should return valid config', () => {
       const config = { upstream: 'elastic/kibana', branches: ['6.1', '6.x'] };
-      expect(
-        configs.validateProjectConfig(config, '/path/to/.backportrc.json')
-      ).toBe(config);
+      expect(validateProjectConfig(config, '/path/to/.backportrc.json')).toBe(
+        config
+      );
     });
   });
 
@@ -189,8 +206,10 @@ describe('config.js', () => {
 
     it('should fail if config is invalid', () => {
       expect(() =>
-        configs.validateGlobalConfig(
-          { username: 1337 },
+        validateGlobalConfig(
+          ({
+            username: 1337
+          } as any) as GlobalConfig,
           '/path/to/.backport/config.json'
         )
       ).toThrowErrorMatchingSnapshot();
@@ -199,7 +218,7 @@ describe('config.js', () => {
     it('should return valid config', () => {
       const config = { username: 'sqren', accessToken: 'myAccessToken' };
       expect(
-        configs.validateGlobalConfig(config, '/path/to/.backport/config.json')
+        validateGlobalConfig(config, '/path/to/.backport/config.json')
       ).toBe(config);
     });
   });
