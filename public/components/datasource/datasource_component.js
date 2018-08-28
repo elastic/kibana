@@ -93,6 +93,14 @@ export class DatasourceComponent extends PureComponent {
       return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
     }
 
+    const datasourcePreview = previewing ? (
+      <DatasourcePreview
+        show={previewing}
+        done={() => setPreviewing(false)}
+        function={this.getDatasourceFunctionNode(stateDatasource.name, stateArgs)}
+      />
+    ) : null;
+
     return (
       <Fragment>
         <EuiPanel>
@@ -134,11 +142,7 @@ export class DatasourceComponent extends PureComponent {
           </EuiFlexGroup>
         </EuiPanel>
 
-        <DatasourcePreview
-          show={previewing}
-          done={() => setPreviewing(false)}
-          function={this.getDatasourceFunctionNode(stateDatasource.name, stateArgs)}
-        />
+        {datasourcePreview}
       </Fragment>
     );
   }

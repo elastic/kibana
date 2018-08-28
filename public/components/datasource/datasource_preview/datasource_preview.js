@@ -8,33 +8,49 @@ import {
   EuiModalHeaderTitle,
   EuiPanel,
   EuiText,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { Datatable } from '../../datatable';
+import { Error } from '../../error';
 
-export const DatasourcePreview = ({ show, done, datatable }) =>
-  show ? (
-    <EuiOverlayMask>
-      <EuiModal onClose={done}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>Datasource Preview</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody className="canvasDatasourcePreview">
-          <EuiText size="s" color="subdued">
-            <p>
-              Shown below are the first 10 rows of your datasource. Click <strong>Save</strong> in
-              the sidebar to use this data.
-            </p>
-          </EuiText>
+export const DatasourcePreview = ({ done, datatable }) => (
+  <EuiOverlayMask>
+    <EuiModal onClose={done}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Datasource Preview</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody className="canvasDatasourcePreview">
+        <EuiText size="s" color="subdued">
+          <p>
+            Click <strong>Save</strong> in the sidebar to use this data.
+          </p>
+        </EuiText>
+        {datatable.type === 'error' ? (
+          <Error payload={datatable} />
+        ) : (
           <EuiPanel className="canvasDatasourcePreview__panel">
-            <Datatable datatable={datatable} showHeader />
+            {datatable.rows.length > 0 ? (
+              <Datatable datatable={datatable} showHeader paginate />
+            ) : (
+              <EuiEmptyPrompt
+                title={<h2>No documents found</h2>}
+                titleSize="s"
+                body={
+                  <p>
+                    We couldn't find any documents matching your search criteria.<br /> Check your
+                    datasource settings and try again.
+                  </p>
+                }
+              />
+            )}
           </EuiPanel>
-        </EuiModalBody>
-      </EuiModal>
-    </EuiOverlayMask>
-  ) : null;
+        )}
+      </EuiModalBody>
+    </EuiModal>
+  </EuiOverlayMask>
+);
 
 DatasourcePreview.propTypes = {
-  show: PropTypes.bool.isRequired,
   datatable: PropTypes.object,
   done: PropTypes.func,
 };
