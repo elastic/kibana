@@ -12,7 +12,7 @@ import { Layout } from './layout';
 type EvalArgs = any[];
 
 interface EvaluateOptions {
-  // Fn is a function in string form to avoid tslint from auto formatting it into a version not
+  // 'fn' is a function in string form to avoid tslint from auto formatting it into a version not
   // underfood by transform_fn safeWrap.
   fn: ((evalArgs: EvalArgs) => any) | string;
   args: EvalArgs; // Arguments to be passed into the function defined by fn.
@@ -22,8 +22,6 @@ interface BrowserClient {
   evaluate: (evaluateOptions: EvaluateOptions) => void;
 }
 
-const groupCount: number = 2;
-
 export class PrintLayout extends Layout {
   public selectors = {
     screenshot: '[data-shared-item]',
@@ -32,6 +30,8 @@ export class PrintLayout extends Layout {
     timefilterFromAttribute: 'data-shared-timefilter-from',
     timefilterToAttribute: 'data-shared-timefilter-to',
   };
+
+  public readonly groupCount = 2;
 
   private captureConfig: CaptureConfig;
 

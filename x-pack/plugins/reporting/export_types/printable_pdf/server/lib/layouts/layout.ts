@@ -31,7 +31,7 @@ export abstract class Layout {
 
   public abstract getPdfPageOrientation(): string | undefined;
 
-  public abstract getPdfPageSize(pageSizeParamsIn: PageSizeParams): string | Size;
+  public abstract getPdfPageSize(pageSizeParams: PageSizeParams): string | Size;
 
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight;
 

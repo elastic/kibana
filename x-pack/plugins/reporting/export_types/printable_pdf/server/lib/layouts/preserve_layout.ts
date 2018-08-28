@@ -10,7 +10,7 @@ import { Layout, PageSizeParams } from './layout';
 const ZOOM: number = 2;
 
 export class PreserveLayout extends Layout {
-  public selectors = {
+  public readonly selectors = {
     screenshot: '[data-shared-items-container]',
     renderComplete: '[data-shared-item]',
     itemsCountAttribute: 'data-shared-items-count',
@@ -66,16 +66,16 @@ export class PreserveLayout extends Layout {
     return undefined;
   }
 
-  public getPdfPageSize(pagesizeparams: PageSizeParams) {
+  public getPdfPageSize(pageSizeParams: PageSizeParams) {
     return {
       height:
         this.height +
-        pagesizeparams.pageMarginTop +
-        pagesizeparams.pageMarginBottom +
-        pagesizeparams.tableBorderWidth * 2 +
-        pagesizeparams.headingHeight +
-        pagesizeparams.subheadingHeight,
-      width: this.width + pagesizeparams.pageMarginWidth * 2 + pagesizeparams.tableBorderWidth * 2,
+        pageSizeParams.pageMarginTop +
+        pageSizeParams.pageMarginBottom +
+        pageSizeParams.tableBorderWidth * 2 +
+        pageSizeParams.headingHeight +
+        pageSizeParams.subheadingHeight,
+      width: this.width + pageSizeParams.pageMarginWidth * 2 + pageSizeParams.tableBorderWidth * 2,
     };
   }
 }

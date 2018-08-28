@@ -6,12 +6,12 @@
 import { Size } from '../../../../../types';
 
 export interface CaptureConfig {
-    zoom: number;
-    viewport: Size;
+  zoom: number;
+  viewport: Size;
   }
   
 export interface ViewZoomWidthHeight {
-    zoom: number;
-    width: number;
-    height: number;
-  }
+  zoom: number;
+  width: number;
+  height: number;
+}

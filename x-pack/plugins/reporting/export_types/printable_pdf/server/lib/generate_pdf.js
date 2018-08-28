@@ -11,7 +11,7 @@ import { pdf } from './pdf';
 import { groupBy } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from './screenshots';
-import { createlayout } from './layouts/layout_factory';
+import { createLayout } from './layouts/layout_factory';
 
 const getTimeRange = (urlScreenshots) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
@@ -68,7 +68,7 @@ function generatePdfObservableFn(server) {
 
   return function generatePdfObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
 
-    const layout = createlayout(server, layoutParams);
+    const layout = createLayout(server, layoutParams);
 
     const screenshots$ = urlScreenshotsObservable(urls, headers, layout);
 
