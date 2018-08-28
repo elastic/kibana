@@ -67,10 +67,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       return role.then(res => res.toJSON());
     },
-    kibanaApplicationPrivilege(ApplicationPrivileges, kbnUrl, Promise, Private) {
-      return ApplicationPrivileges.query().$promise
-        .catch(checkLicenseError(kbnUrl, Promise, Private));
-    },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
       return ShieldUser.query().$promise
@@ -92,7 +88,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     const Notifier = $injector.get('Notifier');
 
-    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
@@ -124,6 +119,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       indexPatterns,
       spaces,
     } = $route.current.locals;
+
+    // todo: don't hard-code this...
+    const kibanaApplicationPrivilege = [{ name: 'all' }, { name: 'read' } ];
 
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('editRoleReactRoot');
