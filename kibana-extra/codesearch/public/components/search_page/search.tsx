@@ -88,8 +88,8 @@ class SearchPage extends React.PureComponent<Props, State> {
           };
           return range;
         });
-        const repoLinkUrl = `/${item.uri}/tree/HEAD/`;
-        const fileLinkUrl = `/${item.uri}/blob/HEAD/${item.filePath}`;
+        const repoLinkUrl = `/${item.uri}/tree/master/`;
+        const fileLinkUrl = `/${item.uri}/blob/master/${item.filePath}`;
         return (
           <div key={`resultitem${index}`}>
             <p>

@@ -36,9 +36,9 @@ export class WorkspaceHandler {
   public async openWorkspace(repositoryUri: string, revision: string) {
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
-    if (revision !== 'head') {
+    if (revision !== 'master') {
       await this.checkCommit(bareRepo, targetCommit);
-      revision = 'head';
+      revision = 'master';
     }
     let workspaceRepo: Repository;
     if (this.workspaceExists(repositoryUri, revision)) {
@@ -46,8 +46,9 @@ export class WorkspaceHandler {
     } else {
       workspaceRepo = await this.cloneWorkspace(bareRepo, repositoryUri, revision);
     }
-    const headCommit = await workspaceRepo.getHeadCommit();
-    if (headCommit.sha() !== targetCommit.sha()) {
+
+    const workspaceHeadCommit = await workspaceRepo.getHeadCommit();
+    if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
       const commit = await workspaceRepo.getCommit(targetCommit.sha());
       this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
       const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
@@ -55,8 +56,8 @@ export class WorkspaceHandler {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
       }
     }
-    this.setWorkspaceRevision(workspaceRepo, headCommit);
-    return { workspaceRepo, workspaceRevision: headCommit.sha().substring(0, 7) };
+    this.setWorkspaceRevision(workspaceRepo, workspaceHeadCommit);
+    return { workspaceRepo, workspaceRevision: workspaceHeadCommit.sha().substring(0, 7) };
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
@@ -221,10 +222,10 @@ export class WorkspaceHandler {
   }
 
   private async checkCommit(repository: Repository, commit: Commit) {
-    // we only support HEAD now.
-    const head = await repository.getHeadCommit();
-    if (head.sha() !== commit.sha()) {
-      throw Boom.badRequest(`revision must be HEAD.`);
+    // we only support master now.
+    const master = await repository.getMasterCommit();
+    if (master.sha() !== commit.sha()) {
+      throw Boom.badRequest(`revision must be master.`);
     }
   }
 

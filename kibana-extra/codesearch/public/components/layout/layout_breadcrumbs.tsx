@@ -28,7 +28,7 @@ export class LayoutBreadcrumbs extends React.PureComponent<Props> {
       },
       {
         text: repo,
-        href: `#${resource}/${org}/${repo}/tree/HEAD`,
+        href: `#${resource}/${org}/${repo}/tree/master`,
       },
       {
         text: <VersionDropDown head={revision} repoUri={repoUri} path={path} pathType={pathType} />,

@@ -90,7 +90,7 @@ export class MonacoHelper {
     file: string,
     text: string,
     lang: string,
-    revision: string = 'HEAD'
+    revision: string = 'master'
   ) {
     if (!this.initialized) {
       await this.init();

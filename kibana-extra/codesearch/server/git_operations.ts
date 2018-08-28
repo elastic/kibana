@@ -52,7 +52,7 @@ export class GitOperations {
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
   }
-  public async fileContent(uri: RepositoryUri, path: string, revision: string = 'HEAD') {
+  public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
     const entry: TreeEntry = await checkExists(
