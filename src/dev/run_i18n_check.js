@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import { run } from './run';
 import { extractDefaultTranslations } from './i18n/extract_default_translations';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
-  try {
-    await extractDefaultTranslations({
-      paths: Array.isArray(path) ? path : [path || './'],
-      output,
-      outputFormat,
-    });
-  } catch (e) {
-    console.error(`${chalk.white.bgRed(' I18N ERROR ')} ${e.message || e}`);
-    process.exit(1);
-  }
+  await extractDefaultTranslations({
+    paths: Array.isArray(path) ? path : [path || './'],
+    output,
+    outputFormat,
+  });
 });
