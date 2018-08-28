@@ -5,26 +5,12 @@ import { argTypeRegistry } from './arg_type';
 
 export class Arg {
   constructor(props) {
-    const propNames = [
-      'name',
-      'displayName',
-      'help',
-      'multi',
-      'required',
-      'types',
-      'default',
-      'resolve',
-      'options',
-    ];
-
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
     if (!props.name) throw new Error('Args must have a name property');
 
-    // properties that can be passed in
+    // properties that can be overridden
     const defaultProps = {
-      displayName: props.name,
-      help: argType.help,
       multi: false,
       required: false,
       types: [],
@@ -33,9 +19,22 @@ export class Arg {
       resolve: () => ({}),
     };
 
-    Object.assign(this, defaultProps, pick(props, propNames), {
+    const viewOverrides = {
       argType,
-    });
+      ...pick(props, [
+        'name',
+        'displayName',
+        'help',
+        'multi',
+        'required',
+        'types',
+        'default',
+        'resolve',
+        'options',
+      ]),
+    };
+
+    Object.assign(this, defaultProps, argType, viewOverrides);
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?

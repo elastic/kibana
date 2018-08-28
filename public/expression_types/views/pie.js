@@ -9,7 +9,6 @@ export const pie = () => ({
   args: [
     {
       name: 'palette',
-      displayName: 'Color palette',
       argType: 'palette',
     },
     {
@@ -60,16 +59,12 @@ export const pie = () => ({
     },
     {
       name: 'seriesStyle',
-      displayName: 'Series Style',
-      help: 'Set the color of a specific slice, expand to select series',
       argType: 'seriesStyle',
       default: '{seriesStyle}',
       multi: true,
     },
     {
       name: 'font',
-      displayName: 'Text settings',
-      help: 'Fonts, alignment and color',
       argType: 'font',
     },
     {

@@ -31,7 +31,7 @@ EnhancedExtendedTemplate.propTypes = {
 export const seriesStyle = () => ({
   name: 'seriesStyle',
   displayName: 'Series Style',
-  help: 'Set the style for a selected named series',
+  help: 'Set color, select line sizes, and more. Expand to select the series you want to style',
   template: templateFromReactComponent(EnhancedExtendedTemplate),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
 });

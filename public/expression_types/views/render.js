@@ -7,10 +7,7 @@ export const render = () => ({
   args: [
     {
       name: 'containerStyle',
-      displayName: 'Container',
-      help: 'Tweak the appearance of the element container',
       argType: 'containerStyle',
-      default: '{containerStyle}',
     },
     {
       name: 'css',

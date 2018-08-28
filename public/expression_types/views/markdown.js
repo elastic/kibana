@@ -18,8 +18,6 @@ export const markdown = () => ({
     },
     {
       name: 'font',
-      displayName: 'Text settings',
-      help: 'Fonts, alignment and color',
       argType: 'font',
     },
   ],

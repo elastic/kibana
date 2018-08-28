@@ -11,7 +11,6 @@ export const plot = () => ({
   args: [
     {
       name: 'palette',
-      displayName: 'Color palette',
       argType: 'palette',
     },
     {
@@ -40,8 +39,6 @@ export const plot = () => ({
     },
     {
       name: 'font',
-      displayName: 'Text settings',
-      help: 'Fonts, alignment and color',
       argType: 'font',
     },
     {
@@ -56,8 +53,6 @@ export const plot = () => ({
     },
     {
       name: 'seriesStyle',
-      displayName: 'Series style',
-      help: 'Set color, select line sizes, and more. Expand to select the series you want to style',
       argType: 'seriesStyle',
       default: '{seriesStyle points=5}',
       options: {
