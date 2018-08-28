@@ -54,17 +54,12 @@ export default function ({ getService, getPageObjects }) {
 
     it('should install logs sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('logs');
-      await retry.try(async () => {
-        const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulInstallToastExist();
-        expect(successToastExists).to.be(true);
-      });
-
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
       expect(isInstalled).to.be(true);
     });
 
     describe('dashboard', () => {
-      after(async () => {
+      afterEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -107,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
         expect(tsvb).to.be(true);
       });
 
-      it.skip('should launch sample logs data set dashboard', async ()=> {
+      it('should launch sample logs data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const today = new Date();
@@ -130,12 +125,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should uninstall logs sample data set', async ()=> {
-        await PageObjects.home.removeSampleDataSet('logs');
-        await retry.try(async () => {
-          const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulUninstallToastExist();
-          expect(successToastExists).to.be(true);
-        });
-
+        await PageObjects.home.removeSampleDataSet('flights');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
         expect(isInstalled).to.be(false);
       });
