@@ -77,7 +77,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           <EuiCallOut
             color="primary"
             iconType="iInCircle"
-            title={"Lowest possible privilege is 'read'"}
+            title={"The minimal possible privilege is 'read'."}
           />
         );
       }

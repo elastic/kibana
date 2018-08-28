@@ -81,23 +81,23 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
     const description = (
       <p>
-        Specifies the lowest permission level for all spaces, unless a custom privilege is
-        specified.
+        Control the actions users can perform in your spaces. Individual space privileges override
+        this setting.
       </p>
     );
 
     let helptext;
     if (basePrivilege === NO_PRIVILEGE_VALUE) {
-      helptext = 'No access';
+      helptext = 'No access to spaces';
     } else if (basePrivilege === 'all') {
-      helptext = 'View, edit, and share all objects and apps within all spaces';
+      helptext = 'View, edit, and share objects and apps';
     } else if (basePrivilege === 'read') {
-      helptext = 'View only mode';
+      helptext = 'View objects and apps';
     }
 
     return (
       <Fragment>
-        <EuiDescribedFormGroup title={<h3>Minimum privilege</h3>} description={description}>
+        <EuiDescribedFormGroup title={<h3>All space privileges</h3>} description={description}>
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
             <PrivilegeSelector
               data-test-subj={'kibanaMinimumPrivilege'}
@@ -149,15 +149,8 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
             Customize permission levels per space. If a space is not customized, its permissions
             will default to the minimum privilege specified above.
           </p>
-          {basePrivilege !== 'all' &&
-            this.props.editable && (
-              <p>
-                You can bulk-create space privileges though they will be saved individually upon
-                saving the role.
-              </p>
-            )}
         </EuiText>
-
+        <EuiSpacer size={'s'} />
         {(basePrivilege !== NO_PRIVILEGE_VALUE || isReservedRole(this.props.role)) && (
           <PrivilegeCalloutWarning
             basePrivilege={basePrivilege}

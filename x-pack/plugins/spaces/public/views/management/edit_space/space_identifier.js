@@ -29,11 +29,15 @@ export class SpaceIdentifier extends Component {
         <EuiFormRow
           label={this.getLabel()}
           helpText={this.getHelpText()}
-          {...this.props.validator.validateSpaceIdentifier(this.props.space)}
+          {...this.props.validator.validateURLIdentifier(this.props.space)}
         >
           <EuiFieldText
             readOnly={!this.state.editing}
-            placeholder={this.state.editing || !this.props.editable ? null : 'give your space a name to see its identifier'}
+            placeholder={
+              this.state.editing || !this.props.editable
+                ? null
+                : 'The URL Identifier is automatically generated from the space name'
+            }
             value={id}
             onChange={this.onChange}
             inputRef={(ref) => this.textFieldRef = ref}
@@ -45,15 +49,15 @@ export class SpaceIdentifier extends Component {
 
   getLabel = () => {
     if (!this.props.editable) {
-      return (<p>Space Identifier</p>);
+      return (<p>URL Identifier</p>);
     }
 
     const editLinkText = this.state.editing ? `[stop editing]` : `[edit]`;
-    return (<p>Space Identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
+    return (<p>URL Identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
   };
 
   getHelpText = () => {
-    return (<p>Links within Kibana will include this space identifier</p>);
+    return (<p>The identifier becomes part of the Kibana URL when you are inside this space.</p>);
   };
 
   onEditClick = () => {

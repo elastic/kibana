@@ -10,7 +10,7 @@ exports[`<ImpactedSpacesFlyout> renders without crashing 1`] = `
       onClick={[Function]}
       type="button"
     >
-      See summary of all spaces privileges
+      View summary of spaces privileges
     </EuiLink>
   </div>
 </React.Fragment>

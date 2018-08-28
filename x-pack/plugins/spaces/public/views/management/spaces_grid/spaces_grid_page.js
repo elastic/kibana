@@ -54,7 +54,11 @@ export class SpacesGridPage extends Component {
               onSelectionChange: this.onSelectionChange
             }}
             pagination={true}
-            search={true}
+            search={{
+              box: {
+                placeholder: 'Search'
+              }
+            }}
             loading={this.state.loading}
             message={this.state.loading ? "loading..." : undefined}
           />
@@ -76,7 +80,7 @@ export class SpacesGridPage extends Component {
     }
 
     return (
-      <EuiButton fill onClick={() => { window.location.hash = `#/management/spaces/create`; }}>Create new space</EuiButton>
+      <EuiButton fill onClick={() => { window.location.hash = `#/management/spaces/create`; }}>Create space</EuiButton>
     );
   }
 

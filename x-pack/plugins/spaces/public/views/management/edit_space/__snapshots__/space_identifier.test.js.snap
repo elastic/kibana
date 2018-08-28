@@ -8,13 +8,13 @@ exports[`renders without crashing 1`] = `
     hasEmptyLabelSpace={false}
     helpText={
       <p>
-        Links within Kibana will include this space identifier
+        The identifier becomes part of the Kibana URL when you are inside this space.
       </p>
     }
     isInvalid={false}
     label={
       <p>
-        Space Identifier 
+        URL Identifier 
         <EuiLink
           color="primary"
           onClick={[Function]}
@@ -31,7 +31,7 @@ exports[`renders without crashing 1`] = `
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}
-      placeholder="give your space a name to see its identifier"
+      placeholder="The URL Identifier is automatically generated from the space name"
       readOnly={true}
       value=""
     />

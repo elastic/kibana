@@ -75,7 +75,7 @@ exports[`it renders without crashing 1`] = `
             className="euiText euiText--extraSmall"
           >
             <p>
-              You can change your space at anytime from within Kibana.
+              You can change your space at anytime.
             </p>
           </div>
         </div>

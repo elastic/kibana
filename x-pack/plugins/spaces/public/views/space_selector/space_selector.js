@@ -91,7 +91,7 @@ export class SpaceSelector extends Component {
               {this.getSearchField()}
 
               <EuiFlexItem>
-                <EuiText size="xs"><p>You can change your space at anytime from within Kibana.</p></EuiText>
+                <EuiText size="xs"><p>You can change your space at anytime.</p></EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
 
