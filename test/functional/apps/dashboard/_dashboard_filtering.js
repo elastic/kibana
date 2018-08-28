@@ -266,6 +266,21 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(1);
       });
 
+      it('Removing filter pills and query unfiters data as expected', async () => {
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        await queryBar.setQuery('');
+        await filterBar.removeFilter('grr');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboardExpect.pieSliceCount(5);
+
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.header.clickDashboard();
+
+        await dashboardExpect.pieSliceCount(5);
+      });
+
       it('Pie chart linked to saved search filters data', async () => {
         await dashboardAddPanel.addVisualization('Filter Test: animals: linked to search with filter');
         await dashboardExpect.pieSliceCount(3);
