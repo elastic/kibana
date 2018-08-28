@@ -1,14 +1,19 @@
 .sideNavTree {
   padding: 1rem 0 1rem 1rem;
+  height: 100%;
+}
+
+%fileNode {
+  padding: 4px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .fileNode {
-  padding: 0.25rem;
-  cursor: pointer;
+  @extend %fileNode;
 }
 
 .activeFileNode {
-  padding: 0.25rem;
-  cursor: pointer;
+  @extend %fileNode;
   background: #0079a5;
 }
