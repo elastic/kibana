@@ -50,6 +50,7 @@ class FieldSelect extends Component<
 
   public handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
+
     this.props.setValue(value);
     if (this.props.onChange) {
       this.props.onChange(e, e.currentTarget.value);
@@ -98,7 +99,7 @@ class FieldSelect extends Component<
         <EuiSelect
           id={id}
           name={name}
-          value={getValue}
+          value={getValue() || ''}
           options={options}
           isInvalid={!disabled && error}
           onChange={this.handleChange}

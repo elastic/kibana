@@ -99,7 +99,7 @@ class CodeEditor extends Component<
           name={name}
           mode={mode}
           theme="github"
-          value={getValue()}
+          value={getValue() || ''}
           isReadOnly={isReadOnly || false}
           isInvalid={error}
           onChange={this.handleChange}

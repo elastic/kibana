@@ -94,7 +94,7 @@ class FieldText extends Component<
         <EuiFieldText
           id={id}
           name={name}
-          value={getValue()}
+          value={getValue() || ''}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

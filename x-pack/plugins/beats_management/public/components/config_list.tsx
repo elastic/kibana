@@ -37,8 +37,9 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
         field: 'block_obj.module',
         name: 'Module',
         truncateText: false,
-        render: (item: ClientSideConfigurationBlock) =>
-          (item && (item.block_obj as any).module) || 'N/A',
+        render: (value: string) => {
+          return value || 'N/A';
+        },
       },
       {
         field: 'description',
