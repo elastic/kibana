@@ -36,12 +36,12 @@ function replaceEnvVarRefs(val: string) {
   });
 }
 
-function merge(target: any, value: any, key: string = '') {
+function merge(target: Record<string, any>, value: any, key?: string) {
   if (isPlainObject(value) || Array.isArray(value)) {
     for (const [subKey, subVal] of Object.entries(value)) {
       merge(target, subVal, key ? `${key}.${subKey}` : subKey);
     }
-  } else {
+  } else if (key !== undefined) {
     set(target, key, typeof value === 'string' ? replaceEnvVarRefs(value) : value);
   }
 
