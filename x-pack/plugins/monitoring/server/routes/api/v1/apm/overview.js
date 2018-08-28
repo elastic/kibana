@@ -5,11 +5,13 @@
  */
 
 import Joi from 'joi';
+import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { getStats } from '../../../../lib/beats';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { metricSet } from './metric_set_overview';
+import { handleError } from '../../../../lib/errors';
 
 export function apmOverviewRoute(server) {
-  /**
-   * Kibana overview (metrics)
-   */
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm',
@@ -27,8 +29,28 @@ export function apmOverviewRoute(server) {
         })
       }
     },
-    async handler() {
+    async handler(req, reply) {
+      const config = server.config();
+      const ccs = req.payload.ccs;
+      const clusterUuid = req.params.clusterUuid;
+      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
 
+      try {
+        const [
+          stats,
+          metrics,
+        ] = await Promise.all([
+          getStats(req, apmIndexPattern, clusterUuid),
+          getMetrics(req, apmIndexPattern, metricSet),
+        ]);
+
+        reply({
+          stats,
+          metrics
+        });
+      } catch (err) {
+        reply(handleError(err, req));
+      }
     }
   });
 }

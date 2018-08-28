@@ -48,7 +48,7 @@ export function ApmServerInstances({ apms, goToInstance }) {
 
   return (
     <div>
-      <Status stats={apms.data.clusterStatus}/>
+      <Status stats={apms.data.stats}/>
       <MonitoringTable
         className="apmInstancesTable"
         rows={apms.data.apms}

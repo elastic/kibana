@@ -7,7 +7,7 @@
 import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator } from './helpers';
+import { ClusterItemContainer } from './helpers';
 
 import {
   EuiFlexGrid,
@@ -26,26 +26,20 @@ export function ApmPanel(props) {
     return null;
   }
 
-  const status = props.count > 0 ? 'green' : 'red';
-
-  const statusIndicator = (
-    <HealthStatusIndicator status={status} />
-  );
-
-  const goToKibana = () => props.changeUrl('apm');
+  const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
 
   return (
-    <ClusterItemContainer {...props} statusIndicator={statusIndicator} url="apm" title="Apm">
+    <ClusterItemContainer {...props} url="apm" title="Apm">
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
                 <EuiLink
-                  onClick={goToKibana}
+                  onClick={goToApm}
                   aria-label="Apm Overview"
-                  data-test-subj="kbnOverview"
+                  data-test-subj="apmOverview"
                 >
                   Overview
                 </EuiLink>

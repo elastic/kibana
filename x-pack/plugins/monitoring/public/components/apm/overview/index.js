@@ -17,7 +17,7 @@ import {
 import { Status } from '../instances/status';
 
 export function ApmOverview({
-  clusterStatus,
+  stats,
   ...props
 }) {
   const seriesToShow = [
@@ -37,7 +37,7 @@ export function ApmOverview({
   return (
     <EuiPage style={{ backgroundColor: 'white' }}>
       <EuiPageBody>
-        <Status stats={clusterStatus}/>
+        <Status stats={stats}/>
         <EuiSpacer size="s"/>
         <EuiFlexGroup wrap>
           {charts}

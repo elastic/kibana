@@ -5,11 +5,11 @@
  */
 
 import Joi from 'joi';
+import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { getStats } from '../../../../lib/beats';
+import { handleError } from '../../../../lib/errors';
 
 export function apmInstancesRoute(server) {
-  /**
-   * Kibana listing (instances)
-   */
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
@@ -27,8 +27,25 @@ export function apmInstancesRoute(server) {
         })
       }
     },
-    async handler() {
+    async handler(req, reply) {
+      const config = server.config();
+      const ccs = req.payload.ccs;
+      const clusterUuid = req.params.clusterUuid;
+      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
 
+      try {
+
+        const [ stats ] = await Promise.all([
+          getStats(req, apmIndexPattern, clusterUuid),
+        ]);
+
+        reply({
+          stats,
+        });
+
+      } catch (err) {
+        reply(handleError(err, req));
+      }
     }
   });
 }
