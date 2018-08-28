@@ -17,26 +17,15 @@
  * under the License.
  */
 
-import { ToolingLog } from '../../tooling_log';
-import { withProcRunner } from '../with_proc_runner';
+import React from 'react';
+import {
+  EuiText
+} from '@elastic/eui';
 
-describe('proc runner', () => {
-  function runProc({ thing = '', procs }) {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        procs.run('proc', {
-          cmd: './proc',
-          args: ['these', 'are', 'words'],
-        });
-        resolve(thing);
-      }, 500);
-    });
-  }
-
-  it('passes procs to a function', async () => {
-    await withProcRunner(new ToolingLog(), async procs => {
-      await runProc({ procs });
-      await procs.stop('proc');
-    });
-  });
-});
+export const PageTitle = () => {
+  return (
+    <EuiText>
+      <h1 data-test-subj="managementSettingsTitle">Settings</h1>
+    </EuiText>
+  );
+};

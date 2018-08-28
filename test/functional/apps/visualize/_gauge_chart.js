@@ -76,12 +76,11 @@ export default function ({ getService, getPageObjects }) {
       const expectedTexts = [ '2,904\nwin 8: Count', '0B\nwin 8: Min bytes' ];
 
       await PageObjects.visualize.clickMetricEditor();
-      await PageObjects.visualize.clickBucket('Split Group');
       await PageObjects.visualize.selectAggregation('Terms');
       await PageObjects.visualize.selectField('machine.os.raw');
       await PageObjects.visualize.setSize('1');
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
       await PageObjects.visualize.selectAggregation('Min', 'metrics');
       await PageObjects.visualize.selectField('bytes', 'metrics');
       await PageObjects.visualize.clickGo();
