@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import {
   colors,
   fontFamilyCode,
   fontSizes,
+  px,
   units
 } from '../../../style/variables';
 
@@ -26,7 +28,7 @@ const Table = styled.table`
 `;
 
 const Row = styled.tr`
-  border-bottom: 1px solid ${colors.gray4};
+  border-bottom: ${px(1)} solid ${colors.gray4};
   &:last-child {
     border: 0;
   }
@@ -34,7 +36,7 @@ const Row = styled.tr`
 
 const Cell = styled.td`
   vertical-align: top;
-  padding: ${units.half}px 0;
+  padding: ${px(units.half)} 0;
 
   ${Row}:first-child> & {
     padding-top: 0;
@@ -45,7 +47,7 @@ const Cell = styled.td`
   }
 
   &:first-child {
-    width: 300px;
+    width: ${px(units.unit * 20)};
     font-weight: bold;
   }
 `;

@@ -64,7 +64,7 @@ function sortKeysByConfig(object, currentKey) {
 
 // TODO: if propData defaults to an empty object, the if (!propData)
 // will never be truthy unless propData is explicitly null or false...
-export function PropertiesTable({ propData = {}, propKey, agentName }) {
+export function PropertiesTable({ propData, propKey, agentName }) {
   if (!propData) {
     return (
       <TableContainer>
