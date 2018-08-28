@@ -27,6 +27,12 @@ const createMockShieldClient = (response) => {
   };
 };
 
+describe(`#checkPrivilegesAtResources`, () => {
+  test(`there are tests for this or you removed it`, () => {
+    expect(false).toBe(true);
+  });
+});
+
 describe('#checkPrivilegesAtSpace', () => {
   const checkPrivilegesAtSpaceTest = (description, {
     spaceId,
