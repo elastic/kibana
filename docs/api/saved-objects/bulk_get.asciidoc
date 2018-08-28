@@ -1,0 +1,81 @@
+[[saved-objects-api-bulk-get]]
+=== Bulk Get Objects
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
+The bulk-get saved object API enables you to retrieve multiple Kibana saved
+objects by id.
+
+==== Request
+
+`POST /api/saved_objects/_bulk_get`
+
+==== Request Body
+
+The request body must be a JSON array containing objects, each of which
+contains the following properties:
+
+`type` (required)::
+  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+
+`id` (required)::
+  (string) ID of object to retrieve
+
+==== Response body
+
+The response body will have a top level `saved_objects` property that contains
+an array of objects, which represent the response for each of the requested
+objects. The order of the objects in the response is identical to the order of
+the objects in the request.
+
+For any saved object that could not be found, an error object will exist in its
+place.
+
+==== Examples
+
+The following example attempts to retrieve an index pattern with id
+`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
+exists.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_bulk_get
+[
+  {
+    "type": "index-pattern",
+    "id": "my-pattern"
+  },
+  {
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }
+]
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "saved_objects": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern",
+      "version": 1,
+      "attributes": {
+        "title": "my-pattern-*"
+      }
+    },
+    {
+      "id": "my-dashboard",
+      "type": "dashboard",
+      "error": {
+        "statusCode": 404,
+        "message": "Not found"
+      }
+    }
+  ]
+}
+--------------------------------------------------

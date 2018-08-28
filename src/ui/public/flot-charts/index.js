@@ -37,4 +37,5 @@ require('ui/flot-charts/jquery.flot.pie');
 require('ui/flot-charts/jquery.flot.stack');
 require('ui/flot-charts/jquery.flot.threshold');
 require('ui/flot-charts/jquery.flot.fillbetween');
+require('ui/flot-charts/jquery.flot.log');
 module.exports = $;

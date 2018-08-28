@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
@@ -44,14 +63,6 @@ function getPrecision(precision) {
   return precision;
 }
 
-function getMapZoom(vis) {
-  if (vis.hasUiState() && parseInt(vis.uiStateVal('mapZoom')) >= 0) {
-    return parseInt(vis.uiStateVal('mapZoom'));
-  }
-
-  return vis.params.mapZoom;
-}
-
 function isOutsideCollar(bounds, collar) {
   return bounds && collar && !geoContains(collar, bounds);
 }
@@ -81,10 +92,12 @@ export const geoHashBucketAgg = new BucketAggType({
     },
     {
       name: 'mapZoom',
+      default: 2,
       write: _.noop
     },
     {
       name: 'mapCenter',
+      default: [0, 0],
       write: _.noop
     },
     {
@@ -95,36 +108,36 @@ export const geoHashBucketAgg = new BucketAggType({
       controller: function () {
       },
       write: function (aggConfig, output) {
-        const vis = aggConfig.vis;
-        const currZoom = getMapZoom(vis);
+        const currZoom = aggConfig.params.mapZoom;
         const autoPrecisionVal = zoomPrecision[currZoom];
-        output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
+        output.params.precision = aggConfig.params.autoPrecision ?
+          autoPrecisionVal : getPrecision(aggConfig.params.precision);
       }
     }
   ],
   getRequestAggs: function (agg) {
     const aggs = [];
+    const { vis, params } = agg;
 
-    if (agg.params.isFilteredByCollar && agg.getField()) {
-      const vis = agg.vis;
-      const mapBounds = vis.sessionState.mapBounds;
-      const mapZoom = getMapZoom(vis);
+    if (params.isFilteredByCollar && agg.getField()) {
+      const { mapBounds, mapZoom } = params;
       if (mapBounds) {
-        const lastMapCollar = vis.sessionState.mapCollar;
         let mapCollar;
-        if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
+        if (!agg.lastMapCollar || agg.lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, agg.lastMapCollar)) {
           mapCollar = scaleBounds(mapBounds);
           mapCollar.zoom = mapZoom;
-          vis.sessionState.mapCollar = mapCollar;
+          agg.lastMapCollar = mapCollar;
         } else {
-          mapCollar = lastMapCollar;
+          mapCollar = agg.lastMapCollar;
         }
-        const boundingBox = {};
-        boundingBox[agg.getField().name] = {
-          top_left: mapCollar.top_left,
-          bottom_right: mapCollar.bottom_right
+        const boundingBox = {
+          ignore_unmapped: true,
+          [agg.getField().name]: {
+            top_left: mapCollar.top_left,
+            bottom_right: mapCollar.bottom_right
+          }
         };
-        aggs.push(new AggConfig(agg.vis, {
+        aggs.push(new AggConfig(vis, {
           type: 'filter',
           id: 'filter_agg',
           enabled: true,
@@ -140,14 +153,13 @@ export const geoHashBucketAgg = new BucketAggType({
 
     aggs.push(agg);
 
-    if (agg.params.useGeocentroid) {
-      aggs.push(new AggConfig(agg.vis, {
+    if (params.useGeocentroid) {
+      aggs.push(new AggConfig(vis, {
         type: 'geo_centroid',
         enabled: true,
         params: {
           field: agg.getField()
-        },
-        schema: 'metric'
+        }
       }));
     }
 

@@ -13,10 +13,10 @@ import template from './confirm_modal.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.service('mlConfirmModalService', function ($modal, $q) {
+module.service('mlConfirmModalService', function ($modal) {
 
   this.open = function (options) {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       $modal.open({
         template,
         controller: 'MlConfirmModal',

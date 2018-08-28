@@ -7,7 +7,7 @@
 export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
   const testSubjects = getService('testSubjects');
 
-  const SUBJ_SUMMARY = 'elasticsearchNodeSummaryStatus';
+  const SUBJ_SUMMARY = 'elasticsearchNodeDetailStatus';
   const SUBJ_SUMMARY_TRANSPORT_ADDRESS = `${SUBJ_SUMMARY} transportAddress`;
   const SUBJ_SUMMARY_JVM_HEAP          = `${SUBJ_SUMMARY} jvmHeap`;
   const SUBJ_SUMMARY_FREE_DISK_SPACE   = `${SUBJ_SUMMARY} freeDiskSpace`;

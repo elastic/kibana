@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
-import { ElasticsearchMetric } from '../metrics';
+import { KibanaClusterMetric } from '../metrics';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -16,7 +16,7 @@ import { ElasticsearchMetric } from '../metrics';
  * The set contains single cluster for cluster overview page and cluster status bar
 
  * Timespan for the data is an interval of time based on calculations of an
- * interval size using the same calculation as determinting bucketSize using
+ * interval size using the same calculation as determining bucketSize using
  * the timepicker for a chart
 
  * Returns, for each cluster,
@@ -32,7 +32,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
 
   return Promise.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
-    const metric = ElasticsearchMetric.getMetricFields();
+    const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
       size: 0,

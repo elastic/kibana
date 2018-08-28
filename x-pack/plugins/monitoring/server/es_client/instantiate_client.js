@@ -10,7 +10,7 @@ import { LOGGING_TAG } from '../../common/constants';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
- * This allows the app to connect to a decidated monitoring cluster even if
+ * This allows the app to connect to a dedicated monitoring cluster even if
  * Kibana itself is connected to a production cluster.
  */
 

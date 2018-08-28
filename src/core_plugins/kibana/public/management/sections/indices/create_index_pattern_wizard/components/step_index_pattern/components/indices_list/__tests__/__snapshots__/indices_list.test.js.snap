@@ -2,7 +2,9 @@
 
 exports[`IndicesList should change pages 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -32,6 +34,7 @@ exports[`IndicesList should change pages 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -52,11 +55,19 @@ exports[`IndicesList should change pages 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            1
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
+        hasArrow={true}
         id="customizablePagination"
         isOpen={false}
         ownFocus={false}
@@ -69,25 +80,33 @@ exports[`IndicesList should change pages 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -102,7 +121,9 @@ exports[`IndicesList should change pages 1`] = `
 
 exports[`IndicesList should change per page 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -122,6 +143,7 @@ exports[`IndicesList should change per page 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -142,11 +164,19 @@ exports[`IndicesList should change per page 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            1
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 1,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
+        hasArrow={true}
         id="customizablePagination"
         isOpen={false}
         ownFocus={false}
@@ -159,25 +189,33 @@ exports[`IndicesList should change per page 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -202,7 +240,9 @@ exports[`IndicesList should change per page 1`] = `
 
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -237,6 +277,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -257,11 +298,19 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
+        hasArrow={true}
         id="customizablePagination"
         isOpen={false}
         ownFocus={false}
@@ -274,25 +323,33 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -307,7 +364,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
 
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -337,6 +396,7 @@ exports[`IndicesList should render normally 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -357,11 +417,19 @@ exports[`IndicesList should render normally 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
+        hasArrow={true}
         id="customizablePagination"
         isOpen={false}
         ownFocus={false}
@@ -374,25 +442,33 @@ exports[`IndicesList should render normally 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,
@@ -407,7 +483,9 @@ exports[`IndicesList should render normally 1`] = `
 
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={true}
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -517,6 +595,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -537,11 +616,19 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             size="s"
             type="button"
           >
-            Rows per page: 
-            10
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="kbn.management.createIndexPattern.step.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
           </EuiButtonEmpty>
         }
         closePopover={[Function]}
+        hasArrow={true}
         id="customizablePagination"
         isOpen={false}
         ownFocus={false}
@@ -554,25 +641,33 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             Array [
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 5
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 10
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 20
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 icon="empty"
+                layoutAlign="center"
                 onClick={[Function]}
+                toolTipPosition="right"
               >
                 50
               </EuiContextMenuItem>,

@@ -13,7 +13,7 @@ import {
   shouldShowRevertToBasicLicense,
   getStartBasicMessages
 } from '../../../store/reducers/licenseManagement';
-import { startBasicLicense } from '../../../store/actions/start_basic';
+import { startBasicLicense, cancelStartBasicLicense } from '../../../store/actions/start_basic';
 
 const mapStateToProps = state => {
   return {
@@ -25,7 +25,8 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = {
-  startBasicLicense
+  startBasicLicense,
+  cancelStartBasicLicense
 };
 
 export const RevertToBasic = connect(mapStateToProps, mapDispatchToProps)(

@@ -11,7 +11,7 @@ import { get } from 'lodash';
  *
  * Note: This does not guarantee that any production cluster has a valid license; only that Cluster Alerts in general can be used!
  *
- * @param  {Object} server Serevr object containing config and plugins
+ * @param  {Object} server Server object containing config and plugins
  * @return {Boolean} {@code true} to indicate that cluster alerts can be used.
  */
 export function verifyMonitoringLicense(server) {

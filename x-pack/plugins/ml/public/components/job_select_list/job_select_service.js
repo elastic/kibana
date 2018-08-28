@@ -9,14 +9,13 @@
 // Service with functions used for broadcasting job picker changes
 
 import _ from 'lodash';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, Private, globalState) {
-  const mlJobService = Private(JobServiceProvider);
+export function JobSelectServiceProvider($rootScope, globalState) {
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {
@@ -44,7 +43,7 @@ export function JobSelectServiceProvider($rootScope, Private, globalState) {
       // if there are no valid ids, warn and then select the first job
       if (validIds.length === 0) {
         const warningText = `No jobs selected, auto selecting first job`;
-        notify.warning(warningText, { lifetime: 30000 });
+        toastNotifications.addWarning(warningText);
 
         if (mlJobService.jobs.length) {
           validIds = [mlJobService.jobs[0].job_id];
@@ -92,7 +91,7 @@ export function JobSelectServiceProvider($rootScope, Private, globalState) {
     if (invalidIds.length > 0) {
       const warningText = (invalidIds.length === 1) ? `Requested job ${invalidIds} does not exist` :
         `Requested jobs ${invalidIds} do not exist`;
-      notify.warning(warningText, { lifetime: 30000 });
+      toastNotifications.addWarning(warningText);
     }
   }
 

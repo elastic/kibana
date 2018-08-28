@@ -9,8 +9,9 @@ import { checkParam } from '../../error_missing_required';
 import { ElasticsearchMetric } from '../../metrics';
 import { createQuery } from '../../create_query';
 import { calculateRate } from '../../calculate_rate';
+import { getUnassignedShards } from '../shards';
 
-export function handleResponse(resp, min, max) {
+export function handleResponse(resp, min, max, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
   return hits.map(hit => {
@@ -38,17 +39,42 @@ export function handleResponse(resp, min, max) {
       ...rateOptions
     });
 
+    const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
+
+    let status;
+    let statusSort;
+    let unassignedShards;
+    if (shardStatsForIndex && shardStatsForIndex.status) {
+      status = shardStatsForIndex.status;
+      unassignedShards = getUnassignedShards(shardStatsForIndex);
+
+      // create a numerical status value for sorting
+      if (status === 'green') {
+        statusSort = 1;
+      } else if (status === 'yellow') {
+        statusSort = 2;
+      } else {
+        statusSort = 3;
+      }
+    } else {
+      status = 'Deleted / Closed';
+      statusSort = 0;
+    }
+
     return {
       name: stats.index,
+      status,
       doc_count: get(stats, 'primaries.docs.count'),
       data_size: get(stats, 'total.store.size_in_bytes'),
       index_rate: indexRate,
-      search_rate: searchRate
+      search_rate: searchRate,
+      unassigned_shards: unassignedShards,
+      status_sort: statusSort
     };
   });
 }
 
-export function getIndices(req, esIndexPattern, showSystemIndices = false) {
+export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
 
   const { min, max } = req.payload.timeRange;
@@ -110,5 +136,5 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params)
-    .then(resp => handleResponse(resp, min, max));
+    .then(resp => handleResponse(resp, min, max, shardStats));
 }

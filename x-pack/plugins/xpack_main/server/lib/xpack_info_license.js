@@ -39,6 +39,9 @@ export class XPackInfoLicense {
 
   /**
    * Returns license expiration date in ms.
+   *
+   * Note: A basic license created after 6.3 will have no expiration, thus returning undefined.
+   *
    * @returns {number|undefined}
    */
   getExpiryDateInMillis() {
@@ -47,7 +50,7 @@ export class XPackInfoLicense {
 
   /**
    * Checks if the license is represented in a specified license list.
-   * @param candidateLicenses List of the licenses to check against.
+   * @param {String} candidateLicenses List of the licenses to check against.
    * @returns {boolean}
    */
   isOneOf(candidateLicenses) {
@@ -64,5 +67,47 @@ export class XPackInfoLicense {
    */
   getType() {
     return get(this._getRawLicense(), 'type');
+  }
+
+  /**
+   * Returns mode of the license (basic, gold etc.). This is the "effective" type of the license.
+   * @returns {string|undefined}
+   */
+  getMode() {
+    return get(this._getRawLicense(), 'mode');
+  }
+
+  /**
+   * Determine if the current license is active and the supplied {@code type}.
+   *
+   * @param {Function} typeChecker The license type checker.
+   * @returns {boolean}
+   */
+  isActiveLicense(typeChecker) {
+    const license = this._getRawLicense();
+
+    return get(license, 'status') === 'active' && typeChecker(get(license, 'mode'));
+  }
+
+  /**
+   * Determine if the license is an active, basic license.
+   *
+   * Note: This also verifies that the license is active. Therefore it is not safe to assume that !isBasic() === isNotBasic().
+   *
+   * @returns {boolean}
+   */
+  isBasic() {
+    return this.isActiveLicense(mode => mode === 'basic');
+  }
+
+  /**
+   * Determine if the license is an active, non-basic license (e.g., standard, gold, platinum, or trial).
+   *
+   * Note: This also verifies that the license is active. Therefore it is not safe to assume that !isBasic() === isNotBasic().
+   *
+   * @returns {boolean}
+   */
+  isNotBasic() {
+    return this.isActiveLicense(mode => mode !== 'basic');
   }
 }

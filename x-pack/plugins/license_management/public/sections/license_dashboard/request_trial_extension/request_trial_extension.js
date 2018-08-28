@@ -14,13 +14,13 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   }
   const description = (
     <span>
-      If you’d like to continuing using Security, Machine Learning, and our
+      If you’d like to continuing using security, machine learning, and our
       other awesome{' '}
       <EuiLink
         href="https://www.elastic.co/subscriptions/xpack"
         target="_blank"
       >
-        platinum features
+        Platinum features
       </EuiLink>, request an extension now.
     </span>
   );
@@ -31,6 +31,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
         description={description}
         footer={
           <EuiButton
+            data-test-subj="extendTrialButton"
             style={{ marginTop: 'auto' }}
             target="_blank"
             href="https://www.elastic.co/trialextension"

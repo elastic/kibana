@@ -11,15 +11,15 @@
       ng-repeat="section in sections"
       class="page-row"
     >
-      <div class="kuiPanel management-panel">
+      <div class="kuiPanel management-panel" role="group">
         <div class="kuiPanelHeader">
           <div class="kuiPanelHeaderSection">
             <div
               class="management-panel__heading-icon management-panel__heading-icon--{{::section.id}}"
             ></div>
-            <div class="kuiPanelHeader__title">
+            <h3 class="kuiPanelHeader__title">
               {{::section.display}}
-            </div>
+            </h3>
           </div>
         </div>
 
@@ -31,7 +31,7 @@
                 ng-repeat="item in section.visibleItems"
               >
                 <a
-                  data-test-subj="{{::item.name}}"
+                  data-test-subj="{{::item.id}}"
                   class="euiLink euiLink--primary management-panel__link"
                   ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
                   kbn-href="{{::item.disabled ? '' : item.url}}"

@@ -9,6 +9,7 @@ exports[`props iconType 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -38,10 +39,12 @@ exports[`props iconType 1`] = `
       </EuiTitle>
       <EuiText
         className="synopsisBody"
+        grow={true}
       >
         <p>
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>
@@ -61,6 +64,7 @@ exports[`props iconUrl 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -91,10 +95,12 @@ exports[`props iconUrl 1`] = `
       </EuiTitle>
       <EuiText
         className="synopsisBody"
+        grow={true}
       >
         <p>
           <EuiTextColor
             color="subdued"
+            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>
@@ -105,7 +111,7 @@ exports[`props iconUrl 1`] = `
 </a>
 `;
 
-exports[`render 1`] = `
+exports[`props isBeta 1`] = `
 <a
   className="euiLink synopsis"
   data-test-subj="homeSynopsisLinkgreat tutorial"
@@ -114,6 +120,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -134,10 +141,58 @@ exports[`render 1`] = `
       </EuiTitle>
       <EuiText
         className="synopsisBody"
+        grow={true}
       >
         <p>
           <EuiTextColor
             color="subdued"
+            component="span"
+          >
+            this is a great tutorial about...
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</a>
+`;
+
+exports[`render 1`] = `
+<a
+  className="euiLink synopsis"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  href="link_to_item"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      className="synopsisContent"
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        className="synopsisTitle"
+        size="s"
+      >
+        <h4>
+          Great tutorial
+        </h4>
+      </EuiTitle>
+      <EuiText
+        className="synopsisBody"
+        grow={true}
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+            component="span"
           >
             this is a great tutorial about...
           </EuiTextColor>

@@ -1,6 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
+import './vis_type_agg_filter';
+import './vis_type_field_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -10,15 +31,18 @@ import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
+import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { updateEditorStateWithChanges } from './update_editor_state';
+
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis, showSpyPanel) {
+    constructor(el, savedObj) {
       this.el = $(el);
-      this.vis = vis;
-      this.showSpyPanel = showSpyPanel;
+      this.savedObj = savedObj;
+      this.vis = savedObj.vis;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
@@ -27,16 +51,13 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(visData, searchSource, updateStatus, uiState) {
+    render({ uiState, timeRange, appState }) {
       let $scope;
 
       const updateScope = () => {
-        $scope.showSpyPanel = this.showSpyPanel;
         $scope.vis = this.vis;
-        $scope.visData = visData;
         $scope.uiState = uiState;
-        $scope.searchSource = searchSource;
-        $scope.$apply();
+        //$scope.$apply();
       };
 
       return new Promise(resolve => {
@@ -45,19 +66,23 @@ const defaultEditor = function ($rootScope, $compile) {
 
           updateScope();
 
+          $scope.state = $scope.vis.copyCurrentState(true);
+          $scope.oldState = $scope.vis.getSerializableState($scope.state);
+
           $scope.toggleSidebar = () => {
             $scope.$broadcast('render');
           };
 
           this.el.one('renderComplete', resolve);
-
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
+            $scope.oldState = $scope.vis.getSerializableState($scope.state);
+            $scope.vis.setCurrentState($scope.state);
             $scope.vis.updateState();
             $scope.vis.dirty = false;
           };
           $scope.resetEditableVis = () => {
-            $scope.vis.resetState();
+            $scope.state = $scope.vis.copyCurrentState(true);
             $scope.vis.dirty = false;
           };
 
@@ -91,14 +116,21 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          $scope.$watch(function () {
-            return $scope.vis.getCurrentState(false);
+          let lockDirty = false;
+          $scope.$watch(() => {
+            return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.vis.getEnabledState());
+            // when visualization updates its `vis.params` we need to update the editor, but we should
+            // not set the dirty flag (as this change came from vis itself and is already applied)
+            if (lockDirty) {
+              lockDirty = false;
+            } else {
+              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
+            }
 
             $scope.responseValueAggs = null;
             try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
@@ -106,6 +138,15 @@ const defaultEditor = function ($rootScope, $compile) {
             // params have not been set yet. watcher will trigger again
             // when the params update
             catch (e) {} // eslint-disable-line no-empty
+          }, true);
+
+          // fires when visualization state changes, and we need to copy changes to editorState
+          $scope.$watch(() => {
+            return $scope.vis.getCurrentState(false);
+          }, (newState) => {
+            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
+              lockDirty = true;
+            }
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.
@@ -119,7 +160,26 @@ const defaultEditor = function ($rootScope, $compile) {
           updateScope();
         }
 
-        $scope.$broadcast('render');
+        if (!this._handler) {
+          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          getVisualizeLoader().then(loader => {
+            if (!visualizationEl) {
+              return;
+            }
+            this._loader = loader;
+            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
+              uiState: uiState,
+              listenOnChange: false,
+              timeRange: timeRange,
+              appState: appState,
+            });
+          });
+        } else {
+          this._handler.update({
+            timeRange: timeRange
+          });
+        }
+
       });
     }
 
@@ -131,6 +191,9 @@ const defaultEditor = function ($rootScope, $compile) {
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;
+      }
+      if (this._handler) {
+        this._handler.destroy();
       }
     }
   };

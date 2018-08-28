@@ -1,3 +1,23 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import url from 'url';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
@@ -12,12 +32,14 @@ export default function (plugin, server) {
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, url) {
+  function waitForPong(callWithInternalUser, elasticsearchUrl) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(`Unable to connect to Elasticsearch at ${url}.`);
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
+      const displayUrl = url.format({ ...url.parse(elasticsearchUrl), auth: undefined });
+      plugin.status.red(`Unable to connect to Elasticsearch at ${displayUrl}.`);
+
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
     });
   }
 

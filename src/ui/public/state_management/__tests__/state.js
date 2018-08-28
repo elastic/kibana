@@ -1,9 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
 import '../../private';
-import { Notifier, fatalErrorInternals } from '../../notify';
+import { toastNotifications } from '../../notify';
+import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
 import {
   unhashQueryString,
@@ -17,8 +37,10 @@ import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 
 describe('State Management', () => {
+  const sandbox = sinon.createSandbox();
+  afterEach(() => sandbox.restore());
+
   describe('Enabled', () => {
-    const notifier = new Notifier();
     let $rootScope;
     let $location;
     let Events;
@@ -30,24 +52,21 @@ describe('State Management', () => {
       $location = _$location_;
       $rootScope = _$rootScope_;
       Events = Private(EventsProvider);
-      Notifier.prototype._notifs.splice(0);
 
       setup = opts => {
         const { param, initial, storeInHash } = (opts || {});
         sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
         const store = new StubBrowserStorage();
         const hashedItemStore = new HashedItemStore(store);
-        const state = new State(param, initial, hashedItemStore, notifier);
+        const state = new State(param, initial, hashedItemStore);
 
         const getUnhashedSearch = state => {
           return unhashQueryString($location.search(), [ state ]);
         };
 
-        return { notifier, store, hashedItemStore, state, getUnhashedSearch };
+        return { store, hashedItemStore, state, getUnhashedSearch };
       };
     }));
-
-    afterEach(() => Notifier.prototype._notifs.splice(0));
 
     describe('Provider', () => {
       it('should reset the state to the defaults', () => {
@@ -210,7 +229,7 @@ describe('State Management', () => {
 
       it('does not replace the state value on read', () => {
         const { state } = setup();
-        sinon.stub($location, 'search', (newSearch) => {
+        sinon.stub($location, 'search').callsFake((newSearch) => {
           if (newSearch) {
             return $location;
           } else {
@@ -253,26 +272,37 @@ describe('State Management', () => {
 
       describe('error handling', () => {
         it('notifies the user when a hash value does not map to a stored value', () => {
-          const { state, notifier } = setup({ storeInHash: true });
+          // Ideally, state.js shouldn't be tightly coupled to toastNotifications. Instead, it
+          // should notify its consumer of this error state and the consumer should be responsible
+          // for notifying the user of the error. This test verifies the side effect of the error
+          // until we can remove this coupling.
+
+          // Clear existing toasts.
+          toastNotifications.list.splice(0);
+
+          const { state } = setup({ storeInHash: true });
           const search = $location.search();
           const badHash = createStateHash('{"a": "b"}', () => null);
 
           search[state.getQueryParamName()] = badHash;
           $location.search(search);
 
-          expect(notifier._notifs).to.have.length(0);
+          expect(toastNotifications.list).to.have.length(0);
           state.fetch();
-          expect(notifier._notifs).to.have.length(1);
-          expect(notifier._notifs[0].content).to.match(/use the share functionality/i);
+          expect(toastNotifications.list).to.have.length(1);
+          expect(toastNotifications.list[0].title).to.match(/use the share functionality/i);
         });
 
-        it('throws error linking to github when setting item fails', () => {
+        it('triggers fatal error linking to github when setting item fails', () => {
           const { state, hashedItemStore } = setup({ storeInHash: true });
-          sinon.stub(fatalErrorInternals, 'show');
+          const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
           sinon.stub(hashedItemStore, 'setItem').returns(false);
-          expect(() => {
-            state.toQueryParam();
-          }).to.throwError(/github\.com/);
+          state.toQueryParam();
+          sinon.assert.calledOnce(fatalErrorStub);
+          sinon.assert.calledWith(fatalErrorStub, sinon.match(error => (
+            error instanceof Error &&
+            error.message.includes('github.com'))
+          ));
         });
 
         it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
@@ -311,7 +341,6 @@ describe('State Management', () => {
       const State = Private(StateProvider);
       $location = _$location_;
       $rootScope = _$rootScope_;
-      Notifier.prototype._notifs.splice(0);
 
       sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(false);
 
@@ -323,8 +352,6 @@ describe('State Management', () => {
 
       state = new MockPersistedState(stateParam);
     }));
-
-    afterEach(() => Notifier.prototype._notifs.splice(0));
 
     describe('changing state', () => {
       const methods = ['save', 'replace', 'reset'];

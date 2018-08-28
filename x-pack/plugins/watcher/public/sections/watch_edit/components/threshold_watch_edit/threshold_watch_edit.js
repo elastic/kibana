@@ -24,7 +24,7 @@ import 'plugins/watcher/services/interval';
 import 'plugins/watcher/services/action_defaults';
 
 import dateMath from '@kbn/datemath';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
@@ -39,7 +39,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
   const actionDefaultsService = $injector.get('xpackWatcherActionDefaultsService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
   const $interval = $injector.get('$interval');
 
   return {
@@ -53,7 +53,6 @@ app.directive('thresholdWatchEdit', function ($injector) {
     controller: class ThresholdWatchEditController extends InitAfterBindingsWorkaround {
       initAfterBindings($scope) {
         this.index = undefined;
-        this.notifier = new Notifier({ location: 'Watcher' });
         this.originalWatch = {
           ...this.watch
         };
@@ -64,9 +63,9 @@ app.directive('thresholdWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
         $scope.$on('$destroy', () => {
-          dirtyPrompt.deregister();
+          // dirtyPrompt.deregister();
           this.stopRefreshWatchVisualizationTimer();
         });
 
@@ -141,18 +140,18 @@ app.directive('thresholdWatchEdit', function ($injector) {
 
             if (actionStatus.lastExecutionSuccessful === false) {
               const message = actionStatus.lastExecutionReason || action.simulateFailMessage;
-              this.notifier.error(message);
+              toastNotifications.addDanger(message);
             } else {
               toastNotifications.addSuccess(action.simulateMessage);
             }
           })
           .catch(err => {
-            this.notifier.error(err);
+            toastNotifications.addDanger(err);
           });
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
       }
 
@@ -197,7 +196,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
             this.restartRefreshWatchVisualizationTimer();
           })
           .catch(e => {
-            this.notifier.error(e);
+            toastNotifications.addDanger(e);
             this.stopRefreshWatchVisualizationTimer();
           });
       }, 500);
@@ -270,7 +269,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
             const message = `Watch with ID "${this.watch.id}"${watchNameMessageFragment} already exists. Do you want to overwrite it?`;
             return confirmModal(message, confirmModalOptions);
           })
-          .catch(err => this.notifier.error(err));
+          .catch(err => toastNotifications.addDanger(err));
       }
 
       isExistingWatch = () => {
@@ -298,7 +297,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
     }

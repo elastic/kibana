@@ -1,25 +1,42 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import {
-  SystemsType,
-  SystemName,
-  SystemMetadata,
-  KibanaSystemClassStatic,
   KibanaSystem,
+  KibanaSystemClassStatic,
+  SystemMetadata,
+  SystemName,
+  SystemsType,
 } from './system_types';
 
 function isPromise(obj: any) {
-  return (
-    obj != null && typeof obj === 'object' && typeof obj.then === 'function'
-  );
+  return obj != null && typeof obj === 'object' && typeof obj.then === 'function';
 }
 
 export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
-  readonly name: SystemName;
-  readonly dependencies: SystemName[];
-  readonly metadata?: M;
+  public readonly name: SystemName;
+  public readonly dependencies: SystemName[];
+  public readonly metadata?: M;
 
-  private readonly _systemClass: KibanaSystemClassStatic<C, D, E>;
-  private _systemInstance?: KibanaSystem<C, D, E>;
-  private _exposedValues?: E;
+  private readonly systemClass: KibanaSystemClassStatic<C, D, E>;
+  private systemInstance?: KibanaSystem<C, D, E>;
+  private exposedValues?: E;
 
   constructor(
     name: SystemName,
@@ -32,25 +49,20 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
     this.name = name;
     this.dependencies = config.dependencies || [];
     this.metadata = config.metadata;
-    this._systemClass = config.implementation;
+    this.systemClass = config.implementation;
   }
 
-  getExposedValues(): E {
-    if (this._systemInstance === undefined) {
-      throw new Error(
-        'trying to get the exposed value of a system that is NOT running'
-      );
+  public getExposedValues(): E {
+    if (this.systemInstance === undefined) {
+      throw new Error('trying to get the exposed value of a system that is NOT running');
     }
 
-    return this._exposedValues!;
+    return this.exposedValues!;
   }
 
-  start(kibanaValues: C, dependenciesValues: D) {
-    this._systemInstance = new this._systemClass(
-      kibanaValues,
-      dependenciesValues
-    );
-    const exposedValues = this._systemInstance.start();
+  public start(kibanaValues: C, dependenciesValues: D) {
+    this.systemInstance = new this.systemClass(kibanaValues, dependenciesValues);
+    const exposedValues = this.systemInstance.start();
 
     if (isPromise(exposedValues)) {
       throw new Error(
@@ -60,21 +72,18 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
       );
     }
 
-    this._exposedValues =
-      exposedValues === undefined ? ({} as E) : exposedValues;
+    this.exposedValues = exposedValues === undefined ? ({} as E) : exposedValues;
   }
 
-  stop() {
-    const stoppedResponse = this._systemInstance && this._systemInstance.stop();
+  public stop() {
+    const stoppedResponse = this.systemInstance && this.systemInstance.stop();
 
-    this._exposedValues = undefined;
-    this._systemInstance = undefined;
+    this.exposedValues = undefined;
+    this.systemInstance = undefined;
 
     if (isPromise(stoppedResponse)) {
       throw new Error(
-        `A promise was returned when stopping [${
-          this.name
-        }], but systems must stop synchronously.`
+        `A promise was returned when stopping [${this.name}], but systems must stop synchronously.`
       );
     }
   }

@@ -77,3 +77,34 @@
     }
   }
 }
+
+/*
+  Style tooltip popup (gets created dynamically at the top level if dashboard has a Vega vis
+  Adapted from https://github.com/vega/vega-tooltip
+ */
+#vega-kibana-tooltip {
+  h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  table {
+    border-spacing: 0;
+  }
+  td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  td.key {
+    color: #808080;
+    max-width: 150px;
+    text-align: right;
+    padding-right: 4px;
+  }
+  td.value {
+    max-width: 200px;
+    text-align: left;
+  }
+}

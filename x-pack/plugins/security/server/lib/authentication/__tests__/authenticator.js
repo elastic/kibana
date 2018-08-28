@@ -16,7 +16,7 @@ import { initAuthenticator } from '../authenticator';
 import * as ClientShield from '../../../../../../server/lib/get_client_shield';
 
 describe('Authenticator', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let config;
   let server;

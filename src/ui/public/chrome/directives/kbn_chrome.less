@@ -2,13 +2,19 @@
 @import (reference) "~ui/styles/mixins";
 @import (reference) "~ui/styles/variables";
 
-body {
+/**
+ * stretch the root element of the Kibana application to set the base-size that
+ * flexed children should keep. Only works when paired with root styles applied
+ * by core service from new platform
+ */
+#kibana-body {
   overflow-x: hidden;
   min-height: 100%;
 }
 
 .app-wrapper {
-  .real-flex-parent();
+  display: flex;
+  flex-flow: column nowrap;
   position: absolute;
   left: @global-nav-closed-width;
   top: 0;
@@ -31,6 +37,14 @@ body {
   }
 }
 
-  .app-wrapper-panel {
-    .flex-parent(@shrink: 0);
+.app-wrapper-panel {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
   }
+}

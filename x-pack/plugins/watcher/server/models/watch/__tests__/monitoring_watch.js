@@ -41,7 +41,7 @@ describe('MonitoringWatch', () => {
 
     let props;
     beforeEach(() => {
-      constructorMock.reset();
+      constructorMock.resetHistory();
 
       props = {};
     });
@@ -108,7 +108,7 @@ describe('MonitoringWatch', () => {
 
     let props;
     beforeEach(() => {
-      downstreamJsonMock.reset();
+      downstreamJsonMock.resetHistory();
 
       props = {};
     });
@@ -129,7 +129,7 @@ describe('MonitoringWatch', () => {
   describe('fromUpstreamJson factory method', () => {
 
     beforeEach(() => {
-      getPropsFromUpstreamJsonMock.reset();
+      getPropsFromUpstreamJsonMock.resetHistory();
     });
 
     it('should call the getPropsFromUpstreamJson method of BaseWatch', () => {

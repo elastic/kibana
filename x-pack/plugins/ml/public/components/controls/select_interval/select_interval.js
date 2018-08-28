@@ -7,65 +7,72 @@
 
 
 /*
- * AngularJS directive for rendering a select element with various interval levels.
+ * React component for rendering a select element with various aggregation interval levels.
  */
-
 import _ from 'lodash';
+import React, { Component } from 'react';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import {
+  EuiSelect
+} from '@elastic/eui';
 
-import template from './select_interval.html';
-import 'plugins/ml/components/controls/controls_select';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+const OPTIONS = [
+  { value: 'auto', text: 'Auto' },
+  { value: 'hour', text: '1 hour' },
+  { value: 'day', text: '1 day' },
+  { value: 'second', text: 'Show all' }
+];
 
-module
-  .service('mlSelectIntervalService', function (Private) {
-    const stateFactory = Private(stateFactoryProvider);
-    this.state = stateFactory('mlSelectInterval', {
-      interval: { display: 'Auto', val: 'auto' }
-    });
-  })
-  .directive('mlSelectInterval', function (mlSelectIntervalService) {
-    return {
-      restrict: 'E',
-      template,
-      link: function (scope, element) {
-        scope.intervalOptions = [
-          { display: 'Auto', val: 'auto' },
-          { display: '1 hour', val: 'hour' },
-          { display: '1 day', val: 'day' },
-          { display: 'Show all', val: 'second' }
-        ];
+function optionValueToInterval(value) {
+  // Builds the corresponding interval object with the required display and val properties
+  // from the specified value.
+  const option = OPTIONS.find(opt => (opt.value === value));
 
-        const intervalState = mlSelectIntervalService.state.get('interval');
-        const intervalValue = _.get(intervalState, 'val', 'auto');
-        let intervalOption = scope.intervalOptions.find(d => d.val === intervalValue);
-        if (intervalOption === undefined) {
-          // Attempt to set value in URL which doesn't map to one of the options.
-          intervalOption = scope.intervalOptions.find(d => d.val === 'auto');
-        }
-        scope.interval = intervalOption;
-        mlSelectIntervalService.state.set('interval', scope.interval);
+  // Default to auto if supplied value doesn't map to one of the options.
+  let interval = OPTIONS[0];
+  if (option !== undefined) {
+    interval = { display: option.text, val: option.value };
+  }
 
-        scope.setInterval = function (interval) {
-          if (!_.isEqual(scope.interval, interval)) {
-            scope.interval = interval;
-            mlSelectIntervalService.state.set('interval', scope.interval).changed();
-          }
-        };
+  return interval;
+}
 
-        function setScopeInterval() {
-          scope.setInterval(mlSelectIntervalService.state.get('interval'));
-        }
+class SelectInterval extends Component {
+  constructor(props) {
+    super(props);
 
-        mlSelectIntervalService.state.watch(setScopeInterval);
+    // Restore the interval from the state, or default to auto.
+    this.mlSelectIntervalService = this.props.mlSelectIntervalService;
+    const intervalState = this.mlSelectIntervalService.state.get('interval');
+    const intervalValue = _.get(intervalState, 'val', 'auto');
+    const interval = optionValueToInterval(intervalValue);
+    this.mlSelectIntervalService.state.set('interval', interval);
 
-        element.on('$destroy', () => {
-          mlSelectIntervalService.state.unwatch(setScopeInterval);
-          scope.$destroy();
-        });
-      }
+    this.state = {
+      value: interval.val
     };
-  });
+  }
+
+  onChange = (e) => {
+    this.setState({
+      value: e.target.value,
+    });
+
+    const interval = optionValueToInterval(e.target.value);
+    this.mlSelectIntervalService.state.set('interval', interval).changed();
+  };
+
+  render() {
+    return (
+      <EuiSelect
+        options={OPTIONS}
+        className="ml-select-interval"
+        value={this.state.value}
+        onChange={this.onChange}
+      />
+    );
+  }
+}
+
+export { SelectInterval };

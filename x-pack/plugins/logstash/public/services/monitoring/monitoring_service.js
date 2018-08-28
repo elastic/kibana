@@ -6,7 +6,10 @@
 
 import moment from 'moment';
 import chrome from 'ui/chrome';
-import { ROUTES } from '../../../common/constants';
+import {
+  ROUTES,
+  MONITORING
+} from '../../../common/constants';
 import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
 
 export class MonitoringService {
@@ -34,7 +37,7 @@ export class MonitoringService {
         const body = {
           timeRange: {
             max: now.toISOString(),
-            min: now.subtract(30, 'seconds').toISOString()
+            min: now.subtract(MONITORING.ACTIVE_PIPELINE_RANGE_S, 'seconds').toISOString()
           }
         };
         return this.$http.post(url, body);

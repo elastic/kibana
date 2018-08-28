@@ -1,4 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { delay } from 'bluebird';
+import expect from 'expect.js';
 
 import getUrl from '../../../src/test_utils/get_url';
 
@@ -28,7 +48,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl) {
       const appConfig = {
         ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
@@ -36,8 +56,31 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
-      return remote.get(appUrl);
+      await remote.get(appUrl);
+      await this.loginIfPrompted(appUrl);
     }
+
+
+    async loginIfPrompted(appUrl) {
+      let currentUrl = await remote.getCurrentUrl();
+      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
+      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      const loginPage = currentUrl.includes('/login');
+      const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
+      if (loginPage && !wantedLoginPage) {
+        log.debug(`Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`);
+        await PageObjects.shield.login(
+          config.get('servers.kibana.username'),
+          config.get('servers.kibana.password')
+        );
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        currentUrl = await remote.getCurrentUrl();
+        log.debug(`Finished login process currentUrl = ${currentUrl}`);
+      }
+      return currentUrl;
+    }
+
 
     navigateToApp(appName) {
       const self = this;
@@ -51,14 +94,15 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             .then(function (defaultIndex) {
               if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
                 if (!defaultIndex) {
-                // https://github.com/elastic/kibana/issues/7496
-                // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
-                // that change.  If we got here, fix it.
+                  // https://github.com/elastic/kibana/issues/7496
+                  // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
+                  // that change.  If we got here, fix it.
                   log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
                     'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*'
+                    'defaultIndex': 'logstash-*',
+                    'telemetry:optIn': false
                   });
                 }
               }
@@ -75,17 +119,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               return remote.refresh();
             })
             .then(async function () {
-              const currentUrl = await remote.getCurrentUrl();
-              const loginPage = currentUrl.includes('/login');
-              const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
-
-              if (loginPage && !wantedLoginPage) {
-                log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
-                await PageObjects.shield.login(
-                  config.get('servers.kibana.username'),
-                  config.get('servers.kibana.password')
-                );
-              }
+              const currentUrl = await self.loginIfPrompted(appUrl);
 
               if (currentUrl.includes('app/kibana')) {
                 await testSubjects.find('kibanaChrome');
@@ -108,14 +142,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
               const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
-             + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+                + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
               if (!navSuccessful) {
                 const msg = 'App failed to load: ' + appName +
-              ' in ' + defaultFindTimeout + 'ms' +
-              ' appUrl = ' + appUrl +
-              ' currentUrl = ' + currentUrl;
+                  ' in ' + defaultFindTimeout + 'ms' +
+                  ' appUrl = ' + appUrl +
+                  ' currentUrl = ' + currentUrl;
                 log.debug(msg);
                 throw new Error(msg);
               }
@@ -130,7 +164,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           .then(function (currentUrl) {
             let lastUrl = currentUrl;
             return retry.try(function () {
-            // give the app time to update the URL
+              // give the app time to update the URL
               return self.sleep(501)
                 .then(function () {
                   return remote.getCurrentUrl();
@@ -241,13 +275,28 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async isConfirmModalOpen() {
-      log.debug('isConfirmModalOpen');
-      return await testSubjects.exists('confirmModalCancelButton', 2000);
+    async expectConfirmModalOpenState(state) {
+      if (typeof state !== 'boolean') {
+        throw new Error('pass true or false to expectConfirmModalOpenState()');
+      }
+
+      log.debug(`expectConfirmModalOpenState(${state})`);
+
+      // we use retry here instead of a simple .exists() check because the modal
+      // fades in/out, which takes time, and we really only care that at some point
+      // the modal is either open or closed
+      await retry.try(async () => {
+        const actualState = await testSubjects.exists('confirmModalCancelButton');
+        expect(actualState).to.be(state);
+      });
     }
 
     async getBreadcrumbPageTitle() {
       return await testSubjects.getVisibleText('breadcrumbPageTitle');
+    }
+
+    async getTopNavText() {
+      return await testSubjects.getVisibleText('top-nav');
     }
 
     async doesCssSelectorExist(selector) {
@@ -278,6 +327,25 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           throw new Error('Local nav not visible yet');
         }
       });
+    }
+
+    async closeToast() {
+      const toast = await find.byCssSelector('.euiToast');
+      await remote.moveMouseTo(toast);
+      await find.clickByCssSelector('.euiToast__closeButton');
+    }
+
+    async clearAllToasts() {
+      const toasts = await find.allByCssSelector('.euiToast');
+      for (const toastElement of toasts) {
+        try {
+          await remote.moveMouseTo(toastElement);
+          const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+          await closeBtn.click();
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
+      }
     }
   }
 

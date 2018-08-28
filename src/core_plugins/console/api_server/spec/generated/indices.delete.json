@@ -1,5 +1,5 @@
 {
-  "{index}": {
+  "indices.delete": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",
@@ -17,6 +17,7 @@
     ],
     "patterns": [
       "{indices}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-delete-index.html"
   }
 }

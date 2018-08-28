@@ -1,1 +1,0 @@
-export { dateEditor } from './date';

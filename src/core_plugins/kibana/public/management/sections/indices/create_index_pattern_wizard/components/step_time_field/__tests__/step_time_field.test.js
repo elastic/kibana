@@ -1,7 +1,26 @@
-import React from 'react';
-import { shallow } from 'enzyme';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import { StepTimeField } from '../step_time_field';
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { StepTimeFieldComponent } from '../step_time_field';
 
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
@@ -20,8 +39,8 @@ const indexPatternsService = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -33,8 +52,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render timeFields', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -53,8 +72,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render a selected timeField', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -75,8 +94,8 @@ describe('StepTimeField', () => {
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -103,8 +122,8 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -126,8 +145,8 @@ describe('StepTimeField', () => {
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -149,8 +168,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -164,8 +183,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
@@ -182,8 +201,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}

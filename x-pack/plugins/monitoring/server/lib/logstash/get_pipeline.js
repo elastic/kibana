@@ -17,6 +17,8 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   const isInput = vertex.plugin_type === 'input';
   const isProcessor = vertex.plugin_type === 'filter' || vertex.plugin_type === 'output';
 
+  const timeseriesIntervalInMillis = timeseriesIntervalInSeconds * 1000;
+
   const eventsInTotal = vertexStatsBucket.events_in_total.value;
   const eventsOutTotal = get(vertexStatsBucket, 'events_out_total.value', null);
 
@@ -24,6 +26,9 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   const inputStats = {};
   const processorStats = {};
+  const eventsProcessedStats = {
+    events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis
+  };
 
   let eventsTotal;
 
@@ -36,22 +41,23 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   if (isProcessor) {
     eventsTotal = eventsInTotal;
     processorStats.percent_of_total_processor_duration = durationInMillis / totalProcessorsDurationInMillis;
+    eventsProcessedStats.events_in_per_millisecond = eventsInTotal / timeseriesIntervalInMillis;
   }
 
   return {
     events_in: eventsInTotal,
     events_out: eventsOutTotal,
     duration_in_millis: durationInMillis,
-    events_per_millisecond: eventsTotal / (timeseriesIntervalInSeconds * 1000),
     millis_per_event: durationInMillis / eventsTotal,
     ...inputStats,
-    ...processorStats
+    ...processorStats,
+    ...eventsProcessedStats
   };
 }
 
 /**
  * The UI needs a list of all vertices for the requested pipeline version, with each vertex in the list having its timeseries metrics associated with it. The
- * stateDocument object provides the list of vertices while the statsAggregation object provides timeseries metrics. This function stithces the two together
+ * stateDocument object provides the list of vertices while the statsAggregation object provides timeseries metrics. This function stitches the two together
  * and returns the modified stateDocument object.
  *
  * @param {Object} stateDocument

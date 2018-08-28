@@ -27,14 +27,19 @@ export function http(options) {
       const allHeaders = (options.headers === undefined) ? headers : { ...options.headers, ...headers };
       const body = (options.data === undefined) ? null : JSON.stringify(options.data);
 
-      fetch(url, {
+      const payload = {
         method: (options.method || 'GET'),
-        headers: (allHeaders),
-        credentials: 'same-origin',
-        body,
-      })
+        headers: allHeaders,
+        credentials: 'same-origin'
+      };
+
+      if (body !== null) {
+        payload.body = body;
+      }
+
+      fetch(url, payload)
         .then((resp) => {
-          resolve(resp.json());
+          resp.json().then((resp.ok === true) ? resolve : reject);
         })
         .catch((resp) => {
           reject(resp);

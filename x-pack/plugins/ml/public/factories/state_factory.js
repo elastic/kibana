@@ -19,11 +19,7 @@ import { listenerFactoryProvider } from './listener_factory';
 // Have a look at the unit tests which demonstrate basic usage.
 
 export function stateFactoryProvider(AppState) {
-  return function (stateName, defaultState) {
-    if (typeof stateName !== 'string') {
-      throw 'stateName needs to be of type `string`';
-    }
-
+  function initializeAppState(stateName, defaultState) {
     const appState = new AppState();
     appState.fetch();
 
@@ -49,6 +45,16 @@ export function stateFactoryProvider(AppState) {
       }
     }
 
+    return appState;
+  }
+
+  return function (stateName, defaultState) {
+    if (typeof stateName !== 'string') {
+      throw 'stateName needs to be of type `string`';
+    }
+
+    let appState = initializeAppState(stateName, defaultState);
+
     // () two times here, because the Provider first returns
     // the Factory, which then returns the actual listener
     const listener = listenerFactoryProvider()();
@@ -60,11 +66,13 @@ export function stateFactoryProvider(AppState) {
     // on the state.
     const state = {
       get(name) {
-        return appState[stateName] && appState[stateName][name];
+        updateAppState();
+        return appState[stateName][name];
       },
       // only if value doesn't match the existing one, the state gets updated
       // and saved.
       set(name, value) {
+        updateAppState();
         if (!_.isEqual(appState[stateName][name], value)) {
           appState[stateName][name] = value;
           appState.save();
@@ -73,6 +81,7 @@ export function stateFactoryProvider(AppState) {
         return state;
       },
       reset() {
+        updateAppState();
         if (!_.isEqual(appState[stateName], defaultState)) {
           appState[stateName] = _.cloneDeep(defaultState);
           appState.save();
@@ -91,6 +100,16 @@ export function stateFactoryProvider(AppState) {
         }
       }
     };
+
+    // gets the current state of AppState, if for whatever reason this custom
+    // state isn't part of AppState anymore, reinitialize it
+    function updateAppState() {
+      appState.fetch();
+      if (typeof appState[stateName] === 'undefined') {
+        appState = initializeAppState(stateName, defaultState);
+        changed = true;
+      }
+    }
 
     return state;
   };

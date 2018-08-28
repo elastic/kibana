@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 
 import { Command } from 'commander';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');
@@ -13,6 +32,7 @@ cmd
   .option('--config [path]', 'Path to a config file', resolveConfigPath, defaultConfigPath)
   .option('--bail', 'stop tests after the first failure', false)
   .option('--grep <pattern>', 'pattern used to select which tests to run')
+  .option('--invert', 'invert grep to exclude tests', false)
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -26,8 +46,10 @@ if (cmd.quiet) logLevel = 'error';
 if (cmd.debug) logLevel = 'debug';
 if (cmd.verbose) logLevel = 'verbose';
 
-const log = createToolingLog(logLevel);
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: logLevel,
+  writeTo: process.stdout
+});
 
 const functionalTestRunner = createFunctionalTestRunner({
   log,
@@ -36,6 +58,7 @@ const functionalTestRunner = createFunctionalTestRunner({
     mochaOpts: {
       bail: cmd.bail,
       grep: cmd.grep,
+      invert: cmd.invert,
     },
     updateBaselines: cmd.updateBaselines
   }

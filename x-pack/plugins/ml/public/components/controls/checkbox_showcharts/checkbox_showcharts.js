@@ -7,37 +7,49 @@
 
 
 /*
- * AngularJS directive+service for a checkbox element to toggle charts display.
+ * React component for a checkbox element to toggle charts display.
  */
+import React, { Component } from 'react';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import {
+  EuiCheckbox
+} from '@elastic/eui';
 
-import template from './checkbox_showcharts.html';
-import 'plugins/ml/components/controls/controls_select';
+import makeId from '@elastic/eui/lib/components/form/form_row/make_id';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+class CheckboxShowCharts extends Component {
+  constructor(props) {
+    super(props);
 
-module
-  .service('mlCheckboxShowChartsService', function (Private) {
-    const stateFactory = Private(stateFactoryProvider);
-    this.state = stateFactory('mlCheckboxShowCharts', {
-      showCharts: true
-    });
-  })
-  .directive('mlCheckboxShowCharts', function (mlCheckboxShowChartsService) {
-    return {
-      restrict: 'E',
-      template,
-      scope: {
-        visible: '='
-      },
-      link: function (scope) {
-        scope.showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-        scope.toggleChartsVisibility = function () {
-          mlCheckboxShowChartsService.state.set('showCharts', scope.showCharts);
-          mlCheckboxShowChartsService.state.changed();
-        };
-      }
+    // Restore the checked setting from the state.
+    this.mlCheckboxShowChartsService = this.props.mlCheckboxShowChartsService;
+    const showCharts = this.mlCheckboxShowChartsService.state.get('showCharts');
+
+    this.state = {
+      checked: showCharts
     };
-  });
+  }
+
+  onChange = (e) => {
+    const showCharts = e.target.checked;
+    this.mlCheckboxShowChartsService.state.set('showCharts', showCharts);
+    this.mlCheckboxShowChartsService.state.changed();
+
+    this.setState({
+      checked: showCharts,
+    });
+  };
+
+  render() {
+    return (
+      <EuiCheckbox
+        id={makeId()}
+        label="Show charts"
+        checked={this.state.checked}
+        onChange={this.onChange}
+      />
+    );
+  }
+}
+
+export { CheckboxShowCharts };

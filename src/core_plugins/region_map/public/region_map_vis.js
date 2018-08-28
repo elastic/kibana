@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import './region_map.less';
 import './region_map_vis_params';
 import image from './images/icon-vector-map.svg';
@@ -14,7 +33,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -31,6 +50,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
+        emsHotLink: '',
         selectedJoinField: selectedJoinField,
         isDisplayWarning: true,
         wms: config.get('visualization:tileMap:WMSdefaults'),
@@ -59,8 +79,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           text: 'top right',
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
-        vectorLayers: vectorLayers,
-        baseLayers: []
+        vectorLayers: vectorLayers
       },
       schemas: new Schemas([
         {

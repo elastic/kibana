@@ -7,6 +7,8 @@
 export default function ({ loadTestFile }) {
   describe('Logstash', () => {
     loadTestFile(require.resolve('./overview'));
+    loadTestFile(require.resolve('./nodes'));
+    loadTestFile(require.resolve('./node_detail'));
   });
 }
 

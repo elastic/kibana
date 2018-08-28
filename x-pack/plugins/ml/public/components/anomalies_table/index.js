@@ -5,7 +5,6 @@
  */
 
 
-
-import './styles/main.less';
-import './anomalies_table_directive.js';
+import './anomalies_table_directive';
 import './anomalies_table_service.js';
+import './styles/main.less';

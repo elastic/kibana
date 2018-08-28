@@ -7,6 +7,8 @@
 import React from "react";
 import { EuiCodeEditor } from "@elastic/eui";
 
+import 'brace/theme/textmate';
+
 export class ShowJson extends React.PureComponent {
   componentWillMount() {
     this.props.loadIndexData(this.props);
@@ -26,10 +28,13 @@ export class ShowJson extends React.PureComponent {
     return (
       <EuiCodeEditor
         mode="json"
-        theme="github"
+        theme="textmate"
         isReadOnly
         setOptions={{ maxLines: Infinity }}
         value={json}
+        editorProps={{
+          $blockScrolling: Infinity
+        }}
       />
     );
   }

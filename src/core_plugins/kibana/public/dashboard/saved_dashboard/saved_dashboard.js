@@ -1,15 +1,36 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function (courier, config) {
+module.factory('SavedDashboard', function (Private, config) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  createLegacyClass(SavedDashboard).inherits(courier.SavedObject);
+  const SavedObject = Private(SavedObjectProvider);
+  createLegacyClass(SavedDashboard).inherits(SavedObject);
   function SavedDashboard(id) {
     // Gives our SavedDashboard the properties of a SavedObject
     SavedDashboard.Super.call(this, {
@@ -45,7 +66,7 @@ module.factory('SavedDashboard', function (courier, config) {
     });
 
 
-    this.showInRecenltyAccessed = true;
+    this.showInRecentlyAccessed = true;
   }
 
   // save these objects with the 'dashboard' type

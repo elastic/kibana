@@ -24,7 +24,8 @@ app.directive('durationSelect', function ($injector) {
       minimumUnit: '=',
       minimumSize: '=',
       unit: '=',
-      size: '='
+      size: '=',
+      describedBy: '@',
     },
     template,
     replace: true,

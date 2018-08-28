@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 
 export const watch = {
   trigger: {
@@ -83,7 +83,7 @@ export const watch = {
                         script: {
                           lang: 'painless',
                           inline: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()-((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC)`,
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()`,
                           params: {
                             'padding': 10
                           }
@@ -93,7 +93,7 @@ export const watch = {
                         script: {
                           lang: 'painless',
                           inline: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()+((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC)`,
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()`,
                           params: {
                             'padding': 10
                           }

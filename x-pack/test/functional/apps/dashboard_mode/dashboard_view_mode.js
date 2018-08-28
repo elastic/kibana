@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -56,12 +57,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.security.clickUsersSection();
         await PageObjects.security.clickCreateNewUser();
-
         await testSubjects.setValue('userFormUserNameInput', 'dashuser');
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('kibana_user');
         await PageObjects.security.assignRoleToUser('logstash-data');
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.setValue('passwordInput', '123456');
         await testSubjects.setValue('passwordConfirmationInput', '123456');
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'my@email.com');
+        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
         await PageObjects.security.assignRoleToUser('superuser');
 
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
@@ -163,17 +163,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editIconExists = await testSubjects.exists('dashboardPanelEditLink');
-        expect(editIconExists).to.be(false);
-      });
-
-      it('does not show the visualization move icon', async () => {
-        const moveIconExists = await testSubjects.exists('dashboardPanelMoveIcon');
-        expect(moveIconExists).to.be(false);
+        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
+        expect(editLinkExists).to.be(false);
       });
 
       it('does not show the visualization delete icon', async () => {
-        const deleteIconExists = await testSubjects.exists('dashboardPanelRemoveIcon');
+        const deleteIconExists = await dashboardPanelActions.removePanelActionExists();
         expect(deleteIconExists).to.be(false);
       });
 

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import '../saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
@@ -14,6 +33,7 @@ import { uiModules } from 'ui/modules';
 import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { timefilter } from 'ui/timefilter';
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -31,7 +51,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Private, config) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -60,7 +80,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
       return;
     }
 
-    // If the specified category doesn't have a valu ein our display names
+    // If the specified category doesn't have a value in our display names
     // mapping (most likely because the vis specified a random category, not using
     // CATEGORY values), just move it to the OTHER category.
     if (!CATEGORY_DISPLAY_NAMES[categoryName]) {
@@ -201,7 +221,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);

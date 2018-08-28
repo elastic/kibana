@@ -42,7 +42,7 @@ $buttonWarningHoverBackgroundColor: darken($buttonWarningBackgroundColor, 10%);
 $buttonWarningDisabledBackgroundColor: lighten($buttonWarningBackgroundColor, 10%);
 
 // Hollow
-$buttonHollowDiabledTextColor: #dddddd;
+$buttonHollowDisabledTextColor: #dddddd;
 
 @import "button";
 @import "button_group/button_group";

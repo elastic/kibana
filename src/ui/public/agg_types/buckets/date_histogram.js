@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { jstz as tzDetect } from 'jstimezonedetect';
 import _ from 'lodash';
 import chrome from '../../chrome';
@@ -23,7 +42,7 @@ function getInterval(agg) {
 }
 
 function getBounds(vis) {
-  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters) {
+  if (vis.filters && vis.filters.timeRange) {
     return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
   }
 }
@@ -73,7 +92,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'field',
       filterFieldTypes: 'date',
       default: function (agg) {
-        return agg.vis.indexPattern.timeFieldName;
+        return agg._indexPattern.timeFieldName;
       },
       onChange: function (agg) {
         if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
@@ -101,24 +120,17 @@ export const dateHistogramBucketAgg = new BucketAggType({
       modifyAggConfigOnSearchRequestStart: function (agg) {
         setBounds(agg, true);
       },
-      write: function (agg, output) {
-        setBounds(agg);
+      write: function (agg, output, aggs) {
+        setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
 
         const interval = agg.buckets.getInterval();
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        if (isDefaultTimezone) {
-          output.params.time_zone = detectedTimezone || tzOffset;
-        } else {
-          output.params.time_zone = config.get('dateFormat:tz');
-        }
-
         const scaleMetrics = interval.scaled && interval.scale < 1;
-        if (scaleMetrics) {
-          const all = _.every(agg.vis.getAggConfig().bySchemaGroup.metrics, function (agg) {
+        if (scaleMetrics && aggs) {
+          const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
             return agg.type && agg.type.isScalable();
           });
           if (all) {
@@ -128,13 +140,18 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
       }
     },
-
+    {
+      name: 'time_zone',
+      default: () => {
+        const isDefaultTimezone = config.isDefault('dateFormat:tz');
+        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      },
+    },
     {
       name: 'customInterval',
       default: '2h',
       write: _.noop
     },
-
     {
       name: 'format'
     },

@@ -4,38 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import template from './pattern_input.html';
-import './pattern_input.less';
+import React from 'react';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiCodeEditor
+} from '@elastic/eui';
+import { EDITOR } from '../../../../../common/constants';
+import { GrokMode } from '../../../../lib/ace';
 
-const app = uiModules.get('xpack/grokdebugger');
-
-app.directive('patternInput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      onChange: '='
-    },
-    bindToController: true,
-    controllerAs: 'patternInput',
-    controller: class PatternInputController {
-      constructor($scope) {
-        $scope.$watch('patternInput.pattern', (newPattern) => {
-          this.onChange(newPattern);
-        });
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
+export function PatternInput({ value, onChange }) {
+  return (
+    <EuiFormRow
+      label="Grok Pattern"
+      fullWidth
+      data-test-subj="acePatternInput"
+    >
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          width="100%"
+          value={value}
+          onChange={onChange}
+          mode={new GrokMode()}
+          setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 10
-          });
-          editor.$blockScrolling = Infinity;
-        };
-      }
-    }
-  };
-});
+            minLines: EDITOR.PATTERN_MIN_LINES,
+            maxLines: EDITOR.PATTERN_MAX_LINES,
+          }}
+        />
+      </EuiPanel>
+    </EuiFormRow>
+  );
+}

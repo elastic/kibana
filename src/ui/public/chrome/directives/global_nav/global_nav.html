@@ -13,25 +13,27 @@
       href="{{ getHref('/app/kibana#/home') }}"
       data-test-subj="kibanaLogo"
     >
-      <li
-        ng-if="!logoBrand && !smallLogoBrand"
-        aria-label="{{ appTitle }} Logo"
-        class="logo kibana"
-      ></li>
+      <ul>
+        <li
+          ng-if="!logoBrand && !smallLogoBrand"
+          aria-label="{{ appTitle }} home"
+          class="logo kibana"
+        ></li>
 
-      <li
-        ng-if="logoBrand"
-        ng-style="{ 'background': logoBrand }"
-        aria-label="{{ appTitle }} Logo"
-        class="logo hidden-sm"
-      ></li>
+        <li
+          ng-if="logoBrand"
+          ng-style="{ 'background': logoBrand }"
+          aria-label="{{ appTitle }} home"
+          class="logo hidden-sm"
+        ></li>
 
-      <li
-        ng-if="smallLogoBrand"
-        ng-style="{ 'background': smallLogoBrand }"
-        aria-label="{{ appTitle }} Logo"
-        class="logo-small visible-sm hidden-xs"
-      ></li>
+        <li
+          ng-if="smallLogoBrand"
+          ng-style="{ 'background': smallLogoBrand }"
+          aria-label="{{ appTitle }} home"
+          class="logo-small visible-sm hidden-xs"
+        ></li>
+      </ul>
     </a>
   </div>
 

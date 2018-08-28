@@ -111,7 +111,14 @@ describe('lib/auth_redirect', function () {
 
     await authenticate(request, reply);
 
-    sinon.assert.calledWithExactly(reply, Boom.unauthorized());
+    sinon.assert.calledWithExactly(
+      reply,
+      sinon.match({
+        isBoom: true,
+        message: 'Unauthorized',
+        output: { statusCode: 401 },
+      })
+    );
     sinon.assert.notCalled(reply.redirect);
     sinon.assert.notCalled(reply.continue);
   });

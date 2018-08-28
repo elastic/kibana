@@ -1,11 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import expect from 'expect.js';
-import Chance from 'chance';
 
 import { UiApp } from '../ui_app';
 import { UiNavLink } from '../../ui_nav_links';
-
-const chance = new Chance();
 
 function createStubUiAppSpec(extraParams) {
   return {
@@ -18,31 +34,20 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    uses: [
-      'visTypes',
-      'chromeNavControls',
-      'hacks',
-    ],
     ...extraParams
   };
 }
 
-function createStubKbnServer() {
+function createStubKbnServer(extraParams) {
   return {
     plugins: [],
-    uiExports: {
-      appExtensions: {
-        hacks: [
-          'plugins/foo/hack'
-        ]
-      }
-    },
     config: {
       get: sinon.stub()
         .withArgs('server.basePath')
         .returns('')
     },
-    server: {}
+    server: {},
+    ...extraParams,
   };
 }
 
@@ -81,8 +86,12 @@ describe('ui apps / UiApp', () => {
         expect(app.getNavLink()).to.be.a(UiNavLink);
       });
 
-      it('has an empty modules list', () => {
-        expect(app.getModules()).to.eql([]);
+      it('has no main module', () => {
+        expect(app.getMainModuleId()).to.be(undefined);
+      });
+
+      it('has no styleSheetPath', () => {
+        expect(app.getStyleSheetUrlPath()).to.be(undefined);
       });
 
       it('has a mostly empty JSON representation', () => {
@@ -126,11 +135,8 @@ describe('ui apps / UiApp', () => {
         expect(app.getNavLink()).to.be(undefined);
       });
 
-      it('includes main and hack modules', () => {
-        expect(app.getModules()).to.eql([
-          'main.js',
-          'plugins/foo/hack'
-        ]);
+      it('has a main module', () => {
+        expect(app.getMainModuleId()).to.be('main.js');
       });
 
       it('has spec values in JSON representation', () => {
@@ -295,44 +301,26 @@ describe('ui apps / UiApp', () => {
     });
   });
 
-  describe('#getModules', () => {
-    it('returns empty array by default', () => {
+  describe('#getMainModuleId', () => {
+    it('returns undefined by default', () => {
       const app = createUiApp({ id: 'foo' });
-      expect(app.getModules()).to.eql([]);
+      expect(app.getMainModuleId()).to.be(undefined);
     });
 
-    it('returns main module if not using appExtensions', () => {
+    it('returns main module id', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
-      expect(app.getModules()).to.eql(['bar']);
+      expect(app.getMainModuleId()).to.be('bar');
     });
+  });
 
-    it('returns appExtensions for used types only, in alphabetical order, starting with main module', () => {
-      const kbnServer = createStubKbnServer();
-      kbnServer.uiExports.appExtensions = {
-        abc: chance.shuffle([
-          'a',
-          'b',
-          'c',
-        ]),
-        def: chance.shuffle([
-          'd',
-          'e',
-          'f',
-        ])
-      };
+  describe('#getStyleSheetUrlPath', () => {
+    it('returns public path to styleSheetPath', () => {
+      const app = createUiApp(
+        createStubUiAppSpec({ pluginId: 'foo', id: 'foo', styleSheetPath: '/bar/public/baz/style.scss' }),
+        createStubKbnServer({ plugins: [{ id: 'foo', publicDir: '/bar/public' }] })
+      );
 
-      const appExtensionType = chance.shuffle(Object.keys(kbnServer.uiExports.appExtensions))[0];
-      const appSpec = {
-        id: 'foo',
-        main: 'bar',
-        uses: [appExtensionType],
-      };
-
-      const app = createUiApp(appSpec, kbnServer);
-      expect(app.getModules()).to.eql([
-        'bar',
-        ...appExtensionType.split(''),
-      ]);
+      expect(app.getStyleSheetUrlPath()).to.eql('plugins/foo/baz/style.css');
     });
   });
 });

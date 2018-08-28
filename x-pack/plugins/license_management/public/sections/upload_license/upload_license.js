@@ -22,6 +22,9 @@ import {
 } from '@elastic/eui';
 
 export class UploadLicense extends React.PureComponent {
+  componentDidMount() {
+    this.props.addUploadErrorMessage('');
+  }
   send = acknowledge => {
     const file = this.file;
     const fr = new FileReader();
@@ -89,7 +92,6 @@ export class UploadLicense extends React.PureComponent {
       this.props.addUploadErrorMessage('You must select a license file.');
     }
   };
-
   render() {
     const { currentLicenseType, applying } = this.props;
     return (
@@ -132,7 +134,7 @@ export class UploadLicense extends React.PureComponent {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill isLoading={applying} onClick={this.submit}>
+                <EuiButton data-test-subj="uploadLicenseButton" fill isLoading={applying} onClick={this.submit}>
                   {applying ? 'Uploading...' : 'Upload'}
                 </EuiButton>
               </EuiFlexItem>

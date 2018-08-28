@@ -12,7 +12,7 @@ import Timeline from '../index';
 import props from './props.json';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 
-describe('Timline', () => {
+describe('Timeline', () => {
   beforeAll(() => {
     mockMoment();
   });

@@ -28,7 +28,6 @@
   -webkit-text-size-adjust: 100%;
   line-height: 1.5;
   color: @text-color;
-  font-size: 16px;
   word-wrap: break-word;
 }
 
@@ -553,4 +552,43 @@
 .markdown-body .task-list-item input {
   margin: 0 0.2em 0.25em -1.6em;
   vertical-align: middle;
+}
+
+// SASSTODO: Make sure these colors convert to theme variables
+.theme-dark {
+  .markdown-body {
+    color: #cecece;
+  }
+
+  .markdown-body code {
+    color: #ffffff;
+    background-color: #5f5f5f;
+  }
+
+  .markdown-body pre {
+    background-color: #5f5f5f;
+    border: none;
+  }
+
+  .markdown-body table {
+    border-left: 1px solid @gray6;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border-top: 1px solid @gray6;
+    border-bottom: 1px solid @gray6;
+
+    &:last-child {
+      border-right: 1px solid @gray6;
+    }
+  }
+
+  .markdown-body table tr {
+    border-top: 1px solid @gray6;
+  }
+
+  .markdown-body blockquote {
+    color: #8d8d8d;
+  }
 }

@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'ml',
     title: 'Machine Learning',
     description: 'Automatically model the normal behavior of your time series data to detect anomalies.',
-    icon: '/plugins/ml/assets/app_ml.svg',
+    icon: 'machineLearningApp',
     path: '/app/ml',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA

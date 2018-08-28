@@ -20,7 +20,10 @@
   </div>
 
   <div class="details-select">
-    <select class="kuiSelect" ng-model="detailsMode" ng-change="detailsModeChanged(detailsMode)">
+    <select class="kuiSelect"
+      ng-model="detailsMode"
+      ng-change="detailsModeChanged(detailsMode)"
+      aria-label="Select metric details display">
       <option value="distribution">distribution of values</option>
       <option value="top">top values</option>
     </select>

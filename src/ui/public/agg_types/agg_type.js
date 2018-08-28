@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { AggParams } from './agg_params';
 import { fieldFormats } from '../registry/field_formats';
@@ -43,7 +62,7 @@ function AggType(config) {
    *
    * @method makeLabel
    * @param {AggConfig} aggConfig - an agg config of this type
-   * @returns {string} - label that can be used in the ui to descripe the aggConfig
+   * @returns {string} - label that can be used in the ui to describe the aggConfig
    */
   this.makeLabel = config.makeLabel || _.constant(this.name);
 
@@ -51,7 +70,7 @@ function AggType(config) {
    * Describes if this aggType creates data that is ordered, and if that ordered data
    * is some sort of time series.
    *
-   * If the aggType does not create ordered data, set this to something "falsey".
+   * If the aggType does not create ordered data, set this to something "falsy".
    *
    * If this does create orderedData, then the value should be an object.
    *
@@ -155,11 +174,11 @@ function AggType(config) {
 
 /**
  * Pick a format for the values produced by this agg type,
- * overriden by several metrics that always output a simple
+ * overridden by several metrics that always output a simple
  * number
  *
  * @param  {agg} agg - the agg to pick a format for
- * @return {FieldFromat}
+ * @return {FieldFormat}
  */
 AggType.prototype.getFormat = function (agg) {
   const field = agg.getField();

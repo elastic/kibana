@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import AggConfigResult from '../../vis/agg_config_result';
 import { TabifyTable } from './_table';
@@ -44,7 +63,8 @@ function TabbedAggResponseWriter(aggs, opts) {
   // to their aggConfig and enable the filterbar and tooltip formatters
   this.asAggConfigResults = !!this.opts.asAggConfigResults;
 
-  this.columns = tabifyGetColumns(aggs, this.minimalColumns);
+  this.aggs = aggs;
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.minimalColumns);
   this.aggStack = _.pluck(this.columns, 'aggConfig');
 
   this.root = new TabifyTableGroup();
@@ -137,7 +157,7 @@ TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
 
   if (this.minimalColumns) return;
 
-  // hierarchical vis creats additional columns for each bucket
+  // hierarchical vis creates additional columns for each bucket
   // we will remove those too
   const mCol = this.columns.splice(i, 1).pop();
   const mI = _.findIndex(this.aggStack, function (agg) {
@@ -214,15 +234,15 @@ TabbedAggResponseWriter.prototype.cell = function (agg, value, block, filters) {
     value = new AggConfigResult(agg, this.acrStack[0], value, value, filters);
   }
 
-  const staskResult = this.asAggConfigResults && value.type === 'bucket';
+  const stackResult = this.asAggConfigResults && value.type === 'bucket';
 
   this.rowBuffer.push(value);
-  if (staskResult) this.acrStack.unshift(value);
+  if (stackResult) this.acrStack.unshift(value);
 
   if (_.isFunction(block)) block.call(this);
 
   this.rowBuffer.pop(value);
-  if (staskResult) this.acrStack.shift();
+  if (stackResult) this.acrStack.shift();
 
   return value;
 };

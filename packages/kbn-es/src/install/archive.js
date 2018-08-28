@@ -1,8 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
-const { log: defaultLog, extractTarball } = require('../utils');
+const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 
 /**
@@ -30,17 +49,17 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   log.info('extracting %s', chalk.bold(archive));
-  await extractTarball(archive, installPath);
+  await decompress(archive, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
-  if (license !== 'oss') {
-    await appendToConfig(
-      installPath,
-      'xpack.license.self_generated.type',
-      license
-    );
-
+  if (license === 'trial') {
+    // starting in 6.3, security is disabled by default. Since we bootstrap
+    // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  }
+
+  if (license !== 'oss') {
+    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
     await configureKeystore(installPath, password, log);
   }
 
@@ -48,7 +67,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
 };
 
 /**
- * Recurive deletion for a directory
+ * Recursive deletion for a directory
  *
  * @param {String} path
  */
@@ -75,11 +94,7 @@ function rmrfSync(path) {
  * @param {String} value
  */
 async function appendToConfig(installPath, key, value) {
-  fs.appendFileSync(
-    path.resolve(installPath, ES_CONFIG),
-    `${key}: ${value}\n`,
-    'utf8'
-  );
+  fs.appendFileSync(path.resolve(installPath, ES_CONFIG), `${key}: ${value}\n`, 'utf8');
 }
 
 /**

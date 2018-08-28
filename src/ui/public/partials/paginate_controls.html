@@ -65,6 +65,7 @@
     <li ng-style="{'visibility':'hidden'}" ng-if="page.last">
       <button
         class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        data-test-subj="paginateNext"
         ng-click="paginate.goToPage(page.next)"
       >
         <span class="euiButtonEmpty__content">»</span>
@@ -73,6 +74,7 @@
     <li ng-style="{'visibility':'visible'}" ng-if="!page.last">
       <button
         class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        data-test-subj="paginateNext"
         ng-click="paginate.goToPage(page.next)"
       >
         <span class="euiButtonEmpty__content">»</span>

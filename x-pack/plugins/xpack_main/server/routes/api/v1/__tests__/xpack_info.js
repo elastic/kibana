@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import sinon from 'sinon';
 
 import { xpackInfoRoute } from '../xpack_info';
@@ -43,7 +42,11 @@ describe('XPackInfo routes', () => {
 
     sinon.assert.calledWithExactly(
       replyStub,
-      Boom.notFound()
+      sinon.match({
+        isBoom: true,
+        message: 'Not Found',
+        output: { statusCode: 404 },
+      })
     );
   });
 

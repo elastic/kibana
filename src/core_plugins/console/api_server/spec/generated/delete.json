@@ -1,6 +1,7 @@
 {
-  "{index}/{type}/{id}": {
+  "delete": {
     "url_params": {
+      "include_type_name": "",
       "wait_for_active_shards": "",
       "parent": "",
       "refresh": [
@@ -22,7 +23,9 @@
       "DELETE"
     ],
     "patterns": [
-      "{indices}/{type}/{id}"
-    ]
+      "{indices}/{type}/{id}",
+      "{indices}/_doc/{id}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete.html"
   }
 }

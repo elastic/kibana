@@ -17,7 +17,7 @@ export function MonitoringTableToolBar(props) {
   const searchBox = props.showSearchBox
     ? (
       <KuiToolBarSearchBox
-        filter={props.filterText}
+        defaultValue={props.filterText}
         onFilter={props.onFilterChange}
         placeholder={props.placeholder}
         data-test-subj="monitoringTableToolBar"
@@ -37,9 +37,18 @@ export function MonitoringTableToolBar(props) {
     )
     : null;
 
+  const totalRows = Boolean(props.showTotalRows)
+    ? (
+      <p tabIndex="0" className="monitoringTableToolbarTotalRows">
+        {props.totalRows} in total
+      </p>
+    )
+    : null;
+
   return (
     <KuiToolBar>
       { searchBox }
+      { totalRows }
       { props.renderToolBarSections(props) }
       { paginationSection }
     </KuiToolBar>
@@ -47,5 +56,6 @@ export function MonitoringTableToolBar(props) {
 }
 MonitoringTableToolBar.defaultProps = {
   renderToolBarSections: noop,
-  showSearchBox: true
+  showSearchBox: true,
+  showTotalRows: true
 };

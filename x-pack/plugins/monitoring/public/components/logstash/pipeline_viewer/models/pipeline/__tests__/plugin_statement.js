@@ -39,6 +39,17 @@ describe('PluginStatement class', () => {
       expect(pluginStatement.meta).to.be(meta);
       expect(pluginStatement.pluginType).to.be('output');
       expect(pluginStatement.name).to.be('elasticsearch');
+      expect(pluginStatement.vertex).to.eql(pluginVertex);
+    });
+  });
+
+  describe('toList', () => {
+    it('creates a list with plugin statement in it', () => {
+      const pluginStatement = PluginStatement.fromPipelineGraphVertex(pluginVertex);
+
+      const result = pluginStatement.toList();
+      expect(result.length).to.be(1);
+      expect(result[0].id).to.be('es_output');
     });
   });
 });

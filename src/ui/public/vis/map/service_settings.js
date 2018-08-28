@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
@@ -20,7 +39,7 @@ uiModules.get('kibana')
 
     /**
      *  Unescape a url template that was escaped by encodeURI() so leaflet
-     *  will be able to correctly locate the varables in the template
+     *  will be able to correctly locate the variables in the template
      *  @param  {String} url
      *  @return {String}
      */
@@ -57,7 +76,7 @@ uiModules.get('kibana')
             return response.data;
           } catch (e) {
             if (!e) {
-              e = new Error('Unkown error');
+              e = new Error('Unknown error');
             }
             if (!(e instanceof Error)) {
               e = new Error(e.data || `status ${e.statusText || e.status}`);
@@ -163,6 +182,11 @@ uiModules.get('kibana')
             }
           }
         }
+      }
+
+      getEMSHotLink(fileLayer) {
+        const id = `file/${fileLayer.name}`;
+        return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
     }
 

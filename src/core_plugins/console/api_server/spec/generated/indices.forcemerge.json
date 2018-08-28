@@ -1,5 +1,5 @@
 {
-  "_forcemerge": {
+  "indices.forcemerge": {
     "url_params": {
       "flush": "__flag__",
       "ignore_unavailable": "__flag__",
@@ -11,8 +11,7 @@
         "all"
       ],
       "max_num_segments": "dynamic",
-      "only_expunge_deletes": "__flag__",
-      "wait_for_merge": "__flag__"
+      "only_expunge_deletes": "__flag__"
     },
     "methods": [
       "POST"
@@ -20,6 +19,7 @@
     "patterns": [
       "_forcemerge",
       "{indices}/_forcemerge"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
   }
 }

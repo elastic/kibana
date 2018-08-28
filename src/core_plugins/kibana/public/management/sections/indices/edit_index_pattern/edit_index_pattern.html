@@ -5,7 +5,7 @@
       data-test-subj="editIndexPattern"
       class="kuiViewContent"
       role="region"
-      aria-label="Index pattern details"
+      aria-label="{{'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
     >
       <!-- Header -->
       <kbn-management-index-header
@@ -18,14 +18,19 @@
       <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
         <span class="label label-success">
           <span class="kuiIcon fa-clock-o"></span>
-          <span>Time Filter field name</span>: {{indexPattern.timeFieldName}}
+          <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+                i18n-default-message="Time Filter field name: {timeFieldName}"
+                i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
         </span>
       </p>
 
       <p class="kuiText kuiVerticalRhythm">
-        This page lists every field in the <strong>{{::indexPattern.title}}</strong> index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch
+        <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+          i18n-default-message="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
+          i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
         <a target="_window" class="euiLink euiLink--primary" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
-          Mapping API
+          <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink"
+                i18n-default-message="Mapping API"></span>
           <i aria-hidden="true" class="fa-link fa"></i>
         </a>
       </p>
@@ -37,16 +42,16 @@
       >
         <div class="kuiInfoPanelHeader">
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-          <span class="kuiInfoPanelHeader__title">
-            Support for repeating index patterns removed
+          <span class="kuiInfoPanelHeader__title"
+                i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternHeader"
+                i18n-default-message="Support for repeating index patterns removed">
           </span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
-            Support for time-interval based index patterns has been removed! In the next major
-            version of Kibana this index patterns will stop working. Migrate saved objects that
-            use this index pattern to a wildcard pattern and delete this one.
+            <span i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternLabel"
+                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana this index patterns will stop working. Migrate saved objects that use this index pattern to a wildcard pattern and delete this one."></span>
           </div>
         </div>
       </div>
@@ -57,14 +62,16 @@
       >
         <div class="kuiInfoPanelHeader">
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
-          <span class="kuiInfoPanelHeader__title">
-            Mapping conflict
-          </span>
+          <span class="kuiInfoPanelHeader__title"
+                i18n-id="kbn.management.editIndexPattern.mappingConflictHeader"
+                i18n-default-message="Mapping conflict"></span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div class="kuiInfoPanelBody__message">
-            {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
+            <span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
+                  i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data."
+                  i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
           </div>
         </div>
       </div>
@@ -96,9 +103,9 @@
             <input
               class="kuiSearchInput__input"
               type="text"
-              aria-label="Filter"
+              aria-label="{{'kbn.management.editIndexPattern.fields.filterAria' | i18n: {defaultMessage: 'Filter'} }}"
               ng-model="fieldFilter"
-              placeholder="Filter"
+              placeholder="{{'kbn.management.editIndexPattern.fields.filterPlaceholder' | i18n: {defaultMessage: 'Filter'} }}"
               data-test-subj="indexPatternFieldFilter"
             >
           </div>
@@ -115,7 +122,9 @@
             ng-change="changeFilter('indexedFieldTypeFilter', indexedFieldTypeFilter)"
             ng-options="o for o in indexedFieldTypes"
           >
-            <option value="">All field types</option>
+            <option value=""
+                    i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
+                    i18n-default-message="All field types"></option>
           </select>
         </div>
 
@@ -130,7 +139,9 @@
             ng-change="changeFilter('scriptedFieldLanguageFilter', scriptedFieldLanguageFilter)"
             ng-options="o for o in scriptedFieldLanguages"
           >
-            <option value="">All languages</option>
+            <option value=""
+                    i18n-id="kbn.management.editIndexPattern.fields.allLangsDropDown"
+                    i18n-default-message="All languages"></option>
           </select>
         </div>
       </form>

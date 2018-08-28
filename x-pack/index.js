@@ -21,6 +21,8 @@ import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { consoleExtensions } from './plugins/console_extensions';
+import { notifications } from './plugins/notifications';
+import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 
 module.exports = function (kibana) {
   return [
@@ -40,6 +42,8 @@ module.exports = function (kibana) {
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),
-    consoleExtensions(kibana)
+    consoleExtensions(kibana),
+    notifications(kibana),
+    kueryAutocomplete(kibana)
   ];
 };

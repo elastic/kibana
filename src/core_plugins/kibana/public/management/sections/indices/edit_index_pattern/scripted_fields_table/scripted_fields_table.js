@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 'ui/scripting_languages';
@@ -16,7 +35,9 @@ import {
   CallOuts,
 } from './components';
 
-export class ScriptedFieldsTable extends Component {
+import { I18nProvider, injectI18n } from '@kbn/i18n/react';
+
+export class ScriptedFieldsTableComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     fieldFilter: PropTypes.string,
@@ -122,14 +143,23 @@ export class ScriptedFieldsTable extends Component {
       return null;
     }
 
+    const { intl } = this.props;
+    const title = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteFieldLabel', defaultMessage: 'Delete scripted field \'{fieldName}\'?' },
+      { fieldName: fieldToDelete.name });
+    const cancelButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.cancelButton', defaultMessage: 'Cancel' });
+    const confirmButtonText = intl.formatMessage(
+      { id: 'kbn.management.editIndexPattern.scripted.deleteField.deleteButton', defaultMessage: 'Delete' });
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Delete scripted field '${fieldToDelete.name}'?`}
+          title={title}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteField}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={cancelButtonText}
+          confirmButtonText={confirmButtonText}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>
@@ -145,22 +175,26 @@ export class ScriptedFieldsTable extends Component {
     const items = this.getFilteredItems();
 
     return (
-      <div>
-        <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+      <I18nProvider>
+        <div>
+          <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
 
-        {this.renderCallOuts()}
+          {this.renderCallOuts()}
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-        <Table
-          indexPattern={indexPattern}
-          items={items}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-          deleteField={this.startDeleteField}
-        />
+          <Table
+            indexPattern={indexPattern}
+            items={items}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+            deleteField={this.startDeleteField}
+          />
 
-        {this.renderDeleteConfirmationModal()}
-      </div>
+          {this.renderDeleteConfirmationModal()}
+        </div>
+      </I18nProvider>
     );
   }
 }
+
+export const ScriptedFieldsTable = injectI18n(ScriptedFieldsTableComponent);

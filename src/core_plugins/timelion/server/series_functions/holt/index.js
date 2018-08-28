@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
 import ses from './lib/ses';
@@ -39,7 +58,7 @@ export default new Chainable('holt', {
     {
       name: 'season',
       types: ['string'],
-      help: 'How long is the season, eg, 1w if you pattern repeats weekly. (Only useful with gamma)'
+      help: 'How long is the season, e.g., 1w if you pattern repeats weekly. (Only useful with gamma)'
     },
     {
       name: 'sample',
@@ -68,7 +87,7 @@ export default new Chainable('holt', {
 
       // Single exponential smoothing
       // This is basically a weighted moving average in which the older
-      // points exponentially degrade relative to the alpha, eg:
+      // points exponentially degrade relative to the alpha, e.g.:
       // 0.8^1, 0.8^2, 0.8^3, etc
 
       const times = _.map(series.data, 0);
@@ -84,7 +103,7 @@ export default new Chainable('holt', {
 
       if (alpha != null && beta != null && gamma != null) {
         if (!sample || !args.byName.season || sample < 2) {
-          throw new Error('Must specificy a season length and a sample size >= 2');
+          throw new Error('Must specify a season length and a sample size >= 2');
         }
         const season = Math.round(toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval));
         points = tes(points, alpha, beta, gamma, season, sample);

@@ -11,6 +11,7 @@
       "_snapshot/_status",
       "_snapshot/{repository}/_status",
       "_snapshot/{repository}/{snapshot}/_status"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
   }
 }

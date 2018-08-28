@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { edgeFactory } from '../edge_factory';
-import { PlainEdge } from '../plain_edge';
+import { Edge } from '../edge';
 import { BooleanEdge } from '../boolean_edge';
 
 describe('edgeFactory', () => {
@@ -27,9 +27,9 @@ describe('edgeFactory', () => {
     };
   });
 
-  it('returns a PlainEdge when edge type is plain', () => {
+  it('returns an Edge when edge type is plain', () => {
     edgeJson.type = 'plain';
-    expect(edgeFactory(graph, edgeJson)).to.be.a(PlainEdge);
+    expect(edgeFactory(graph, edgeJson)).to.be.a(Edge);
   });
 
   it('returns a BooleanEdge when edge type is boolean', () => {

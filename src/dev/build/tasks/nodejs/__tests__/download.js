@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { createServer } from 'http';
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
@@ -7,7 +26,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import Wreck from 'wreck';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
 const TMP_DESTINATION = resolve(__dirname, '__tmp__');
@@ -19,12 +38,16 @@ after(async () => {
 });
 
 describe('src/dev/build/tasks/nodejs/download', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
-  const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', onLogLine);
+  const log = new ToolingLog({
+    level: 'verbose',
+    writeTo: {
+      write: onLogLine
+    }
+  });
 
   const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
   const createSendHandler = (send) => (req, res) => {
@@ -151,7 +174,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
       });
     });
 
-    it('makes 6 sequests if `retries: 5` and all failed', async () => {
+    it('makes 6 requests if `retries: 5` and all failed', async () => {
       let reqCount = 0;
       nextHandler = function sequenceHandler(req, res) {
         reqCount += 1;
@@ -177,7 +200,7 @@ describe('src/dev/build/tasks/nodejs/download', () => {
 
   describe('sha256 option not supplied', () => {
     before(() => {
-      sinon.spy(Wreck, 'request');
+      sinon.stub(Wreck, 'request');
     });
     after(() => {
       Wreck.request.restore();

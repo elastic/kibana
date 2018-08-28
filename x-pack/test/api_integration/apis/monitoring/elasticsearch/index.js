@@ -9,5 +9,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./nodes'));
     loadTestFile(require.resolve('./node_detail'));
+    loadTestFile(require.resolve('./node_detail_advanced'));
+    loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./index_detail'));
   });
 }

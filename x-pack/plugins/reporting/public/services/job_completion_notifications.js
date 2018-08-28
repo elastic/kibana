@@ -7,18 +7,19 @@
 import { uiModules } from 'ui/modules';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../common/constants';
 
-class JobCompletionNotifications {
-
+export const jobCompletionNotifications = {
   add(jobId) {
     const jobs = this.getAll();
     jobs.push(jobId);
     this._set(jobs);
-  }
+  },
 
   getAll() {
-    const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+    const sessionValue = sessionStorage.getItem(
+      JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY
+    );
     return sessionValue ? JSON.parse(sessionValue) : [];
-  }
+  },
 
   remove(jobId) {
     const jobs = this.getAll();
@@ -29,14 +30,16 @@ class JobCompletionNotifications {
 
     jobs.splice(index, 1);
     this._set(jobs);
-  }
+  },
 
   _set(jobs) {
-    sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
-  }
-}
+    sessionStorage.setItem(
+      JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
+      JSON.stringify(jobs)
+    );
+  },
+};
 
-uiModules.get('xpack/reporting')
-  .factory('reportingJobCompletionNotifications', function () {
-    return new JobCompletionNotifications();
-  });
+uiModules
+  .get('xpack/reporting')
+  .factory('reportingJobCompletionNotifications', () => jobCompletionNotifications);

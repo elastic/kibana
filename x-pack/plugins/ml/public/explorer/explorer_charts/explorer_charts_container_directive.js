@@ -19,13 +19,13 @@ import moment from 'moment';
 import rison from 'rison-node';
 
 import chrome from 'ui/chrome';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 import template from './explorer_charts_container.html';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlExplorerChartsContainer', function ($window, timefilter) {
+module.directive('mlExplorerChartsContainer', function ($window) {
 
   function link(scope, element) {
     // Create a div for the tooltip.

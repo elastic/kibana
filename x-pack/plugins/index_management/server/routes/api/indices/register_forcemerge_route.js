@@ -11,8 +11,6 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 
 async function forcemergeIndices(callWithRequest, indices, maxNumSegments) {
   const params = {
-    ignoreUnavailable: true,
-    allowNoIndices: false,
     expandWildcards: 'none',
     index: indices,
   };

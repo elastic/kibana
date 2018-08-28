@@ -6,7 +6,7 @@
 
 import { get, last } from 'lodash';
 import { createQuery } from '../create_query';
-import { ElasticsearchMetric } from '../metrics';
+import { LogstashMetric } from '../metrics';
 
 function scalarCounterAggregation(field, fieldPath, ephemeralIdField, maxBucketSize) {
   const fullPath = `${fieldPath}.${field}`;
@@ -166,7 +166,7 @@ export async function getPipelineStatsAggregation(callWithRequest, req, logstash
     type: 'logstash_stats',
     start,
     end,
-    metric: ElasticsearchMetric.getMetricFields(),
+    metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters
   });

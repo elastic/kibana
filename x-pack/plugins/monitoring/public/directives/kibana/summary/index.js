@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import template from './index.html';
+import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringKibanaSummary', () => {
   return {
     restrict: 'E',
-    template: template,
     scope: {
       kibana: '='
+    },
+    link(scope, $el) {
+      scope.$watch('kibana', kibana => {
+        render(<DetailStatus stats={kibana} />, $el[0]);
+      });
     }
   };
 });

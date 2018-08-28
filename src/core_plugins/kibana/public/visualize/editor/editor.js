@@ -1,7 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
+import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
-import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
@@ -22,12 +41,14 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { timefilter } from 'ui/timefilter';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -37,7 +58,7 @@ uiRoutes
         }
 
         return savedVisualizations.get($route.current.params)
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             '*': '/visualize'
           }));
       }
@@ -46,7 +67,7 @@ uiRoutes
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, courier, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
@@ -55,7 +76,7 @@ uiRoutes
               savedVis.id);
             return savedVis;
           })
-          .catch(courier.redirectWhenMissing({
+          .catch(redirectWhenMissing({
             'visualization': '/visualize',
             'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
             'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
@@ -68,7 +89,7 @@ uiRoutes
 uiModules
   .get('app/visualize', [
     'kibana/notify',
-    'kibana/courier'
+    'kibana/url'
   ])
   .directive('visualizeApp', function () {
     return {
@@ -78,7 +99,20 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor(
+  $scope,
+  $element,
+  $route,
+  AppState,
+  $window,
+  kbnUrl,
+  redirectWhenMissing,
+  Private,
+  Promise,
+  config,
+  kbnBaseUrl,
+  localStorage
+) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -91,6 +125,19 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   // vis is instance of src/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
+
+  // adds top level search source to the stack to which global filters are applied
+  const getTopLevelSearchSource = (searchSource) => {
+    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
+    return searchSource;
+  };
+
+  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
+  const globalFiltersSearchSource = searchSource.create();
+  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
+  topLevelSearchSource.setParent(globalFiltersSearchSource);
+
+
   $scope.vis = vis;
 
   $scope.topNavMenu = [{
@@ -111,6 +158,21 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     description: 'Share Visualization',
     template: require('plugins/kibana/visualize/editor/panels/share.html'),
     testId: 'visualizeShareButton',
+  }, {
+    key: 'inspect',
+    description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
+    disableButton() {
+      return !vis.hasInspector();
+    },
+    run() {
+      vis.openInspector().bindToAngularScope($scope);
+    },
+    tooltip() {
+      if (!vis.hasInspector()) {
+        return 'This visualization doesn\'t support any inspectors.';
+      }
+    }
   }, {
     key: 'refresh',
     description: 'Refresh',
@@ -144,11 +206,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {
+    query: searchSource.getOwnField('query') || {
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
     },
-    filters: searchSource.getOwn('filter') || [],
+    filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState
   };
 
@@ -164,7 +226,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       Promise.try(function () {
         vis.setState(appState.vis);
       })
-        .catch(courier.redirectWhenMissing({
+        .catch(redirectWhenMissing({
           'index-pattern-field': '/visualize'
         }));
     }
@@ -188,9 +250,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.timefilter = timefilter;
-    $scope.timeRange = timefilter.time;
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
+    $scope.timeRange = timefilter.getTime();
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -206,7 +267,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index")',
+      'searchSource.getField("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
@@ -219,28 +280,52 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
 
     const updateTimeRange = () => {
-      $scope.timeRange = timefilter.time;
+      $scope.timeRange = timefilter.getTime();
+      // In case we are running in embedded mode (i.e. we used the visualize loader to embed)
+      // the visualization, we need to update the timeRange on the visualize handler.
+      if ($scope._handler) {
+        $scope._handler.update({
+          timeRange: $scope.timeRange,
+        });
+      }
     };
 
     timefilter.enableAutoRefreshSelector();
-    timefilter.on('update', updateTimeRange);
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      $state.save();
+      $scope.fetch();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
+      const globalFilters = queryFilter.getGlobalFilters();
+      savedVis.searchSource.setField('query', $state.query);
+      savedVis.searchSource.setField('filter', $state.filters);
+      globalFiltersSearchSource.setField('filter', globalFilters);
       $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {
+      if ($scope._handler) {
+        $scope._handler.destroy();
+      }
       savedVis.destroy();
       stateMonitor.destroy();
-      timefilter.off('update', updateTimeRange);
     });
+
+    if (!$scope.chrome.getVisible()) {
+      getVisualizeLoader().then(loader => {
+        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
+          timeRange: $scope.timeRange,
+          uiState: $scope.uiState,
+          appState: $state,
+          listenOnChange: false
+        });
+      });
+    }
   }
 
   $scope.updateQueryAndFetch = function (query) {
@@ -298,26 +383,19 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
-
     $state.linked = false;
-    const parent = searchSource.getParent(true);
-    const parentsParent = parent.getParent(true);
+    const searchSourceParent = searchSource.getParent();
+    const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
-    parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
+    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
-    // copy over all state except "aggs", "query" and "filter"
-    _(parent.toJSON())
-      .omit(['aggs', 'filter', 'query'])
-      .forOwn(function (val, key) {
-        searchSource.set(key, val);
-      })
-      .commit();
+    $state.query = searchSourceParent.getField('query');
+    $state.filters = searchSourceParent.getField('filter');
+    searchSource.setField('index', searchSourceParent.getField('index'));
+    searchSource.setParent(searchSourceGrandparent);
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
-    searchSource.inherits(parentsParent);
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $scope.fetch();
   };

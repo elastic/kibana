@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { createSelector } from 'reselect';
 import { LOCATION_UPDATE } from './location';
 import { toQuery, legacyDecodeURIComponent } from '../utils/url';
-import { getDefaultTransactionId } from './transactionDistribution';
-import { getDefaultTransactionType } from './service';
+import { getDefaultTransactionId } from './reactReduxRequest/transactionDistribution';
+import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
@@ -26,6 +26,7 @@ function urlParams(state = {}, action) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
+        processorEvent,
         serviceName,
         transactionType,
         transactionName,
@@ -37,24 +38,25 @@ function urlParams(state = {}, action) {
         detailTab,
         spanId,
         page,
-        sortBy,
-        sortOrder,
-        q
+        sortDirection,
+        sortField,
+        kuery
       } = toQuery(action.location.search);
 
       return {
         ...state,
 
         // query params
-        q,
-        sortBy,
-        sortOrder,
+        sortDirection,
+        sortField,
         page: toNumber(page) || 0,
         transactionId,
         detailTab,
         spanId: toNumber(spanId),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
+        processorEvent,
         serviceName,
         transactionType: legacyDecodeURIComponent(transactionType),
         transactionName: legacyDecodeURIComponent(transactionName),
@@ -87,12 +89,14 @@ function getPathParams(pathname) {
   switch (pageName) {
     case 'transactions':
       return {
+        processorEvent: 'transaction',
         serviceName: paths[0],
         transactionType: paths[2],
         transactionName: paths[3]
       };
     case 'errors':
       return {
+        processorEvent: 'error',
         serviceName: paths[0],
         errorGroupId: paths[2]
       };

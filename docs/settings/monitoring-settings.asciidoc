@@ -1,0 +1,130 @@
+[role="xpack"]
+[[monitoring-settings-kb]]
+=== Monitoring Settings in Kibana
+++++
+<titleabbrev>Monitoring Settings</titleabbrev>
+++++
+
+By default, the Monitoring application is enabled, but data collection
+is disabled.  When you first start {kib} monitoring, you will be prompted to
+enable data collection.
+
+You can adjust how monitoring data is
+collected from {kib} and displayed in {kib} by configuring settings in the
+`kibana.yml` file. There are also `xpack.monitoring.elasticsearch.*` settings,
+which support the same values as <<settings,{kib} configuration settings>>.
+
+To control how data is collected from your {es} nodes, you configure
+{ref}/monitoring-settings.html[`xpack.monitoring.collection`
+settings] in `elasticsearch.yml`. To control how monitoring data is collected
+from Logstash, you configure
+{logstash-ref}/configuring-logstash.html#monitoring-settings[`xpack.monitoring` settings]
+in `logstash.yml`.
+
+For more information, see
+{xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
+
+[float]
+[[monitoring-general-settings]]
+==== General Monitoring Settings
+
+`xpack.monitoring.enabled`::
+Set to `true` (default) to enable {monitoring} in {kib}. Unlike the
+`xpack.monitoring.ui.enabled` setting, when this setting is `false`, the
+monitoring back-end does not run and {kib} stats are not sent to the monitoring
+cluster.
+
+`xpack.monitoring.elasticsearch.url`::
+Specifies the location of the {es} cluster where your monitoring data is stored.
+By default, this is the same as the `elasticsearch.url`. This setting enables
+you to use a single {kib} instance to search and visualize data in your
+production cluster as well as monitor data sent to a dedicated monitoring
+cluster.
+
+`xpack.monitoring.elasticsearch.username`::
+Specifies the user ID that {kib} uses for authentication when it retrieves data
+from the monitoring cluster. If not set, {kib} uses the value of the
+`elasticsearch.username` setting.
+
+`xpack.monitoring.elasticsearch.password`::
+Specifies the password that {kib} uses for authentication when it retrieves data
+from the monitoring cluster. If not set, {kib} uses the value of the
+`elasticsearch.password` setting.
+
+`xpack.monitoring.report_stats`::
+deprecated[6.3.0, Use `xpack.xpack_main.telemetry.enabled` instead.]
+
+`xpack.xpack_main.telemetry.enabled`::
+Set to `true` (default) to send cluster statistics to Elastic. Reporting your
+cluster statistics helps us improve your user experience. Your data is never
+shared with anyone. Set to `false` to disable statistics reporting from any
+browser connected to the {kib} instance. You can also opt out through the
+*Advanced Settings* in {kib}.
+
+`xpack.monitoring.elasticsearch.pingTimeout`::
+Specifies the time in milliseconds to wait for {es} to respond to internal
+health checks. By default, it matches the `elasticsearch.pingTimeout` setting,
+which has a default value of `30000`.
+
+[float]
+[[monitoring-collection-settings]]
+==== Monitoring Collection Settings
+
+These settings control how data is collected from {kib}.
+
+`xpack.monitoring.kibana.collection.enabled`::
+Set to `true` (default) to enable data collection from the {kib} NodeJS server
+for {kib} Dashboards to be featured in the Monitoring.
+
+`xpack.monitoring.kibana.collection.interval`::
+Specifies the number of milliseconds to wait in between data sampling on the
+{kib} NodeJS server for the metrics that are displayed in the {kib} dashboards.
+Defaults to `10000` (10 seconds).
+
+
+[float]
+[[monitoring-ui-settings]]
+==== Monitoring UI Settings
+
+These settings adjust how the {kib} Monitoring page displays monitoring data.
+However, the defaults work best in most circumstances. For more information
+about configuring {kib}, see
+{kibana-ref}/settings.html[Setting Kibana Server Properties].
+
+`xpack.monitoring.ui.enabled`::
+Set to `false` to hide the Monitoring UI in {kib}. The monitoring back-end
+continues to run as an agent for sending {kib} stats to the monitoring
+cluster. Defaults to `true`.
+
+`xpack.monitoring.max_bucket_size`::
+Specifies the number of term buckets to return out of the overall terms list when
+performing terms aggregations to retrieve index and node metrics. For more
+information about the `size` parameter, see
+{ref}/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size[Terms Aggregation].
+Defaults to `10000`.
+
+`xpack.monitoring.min_interval_seconds`::
+Specifies the minimum number of seconds that a time bucket in a chart can
+represent. Defaults to 10. If you modify the
+`xpack.monitoring.collection.interval` in `elasticsearch.yml`, use the same
+value in this setting.
+
+[float]
+[[monitoring-ui-cgroup-settings]]
+===== Monitoring UI Container Settings
+
+The Monitoring UI exposes the Cgroup statistics that we collect for you to make
+better decisions about your container performance, rather than guessing based on
+the overall machine performance. If you are not running your applications in a
+container, then Cgroup statistics are not useful.
+
+`xpack.monitoring.ui.container.elasticsearch.enabled`::
+
+For {es} clusters that are running in containers, this setting changes the
+*Node Listing* to display the CPU utilization based on the reported Cgroup
+statistics. It also adds the calculated Cgroup CPU utilization to the
+*Node Overview* page instead of the overall operating system's CPU
+utilization. Defaults to `false`.
++
+[role="screenshot"]
+image::images/monitoring-containers.png[Elasticsearch Inside a Container]

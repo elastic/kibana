@@ -23,6 +23,7 @@ import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { SORT_ASCENDING } from '../../../../common/constants';
 import { formatMetric } from '../../../lib/format_number';
+import { timefilter } from 'ui/timefilter';
 
 const filterFields = [ 'id' ];
 const columns = [
@@ -40,7 +41,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={onPipelineClick.bind(null, id)}
               data-test-subj="id"
@@ -66,7 +67,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="eventsEmittedRate"
             >
               { formatMetric(latestThroughput, '0.[0]a', throughputMetric.metric.units) }
@@ -90,7 +91,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="nodeCount"
             >
               { formatMetric(latestNodesCount, '0a') }
@@ -105,7 +106,6 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
   const kbnUrl = $injector.get('kbnUrl');
-  const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
   const dateFormat = config.get('dateFormat');
@@ -124,10 +124,10 @@ uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
     link: function (scope, $el) {
 
       function onBrush(xaxis) {
-        scope.$evalAsync(() => {
-          timefilter.time.from = moment(xaxis.from);
-          timefilter.time.to = moment(xaxis.to);
-          timefilter.time.mode = 'absolute';
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute'
         });
       }
 

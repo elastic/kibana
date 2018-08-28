@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import Boom from 'boom';
 import { getServices } from '../lib/services/get_services';
 import { getService } from '../lib/services/get_service';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { dateValidation } from '../lib/helpers/date_validation';
+import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const ROOT = '/api/apm/services';
 const pre = [{ method: setupRequest, assign: 'setup' }];
@@ -25,10 +24,7 @@ export function initServicesApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {
@@ -45,10 +41,7 @@ export function initServicesApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({
-          start: dateValidation,
-          end: dateValidation
-        })
+        query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {

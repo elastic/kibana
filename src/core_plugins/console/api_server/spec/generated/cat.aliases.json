@@ -1,5 +1,5 @@
 {
-  "_cat/aliases": {
+  "cat.aliases": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -15,6 +15,7 @@
     "patterns": [
       "_cat/aliases",
       "_cat/aliases/{name}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-alias.html"
   }
 }

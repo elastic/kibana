@@ -26,7 +26,7 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should summarize single kibana instance with metrics', async () => {
+    it('should summarize kibana instances with stats', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
         .set('kbn-xsrf', 'xxx')

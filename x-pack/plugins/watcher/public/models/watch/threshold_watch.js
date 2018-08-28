@@ -41,7 +41,7 @@ export class ThresholdWatch extends BaseWatch {
     this.timeWindowSize = props.timeWindowSize || DEFAULT_VALUES.TIME_WINDOW_SIZE;
     this.timeWindowUnit = props.timeWindowUnit || DEFAULT_VALUES.TIME_WINDOW_UNIT;
 
-    //NOTE: The threshold must be of the appropriate type. ie: number/date.
+    //NOTE: The threshold must be of the appropriate type, i.e.,number/date.
     //Conversion from string must occur by consumer when assigning a
     //value to this property.
     this.threshold = props.threshold || DEFAULT_VALUES.THRESHOLD;

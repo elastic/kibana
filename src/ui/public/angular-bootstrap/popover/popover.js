@@ -1,7 +1,7 @@
 /**
  * The following features are still outstanding: popup delay, animation as a
  * function, placement as a function, inside, support for more triggers than
- * just mouse enter/leave, html popovers, and selector delegatation.
+ * just mouse enter/leave, html popovers, and selector delegation.
  */
 angular.module( 'ui.bootstrap.popover', [ 'ui.bootstrap.tooltip' ] )
 

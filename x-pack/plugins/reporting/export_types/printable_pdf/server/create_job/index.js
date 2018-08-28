@@ -9,10 +9,10 @@ import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { compatibilityShimFactory } from './compatibility_shim';
 
 function createJobFn(server) {
-  const compatibiltyShim = compatibilityShimFactory(server);
+  const compatibilityShim = compatibilityShimFactory(server);
   const crypto = cryptoFactory(server);
 
-  return compatibiltyShim(async function createJob({
+  return compatibilityShim(async function createJob({
     objectType,
     title,
     relativeUrls,

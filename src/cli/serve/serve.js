@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { statSync, lstatSync, realpathSync } from 'fs';
 import { isWorker } from 'cluster';
@@ -5,10 +24,14 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
+import { Config } from '../../server/config/config';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
+
+const { startRepl } = canRequire('../repl') ? require('../repl') : { };
 
 function canRequire(path) {
   try {
@@ -107,8 +130,8 @@ function readServerSettings(opts, extraCliOptions) {
       : [],
   )));
 
-  merge(readKeystore());
   merge(extraCliOptions);
+  merge(readKeystore(get('path.data')));
 
   return settings;
 }
@@ -152,6 +175,10 @@ export default function (program) {
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
 
+  if (!!startRepl) {
+    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
+  }
+
   if (XPACK_OPTIONAL) {
     command
       .option('--oss', 'Start Kibana without X-Pack');
@@ -184,7 +211,7 @@ export default function (program) {
       if (CAN_CLUSTER && opts.dev && !isWorker) {
         // stop processing the action and handoff to cluster manager
         const ClusterManager = require(CLUSTER_MANAGER_PATH);
-        new ClusterManager(opts, settings);
+        await ClusterManager.create(opts, settings);
         return;
       }
 
@@ -192,6 +219,9 @@ export default function (program) {
       const KbnServer = require('../../server/kbn_server');
       try {
         kbnServer = new KbnServer(settings);
+        if (shouldStartRepl(opts)) {
+          startRepl(kbnServer);
+        }
         await kbnServer.ready();
       } catch (error) {
         const { server } = kbnServer;
@@ -216,15 +246,33 @@ export default function (program) {
         process.exit(exitCode);
       }
 
-      process.on('SIGHUP', function reloadConfig() {
-        const settings = getCurrentSettings();
+      process.on('SIGHUP', async function reloadConfig() {
+        const settings = transformDeprecations(getCurrentSettings());
+        const config = new Config(kbnServer.config.getSchema(), settings);
+
         kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        kbnServer.applyLoggingConfiguration(settings);
+        await kbnServer.applyLoggingConfiguration(config);
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+
+        // If new platform config subscription is active, let's notify it with the updated config.
+        if (kbnServer.newPlatform) {
+          kbnServer.newPlatform.updateConfig(config);
+        }
       });
 
       return kbnServer;
     });
+}
+
+function shouldStartRepl(opts) {
+  if (opts.repl && !startRepl) {
+    throw new Error('Kibana REPL mode can only be run in development mode.');
+  }
+
+  // The kbnWorkerType check is necessary to prevent the repl
+  // from being started multiple times in different processes.
+  // We only want one REPL.
+  return opts.repl && process.env.kbnWorkerType === 'server';
 }
 
 function logFatal(message, server) {

@@ -17,12 +17,10 @@ import rison from 'rison-node';
 import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/ml/components/form_filter_input';
 
-import 'ui/courier';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
-import { luceneStringToDsl } from 'ui/courier/data_source/build_query/lucene_string_to_dsl.js';
-import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
+import { decorateQuery, luceneStringToDsl } from 'ui/courier';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
@@ -30,9 +28,10 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
-import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './datavisualizer.html';
 
 uiRoutes
@@ -41,12 +40,14 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkGetJobsPrivilege,
-      indexPattern: getIndexPatternWithRoute,
-      savedSearch: getSavedSearchWithRoute,
-      checkMlNodesAvailable
+      indexPattern: loadCurrentIndexPattern,
+      savedSearch: loadCurrentSavedSearch,
+      checkMlNodesAvailable,
+      initPromise: initPromise(true)
     }
   });
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -56,9 +57,7 @@ module
     $route,
     $timeout,
     $window,
-    $q,
     Private,
-    timefilter,
     AppState) {
 
     timefilter.enableTimeRangeSelector();
@@ -142,7 +141,7 @@ module
 
 
     // Refresh the data when the time range is altered.
-    $scope.$listen(timefilter, 'fetch', function () {
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
@@ -461,7 +460,7 @@ module
       buckets.setBarTarget(BAR_TARGET);
       const aggInterval = buckets.getInterval();
 
-      $q.when(ml.getVisualizerFieldStats({
+      ml.getVisualizerFieldStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -470,7 +469,7 @@ module
         samplerShardSize: $scope.samplerShardSize,
         interval: aggInterval.expression,
         fields: numberFields
-      }))
+      })
         .then((resp) => {
           // Add the metric stats to the existing stats in the corresponding card.
           _.each($scope.metricCards, (card) => {
@@ -520,7 +519,7 @@ module
 
       if (fields.length > 0) {
 
-        $q.when(ml.getVisualizerFieldStats({
+        ml.getVisualizerFieldStats({
           indexPatternTitle: indexPattern.title,
           query: $scope.searchQuery,
           fields: fields,
@@ -529,7 +528,7 @@ module
           latest: $scope.latest,
           samplerShardSize: $scope.samplerShardSize,
           maxExamples: 10
-        }))
+        })
           .then((resp) => {
             // Add the metric stats to the existing stats in the corresponding card.
             _.each($scope.fieldCards, (card) => {
@@ -575,7 +574,7 @@ module
       // 2. List of aggregatable fields that do not exist in docs
       // 3. List of non-aggregatable fields that do exist in docs.
       // 4. List of non-aggregatable fields that do not exist in docs.
-      $q.when(ml.getVisualizerOverallStats({
+      ml.getVisualizerOverallStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -584,7 +583,7 @@ module
         latest: $scope.latest,
         aggregatableFields: aggregatableFields,
         nonAggregatableFields: nonAggregatableFields
-      }))
+      })
         .then((resp) => {
           $scope.overallStats = resp;
           createMetricCards();

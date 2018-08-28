@@ -38,41 +38,41 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('green status index with full shard allocation', async () => {
+      it('should have an index summary with green status index with full shard allocation', async () => {
         await indicesList.clickRowByName('avocado-tweets-2017.10.02');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 8.8 MB',
-          dataSizePrimaries: 'Primaries: 4.4 MB',
-          documentCount: 'Documents: 628',
-          totalShards: 'Total Shards: 10',
-          unassignedShards: 'Unassigned Shards: 0',
+          dataSize: 'Total:\n8.8 MB',
+          dataSizePrimaries: 'Primaries:\n4.4 MB',
+          documentCount: 'Documents:\n628',
+          totalShards: 'Total Shards:\n10',
+          unassignedShards: 'Unassigned Shards:\n0',
           health: 'Health: green',
         });
       });
 
-      it('green status index with single relocating shard', async () => {
+      it('should have an index summary with green status index with single relocating shard', async () => {
         await indicesList.clickRowByName('relocation_test');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 4.8 KB',
-          dataSizePrimaries: 'Primaries: 4.8 KB',
-          documentCount: 'Documents: 1',
-          totalShards: 'Total Shards: 1',
-          unassignedShards: 'Unassigned Shards: 0',
+          dataSize: 'Total:\n4.8 KB',
+          dataSizePrimaries: 'Primaries:\n4.8 KB',
+          documentCount: 'Documents:\n1',
+          totalShards: 'Total Shards:\n1',
+          unassignedShards: 'Unassigned Shards:\n0',
           health: 'Health: green',
         });
       });
 
-      it('yellow status index with single unallocated shard', async () => {
+      it('should have an index summary with yellow status index with single unallocated shard', async () => {
         await indicesList.clickRowByName('phone-home');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 1.2 MB',
-          dataSizePrimaries: 'Primaries: 657.6 KB',
-          documentCount: 'Documents: 10',
-          totalShards: 'Total Shards: 10',
-          unassignedShards: 'Unassigned Shards: 1',
+          dataSize: 'Total:\n1.2 MB',
+          dataSizePrimaries: 'Primaries:\n657.6 KB',
+          documentCount: 'Documents:\n10',
+          totalShards: 'Total Shards:\n10',
+          unassignedShards: 'Unassigned Shards:\n1',
           health: 'Health: yellow',
         });
       });
@@ -96,16 +96,16 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it.skip('shows NA', async () => {
+      it.skip('should have an index summary with NA for deleted index', async () => {
         await indicesList.setFilter('deleted');
         await indicesList.clickRowByName('many-0001_clruksahirti');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 3.6 KB',
-          dataSizePrimaries: 'Primaries: 3.6 KB',
-          documentCount: 'Documents: 1',
-          totalShards: 'Total Shards: N/A',
-          unassignedShards: 'Unassigned Shards: N/A',
+          dataSize: 'Total:\n3.6 KB',
+          dataSizePrimaries: 'Primaries:\n3.6 KB',
+          documentCount: 'Documents:\n1',
+          totalShards: 'Total Shards:\nN/A',
+          unassignedShards: 'Unassigned Shards:\nN/A',
           health: 'Health: Not Available',
         });
       });

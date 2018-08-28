@@ -13,8 +13,8 @@
       ></bread-crumbs>
 
       <!-- Tabs. -->
-      <div data-transclude-slot="bottomRow" class="kuiLocalTabs" role="tablist">
-        <h2 class="kuiLocalTab" ng-if="!sectionName" id="tabHeader" tabindex="0">
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs" role="tablist" ng-show="!sectionName || section.visibleItems.length > 0">
+        <h2 class="kuiLocalTab" ng-if="!sectionName" id="tabHeader" tabindex="0" role="tab">
           {{::section.display}}
         </h2>
         <a

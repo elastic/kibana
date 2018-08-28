@@ -69,9 +69,6 @@ export class SlackAction extends BaseAction {
     if (!json.actionJson.slack.message.to) {
       throw badRequest('json argument must contain an actionJson.slack.message.to property');
     }
-    if (!json.actionJson.slack.message.text) {
-      throw badRequest('json argument must contain an actionJson.slack.message.text property');
-    }
 
     Object.assign(props, {
       to: json.actionJson.slack.message.to,

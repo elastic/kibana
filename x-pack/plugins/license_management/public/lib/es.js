@@ -35,7 +35,7 @@ export function startBasic(acknowledge) {
 
 export function startTrial() {
   const options = {
-    url: chrome.addBasePath('/api/license/start_trial?acknowledge=true'),
+    url: chrome.addBasePath('/api/license/start_trial'),
     contentType: 'application/json',
     cache: false,
     crossDomain: true,

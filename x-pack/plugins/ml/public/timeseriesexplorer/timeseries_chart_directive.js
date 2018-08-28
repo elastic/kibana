@@ -16,22 +16,23 @@ import $ from 'jquery';
 import angular from 'angular';
 import d3 from 'd3';
 import moment from 'moment';
-import 'ui/timefilter';
+import { timefilter } from 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
+import { formatValue } from 'plugins/ml/formatters/format_value';
 import {
   drawLineChartDots,
   filterAxisLabels,
   numTicksForDateFormat
 } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
+import { mlAnomaliesTableService } from 'plugins/ml/components/anomalies_table/anomalies_table_service';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
-import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
-import 'plugins/ml/filters/format_value';
+import { findChartPointForAnomalyTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -39,15 +40,11 @@ const module = uiModules.get('apps/ml');
 module.directive('mlTimeseriesChart', function (
   $compile,
   $timeout,
-  timefilter,
-  mlAnomaliesTableService,
-  formatValueFilter,
   Private,
   mlChartTooltipService) {
 
   function link(scope, element) {
 
-    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     // Key dimensions for the viz and constituent charts.
     let svgWidth = angular.element('.results-container').width();
     const focusZoomPanelHeight = 25;
@@ -114,9 +111,9 @@ module.directive('mlTimeseriesChart', function (
       drawContextChartSelection();
     });
 
-    scope.$on('renderFocusChart', () => {
-      renderFocusChart();
-    });
+    scope.$watchCollection('focusForecastData', renderFocusChart);
+    scope.$watchCollection('focusChartData', renderFocusChart);
+    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));
@@ -966,13 +963,16 @@ module.directive('mlTimeseriesChart', function (
         contents += `anomaly score: ${displayScore}<br/>`;
 
         if (scope.modelPlotEnabled === false) {
-          if (_.has(marker, 'actual')) {
+          // Show actual/typical when available except for rare detectors.
+          // Rare detectors always have 1 as actual and the probability as typical.
+          // Exposing those values in the tooltip with actual/typical labels might irritate users.
+          if (_.has(marker, 'actual') && marker.function !== 'rare') {
             // Display the record actual in preference to the chart value, which may be
             // different depending on the aggregation interval of the chart.
-            contents += `actual: ${formatValueFilter(marker.actual, marker.function, fieldFormat)}`;
-            contents += `<br/>typical: ${formatValueFilter(marker.typical, marker.function, fieldFormat)}`;
+            contents += `actual: ${formatValue(marker.actual, marker.function, fieldFormat)}`;
+            contents += `<br/>typical: ${formatValue(marker.typical, marker.function, fieldFormat)}`;
           } else {
-            contents += `value: ${formatValueFilter(marker.value, marker.function, fieldFormat)}`;
+            contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
             if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
               const numberOfCauses = marker.numberOfCauses;
               const byFieldName = mlEscape(marker.byFieldName);
@@ -986,21 +986,21 @@ module.directive('mlTimeseriesChart', function (
             }
           }
         } else {
-          contents += `value: ${formatValueFilter(marker.value, marker.function, fieldFormat)}`;
-          contents += `<br/>upper bounds: ${formatValueFilter(marker.upper, marker.function, fieldFormat)}`;
-          contents += `<br/>lower bounds: ${formatValueFilter(marker.lower, marker.function, fieldFormat)}`;
+          contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
+          contents += `<br/>upper bounds: ${formatValue(marker.upper, marker.function, fieldFormat)}`;
+          contents += `<br/>lower bounds: ${formatValue(marker.lower, marker.function, fieldFormat)}`;
         }
       } else {
         // TODO - need better formatting for small decimals.
         if (_.get(marker, 'isForecast', false) === true) {
-          contents += `prediction: ${formatValueFilter(marker.value, marker.function, fieldFormat)}`;
+          contents += `prediction: ${formatValue(marker.value, marker.function, fieldFormat)}`;
         } else {
-          contents += `value: ${formatValueFilter(marker.value, marker.function, fieldFormat)}`;
+          contents += `value: ${formatValue(marker.value, marker.function, fieldFormat)}`;
         }
 
         if (scope.modelPlotEnabled === true) {
-          contents += `<br/>upper bounds: ${formatValueFilter(marker.upper, marker.function, fieldFormat)}`;
-          contents += `<br/>lower bounds: ${formatValueFilter(marker.lower, marker.function, fieldFormat)}`;
+          contents += `<br/>upper bounds: ${formatValue(marker.upper, marker.function, fieldFormat)}`;
+          contents += `<br/>lower bounds: ${formatValue(marker.lower, marker.function, fieldFormat)}`;
         }
       }
 
@@ -1017,11 +1017,11 @@ module.directive('mlTimeseriesChart', function (
     function highlightFocusChartAnomaly(record) {
       // Highlights the anomaly marker in the focus chart corresponding to the specified record.
 
-      // Find the anomaly marker which is closest in time to the source record.
+      // Find the anomaly marker which corresponds to the time of the anomaly record.
       // Depending on the way the chart is aggregated, there may not be
       // a point at exactly the same time as the record being highlighted.
       const anomalyTime = record.source.timestamp;
-      const markerToSelect = findNearestChartPointToTime(scope.focusChartData, anomalyTime);
+      const markerToSelect = findChartPointForAnomalyTime(scope.focusChartData, anomalyTime);
 
       // Render an additional highlighted anomaly marker on the focus chart.
       // TODO - plot anomaly markers for cases where there is an anomaly due

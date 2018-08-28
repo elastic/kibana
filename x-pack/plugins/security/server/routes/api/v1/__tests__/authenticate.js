@@ -15,6 +15,7 @@ import { AuthenticationResult } from '../../../../../server/lib/authentication/a
 import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
 import { initAuthenticateApi } from '../authenticate';
 import { DeauthenticationResult } from '../../../../lib/authentication/deauthentication_result';
+import { CHECK_PRIVILEGES_RESULT } from '../../../../lib/authorization';
 
 describe('Authentication routes', () => {
   let serverStub;
@@ -33,6 +34,7 @@ describe('Authentication routes', () => {
     let loginRoute;
     let request;
     let authenticateStub;
+    let checkPrivilegesWithRequestStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -48,6 +50,7 @@ describe('Authentication routes', () => {
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
         sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
       );
+      checkPrivilegesWithRequestStub = serverStub.plugins.security.authorization.checkPrivilegesWithRequest;
     });
 
     it('correctly defines route.', async () => {
@@ -61,6 +64,9 @@ describe('Authentication routes', () => {
             username: Joi.string().required(),
             password: Joi.string().required()
           }
+        },
+        response: {
+          emptyStatusCode: 204,
         }
       });
     });
@@ -93,7 +99,15 @@ describe('Authentication routes', () => {
 
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized(failureReason));
+
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: failureReason.toString(),
+          output: { statusCode: 401 },
+        })
+      );
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -105,21 +119,76 @@ describe('Authentication routes', () => {
 
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized());
-    });
 
-    it('returns user data if authentication succeed.', async () => {
-      const user = { username: 'user' };
-      authenticateStub.returns(
-        Promise.resolve(AuthenticationResult.succeeded(user))
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: 'Unauthorized',
+          output: { statusCode: 401 },
+        })
       );
-
-      await loginRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.calledOnce(replyStub.continue);
-      sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
     });
+
+    describe('authentication succeeds', () => {
+      const getDeprecationMessage = username =>
+        `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
+
+      it(`returns user data and doesn't log deprecation warning if checkPrivileges result is authorized.`, async () => {
+        const user = { username: 'user' };
+        authenticateStub.returns(
+          Promise.resolve(AuthenticationResult.succeeded(user))
+        );
+        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.AUTHORIZED });
+        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
+
+        await loginRoute.handler(request, replyStub);
+
+        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
+        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
+        sinon.assert.notCalled(replyStub);
+        sinon.assert.calledOnce(replyStub.continue);
+        sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
+      });
+
+      it(`returns user data and logs deprecation warning if checkPrivileges result is legacy.`, async () => {
+        const user = { username: 'user' };
+        authenticateStub.returns(
+          Promise.resolve(AuthenticationResult.succeeded(user))
+        );
+        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.LEGACY });
+        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
+
+        await loginRoute.handler(request, replyStub);
+
+        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
+        sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
+        sinon.assert.notCalled(replyStub);
+        sinon.assert.calledOnce(replyStub.continue);
+        sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
+      });
+
+      it(`returns user data and doesn't log deprecation warning if checkPrivileges result is unauthorized.`, async () => {
+        const user = { username: 'user' };
+        authenticateStub.returns(
+          Promise.resolve(AuthenticationResult.succeeded(user))
+        );
+        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED });
+        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
+
+        await loginRoute.handler(request, replyStub);
+
+        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
+        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
+        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
+        sinon.assert.notCalled(replyStub);
+        sinon.assert.calledOnce(replyStub.continue);
+        sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
+      });
+    });
+
   });
 
   describe('logout', () => {
@@ -183,7 +252,11 @@ describe('Authentication routes', () => {
       sinon.assert.calledOnce(replyStub);
       sinon.assert.calledWithExactly(
         replyStub,
-        Boom.badRequest('Client should be able to process redirect response.')
+        sinon.match({
+          isBoom: true,
+          message: 'Client should be able to process redirect response.',
+          output: { statusCode: 400 }
+        })
       );
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
@@ -323,7 +396,14 @@ describe('Authentication routes', () => {
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized(failureReason));
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: failureReason.toString(),
+          output: { statusCode: 401 }
+        })
+      );
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -336,7 +416,14 @@ describe('Authentication routes', () => {
       sinon.assert.notCalled(replyStub.continue);
       sinon.assert.notCalled(replyStub.redirect);
       sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.unauthorized());
+      sinon.assert.calledWithExactly(
+        replyStub,
+        sinon.match({
+          isBoom: true,
+          message: 'Unauthorized',
+          output: { statusCode: 401 }
+        })
+      );
     });
 
     it('returns 403 if there an active session exists.', async () => {
@@ -351,10 +438,12 @@ describe('Authentication routes', () => {
       sinon.assert.calledOnce(replyStub);
       sinon.assert.calledWithExactly(
         replyStub,
-        Boom.forbidden(
-          'Sorry, you already have an active Kibana session. ' +
-          'If you want to start a new one, please logout from the existing session first.'
-        )
+        sinon.match({
+          isBoom: true,
+          message: 'Sorry, you already have an active Kibana session. ' +
+            'If you want to start a new one, please logout from the existing session first.',
+          output: { statusCode: 403 }
+        })
       );
     });
 

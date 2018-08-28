@@ -27,6 +27,7 @@
           </a>
           &nbsp;
           <a
+            data-test-subj="unlinkSavedSearch"
             href=""
             ng-dblclick="unlink()"
             tooltip="Double click to unlink from Saved Search"
@@ -66,15 +67,14 @@
     </div>
   </div>
 
-  <visualize
+  <div class="visualize" ng-if="!chrome.getVisible()"/>
+
+  <visualization-editor
+    ng-if="chrome.getVisible()"
     saved-obj="savedVis"
     ui-state="uiState"
-    app-state="state"
-    editor-mode="chrome.getVisible()"
-    show-spy-panel="chrome.getVisible()"
     time-range="timeRange"
-    >
-
-  </visualize>
+    class="vis-editor-content"
+  />
 
 </visualize-app>

@@ -5,61 +5,57 @@
  */
 
 import React, { Component } from 'react';
-import withErrorHandler from '../../shared/withErrorHandler';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
-import { loadAgentStatus } from '../../../services/rest';
+import { loadAgentStatus } from '../../../services/rest/apm';
 import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';
 import List from './List';
-import { getKey } from '../../../store/apiHelpers';
 import { HeaderContainer } from '../../shared/UIComponents';
+import { KueryBar } from '../../shared/KueryBar';
 
-function fetchData(props) {
-  const { start, end } = props.urlParams;
-  const key = getKey({ start, end });
-
-  if (key && props.serviceList.key !== key) {
-    props.loadServiceList({ start, end });
-  }
-}
+import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
+import EmptyMessage from '../../shared/EmptyMessage';
 
 class ServiceOverview extends Component {
   state = {
-    noHistoricalDataFound: false
+    historicalDataFound: true
   };
 
-  checkForHistoricalData({ serviceList }) {
+  async checkForHistoricalData({ serviceList }) {
     if (serviceList.status === STATUS.SUCCESS && isEmpty(serviceList.data)) {
-      loadAgentStatus().then(result => {
-        if (!result.dataFound) {
-          this.setState({ noHistoricalDataFound: true });
-        }
-      });
+      const result = await loadAgentStatus();
+      if (!result.dataFound) {
+        this.setState({ historicalDataFound: false });
+      }
     }
   }
 
   componentDidMount() {
-    fetchData(this.props);
     this.checkForHistoricalData(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    fetchData(nextProps);
-    this.checkForHistoricalData(nextProps);
+  componentDidUpdate() {
+    // QUESTION: Do we want to check on ANY update, or only if serviceList status/data have changed?
+    this.checkForHistoricalData(this.props);
   }
 
   render() {
-    const { serviceList, changeServiceSorting, serviceSorting } = this.props;
-    const { noHistoricalDataFound } = this.state;
+    const { urlParams } = this.props;
+    const { historicalDataFound } = this.state;
 
-    const emptyMessageHeading = noHistoricalDataFound
-      ? "Looks like you don't have any services with APM installed. Let's add some!"
-      : 'No services with data in the selected time range.';
-
-    const emptyMessageSubHeading = noHistoricalDataFound ? (
-      <SetupInstructionsLink buttonFill />
-    ) : null;
+    const noItemsMessage = (
+      <EmptyMessage
+        heading={
+          historicalDataFound
+            ? 'No services were found'
+            : "Looks like you don't have any services with APM installed. Let's add some!"
+        }
+        subheading={
+          !historicalDataFound ? <SetupInstructionsLink buttonFill /> : null
+        }
+      />
+    );
 
     return (
       <div>
@@ -68,12 +64,13 @@ class ServiceOverview extends Component {
           <SetupInstructionsLink />
         </HeaderContainer>
 
-        <List
-          items={serviceList.data}
-          changeServiceSorting={changeServiceSorting}
-          serviceSorting={serviceSorting}
-          emptyMessageHeading={emptyMessageHeading}
-          emptyMessageSubHeading={emptyMessageSubHeading}
+        <KueryBar />
+
+        <ServiceListRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <List items={data} noItemsMessage={noItemsMessage} />
+          )}
         />
       </div>
     );
@@ -82,7 +79,7 @@ class ServiceOverview extends Component {
 
 function SetupInstructionsLink({ buttonFill = false }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'} query={{}}>
+    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
       <EuiButton size="s" color="primary" fill={buttonFill}>
         Setup Instructions
       </EuiButton>
@@ -90,4 +87,4 @@ function SetupInstructionsLink({ buttonFill = false }) {
   );
 }
 
-export default withErrorHandler(ServiceOverview, ['serviceList']);
+export default ServiceOverview;

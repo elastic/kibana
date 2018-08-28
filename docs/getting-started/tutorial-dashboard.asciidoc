@@ -1,20 +1,27 @@
 [[tutorial-dashboard]]
-== Putting it all Together with Dashboards
+=== Displaying your visualizations in a dashboard
 
-A dashboard is a collection of visualizations that you can arrange and share. 
-To build a dashboard that contains the visualizations you saved during this tutorial:
+A dashboard is a collection of visualizations that you can arrange and share.
+You'll build a dashboard that contains the visualizations you saved during
+this tutorial.
 
-. Click *Dashboard* in the side navigation.
-. Click *Add* to display the list of saved visualizations. 
-. Click _Markdown Example_, _Pie Example_, _Bar Example_, and _Map Example_, then close the list of
-visualizations by clicking the small up-arrow at the bottom of the list. 
+. Open *Dashboard*.
+. Click *Create new dashboard*.
+. Click *Add*.
+. Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
 
-Hovering over a visualization displays the container controls that enable you to
-edit, move, delete, and resize the visualization. 
 
-Your sample dashboard should end up looking roughly like this:
+Your sample dashboard look like this:
 
+[role="screenshot"]
 image::images/tutorial-dashboard.png[]
+
+You can rearrange the visualizations by clicking a the header of a
+visualization and dragging. The gear icon in the top right of a visualization
+displays controls for editing and deleting the visualization.  A resize control
+is on the lower right.
 
 To get a link to share or HTML code to embed the dashboard in a web page, save
 the dashboard and click  *Share*.
+
+*Save* your dashboard.

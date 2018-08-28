@@ -1,16 +1,49 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { resolve } from 'path';
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 
 import Log from '../log';
 import Worker from './worker';
-import BasePathProxy from './base_path_proxy';
+import { Config } from '../../server/config/config';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { configureBasePathProxy } from './configure_base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  constructor(opts = {}, settings = {}) {
+  static async create(opts = {}, settings = {}) {
+    const transformedSettings = transformDeprecations(settings);
+    const config = Config.withDefaultSchema(transformedSettings);
+
+    const basePathProxy = opts.basePath
+      ? await configureBasePathProxy(config)
+      : undefined;
+
+    return new ClusterManager(opts, config, basePathProxy);
+  }
+
+  constructor(opts, config, basePathProxy) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
+    this.inReplMode = !!opts.repl;
 
     const serverArgv = [];
     const optimizerArgv = [
@@ -18,17 +51,17 @@ export default class ClusterManager {
       '--server.autoListen=false',
     ];
 
-    if (opts.basePath) {
-      this.basePathProxy = new BasePathProxy(this, settings);
+    if (basePathProxy) {
+      this.basePathProxy = basePathProxy;
 
       optimizerArgv.push(
-        `--server.basePath=${this.basePathProxy.basePath}`,
+        `--server.basePath=${this.basePathProxy.getBasePath()}`,
         '--server.rewriteBasePath=true',
       );
 
       serverArgv.push(
-        `--server.port=${this.basePathProxy.targetPort}`,
-        `--server.basePath=${this.basePathProxy.basePath}`,
+        `--server.port=${this.basePathProxy.getTargetPort()}`,
+        `--server.basePath=${this.basePathProxy.getBasePath()}`,
         '--server.rewriteBasePath=true',
       );
     }
@@ -49,6 +82,12 @@ export default class ClusterManager {
       })
     ];
 
+    if (basePathProxy) {
+      // Pass server worker to the basepath proxy so that it can hold off the
+      // proxying until server worker is ready.
+      this.basePathProxy.serverWorker = this.server;
+    }
+
     // broker messages between workers
     this.workers.forEach((worker) => {
       worker.on('broadcast', (msg) => {
@@ -63,14 +102,16 @@ export default class ClusterManager {
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
     if (opts.watch) {
+      const pluginPaths = config.get('plugins.paths');
+      const scanDirs = config.get('plugins.scanDirs');
       const extraPaths = [
-        ...settings.plugins.paths,
-        ...settings.plugins.scanDirs,
+        ...pluginPaths,
+        ...scanDirs,
       ];
 
-      const extraIgnores = settings.plugins.scanDirs
+      const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
-        .concat(settings.plugins.paths)
+        .concat(pluginPaths)
         .reduce((acc, path) => acc.concat(
           resolve(path, 'test'),
           resolve(path, 'build'),
@@ -89,7 +130,7 @@ export default class ClusterManager {
     this.setupManualRestart();
     invoke(this.workers, 'start');
     if (this.basePathProxy) {
-      this.basePathProxy.listen();
+      this.basePathProxy.start();
     }
   }
 
@@ -133,6 +174,12 @@ export default class ClusterManager {
   }
 
   setupManualRestart() {
+    // If we're in REPL mode, the user can use the REPL to manually restart.
+    // The setupManualRestart method interferes with stdin/stdout, in a way
+    // that negatively affects the REPL.
+    if (this.inReplMode) {
+      return;
+    }
     const readline = require('readline');
     const rl = readline.createInterface(process.stdin, process.stdout);
 

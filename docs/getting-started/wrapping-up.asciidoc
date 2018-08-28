@@ -1,14 +1,14 @@
 [[wrapping-up]]
-== Wrapping Up
+=== Wrapping up
 
 Now that you have a handle on the basics, you're ready to start exploring
 your own data with Kibana.
 
-* See {kibana-ref}/discover.html[Discover] for more information about searching and filtering
+* See {kibana-ref}/discover.html[Discover] for information about searching and filtering
 your data.
-* See {kibana-ref}/visualize.html[Visualize] for information about all of the visualization
+* See {kibana-ref}/visualize.html[Visualize] for information about the visualization
 types Kibana has to offer.
 * See {kibana-ref}/management.html[Management] for information about configuring Kibana
-and managing your saved objects. 
-* See {kibana-ref}/console-kibana.html[Console] for information about the interactive 
-console UI you can use to submit REST requests to Elasticsearch.
+and managing your saved objects.
+* See {kibana-ref}/console-kibana.html[Console] to learn about the interactive
+console you can use to submit REST requests to Elasticsearch.

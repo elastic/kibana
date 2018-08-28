@@ -1,5 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const fetch = require('node-fetch');
 const fs = require('fs');
+const os = require('os');
 const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const path = require('path');
@@ -50,7 +70,7 @@ exports.installSnapshot = async function installSnapshot({
  * @param {String} url
  * @param {String} dest
  * @param {ToolingLog} log
- * @returns {Promose}
+ * @returns {Promise}
  */
 function downloadFile(url, dest, log) {
   const downloadPath = `${dest}.tmp`;
@@ -64,10 +84,7 @@ function downloadFile(url, dest, log) {
     res =>
       new Promise((resolve, reject) => {
         if (res.status === 304) {
-          log.info(
-            'etags match, using cache from %s',
-            chalk.bold(cacheMeta.ts)
-          );
+          log.info('etags match, using cache from %s', chalk.bold(cacheMeta.ts));
           return resolve();
         }
 
@@ -97,9 +114,8 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  if (license === 'oss') {
-    return `elasticsearch-oss/elasticsearch-oss-${version}-SNAPSHOT.tar.gz`;
-  }
+  const extension = os.platform().startsWith('win') ? 'zip' : 'tar.gz';
+  const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
-  return `elasticsearch-${version}-SNAPSHOT.tar.gz`;
+  return `${basename}-SNAPSHOT.${extension}`;
 }

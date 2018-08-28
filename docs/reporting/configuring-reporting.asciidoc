@@ -1,0 +1,31 @@
+[role="xpack"]
+[[configuring-reporting]]
+== Configuring Reporting
+
+NOTE: If you use a reverse-proxy (NGINX, Apache, etc.) to access Kibana, you need
+to configure the <<reporting-kibana-server-settings, Kibana server settings>>
+
+By default, a new encryption key is generated for {reporting} each time
+you start Kibana. This means any pending reports will fail if you
+restart Kibana.
+
+To set a static encryption key for reporting, set the
+`xpack.reporting.encryptionKey` property in the `kibana.yml`
+configuration file. You can use any text string as the encryption key.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+NOTE: If you are load balancing across multiple Kibana instances, they need
+to have the same reporting encryption key. Otherwise, report generation
+will fail if a report is requested through one instance and another instance
+picks up the job from the report queue.
+
+You can also configure settings in `kibana.yml` to control how {reporting}
+communicates with the Kibana server, manages background jobs, and captures
+screenshots. See <<reporting-settings-kb, Reporting Settings>> for the complete
+list of settings.
+
+include::{kib-repo-dir}/security/reporting.asciidoc[]

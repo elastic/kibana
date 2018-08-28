@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_explain": {
+  "explain": {
     "url_params": {
       "analyze_wildcard": "__flag__",
       "analyzer": "",
@@ -24,6 +24,7 @@
     ],
     "patterns": [
       "{indices}/{type}/{id}/_explain"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html"
   }
 }

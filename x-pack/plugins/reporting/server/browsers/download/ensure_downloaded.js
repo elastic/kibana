@@ -27,7 +27,7 @@ export async function ensureBrowserDownloaded(browserType) {
 
 /**
  * Like ensureBrowserDownloaded(), except it applies to all browsers
- * @return {Proimse<undefined>}
+ * @return {Promise<undefined>}
  */
 export async function ensureAllBrowsersDownloaded() {
   await ensureDownloaded(Object.values(BROWSERS_BY_TYPE));

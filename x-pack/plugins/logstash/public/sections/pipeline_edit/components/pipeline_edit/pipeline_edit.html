@@ -98,16 +98,17 @@
           >
             Pipeline
           </label>
-          <div
-            class="pipeline-editor"
-            ruby-input
-            require-keys="true"
-            ui-ace="{
-              onLoad: aceLoaded
-            }"
-            ng-model="pipelineEdit.pipeline.pipeline"
-            data-test-subj="acePipeline"
-          ></div>
+          <div class="pipeline-editor">
+            <div
+              ruby-input
+              require-keys="true"
+              ui-ace="{
+                onLoad: aceLoaded
+              }"
+              ng-model="pipelineEdit.pipeline.pipeline"
+              data-test-subj="acePipeline"
+            ></div>
+          </div>
         </div>
       </form>
 

@@ -83,7 +83,7 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
     filterPath: 'aggregations',
     body: {
       query: createBeatsQuery({
-        uuid: clusterUuid,
+        clusterUuid,
         filters: [ lastDayFilter ],
       }),
       aggs: {

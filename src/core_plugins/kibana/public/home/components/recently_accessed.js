@@ -1,4 +1,22 @@
-import './recently_accessed.less';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -12,6 +30,8 @@ import {
   EuiPopover,
   EuiIcon,
   EuiSpacer,
+  EuiToolTip,
+  EuiTitle,
 } from '@elastic/eui';
 
 export const NUM_LONG_LINKS = 5;
@@ -53,7 +73,7 @@ export class RecentlyAccessed extends Component {
             data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
           >
             <EuiLink
-              className="recentlyAccessedDropwdownLink"
+              className="homRecentlyAccessed__dropdownLink"
               href={this.props.recentlyAccessed[i].link}
             >
               {this.props.recentlyAccessed[i].label}
@@ -69,7 +89,7 @@ export class RecentlyAccessed extends Component {
         data-test-subj="openMoreRecentlyAccessedPopover"
       >
         <EuiTextColor
-          className="recentlyAccessedDropdownLabel"
+          className="homRecentlyAccessed__dropdownLabel"
           color="subdued"
         >
           {`${dropdownLinks.length} more`}
@@ -106,7 +126,7 @@ export class RecentlyAccessed extends Component {
     let separator;
     if (includeSeparator) {
       separator = (
-        <EuiFlexItem grow={false} className="recentlyAccessedSeparator">
+        <EuiFlexItem grow={false} className="homRecentlyAccessed__separator">
           <EuiText>
             <EuiIcon
               type="dot"
@@ -118,7 +138,7 @@ export class RecentlyAccessed extends Component {
     }
     // Want to avoid a bunch of white space around items with short labels (happens when min width is too large).
     // Also want to avoid truncating really short names (happens when there is no min width)
-    // Dynamically setting the min width based on label lengh meets both of these goals.
+    // Dynamically setting the min width based on label length meets both of these goals.
     const EM_RATIO = 0.65; // 'em' ratio that avoids too much horizontal white space and too much truncation
     const minWidth = (recentlyAccessedItem.label.length < 8 ? recentlyAccessedItem.label.length : 8) * EM_RATIO;
     const style = { minWidth: `${minWidth}em` };
@@ -126,16 +146,22 @@ export class RecentlyAccessed extends Component {
       <React.Fragment key={recentlyAccessedItem.id}>
         {separator}
         <EuiFlexItem
-          className="recentlyAccessedItem"
+          className="homRecentlyAccessed__item"
           style={style}
           grow={false}
         >
-          <EuiLink
-            className="recentlyAccessedLongLink"
-            href={recentlyAccessedItem.link}
+          <EuiToolTip
+            anchorClassName="homRecentlyAccessed__anchor"
+            position="bottom"
+            content={recentlyAccessedItem.label}
           >
-            {recentlyAccessedItem.label}
-          </EuiLink>
+            <EuiLink
+              className="homRecentlyAccessed__longLink"
+              href={recentlyAccessedItem.link}
+            >
+              {recentlyAccessedItem.label}
+            </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       </React.Fragment>
     );
@@ -168,18 +194,18 @@ export class RecentlyAccessed extends Component {
   render() {
     return (
       <EuiPanel paddingSize="l">
-        <EuiText>
-          <p>
+        <EuiTitle size="xs">
+          <h3>
             <EuiTextColor color="subdued">
               Recently viewed
             </EuiTextColor>
-          </p>
-        </EuiText>
+          </h3>
+        </EuiTitle>
 
         <EuiSpacer size="s"/>
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false} className="recentlyAccessedFlexItem">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" wrap>
+          <EuiFlexItem grow={false} className="homRecentlyAccessed__flexItem">
             <EuiFlexGroup>
               {this.renderRecentlyAccessed()}
             </EuiFlexGroup>

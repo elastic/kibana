@@ -22,8 +22,6 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
-import 'ui/timefilter';
-
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../common/constants/states';
@@ -33,6 +31,8 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlForecastService } from 'plugins/ml/services/forecast_service';
 
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
@@ -123,7 +123,7 @@ class ForecastingModal extends Component {
       jobOpeningState: PROGRESS_STATES.WAITING
     });
 
-    this.props.mlJobService.openJob(this.props.job.job_id)
+    mlJobService.openJob(this.props.job.job_id)
       .then(() => {
         // If open was successful run the forecast, then close the job again.
         this.setState({
@@ -160,7 +160,7 @@ class ForecastingModal extends Component {
     // formats accepted by Kibana (w, M, y) are not valid formats in Elasticsearch.
     const durationInSeconds = parseInterval(this.state.newForecastDuration).asSeconds();
 
-    this.props.mlForecastService.runForecast(this.props.job.job_id, `${durationInSeconds}s`)
+    mlForecastService.runForecast(this.props.job.job_id, `${durationInSeconds}s`)
       .then((resp) => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
         // So wait for results and then refresh the dashboard to the end of the forecast.
@@ -180,7 +180,7 @@ class ForecastingModal extends Component {
     let previousProgress = 0;
     let noProgressMs = 0;
     this.forecastChecker = setInterval(() => {
-      this.props.mlForecastService.getForecastRequestStats(this.props.job, forecastId)
+      mlForecastService.getForecastRequestStats(this.props.job, forecastId)
         .then((resp) => {
           // Get the progress (stats value is between 0 and 1).
           const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
@@ -198,7 +198,7 @@ class ForecastingModal extends Component {
 
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              this.props.mlJobService.closeJob(this.props.job.job_id)
+              mlJobService.closeJob(this.props.job.job_id)
                 .then(() => {
                   this.setState({
                     jobClosingState: PROGRESS_STATES.DONE
@@ -263,7 +263,7 @@ class ForecastingModal extends Component {
           forecast_status: FORECAST_REQUEST_STATE.FINISHED
         }
       };
-      this.props.mlForecastService.getForecastsSummary(
+      mlForecastService.getForecastsSummary(
         job,
         statusFinishedQuery,
         bounds.min.valueOf(),
@@ -399,9 +399,8 @@ ForecastingModal.propTypes = {
   job: PropTypes.object,
   detectorIndex: PropTypes.number,
   entities: PropTypes.array,
-  mlForecastService: PropTypes.object.isRequired,
-  mlJobService: PropTypes.object.isRequired,
   loadForForecastId: PropTypes.func,
+  timefilter: PropTypes.object,
 };
 
 export { ForecastingModal };

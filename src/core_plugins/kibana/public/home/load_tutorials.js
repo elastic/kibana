@@ -1,6 +1,25 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 
 const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
@@ -9,7 +28,7 @@ headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
 
 let tutorials = [];
-let turorialsLoaded = false;
+let tutorialsLoaded = false;
 
 async function loadTutorials() {
   try {
@@ -23,14 +42,17 @@ async function loadTutorials() {
     }
 
     tutorials = await response.json();
-    turorialsLoaded = true;
+    tutorialsLoaded = true;
   } catch(err) {
-    notify.error(`Unable to load tutorials, ${err}`);
+    toastNotifications.addDanger({
+      title: 'Unable to load tutorials',
+      text: err.message,
+    });
   }
 }
 
 export async function getTutorials() {
-  if (!turorialsLoaded) {
+  if (!tutorialsLoaded) {
     await loadTutorials();
   }
 
@@ -38,7 +60,7 @@ export async function getTutorials() {
 }
 
 export async function getTutorial(id) {
-  if (!turorialsLoaded) {
+  if (!tutorialsLoaded) {
     await loadTutorials();
   }
 

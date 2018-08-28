@@ -15,7 +15,7 @@ const path = require('path');
 const del = require('del');
 const runSequence = require('run-sequence');
 const pluginHelpers = require('@kbn/plugin-helpers');
-const { createToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 
 const logger = require('./gulp_helpers/logger');
 const buildVersion = require('./gulp_helpers/build_version')();
@@ -26,7 +26,7 @@ const getFlags = require('./gulp_helpers/get_flags');
 
 const pkg = require('./package.json');
 const { ensureAllBrowsersDownloaded } = require('./plugins/reporting/server/browsers');
-const { createAutoJunitReporter, generateNoticeFromSource } = require('../src/dev');
+const { createAutoJUnitReporter, generateNoticeFromSource } = require('../src/dev');
 
 const buildDir = path.resolve(__dirname, 'build');
 const buildTarget = path.resolve(buildDir, 'plugin');
@@ -35,7 +35,7 @@ const coverageDir = path.resolve(__dirname, 'coverage');
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
-  reporter: createAutoJunitReporter({
+  reporter: createAutoJUnitReporter({
     reportName: 'X-Pack Mocha Tests',
     rootDirectory: __dirname,
   }),
@@ -76,8 +76,10 @@ gulp.task('build', ['clean', 'report', 'prepare'], async () => {
   });
 
   const buildRoot = path.resolve(buildTarget, 'kibana/x-pack');
-  const log = createToolingLog('info');
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout
+  });
 
   writeFileSync(
     path.resolve(buildRoot, 'NOTICE.txt'),

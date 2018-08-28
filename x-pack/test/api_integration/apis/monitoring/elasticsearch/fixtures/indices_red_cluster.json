@@ -1,0 +1,274 @@
+{
+  "clusterStatus": {
+    "status": "red",
+    "indicesCount": 19,
+    "documentCount": 4535,
+    "dataSize": 9036305,
+    "nodesCount": 1,
+    "upTime": 1403187,
+    "version": [
+      "7.0.0-alpha1"
+    ],
+    "memUsed": 280753264,
+    "memMax": 709623808,
+    "unassignedShards": 23,
+    "totalShards": 46
+  },
+  "indices": [
+    {
+      "name": "many-0010_dgnlpqtstfvi",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0024_rixhhwzyiczb",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0016_gyvtsyauoqqg",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0006_gkuqbjonkjmg",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 4.0788690476190474,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0022_dqbcjopzejlk",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0020_fqfovcnznbus",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0012_jwomwdgfpisl",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0018_ipugjcmuagih",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0008_amnscruqlsnu",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 4.0788690476190474,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "many-0014_zrukbrvuluby",
+      "status": "green",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "unassigned_shards": 0,
+      "status_sort": 1
+    },
+    {
+      "name": "phone-home",
+      "status": "yellow",
+      "doc_count": 1,
+      "data_size": 67798,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 5,
+      "status_sort": 2
+    },
+    {
+      "name": "many-0015_vwmrucgzvohb",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0009_reolfgzjjtvh",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0011_xtkcmlwmxcov",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0019_slpgftmneikv",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0017_zpyxggzmytun",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0025_xmvpnfeuqxtp",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0013_smjuwdkhpduv",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0007_milycdknpycp",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0021_xjtlceanhvup",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0.000744047619047619,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0023_hkbvktonytxh",
+      "status": "red",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "unassigned_shards": 1,
+      "status_sort": 3
+    },
+    {
+      "name": "many-0005_dnzzblxoumfe",
+      "status": "Deleted / Closed",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status_sort": 0
+    },
+    {
+      "name": "many-0004_wzgjkelqclur",
+      "status": "Deleted / Closed",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status_sort": 0
+    },
+    {
+      "name": "many-0002_emdkmgdeflno",
+      "status": "Deleted / Closed",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status_sort": 0
+    },
+    {
+      "name": "many-0003_jbwrztjwhkjt",
+      "status": "Deleted / Closed",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status_sort": 0
+    },
+    {
+      "name": "many-0001_clruksahirti",
+      "status": "Deleted / Closed",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status_sort": 0
+    }
+  ]
+}

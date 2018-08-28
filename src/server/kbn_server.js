@@ -1,13 +1,32 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { constant, once, compact, flatten } from 'lodash';
 import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
-import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
+import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
@@ -16,9 +35,14 @@ import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
+import { sampleDataMixin } from './sample_data';
 import { kibanaIndexMappingsMixin } from './mappings';
+import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { sassMixin } from './sass';
+import { injectIntoKbnServer as newPlatformMixin } from '../core';
+import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
@@ -35,13 +59,18 @@ export default class KbnServer {
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
+      newPlatformMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
+      usageMixin,
       statusMixin,
 
       // writes pid file
@@ -55,6 +84,7 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
+      i18nMixin,
       indexPatternsMixin,
 
       // setup server.getKibanaIndexMappingsDsl()
@@ -63,14 +93,23 @@ export default class KbnServer {
       // setup saved object routes
       savedObjectsMixin,
 
+      // setup routes for installing/uninstalling sample data sets
+      sampleDataMixin,
+
+      // setup routes for short urls
+      urlShorteningMixin,
+
       // ensure that all bundles are built, or that the
       // watch bundle server is running
       optimizeMixin,
 
+      // transpiles SCSS into CSS
+      sassMixin,
+
       // initialize the plugins
       Plugins.initializeMixin,
 
-      // notify any deffered setup logic that plugins have intialized
+      // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
 
       () => {
@@ -107,12 +146,9 @@ export default class KbnServer {
    * @return undefined
    */
   async listen() {
-    const {
-      server,
-      config,
-    } = this;
-
     await this.ready();
+
+    const { server } = this;
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {
@@ -120,11 +156,6 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
     return server;
   }
 
@@ -140,8 +171,7 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  applyLoggingConfiguration(settings) {
-    const config = Config.withDefaultSchema(settings);
+  async applyLoggingConfiguration(config) {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),

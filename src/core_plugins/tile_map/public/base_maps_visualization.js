@@ -1,8 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
-import { Observable } from 'rxjs/Rx';
+import * as Rx from 'rxjs';
+import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
-
+import { toastNotifications } from 'ui/notify';
 
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
@@ -23,6 +43,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._chartData = null; //reference to data currently on the map.
       this._baseLayerDirty = true;
       this._mapIsLoaded = this._makeKibanaMap();
+    }
+
+    isLoaded() {
+      return this._mapIsLoaded;
     }
 
     destroy() {
@@ -97,7 +121,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     _baseLayerConfigured() {
       const mapParams = this._getMapsParams();
-      return mapParams.wms.baseLayersAreLoaded || mapParams.wms.selectedTmsLayer;
+      return mapParams.wms.selectedTmsLayer;
     }
 
     async _updateBaseLayer() {
@@ -118,7 +142,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
             this._setTmsLayer(firstRoadMapLayer);
           }
         } catch (e) {
-          this._notify.warning(e.message);
+          toastNotifications.addWarning(e.message);
           return;
         }
         return;
@@ -142,15 +166,13 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
               ...mapParams.wms.options
             }
           });
-        } else {
-
-          await mapParams.wms.baseLayersAreLoaded;
+        } else if (mapParams.wms.selectedTmsLayer) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
           this._setTmsLayer(selectedTmsLayer);
 
         }
       } catch (tmsLoadingError) {
-        this._notify.warning(tmsLoadingError.message);
+        toastNotifications.addWarning(tmsLoadingError.message);
       }
 
 
@@ -207,13 +229,12 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       }
 
       const maxTimeForBaseLayer = 10000;
-      const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);
-      const timer$ = Observable.timer(maxTimeForBaseLayer);
+      const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
+      const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Observable.race(interval$, timer$).first().toPromise();
+      return Rx.race(interval$, timer$).pipe(first()).toPromise();
 
     }
 
   };
 }
-

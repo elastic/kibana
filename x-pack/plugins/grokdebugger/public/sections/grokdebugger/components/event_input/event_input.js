@@ -4,39 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import template from './event_input.html';
-import './event_input.less';
-import 'ace';
+import React from 'react';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiCodeEditor
+} from '@elastic/eui';
+import { EDITOR } from '../../../../../common/constants';
 
-const app = uiModules.get('xpack/grokdebugger');
-
-app.directive('eventInput', function () {
-  return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      onChange: '='
-    },
-    bindToController: true,
-    controllerAs: 'eventInput',
-    controller: class EventInputController {
-      constructor($scope) {
-        $scope.$watch('eventInput.rawEvent', (newRawEvent) => {
-          this.onChange(newRawEvent);
-        });
-        $scope.aceLoaded = (editor) => {
-          this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
+export function EventInput({ value, onChange }) {
+  return (
+    <EuiFormRow
+      label="Sample Data"
+      fullWidth
+      data-test-subj="aceEventInput"
+    >
+      <EuiPanel paddingSize="s">
+        <EuiCodeEditor
+          width="100%"
+          value={value}
+          onChange={onChange}
+          setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 10
-          });
-          editor.$blockScrolling = Infinity;
-        };
-      }
-    }
-  };
-});
+            minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
+            maxLines: EDITOR.SAMPLE_DATA_MAX_LINES
+          }}
+        />
+      </EuiPanel>
+    </EuiFormRow>
+  );
+}

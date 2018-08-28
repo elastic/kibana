@@ -6,7 +6,7 @@
 Our style guide is an extension of [Sass Guidelines by Hugo Giraudel](https://sass-guidelin.es/). The rules we especially focus on are:
 
 * [Syntax & formatting](https://sass-guidelin.es/#syntax--formatting) (exceptions below)
-* [Naming conventions](https://sass-guidelin.es/#naming-conventions) (see the [CSS Style Guide](css_style_guide.md) for infomation on exceptions)
+* [Naming conventions](https://sass-guidelin.es/#naming-conventions) (see the [CSS Style Guide](css_style_guide.md) for information on exceptions)
 * [Variables](https://sass-guidelin.es/#variables)
 * [Mixins](https://sass-guidelin.es/#mixins)
 

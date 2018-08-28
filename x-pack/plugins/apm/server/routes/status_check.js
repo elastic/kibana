@@ -24,7 +24,9 @@ export function initStatusApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({})
+        query: Joi.object().keys({
+          _debug: Joi.bool()
+        })
       }
     },
     handler: (req, reply) => {
@@ -41,7 +43,9 @@ export function initStatusApi(server) {
     config: {
       pre,
       validate: {
-        query: Joi.object().keys({})
+        query: Joi.object().keys({
+          _debug: Joi.bool()
+        })
       }
     },
     handler: (req, reply) => {

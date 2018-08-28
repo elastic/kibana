@@ -1,4 +1,24 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
+import { toastNotifications } from 'ui/notify';
 import { extractBuckets } from './_extract_buckets';
 import { createRawData } from './_create_raw_data';
 import { arrayToLinkedList } from './_array_to_linked_list';
@@ -6,17 +26,12 @@ import AggConfigResult from '../../vis/agg_config_result';
 import { AggResponseHierarchicalBuildSplitProvider } from './_build_split';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
 
-export function BuildHierarchicalDataProvider(Private, Notifier) {
+export function BuildHierarchicalDataProvider(Private) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
 
-
-  const notify = new Notifier({
-    location: 'Pie chart response converter'
-  });
-
   return function (vis, resp) {
-    // Create a refrenece to the buckets
+    // Create a reference to the buckets
     let buckets = vis.getAggConfig().bySchemaGroup.buckets;
 
     // Find the metric so it's easier to reference.
@@ -54,7 +69,10 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
     const aggData = resp.aggregations ? resp.aggregations[firstAgg.id] : null;
 
     if (!firstAgg._next && firstAgg.schema.name === 'split') {
-      notify.error('Splitting charts without splitting slices is not supported. Pretending that we are just splitting slices.');
+      toastNotifications.addDanger({
+        title: 'Splitting charts without splitting slices is not supported',
+        text: 'Pretending that we are just splitting slices.'
+      });
     }
 
     // start with splitting slices

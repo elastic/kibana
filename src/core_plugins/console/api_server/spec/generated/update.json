@@ -1,0 +1,34 @@
+{
+  "update": {
+    "url_params": {
+      "include_type_name": "",
+      "wait_for_active_shards": "",
+      "_source": [],
+      "_source_exclude": [],
+      "_source_include": [],
+      "lang": "painless",
+      "parent": "",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "retry_on_conflict": "0",
+      "routing": "",
+      "timeout": "",
+      "version": "",
+      "version_type": [
+        "internal",
+        "force"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/{type}/{id}/_update",
+      "{indices}/_doc/{id}/_update"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
+  }
+}

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import React from 'react';
 import { banners } from '../../notify';
@@ -8,6 +27,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { clearTimeout } from 'timers';
+import { i18n } from '@kbn/i18n';
 
 let bannerId;
 let timeoutId;
@@ -24,8 +44,9 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          `In order to visualize and explore data in Kibana,
-          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+          i18n.translate('common.ui.indexPattern.bannerLabel',
+            //eslint-disable-next-line max-len
+            { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }
       />
     )

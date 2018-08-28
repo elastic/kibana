@@ -4,53 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
-import { getPageData } from './get_page_data';
+import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit();
-    },
-    pageData: getPageData
+    }
   },
-  controllerAs: 'esIndices',
-  controller: class EsIndicesList extends MonitoringViewBaseTableController {
-
+  controllerAs: 'elasticsearchIndices',
+  controller: class ElasticsearchIndicesController extends MonitoringViewBaseTableController {
     constructor($injector, $scope) {
+      const $route = $injector.get('$route');
+      const globalState = $injector.get('globalState');
+      const features = $injector.get('features');
+
+      const { cluster_uuid: clusterUuid } = globalState;
+      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: clusterUuid });
+
+      let showSystemIndices = features.isEnabled('showSystemIndices', false);
+
       super({
         title: 'Elasticsearch - Indices',
         storageKey: 'elasticsearch.indices',
-        getPageData,
+        apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
+        reactNodeId: 'elasticsearchIndicesReact',
+        defaultData: {},
+        $scope,
+        $injector,
         $scope,
         $injector
       });
 
-      const $route = $injector.get('$route');
-      this.data = $route.current.locals.pageData;
-      const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-
-      // used in table toolbar
-      const features = $injector.get('features');
-      this.showSystemIndices = features.isEnabled('showSystemIndices', false);
-
       // for binding
-      this.toggleShowSystemIndices = isChecked => {
+      const toggleShowSystemIndices = isChecked => {
         // flip the boolean
-        this.showSystemIndices = isChecked;
+        showSystemIndices = isChecked;
         // preserve setting in localStorage
         features.update('showSystemIndices', isChecked);
         // update the page (resets pagination and sorting)
         this.updateData();
       };
-    }
 
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(data);
+      });
+
+      this.renderReact = ({ clusterStatus, indices }) => {
+        super.renderReact(
+          <ElasticsearchIndices
+            clusterStatus={clusterStatus}
+            indices={indices}
+            showSystemIndices={showSystemIndices}
+            toggleShowSystemIndices={toggleShowSystemIndices}
+          />
+        );
+      };
+    }
   }
 });

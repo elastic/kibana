@@ -1,7 +1,27 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 
 export const createStubStats = () => ({
   createdIndex: sinon.stub(),
+  createdAliases: sinon.stub(),
   deletedIndex: sinon.stub(),
   skippedIndex: sinon.stub(),
   archivedIndex: sinon.stub(),
@@ -16,9 +36,9 @@ export const createStubStats = () => ({
   },
 });
 
-export const createStubIndexRecord = (index) => ({
+export const createStubIndexRecord = (index, aliases = {}) => ({
   type: 'index',
-  value: { index }
+  value: { index, aliases }
 });
 
 export const createStubDocRecord = (index, id) => ({
@@ -36,7 +56,7 @@ const createEsClientError = (errorType) => {
   return err;
 };
 
-export const createStubClient = (existingIndices = []) => ({
+export const createStubClient = (existingIndices = [], aliases = {}) => ({
   indices: {
     get: sinon.spy(async ({ index }) => {
       if (!existingIndices.includes(index)) {
@@ -49,6 +69,19 @@ export const createStubClient = (existingIndices = []) => ({
           settings: {},
         }
       };
+    }),
+    getAlias: sinon.spy(({ index }) => {
+      return Promise.resolve({ [index]: { aliases: aliases[index] || {} } });
+    }),
+    updateAliases: sinon.spy(async ({ body }) => {
+      body.actions.forEach(({ add: { index, alias } }) => {
+        if (!existingIndices.includes(index)) {
+          throw createEsClientError('index_not_found_exception');
+        }
+        existingIndices.push({ index, alias });
+      });
+
+      return { ok: true };
     }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index)) {

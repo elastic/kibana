@@ -89,7 +89,7 @@ export function ElasticsearchPanel(props) {
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>Version</EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esVersion">
-                { get(nodes, 'versions[0]') || 'N/A' }
+                { props.version || 'N/A' }
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>Uptime</EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esUptime">

@@ -7,14 +7,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-jest.mock('../../../../utils/timepicker', () => {});
 
 import Breadcrumbs from '../Breadcrumbs';
 import { toJson } from '../../../../utils/testHelpers';
 
 function expectBreadcrumbToMatchSnapshot(route) {
   const wrapper = mount(
-    <MemoryRouter initialEntries={[`${route}?_g=`]}>
+    <MemoryRouter initialEntries={[`${route}?_g=myG&kuery=myKuery`]}>
       <Breadcrumbs />
     </MemoryRouter>
   );

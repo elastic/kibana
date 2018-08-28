@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
@@ -7,7 +26,7 @@ import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 
-describe('Controller', function () {
+describe('Table Vis Controller', function () {
   let $rootScope;
   let $compile;
   let Private;
@@ -87,7 +106,7 @@ describe('Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.oneRangeBucket, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
       isHierarchical: vis.isHierarchical()
     }));
 
@@ -102,7 +121,7 @@ describe('Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.oneRangeBucket, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
       isHierarchical: vis.isHierarchical()
     }));
     removeEsResponseFromScope();
@@ -123,7 +142,7 @@ describe('Controller', function () {
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), resp, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
       isHierarchical: vis.isHierarchical()
     }));
 
@@ -139,7 +158,7 @@ describe('Controller', function () {
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), resp, {
+    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
       isHierarchical: vis.isHierarchical()
     }));
 

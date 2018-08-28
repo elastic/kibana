@@ -2,49 +2,52 @@
 
 exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
-      gutterSize="l"
+      direction="row"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
       <EuiFlexItem
         component="div"
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             if
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="primary"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <div>
         <p>
           This is a conditional statement in your pipeline.
@@ -68,49 +71,52 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 
 exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
-      gutterSize="l"
+      direction="row"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
       <EuiFlexItem
         component="div"
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             grok filter
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="primary"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <div>
         <p>
           This 
@@ -127,7 +133,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           size="l"
         />
       </div>
-      <EuiTable>
+      <EuiTable
+        responsive={true}
+      >
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
@@ -354,59 +362,67 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 
 exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
-      gutterSize="l"
+      direction="row"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
       <EuiFlexItem
         component="div"
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             grok filter
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="primary"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <p>
         This 
         plugin
         's ID is 
-        <strong>
+        <EuiBadge
+          color="default"
+          iconSide="left"
+        >
           parse_apache_logline
-        </strong>
+        </EuiBadge>
         .
       </p>
-      <EuiTable>
+      <EuiTable
+        responsive={true}
+      >
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
@@ -633,49 +649,52 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 
 exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
-      gutterSize="l"
+      direction="row"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
       <EuiFlexItem
         component="div"
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
             queue
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={false}
-      >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="primary"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <p>
         This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline.
       </p>
@@ -689,48 +708,50 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 
 exports[`DetailDrawer component shows vertex title 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
   onClose={[MockFunction]}
+  ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={false}
+  >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="baseline"
       component="div"
-      gutterSize="l"
+      direction="row"
+      gutterSize="s"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
     >
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
       >
-        <EuiTitle>
-          <h2>
-            <img
-              className="lspvDetailDrawerIcon"
-              height={18}
-              width={18}
-            />
-          </h2>
-        </EuiTitle>
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+          size="m"
+        />
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={false}
+        grow={true}
       >
-        <EuiButtonIcon
-          aria-label="Close"
-          color="primary"
-          iconType="cross"
-          onClick={[MockFunction]}
-          type="button"
-        />
+        <EuiTitle
+          size="m"
+        >
+          <h2 />
+        </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText />
+    <EuiText
+      grow={true}
+    />
   </EuiFlyoutBody>
 </EuiFlyout>
 `;

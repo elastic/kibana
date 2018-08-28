@@ -4,57 +4,150 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIconTip } from '@elastic/eui';
+import styled from 'styled-components';
+import chrome from 'ui/chrome';
 import React, { Component } from 'react';
-import withErrorHandler from '../../shared/withErrorHandler';
-import { HeaderLarge, HeaderMedium } from '../../shared/UIComponents';
+import PropTypes from 'prop-types';
+import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
-import Charts from './Charts';
+import Charts from '../../shared/charts/TransactionCharts';
+import { getMlJobUrl } from '../../../utils/url';
 import List from './List';
-import { getKey } from '../../../store/apiHelpers';
+import { units, px, fontSizes } from '../../../style/variables';
+import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
+import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
+import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
-function loadTransactionList(props) {
-  const { serviceName, start, end, transactionType } = props.urlParams;
-  const key = getKey({ serviceName, start, end, transactionType });
+import DynamicBaselineButton from './DynamicBaseline/Button';
+import DynamicBaselineFlyout from './DynamicBaseline/Flyout';
+import { KueryBar } from '../../shared/KueryBar';
 
-  if (key && props.transactionList.key !== key) {
-    props.loadTransactionList({ serviceName, start, end, transactionType });
-  }
+function ServiceDetailsAndTransactionList({ urlParams, render }) {
+  return (
+    <ServiceDetailsRequest
+      urlParams={urlParams}
+      render={serviceDetails => {
+        return (
+          <TransactionListRequest
+            urlParams={urlParams}
+            render={transactionList => {
+              return render({
+                transactionList: transactionList.data,
+                serviceDetails: serviceDetails.data
+              });
+            }}
+          />
+        );
+      }}
+    />
+  );
 }
 
-export class TransactionOverview extends Component {
-  componentDidMount() {
-    loadTransactionList(this.props);
-  }
+const MLTipContainer = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: ${fontSizes.small};
+`;
 
-  componentWillReceiveProps(nextProps) {
-    loadTransactionList(nextProps);
-  }
+const MLText = styled.div`
+  margin-left: ${px(units.half)};
+`;
+
+class TransactionOverview extends Component {
+  state = {
+    isFlyoutOpen: false
+  };
+
+  onOpenFlyout = () => this.setState({ isFlyoutOpen: true });
+  onCloseFlyout = () => this.setState({ isFlyoutOpen: false });
 
   render() {
-    const { serviceName, transactionType } = this.props.urlParams;
-    const {
-      changeTransactionSorting,
-      transactionSorting,
-      transactionList
-    } = this.props;
+    const { hasDynamicBaseline, license, location, urlParams } = this.props;
+
+    const { serviceName, transactionType } = urlParams;
+    const mlEnabled = chrome.getInjected('mlEnabled');
+
+    const ChartHeaderContent =
+      hasDynamicBaseline && license.data.features.ml.isAvailable ? (
+        <MLTipContainer>
+          <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+          <MLText>
+            Machine Learning:{' '}
+            <a
+              href={getMlJobUrl(
+                serviceName,
+                transactionType,
+                this.props.location
+              )}
+            >
+              View Job
+            </a>
+          </MLText>
+        </MLTipContainer>
+      ) : null;
 
     return (
       <div>
-        <HeaderLarge>{serviceName}</HeaderLarge>
-        <TabNavigation />
-        <Charts />
-        <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>
-        <List
+        <HeaderContainer>
+          <h1>{serviceName}</h1>
+          {license.data.features.ml.isAvailable &&
+            mlEnabled && (
+              <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
+            )}
+        </HeaderContainer>
+
+        <KueryBar />
+
+        <DynamicBaselineFlyout
+          hasDynamicBaseline={hasDynamicBaseline}
+          isOpen={this.state.isFlyoutOpen}
+          location={location}
+          onClose={this.onCloseFlyout}
           serviceName={serviceName}
-          type={transactionType}
-          items={transactionList.data}
-          changeTransactionSorting={changeTransactionSorting}
-          transactionSorting={transactionSorting}
+          transactionType={transactionType}
+        />
+
+        <TabNavigation />
+
+        <OverviewChartsRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <Charts
+              charts={data}
+              urlParams={urlParams}
+              location={location}
+              ChartHeaderContent={ChartHeaderContent}
+            />
+          )}
+        />
+
+        <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>
+
+        <ServiceDetailsAndTransactionList
+          urlParams={urlParams}
+          render={({ serviceDetails, transactionList }) => {
+            return (
+              <List
+                agentName={serviceDetails.agentName}
+                items={transactionList}
+                serviceName={serviceName}
+                type={transactionType}
+              />
+            );
+          }}
         />
       </div>
     );
   }
 }
+
+TransactionOverview.propTypes = {
+  hasDynamicBaseline: PropTypes.bool.isRequired,
+  license: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
+};
 
 // TODO: This is duplicated in TabNavigation
 function transactionTypeLabel(type) {
@@ -68,4 +161,4 @@ function transactionTypeLabel(type) {
   }
 }
 
-export default withErrorHandler(TransactionOverview, ['transactionList']);
+export default TransactionOverview;

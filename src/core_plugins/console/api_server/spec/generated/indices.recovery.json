@@ -1,5 +1,5 @@
 {
-  "_recovery": {
+  "indices.recovery": {
     "url_params": {
       "detailed": "__flag__",
       "active_only": "__flag__"
@@ -10,6 +10,7 @@
     "patterns": [
       "_recovery",
       "{indices}/_recovery"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-recovery.html"
   }
 }

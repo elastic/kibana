@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
@@ -14,23 +33,30 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class DashboardPage {
-    async initTests() {
+    async initTests({
+      kibanaIndex = 'dashboard/legacy',
+      dataIndex = 'logstash_functional',
+      defaultIndex = 'logstash-*',
+    } = {}) {
       log.debug('load kibana index with visualizations and log data');
       await Promise.all([
-        esArchiver.load('dashboard'),
-        esArchiver.loadIfNeeded('logstash_functional')
+        esArchiver.load(kibanaIndex),
+        esArchiver.loadIfNeeded(dataIndex)
       ]);
 
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': defaultIndex,
+        'telemetry:optIn': false
       });
-
+      await this.selectDefaultIndex(defaultIndex);
       await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
@@ -41,18 +67,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickEditVisualization() {
-      log.debug('clickEditVisualization');
-
-      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
-      await retry.try(async () => {
-        await this.showPanelEditControlsDropdownMenu();
-        await testSubjects.click('dashboardPanelEditLink');
-        const current = await remote.getCurrentUrl();
-        if (current.indexOf('visualize') < 0) {
-          throw new Error('not on visualize page');
-        }
-      });
+    async selectDefaultIndex(indexName) {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickLinkText(indexName);
+      await PageObjects.settings.clickDefaultIndexButton();
     }
 
     async clickFullScreenMode() {
@@ -127,27 +146,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getQueryInputElement() {
-      return await testSubjects.find('queryInput');
-    }
-
-    async getQuery() {
-      log.debug(`getQuery`);
-      const queryInputElement = await this.getQueryInputElement();
-      return await queryInputElement.getProperty('value');
-    }
-
-    async setQuery(query) {
-      log.debug(`setQuery(${query})`);
-      return await testSubjects.setValue('queryInput', query);
-    }
-
-    async clickFilterButton() {
-      log.debug('Clicking filter button');
-      await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async clickClone() {
       log.debug('Clicking clone');
       await testSubjects.click('dashboardClone');
@@ -171,9 +169,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    async isDuplicateTitleWarningDisplayed() {
+      return await testSubjects.exists('titleDupicateWarnMsg');
+    }
+
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      await retry.waitFor('not in view mode', async () => (
+        !await this.getIsInViewMode()
+      ));
     }
 
     async getIsInViewMode() {
@@ -187,7 +192,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      return await testSubjects.click('newDashboardLink');
+      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
+      const exists = await testSubjects.exists('newDashboardLink');
+      if (exists) {
+        return await testSubjects.click('newDashboardLink');
+      }
+
+      // no dashboards exist, click createDashboardPromptButton to create new dashboard
+      return await this.clickCreateDashboardPrompt();
     }
 
     async clickCreateDashboardPrompt() {
@@ -198,29 +210,26 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
-    async clickListItemCheckbox() {
-      await testSubjects.click('dashboardListItemCheckbox');
+    async checkDashboardListingRow(id) {
+      await testSubjects.click(`checkboxSelectRow-${id}`);
+    }
+
+    async checkDashboardListingSelectAllCheckbox() {
+      const element = await testSubjects.find('checkboxSelectAll');
+      const isSelected = await element.isSelected();
+      if (!isSelected) {
+        log.debug(`checking checkbox "checkboxSelectAll"`);
+        await testSubjects.click('checkboxSelectAll');
+      }
     }
 
     async clickDeleteSelectedDashboards() {
       await testSubjects.click('deleteSelectedDashboards');
     }
 
-    async clickAddVisualization() {
-      await testSubjects.click('dashboardAddPanelButton');
-    }
-
-    async clickAddNewVisualizationLink() {
-      await testSubjects.click('addNewSavedObjectLink');
-    }
-
-    async clickOptions() {
-      await testSubjects.click('dashboardOptionsButton');
-    }
-
     async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return await testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardOptionsMenu');
     }
 
     async openOptions() {
@@ -231,6 +240,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    // avoids any 'Object with id x not found' errors when switching tests.
+    async clearSavedObjectsFromAppLinks() {
+      await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.gotoLandingPage();
+      await PageObjects.header.clickDashboard();
+      await this.gotoDashboardLandingPage();
+    }
+
     async isDarkThemeOn() {
       log.debug('isDarkThemeOn');
       await this.openOptions();
@@ -239,6 +256,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async useDarkTheme(on) {
+      log.debug(`useDarkTheme: on ${on}`);
       await this.openOptions();
       const isDarkThemeOn = await this.isDarkThemeOn();
       if (isDarkThemeOn !== on) {
@@ -261,46 +279,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async clickVizNameLink(vizName) {
-      await find.clickByPartialLinkText(vizName);
-    }
-
-    async closeAddVizualizationPanel() {
-      log.debug('closeAddVizualizationPanel');
-      await find.clickByCssSelector('i.fa fa-chevron-up');
-    }
-
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
-    }
-
-    async filterEmbeddableNames(name) {
-      await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async clickSavedSearchTab() {
-      await testSubjects.click('addSavedSearchTab');
-    }
-
-    async addSavedSearch(searchName) {
-      await this.clickAddVisualization();
-      await this.clickSavedSearchTab();
-      await this.filterEmbeddableNames(searchName);
-
-      await find.clickByPartialLinkText(searchName);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
-      await this.clickAddVisualization();
-    }
-
-    async addVisualization(vizName) {
-      await this.clickAddVisualization();
-      log.debug('filter visualization (' + vizName + ')');
-      await this.filterEmbeddableNames(vizName);
-      await this.clickVizNameLink(vizName);
-      // this second click of 'Add' collapses the Add Visualization pane
-      await this.clickAddVisualization();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
@@ -310,6 +291,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     /**
+     * Save the current dashboard with the specified name and options and
+     * verify that the save was successful
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
@@ -318,13 +301,46 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
-        await PageObjects.common.clickConfirmOnModal();
+        await this.clickSave();
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+      // Confirm that the Dashboard has actually been saved
+      if (!await testSubjects.exists('saveDashboardSuccess')) {
+        throw new Error('Expected to find "saveDashboardSuccess" toast after saving dashboard');
+      }
+
+      await this.waitForSaveModalToClose();
+    }
+
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for dashboard save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('dashboardSaveModal')) {
+          throw new Error('dashboard save still open');
+        }
+      });
+    }
+
+    async deleteDashboard(dashboardName, dashboardId) {
+      await this.gotoDashboardLandingPage();
+      await this.searchForDashboardWithName(dashboardName);
+      await this.checkDashboardListingRow(dashboardId);
+      await this.clickDeleteSelectedDashboards();
+      await PageObjects.common.clickConfirmOnModal();
+    }
+
+    async cancelSave() {
+      log.debug('Canceling save');
+      await testSubjects.click('saveCancelButton');
+    }
+
+    async clickSave() {
+      await retry.try(async () => {
+        log.debug('clicking final Save button for named dashboard');
+        return await testSubjects.click('confirmSaveDashboardButton');
+      });
     }
 
     /**
@@ -348,10 +364,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      await this.clickSave();
     }
 
     async selectDashboard(dashName) {
@@ -366,6 +379,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
+        await PageObjects.common.pressEnterKey();
       });
     }
 
@@ -385,13 +399,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
+        await PageObjects.common.pressEnterKey();
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
@@ -407,6 +422,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     // entry, or at least to a single page of results
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
+
+      await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
@@ -431,10 +448,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return Promise.all(getTitlePromises);
     }
 
-    async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
-    }
-
     async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
       async function getPanelDimensions(panel) {
@@ -451,7 +464,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await find.allByCssSelector('.react-grid-item');
+      const panels = await testSubjects.findAll('dashboardPanel');
       return panels.length;
     }
 
@@ -475,39 +488,29 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return this.getTestVisualizations().map(visualization => visualization.description);
     }
 
-    async showPanelEditControlsDropdownMenu() {
-      log.debug('showPanelEditControlsDropdownMenu');
-      const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-      if (editLinkExists) return;
-
-      await retry.try(async () => {
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        if (!editLinkExists) {
-          throw new Error('No edit link exists, toggle menu not open. Try again.');
-        }
-      });
-    }
-
-    async clickDashboardPanelEditLink() {
-      await this.showPanelEditControlsDropdownMenu();
-      await testSubjects.click('dashboardPanelEditLink');
-    }
-
-    async clickDashboardPanelRemoveIcon() {
-      await this.showPanelEditControlsDropdownMenu();
-      await testSubjects.click('dashboardPanelRemoveIcon');
+    async getDashboardPanels() {
+      return await testSubjects.findAll('dashboardPanel');
     }
 
     async addVisualizations(visualizations) {
-      for (const vizName of visualizations) {
-        await this.addVisualization(vizName);
-      }
+      await dashboardAddPanel.addVisualizations(visualizations);
+    }
+
+    async setTimepickerInHistoricalDataRange() {
+      const fromTime = '2015-09-19 06:31:44.000';
+      const toTime = '2015-09-23 18:31:44.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInDataRange() {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
+      const fromTime = '2018-01-01 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async setTimepickerInLogstashDataRange() {
+      const fromTime = '2018-04-09 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
@@ -542,68 +545,26 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }
 
-    async getPieSliceCount() {
+    async getPieSliceCount(timeout) {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
         return slices.length;
       });
     }
 
-    async filterOnPieSlice() {
-      log.debug('Filtering on a pie slice');
-      await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-        log.debug('Slices found:' + slices.length);
-        return slices[0].click();
-      });
-    }
-
-    async arePanelMainMenuOptionsOpen(panel) {
-      log.debug('arePanelMainMenuOptionsOpen');
-      // Sub menu used arbitrarily - any option on the main menu panel would do.
-      return panel ?
-        await testSubjects.descendantExists('dashboardPanelOptionsSubMenuLink', panel) :
-        await testSubjects.exists('dashboardPanelOptionsSubMenuLink');
-    }
-
-    async openPanelOptions(panel) {
-      log.debug('openPanelOptions');
-      const panelOpen = await this.arePanelMainMenuOptionsOpen(panel);
-      if (!panelOpen) {
+    async filterOnPieSlice(sliceValue) {
+      log.debug(`Filtering on a pie slice with optional value ${sliceValue}`);
+      if (sliceValue) {
+        await testSubjects.click(`pieSlice-${sliceValue}`);
+      } else {
+        // If no pie slice has been provided, find the first one available.
         await retry.try(async () => {
-          await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-          const toggleMenuItem = panel ?
-            await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
-            await testSubjects.find('dashboardPanelToggleMenuIcon');
-          await toggleMenuItem.click();
-          const panelOpen = await this.arePanelMainMenuOptionsOpen(panel);
-          if (!panelOpen) { throw new Error('Panel menu still not open'); }
+          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+          log.debug('Slices found:' + slices.length);
+          return slices[0].click();
         });
       }
-    }
-
-    async toggleExpandPanel(panel) {
-      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-      const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
-      if (!expandShown) {
-        await this.openPanelOptions(panel);
-      }
-      await testSubjects.click('dashboardPanelExpandIcon');
-    }
-
-    async setCustomPanelTitle(customTitle, panel) {
-      log.debug(`setCustomPanelTitle(${customTitle}, ${panel})`);
-      await this.openPanelOptions(panel);
-      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
-    }
-
-    async resetCustomPanelTitle(panel) {
-      log.debug('resetCustomPanelTitle');
-      await this.openPanelOptions(panel);
-      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
-      await testSubjects.click('resetCustomDashboardPanelTitle');
     }
 
     async getSharedItemsCount() {
@@ -618,19 +579,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      await retry.try(async () => {
-        const sharedItems = await find.allByCssSelector('[data-shared-item]');
-        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
-          return await sharedItem.getAttribute('data-render-complete');
-        }));
-        if (renderComplete.length !== sharedItems.length) {
-          throw new Error('Some shared items dont have data-render-complete attribute');
-        }
-        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
-        if (totalCount < sharedItems.length) {
-          throw new Error('Still waiting on more visualizations to finish rendering');
-        }
-      });
+      log.debug('waitForRenderComplete');
+      const count = await this.getSharedItemsCount();
+      await renderable.waitForRender(parseInt(count));
+    }
+
+    async getSharedContainerData() {
+      log.debug('getSharedContainerData');
+      const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
+      return {
+        title: await sharedContainer.getAttribute('data-title'),
+        description: await sharedContainer.getAttribute('data-description'),
+        count: await sharedContainer.getAttribute('data-shared-items-count'),
+      };
     }
 
     async getPanelSharedItemData() {

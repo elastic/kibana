@@ -12,10 +12,10 @@ import {
 } from '../../../common/constants';
 
 export async function getTransactionDuration({ transactionId, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 1,
       _source: TRANSACTION_DURATION,
@@ -38,6 +38,10 @@ export async function getTransactionDuration({ transactionId, setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
   return get(resp, `hits.hits[0]._source.${TRANSACTION_DURATION}`);

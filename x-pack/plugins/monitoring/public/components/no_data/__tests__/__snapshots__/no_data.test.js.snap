@@ -5,13 +5,15 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   class="euiPage"
 >
   <div
-    class="euiPageBody"
+    class="euiPageBody euiPageBody--restrictWidth-custom"
+    style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge"
+        focusable="false"
         height="32"
         viewBox="0 0 32 32"
         width="32"
@@ -84,13 +86,15 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   class="euiPage"
 >
   <div
-    class="euiPageBody"
+    class="euiPageBody euiPageBody--restrictWidth-custom"
+    style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge"
+        focusable="false"
         height="32"
         viewBox="0 0 32 32"
         width="32"
@@ -136,7 +140,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"

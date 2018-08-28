@@ -15,12 +15,14 @@ async function getSpans({ transactionId, setup }) {
   const { start, end, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.spanIndices'),
     body: {
       size: 500,
       query: {
         bool: {
           filter: [
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [PROCESSOR_EVENT]: 'span' } },
             {
               range: {
                 '@timestamp': {
@@ -29,9 +31,7 @@ async function getSpans({ transactionId, setup }) {
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [PROCESSOR_EVENT]: 'span' } }
+            }
           ]
         }
       },

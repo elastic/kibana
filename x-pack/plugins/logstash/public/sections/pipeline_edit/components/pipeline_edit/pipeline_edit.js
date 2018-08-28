@@ -7,14 +7,13 @@
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
-import 'ui/dirty_prompt';
+import { toastNotifications } from 'ui/notify';
 import template from './pipeline_edit.html';
 import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
 import './pipeline_edit.less';
 import '../../../../components/tooltip';
-import { TOOLTIPS } from '../../../../../common/constants';
+import { EDITOR, TOOLTIPS } from '../../../../../common/constants';
 import 'ace';
 
 const app = uiModules.get('xpack/logstash');
@@ -25,20 +24,18 @@ app.directive('pipelineEdit', function ($injector) {
   const securityService = $injector.get('logstashSecurityService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
 
   return {
     restrict: 'E',
     template: template,
     scope: {
-      pipeline: '='
+      pipeline: '=',
     },
     bindToController: true,
     controllerAs: 'pipelineEdit',
     controller: class PipelineEditController extends InitAfterBindingsWorkaround {
       initAfterBindings($scope) {
         this.originalPipeline = { ...this.pipeline };
-        this.notifier = new Notifier({ location: 'Logstash' });
         this.isNewPipeline = isEmpty(this.pipeline.id);
         // only if security is enabled and available, we tack on the username.
         if (securityService.isSecurityEnabled) {
@@ -46,13 +43,23 @@ app.directive('pipelineEdit', function ($injector) {
         } else {
           $scope.user = null;
         }
-        $scope.aceLoaded = (editor) => {
+        $scope.aceLoaded = editor => {
           this.editor = editor;
+          /*
+           * This sets the space between the editor's borders and the
+           * edges of the top/bottom lines to make for a less-crowded
+           * typing experience.
+           */
+          editor.renderer.setScrollMargin(
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_TOP_PX,
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM_PX,
+            0,
+            0
+          );
           editor.setReadOnly(this.isReadOnly);
-          editor.getSession().setMode("ace/mode/ruby");
           editor.setOptions({
             minLines: 25,
-            maxLines: Infinity
+            maxLines: Infinity,
           });
           editor.$blockScrolling = Infinity;
         };
@@ -61,53 +68,56 @@ app.directive('pipelineEdit', function ($injector) {
         }
 
         this.tooltips = TOOLTIPS;
-
-        dirtyPrompt.register(() => !this.pipeline.isEqualTo(this.originalPipeline));
-        $scope.$on('$destroy', dirtyPrompt.deregister);
       }
 
-      onPipelineSave = (username) => {
+      onPipelineSave = username => {
         this.pipeline.username = username;
-        return pipelineService.savePipeline(this.pipeline)
+        return pipelineService
+          .savePipeline(this.pipeline)
           .then(() => {
             toastNotifications.addSuccess(`Saved '${this.pipeline.id}'`);
             this.close();
           })
           .catch(err => {
-            return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+            return licenseService
+              .checkValidity()
+              .then(() => toastNotifications.addDanger(err));
           });
-      }
+      };
 
-      onPipelineDelete = (pipelineId) => {
+      onPipelineDelete = pipelineId => {
         const confirmModalOptions = {
           onConfirm: this.deletePipeline,
-          confirmButtonText: `Delete pipeline ${pipelineId}`
+          confirmButtonText: `Delete pipeline ${pipelineId}`,
         };
 
-        return confirmModal('You cannot recover a deleted pipeline.', confirmModalOptions);
-      }
+        return confirmModal(
+          'You cannot recover a deleted pipeline.',
+          confirmModalOptions
+        );
+      };
 
       onClose = () => {
         this.close();
-      }
+      };
 
       deletePipeline = () => {
-        return pipelineService.deletePipeline(this.pipeline.id)
+        return pipelineService
+          .deletePipeline(this.pipeline.id)
           .then(() => {
             toastNotifications.addSuccess(`Deleted '${this.pipeline.id}'`);
             this.close();
           })
           .catch(err => {
-            return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+            return licenseService
+              .checkValidity()
+              .then(() => toastNotifications.addDanger(err));
           });
-      }
+      };
 
       close = () => {
-        dirtyPrompt.deregister();
         kbnUrl.change('/management/logstash/pipelines', {});
-      }
+      };
 
       get isSaveEnabled() {
         return !(this.form.$invalid || this.jsonForm.$invalid);
@@ -116,6 +126,6 @@ app.directive('pipelineEdit', function ($injector) {
       get isReadOnly() {
         return licenseService.isReadOnly;
       }
-    }
+    },
   };
 });

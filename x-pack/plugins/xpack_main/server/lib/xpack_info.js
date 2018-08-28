@@ -6,7 +6,7 @@
 
 import { createHash } from 'crypto';
 import moment from 'moment';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { Poller } from '../../../../common/poller';
 import { XPackInfoLicense } from './xpack_info_license';
 
@@ -27,6 +27,15 @@ export class XPackInfo {
    * @private
    */
   _featureLicenseCheckResultsGenerators = new Map();
+
+
+  /**
+   * Set of listener functions that will be called whenever the license
+   * info changes
+   * @type {Set<Function>}
+   */
+  _licenseInfoChangedListeners = new Set();
+
 
   /**
    * Cache that may contain last xpack info API response or error, json representation
@@ -87,15 +96,31 @@ export class XPackInfo {
   }
 
   /**
+   * Checks whether ES was available
+   * @returns {boolean}
+   */
+  isXpackUnavailable() {
+    return this._cache.error instanceof Error && this._cache.error.status === 400;
+  }
+
+  /**
    * If present, describes the reason why XPack info is not available.
    * @returns {Error|string}
    */
   unavailableReason() {
-    if (this._cache.error instanceof Error && this._cache.error.status === 400) {
+    if (!this._cache.error && this._cache.response && !this._cache.response.license) {
+      return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
+    }
+
+    if (this.isXpackUnavailable()) {
       return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
     }
 
     return this._cache.error;
+  }
+
+  onLicenseInfoChange(handler) {
+    this._licenseInfoChangedListeners.add(handler);
   }
 
   /**
@@ -116,26 +141,42 @@ export class XPackInfo {
         path: '/_xpack'
       });
 
-      if (this._hasLicenseInfoChanged(response)) {
-        const licenseInfo = [
+      const licenseInfoChanged = this._hasLicenseInfoChanged(response);
+
+      if (licenseInfoChanged) {
+        const licenseInfoParts = [
           `mode: ${get(response, 'license.mode')}`,
           `status: ${get(response, 'license.status')}`,
-          `expiry date: ${moment(get(response, 'license.expiry_date_in_millis'), 'x').format()}`
-        ].join(' | ');
+        ];
+
+        if (has(response, 'license.expiry_date_in_millis')) {
+          const expiryDate = moment(response.license.expiry_date_in_millis, 'x').format();
+          licenseInfoParts.push(`expiry date: ${expiryDate}`);
+        }
+
+        const licenseInfo = licenseInfoParts.join(' | ');
 
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
       this._cache = { response };
+
+      if (licenseInfoChanged) {
+        // call license info changed listeners
+        for (const listener of this._licenseInfoChangedListeners) {
+          listener();
+        }
+      }
+
     } catch(error) {
       this._log(
-        [ 'license', 'warning', 'xpack' ],
+        ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
+        ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };

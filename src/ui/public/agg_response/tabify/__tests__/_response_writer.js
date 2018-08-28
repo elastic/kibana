@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
@@ -28,7 +47,7 @@ describe('TabbedAggResponseWriter class', function () {
 
     it('sets canSplit=true by default', function () {
       const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+      const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
         isHierarchical: vis.isHierarchical()
       });
       expect(writer).to.have.property('canSplit', true);
@@ -36,7 +55,7 @@ describe('TabbedAggResponseWriter class', function () {
 
     it('sets canSplit=false when config says to', function () {
       const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-      const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+      const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
         canSplit: false,
         isHierarchical: vis.isHierarchical()
       });
@@ -48,7 +67,7 @@ describe('TabbedAggResponseWriter class', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
         const partial = Boolean(Math.round(Math.random()));
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical(),
           partialRows: partial
         });
@@ -60,7 +79,7 @@ describe('TabbedAggResponseWriter class', function () {
         const hierarchical = Boolean(Math.round(Math.random()));
         sinon.stub(vis, 'isHierarchical').returns(hierarchical);
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         expect(writer).to.have.property('partialRows', hierarchical);
@@ -70,7 +89,7 @@ describe('TabbedAggResponseWriter class', function () {
     it('starts off with a root TabifyTableGroup', function () {
       const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
 
-      const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+      const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
         isHierarchical: vis.isHierarchical()
       });
       expect(writer.root).to.be.a(TabifyTableGroup);
@@ -86,7 +105,7 @@ describe('TabbedAggResponseWriter class', function () {
     describe('#response()', function () {
       it('returns the root TabifyTableGroup if splitting', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         expect(writer.response()).to.be(writer.root);
@@ -94,7 +113,7 @@ describe('TabbedAggResponseWriter class', function () {
 
       it('returns the first table if not splitting', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical(),
           canSplit: false
         });
@@ -111,7 +130,7 @@ describe('TabbedAggResponseWriter class', function () {
           ]
         });
         const buckets = new TabifyBuckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         const tables = [];
@@ -165,7 +184,7 @@ describe('TabbedAggResponseWriter class', function () {
         });
         const agg = vis.aggs.bySchemaName.split[0];
         const buckets = new TabifyBuckets({ buckets: [ { key: 'apache' } ] });
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical(),
           canSplit: false
         });
@@ -186,7 +205,7 @@ describe('TabbedAggResponseWriter class', function () {
           ]
         });
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical(),
           asAggConfigResults: true
         });
@@ -237,7 +256,7 @@ describe('TabbedAggResponseWriter class', function () {
       it('logs a cell in the TabbedAggResponseWriters row buffer, calls the block arg, then removes the value from the buffer',
         function () {
           const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-          const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+          const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
             isHierarchical: vis.isHierarchical()
           });
 
@@ -253,7 +272,7 @@ describe('TabbedAggResponseWriter class', function () {
     describe('#row()', function () {
       it('writes the TabbedAggResponseWriters internal rowBuffer into a table', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
 
@@ -293,7 +312,7 @@ describe('TabbedAggResponseWriter class', function () {
 
         const count = vis.aggs[3];
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         writer.split(type, typeTabifyBuckets, function () {
@@ -339,7 +358,7 @@ describe('TabbedAggResponseWriter class', function () {
           ]
         });
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         const table = writer._table();
@@ -360,7 +379,7 @@ describe('TabbedAggResponseWriter class', function () {
           ]
         });
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
           isHierarchical: vis.isHierarchical()
         });
         const table = writer._table();

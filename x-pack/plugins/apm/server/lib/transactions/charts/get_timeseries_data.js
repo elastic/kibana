@@ -14,6 +14,7 @@ import {
 import { get, sortBy, round } from 'lodash';
 import mean from 'lodash.mean';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getAvgResponseTimeAnomalies } from './get_avg_response_time_anomalies/get_avg_response_time_anomalies';
 
 export async function getTimeseriesData({
   serviceName,
@@ -21,11 +22,11 @@ export async function getTimeseriesData({
   transactionName,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
@@ -94,6 +95,10 @@ export async function getTimeseriesData({
     }
   };
 
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
+
   if (transactionName) {
     params.body.query.bool.must = [
       { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
@@ -146,15 +151,23 @@ export async function getTimeseriesData({
     bucket => bucket.key.replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
   );
 
+  const avgResponseTimesAnomalies = await getAvgResponseTimeAnomalies({
+    serviceName,
+    transactionType,
+    transactionName,
+    setup
+  });
+
   return {
     total_hits: resp.hits.total,
     dates: dates,
     response_times: {
       avg: responseTime.avg,
       p95: responseTime.p95,
-      p99: responseTime.p99
+      p99: responseTime.p99,
+      avg_anomalies: avgResponseTimesAnomalies
     },
     tpm_buckets: tpmBuckets,
-    weighted_average: overallAvgDuration || 0
+    overall_avg_duration: overallAvgDuration || 0
   };
 }

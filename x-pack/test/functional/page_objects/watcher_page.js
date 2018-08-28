@@ -23,8 +23,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async createWatch(watchName, name) {
-      await testSubjects.click('createNewWatch');
-      await testSubjects.click('AdvancedWatch');
+      await testSubjects.click('createAdvancedWatchButton');
       await remote.findById('id').type(watchName);
       await remote.findById('name').type(name);
       await testSubjects.click('btnSaveWatch');

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -42,23 +61,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
-    });
-
-    it('preserves the original title on cancel', async function () {
-      await PageObjects.common.clickCancelOnModal();
-      await PageObjects.dashboard.confirmClone();
-
-      await retry.try(async () => {
-        // Should see the same confirmation if the title is the same.
-        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-        expect(isConfirmOpen).to.equal(true);
-      });
+      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      expect(isWarningDisplayed).to.equal(true);
     });
 
     it('and doesn\'t save', async () => {
-      await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.cancelClone();
 
       const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
@@ -70,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickClone();
 
       await PageObjects.dashboard.confirmClone();
-      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.dashboard.confirmClone();
 
       // This is important since saving a new dashboard will cause a refresh of the page.  We have to
       // wait till it finishes reloading or it might reload the url after simulating the

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
@@ -75,16 +94,16 @@ uiModules.get('kibana')
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
 
-          $scope.indexPattern = $scope.searchSource.get('index');
+          $scope.indexPattern = $scope.searchSource.getField('index');
 
-          $scope.searchSource.size(config.get('discover:sampleSize'));
-          $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
+          $scope.searchSource.setField('size', config.get('discover:sampleSize'));
+          $scope.searchSource.setField('sort', getSort($scope.sorting, $scope.indexPattern));
 
           // Set the watcher after initialization
           $scope.$watchCollection('sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
-            $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));
+            $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
             $scope.searchSource.fetchQueued();
           });
 

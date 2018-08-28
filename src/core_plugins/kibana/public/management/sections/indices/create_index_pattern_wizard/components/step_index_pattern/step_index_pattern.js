@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
@@ -19,7 +38,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-export class StepIndexPattern extends Component {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+
+const uiSettings = chrome.getUiSettingsClient();
+
+export class StepIndexPatternComponent extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
@@ -30,7 +54,7 @@ export class StepIndexPattern extends Component {
   }
 
   static defaultProps = {
-    initialQuery: '',
+    initialQuery: uiSettings.get('indexPattern:placeholder'),
   }
 
   constructor(props) {
@@ -186,17 +210,26 @@ export class StepIndexPattern extends Component {
 
     return (
       <EuiCallOut
-        title="Whoops!"
+        title={<FormattedMessage
+          id="kbn.management.createIndexPattern.step.warningHeader"
+          defaultMessage="Whoops!"
+        />}
         iconType="help"
         color="warning"
       >
-        <p>There&apos;s already an index pattern called `{query}`</p>
+        <p>
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.step.warningLabel"
+            defaultMessage="There's already an index pattern called `{query}`"
+            values={{ query }}
+          />
+        </p>
       </EuiCallOut>
     );
   }
 
   renderHeader({ exactMatchedIndices: indices }) {
-    const { goToNextStep } = this.props;
+    const { goToNextStep, intl } = this.props;
     const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
 
     let containsErrors = false;
@@ -208,7 +241,14 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(`An index pattern cannot contain spaces or the characters: ${characterList}`);
+      const errorMessage = intl.formatMessage(
+        {
+          id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
+          defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
+        },
+        { characterList });
+
+      errors.push(errorMessage);
       containsErrors = true;
     }
 
@@ -254,3 +294,5 @@ export class StepIndexPattern extends Component {
     );
   }
 }
+
+export const StepIndexPattern = injectI18n(StepIndexPatternComponent);

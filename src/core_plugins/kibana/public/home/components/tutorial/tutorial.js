@@ -1,12 +1,41 @@
-import './tutorial.less';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { RadioButtonGroup } from './radio_button_group';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
+import { SavedObjectsInstaller } from './saved_objects_installer';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiPageBody,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -22,6 +51,7 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
+      statusCheckStates: [],
       tutorial: null
     };
 
@@ -51,7 +81,7 @@ export class Tutorial extends React.Component {
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
         tutorial: tutorial
-      }, this.setParamDefaults);
+      }, this.initInstructionsState);
     } else {
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
@@ -75,26 +105,33 @@ export class Tutorial extends React.Component {
       default:
         throw new Error(`Unhandled instruction type ${this.state.visibleInstructions}`);
     }
-  }
+  };
 
-  setParamDefaults = () => {
+  getInstructionSets = () => this.getInstructions().instructionSets;
+
+  initInstructionsState = () => {
     const instructions = this.getInstructions();
+
     const paramValues = {};
     if (instructions.params) {
       instructions.params.forEach((param => {
         paramValues[param.id] = param.defaultValue;
       }));
     }
+
+    const statusCheckStates = new Array(instructions.instructionSets.length).fill(StatusCheckStates.NOT_CHECKED);
+
     this.setState({
-      paramValues: paramValues
+      paramValues,
+      statusCheckStates,
     });
-  }
+  };
 
   setVisibleInstructions = (instructionsType) => {
     this.setState({
       visibleInstructions: instructionsType
-    }, this.setParamDefaults);
-  }
+    }, this.initInstructionsState);
+  };
 
   setParameter = (paramId, newValue) => {
     this.setState(previousState => {
@@ -102,40 +139,104 @@ export class Tutorial extends React.Component {
       paramValues[paramId] = newValue;
       return { paramValues: paramValues };
     });
-  }
+  };
 
-  onPrem = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
-  }
+  checkInstructionSetStatus = async (instructionSetIndex) => {
+    const instructionSet = this.getInstructionSets()[instructionSetIndex];
+    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
-  onPremElasticCloud = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
-  }
+    if (esHitsCheckConfig) {
+      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+
+      this.setState((prevState) => ({
+        statusCheckStates: {
+          ...prevState.statusCheckStates,
+          [instructionSetIndex]: statusCheckState,
+        }
+      }));
+    }
+  };
+
+  /**
+   *
+   * @param esHitsCheckConfig
+   * @return {Promise<string>}
+   */
+  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
+    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
+    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
+      method: 'post',
+      body: `${searchHeader}\n${searchBody}\n`,
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/x-ndjson',
+        'kbn-xsrf': 'kibana',
+      },
+      credentials: 'same-origin'
+    });
+
+    if (response.status > 300) {
+      return StatusCheckStates.ERROR;
+    }
+
+    const results = await response.json();
+    const numHits = _.get(results, 'responses.[0].hits.hits.length', 0);
+    return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
+  };
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
-        { onClick: this.onPrem, label: 'Self managed', dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM,
+          label: 'Self managed',
+        },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
+          label: 'Elastic Cloud',
+        }
       ];
       return (
-        <RadioButtonGroup
-          buttons={radioButtons}
-          selectedBtnLabel={radioButtons[0].label}
-        />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              options={radioButtons}
+              idSelected={this.state.visibleInstructions}
+              onChange={this.setVisibleInstructions}
+              color="primary"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
-  }
+  };
+
+  onStatusCheck = (instructionSetIndex) => {
+    this.setState(
+      (prevState) => ({
+        statusCheckStates: {
+          ...prevState.statusCheckStates,
+          [instructionSetIndex]: StatusCheckStates.FETCHING,
+        }
+      }),
+      this.checkInstructionSetStatus.bind(null, instructionSetIndex)
+    );
+  };
 
   renderInstructionSets = (instructions) => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
+
       return (
         <InstructionSet
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
+          statusCheckConfig={instructionSet.statusCheck}
+          statusCheckState={this.state.statusCheckStates[index]}
+          onStatusCheck={() => { this.onStatusCheck(index); }}
           offset={currentOffset}
           params={instructions.params}
           paramValues={this.state.paramValues}
@@ -145,6 +246,21 @@ export class Tutorial extends React.Component {
         />
       );
     });
+  };
+
+  renderSavedObjectsInstaller = () => {
+    if (!this.state.tutorial.savedObjects) {
+      return;
+    }
+
+    return (
+      <SavedObjectsInstaller
+        bulkCreate={this.props.bulkCreate}
+        savedObjects={this.state.tutorial.savedObjects}
+        installMsg={this.state.tutorial.savedObjectsInstallMsg}
+      />
+    );
+
   }
 
   renderFooter = () => {
@@ -171,13 +287,13 @@ export class Tutorial extends React.Component {
         />
       );
     }
-  }
+  };
 
   render() {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homePanel">
+        <div className="homTutorial__notFoundPanel">
           <EuiText>
             <p>
               Unable to find tutorial {this.props.tutorialId}
@@ -207,27 +323,34 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={this.state.tutorial.euiIconType}
+            isBeta={this.state.tutorial.isBeta}
           />
 
           <EuiSpacer />
-          <div className="text-center">
+          <div className="eui-textCenter">
             {this.renderInstructionSetsToggle()}
           </div>
 
           <EuiSpacer />
           <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
+            {this.renderSavedObjectsInstaller()}
             {this.renderFooter()}
           </EuiPanel>
         </div>
       );
     }
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
+        <EuiPageBody>
 
-        <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
-        <EuiSpacer size="s" />
-        {content}
+          <div>
+            <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
+          </div>
+          <EuiSpacer size="s" />
+          {content}
+
+        </EuiPageBody>
       </EuiPage>
     );
   }
@@ -238,5 +361,6 @@ Tutorial.propTypes = {
   isCloudEnabled: PropTypes.bool.isRequired,
   getTutorial: PropTypes.func.isRequired,
   replaceTemplateStrings: PropTypes.func.isRequired,
-  tutorialId: PropTypes.string.isRequired
+  tutorialId: PropTypes.string.isRequired,
+  bulkCreate: PropTypes.func.isRequired,
 };

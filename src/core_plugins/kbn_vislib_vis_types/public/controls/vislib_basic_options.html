@@ -7,7 +7,7 @@
       <select
         id="visualizeBasicSettingsLegendPosition"
         class="form-control"
-        ng-model="vis.params.legendPosition"
+        ng-model="editorState.params.legendPosition"
         ng-options="position.value as position.text for position in vis.type.editorConfig.collections.legendPositions"
       >
       </select>
@@ -19,7 +19,7 @@
       Show Tooltip
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input id="showTooltip" type="checkbox" ng-model="vis.params.addTooltip">
+      <input id="showTooltip" type="checkbox" ng-model="editorState.params.addTooltip">
     </div>
   </div>
 </div>

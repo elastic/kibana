@@ -6,30 +6,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import withErrorHandler from '../../shared/withErrorHandler';
 import { HeaderContainer } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import List from './List';
-import { getKey } from '../../../store/apiHelpers';
 import WatcherFlyout from './Watcher/WatcherFlyOut';
-import OpenWatcherDialogButton from './Watcher/OpenWatcherDialogButton';
-
-function maybeLoadList(props) {
-  const { serviceName, start, end, q, sortBy, sortOrder } = props.urlParams;
-  const keyArgs = {
-    serviceName,
-    start,
-    end,
-    q,
-    sortBy,
-    sortOrder
-  };
-  const key = getKey(keyArgs, false);
-
-  if (serviceName && start && end && props.errorGroupList.key !== key) {
-    props.loadErrorGroupList(keyArgs);
-  }
-}
+import WatcherButton from './Watcher/WatcherButton';
+import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
+import { KueryBar } from '../../shared/KueryBar';
 
 class ErrorGroupOverview extends Component {
   state = {
@@ -44,38 +27,33 @@ class ErrorGroupOverview extends Component {
     this.setState({ isFlyoutOpen: false });
   };
 
-  componentDidMount() {
-    maybeLoadList(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    maybeLoadList(nextProps);
-  }
-
   render() {
-    const { license, location } = this.props;
-    const { serviceName } = this.props.urlParams;
+    const { license, location, urlParams } = this.props;
+    const { serviceName } = urlParams;
 
     return (
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
           {license.data.features.watcher.isAvailable && (
-            <OpenWatcherDialogButton onOpenFlyout={this.onOpenFlyout} />
+            <WatcherButton onOpenFlyout={this.onOpenFlyout} />
           )}
         </HeaderContainer>
 
+        <KueryBar />
+
         <TabNavigation />
 
-        <List
-          urlParams={this.props.urlParams}
-          items={this.props.errorGroupList.data}
-          location={location}
+        <ErrorGroupDetailsRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <List urlParams={urlParams} items={data} location={location} />
+          )}
         />
 
         <WatcherFlyout
           serviceName={serviceName}
-          isFlyoutOpen={this.state.isFlyoutOpen}
+          isOpen={this.state.isFlyoutOpen}
           onClose={this.onCloseFlyout}
         />
       </div>
@@ -84,7 +62,9 @@ class ErrorGroupOverview extends Component {
 }
 
 ErrorGroupOverview.propTypes = {
-  location: PropTypes.object.isRequired
+  license: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  urlParams: PropTypes.object.isRequired
 };
 
-export default withErrorHandler(ErrorGroupOverview, ['errorGroupList']);
+export default ErrorGroupOverview;

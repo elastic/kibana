@@ -6,8 +6,9 @@
 
 
 
-import { PostSaveServiceProvider } from './post_save_service';
-import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { postSaveService } from './post_save_service';
+import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { xpackFeatureProvider } from 'plugins/ml/license/check_license';
 import template from './post_save_options.html';
 
 import { uiModules } from 'ui/modules';
@@ -24,17 +25,15 @@ module.directive('mlPostSaveOptions', function (Private) {
     },
     template,
     link: function ($scope) {
+      const xpackFeature = Private(xpackFeatureProvider);
 
-      const postSaveService = Private(PostSaveServiceProvider);
-      const createWatchService = Private(CreateWatchServiceProvider);
-
-      $scope.watcherEnabled = createWatchService.isWatcherEnabled();
+      $scope.watcherEnabled = xpackFeature.isAvailable('watcher');
       $scope.status = postSaveService.status;
       $scope.STATUS = postSaveService.STATUS;
 
-      createWatchService.reset();
+      mlCreateWatchService.reset();
 
-      createWatchService.config.includeInfluencers = $scope.includeInfluencers;
+      mlCreateWatchService.config.includeInfluencers = $scope.includeInfluencers;
       $scope.runInRealtime = false;
       $scope.createWatch = false;
       $scope.embedded = true;

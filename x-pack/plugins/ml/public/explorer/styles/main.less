@@ -2,7 +2,6 @@
   width: 100%;
   display: inline-block;
   color: #555;
-  font-size: 10px;
 
   .visualize-error {
     h4 {
@@ -35,7 +34,21 @@
   }
 
   .results-container {
+
+    .col-xs-12 {
+      width: calc(~"100% - 30px");
+      padding-left: 10px;
+    }
+
     padding: 15px 0px 15px 0px;
+
+    .no-influencers-warning {
+      float: left;
+      padding-top: 2px;
+      padding-left: 15px;
+      color: #7b8a8b;
+      font-size: 14px;
+    }
 
     .panel-title {
       color: #7b8a8b;
@@ -97,6 +110,14 @@
     .dropdown-menu > li > a:focus {
       color: #ffffff;
       box-shadow: none;
+    }
+  }
+
+  .ml-anomalies-controls {
+    padding-top: 5px;
+
+    #show_charts_checkbox_control {
+      padding-top: 28px;
     }
   }
 
@@ -274,17 +295,20 @@
 
       .time-tick-labels {
         height: 25px;
-        font-size:11px;
-        margin-top: 4px;
+        margin-top: 2px;
         margin-left: 175px;
-        .tick-label-wrapper {
-          position: absolute;
-          .tick-label {
-            position: relative;
-            text-align: center;
-            margin-left: -50%;
-            width: 100px;
-          }
+        /* hide d3's domain line */
+        path.domain {
+          display: none;
+        }
+        /* hide d3's tick line */
+        g.tick line {
+          display: none;
+        }
+        /* override d3's default tick styles */
+        g.tick text {
+          font-size:11px;
+          fill: #555;
         }
       }
     }

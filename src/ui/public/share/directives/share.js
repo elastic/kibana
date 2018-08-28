@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import {
   parse as parseUrl,
   format as formatUrl,
@@ -9,7 +28,7 @@ import {
 } from '../../state_management/state_hashing';
 import { toastNotifications } from '../../notify';
 
-import { UrlShortenerProvider } from '../lib/url_shortener';
+import { shortenUrl } from '../lib/url_shortener';
 
 import { uiModules } from '../../modules';
 import shareTemplate from '../views/share.html';
@@ -17,7 +36,6 @@ const app = uiModules.get('kibana');
 
 app.directive('share', function (Private) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const urlShortener = Private(UrlShortenerProvider);
 
   return {
     restrict: 'E',
@@ -125,9 +143,12 @@ app.directive('share', function (Private) {
         this.urlFlags.shortSnapshot = !this.urlFlags.shortSnapshot;
 
         if (this.urlFlags.shortSnapshot) {
-          urlShortener.shortenUrl(this.urls.snapshot)
+          shortenUrl(this.urls.snapshot)
             .then(shortUrl => {
-              this.urls.shortSnapshot = shortUrl;
+              // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
+              $scope.$apply(() => {
+                this.urls.shortSnapshot = shortUrl;
+              });
             });
         }
       };
@@ -137,9 +158,12 @@ app.directive('share', function (Private) {
 
         if (this.urlFlags.shortSnapshotIframe) {
           const snapshotIframe = this.makeUrlEmbeddable(this.urls.snapshot);
-          urlShortener.shortenUrl(snapshotIframe)
+          shortenUrl(snapshotIframe)
             .then(shortUrl => {
-              this.urls.shortSnapshotIframe = shortUrl;
+              // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
+              $scope.$apply(() => {
+                this.urls.shortSnapshotIframe = shortUrl;
+              });
             });
         }
       };

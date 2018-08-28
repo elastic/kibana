@@ -6,20 +6,18 @@
 
 import { connect } from 'react-redux';
 import ServiceOverview from './view';
-import { loadServiceList, getServiceList } from '../../../store/serviceList';
+import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
 import { getUrlParams } from '../../../store/urlParams';
-import sorting, { changeServiceSorting } from '../../../store/sorting';
 
 function mapStateToProps(state = {}) {
   return {
     serviceList: getServiceList(state),
-    urlParams: getUrlParams(state),
-    serviceSorting: sorting(state, 'service').sorting.service
+    urlParams: getUrlParams(state)
   };
 }
 
-const mapDispatchToProps = {
-  loadServiceList,
-  changeServiceSorting
-};
-export default connect(mapStateToProps, mapDispatchToProps)(ServiceOverview);
+const mapDispatchToProps = {};
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ServiceOverview);

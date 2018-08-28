@@ -11,10 +11,10 @@ import template from './import_events_modal.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.service('mlImportEventsService', function ($q, $modal) {
+module.service('mlImportEventsService', function ($modal) {
 
   this.openImportEventsWindow = function () {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const modal = $modal.open({
         template,
         controller: 'MlImportEventsModal',

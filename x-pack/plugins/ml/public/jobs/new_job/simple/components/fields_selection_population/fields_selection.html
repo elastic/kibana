@@ -40,13 +40,15 @@
             </div>
             <div>
               <div class="agg-type">
-                <select
-                  class="form-control"
-                  ng-model="field.agg.type"
-                  ng-options="agg as agg.title for agg in ui.aggTypeOptions | filterAggTypes:field"
-                  ng-change="formChange()"
-                  ng-disabled="formConfig.fields[$index] === undefined || jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED">
-                </select>
+                <div class="agg-type-select-wrapper">
+                  <select
+                    class="form-control agg-type-select"
+                    ng-model="field.agg.type"
+                    ng-options="agg as agg.title for agg in ui.aggTypeOptions | filterAggTypes:field"
+                    ng-change="formChange()"
+                    ng-disabled="formConfig.fields[$index] === undefined || jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED">
+                  </select>
+                </div>
                 <button
                   aria-label="Remove Detector"
                   ng-click="removeField($index, field)"

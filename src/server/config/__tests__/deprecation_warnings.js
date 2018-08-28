@@ -1,9 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { spawn } from 'child_process';
 
 import expect from 'expect.js';
 
 const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
-const BABEL_REGISTER = require.resolve('../../../babel-register');
+const SETUP_NODE_ENV = require.resolve('../../../setup_node_env');
 const SECOND = 1000;
 
 describe('config/deprecation warnings mixin', function () {
@@ -14,7 +33,7 @@ describe('config/deprecation warnings mixin', function () {
 
   before(() => new Promise((resolve, reject) => {
     proc = spawn(process.execPath, [
-      '-r', BABEL_REGISTER,
+      '-r', SETUP_NODE_ENV,
       RUN_KBN_SERVER_STARTUP
     ], {
       stdio: ['ignore', 'pipe', 'pipe'],

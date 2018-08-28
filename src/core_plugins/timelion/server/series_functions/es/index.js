@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
@@ -16,13 +35,13 @@ export default new Datasource('es', {
       types: ['string', 'null'],
       multi: true,
       help: 'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field.' +
-        ' Eg "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
+        ' E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
     },
     {
       name: 'split',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch field to split the series on and a limit. Eg, "hostname:10" to get the top 10 hostnames'
+      help: 'An elasticsearch field to split the series on and a limit. E.g., "hostname:10" to get the top 10 hostnames'
     },
     {
       name: 'index',

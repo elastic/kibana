@@ -36,7 +36,7 @@ export class ExplainCollectionInterval extends React.Component {
       property,
       data,
       isCollectionIntervalUpdated,
-      isCollectionEnabledUpdating
+      isCollectionIntervalUpdating
     } = this.props;
 
     const renderButton = () => (
@@ -68,7 +68,7 @@ export class ExplainCollectionInterval extends React.Component {
               onClick={this.handleClick}
               type="button"
               data-test-subj="enableCollectionInterval"
-              isLoading={isCollectionEnabledUpdating}
+              isLoading={isCollectionIntervalUpdating}
             >
               Turn on monitoring
             </EuiButton>

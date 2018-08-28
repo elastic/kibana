@@ -11,16 +11,15 @@
 import _ from 'lodash';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
-import { SimpleJobSearchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlSimpleJobSearchService } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
+import { timefilter } from 'ui/timefilter';
 
-export function ChartDataUtilsProvider($q, Private, timefilter) {
+export function ChartDataUtilsProvider(Private) {
   const TimeBuckets = Private(IntervalHelperProvider);
-  const mlResultsService = Private(ResultsServiceProvider);
-  const mlSimpleJobSearchService = Private(SimpleJobSearchServiceProvider);
 
   function loadDocCountData(formConfig, chartData) {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // set doc count chart to be 10x less than detector charts
       const BAR_TARGET = Math.ceil(formConfig.chartInterval.barTarget / 10);
       const MAX_BARS = BAR_TARGET + (BAR_TARGET / 100) * 100; // 100% larger that bar target
@@ -79,7 +78,7 @@ export function ChartDataUtilsProvider($q, Private, timefilter) {
   }
 
   function loadJobSwimlaneData(formConfig, chartData) {
-    return $q((resolve) => {
+    return new Promise((resolve) => {
       mlResultsService.getScoresByBucket(
         [formConfig.jobId],
         formConfig.start,
@@ -119,7 +118,7 @@ export function ChartDataUtilsProvider($q, Private, timefilter) {
   }
 
   function loadDetectorSwimlaneData(formConfig, chartData) {
-    return $q((resolve) => {
+    return new Promise((resolve) => {
       mlSimpleJobSearchService.getScoresByRecord(
         formConfig.jobId,
         formConfig.start,
@@ -180,13 +179,13 @@ export function ChartDataUtilsProvider($q, Private, timefilter) {
     // on the highest value multiplied by an irrational number, to minimize the chances
     // of the highestValue not corresponding to the full quota of decimal places
     // when formatted e.g. 12.340KB would be formatted to only 2 decimal places 12.34KB
-    const textCheckMultipler = 1 + (Math.sqrt(2) / 100);
+    const textCheckMultiplier = 1 + (Math.sqrt(2) / 100);
     _.each(chartData.detectors, (detector) => {
       let longestWidthForDetector = 0;
       if (detector.fieldFormat !== undefined) {
         const longestTextForDetector = detector.fieldFormat.convert(detector.highestValue, 'text');
         longestWidthForDetector = calculateTextWidth(longestTextForDetector, false);
-        const longestTextCheck = detector.fieldFormat.convert(detector.highestValue * textCheckMultipler, 'text');
+        const longestTextCheck = detector.fieldFormat.convert(detector.highestValue * textCheckMultiplier, 'text');
         const longestWidthCheck = calculateTextWidth(longestTextCheck, false);
         longestWidthForDetector = Math.max(longestWidthForDetector, longestWidthCheck);
       } else {

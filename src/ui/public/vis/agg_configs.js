@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name AggConfig
  *
@@ -10,28 +29,40 @@
 import _ from 'lodash';
 import { IndexedArray } from '../indexed_array';
 import { AggConfig } from './agg_config';
-import { aggTypes } from '../agg_types';
-import { createLegacyClass } from '../utils/legacy_class';
 
-export function VisAggConfigsProvider() {
-  AggConfig.aggTypes = aggTypes;
+function removeParentAggs(obj) {
+  for(const prop in obj) {
+    if (prop === 'parentAggs') delete obj[prop];
+    else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+  }
+}
 
-  createLegacyClass(AggConfigs).inherits(IndexedArray);
-  function AggConfigs(vis, configStates) {
-    const self = this;
-    self.vis = vis;
+function parseParentAggs(dslLvlCursor, dsl) {
+  if (dsl.parentAggs) {
+    _.each(dsl.parentAggs, (agg, key) => {
+      dslLvlCursor[key] = agg;
+      parseParentAggs(dslLvlCursor, agg);
+    });
+  }
+}
 
-    configStates = AggConfig.ensureIds(configStates || []);
+class AggConfigs extends IndexedArray {
+  constructor(vis, configStates = []) {
+    configStates = AggConfig.ensureIds(configStates);
 
-    AggConfigs.Super.call(self, {
+    super({
       index: ['id'],
       group: ['schema.group', 'type.name', 'schema.name'],
-      initialSet: configStates.map(function (aggConfigState) {
-        if (aggConfigState instanceof AggConfig) return aggConfigState;
-        return new AggConfig(vis, aggConfigState);
-      })
     });
 
+    this.push(...configStates.map(aggConfigState => {
+      if (aggConfigState instanceof AggConfig) {
+        return aggConfigState;
+      }
+      return new AggConfig(vis, aggConfigState, this);
+    }));
+
+    this.vis = vis;
 
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
@@ -40,15 +71,15 @@ export function VisAggConfigsProvider() {
     // set anything.
     if (vis && vis.type && vis.type.schemas && vis.type.schemas.all) {
       _(vis.type.schemas.all)
-        .filter(function (schema) {
+        .filter(schema => {
           return Array.isArray(schema.defaults) && schema.defaults.length > 0;
         })
-        .each(function (schema) {
-          if (!self.bySchemaName[schema.name]) {
+        .each(schema => {
+          if (!this.bySchemaName[schema.name]) {
             const defaults = schema.defaults.slice(0, schema.max);
-            _.each(defaults, function (defaultState) {
-              const state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
-              self.push(new AggConfig(vis, state));
+            _.each(defaults, defaultState => {
+              const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
+              this.push(new AggConfig(vis, state, this));
             });
           }
         })
@@ -61,7 +92,7 @@ export function VisAggConfigsProvider() {
    * Ignores the non-array indexes
    * @param aggConfigs an AggConfigs instance
    */
-  AggConfigs.prototype.jsonDataEquals = function (aggConfigs) {
+  jsonDataEquals(aggConfigs) {
     if (aggConfigs.length !== this.length) {
       return false;
     }
@@ -71,25 +102,9 @@ export function VisAggConfigsProvider() {
       }
     }
     return true;
-  };
-
-  function removeParentAggs(obj) {
-    for(const prop in obj) {
-      if (prop === 'parentAggs') delete obj[prop];
-      else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
-    }
   }
 
-  function parseParentAggs(dslLvlCursor, dsl) {
-    if (dsl.parentAggs) {
-      _.each(dsl.parentAggs, (agg, key) => {
-        dslLvlCursor[key] = agg;
-        parseParentAggs(dslLvlCursor, agg);
-      });
-    }
-  }
-
-  AggConfigs.prototype.toDsl = function () {
+  toDsl() {
     const dslTopLvl = {};
     let dslLvlCursor;
     let nestedMetrics;
@@ -100,19 +115,17 @@ export function VisAggConfigsProvider() {
         .filter(function (agg) {
           return agg.type.name !== 'count';
         })
-        .map(function (agg) {
+        .map(agg => {
           return {
             config: agg,
-            dsl: agg.toDsl()
+            dsl: agg.toDsl(this)
           };
         })
         .value();
     }
     this.getRequestAggs()
-      .filter(function (config) {
-        return !config.type.hasNoDsl;
-      })
-      .forEach(function nestEachConfig(config, i, list) {
+      .filter(config => !config.type.hasNoDsl)
+      .forEach((config, i, list) => {
         if (!dslLvlCursor) {
         // start at the top level
           dslLvlCursor = dslTopLvl;
@@ -126,18 +139,18 @@ export function VisAggConfigsProvider() {
           dslLvlCursor = prevDsl.aggs || dslLvlCursor;
         }
 
-        const dsl = dslLvlCursor[config.id] = config.toDsl();
+        const dsl = dslLvlCursor[config.id] = config.toDsl(this);
         let subAggs;
 
         parseParentAggs(dslLvlCursor, dsl);
 
-        if (config.schema.group === 'buckets' && i < list.length - 1) {
+        if (config.type.type === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
 
         if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach(function (agg) {
+          nestedMetrics.forEach(agg => {
             subAggs[agg.config.id] = agg.dsl;
           });
         }
@@ -145,19 +158,17 @@ export function VisAggConfigsProvider() {
 
     removeParentAggs(dslTopLvl);
     return dslTopLvl;
-  };
+  }
 
-  AggConfigs.prototype.getRequestAggs = function () {
+  getRequestAggs() {
     //collect all the aggregations
     const aggregations = this.reduce((requestValuesAggs, agg) => {
       const aggs = agg.getRequestAggs();
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
     //move metrics to the end
-    return _.sortBy(aggregations, function (agg) {
-      return agg.schema.group === 'metrics' ? 1 : 0;
-    });
-  };
+    return _.sortBy(aggregations, agg => agg.type.type === 'metrics' ? 1 : 0);
+  }
 
   /**
    * Gets the AggConfigs (and possibly ResponseAggConfigs) that
@@ -170,12 +181,12 @@ export function VisAggConfigsProvider() {
    *
    * @return {array[AggConfig]}
    */
-  AggConfigs.prototype.getResponseAggs = function () {
+  getResponseAggs() {
     return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
       const aggs = agg.getResponseAggs();
       return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
     }, []);
-  };
+  }
 
 
   /**
@@ -185,14 +196,22 @@ export function VisAggConfigsProvider() {
    * @param  {string} id - the id of the agg to find
    * @return {AggConfig}
    */
-  AggConfigs.prototype.getResponseAggById = function (id) {
+  getResponseAggById(id) {
     id = String(id);
     const reqAgg = _.find(this.getRequestAggs(), function (agg) {
       return id.substr(0, String(agg.id).length) === agg.id;
     });
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id: id });
-  };
+  }
 
-  return AggConfigs;
+  onSearchRequestStart(searchSource, searchRequest) {
+    return Promise.all(
+      this.getRequestAggs().map(agg =>
+        agg.onSearchRequestStart(searchSource, searchRequest)
+      )
+    );
+  }
 }
+
+export { AggConfigs };

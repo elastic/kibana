@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
@@ -34,7 +32,6 @@ describe('ML - <ml-info-icon>', () => {
     const scope = $element.isolateScope();
 
     expect(scope.id).to.be.an('undefined');
-    expect(scope.text).to.be('');
   });
 
   it('Initialization with a non-existing tooltip attribute doesn\'t throw an error', () => {
@@ -44,8 +41,8 @@ describe('ML - <ml-info-icon>', () => {
     scope.$digest();
 
     expect(scope.id).to.be(id);
-    expect(scope.text).to.be('');
   });
+
   it('Initialize with existing tooltip attribute', () => {
     const id = 'new_job_id';
     $element = $compile(`<i ml-info-icon="${id}" />`)($scope);
@@ -54,10 +51,9 @@ describe('ML - <ml-info-icon>', () => {
 
     // test scope values
     expect(scope.id).to.be(id);
-    expect(scope.text).to.be(tooltips[id].text);
 
     // test the rendered span element which should be referenced by aria-describedby
-    const span = $element.find('span');
+    const span = $element.find('span.ml-info-tooltip-text');
     expect(span[0].id).to.be('ml_aria_description_' + id);
     expect(span.text()).to.be(tooltips[id].text);
   });

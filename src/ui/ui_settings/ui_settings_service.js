@@ -1,12 +1,26 @@
-import { defaultsDeep } from 'lodash';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-function hydrateUserSettings(userSettings) {
-  return Object.keys(userSettings)
-    .map(key => ({ key, userValue: userSettings[key] }))
-    .filter(({ userValue }) => userValue !== null)
-    .reduce((acc, { key, userValue }) => ({ ...acc, [key]: { userValue } }), {});
-}
+import { defaultsDeep } from 'lodash';
+import Boom from 'boom';
+
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 /**
  *  Service that provides access to the UiSettings stored in elasticsearch.
@@ -34,6 +48,7 @@ export class UiSettingsService {
       getDefaults = () => ({}),
       // function that accepts log messages in the same format as server.log
       log = () => {},
+      overrides = {},
     } = options;
 
     this._type = type;
@@ -41,6 +56,7 @@ export class UiSettingsService {
     this._buildNum = buildNum;
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
+    this._overrides = overrides;
     this._log = log;
   }
 
@@ -72,7 +88,26 @@ export class UiSettingsService {
   }
 
   async getUserProvided(options) {
-    return hydrateUserSettings(await this._read(options));
+    const userProvided = {};
+
+    // write the userValue for each key stored in the saved object that is not overridden
+    for (const [key, userValue] of Object.entries(await this._read(options))) {
+      if (userValue !== null && !this.isOverridden(key)) {
+        userProvided[key] = {
+          userValue
+        };
+      }
+    }
+
+    // write all overridden keys, dropping the userValue is override is null and
+    // adding keys for overrides that are not in saved object
+    for (const [key, userValue] of Object.entries(this._overrides)) {
+      userProvided[key] = userValue === null
+        ? { isOverridden: true }
+        : { isOverridden: true, userValue };
+    }
+
+    return userProvided;
   }
 
   async setMany(changes) {
@@ -95,7 +130,21 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
+  isOverridden(key) {
+    return this._overrides.hasOwnProperty(key);
+  }
+
+  assertUpdateAllowed(key) {
+    if (this.isOverridden(key)) {
+      throw Boom.badRequest(`Unable to update "${key}" because it is overridden`);
+    }
+  }
+
   async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {
+    for (const key of Object.keys(changes)) {
+      this.assertUpdateAllowed(key);
+    }
+
     try {
       await this._savedObjectsClient.update(this._type, this._id, changes);
     } catch (error) {

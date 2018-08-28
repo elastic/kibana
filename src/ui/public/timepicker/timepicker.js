@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import html from './timepicker.html';
 import './quick_panel';
 import './recent_panel';
@@ -8,7 +27,6 @@ import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { Notifier } from '../notify';
 import './timepicker.less';
 import '../directives/input_datetime';
 import '../directives/inequality';
@@ -17,10 +35,8 @@ import './kbn_global_timepicker';
 import { uiModules } from '../modules';
 import { TIME_MODES } from './modes';
 import { timeUnits } from './time_units';
+import { prettyInterval } from './pretty_interval';
 const module = uiModules.get('ui/timepicker');
-const notify = new Notifier({
-  location: 'timepicker',
-});
 
 module.directive('kbnTimepicker', function (refreshIntervals) {
   return {
@@ -83,14 +99,22 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       // If we always return a new object from the getters below (pickFromDate and pickToDate) we'll create an
       // infinite digest loop, so we maintain these copies to return instead.
       $scope.$watch('absolute.from', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.from', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
       $scope.$watch('absolute.to', function (newDate) {
+        if (!newDate) {
+          return;
+        }
+
         _.set($scope, 'browserAbsolute.to', new Date(newDate.year(), newDate.month(), newDate.date()));
       });
 
-      // The datepicker directive uses native Javascript Dates, ignoring moment's default timezone. This causes
+      // The datepicker directive uses native JavaScript Dates, ignoring moment's default timezone. This causes
       // the datepicker and the text input above it to get out of sync if the user changed the `dateFormat:tz` config
       // in advanced settings. The text input will show the date in the user selected timezone, the datepicker will
       // show the date in the local browser timezone. Since we really just want a day, month, year from the datepicker
@@ -146,7 +170,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       };
 
       $scope.setQuick = function (from, to) {
-        $scope.onFilterSelect({ from, to });
+        $scope.onFilterSelect({ from, to, mode: TIME_MODES.QUICK });
       };
 
       $scope.setToNow = function (key) {
@@ -184,7 +208,8 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyRelative = function () {
         $scope.onFilterSelect({
           from: getRelativeString('from'),
-          to: getRelativeString('to')
+          to: getRelativeString('to'),
+          mode: TIME_MODES.RELATIVE,
         });
       };
 
@@ -205,18 +230,25 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
       $scope.applyAbsolute = function () {
         $scope.onFilterSelect({
           from: moment($scope.absolute.from),
-          to: moment($scope.absolute.to)
+          to: moment($scope.absolute.to),
+          mode: TIME_MODES.ABSOLUTE,
         });
+      };
+
+      $scope.prettyInterval = function (interval) {
+        return prettyInterval(interval.value);
       };
 
       $scope.setRefreshInterval = function (interval) {
         interval = _.clone(interval || {});
-        notify.log('before: ' + interval.pause);
         interval.pause = (interval.pause == null || interval.pause === false) ? false : true;
 
-        notify.log('after: ' + interval.pause);
-
-        $scope.onIntervalSelect({ interval });
+        $scope.onIntervalSelect({
+          interval: {
+            value: interval.value,
+            pause: interval.pause,
+          }
+        });
       };
 
       $scope.setMode($scope.mode);

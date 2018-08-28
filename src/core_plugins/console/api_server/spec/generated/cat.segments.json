@@ -1,5 +1,5 @@
 {
-  "_cat/segments": {
+  "cat.segments": {
     "url_params": {
       "format": "",
       "bytes": [
@@ -26,6 +26,7 @@
     "patterns": [
       "_cat/segments",
       "_cat/segments/{indices}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-segments.html"
   }
 }

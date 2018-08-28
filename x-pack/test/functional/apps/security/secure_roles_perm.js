@@ -13,10 +13,12 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
 
 
-  describe('security', function () {
+  describe('secure roles and permissions', function () {
     before(async () => {
       await remote.setWindowSize(1600, 1000);
       log.debug('users');
@@ -64,12 +66,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it('Kibana User navigating to Management gets - You do not have permission to manage users', async function () {
-      const expectedMessage = 'You do not have permission to manage users.';
+    it('Kibana User navigating to Management gets permission denied', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
-      const actualMessage = await PageObjects.security.getPermissionDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
+      await retry.tryForTime(2000, async () => {
+        await testSubjects.find('permissionDeniedMessage');
+      });
     });
 
     it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function () {

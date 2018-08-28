@@ -1,0 +1,49 @@
+[[start-stop]]
+== Starting and stopping Kibana
+
+The method for starting and stopping {kib} varies depending on how you installed 
+it. 
+
+[float]
+[[start-start-targz]]
+=== Archive packages (`.tar.gz`)
+
+If you installed {kib} on Linux or Darwin with a `.tar.gz` package, you can 
+start and stop {kib} from the command line.  
+
+[float]
+include::install/targz-running.asciidoc[]
+
+[float]
+[[start-stop-zip]]
+=== Archive packages (`.zip`)
+
+If you installed {kib} on Windows with a `.zip` package, you can 
+stop and start {kib} from the command line.  
+
+[float]
+include::install/windows-running.asciidoc[]
+
+[float]
+[[start-stop-deb]]
+=== Debian packages
+
+include::install/init-systemd.asciidoc[]
+
+[float]
+include::install/deb-init.asciidoc[]
+
+[float]
+include::install/systemd.asciidoc[]
+
+[float]
+[[start-stop-rpm]]
+=== RPM packages
+
+include::install/init-systemd.asciidoc[]
+
+[float]
+include::install/rpm-init.asciidoc[]
+
+[float]
+include::install/systemd.asciidoc[]

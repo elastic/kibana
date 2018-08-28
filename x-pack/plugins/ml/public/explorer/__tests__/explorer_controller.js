@@ -19,7 +19,7 @@ describe('ML - Explorer Controller', () => {
       const scope = $rootScope.$new();
       $controller('MlExplorerController', { $scope: scope });
 
-      expect(scope.showCharts).to.be.true;
+      expect(scope.loading).to.be(true);
     });
   });
 });

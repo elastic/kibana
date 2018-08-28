@@ -9,6 +9,7 @@
     "NOTICE.txt",
     "package.json",
     "yarn.lock",
+    "tsconfig.json",
     "index.js",
     "plugins/reporting/.phantom/*",
     "plugins/reporting/.chromium/*",

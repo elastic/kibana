@@ -1,24 +1,40 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 jest.mock('../utils/scripts');
 jest.mock('../utils/link_project_executables');
 
 import { resolve } from 'path';
 
-import {
-  absolutePathSnapshotSerializer,
-  stripAnsiSnapshotSerializer,
-} from '../test_helpers';
-import { BootstrapCommand } from './bootstrap';
-import { PackageJson } from '../utils/package_json';
+import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
+import { linkProjectExecutables } from '../utils/link_project_executables';
+import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
-import { linkProjectExecutables } from '../utils/link_project_executables';
+import { BootstrapCommand } from './bootstrap';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 
-const createProject = (packageJson: PackageJson, path = '.') =>
+const createProject = (packageJson: IPackageJson, path = '.') =>
   new Project(
     {
       name: 'kibana',
@@ -31,7 +47,9 @@ const createProject = (packageJson: PackageJson, path = '.') =>
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -45,19 +63,19 @@ test('handles dependencies of dependencies', async () => {
   });
   const foo = createProject(
     {
-      name: 'foo',
       dependencies: {
         bar: 'link:../bar',
       },
+      name: 'foo',
     },
     'packages/foo'
   );
   const bar = createProject(
     {
-      name: 'bar',
       dependencies: {
         baz: 'link:../baz',
       },
+      name: 'bar',
     },
     'packages/bar'
   );
@@ -67,12 +85,7 @@ test('handles dependencies of dependencies', async () => {
     },
     'packages/baz'
   );
-  const projects = new Map([
-    ['kibana', kibana],
-    ['foo', foo],
-    ['bar', bar],
-    ['baz', baz],
-  ]);
+  const projects = new Map([['kibana', kibana], ['foo', foo], ['bar', bar], ['baz', baz]]);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);

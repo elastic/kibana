@@ -1,5 +1,5 @@
 {
-  "_cat/templates": {
+  "cat.templates": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -15,6 +15,7 @@
     "patterns": [
       "_cat/templates",
       "_cat/templates/{name}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-templates.html"
   }
 }

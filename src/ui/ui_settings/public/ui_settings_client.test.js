@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { UiSettingsClient } from './ui_settings_client';
 import { sendRequest } from './send_request';
 
@@ -104,6 +123,18 @@ describe('#set', () => {
 
     await expect(config.set('foo', 'bar')).resolves.toBe(false);
   });
+
+  it('throws an error if key is overridden', async () => {
+    const { config } = setup({
+      initialSettings: {
+        foo: {
+          isOverridden: true,
+          value: 'bar'
+        }
+      }
+    });
+    await expect(config.set('foo', true)).rejects.toThrowErrorMatchingSnapshot();
+  });
 });
 
 describe('#remove', () => {
@@ -120,6 +151,18 @@ describe('#remove', () => {
     });
 
     await expect(config.remove('dateFormat')).resolves.toBe(false);
+  });
+
+  it('throws an error if key is overridden', async () => {
+    const { config } = setup({
+      initialSettings: {
+        bar: {
+          isOverridden: true,
+          userValue: true
+        }
+      }
+    });
+    await expect(config.remove('bar')).rejects.toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -154,7 +197,7 @@ describe('#isCustom', () => {
     expect(config.isCustom('dateFormat')).toBe(false);
   });
 
-  it('returns false for unkown name', () => {
+  it('returns false for unknown name', () => {
     const { config } = setup();
     expect(config.isCustom('foo')).toBe(false);
   });
@@ -204,7 +247,7 @@ describe('#subscribe', () => {
 
 describe('#overrideLocalDefault', () => {
   describe('key has no user value', () => {
-    it('synchonously modifies the default value returned by get()', () => {
+    it('synchronously modifies the default value returned by get()', () => {
       const { config } = setup();
 
       expect(config.get('dateFormat')).toMatchSnapshot('get before override');
@@ -212,7 +255,7 @@ describe('#overrideLocalDefault', () => {
       expect(config.get('dateFormat')).toMatchSnapshot('get after override');
     });
 
-    it('synchonously modifies the value returned by getAll()', () => {
+    it('synchronously modifies the value returned by getAll()', () => {
       const { config } = setup();
 
       expect(config.getAll()).toMatchSnapshot('getAll before override');
@@ -272,6 +315,63 @@ describe('#overrideLocalDefault', () => {
 
       expect(config.get('dateFormat')).toMatchSnapshot('get after override');
       expect(config.getAll()).toMatchSnapshot('getAll after override');
+    });
+  });
+
+  describe('#isOverridden()', () => {
+    it('returns false if key is unknown', () => {
+      const { config } = setup();
+      expect(config.isOverridden('foo')).toBe(false);
+    });
+    it('returns false if key is no overridden', () => {
+      const { config } = setup({
+        initialSettings: {
+          foo: {
+            userValue: 1
+          },
+          bar: {
+            isOverridden: true,
+            userValue: 2
+          }
+        }
+      });
+      expect(config.isOverridden('foo')).toBe(false);
+    });
+    it('returns true when key is overridden', () => {
+      const { config } = setup({
+        initialSettings: {
+          foo: {
+            userValue: 1
+          },
+          bar: {
+            isOverridden: true,
+            userValue: 2
+          },
+        }
+      });
+      expect(config.isOverridden('bar')).toBe(true);
+    });
+    it('returns false for object prototype properties', () => {
+      const { config } = setup();
+      expect(config.isOverridden('hasOwnProperty')).toBe(false);
+    });
+  });
+
+  describe('#assertUpdateAllowed()', () => {
+    it('returns false if no settings defined', () => {
+      const { config } = setup();
+      expect(config.assertUpdateAllowed('foo')).toBe(undefined);
+    });
+    it('throws error when keys is overridden', () => {
+      const { config } = setup({
+        initialSettings: {
+          foo: {
+            isOverridden: true,
+            userValue: 'bar'
+          }
+        }
+      });
+      expect(() => config.assertUpdateAllowed('foo')).toThrowErrorMatchingSnapshot();
     });
   });
 });

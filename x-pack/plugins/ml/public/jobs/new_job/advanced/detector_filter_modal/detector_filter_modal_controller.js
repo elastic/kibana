@@ -87,7 +87,7 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
       value_list: []
     };
   } else {
-    // edting an existing filter
+    // editing an existing filter
     $scope.editMode = true;
     $scope.filter = params.filter;
     $scope.title = 'Edit filter';
@@ -202,7 +202,7 @@ module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, par
       delete filter.value_list;
     }
 
-    // make a local copy of the detector, add the new fitler
+    // make a local copy of the detector, add the new filter
     // and send it off for validation.
     // if it passes, add the filter to the real detector.
     const dtr = angular.copy($scope.detector);

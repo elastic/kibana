@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 
 export const SUGGESTION_TYPE = {
@@ -110,7 +129,7 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
     return { list: [functionHelp], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
   }
 
-  // return argument value suggestions when cursor is inside agrument value
+  // return argument value suggestions when cursor is inside argument value
   const activeArg = activeFunc.arguments.find((argument) => {
     return inLocation(cursorPosition, argument.location);
   });
@@ -162,7 +181,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
     let message;
     try {
       // The grammar will throw an error containing a message if the expression is formatted
-      // correctly and is prepared to accept suggestions. If the expression is not formmated
+      // correctly and is prepared to accept suggestions. If the expression is not formatted
       // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
       // attempt will throw an error.
       message = JSON.parse(e.message);

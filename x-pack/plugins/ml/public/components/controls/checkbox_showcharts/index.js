@@ -5,5 +5,4 @@
  */
 
 
-
-import './checkbox_showcharts';
+import './checkbox_showcharts_directive';

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const execa = require('execa');
 const path = require('path');
 const fs = require('fs');
@@ -8,15 +27,9 @@ const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
 const { createCliError } = require('../errors');
 const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
-const {
-  GRADLE_BIN,
-  ES_ARCHIVE_PATTERN,
-  ES_OSS_ARCHIVE_PATTERN,
-  BASE_PATH,
-} = require('../paths');
+const { GRADLE_BIN, ES_ARCHIVE_PATTERN, ES_OSS_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
 
-const onceEvent = (emitter, event) =>
-  new Promise(resolve => emitter.once(event, resolve));
+const onceEvent = (emitter, event) => new Promise(resolve => emitter.once(event, resolve));
 
 /**
  * Installs ES from source
@@ -46,15 +59,10 @@ exports.installSource = async function installSource({
 
   const cacheMeta = cache.readMeta(dest);
   const isCached = cacheMeta.exists && cacheMeta.etag === metadata.etag;
-  const archive = isCached
-    ? dest
-    : await createSnapshot({ sourcePath, log, license });
+  const archive = isCached ? dest : await createSnapshot({ sourcePath, log, license });
 
   if (isCached) {
-    log.info(
-      'source path unchanged since %s, using cache',
-      chalk.bold(cacheMeta.ts)
-    );
+    log.info('source path unchanged since %s, using cache', chalk.bold(cacheMeta.ts));
   } else {
     cache.writeMeta(dest, metadata);
     fs.copyFileSync(archive, dest);
@@ -149,11 +157,8 @@ async function createSnapshot({ license, sourcePath, log = defaultLog }) {
     throw createCliError('unable to build ES');
   }
 
-  const archivePattern =
-    license === 'oss' ? ES_OSS_ARCHIVE_PATTERN : ES_ARCHIVE_PATTERN;
-  const esTarballPath = findMostRecentlyChanged(
-    path.resolve(sourcePath, archivePattern)
-  );
+  const archivePattern = license === 'oss' ? ES_OSS_ARCHIVE_PATTERN : ES_ARCHIVE_PATTERN;
+  const esTarballPath = findMostRecentlyChanged(path.resolve(sourcePath, archivePattern));
 
   if (!esTarballPath) {
     throw createCliError('could not locate ES distribution');

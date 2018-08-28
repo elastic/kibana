@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import { Control } from './control';
 
@@ -9,18 +28,45 @@ function createControlParams(id, label) {
   };
 }
 
-const UNSET_VALUE = '';
+let valueFromFilterBar;
 const mockFilterManager = {
   getValueFromFilterBar: () => {
-    return '';
+    return valueFromFilterBar;
   },
   createFilter: (value) => {
     return `mockKbnFilter:${value}`;
   },
-  getUnsetValue: () => { return UNSET_VALUE; },
   getIndexPattern: () => { return 'mockIndexPattern'; }
 };
 const mockKbnApi = {};
+
+describe('hasChanged', () => {
+  let control;
+
+  beforeEach(() => {
+    control = new Control(createControlParams(3, 'control'), mockFilterManager, mockKbnApi);
+  });
+
+  afterEach(() => {
+    valueFromFilterBar = undefined;
+  });
+
+  test('should be false if value has not changed', () => {
+    expect(control.hasChanged()).to.be(false);
+  });
+
+  test('should be true if value has been set', () => {
+    control.set('new value');
+    expect(control.hasChanged()).to.be(true);
+  });
+
+  test('should be false if value has been set and control is cleared', () => {
+    control.set('new value');
+    control.clear();
+    expect(control.hasChanged()).to.be(false);
+  });
+
+});
 
 describe('ancestors', () => {
 
@@ -38,6 +84,8 @@ describe('ancestors', () => {
       grandParentControl.set('myGrandParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(false);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -45,6 +93,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(false);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(true);
     });
 
@@ -53,6 +103,8 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
+      expect(grandParentControl.hasValue()).to.be(true);
+      expect(parentControl.hasValue()).to.be(true);
       expect(childControl.hasUnsetAncestor()).to.be(false);
     });
   });

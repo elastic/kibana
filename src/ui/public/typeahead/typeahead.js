@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import template from './typeahead.html';
 import { uiModules } from '../modules';
 import { comboBoxKeyCodes } from '@elastic/eui';
@@ -17,13 +36,15 @@ typeahead.directive('kbnTypeahead', function () {
     scope: {
       items: '=',
       itemTemplate: '=',
-      onSelect: '&'
+      onSelect: '&',
+      onFocusChange: '&'
     },
     bindToController: true,
     controllerAs: 'typeahead',
     controller: function ($scope, $element) {
       this.isHidden = true;
       this.selectedIndex = null;
+      this.elementID = $element.attr('id');
 
       this.submit = () => {
         const item = this.items[this.selectedIndex];
@@ -118,6 +139,10 @@ typeahead.directive('kbnTypeahead', function () {
       this.onMouseLeave = () => {
         this.isMousedOver = false;
       };
+
+      $scope.$watch('typeahead.selectedIndex', (newIndex) => {
+        this.onFocusChange({ $focusedItemID: newIndex !== null ? `${this.elementID}-typeahead-item-${newIndex}` : '' });
+      });
     }
   };
 });

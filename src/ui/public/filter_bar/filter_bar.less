@@ -49,6 +49,25 @@ filter-bar {
   }
 }
 
+.filter-panel {
+  position: relative;
+
+  .filter-panel__pill {
+    display: inline;
+  }
+
+}
+
+.filter-panel--close {
+  max-height: 36px;
+  overflow-y: hidden;
+  min-width: 250px;
+
+  .filter-panel__pill {
+    display: inline-block;
+  }
+}
+
 .filter-bar {
   padding: 6px 10px 1px 10px;
   background: @filter-bar-bar-bg;
@@ -74,6 +93,30 @@ filter-bar {
     text-overflow: ellipsis;
     vertical-align: middle;
     line-height: 1.5;
+  }
+
+  .action-show {
+    position: absolute;
+    right: 30px;
+    bottom: 0;
+  }
+
+  .filter-nav-link__icon {
+    display: inline;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0.75;
+    font-size: 16px;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .filter-nav-link__collapser {
+      border: none;
+      line-height: 1;
+    }
   }
 
   .filter {
@@ -168,3 +211,49 @@ filter-bar {
     font-size: 0.9em;
     background: @filter-bar-bar-condensed-bg;
   }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  @filter-bar-confirm-bg:                       @gray3;
+  @filter-bar-confirm-filter-color:             @gray3;
+  @filter-bar-confirm-border:                   @black;
+  @filter-bar-confirm-filter-bg:                @gray12;
+  @filter-bar-bar-bg:                           @gray3;
+  @filter-bar-bar-border:                       @black;
+  @filter-bar-bar-condensed-bg:                 darken(@filter-bar-bar-bg, 5%);
+  @filter-bar-bar-filter-bg:                    desaturate(@brand-success, 30%);
+  @filter-bar-bar-filter-color:                 @white;
+  @filter-bar-bar-filter-negate-bg:             desaturate(@brand-success, 30%);
+
+  .filter-bar-confirm {
+    background: @filter-bar-confirm-bg;
+    border-bottom-color: @filter-bar-confirm-border;
+
+    .filter {
+      background-color: @filter-bar-confirm-filter-bg;
+      color: @filter-bar-confirm-filter-color;
+    }
+  }
+
+  .filter-bar {
+    background: @filter-bar-bar-bg;
+    border-bottom-color: @filter-bar-bar-border;
+
+    .filter {
+      background-color: @filter-bar-bar-filter-bg;
+      color: @filter-bar-bar-filter-color;
+
+      &.negate {
+        background-color: @filter-bar-bar-filter-negate-bg;
+      }
+
+      a {
+        color: @filter-bar-bar-filter-color;
+      }
+    }
+  }
+
+    .filter-bar-condensed {
+      background: @filter-bar-bar-condensed-bg;
+    }
+}

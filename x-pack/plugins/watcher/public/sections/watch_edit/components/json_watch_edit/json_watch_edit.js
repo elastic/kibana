@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import 'ui/dirty_prompt';
 import template from './json_watch_edit.html';
 import 'plugins/watcher/components/kbn_tabs';
@@ -26,7 +26,7 @@ app.directive('jsonWatchEdit', function ($injector) {
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
-  const dirtyPrompt = $injector.get('dirtyPrompt');
+  // const dirtyPrompt = $injector.get('dirtyPrompt');
 
   return {
     restrict: 'E',
@@ -37,8 +37,7 @@ app.directive('jsonWatchEdit', function ($injector) {
     bindToController: true,
     controllerAs: 'jsonWatchEdit',
     controller: class JsonWatchEditController extends InitAfterBindingsWorkaround {
-      initAfterBindings($scope) {
-        this.notifier = new Notifier({ location: 'Watcher' });
+      initAfterBindings() {
         this.selectedTabId = 'edit-watch';
         this.simulateResults = null;
         this.originalWatch = {
@@ -51,8 +50,8 @@ app.directive('jsonWatchEdit', function ($injector) {
         ];
         this.breadcrumb = this.watch.displayName;
 
-        dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
-        $scope.$on('$destroy', dirtyPrompt.deregister);
+        // dirtyPrompt.register(() => !this.watch.isEqualTo(this.originalWatch));
+        // $scope.$on('$destroy', dirtyPrompt.deregister);
 
         this.onExecuteDetailsValid();
       }
@@ -96,7 +95,7 @@ app.directive('jsonWatchEdit', function ($injector) {
             this.onTabSelect('simulate-results');
           })
           .catch(e => {
-            this.notifier.error(e);
+            toastNotifications.addDanger(e);
           });
       }
 
@@ -120,7 +119,7 @@ app.directive('jsonWatchEdit', function ($injector) {
             const message = `Watch with ID "${this.watch.id}"${watchNameMessageFragment} already exists. Do you want to overwrite it?`;
             return confirmModal(message, confirmModalOptions);
           })
-          .catch(err => this.notifier.error(err));
+          .catch(err => toastNotifications.addDanger(err));
       }
 
       isExistingWatch = () => {
@@ -148,7 +147,7 @@ app.directive('jsonWatchEdit', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
@@ -169,12 +168,12 @@ app.directive('jsonWatchEdit', function ($injector) {
           })
           .catch(err => {
             return licenseService.checkValidity()
-              .then(() => this.notifier.error(err));
+              .then(() => toastNotifications.addDanger(err));
           });
       }
 
       onClose = () => {
-        dirtyPrompt.deregister();
+        // dirtyPrompt.deregister();
         kbnUrl.change('/management/elasticsearch/watcher/watches', {});
       }
     }

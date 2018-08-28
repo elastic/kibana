@@ -1,5 +1,5 @@
 {
-  "_flush": {
+  "indices.flush": {
     "url_params": {
       "force": "__flag__",
       "wait_if_ongoing": "__flag__",
@@ -19,6 +19,7 @@
     "patterns": [
       "_flush",
       "{indices}/_flush"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html"
   }
 }

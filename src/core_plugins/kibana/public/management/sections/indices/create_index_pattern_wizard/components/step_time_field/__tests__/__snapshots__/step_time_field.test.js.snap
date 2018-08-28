@@ -25,6 +25,7 @@ exports[`StepTimeField should render a loading state when creating the index pat
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -40,8 +41,14 @@ exports[`StepTimeField should render a loading state when creating the index pat
       component="div"
       grow={false}
     >
-      <EuiText>
-        Creating index pattern...
+      <EuiText
+        grow={true}
+      >
+        <FormattedMessage
+          defaultMessage="Creating index pattern..."
+          id="kbn.management.createIndexPattern.stepTime.creatingLabel"
+          values={Object {}}
+        />
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>

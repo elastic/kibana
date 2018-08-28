@@ -5,13 +5,14 @@
  */
 
 import d3 from 'd3';
-import { zipObject, difference, memoize } from 'lodash';
+import { last, zipObject, difference, memoize, get, isEmpty } from 'lodash';
 import { colors } from '../../style/variables';
 import {
   asMillisWithDefault,
   asDecimal,
   tpmUnit
 } from '../../utils/formatters';
+import { rgba } from 'polished';
 
 export const getEmptySerie = memoize(
   (start = Date.now() - 3600000, end = Date.now()) => {
@@ -34,70 +35,95 @@ export const getEmptySerie = memoize(
 
 export function getCharts(urlParams, charts) {
   const { start, end, transactionType } = urlParams;
-  const chartsData = charts.data;
-  const noHits = chartsData.totalHits === 0;
+  const noHits = charts.totalHits === 0;
   const tpmSeries = noHits
     ? getEmptySerie(start, end)
-    : getTpmSeries(chartsData, transactionType);
+    : getTpmSeries(charts, transactionType);
 
   const responseTimeSeries = noHits
     ? getEmptySerie(start, end)
-    : getResponseTimeSeries(chartsData);
+    : getResponseTimeSeries(charts);
 
   return {
-    ...charts,
-    data: {
-      noHits,
-      tpmSeries,
-      responseTimeSeries
-    }
+    noHits,
+    tpmSeries,
+    responseTimeSeries
   };
 }
 
 export function getResponseTimeSeries(chartsData) {
-  const { dates, weightedAverage } = chartsData;
-  const { avg, p95, p99 } = chartsData.responseTimes;
+  const { dates, overallAvgDuration } = chartsData;
+  const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
 
-  return [
+  const series = [
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
-      legendValue: `${asMillisWithDefault(weightedAverage)}`,
-      type: 'area',
-      color: colors.apmBlue,
-      areaColor: 'rgba(49, 133, 252, 0.1)' // apmBlue
+      legendValue: `${asMillisWithDefault(overallAvgDuration)}`,
+      type: 'line',
+      color: colors.apmBlue
     },
     {
       title: '95th percentile',
       titleShort: '95th',
       data: getChartValues(dates, p95),
-      type: 'area',
-      color: colors.apmYellow,
-      areaColor: 'rgba(236, 174, 35, 0.1)' // apmYellow
+      type: 'line',
+      color: colors.apmYellow
     },
     {
       title: '99th percentile',
       titleShort: '99th',
       data: getChartValues(dates, p99),
-      type: 'area',
-      color: colors.apmOrange,
-      areaColor: 'rgba(249, 133, 16, 0.1)' // apmOrange
+      type: 'line',
+      color: colors.apmOrange
     }
   ];
-}
 
-function getTpmLegendTitle(bucketKey) {
-  // hide legend text for transactions without "result"
-  if (bucketKey === 'transaction_result_missing') {
-    return '';
+  if (!isEmpty(avgAnomalies.buckets)) {
+    // insert after Avg. serie
+    series.splice(1, 0, {
+      title: 'Anomaly Boundaries',
+      hideLegend: true,
+      hideTooltipValue: true,
+      data: getAnomalyBoundaryValues(
+        dates,
+        avgAnomalies.buckets,
+        avgAnomalies.bucketSpanAsMillis
+      ),
+      type: 'area',
+      color: 'none',
+      areaColor: rgba(colors.apmBlue, 0.1)
+    });
+
+    series.splice(1, 0, {
+      title: 'Anomaly score',
+      hideLegend: true,
+      hideTooltipValue: true,
+      data: getAnomalyScoreValues(
+        dates,
+        avgAnomalies.buckets,
+        avgAnomalies.bucketSpanAsMillis
+      ),
+      type: 'areaMaxHeight',
+      color: 'none',
+      areaColor: rgba(colors.apmRed, 0.1)
+    });
   }
 
-  return bucketKey;
+  return series;
 }
 
-function getTpmSeries(chartsData, transactionType) {
+export function getTpmSeries(chartsData, transactionType) {
   const { dates, tpmBuckets } = chartsData;
   const getColor = getColorByKey(tpmBuckets.map(({ key }) => key));
+  const getTpmLegendTitle = bucketKey => {
+    // hide legend text for transactions without "result"
+    if (bucketKey === 'transaction_result_missing') {
+      return '';
+    }
+
+    return bucketKey;
+  };
 
   return tpmBuckets.map(bucket => {
     return {
@@ -131,9 +157,73 @@ function getColorByKey(keys) {
   return key => assignedColors[key] || unassignedColors[key];
 }
 
-function getChartValues(dates = [], yValues = []) {
+function getChartValues(dates = [], buckets = []) {
   return dates.map((x, i) => ({
     x,
-    y: yValues[i]
+    y: buckets[i]
   }));
+}
+
+export function getAnomalyScoreValues(
+  dates = [],
+  buckets = [],
+  bucketSpanAsMillis
+) {
+  const ANOMALY_THRESHOLD = 75;
+  const getX = (currentX, i) => currentX + bucketSpanAsMillis * i;
+
+  return dates
+    .map((x, i) => {
+      const { anomalyScore } = buckets[i] || {};
+      return {
+        x,
+        anomalyScore
+      };
+    })
+    .filter(p => p.anomalyScore > ANOMALY_THRESHOLD)
+    .reduce((acc, p, i, points) => {
+      acc.push({ x: p.x, y: 1 });
+      const { x: nextX } = points[i + 1] || {};
+      const endX = getX(p.x, 1);
+      if (nextX == null || nextX > endX) {
+        acc.push(
+          {
+            x: endX,
+            y: 1
+          },
+          {
+            x: getX(p.x, 2)
+          }
+        );
+      }
+
+      return acc;
+    }, []);
+}
+
+export function getAnomalyBoundaryValues(
+  dates = [],
+  buckets = [],
+  bucketSpanAsMillis
+) {
+  const lastX = last(dates);
+  return dates
+    .map((x, i) => ({
+      x,
+      y0: get(buckets[i], 'lower'),
+      y: get(buckets[i], 'upper')
+    }))
+    .filter(point => point.y != null)
+    .reduce((acc, p, i, points) => {
+      const isLast = last(points) === p;
+      acc.push(p);
+
+      if (isLast) {
+        acc.push({
+          ...p,
+          x: Math.min(p.x + bucketSpanAsMillis, lastX) // avoid going beyond the last date
+        });
+      }
+      return acc;
+    }, []);
 }

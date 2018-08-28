@@ -19,17 +19,19 @@ export async function getBuckets({
   bucketSize = 100,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const bucketTargetCount = config.get('xpack.apm.bucketTargetCount');
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
             {
               range: {
                 '@timestamp': {
@@ -38,9 +40,7 @@ export async function getBuckets({
                   format: 'epoch_millis'
                 }
               }
-            },
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+            }
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }
@@ -68,6 +68,10 @@ export async function getBuckets({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
 

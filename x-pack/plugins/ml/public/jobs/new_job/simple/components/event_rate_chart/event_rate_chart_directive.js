@@ -15,7 +15,6 @@ import $ from 'jquery';
 import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
-import 'ui/timefilter';
 
 import { TimeBuckets } from 'ui/time_buckets';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
@@ -29,7 +28,9 @@ module.directive('mlEventRateChart', function () {
 
     let svgWidth = 0;
     const barChartHeight = scope.eventRateChartHeight;
-    const margin = { top: 0, right: 0, bottom: 20, left: scope.chartTicksMargin.width };
+    const marginTop = 5;
+    const progressBarMarginBottom = barChartHeight + marginTop - 15;
+    const margin = { top: marginTop, right: 1, bottom: 20, left: scope.chartTicksMargin.width };
     const svgHeight = barChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
@@ -84,7 +85,7 @@ module.directive('mlEventRateChart', function () {
 
       if (chartElement.select('.progress-bar')[0][0] === null) {
         const style = `width: ${(+vizWidth + 2)}px;
-          margin-bottom: -${(+barChartHeight - 15)}px;
+          margin-bottom: -${(+progressBarMarginBottom)}px;
           margin-left: ${(+margin.left - 1)}px;'`;
 
         chartElement.append('div')
@@ -120,9 +121,15 @@ module.directive('mlEventRateChart', function () {
       }
       swimlaneXScale.domain(d3.extent(finerData, d => d.date));
 
+
+      // Extend the time range/domain at the end by 1 barsInterval,
+      // otherwise the last bar will start at the end of vizWidth
+      // and overflow the chart.
+      const timeExtent = d3.extent(data, d => d.date);
+      timeExtent[1] = new Date(timeExtent[1].getTime() + scope.chartData.barsInterval);
       barChartXScale = d3.time.scale()
         .range([0, vizWidth])
-        .domain(d3.extent(data, d => d.date));
+        .domain(timeExtent);
 
       chartLimits.max = d3.max(data, (d) => d.value);
       chartLimits.min = 0;

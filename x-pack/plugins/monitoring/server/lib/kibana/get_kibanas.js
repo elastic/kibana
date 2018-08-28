@@ -9,7 +9,7 @@ import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
-import { ElasticsearchMetric } from '../metrics';
+import { KibanaMetric } from '../metrics';
 
 /*
  * Get detailed info for Kibanas in the cluster
@@ -39,7 +39,7 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
         start,
         end,
         clusterUuid,
-        metric: ElasticsearchMetric.getMetricFields()
+        metric: KibanaMetric.getMetricFields()
       }),
       collapse: {
         field: 'kibana_stats.kibana.uuid'

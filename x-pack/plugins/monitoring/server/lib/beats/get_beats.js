@@ -114,7 +114,7 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
       query: createBeatsQuery({
         start,
         end,
-        uuid: clusterUuid
+        clusterUuid
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts

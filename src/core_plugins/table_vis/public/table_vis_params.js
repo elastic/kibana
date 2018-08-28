@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { uiModules } from 'ui/modules';
 import tableVisParamsTemplate from './table_vis_params.html';
 
@@ -10,13 +29,13 @@ uiModules.get('kibana/table_vis')
         $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
 
         $scope.$watchMulti([
-          'vis.params.showPartialRows',
-          'vis.params.showMeticsAtAllLevels'
+          'editorState.params.showPartialRows',
+          'editorState.params.showMetricsAtAllLevels'
         ], function () {
           if (!$scope.vis) return;
 
-          const params = $scope.vis.params;
-          if (params.showPartialRows || params.showMeticsAtAllLevels) {
+          const params = $scope.editorState.params;
+          if (params.showPartialRows || params.showMetricsAtAllLevels) {
             $scope.metricsAtAllLevels = true;
           } else {
             $scope.metricsAtAllLevels = false;

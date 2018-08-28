@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_create": {
+  "create": {
     "url_params": {
       "timeout": "1m",
       "ttl": "5m",

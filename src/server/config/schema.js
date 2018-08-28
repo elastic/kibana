@@ -1,9 +1,75 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import Joi from 'joi';
-import { constants as cryptoConstants } from 'crypto';
+import {
+  constants as cryptoConstants
+} from 'crypto';
 import os from 'os';
 
-import { fromRoot } from '../../utils';
-import { getData } from '../path';
+import {
+  fromRoot
+} from '../../utils';
+import {
+  getData
+} from '../path';
+
+const tilemapSchema = Joi.object({
+  url: Joi.string(),
+  options: Joi.object({
+    attribution: Joi.string(),
+    minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
+    maxZoom: Joi.number().default(10),
+    tileSize: Joi.number(),
+    subdomains: Joi.array().items(Joi.string()).single(),
+    errorTileUrl: Joi.string().uri(),
+    tms: Joi.boolean(),
+    reuseTiles: Joi.boolean(),
+    bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2),
+    default: Joi.boolean()
+  }).default({
+    default: true
+  })
+}).default();
+
+const regionmapSchema = Joi.object({
+  includeElasticMapsService: Joi.boolean().default(true),
+  layers: Joi.array().items(Joi.object({
+    url: Joi.string(),
+    format: Joi.object({
+      type: Joi.string().default('geojson')
+    }).default({
+      type: 'geojson'
+    }),
+    meta: Joi.object({
+      feature_collection_path: Joi.string().default('data')
+    }).default({
+      feature_collection_path: 'data'
+    }),
+    attribution: Joi.string(),
+    name: Joi.string(),
+    fields: Joi.array().items(Joi.object({
+      name: Joi.string(),
+      description: Joi.string()
+    }))
+  })).default([])
+}).default();
 
 export default () => Joi.object({
   pkg: Joi.object({
@@ -91,6 +157,10 @@ export default () => Joi.object({
     }).default(),
   }).default(),
 
+  uiSettings: Joi.object().keys({
+    overrides: Joi.object().unknown(true).default()
+  }).default(),
+
   logging: Joi.object().keys({
     silent: Joi.boolean().default(false),
 
@@ -107,7 +177,6 @@ export default () => Joi.object({
         then: Joi.valid(false).default(false),
         otherwise: Joi.default(false)
       }),
-
     events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
     filter: Joi.any().default({}),
@@ -117,10 +186,8 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-
     useUTC: Joi.boolean().default(true),
-  })
-    .default(),
+  }).default(),
 
   ops: Joi.object({
     interval: Joi.number().default(5000),
@@ -175,53 +242,21 @@ export default () => Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
   map: Joi.object({
-    manifestServiceUrl: Joi.when('$dev', {
-      is: true,
-      // then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
-      then: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest'),
-      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest')
-    }),
-    includeElasticMapsService: Joi.boolean().default(true)
-  }).default(),
-  tilemap: Joi.object({
-    url: Joi.string(),
-    options: Joi.object({
-      attribution: Joi.string(),
-      minZoom: Joi.number().min(0, 'Must be 0 or higher').default(0),
-      maxZoom: Joi.number().default(10),
-      tileSize: Joi.number(),
-      subdomains: Joi.array().items(Joi.string()).single(),
-      errorTileUrl: Joi.string().uri(),
-      tms: Joi.boolean(),
-      reuseTiles: Joi.boolean(),
-      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
-    }).default()
-  }).default(),
-  regionmap: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
-    layers: Joi.array().items(Joi.object({
-      url: Joi.string(),
-      format: Joi.object({
-        type: Joi.string().default('geojson')
-      }).default({
-        type: 'geojson'
-      }),
-      meta: Joi.object({
-        feature_collection_path: Joi.string().default('data')
-      }).default({
-        feature_collection_path: 'data'
-      }),
-      attribution: Joi.string(),
-      name: Joi.string(),
-      fields: Joi.array().items(Joi.object({
-        name: Joi.string(),
-        description: Joi.string()
-      }))
-    }))
+    tilemap: tilemapSchema,
+    regionmap: regionmapSchema,
+    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
   }).default(),
+  tilemap: tilemapSchema.notes('Deprecated'),
+  regionmap: regionmapSchema.notes('Deprecated'),
 
   i18n: Joi.object({
-    defaultLocale: Joi.string().default('en'),
+    locale: Joi.string().default('en'),
   }).default(),
+
+  // This is a configuration node that is specifically handled by the config system
+  // in the new platform, and that the current platform doesn't need to handle at all.
+  __newPlatform: Joi.any(),
 
 }).default();

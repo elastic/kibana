@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 export const EDIT_CONFIG = {
   title: 'Edit the configuration',
   textPre:
@@ -11,21 +30,10 @@ export const EDIT_CONFIG = {
   ],
 };
 
-const IMPORT_DASHBOARD = {
-  title: 'Import dashboards',
-  textPre: 'APM Server ships with preconfigured dashboards.',
-};
-
 const START_SERVER = {
   title: 'Start APM Server',
   textPre:
     'The server processes and stores application performance metrics in Elasticsearch.',
-};
-
-export const IMPORT_DASHBOARD_UNIX = {
-  title: IMPORT_DASHBOARD.title,
-  textPre: IMPORT_DASHBOARD.textPre,
-  commands: ['./apm-server setup'],
 };
 
 export const START_SERVER_UNIX = {
@@ -82,11 +90,6 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
     textPost:
       'Note: If script execution is disabled on your system, you need to set the execution policy for the current session' +
       ' to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
-  },
-  {
-    title: IMPORT_DASHBOARD.title,
-    textPre: IMPORT_DASHBOARD.textPre,
-    commands: ['apm-server.exe setup'],
   },
   EDIT_CONFIG,
   {

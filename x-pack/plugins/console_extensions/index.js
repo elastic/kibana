@@ -9,13 +9,27 @@ export function consoleExtensions(kibana) {
   return new kibana.Plugin({
     id: 'console_extensions',
     require: ['kibana', 'console'],
+    isEnabled(config) {
+      return (
+        config.get('console_extensions.enabled') &&
+        config.has('console.enabled') &&
+        config.get('console.enabled')
+      );
+    },
+
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
     init: server => {
       if (
         server.plugins.console &&
         server.plugins.console.addExtensionSpecFilePath
       ) {
         server.plugins.console.addExtensionSpecFilePath(
-          join(__dirname, 'spec')
+          join(__dirname, 'spec/')
         );
       } else {
         console.warn(

@@ -92,7 +92,7 @@ module.exports = {
     'wrap-iife': [ 'error', 'outside' ],
     yoda: 'off',
 
-    'object-curly-spacing': 'off', // overriden with babel/object-curly-spacing
+    'object-curly-spacing': 'off', // overridden with babel/object-curly-spacing
     'babel/object-curly-spacing': [ 'error', 'always' ],
 
     'jsx-quotes': ['error', 'prefer-double'],
@@ -118,8 +118,6 @@ module.exports = {
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
-    'react/no-did-mount-set-state': 'error',
-    'react/no-did-update-set-state': 'error',
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],

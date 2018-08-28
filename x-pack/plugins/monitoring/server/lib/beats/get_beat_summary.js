@@ -71,7 +71,7 @@ export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beat
       query: createBeatsQuery({
         start,
         end,
-        uuid: clusterUuid,
+        clusterUuid,
         filters
       }),
       collapse: {

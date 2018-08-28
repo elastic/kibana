@@ -14,10 +14,10 @@ export function GrokDebuggerProvider({ getService }) {
   // test subject selectors
   const SUBJ_CONTAINER = 'grokDebugger';
 
-  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} aceEventInput`;
-  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} acePatternInput`;
-  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} aceCustomPatternsInput`;
-  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} aceEventOutput`;
+  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} aceEventInput codeEditorContainer`;
+  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} acePatternInput codeEditorContainer`;
+  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} aceCustomPatternsInput codeEditorContainer`;
+  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} aceEventOutput codeEditorContainer`;
 
   const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} btnToggleCustomPatternsInput`;
   const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} btnSimulate`;
@@ -60,6 +60,24 @@ export function GrokDebuggerProvider({ getService }) {
         const value = JSON.parse(await this.getEventOutput());
         expect(value).to.eql(expectedValue);
       });
+    }
+
+    async assertPatternInputSyntaxHighlighting(expectedHighlights) {
+      const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
+      const highlightedElements = await patternInputElement.findAllByXpath('.//div[@class="ace_line"]/*');
+
+      expect(highlightedElements.length).to.be(expectedHighlights.length);
+      await Promise.all(highlightedElements.map(async (element, index) => {
+        const highlightClass = await element.getAttribute('class');
+        const highlightedContent = await element.getVisibleText();
+
+        const expectedHighlight = expectedHighlights[index];
+        const expectedHighlightClass = `ace_${expectedHighlight.token}`;
+        const expectedHighlightedContent = expectedHighlight.content;
+
+        expect(highlightClass).to.be(expectedHighlightClass);
+        expect(highlightedContent).to.be(expectedHighlightedContent);
+      }));
     }
   };
 }

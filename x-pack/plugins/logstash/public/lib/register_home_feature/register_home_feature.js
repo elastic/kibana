@@ -17,7 +17,7 @@ FeatureCatalogueRegistryProvider.register(($injector) => {
     id: 'management_logstash',
     title: 'Logstash Pipelines',
     description: 'Create, delete, update, and clone data ingestion pipelines.',
-    icon: '/plugins/logstash/assets/app_pipeline.svg',
+    icon: 'pipelineApp',
     path: '/app/kibana#/management/logstash/pipelines',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

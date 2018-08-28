@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -74,7 +93,7 @@ const vectorManifest = {
 
 
 const THRESHOLD = 0.45;
-const PIXEL_DIFF = 64;
+const PIXEL_DIFF = 96;
 
 describe('RegionMapsVisualizationTests', function () {
 
@@ -125,7 +144,7 @@ describe('RegionMapsVisualizationTests', function () {
     };
 
     const serviceSettings = $injector.get('serviceSettings');
-    sinon.stub(serviceSettings, '_getManifest', function (url) {
+    sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;
@@ -286,11 +305,11 @@ describe('RegionMapsVisualizationTests', function () {
       const mismatchedPixelsAfterDataChange = await compareImage(afterdatachangePng);
 
 
-      const anoterTableGroup = _.cloneDeep(newTableGroup);
-      anoterTableGroup.tables[0].rows.pop();//remove one shape
+      const anotherTableGroup = _.cloneDeep(newTableGroup);
+      anotherTableGroup.tables[0].rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
-      await regionMapsVisualization.render(anoterTableGroup, {
+      await regionMapsVisualization.render(anotherTableGroup, {
         resize: true,
         params: false,
         aggs: false,

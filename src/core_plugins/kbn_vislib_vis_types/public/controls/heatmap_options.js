@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { uiModules } from 'ui/modules';
 import heatmapOptionsTemplate from './heatmap_options.html';
 import _ from 'lodash';
@@ -16,13 +35,13 @@ module.directive('heatmapOptions', function () {
       $scope.showColorRange = false;
       $scope.showLabels = false;
       $scope.customColors = false;
-      $scope.valueAxis = $scope.vis.params.valueAxes[0];
+      $scope.valueAxis = $scope.editorState.params.valueAxes[0];
       $scope.options = {
         rotateLabels: $scope.valueAxis.labels.rotate === verticalRotation
       };
 
       $scope.$watch('options.rotateLabels', rotate => {
-        $scope.vis.params.valueAxes[0].labels.rotate = rotate ? verticalRotation : 0;
+        $scope.editorState.params.valueAxes[0].labels.rotate = rotate ? verticalRotation : 0;
       });
 
       $scope.resetColors = function () {
@@ -32,31 +51,31 @@ module.directive('heatmapOptions', function () {
 
       $scope.toggleColorRangeSection = function (checkbox = false) {
         $scope.showColorRange = !$scope.showColorRange;
-        if (checkbox && !$scope.vis.params.setColorRange) $scope.showColorRange = false;
-        if (!checkbox && $scope.showColorRange && !$scope.vis.params.setColorRange) $scope.vis.params.setColorRange = true;
+        if (checkbox && !$scope.editorState.params.setColorRange) $scope.showColorRange = false;
+        if (!checkbox && $scope.showColorRange && !$scope.editorState.params.setColorRange) $scope.editorState.params.setColorRange = true;
       };
 
       $scope.toggleLabelSection = function (checkbox = false) {
         $scope.showLabels = !$scope.showLabels;
         if (checkbox && !$scope.valueAxis.labels.show) $scope.showLabels = false;
         if ($scope.showLabels && !$scope.valueAxis.labels.show) {
-          $scope.vis.params.valueAxes[0].labels.show = true;
+          $scope.editorState.params.valueAxes[0].labels.show = true;
         }
       };
 
       $scope.getGreaterThan = function (index) {
         if (index === 0) return;
-        return $scope.vis.params.colorsRange[index - 1].to;
+        return $scope.editorState.params.colorsRange[index - 1].to;
       };
 
       $scope.addRange = function () {
-        const previousRange = _.last($scope.vis.params.colorsRange);
+        const previousRange = _.last($scope.editorState.params.colorsRange);
         const from = previousRange ? previousRange.to : 0;
-        $scope.vis.params.colorsRange.push({ from: from, to: null });
+        $scope.editorState.params.colorsRange.push({ from: from, to: null });
       };
 
       $scope.removeRange = function (index) {
-        $scope.vis.params.colorsRange.splice(index, 1);
+        $scope.editorState.params.colorsRange.splice(index, 1);
       };
 
       $scope.getColor = function (index) {

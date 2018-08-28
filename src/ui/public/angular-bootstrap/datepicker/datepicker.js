@@ -522,7 +522,7 @@ function ($compile, $parse, $document, $position, dateFilter, dateParser, datepi
         });
       });
 
-      // Outter change
+      // Outer change
       ngModel.$render = function() {
         var date = ngModel.$viewValue ? dateFilter(ngModel.$viewValue, dateFormat) : '';
         element.val(date);

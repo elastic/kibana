@@ -7,8 +7,8 @@
 import expect from 'expect.js';
 import { handleResponse } from '../get_node_summary';
 
-describe('get_node_summary handleResponse', () => {
-  it('default undefined fields in result for empty response', () => {
+describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
+  it('should return undefined fields in result for empty response', () => {
     const clusterState = {};
     const shardStats = {};
     const resolver = null;
@@ -24,13 +24,14 @@ describe('get_node_summary handleResponse', () => {
       nodeTypeLabel: 'Offline Node',
       node_ids: [],
       status: 'Offline',
+      isOnline: false,
       transport_address: '',
       type: 'node',
     });
   });
 
   describe('With node_stats hits', () => {
-    it('incomplete shardStats data', () => {
+    it('should handle incomplete shardStats data', () => {
       const clusterState = {
         nodes: {
           fooNode: {}
@@ -63,10 +64,11 @@ describe('get_node_summary handleResponse', () => {
         nodeTypeClass: 'fa-server',
         node_ids: [],
         status: 'Online',
+        isOnline: true,
       });
     });
 
-    it('incomplete shardStats data, master node', () => {
+    it('should handle incomplete shardStats data, master node', () => {
       const clusterState = {
         nodes: {
           'fooNode-Uuid': {}
@@ -140,6 +142,7 @@ describe('get_node_summary handleResponse', () => {
           'fooNode-Uuid'
         ],
         status: 'Online',
+        isOnline: true,
       });
     });
   });

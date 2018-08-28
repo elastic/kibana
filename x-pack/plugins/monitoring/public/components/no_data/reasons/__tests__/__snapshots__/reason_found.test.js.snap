@@ -58,7 +58,7 @@ Array [
     class="euiSpacer euiSpacer--l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -105,7 +105,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText noData__alignLeft"
+    class="euiText eui-textLeft"
   >
     <p>
       We checked the 

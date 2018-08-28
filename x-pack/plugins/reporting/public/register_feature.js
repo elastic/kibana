@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'reporting',
     title: 'Reporting',
     description: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
-    icon: '/plugins/reporting/assets/app_reporting.svg',
+    icon: 'reportingApp',
     path: '/app/kibana#/management/kibana/reporting',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN

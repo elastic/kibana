@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /* eslint max-len:0 */
 /* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 // Markdown builder is not yet properly accessible
@@ -45,7 +64,7 @@ class MarkdownEditor extends Component {
     const rows = [];
     const rawFormatter = tickFormatter('0.[0000]');
 
-    const createPrimativeRow = key => {
+    const createPrimitiveRow = key => {
       const snippet = `{{ ${key} }}`;
       let value = _.get(variables, key);
       if (/raw$/.test(key)) value = rawFormatter(value);
@@ -87,7 +106,7 @@ class MarkdownEditor extends Component {
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));
         } else {
-          createPrimativeRow(path.concat(name).join('.'));
+          createPrimitiveRow(path.concat(name).join('.'));
         }
       }
     }
@@ -127,7 +146,7 @@ class MarkdownEditor extends Component {
             <tbody>{rows}</tbody>
           </table>
           {rows.length === 0 && (
-            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+            <div className="vis_editor__no-markdown-variables">No variables available for the selected data metrics.</div>
           )}
 
           <div className="vis_editor__markdown-code-desc">

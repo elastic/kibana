@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
@@ -8,8 +27,8 @@ import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
-function hasSeperateAxis(row) {
-  return row.seperate_axis;
+function hasSeparateAxis(row) {
+  return row.separate_axis;
 }
 
 class TimeseriesVisualization extends Component {
@@ -58,7 +77,7 @@ class TimeseriesVisualization extends Component {
       });
     }
     const seriesModel = model.series.map(s => _.cloneDeep(s));
-    const firstSeries = seriesModel.find(s => s.formatter && !s.seperate_axis);
+    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'));
 
     const mainAxis = {
@@ -71,6 +90,11 @@ class TimeseriesVisualization extends Component {
 
     if (model.axis_min) mainAxis.min = model.axis_min;
     if (model.axis_max) mainAxis.max = model.axis_max;
+    if (model.axis_scale === 'log') {
+      mainAxis.mode = 'log';
+      mainAxis.transform = value => value > 0 ? Math.log(value) / Math.LN10 : null;
+      mainAxis.inverseTransform = value => Math.pow(10, value);
+    }
 
     const yaxes = [mainAxis];
 
@@ -96,7 +120,7 @@ class TimeseriesVisualization extends Component {
           });
       }
       if (s.stacked === 'percent') {
-        s.seperate_axis = true;
+        s.separate_axis = true;
         s.axisFormatter = 'percent';
         s.axis_min = 0;
         s.axis_max = 1;
@@ -119,9 +143,9 @@ class TimeseriesVisualization extends Component {
     const interval = this.getInterval();
 
     let axisCount = 1;
-    if (seriesModel.some(hasSeperateAxis)) {
+    if (seriesModel.some(hasSeparateAxis)) {
       seriesModel.forEach((row) => {
-        if (row.seperate_axis) {
+        if (row.separate_axis) {
           axisCount++;
 
           const formatter = tickFormatter(row.formatter, row.value_template);

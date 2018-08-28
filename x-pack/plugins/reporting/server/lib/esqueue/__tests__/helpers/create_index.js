@@ -102,7 +102,7 @@ describe('Create Index', function () {
 
     beforeEach(function () {
       client = new ClientMock();
-      sinon.stub(client.indices, 'exists', () => Promise.resolve(true));
+      sinon.stub(client.indices, 'exists').callsFake(() => Promise.resolve(true));
       createSpy = sinon.spy(client.indices, 'create');
     });
 

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails and stops services if initial logger upgrade fails 1`] = `
+Array [
+  Array [
+    "Configuring logger failed:",
+    [Error: logging config upgrade failed],
+  ],
+]
+`;
+
+exports[`stops services if consequent logger upgrade fails 1`] = `
+Array [
+  Array [
+    "Configuring logger failed:",
+    [Error: logging config consequent upgrade failed],
+  ],
+]
+`;

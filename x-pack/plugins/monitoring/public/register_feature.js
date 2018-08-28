@@ -15,7 +15,7 @@ if (chrome.getInjected('monitoringUiEnabled')) {
       id: 'monitoring',
       title: 'Monitoring',
       description: 'Track the real-time health and performance of your Elastic Stack.',
-      icon: '/plugins/kibana/assets/app_monitoring.svg',
+      icon: 'monitoringApp',
       path: '/app/monitoring',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN

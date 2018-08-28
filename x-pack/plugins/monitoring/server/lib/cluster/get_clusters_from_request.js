@@ -13,34 +13,11 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getPipelines } from '../logstash/get_pipelines';
 import { getBeatsForClusters } from '../beats';
-import { calculateOverallStatus } from '../calculate_overall_status';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
+import { getClustersSummary } from './get_clusters_summary';
 import { CLUSTER_ALERTS_SEARCH_SIZE } from '../../../common/constants';
-
-// manipulate cluster status and license meta data
-export function normalizeClustersData(clusters, kibanaUuid) {
-  clusters.forEach(cluster => {
-    cluster.elasticsearch = {
-      cluster_stats: cluster.cluster_stats,
-      nodes: cluster.nodes,
-      indices: cluster.indices
-    };
-    cluster.status = calculateOverallStatus([
-      cluster.elasticsearch.status,
-      cluster.kibana && cluster.kibana.status || null
-    ]);
-    cluster.isPrimary = cluster.kibana.uuids.includes(kibanaUuid);
-
-    delete cluster.cluster_stats;
-    delete cluster.nodes;
-    delete cluster.indices;
-    delete cluster.kibana.uuids;
-  });
-
-  return clusters;
-}
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -131,5 +108,5 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
 
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  return normalizeClustersData(clusters, kibanaUuid);
+  return getClustersSummary(clusters, kibanaUuid);
 }

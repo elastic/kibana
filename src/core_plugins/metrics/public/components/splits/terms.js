@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import PropTypes from 'prop-types';
 import React from 'react';
 import GroupBySelect from './group_by_select';
@@ -5,7 +24,9 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import Select from 'react-select';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 
 export const SplitByTerms = props => {
   const handleTextChange = createTextHandler(props.onChange);
@@ -21,6 +42,9 @@ export const SplitByTerms = props => {
     { value: 'desc', label: 'Descending' },
     { value: 'asc', label: 'Ascending' },
   ];
+  const selectedDirectionOption = dirOptions.find(option => {
+    return model.terms_direction === option.value;
+  });
 
   return (
     <div className="vis_editor__split-container">
@@ -61,11 +85,12 @@ export const SplitByTerms = props => {
       </div>
       <div className="vis_editor__label">Direction</div>
       <div className="vis_editor__split-aggs">
-        <Select
+        <EuiComboBox
+          isClearable={false}
           options={dirOptions}
-          clearable={false}
-          value={model.terms_direction}
+          selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
           onChange={handleSelectChange('terms_direction')}
+          singleSelection={true}
         />
       </div>
     </div>

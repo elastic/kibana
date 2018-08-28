@@ -1,0 +1,26 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/theme";
+
+grokdebugger {
+  .ace_grokStart,
+  .ace_grokEnd,
+  .ace_grokSeparator,
+  .ace_grokEscape {
+    color: #999999; // euiColorMediumShade
+  }
+
+  .ace_grokPatternName {
+    color: #017F75; // euiColorSecondary
+  }
+
+  .ace_grokFieldName,
+  .ace_grokRegex {
+    color: #0079A5; // euiColorPrimary
+  }
+
+  .ace_grokFieldType {
+    color: #0079A5; // euiColorPrimary
+    font-style: italic;
+  }
+}

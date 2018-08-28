@@ -1,17 +1,35 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series_options';
 import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import '../../visualize/visualize_legend';
-import { VisTypeProvider } from './base_vis_type';
+import './vislib_vis_legend';
+import { BaseVisType } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import VislibProvider from '../../vislib';
 import $ from 'jquery';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
-  const VisType = Private(VisTypeProvider);
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 
@@ -58,12 +76,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           $scope.vis = this.vis;
           $scope.visData = esResponse;
           $scope.uiState = $scope.vis.getUiState();
-          const legendHtml = $compile('<visualize-legend></visualize-legend>')($scope);
+          const legendHtml = $compile('<vislib-legend></vislib-legend>')($scope);
           this.container.appendChild(legendHtml[0]);
           $scope.$digest();
-          // We need to wait one digest cycle for the legend to render, before
-          // we want to render the chart, so it know about the legend size.
-          await new Promise(resolve => $timeout(resolve));
         }
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
@@ -86,11 +101,11 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }
-      $(this.container).find('visualize-legend').remove();
+      $(this.container).find('vislib-legend').remove();
     }
   }
 
-  class VislibVisType extends VisType {
+  class VislibVisType extends BaseVisType {
     constructor(opts) {
       if (!opts.responseHandler) {
         opts.responseHandler = 'basic';

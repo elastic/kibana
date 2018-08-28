@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
@@ -107,7 +126,7 @@ dataTypesArray.forEach(function (dataType) {
       function checkChart(chart) {
         const rect = $(chart.chartEl).find('.series rect').get(0);
 
-        // check for existance of stuff and things
+        // check for existence of stuff and things
         return {
           click: !!rect.__onclick,
           mouseOver: !!rect.__onmouseover,
@@ -303,7 +322,7 @@ describe('datumWidth - monthly interval', function () {
     const chart = vis.handler.charts[0];
     const rects = $(chart.chartEl).find('.series rect');
     const januaryBarWidth = $(rects.get(0)).attr('width');
-    const febuaryBarWidth = $(rects.get(1)).attr('width');
-    expect(febuaryBarWidth).to.be.lessThan(januaryBarWidth);
+    const februaryBarWidth = $(rects.get(1)).attr('width');
+    expect(februaryBarWidth).to.be.lessThan(januaryBarWidth);
   });
 });

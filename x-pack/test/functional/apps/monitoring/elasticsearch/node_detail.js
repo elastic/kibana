@@ -36,34 +36,34 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
       });
 
-      it('master node with 20 indices and 38 shards', async () => {
+      it('should show node summary of master node with 20 indices and 38 shards', async () => {
         await nodesList.clickRowByResolver('jUT5KdxfRbORSCWkb5zjmA');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9300',
-          jvmHeap: 'JVM Heap: 29 %',
-          freeDiskSpace: 'Free Disk Space: 173.9 GB',
-          documentCount: 'Documents: 24.8k',
-          dataSize: 'Data: 50.4 MB',
-          indicesCount: 'Indices: 20',
-          shardsCount: 'Shards: 38',
-          nodeType: 'Type: Master Node',
+          jvmHeap: 'JVM Heap:\n29%',
+          freeDiskSpace: 'Free Disk Space:\n173.9 GB',
+          documentCount: 'Documents:\n24.8k',
+          dataSize: 'Data:\n50.4 MB',
+          indicesCount: 'Indices:\n20',
+          shardsCount: 'Shards:\n38',
+          nodeType: 'Type:\nMaster Node',
           status: 'Status: Online',
         });
       });
 
-      it('data node with 4 indices and 4 shards', async () => {
+      it('should show node summary of data node with 4 indices and 4 shards', async () => {
         await nodesList.clickRowByResolver('bwQWH-7IQY-mFPpfoaoFXQ');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9302',
-          jvmHeap: 'JVM Heap: 17 %',
-          freeDiskSpace: 'Free Disk Space: 173.9 GB',
-          documentCount: 'Documents: 240',
-          dataSize: 'Data: 1.4 MB',
-          indicesCount: 'Indices: 4',
-          shardsCount: 'Shards: 4',
-          nodeType: 'Type: Node',
+          jvmHeap: 'JVM Heap:\n17%',
+          freeDiskSpace: 'Free Disk Space:\n173.9 GB',
+          documentCount: 'Documents:\n240',
+          dataSize: 'Data:\n1.4 MB',
+          indicesCount: 'Indices:\n4',
+          shardsCount: 'Shards:\n4',
+          nodeType: 'Type:\nNode',
           status: 'Status: Online',
         });
       });
@@ -87,18 +87,18 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('shows NA', async () => {
+      it('should show node summary of NA for offline node', async () => {
         await nodesList.clickRowByResolver('1jxg5T33TWub-jJL4qP0Wg');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9302',
-          jvmHeap: 'JVM Heap: N/A',
-          freeDiskSpace: 'Free Disk Space: N/A',
-          documentCount: 'Documents: N/A',
-          dataSize: 'Data: N/A',
-          indicesCount: 'Indices: N/A',
-          shardsCount: 'Shards: N/A',
-          nodeType: 'Type: Offline Node',
+          jvmHeap: 'JVM Heap:\nN/A',
+          freeDiskSpace: 'Free Disk Space:\nN/A',
+          documentCount: 'Documents:\nN/A',
+          dataSize: 'Data:\nN/A',
+          indicesCount: 'Indices:\nN/A',
+          shardsCount: 'Shards:\nN/A',
+          nodeType: 'Type:\nOffline Node',
           status: 'Status: Offline',
         });
       });

@@ -1,12 +1,28 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { resolve } = require('path');
-const { readdirSync } = require('fs');
+const { readdirSync, existsSync, unlink } = require('fs');
 const del = require('del');
 const createBuild = require('./create_build');
 
-const PLUGIN_FIXTURE = resolve(
-  __dirname,
-  '__fixtures__/create_build_test_plugin'
-);
+const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/create_build_test_plugin');
 const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
 const PLUGIN_BUILD_TARGET = resolve(PLUGIN_BUILD_DIR, 'kibana', PLUGIN.id);
@@ -24,13 +40,7 @@ describe('creating the build', () => {
     expect(PLUGIN.pkg.scripts).not.toBeUndefined();
     expect(PLUGIN.pkg.devDependencies).not.toBeUndefined();
 
-    await createBuild(
-      PLUGIN,
-      buildTarget,
-      buildVersion,
-      kibanaVersion,
-      buildFiles
-    );
+    await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
     const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
     expect(pkg).not.toHaveProperty('scripts');
@@ -40,13 +50,7 @@ describe('creating the build', () => {
   it('adds build metadata to package.json', async () => {
     expect(PLUGIN.pkg.build).toBeUndefined();
 
-    await createBuild(
-      PLUGIN,
-      buildTarget,
-      buildVersion,
-      kibanaVersion,
-      buildFiles
-    );
+    await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
     const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
     expect(pkg).toHaveProperty('build');
@@ -58,20 +62,10 @@ describe('creating the build', () => {
     it('installs node_modules as a part of build', async () => {
       expect(PLUGIN.skipInstallDependencies).toBe(false);
 
-      await createBuild(
-        PLUGIN,
-        buildTarget,
-        buildVersion,
-        kibanaVersion,
-        buildFiles
-      );
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
-      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).toContain(
-        'node_modules'
-      );
-      expect(
-        readdirSync(resolve(PLUGIN_BUILD_TARGET, 'node_modules'))
-      ).toContain('noop3');
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).toContain('node_modules');
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET, 'node_modules'))).toContain('noop3');
     });
   });
 
@@ -84,17 +78,33 @@ describe('creating the build', () => {
     it('does not install node_modules as a part of build', async () => {
       expect(PLUGIN.skipInstallDependencies).toBe(true);
 
-      await createBuild(
-        PLUGIN,
-        buildTarget,
-        buildVersion,
-        kibanaVersion,
-        buildFiles
-      );
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
-      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).not.toContain(
-        'node_modules'
-      );
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).not.toContain('node_modules');
+    });
+  });
+
+  describe('with styleSheetToCompile', () => {
+    const sassPath = 'public/styles.scss';
+    const cssPath = resolve(PLUGIN_BUILD_TARGET, 'public/styles.css');
+
+    beforeEach(() => {
+      PLUGIN.skipInstallDependencies = true;
+      PLUGIN.styleSheetToCompile = sassPath;
+    });
+
+    afterEach(() => {
+      PLUGIN.skipInstallDependencies = false;
+      PLUGIN.styleSheetToCompile = undefined;
+      unlink(cssPath);
+    });
+
+    it('produces CSS', async () => {
+      expect(PLUGIN.styleSheetToCompile).toBe(sassPath);
+
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
+
+      expect(existsSync(cssPath)).toBe(true);
     });
   });
 });

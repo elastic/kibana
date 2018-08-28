@@ -1,0 +1,10 @@
+{
+  "xpack.ml.put_filter": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/ml/filters/{filter_id}"
+    ]
+  }
+}

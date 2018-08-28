@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'graph',
     title: 'Graph',
     description: 'Surface and analyze relevant relationships in your Elasticsearch data.',
-    icon: '/plugins/graph/assets/app_graph.svg',
+    icon: 'graphApp',
     path: '/app/graph',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA

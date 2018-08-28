@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { cloneDeep, defaultsDeep } from 'lodash';
 import { createUiSettingsApi } from './ui_settings_api';
 
@@ -83,6 +102,16 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     return this.isDeclared(key) && !('value' in this._cache[key]);
   }
 
+  isOverridden(key) {
+    return this.isDeclared(key) && Boolean(this._cache[key].isOverridden);
+  }
+
+  assertUpdateAllowed(key) {
+    if (this.isOverridden(key)) {
+      throw new Error(`Unable to update "${key}" because its value is overridden by the Kibana server`);
+    }
+  }
+
   overrideLocalDefault(key, newDefault) {
     // capture the previous value
     const prevDefault = this._defaults[key]
@@ -118,6 +147,8 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   async _update(key, value) {
+    this.assertUpdateAllowed(key);
+
     const declared = this.isDeclared(key);
     const defaults = this._defaults;
 
@@ -132,7 +163,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     }
 
     const initialVal = declared ? this.get(key) : undefined;
-    this._setLocally(key, newVal, initialVal);
+    this._setLocally(key, newVal);
 
     try {
       const { settings } = await this._api.batchSet(key, newVal);
@@ -146,6 +177,8 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   _setLocally(key, newValue) {
+    this.assertUpdateAllowed(key);
+
     if (!this.isDeclared(key)) {
       this._cache[key] = {};
     }
@@ -167,8 +200,6 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   _broadcastUpdate(key, newValue, oldValue) {
-    this._notify.log(`config change: ${key}: ${oldValue} -> ${newValue}`);
-
     for (const observer of this._updateObservers) {
       observer({ key, newValue, oldValue });
     }

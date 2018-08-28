@@ -6,7 +6,7 @@
 
 import routes from 'ui/routes';
 import 'ui/url';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import template from './watch_edit_route.html';
 import 'plugins/watcher/services/watch';
 import './components/json_watch_edit';
@@ -40,8 +40,6 @@ routes
         const licenseService = $injector.get('xpackWatcherLicenseService');
         const kbnUrl = $injector.get('kbnUrl');
 
-        const notifier = new Notifier({ location: 'Watcher' });
-
         const watchId = $route.current.params.id;
         const watchType = $route.current.params.watchType;
 
@@ -54,7 +52,7 @@ routes
               return licenseService.checkValidity()
                 .then(() => {
                   if (err.status !== 403) {
-                    notifier.error(err);
+                    toastNotifications.addDanger(err.data.message);
                   }
 
                   kbnUrl.redirect('/management/elasticsearch/watcher/watches');
@@ -68,7 +66,7 @@ routes
             return licenseService.checkValidity()
               .then(() => {
                 if (err.status !== 403) {
-                  notifier.error(err);
+                  toastNotifications.addDanger(err.data.message);
                 }
 
                 kbnUrl.redirect('/management/elasticsearch/watcher/watches');

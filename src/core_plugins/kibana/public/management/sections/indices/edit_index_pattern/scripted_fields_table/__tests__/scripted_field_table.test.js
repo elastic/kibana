@@ -1,7 +1,26 @@
-import React from 'react';
-import { shallow } from 'enzyme';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-import { ScriptedFieldsTable } from '../scripted_fields_table';
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { ScriptedFieldsTableComponent } from '../scripted_fields_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -51,8 +70,8 @@ const indexPattern = {
 
 describe('ScriptedFieldsTable', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -67,8 +86,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -86,8 +105,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the lang filter', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           getScriptedFields: () => ([
             { name: 'ScriptedField', lang: 'painless', script: 'x++' },
@@ -111,8 +130,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should hide the table if there are no scripted fields', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           getScriptedFields: () => ([])
         }}
@@ -129,8 +148,8 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should show a delete modal', async () => {
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={indexPattern}
         helpers={helpers}
       />
@@ -146,8 +165,8 @@ describe('ScriptedFieldsTable', () => {
 
   it('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallow(
-      <ScriptedFieldsTable
+    const component = shallowWithIntl(
+      <ScriptedFieldsTableComponent
         indexPattern={{
           ...indexPattern,
           removeScriptedField,

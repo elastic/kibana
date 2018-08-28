@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import { Markdown } from 'ui/markdown/markdown';
 
@@ -5,29 +24,6 @@ import { Markdown } from 'ui/markdown/markdown';
  * The MarkdownVisComponent renders markdown to HTML and presents it.
  */
 class MarkdownVisComponent extends Component {
-
-  /**
-   * This method will be called when props or the state has been updated, and
-   * we should return whether we want the render method to be called again (true)
-   * or if we know that the render method wouldn't produce anything different and
-   * we don't need it to be called (false).
-   *
-   * We only need to render if one of the parameters used in the render function
-   * actually changed. So we prevent calling render if none of it changed.
-   */
-  shouldComponentUpdate(props) {
-    const shouldUpdate = props.fontSize !== this.props.fontSize ||
-        props.openLinksInNewTab !== this.props.openLinksInNewTab ||
-        props.markdown !== this.props.markdown;
-
-    // If we won't update, we need to trigger the renderComplete method here,
-    // since we will never render and thus never get to componentDidUpdate.
-    if (!shouldUpdate) {
-      this.props.renderComplete();
-    }
-
-    return shouldUpdate;
-  }
 
   /**
    * Will be called after the first render when the component is present in the DOM.
@@ -57,10 +53,12 @@ class MarkdownVisComponent extends Component {
    */
   render() {
     return (
-      <div className="markdown-vis">
+      <div
+        className="markdown-vis"
+        style={{ fontSize: `${this.props.fontSize}pt` }}
+      >
         <Markdown
           data-test-subj="markdownBody"
-          style={{ fontSize: `${this.props.fontSize}pt` }}
           markdown={this.props.markdown}
           openLinksInNewTab={this.props.openLinksInNewTab}
         />

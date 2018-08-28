@@ -1,5 +1,5 @@
 {
-  "_cluster/reroute": {
+  "cluster.reroute": {
     "data_autocomplete_rules": {
       "commands": [
         {

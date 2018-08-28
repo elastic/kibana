@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import sinon from 'sinon';
 import cluster from 'cluster';
 import { findIndex } from 'lodash';
@@ -32,10 +51,10 @@ function setup(opts = {}) {
 }
 
 describe('CLI cluster manager', function () {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   beforeEach(function () {
-    sandbox.stub(cluster, 'fork', () => new MockClusterFork());
+    sandbox.stub(cluster, 'fork').callsFake(() => new MockClusterFork());
   });
 
   afterEach(async function () {
@@ -105,7 +124,7 @@ describe('CLI cluster manager', function () {
     });
 
     describe('do after', function () {
-      it('ignores non-array messsages', function () {
+      it('ignores non-array messages', function () {
         const worker = setup();
         worker.parseIncomingMessage('some string thing');
         worker.parseIncomingMessage(0);
@@ -146,7 +165,7 @@ describe('CLI cluster manager', function () {
       });
     });
 
-    describe('when passed an unkown message', function () {
+    describe('when passed an unknown message', function () {
       it('does nothing', function () {
         const worker = setup();
         worker.onMessage('asdlfkajsdfahsdfiohuasdofihsdoif');

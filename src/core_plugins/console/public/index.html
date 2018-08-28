@@ -16,6 +16,7 @@
             id="consoleRequestOptions"
             class="editor_action"
             dropdown-toggle
+            ng-click="getDocumentation()"
             aria-label="Request options"
           >
             <span class="kuiIcon fa-wrench"></span>
@@ -28,6 +29,9 @@
           >
             <li role="menuitem">
               <button class="link" id="copy_as_curl">Copy as cURL</button>
+            </li>
+            <li role="menuitem" ng-if="documentation">
+              <button ng-click="openDocumentation(documentation)">Open documentation</button>
             </li>
             <li role="menuitem">
               <button ng-click="autoIndent($event)">Auto indent</button>

@@ -1,12 +1,33 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
+import React from 'react';
+import { MarkdownSimple } from 'ui/markdown';
+import { toastNotifications } from 'ui/notify';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 
-
-export function QueryActionsProvider(courier, Notifier, Private, Promise) {
+export function QueryActionsProvider(courier, Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);
   const { fetchPredecessors, fetchSuccessors } = Private(fetchContextProvider);
   const {
@@ -16,10 +37,6 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setQueryParameters,
     setSuccessorCount,
   } = Private(QueryParameterActionsProvider);
-
-  const notifier = new Notifier({
-    location: 'Context',
-  });
 
   const setFailedStatus = (state) => (subject, details = {}) => (
     state.loadingStatus[subject] = {
@@ -42,7 +59,7 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorUid, sort, tieBreakerField } } = state;
+    const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
       return Promise.reject(setFailedStatus(state)('anchor', {
@@ -53,7 +70,7 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorUid, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }])
+      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }])
     ))
       .then(
         (anchorDocument) => {
@@ -63,7 +80,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('anchor', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load the anchor document',
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+          });
           throw error;
         }
       );
@@ -84,7 +104,17 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setLoadingStatus(state)('predecessors');
 
     return Promise.try(() => (
-      fetchPredecessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], predecessorCount, filters)
+      fetchPredecessors(
+        indexPatternId,
+        sort[0],
+        sort[1],
+        anchor.sort[0],
+        tieBreakerField,
+        'asc',
+        anchor.sort[1],
+        predecessorCount,
+        filters
+      )
     ))
       .then(
         (predecessorDocuments) => {
@@ -94,7 +124,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('predecessors', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load documents',
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+          });
           throw error;
         },
       );
@@ -115,7 +148,17 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setLoadingStatus(state)('successors');
 
     return Promise.try(() => (
-      fetchSuccessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], successorCount, filters)
+      fetchSuccessors(
+        indexPatternId,
+        sort[0],
+        sort[1],
+        anchor.sort[0],
+        tieBreakerField,
+        'asc',
+        anchor.sort[1],
+        successorCount,
+        filters
+      )
     ))
       .then(
         (successorDocuments) => {
@@ -125,7 +168,10 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('successors', { error });
-          notifier.error(error);
+          toastNotifications.addDanger({
+            title: 'Unable to load documents',
+            text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+          });
           throw error;
         },
       );

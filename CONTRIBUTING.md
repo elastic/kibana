@@ -111,7 +111,7 @@ You want to make sure there are no merge conflicts. If there are merge conflicts
 
 You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
-Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be commiteed, and then use `git rebase --continue` to tell git to continue the rebase.
+Once you've resolved all of the merge conflicts, use `git add -A` to stage them to be committed, and then use `git rebase --continue` to tell git to continue the rebase.
 
 When the rebase has completed, you will need to force push your branch because the history is now completely different than what's on the remote. **This is potentially dangerous** because it will completely overwrite what you have on the remote, so you need to be sure that you haven't lost any work when resolving merge conflicts. (If there weren't any merge conflicts, then you can force push without having to worry about this.)
 
@@ -195,7 +195,7 @@ Start the development server.
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
-Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
 #### Running Kibana in Open-Source mode
 
@@ -265,8 +265,29 @@ Once that's done, just run:
 yarn test && yarn build --skip-os-packages
 ```
 
+You can get all build options using the following command:
+
+```bash
+yarn build --help
+```
+
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+`yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+
+### Unit testing frameworks
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+
+#### Mocha (legacy)
+Mocha tests are contained in `__tests__` directories.
+
+#### Jest
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
+
+### Running Jest Unit Tests
+
+```bash
+node scripts/jest
+```
 
 ### Debugging Unit Tests
 
@@ -342,6 +363,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
 
+You can also look into the [Scripts README.md](./scripts/README.md) to learn more about using the node scripts we provide for building Kibana, running integration tests, and starting up Kibana and Elasticsearch while you develop.
 
 ### Building OS packages
 
@@ -382,7 +404,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 ## Submitting a Pull Request
 
-Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, eg “Closes #123″.
+Push your local changes to your forked copy of the repository and submit a Pull Request. In the Pull Request, describe what your changes do and mention the number of the issue where discussion has taken place, e.g., “Closes #123″.
 
 Always submit your pull against `master` unless the bug is only present in an older version. If the bug affects both `master` and another branch say so in your pull.
 

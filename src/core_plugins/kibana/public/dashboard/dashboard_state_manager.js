@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -16,6 +35,8 @@ import {
   updateHidePanelTitles,
   updateTimeRange,
   clearStagedFilters,
+  updateFilters,
+  updateQuery,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -31,7 +52,9 @@ import {
   getHidePanelTitles,
   getStagedFilters,
   getEmbeddables,
-  getEmbeddableMetadata
+  getEmbeddableMetadata,
+  getQuery,
+  getFilters,
 } from '../selectors';
 
 /**
@@ -112,10 +135,18 @@ export class DashboardStateManager {
 
   /**
    * Time is part of global state so we need to deal with it outside of _pushAppStateChangesToStore.
-   * @param {Object} newTimeFilter
+   * @param {String|Object} newTimeFilter.to -- either a string representing an absolute time in utc format,
+   * or a relative time (now-15m), or a moment object
+   * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
+   * moment object
+   * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
-    store.dispatch(updateTimeRange(newTimeFilter));
+    store.dispatch(updateTimeRange({
+      from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
+      to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
+      mode: newTimeFilter.mode,
+    }));
   }
 
   /**
@@ -167,6 +198,23 @@ export class DashboardStateManager {
 
     if (getDescription(state) !== this.getDescription()) {
       store.dispatch(updateDescription(this.getDescription()));
+    }
+
+    if (getQuery(state) !== this.getQuery()) {
+      store.dispatch(updateQuery(this.getQuery()));
+    }
+
+    this._pushFiltersToStore();
+  }
+
+  _pushFiltersToStore() {
+    const state = store.getState();
+    const dashboardFilters = this.getDashboardFilterBars();
+    if (!_.isEqual(
+      FilterUtils.cleanFiltersForComparison(dashboardFilters),
+      FilterUtils.cleanFiltersForComparison(getFilters(state))
+    )) {
+      store.dispatch(updateFilters(dashboardFilters));
     }
   }
 
@@ -390,8 +438,8 @@ export class DashboardStateManager {
    */
   getTimeChanged(timeFilter) {
     return (
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.time.from) ||
-      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.time.to)
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeFrom, timeFilter.getTime().from) ||
+      !FilterUtils.areTimesEqual(this.lastSavedDashboardFilters.timeTo, timeFilter.getTime().to)
     );
   }
 
@@ -444,7 +492,7 @@ export class DashboardStateManager {
    * @param {number} id
    * @param {string} type
    */
-  addNewPanel(id, type) {
+  addNewPanel = (id, type) => {
     const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
     const newPanel = createPanelState(id, type, maxPanelIndex, this.getPanels());
     this.getPanels().push(newPanel);
@@ -493,7 +541,8 @@ export class DashboardStateManager {
   /**
    * Updates timeFilter to match the time saved with the dashboard.
    * @param {Object} timeFilter
-   * @param {Object} timeFilter.time
+   * @param {func} timeFilter.setTime
+   * @param {func} timeFilter.setRefreshInterval
    * @param quickTimeRanges
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
@@ -501,20 +550,25 @@ export class DashboardStateManager {
       throw new Error('The time is not saved with this dashboard so should not be synced.');
     }
 
-    timeFilter.time.to = this.savedDashboard.timeTo;
-    timeFilter.time.from = this.savedDashboard.timeFrom;
+    let mode;
     const isMoment = moment(this.savedDashboard.timeTo).isValid();
     if (isMoment) {
-      timeFilter.time.mode = 'absolute';
+      mode = 'absolute';
     } else {
       const quickTime = _.find(
         quickTimeRanges,
         (timeRange) => timeRange.from === this.savedDashboard.timeFrom && timeRange.to === this.savedDashboard.timeTo);
 
-      timeFilter.time.mode = quickTime ? 'quick' : 'relative';
+      mode = quickTime ? 'quick' : 'relative';
     }
+    timeFilter.setTime({
+      from: this.savedDashboard.timeFrom,
+      to: this.savedDashboard.timeTo,
+      mode
+    });
+
     if (this.savedDashboard.refreshInterval) {
-      timeFilter.refreshInterval = this.savedDashboard.refreshInterval;
+      timeFilter.setRefreshInterval(this.savedDashboard.refreshInterval);
     }
   }
 
@@ -531,9 +585,11 @@ export class DashboardStateManager {
    */
   applyFilters(query, filters) {
     this.appState.query = query;
-    this.savedDashboard.searchSource.set('query', query);
-    this.savedDashboard.searchSource.set('filter', filters);
+    this.savedDashboard.searchSource.setField('query', query);
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
+    this._pushFiltersToStore();
   }
 
   /**

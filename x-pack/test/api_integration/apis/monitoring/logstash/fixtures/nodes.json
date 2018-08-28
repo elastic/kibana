@@ -1,0 +1,98 @@
+{
+  "clusterStatus": {
+    "node_count": 2,
+    "events_in_total": 120439,
+    "events_out_total": 114557,
+    "avg_memory": 2075918336,
+    "avg_memory_used": 595127568,
+    "max_uptime": 502472,
+    "pipeline_count": 4,
+    "queue_types": {
+      "memory": 4,
+      "persisted": 0
+    },
+    "versions": [
+      "7.0.0-alpha1"
+    ]
+  },
+  "nodes": [
+    {
+      "jvm": {
+        "mem": {
+          "heap_used_percent": 24
+        }
+      },
+      "logstash": {
+        "pipeline": {
+          "batch_size": 125,
+          "workers": 8
+        },
+        "http_address": "127.0.0.1:9601",
+        "name": "Shaunaks-MacBook-Pro.local",
+        "host": "Shaunaks-MacBook-Pro.local",
+        "uuid": "838a2ada-1951-4043-8a23-4b450f6160a4",
+        "version": "7.0.0-alpha1",
+        "status": "green"
+      },
+      "process": {
+        "cpu": {
+          "percent": 0
+        }
+      },
+      "os": {
+        "cpu": {
+          "load_average": {
+            "1m": 4.30224609375
+          }
+        }
+      },
+      "events": {
+        "out": 75125
+      },
+      "reloads": {
+        "failures": 0,
+        "successes": 0
+      },
+      "availability": false
+    },
+    {
+      "jvm": {
+        "mem": {
+          "heap_used_percent": 33
+        }
+      },
+      "logstash": {
+        "pipeline": {
+          "batch_size": 125,
+          "workers": 8
+        },
+        "http_address": "127.0.0.1:9600",
+        "name": "Shaunaks-MacBook-Pro.local",
+        "host": "Shaunaks-MacBook-Pro.local",
+        "uuid": "29a3dfa6-c146-4534-9bc0-be475d2ce950",
+        "version": "7.0.0-alpha1",
+        "status": "green"
+      },
+      "process": {
+        "cpu": {
+          "percent": 2
+        }
+      },
+      "os": {
+        "cpu": {
+          "load_average": {
+            "1m": 4.416015625
+          }
+        }
+      },
+      "events": {
+        "out": 39432
+      },
+      "reloads": {
+        "failures": 0,
+        "successes": 0
+      },
+      "availability": false
+    }
+  ]
+}

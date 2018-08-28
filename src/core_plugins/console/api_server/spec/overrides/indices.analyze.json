@@ -1,5 +1,5 @@
 {
-  "_analyze": {
+  "indices.analyze": {
     "data_autocomplete_rules": {
       "text": [],
       "field": "{field}",

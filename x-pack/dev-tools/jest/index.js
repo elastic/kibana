@@ -6,7 +6,6 @@
 
 import jest from 'jest';
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 
 import { createJestConfig } from './create_jest_config';
 
@@ -14,8 +13,8 @@ import { createJestConfig } from './create_jest_config';
 export function runJest() {
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
   const config = JSON.stringify(createJestConfig({
-    kibanaDirectory: resolveKibanaPath(''),
-    xPackKibanaDirectory: resolve(__dirname, '..', '..'),
+    kibanaDirectory: resolve(__dirname, '../../..'),
+    xPackKibanaDirectory: resolve(__dirname, '../..'),
   }));
 
   const argv = [

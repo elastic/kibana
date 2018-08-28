@@ -10,7 +10,7 @@ import { setupXPackMain } from '../setup_xpack_main';
 import * as InjectXPackInfoSignatureNS from '../inject_xpack_info_signature';
 
 describe('setupXPackMain()', () => {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   let mockServer;
   let mockElasticsearchPlugin;
@@ -58,7 +58,7 @@ describe('setupXPackMain()', () => {
 
     sinon.assert.calledWithExactly(mockServer.expose, 'info', sinon.match.instanceOf(XPackInfo));
     sinon.assert.calledWithExactly(mockServer.ext, 'onPreResponse', sinon.match.func);
-    sinon.assert.calledWithExactly(mockElasticsearchPlugin.status.on, 'change', sinon.match.typeOf('asyncfunction'));
+    sinon.assert.calledWithExactly(mockElasticsearchPlugin.status.on, 'change', sinon.match.func);
   });
 
   it('onPreResponse hook calls `injectXPackInfoSignature` for every request.', () => {
@@ -95,7 +95,7 @@ describe('setupXPackMain()', () => {
       sinon.stub(xPackInfo, 'isAvailable').returns(false);
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
-      sinon.stub(xPackInfo, 'refreshNow', () => {
+      sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
         return new Promise((resolve) => {
           xPackInfo.isAvailable.returns(true);
           resolve();
@@ -114,7 +114,7 @@ describe('setupXPackMain()', () => {
 
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
-      sinon.stub(xPackInfo, 'refreshNow', () => {
+      sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
         return new Promise((resolve) => {
           xPackInfo.isAvailable.returns(false);
           xPackInfo.unavailableReason.returns('Some weird error.');

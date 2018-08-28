@@ -1,10 +1,37 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
-import { shallow } from 'enzyme';
-import { StepIndexPattern } from '../step_index_pattern';
+import { StepIndexPatternComponent } from '../step_index_pattern';
+import { shallowWithIntl, intl } from 'test_utils/enzyme_helpers';
+import { Header } from '../components/header';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
+
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: () => '',
+  }),
+}));
+
 jest.mock('../../../lib/get_indices', () => ({
   getIndices: (service, query) => {
     if (query.startsWith('e')) {
@@ -27,8 +54,8 @@ const savedObjectsClient = {
 const goToNextStep = () => {};
 
 const createComponent = props => {
-  return shallow(
-    <StepIndexPattern
+  return shallowWithIntl(
+    <StepIndexPatternComponent
       allIndices={allIndices}
       isIncludingSystemIndices={false}
       esService={esService}
@@ -40,6 +67,8 @@ const createComponent = props => {
 };
 
 describe('StepIndexPattern', () => {
+  afterEach(() => intl.formatMessage.mockClear());
+
   it('renders the loading state', () => {
     const component = createComponent();
     component.setState({ isLoadingIndices: true });
@@ -66,8 +95,10 @@ describe('StepIndexPattern', () => {
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
-
-    expect(component.find('[data-test-subj="createIndexPatternStep1Header"]')).toMatchSnapshot();
+    expect({
+      component: component.find('[data-test-subj="createIndexPatternStep1Header"]'),
+      i18n: intl.formatMessage.mock.calls,
+    }).toMatchSnapshot();
   });
 
   it('renders matching indices when input is valid', async () => {
@@ -93,7 +124,7 @@ describe('StepIndexPattern', () => {
   it('disables the next step if the index pattern exists', async () => {
     const component = createComponent();
     component.setState({ indexPatternExists: true });
-    expect(component.find('Header').prop('isNextStepDisabled')).toBe(true);
+    expect(component.find(Header).prop('isNextStepDisabled')).toBe(true);
   });
 
   it('ensures the response of the latest request is persisted', async () => {

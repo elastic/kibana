@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
@@ -32,6 +51,7 @@ class FlotChart extends Component {
             axis.max !== this.props.yaxes[i].max ||
             axis.min !== this.props.yaxes[i].min ||
             axis.axisFormatter !== this.props.yaxes[i].axisFormatter ||
+            axis.mode !== this.props.yaxes[i].mode ||
             axis.axisFormatterTemplate !== this.props.yaxes[i].axisFormatterTemplate
           );
         }
@@ -75,7 +95,7 @@ class FlotChart extends Component {
       const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
-      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
+      _.set(options, 'xaxes[0].ticks', this.calculateTicks());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -148,7 +168,7 @@ class FlotChart extends Component {
         timezone: 'browser',
         mode: 'time',
         font: { color: textColor },
-        ticks: this.calcualteTicks()
+        ticks: this.calculateTicks()
       },
       series: {
         shadowSize: 0
@@ -182,7 +202,7 @@ class FlotChart extends Component {
     return _.assign(opts, props.options);
   }
 
-  calcualteTicks() {
+  calculateTicks() {
     const sample = this.props.xAxisFormatter(new Date());
     const tickLetterWidth = 7;
     const tickPadding = 45;
@@ -200,7 +220,7 @@ class FlotChart extends Component {
     if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
       const options = this.plot.getOptions();
-      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
+      _.set(options, 'xaxes[0].ticks', this.calculateTicks());
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();

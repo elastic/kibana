@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import { management } from 'ui/management';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
@@ -6,6 +25,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { i18n } from '@kbn/i18n';
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -59,7 +79,7 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  display: 'Index Patterns',
+  display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
   url: '#/management/kibana/indices/'
 });
@@ -67,9 +87,10 @@ management.getSection('kibana').register('indices', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
-    title: 'Index Patterns',
-    description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
-    icon: '/plugins/kibana/assets/app_index_pattern.svg',
+    title: i18n.translate('kbn.management.indexPatternHeader', { defaultMessage: 'Index Patterns' }),
+    description: i18n.translate('kbn.management.indexPatternLabel',
+      { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
+    icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

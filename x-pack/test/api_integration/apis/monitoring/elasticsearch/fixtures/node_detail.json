@@ -990,6 +990,7 @@
     "documents": 24830,
     "freeSpace": 186755088384,
     "indexCount": 20,
+    "isOnline": true,
     "name": "whatever-01",
     "nodeTypeClass": "fa-star",
     "nodeTypeLabel": "Master Node",
@@ -1222,7 +1223,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 4,
       "state": "STARTED"
     },
@@ -1231,7 +1231,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 1,
       "state": "STARTED"
     },
@@ -1240,7 +1239,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 2,
       "state": "STARTED"
     },
@@ -1249,7 +1247,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 3,
       "state": "STARTED"
     },
@@ -1258,7 +1255,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 4,
       "state": "STARTED"
     },
@@ -1267,7 +1263,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 1,
       "state": "STARTED"
     },
@@ -1276,7 +1271,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": false,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 2,
       "state": "STARTED"
     },
@@ -1285,7 +1279,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 3,
       "state": "STARTED"
     },
@@ -1294,7 +1287,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": false,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 0,
       "state": "STARTED"
     },
@@ -1303,7 +1295,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 4,
       "state": "STARTED"
     },
@@ -1312,7 +1303,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 1,
       "state": "STARTED"
     },
@@ -1321,7 +1311,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 2,
       "state": "STARTED"
     },
@@ -1330,7 +1319,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 3,
       "state": "STARTED"
     },
@@ -1339,7 +1327,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 0,
       "state": "STARTED"
     },
@@ -1348,7 +1335,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 4,
       "state": "STARTED"
     },
@@ -1357,7 +1343,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 2,
       "state": "STARTED"
     },
@@ -1366,7 +1351,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 3,
       "state": "STARTED"
     },
@@ -1375,7 +1359,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 0,
       "state": "STARTED"
     },
@@ -1384,7 +1367,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 4,
       "state": "STARTED"
     },
@@ -1393,7 +1375,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": false,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 1,
       "state": "STARTED"
     },
@@ -1402,7 +1383,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": false,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 2,
       "state": "STARTED"
     },
@@ -1411,7 +1391,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 3,
       "state": "STARTED"
     },
@@ -1420,7 +1399,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": null,
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 0,
       "state": "STARTED"
     },
@@ -1429,7 +1407,6 @@
       "node": "jUT5KdxfRbORSCWkb5zjmA",
       "primary": true,
       "relocating_node": "bwQWH-7IQY-mFPpfoaoFXQ",
-      "resolver": "jUT5KdxfRbORSCWkb5zjmA",
       "shard": 0,
       "state": "RELOCATING"
     }

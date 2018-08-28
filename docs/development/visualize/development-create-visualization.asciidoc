@@ -81,7 +81,7 @@ Each of the factories have some of the custom parameters, which will be describe
 [[development-base-visualization-type]]
 ==== Base Visualization Type
 The base visualization type does not make any assumptions about the rendering technology you are going to use and
-works with pure Javascript. It is the visualization type we recommend to use.
+works with pure JavaScript. It is the visualization type we recommend to use.
 
 You need to provide a type with a constructor function, a render method which will be called every time 
 options or data change, and a destroy method which will be called to cleanup.
@@ -387,7 +387,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
 const myResponseHandler = (vis, response) => {
    // transform the response (based on vis object?)
-   const resposne = ... transform data ...;
+   const response = ... transform data ...;
    return response;
 };
 

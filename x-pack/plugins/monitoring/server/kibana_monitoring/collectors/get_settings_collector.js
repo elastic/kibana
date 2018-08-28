@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../server/lib/constants';
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 
@@ -13,14 +12,14 @@ import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
  * Check if Cluster Alert email notifications is enabled in config
  * If so, use uiSettings API to fetch the X-Pack default admin email
  */
-export async function getDefaultAdminEmail(config, callWithInternalUser) {
+export async function getDefaultAdminEmail(config, callCluster) {
   if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
   const index = config.get('kibana.index');
   const version = config.get('pkg.version');
-  const uiSettingsDoc = await callWithInternalUser('get', {
+  const uiSettingsDoc = await callCluster('get', {
     index,
     type: 'doc',
     id: `config:${version}`,
@@ -35,11 +34,11 @@ let shouldUseNull = true;
 
 export async function checkForEmailValue(
   config,
-  callWithInternalUser,
+  callCluster,
   _shouldUseNull = shouldUseNull,
   _getDefaultAdminEmail = getDefaultAdminEmail
 ) {
-  const defaultAdminEmail = await _getDefaultAdminEmail(config, callWithInternalUser);
+  const defaultAdminEmail = await _getDefaultAdminEmail(config, callCluster);
 
   // Allow null so clearing the advanced setting will be reflected in the data
   const isAcceptableNull = defaultAdminEmail === null && _shouldUseNull;
@@ -55,39 +54,35 @@ export async function checkForEmailValue(
 }
 
 export function getSettingsCollector(server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const config = server.config();
+  const { collectorSet } = server.usage;
 
-  let _log;
-  const setLogger = logger => {
-    _log = logger;
-  };
+  return collectorSet.makeStatsCollector({
+    type: KIBANA_SETTINGS_TYPE,
+    async fetch(callCluster) {
+      let kibanaSettingsData;
+      const defaultAdminEmail = await checkForEmailValue(config, callCluster);
 
-  const fetch = async () => {
-    let kibanaSettingsData;
-    const defaultAdminEmail = await checkForEmailValue(config, callWithInternalUser);
+      // skip everything if defaultAdminEmail === undefined
+      if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
+        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
+        this.log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
+      } else {
+        this.log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
+      }
 
-    // skip everything if defaultAdminEmail === undefined
-    if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-      kibanaSettingsData = {
+      // remember the current email so that we can mark it as successful if the bulk does not error out
+      shouldUseNull = !!defaultAdminEmail;
+
+      // returns undefined if there was no result
+      return kibanaSettingsData;
+    },
+    getEmailValueStructure(email) {
+      return {
         xpack: {
-          default_admin_email: defaultAdminEmail
+          default_admin_email: email
         }
       };
-      _log.debug(`[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`);
-    } else {
-      _log.debug(`not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`);
     }
-
-    // remember the current email so that we can mark it as successful if the bulk does not error out
-    shouldUseNull = !!defaultAdminEmail;
-
-    return kibanaSettingsData;
-  };
-
-  return {
-    type: KIBANA_SETTINGS_TYPE,
-    setLogger,
-    fetch
-  };
+  });
 }

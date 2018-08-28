@@ -17,10 +17,6 @@ const events = [
       }
     },
     responseTimes: { '5601': { avg: 5.213592233009709, max: 36 } },
-    sockets: {
-      http: { total: 1, '169.254.169.254:80:': 1 },
-      https: { total: 0 }
-    },
     osload: [1.90380859375, 1.84033203125, 1.82666015625],
     osmem: { total: 17179869184, free: 613638144 },
     osup: 4615,
@@ -106,7 +102,6 @@ describe('Event Roller', () => {
       requests: {
         disconnects: 0,
         total: 138, // 103 + 35
-        status_codes: { '200': 20, '304': 118 }
       },
       response_times: {
         average: 5.213592233009709, // max of 5.213592233009709, 4.6

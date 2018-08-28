@@ -8,5 +8,6 @@ export default function ({ loadTestFile }) {
   describe('Beats', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./detail'));
   });
 }

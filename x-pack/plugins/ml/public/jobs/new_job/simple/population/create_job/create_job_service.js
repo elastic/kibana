@@ -8,23 +8,18 @@
 
 import _ from 'lodash';
 
-import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { EVENT_RATE_COUNT_FIELD, WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { ml } from 'plugins/ml/services/ml_api_service';
+import { timefilter } from 'ui/timefilter';
 
+export function PopulationJobServiceProvider(Private) {
 
-export function PopulationJobServiceProvider(
-  $q,
-  es,
-  timefilter,
-  Private) {
-
-  const mlJobService = Private(JobServiceProvider);
   const TimeBuckets = Private(IntervalHelperProvider);
-  const fieldFormatService = Private(FieldFormatServiceProvider);
   const OVER_FIELD_EXAMPLES_COUNT = 40;
 
   class PopulationJobService {
@@ -61,7 +56,7 @@ export function PopulationJobServiceProvider(
     }
 
     getLineChartResults(formConfig, thisLoadTimestamp) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         const fieldIds = formConfig.fields.map(f => f.id);
 
@@ -84,7 +79,7 @@ export function PopulationJobServiceProvider(
 
         const searchJson = getSearchJsonFromConfig(formConfig, timefilter, TimeBuckets);
 
-        es.search(searchJson)
+        ml.esSearch(searchJson)
           .then((resp) => {
             // if this is the last chart load, wipe all previous chart data
             if (thisLoadTimestamp === this.chartData.lastLoadTimestamp) {
@@ -99,7 +94,7 @@ export function PopulationJobServiceProvider(
                 if (fieldId !== EVENT_RATE_COUNT_FIELD) {
                   const field = formConfig.fields[i];
                   const aggType = field.agg.type.dslName;
-                  this.chartData.detectors[i].fieldFormat = fieldFormatService.getFieldFormatFromIndexPattern(
+                  this.chartData.detectors[i].fieldFormat = mlFieldFormatService.getFieldFormatFromIndexPattern(
                     formConfig.indexPattern,
                     fieldId,
                     aggType);
@@ -273,11 +268,15 @@ export function PopulationJobServiceProvider(
         job.results_index_name = job.job_id;
       }
 
+      job.custom_settings = {
+        created_by: WIZARD_TYPE.POPULATION
+      };
+
       return job;
     }
 
     createJob(formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         this.job = this.getJobFromConfig(formConfig);
         const job = createJobForSaving(this.job);
@@ -364,7 +363,7 @@ export function PopulationJobServiceProvider(
       const aggs = {};
       formConfig.fields.forEach((field, i) => {
         if (field.id === EVENT_RATE_COUNT_FIELD) {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // the event rate chart is draw using doc_values, so no need to specify a field.
             // however. if the event rate field is split, add a filter to just match the
             // fields which match the first split value (the front chart)
@@ -377,7 +376,7 @@ export function PopulationJobServiceProvider(
             };
           }
         } else {
-          if (field.splitField !== undefined) {
+          if (field.splitField !== undefined && field.firstSplitFieldName !== undefined) {
             // if the field is split, add a filter to the aggregation to just select the
             // fields which match the first split value (the front chart)
             aggs[i] = {

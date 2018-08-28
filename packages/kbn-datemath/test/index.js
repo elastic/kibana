@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import dateMath from '../src/index';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -35,12 +54,9 @@ describe('dateMath', function() {
       expect(dateMath.parse('now&1d')).to.be(undefined);
     });
 
-    it(
-      'should return undefined if I pass a unit besides' + spans.toString(),
-      function() {
-        expect(dateMath.parse('now+5f')).to.be(undefined);
-      }
-    );
+    it('should return undefined if I pass a unit besides' + spans.toString(), function() {
+      expect(dateMath.parse('now+5f')).to.be(undefined);
+    });
 
     it('should return undefined if rounding unit is not 1', function() {
       expect(dateMath.parse('now/2y')).to.be(undefined);
@@ -55,21 +71,16 @@ describe('dateMath', function() {
 
     describe('forceNow', function() {
       it('should throw an Error if passed a string', function() {
-        const fn = () =>
-          dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
+        const fn = () => dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
         expect(fn).to.throwError();
       });
 
       it('should throw an Error if passed a moment', function() {
-        expect(() =>
-          dateMath.parse('now', { forceNow: moment() })
-        ).to.throwError();
+        expect(() => dateMath.parse('now', { forceNow: moment() })).to.throwError();
       });
 
       it('should throw an Error if passed an invalid date', function() {
-        expect(() =>
-          dateMath.parse('now', { forceNow: new Date('foobar') })
-        ).to.throwError();
+        expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).to.throwError();
       });
     });
   });
@@ -109,9 +120,7 @@ describe('dateMath', function() {
     });
 
     it('should use the forceNow parameter when parsing now', function() {
-      expect(
-        dateMath.parse('now', { forceNow: anchoredDate }).valueOf()
-      ).to.eql(unix);
+      expect(dateMath.parse('now', { forceNow: anchoredDate }).valueOf()).to.eql(unix);
     });
   });
 
@@ -145,9 +154,7 @@ describe('dateMath', function() {
         });
 
         it('should return ' + len + span + ' before forceNow', function() {
-          const parsed = dateMath
-            .parse(nowEx, { forceNow: anchoredDate })
-            .valueOf();
+          const parsed = dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf();
           expect(parsed).to.eql(anchored.subtract(len, span).valueOf());
         });
       });
@@ -174,9 +181,7 @@ describe('dateMath', function() {
         const thenEx = `${anchor}||+${len}${span}`;
 
         it('should return ' + len + span + ' from now', function() {
-          expect(dateMath.parse(nowEx).format(format)).to.eql(
-            now.add(len, span).format(format)
-          );
+          expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
         });
 
         it('should return ' + len + span + ' after ' + anchor, function() {
@@ -186,9 +191,9 @@ describe('dateMath', function() {
         });
 
         it('should return ' + len + span + ' after forceNow', function() {
-          expect(
-            dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()
-          ).to.eql(anchored.add(len, span).valueOf());
+          expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(
+            anchored.add(len, span).valueOf()
+          );
         });
       });
     });
@@ -216,22 +221,20 @@ describe('dateMath', function() {
       });
 
       it(`should round now to the beginning of forceNow's ${span}`, function() {
-        expect(
-          dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()
-        ).to.eql(anchored.startOf(span).valueOf());
+        expect(dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()).to.eql(
+          anchored.startOf(span).valueOf()
+        );
       });
 
       it(`should round now to the end of the ${span}`, function() {
-        expect(
-          dateMath.parse('now/' + span, { roundUp: true }).format(format)
-        ).to.eql(now.endOf(span).format(format));
+        expect(dateMath.parse('now/' + span, { roundUp: true }).format(format)).to.eql(
+          now.endOf(span).format(format)
+        );
       });
 
       it(`should round now to the end of forceNow's ${span}`, function() {
         expect(
-          dateMath
-            .parse('now/' + span, { roundUp: true, forceNow: anchoredDate })
-            .valueOf()
+          dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate }).valueOf()
         ).to.eql(anchored.endOf(span).valueOf());
       });
     });
@@ -317,9 +320,7 @@ describe('dateMath', function() {
     });
 
     it('should round relative to forceNow', function() {
-      const val = dateMath
-        .parse('now-0s/s', { forceNow: anchoredDate })
-        .valueOf();
+      const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate }).valueOf();
       expect(val).to.eql(anchored.startOf('s').valueOf());
     });
 
@@ -355,8 +356,8 @@ describe('dateMath', function() {
       dateMath.parse('now', { momentInstance: m1 });
       expect(m1Spy.called).to.be(true);
       expect(m2Spy.called).to.be(false);
-      m1Spy.reset();
-      m2Spy.reset();
+      m1Spy.resetHistory();
+      m2Spy.resetHistory();
       dateMath.parse('now', { momentInstance: m2 });
       expect(m1Spy.called).to.be(false);
       expect(m2Spy.called).to.be(true);
@@ -371,8 +372,8 @@ describe('dateMath', function() {
       dateMath.parse('now', { momentInstance: m });
       expect(momentSpy.called).to.be(false);
       expect(cloneSpy.called).to.be(true);
-      momentSpy.reset();
-      cloneSpy.reset();
+      momentSpy.resetHistory();
+      cloneSpy.resetHistory();
       dateMath.parse('now');
       expect(momentSpy.called).to.be(true);
       expect(cloneSpy.called).to.be(false);
@@ -383,29 +384,11 @@ describe('dateMath', function() {
 
   describe('units', function() {
     it('should have units descending for unitsDesc', function() {
-      expect(dateMath.unitsDesc).to.eql([
-        'y',
-        'M',
-        'w',
-        'd',
-        'h',
-        'm',
-        's',
-        'ms',
-      ]);
+      expect(dateMath.unitsDesc).to.eql(['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms']);
     });
 
     it('should have units ascending for unitsAsc', function() {
-      expect(dateMath.unitsAsc).to.eql([
-        'ms',
-        's',
-        'm',
-        'h',
-        'd',
-        'w',
-        'M',
-        'y',
-      ]);
+      expect(dateMath.unitsAsc).to.eql(['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']);
     });
   });
 });

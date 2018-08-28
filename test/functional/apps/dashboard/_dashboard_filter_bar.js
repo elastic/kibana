@@ -1,42 +1,124 @@
-import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filter bar', function describeIndexTests() {
-    before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
-    });
-
-    after(async function () {
-      // avoids any 'Object with id x not found' errors when switching tests.
-      await PageObjects.header.clickVisualize();
-      await PageObjects.visualize.gotoLandingPage();
-      await PageObjects.header.clickDashboard();
+  describe('dashboard filter bar', async () => {
+    before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('Filter bar field list uses default index pattern on an empty dashboard', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
-      await testSubjects.click('addFilter');
-      await dashboardExpect.fieldSuggestionIndexPatterns(['logstash-*']);
+    describe('Add a filter bar', async function () {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+
+      it('should show on an empty dashboard', async function () {
+        await PageObjects.dashboard.clickNewDashboard();
+        const hasAddFilter = await testSubjects.exists('addFilter');
+        expect(hasAddFilter).to.be(true);
+      });
+
+      it ('should continue to show for visualizations with no search source', async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
+        const hasAddFilter = await testSubjects.exists('addFilter');
+        expect(hasAddFilter).to.be(true);
+      });
     });
 
-    // TODO: Use a data set that has more than one index pattern to better test this.
-    it('Filter bar field list shows index pattern of vis when one is added', async () => {
-      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-      await testSubjects.click('filterfieldSuggestionList');
-      await dashboardExpect.fieldSuggestionIndexPatterns(['logstash-*']);
+    describe('filter editor field list', async () => {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+      });
+
+      it('uses default index pattern on an empty dashboard', async () => {
+        await testSubjects.click('addFilter');
+        await dashboardExpect.fieldSuggestionIndexPatterns(['logstash-*']);
+      });
+
+      it('shows index pattern of vis when one is added', async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await testSubjects.click('addFilter');
+        await dashboardExpect.fieldSuggestionIndexPatterns(['animals-*']);
+      });
+
+      it('works when a vis with no index pattern is added', async () => {
+        await dashboardAddPanel.addVisualization('Rendering-Test:-markdown');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await testSubjects.click('addFilter');
+        await dashboardExpect.fieldSuggestionIndexPatterns(['animals-*']);
+      });
     });
 
-    it('Filter bar field list works when a vis with no index pattern is added', async () => {
-      await dashboardVisualizations.createAndAddMarkdown({ name: 'markdown', markdown: 'hi ima markdown' });
-      await testSubjects.click('addFilter');
-      await dashboardExpect.fieldSuggestionIndexPatterns(['logstash-*']);
+    describe('filter pills', async function () {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+      });
+
+      it('are not selected by default', async function () {
+        const filters = await PageObjects.dashboard.getFilters(1000);
+        expect(filters.length).to.equal(0);
+      });
+
+      it('are added when a pie chart slice is clicked', async function () {
+        await dashboardAddPanel.addVisualization('Rendering Test: pie');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.dashboard.filterOnPieSlice('4,886');
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
+
+      it('are preserved after saving a dashboard', async () => {
+        await PageObjects.dashboard.saveDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
+
+      it('are preserved after opening a dashboard saved with filters', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
     });
   });
 }

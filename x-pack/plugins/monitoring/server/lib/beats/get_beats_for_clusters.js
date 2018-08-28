@@ -5,7 +5,8 @@
  */
 
 import { checkParam } from '../error_missing_required';
-import { createBeatsQuery } from './create_beats_query.js';
+import { BeatsClusterMetric } from '../metrics';
+import { createBeatsQuery } from './create_beats_query';
 import {
   beatsAggFilterPath,
   beatsUuidsAgg,
@@ -50,7 +51,8 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
         query: createBeatsQuery({
           start,
           end,
-          uuid: clusterUuid,
+          clusterUuid,
+          metric: BeatsClusterMetric.getMetricFields() // override default of BeatMetric.getMetricFields
         }),
         aggs: beatsUuidsAgg(maxBucketSize)
       }
@@ -58,6 +60,6 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
     const response = await callWithRequest(req, 'search', params);
-    return handleResponse(clusterUuid, response, start, end);
+    return handleResponse(clusterUuid, response);
   }));
 }

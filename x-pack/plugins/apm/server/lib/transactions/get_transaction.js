@@ -8,10 +8,10 @@ import { TRANSACTION_ID, PROCESSOR_EVENT } from '../../../common/constants';
 import { get } from 'lodash';
 
 async function getTransaction({ transactionId, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 1,
       query: {
@@ -33,6 +33,11 @@ async function getTransaction({ transactionId, setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
+
   const resp = await client('search', params);
   return get(resp, 'hits.hits[0]._source', {});
 }

@@ -1,1 +1,0 @@
-export { urlEditor } from './url';

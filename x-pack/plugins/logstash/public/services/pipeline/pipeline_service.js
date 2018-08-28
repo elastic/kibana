@@ -9,8 +9,9 @@ import { ROUTES } from '../../../common/constants';
 import { Pipeline } from 'plugins/logstash/models/pipeline';
 
 export class PipelineService {
-  constructor($http) {
+  constructor($http, pipelinesService) {
     this.$http = $http;
+    this.pipelinesService = pipelinesService;
     this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
   }
 
@@ -30,6 +31,7 @@ export class PipelineService {
 
   deletePipeline(id) {
     return this.$http.delete(`${this.basePath}/pipeline/${id}`)
+      .then(() => this.pipelinesService.addToRecentlyDeleted(id))
       .catch(e => {
         throw e.data.message;
       });

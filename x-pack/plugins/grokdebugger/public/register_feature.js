@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'grokdebugger',
     title: 'Grok Debugger',
     description: 'Simulate and debug grok patterns for data transformation on ingestion.',
-    icon: '/plugins/grokdebugger/assets/app_grok.svg',
+    icon: 'grokApp',
     path: '/app/kibana#/dev_tools/grokdebugger',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN

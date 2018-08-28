@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * @name SavedVis
  *
@@ -11,13 +30,14 @@ import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
+import { SavedObjectProvider } from 'ui/courier';
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
+  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private) {
     const Vis = Private(VisProvider);
-
-    createLegacyClass(SavedVis).inherits(courier.SavedObject);
+    const SavedObject = Private(SavedObjectProvider);
+    createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {
       const self = this;
       opts = opts || {};
@@ -47,7 +67,7 @@ uiModules
         afterESResp: this._afterEsResp
       });
 
-      this.showInRecenltyAccessed = true;
+      this.showInRecentlyAccessed = true;
     }
 
     SavedVis.type = 'visualization';
@@ -75,20 +95,9 @@ uiModules
 
       return self._getLinkedSavedSearch()
         .then(function () {
-          self.searchSource.size(0);
+          self.searchSource.setField('size', 0);
 
           return self.vis ? self._updateVis() : self._createVis();
-        })
-        .then(function () {
-          self.searchSource.onRequestStart((searchSource, searchRequest) => {
-            return self.vis.onSearchRequestStart(searchSource, searchRequest);
-          });
-
-          self.searchSource.aggs(function () {
-            return self.vis.aggs.toDsl();
-          });
-
-          return self;
         });
     };
 
@@ -102,7 +111,7 @@ uiModules
       }
 
       if (self.savedSearch) {
-        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
+        self.searchSource.setParent(self.savedSearch.searchSource.getParent());
         self.savedSearch.destroy();
         self.savedSearch = null;
       }
@@ -111,7 +120,7 @@ uiModules
         return savedSearches.get(self.savedSearchId)
           .then(function (savedSearch) {
             self.savedSearch = savedSearch;
-            self.searchSource.inherits(self.savedSearch.searchSource);
+            self.searchSource.setParent(self.savedSearch.searchSource);
           });
       }
     });
@@ -128,7 +137,7 @@ uiModules
         self.visState.title = self.title;
       }
       self.vis = new Vis(
-        self.searchSource.get('index'),
+        self.searchSource.getField('index'),
         self.visState
       );
 
@@ -138,7 +147,7 @@ uiModules
     SavedVis.prototype._updateVis = function () {
       const self = this;
 
-      self.vis.indexPattern = self.searchSource.get('index');
+      self.vis.indexPattern = self.searchSource.getField('index');
       self.visState.title = self.title;
       self.vis.setState(self.visState);
     };

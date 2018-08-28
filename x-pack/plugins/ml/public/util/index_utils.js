@@ -6,34 +6,61 @@
 
 
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-export function getIndexPatterns(Private) {
+let indexPatternCache = [];
+let fullIndexPatterns = [];
+let currentIndexPattern = null;
+let currentSavedSearch = null;
+
+export function loadIndexPatterns(Private, indexPatterns) {
+  fullIndexPatterns = indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title'],
     perPage: 10000
-  }).then(response => response.savedObjects);
+  }).then((response) => {
+    indexPatternCache = response.savedObjects;
+    return indexPatternCache;
+  });
 }
 
-export function getIndexPattern(courier, indexPatternId) {
-  return courier.indexPatterns.get(indexPatternId);
+export function getIndexPatterns() {
+  return indexPatternCache;
 }
 
-export function getIndexPatternWithRoute(courier, $route) {
-  return getIndexPattern(courier, $route.current.params.index);
+export function getIndexPatternIdFromName(name) {
+  for (let j = 0; j < indexPatternCache.length; j++) {
+    if (indexPatternCache[j].get('title') === name) {
+      return indexPatternCache[j].id;
+    }
+  }
+  return name;
 }
 
-export function getIndexPatternProvider(courier) {
-  return function (indexPatternId) {
-    return getIndexPattern(courier, indexPatternId);
-  };
+export function loadCurrentIndexPattern(indexPatterns, $route) {
+  fullIndexPatterns = indexPatterns;
+  currentIndexPattern = fullIndexPatterns.get($route.current.params.index);
+  return currentIndexPattern;
 }
 
-export function getSavedSearchWithRoute(courier, $route, savedSearches) {
-  return savedSearches.get($route.current.params.savedSearchId);
+export function getIndexPatternById(id) {
+  return fullIndexPatterns.get(id);
+}
+
+export function loadCurrentSavedSearch($route, savedSearches) {
+  currentSavedSearch = savedSearches.get($route.current.params.savedSearchId);
+  return currentSavedSearch;
+}
+
+export function getCurrentIndexPattern() {
+  return currentIndexPattern;
+}
+
+export function getCurrentSavedSearch() {
+  return currentSavedSearch;
 }
 
 // returns true if the index passed in is time based
@@ -42,9 +69,10 @@ export function getSavedSearchWithRoute(courier, $route, savedSearches) {
 export function timeBasedIndexCheck(indexPattern, showNotification = false) {
   if (indexPattern.isTimeBased() === false) {
     if (showNotification) {
-      const message = `The index pattern ${indexPattern.title} is not time series based. \
-        Anomaly detection can only be run over indices which are time based.`;
-      notify.warning(message, { lifetime: 0 });
+      toastNotifications.addWarning({
+        title: `The index pattern ${indexPattern.title} is not based on a time series`,
+        text: 'Anomaly detection only runs over time-based indices',
+      });
     }
     return false;
   } else {

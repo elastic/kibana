@@ -1,9 +1,29 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { AggConfig } from 'ui/vis/agg_config';
 import './styles/_tilemap.less';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
+import { toastNotifications } from 'ui/notify';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -23,22 +43,43 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+      const updateGeohashAgg = () => {
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) return;
+        geohashAgg.params.mapBounds = this._kibanaMap.getBounds();
+        geohashAgg.params.mapZoom = this._kibanaMap.getZoomLevel();
+        geohashAgg.params.mapCenter = this._kibanaMap.getCenter();
+      };
+
+      updateGeohashAgg();
+
+      const uiState = this.vis.getUiState();
+      uiState.on('change', (prop) => {
+        if (prop === 'mapZoom' || prop === 'mapCenter') {
+          updateGeohashAgg();
+        }
+      });
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
+        const geohashAgg = this._getGeoHashAgg();
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
-        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
         const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
-        if (geohashAgg && isAutoPrecision) {
+        if (isAutoPrecision) {
           geohashAgg.params.precision = previousPrecision;
         }
       });
       this._kibanaMap.on('zoomend', () => {
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
+        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
         if (!isAutoPrecision) {
           return;
         }
@@ -52,12 +93,12 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this._kibanaMap.addDrawControl();
       this._kibanaMap.on('drawCreated:rectangle', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_bounding_box', event.bounds);
+        const geohashAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
-        const geoAgg = this._getGeoHashAgg();
-        this.addSpatialFilter(geoAgg, 'geo_polygon', { points: event.points });
+        const geohashAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });
     }
 
@@ -145,7 +186,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         return;
       }
 
-      const indexPatternName = agg.vis.indexPattern.id;
+      const indexPatternName = agg._indexPattern.id;
       const field = agg.fieldName();
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
@@ -159,9 +200,9 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
-        searchSource.size(0);
-        searchSource.aggs(function () {
+        const searchSource = this.vis.searchSource.createChild();
+        searchSource.setField('size', 0);
+        searchSource.setField('aggs', function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
             type: 'geo_bounds',
             enabled: true,
@@ -174,7 +215,16 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
             '1': geoBoundsAgg.toDsl()
           };
         });
-        const esResp = await searchSource.fetch();
+        let esResp;
+        try {
+          esResp = await searchSource.fetch();
+        } catch(error) {
+          toastNotifications.addDanger({
+            title: `Unable to get bounds`,
+            text: `${error.message}`,
+          });
+          return;
+        }
         return _.get(esResp, 'aggregations.1.bounds');
       }
     }

@@ -6,3 +6,4 @@
 
 export { ROUTES } from './routes';
 export { PLUGIN } from './plugin';
+export { EDITOR } from './editor';

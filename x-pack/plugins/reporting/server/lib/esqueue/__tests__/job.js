@@ -38,7 +38,7 @@ describe('Job Class', function () {
   let options;
 
   beforeEach(function () {
-    createIndexMock.reset();
+    createIndexMock.resetHistory();
     createIndexMock.returns(Promise.resolve('mock'));
     index = 'test';
 
@@ -163,7 +163,7 @@ describe('Job Class', function () {
       const errMsg = 'test document index failure';
 
       client.index.restore();
-      sinon.stub(client, 'index', () => Promise.reject(new Error(errMsg)));
+      sinon.stub(client, 'index').callsFake(() => Promise.reject(new Error(errMsg)));
       const job = new Job(mockQueue, index, type, payload);
 
       job.once(constants.EVENT_JOB_CREATE_ERROR, (err) => {

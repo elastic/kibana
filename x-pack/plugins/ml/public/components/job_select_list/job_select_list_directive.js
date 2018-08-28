@@ -18,20 +18,20 @@ import d3 from 'd3';
 
 import template from './job_select_list.html';
 import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
+import { timefilter } from 'ui/timefilter';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobSelectList', function (Private, timefilter) {
+module.directive('mlJobSelectList', function (Private) {
   return {
     restrict: 'AE',
     replace: true,
     transclude: true,
     template,
     controller: function ($scope) {
-      const mlJobService = Private(JobServiceProvider);
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
@@ -255,8 +255,10 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
           if (times.length) {
             const min = _.min(times);
             const max = _.max(times);
-            timefilter.time.from = moment(min).toISOString();
-            timefilter.time.to = moment(max).toISOString();
+            timefilter.setTime({
+              from: moment(min).toISOString(),
+              to: moment(max).toISOString()
+            });
           }
         }
         mlJobSelectService.jobSelectListState.applyTimeRange = $scope.applyTimeRange;
@@ -361,8 +363,10 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
       }
 
       $scope.useTimeRange = function (job) {
-        timefilter.time.from = job.timeRange.fromMoment.toISOString();
-        timefilter.time.to = job.timeRange.toMoment.toISOString();
+        timefilter.setTime({
+          from: job.timeRange.fromMoment.toISOString(),
+          to: job.timeRange.toMoment.toISOString()
+        });
       };
     },
     link: function (scope, element, attrs) {

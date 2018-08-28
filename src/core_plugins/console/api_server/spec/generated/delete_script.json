@@ -1,5 +1,5 @@
 {
-  "_scripts/{id}": {
+  "delete_script": {
     "url_params": {
       "timeout": "",
       "master_timeout": ""
@@ -9,6 +9,7 @@
     ],
     "patterns": [
       "_scripts/{id}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
   }
 }

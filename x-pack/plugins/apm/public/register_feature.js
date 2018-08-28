@@ -18,7 +18,7 @@ if (chrome.getInjected('apmUiEnabled')) {
       description:
         'Automatically collect in-depth performance metrics and ' +
         'errors from inside your applications.',
-      icon: '/plugins/kibana/assets/app_apm.svg',
+      icon: 'apmApp',
       path: '/app/apm',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA

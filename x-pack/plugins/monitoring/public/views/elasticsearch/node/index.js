@@ -12,6 +12,7 @@ import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -23,7 +24,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     pageData: getPageData
   },
   controller($injector, $scope) {
-    const timefilter = $injector.get('timefilter');
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -55,7 +55,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
       }
     });
 
-    $executor.start();
+    $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
   }

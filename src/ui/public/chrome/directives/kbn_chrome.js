@@ -1,19 +1,34 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import { remove } from 'lodash';
 
 import './kbn_chrome.less';
 import { uiModules } from '../../modules';
-import { isSystemApiRequest } from '../../system_api';
 import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from '../../state_management/state_hashing';
 import {
   notify,
-  GlobalToastList,
-  toastNotifications,
   GlobalBannerList,
   banners,
 } from '../../notify';
@@ -68,13 +83,6 @@ export function kbnChromeProvider(chrome, internals) {
           $rootScope.$on('$routeUpdate', onRouteChange);
           updateSubUrls(); // initialize sub urls
 
-          const allPendingHttpRequests = () => $http.pendingRequests;
-          const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);
-          $scope.$watchCollection(allPendingHttpRequests, removeSystemApiRequests);
-
-          // and some local values
-          chrome.httpActive = $http.pendingRequests;
-
           // Notifications
           $scope.notifList = notify._notifs;
 
@@ -87,17 +95,6 @@ export function kbnChromeProvider(chrome, internals) {
               subscribe={banners.onChange}
             />,
             document.getElementById('globalBannerList')
-          );
-
-          // Toast Notifications
-          ReactDOM.render(
-            <GlobalToastList
-              toasts={toastNotifications.list}
-              dismissToast={toastNotifications.remove}
-              toastLifeTimeMs={6000}
-              subscribe={toastNotifications.onChange}
-            />,
-            document.getElementById('globalToastList')
           );
 
           return chrome;

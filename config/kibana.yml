@@ -86,6 +86,9 @@
 # Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
 #elasticsearch.startupTimeout: 5000
 
+# Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
+#elasticsearch.logQueries: false
+
 # Specifies the path where Kibana creates the process ID file.
 #pid.file: /var/run/kibana.pid
 
@@ -106,6 +109,5 @@
 # metrics. Minimum is 100ms. Defaults to 5000.
 #ops.interval: 5000
 
-# The default locale. This locale can be used in certain circumstances to substitute any missing
-# translations.
-#i18n.defaultLocale: "en"
+# Specifies locale to be used for all localizable strings, dates and number formats.
+#i18n.locale: "en"

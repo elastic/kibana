@@ -5,7 +5,7 @@
  */
 
 import { createQuery } from '../create_query';
-import { ElasticsearchMetric } from '../metrics';
+import { LogstashMetric } from '../metrics';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 
@@ -29,7 +29,7 @@ function fetchPipelineVersions(...args) {
   ];
   const query = createQuery({
     type: 'logstash_stats',
-    metric: ElasticsearchMetric.getMetricFields(),
+    metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters
   });
