@@ -37,7 +37,7 @@ describe('Console Proxy Route', () => {
     sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
 
     setup = () => {
-      const server = new Server({ port: 0 });
+      const server = new Server();
       teardowns.push(() => server.stop());
       return { server };
     };

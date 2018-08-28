@@ -56,7 +56,7 @@ test('accepts payload with a size larger than default but smaller than route con
   expect(resp.payload).toBe('+++++');
 });
 
-test('fails with 400 if payload size is larger than default and route config allows', async () => {
+test('fails with 413 if payload size is larger than default and route config allows', async () => {
   await makeServer({ maxPayloadBytesDefault: 100, maxPayloadBytesRoute: 200 });
 
   const resp = await makeRequest({

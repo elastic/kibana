@@ -88,7 +88,7 @@ export class LegacyLoggingServer {
   public ext(eventName: ServerExtType, callback: () => void) {
     // method is called by plugin that's being registered.
     if (eventName === 'onPostStop') {
-      this.onPostStopCallbacks.push(callback);
+      this.onPostStopCallback = callback;
     }
     // We don't care about any others the plugin resgisters
   }

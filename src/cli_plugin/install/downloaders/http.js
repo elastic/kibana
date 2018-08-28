@@ -59,7 +59,11 @@ async function sendRequest({ sourceUrl, timeout }, logger) {
 
     return { req, resp };
   } catch (err) {
-    throw new Error('ENOTFOUND');
+    if (err.code === 'ECONNREFUSED') {
+      err = new Error('ENOTFOUND');
+    }
+
+    throw err;
   }
 }
 

@@ -35,7 +35,7 @@ describe('Console Proxy Route', () => {
     request = async (method, path, response) => {
       sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub(response));
 
-      const server = new Server({ port: 0 });
+      const server = new Server();
       server.route(createProxyRoute({
         baseUrl: 'http://localhost:9200'
       }));

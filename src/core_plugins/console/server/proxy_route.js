@@ -76,14 +76,14 @@ export const createProxyRoute = ({
       function filterPath(req) {
         const { path } = req.query;
 
-        if (!pathFilters.some(re => re.test(path))) {
-          const err = Boom.forbidden();
-          err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
-          err.output.headers['content-type'] = 'text/plain';
-          throw err;
+        if (pathFilters.some(re => re.test(path))) {
+          return null;
         }
 
-        return null;
+        const err = Boom.forbidden();
+        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
+        err.output.headers['content-type'] = 'text/plain';
+        throw err;
       },
     ],
 

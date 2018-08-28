@@ -1,3 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`fails with 400 if payload size is larger than default and route config allows 1`] = `"{\\"statusCode\\":413,\\"error\\":\\"Request Entity Too Large\\",\\"message\\":\\"Payload content length greater than maximum allowed: 200\\"}"`;
+exports[`fails with 413 if payload size is larger than default and route config allows 1`] = `"{\\"statusCode\\":413,\\"error\\":\\"Request Entity Too Large\\",\\"message\\":\\"Payload content length greater than maximum allowed: 200\\"}"`;

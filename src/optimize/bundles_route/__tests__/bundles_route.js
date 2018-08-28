@@ -46,7 +46,7 @@ describe('optimizer/bundle route', () => {
       basePublicPath = ''
     } = options;
 
-    const server = new Hapi.Server({ port: 0 });
+    const server = new Hapi.Server();
     server.register([Inert]);
 
     server.route(createBundlesRoute({

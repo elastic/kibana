@@ -87,7 +87,7 @@ describe('plugins/elasticsearch', function () {
     });
 
     it('closes all clusters', async () => {
-      const server = new Hapi.Server({ port: 0 });
+      const server = new Hapi.Server();
       const clusters = createClusters(server);
       const cluster = clusters.create('name', { config: true });
       expect(cluster).to.have.property('stub', true);
