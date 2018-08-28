@@ -17,15 +17,7 @@ exports[`AdvancedSettings should render normally 1`] = `
       component="div"
       grow={true}
     >
-      <EuiText
-        grow={true}
-      >
-        <h1
-          data-test-subj="managementSettingsTitle"
-        >
-          Settings
-        </h1>
-      </EuiText>
+      <advanced_settings_page_title />
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
@@ -331,15 +323,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       component="div"
       grow={true}
     >
-      <EuiText
-        grow={true}
-      >
-        <h1
-          data-test-subj="managementSettingsTitle"
-        >
-          Settings
-        </h1>
-      </EuiText>
+      <advanced_settings_page_title />
     </EuiFlexItem>
     <EuiFlexItem
       component="div"

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,18 +25,30 @@ export function rabbitmqMetricsSpecProvider() {
   const moduleName = 'rabbitmq';
   return {
     id: 'rabbitmqMetrics',
-    name: 'RabbitMQ metrics',
+    name: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.nameTitle', {
+      defaultMessage: 'RabbitMQ metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the RabbitMQ server.',
-    longDescription: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.longDescription', {
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
+      },
+    }),
     //euiIconType: 'logoRabbitMQ',
     isBeta: true,
     artifacts: {
       dashboards: [
         {
           id: 'AV4YobKIge1VCbKU_qVo',
-          linkLabel: 'RabbitMQ metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'RabbitMQ metrics dashboard',
+          }),
           isOverview: true
         }
       ],

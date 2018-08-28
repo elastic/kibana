@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOGSTASH_INSTRUCTIONS = {
+export const createLogstashInstructions = () => ({
   INSTALL: {
     OSX: [
       {
@@ -41,9 +41,9 @@ export const LOGSTASH_INSTRUCTIONS = {
         }),
         commands: [
           'curl -L -O https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.tar.gz',
-          'tar xzvf logstash-{config.kibana.version}.tar.gz'
-        ]
-      }
+          'tar xzvf logstash-{config.kibana.version}.tar.gz',
+        ],
+      },
     ],
     WINDOWS: [
       {
@@ -60,10 +60,10 @@ export const LOGSTASH_INSTRUCTIONS = {
           defaultMessage: 'Download and install Logstash',
         }),
         textPre: i18n.translate('kbn.common.tutorials.logstashInstructions.install.logstash.windowsTextPre', {
-          // eslint-disable-next-line
+          // eslint-disable-next-line no-multi-str
           defaultMessage: 'First time using Logstash?  See the [Getting Started Guide]({logstashLink}).\n\
-            1. [Download]({elasticLink}) the Logstash Windows zip file.\n\
-            2. Extract the contents of the zip file.',
+ 1. [Download]({elasticLink}) the Logstash Windows zip file.\n\
+ 2. Extract the contents of the zip file.',
           values: {
             logstashLink: '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
             elasticLink: 'https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.zip'
@@ -71,5 +71,5 @@ export const LOGSTASH_INSTRUCTIONS = {
         }),
       }
     ],
-  }
-};
+  },
+});

@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
-import { TRYCLOUD_OPTION1, TRYCLOUD_OPTION2 } from './onprem_cloud_instructions';
+import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 
-export const METRICBEAT_INSTRUCTIONS = {
+export const createMetricbeatInstructions = () => ({
   INSTALL: {
     OSX: {
       title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.osxTitle', {
@@ -35,7 +35,7 @@ export const METRICBEAT_INSTRUCTIONS = {
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
-      ]
+      ],
     },
     DEB: {
       title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.debTitle', {
@@ -47,7 +47,7 @@ export const METRICBEAT_INSTRUCTIONS = {
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb'
+        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -64,7 +64,7 @@ export const METRICBEAT_INSTRUCTIONS = {
       }),
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm'
+        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -76,14 +76,14 @@ export const METRICBEAT_INSTRUCTIONS = {
         defaultMessage: 'Download and install Metricbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.windowsTextPre', {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-multi-str
         defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({metricbeatLink}).\n\
-          1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
-          2. Extract the contents of the zip file into {folderPath}.\n\
-          3. Rename the {directoryName} directory to `Metricbeat`.\n\
-          4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
-          **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
-          5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
+ 1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
+ 2. Extract the contents of the zip file into {folderPath}.\n\
+ 3. Rename the {directoryName} directory to `Metricbeat`.\n\
+ 4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
+**Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
+ 5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
         values: {
           directoryName: '`metricbeat-{config.kibana.version}-windows`',
           folderPath: '`C:\\Program Files`',
@@ -93,7 +93,7 @@ export const METRICBEAT_INSTRUCTIONS = {
       }),
       commands: [
         'PS > cd C:\\Program Files\\Metricbeat',
-        'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1'
+        'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.windowsTextPost', {
         defaultMessage: 'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
@@ -148,8 +148,8 @@ export const METRICBEAT_INSTRUCTIONS = {
       commands: [
         'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup',
         'PS C:\\Program Files\\Metricbeat> Start-Service metricbeat',
-      ]
-    }
+      ],
+    },
   },
   CONFIG: {
     OSX: {
@@ -168,10 +168,10 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTextPost', {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-multi-str
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
@@ -197,10 +197,10 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTextPost', {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-multi-str
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
@@ -226,10 +226,10 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTextPost', {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-multi-str
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
@@ -255,10 +255,10 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTextPost', {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-multi-str
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
           and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
@@ -269,9 +269,9 @@ export const METRICBEAT_INSTRUCTIONS = {
       }),
     }
   }
-};
+});
 
-export const METRICBEAT_CLOUD_INSTRUCTIONS = {
+export const createMetricbeatCloudInstructions = () => ({
   CONFIG: {
     OSX: {
       title: i18n.translate('kbn.common.tutorials.metricbeatCloudInstructions.config.osxTitle', {
@@ -350,7 +350,7 @@ export const METRICBEAT_CLOUD_INSTRUCTIONS = {
       }),
     }
   }
-};
+});
 
 export function metricbeatEnableInstructions(moduleName) {
   return {
@@ -371,7 +371,7 @@ export function metricbeatEnableInstructions(moduleName) {
       }),
     },
     DEB: {
-      title: i18n.translate('kbn.common.tutorials.metricbeatEnableInstructions.devTitle', {
+      title: i18n.translate('kbn.common.tutorials.metricbeatEnableInstructions.debTitle', {
         defaultMessage: 'Enable and configure the {moduleName} module',
         values: { moduleName },
       }),
@@ -440,16 +440,18 @@ export function metricbeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'metricset.module': moduleName
-            }
-          }
-        }
-      }
-    }
+              'metricset.module': moduleName,
+            },
+          },
+        },
+      },
+    },
   };
 }
 
 export function onPremInstructions(moduleName) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+
   return {
     instructionSets: [
       {
@@ -463,8 +465,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -472,8 +474,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -481,8 +483,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -490,17 +492,21 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }
 
 export function onPremCloudInstructions(moduleName) {
+  const TRYCLOUD_OPTION1 = createTrycloudOption1();
+  const TRYCLOUD_OPTION2 = createTrycloudOption2();
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+
   return {
     instructionSets: [
       {
@@ -516,8 +522,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -527,8 +533,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -538,8 +544,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -549,17 +555,20 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }
 
 export function cloudInstructions(moduleName) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+  const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
+
   return {
     instructionSets: [
       {
@@ -573,8 +582,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -582,8 +591,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -591,8 +600,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -600,12 +609,12 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }

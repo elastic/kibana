@@ -22,7 +22,7 @@ import './index_header';
 import './create_edit_field';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
@@ -181,8 +181,7 @@ uiRoutes
 
 uiModules.get('apps/management')
   .controller('managementIndicesEdit', function (
-    $scope, $location, $route, config, indexPatterns, Notifier, Private, AppState, docTitle, confirmModal) {
-    const notify = new Notifier();
+    $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
 
@@ -292,7 +291,7 @@ uiModules.get('apps/management')
         const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
         });
-        notify.error(errorMessage);
+        toastNotifications.addDanger(errorMessage);
         return;
       }
       $scope.indexPattern.timeFieldName = field.name;
