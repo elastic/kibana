@@ -184,6 +184,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async setAbsoluteRange(fromTime, toTime) {
+      await this.configureAbsoluteRange(fromTime, toTime);
+      await this.clickGoButton();
+      await this.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    async configureAbsoluteRange(fromTime, toTime) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.ensureTimePickerIsOpen();
       log.debug('--Clicking Absolute button');
@@ -192,8 +198,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.setFromTime(fromTime);
       log.debug('--Setting To Time : ' + toTime);
       await this.setToTime(toTime);
-      await this.clickGoButton();
-      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async setQuickTime(quickTime) {

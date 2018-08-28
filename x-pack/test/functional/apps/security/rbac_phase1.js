@@ -84,10 +84,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.header.configureAbsoluteRange(fromTime, toTime);
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      await PageObjects.header.clickGoButton();
+      // we have two rendering calls: one because we are closing the time picker
+      // the second one is because we updated the data
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount, 2);
       const success = await PageObjects.visualize.saveVisualization(vizName1);
       expect(success).to.be(true);
       await PageObjects.security.logout();
@@ -106,10 +108,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.header.configureAbsoluteRange(fromTime, toTime);
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      await PageObjects.header.clickGoButton();
+      // we have two rendering calls: one because we are closing the time picker
+      // the second one is because we updated the data
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount, 2);
       const success = await PageObjects.visualize.saveVisualization(vizName1);
       expect(success).to.be(false);
       await PageObjects.security.logout();
