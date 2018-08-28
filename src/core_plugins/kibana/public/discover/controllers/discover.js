@@ -532,21 +532,6 @@ function discoverController(
       $scope.fieldCounts = {};
     }
 
-    function logRequestInInspector(resp) {
-      const inspectorRequest = inspectorAdapters.requests.start(
-        `Segment ${$scope.fetchStatus.complete}`,
-        {
-          description: `This request queries Elasticsearch to fetch the data for the search.`,
-        });
-      inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-      $scope.searchSource.getSearchRequestBody().then(body => {
-        inspectorRequest.json(body);
-      });
-      inspectorRequest
-        .stats(getResponseInspectorStats($scope.searchSource, resp))
-        .ok({ json: resp });
-    }
-
     if (!$scope.rows) flushResponseData();
 
     const sort = $state.sort;
@@ -584,13 +569,38 @@ function discoverController(
     segmented.setSortFn(sortFn);
     segmented.setSize($scope.opts.sampleSize);
 
+    let inspectorRequests = [];
+    function logResponseInInspector(resp) {
+      if (inspectorRequests.length > 0) {
+        const inspectorRequest = inspectorRequests.shift();
+        inspectorRequest
+          .stats(getResponseInspectorStats($scope.searchSource, resp))
+          .ok({ json: resp });
+      }
+    }
+
     // triggered when the status updated
     segmented.on('status', function (status) {
       $scope.fetchStatus = status;
       if (status.complete === 0) {
         // starting new segmented search request
         inspectorAdapters.requests.reset();
+        inspectorRequests = [];
       }
+
+      if (status.remaining > 0) {
+        const inspectorRequest = inspectorAdapters.requests.start(
+          `Segment ${$scope.fetchStatus.complete}`,
+          {
+            description: `This request queries Elasticsearch to fetch the data for the search.`,
+          });
+        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+        $scope.searchSource.getSearchRequestBody().then(body => {
+          inspectorRequest.json(body);
+        });
+        inspectorRequests.push(inspectorRequest);
+      }
+
     });
 
     segmented.on('first', function () {
@@ -598,7 +608,7 @@ function discoverController(
     });
 
     segmented.on('segment', (resp) => {
-      logRequestInInspector(resp);
+      logResponseInInspector(resp);
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
@@ -608,7 +618,7 @@ function discoverController(
     });
 
     segmented.on('emptySegment', function (resp) {
-      logRequestInInspector(resp);
+      logResponseInInspector(resp);
     });
 
     segmented.on('mergedSegment', function (merged) {
