@@ -94,7 +94,5 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     // Register a function with server to manage the collection of usage stats
     server.usage.collectorSet.register(getSpacesUsageCollector(server));
-
-    await createDefaultSpace(server);
   }
 });

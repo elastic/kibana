@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_SPACES_MONITORING_TYPE } from '../../common/constants';
+import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 
 /**
@@ -36,7 +36,7 @@ async function getSpacesUsage(callCluster, server, spacesAvailable) {
 export function getSpacesUsageCollector(server) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
-    type: KIBANA_SPACES_MONITORING_TYPE,
+    type: KIBANA_SPACES_STATS_TYPE,
     fetch: async callCluster => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
@@ -63,7 +63,7 @@ export function getSpacesUsageCollector(server) {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
           usage: {
-            xpacl: {
+            xpack: {
               spaces: result
             }
           }
