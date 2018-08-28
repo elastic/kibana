@@ -22,7 +22,7 @@ import { createDeleteRoute } from './delete';
 import { MockServer } from './_mock_server';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
-  const savedObjectsClient = { delete: sinon.stub().returns('') };
+  const savedObjectsClient = { delete: sinon.stub() };
   let server;
 
   beforeEach(() => {

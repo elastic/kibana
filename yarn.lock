@@ -365,7 +365,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/hapi@17.0.18":
+"@types/hapi@^17.0.18":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
   dependencies:
@@ -2059,7 +2059,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@7.2.0, boom@7.x.x:
+boom@7.2.0, boom@7.x.x, boom@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.0.tgz#2bff24a55565767fde869ec808317eb10c48e966"
   dependencies:
@@ -5897,7 +5897,7 @@ gulp-sourcemaps@1.7.3:
     through2 "2.X"
     vinyl "1.X"
 
-"h2o2-latest@npm:h2o2@8.1.2", h2o2@8.1.2:
+"h2o2-latest@npm:h2o2@8.1.2", h2o2@^8.1.2:
   version "8.1.2"
   resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.1.2.tgz#25e6f69f453175c9ca1e3618741c5ebe1b5000c1"
   dependencies:
@@ -5935,9 +5935,9 @@ hapi-auth-cookie@9.0.0:
     hoek "5.x.x"
     joi "13.x.x"
 
-hapi@17.5.3:
-  version "17.5.3"
-  resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.5.3.tgz#60266ca072d69620b5b135c0c98a17228c3bf34d"
+hapi@^17.5.3:
+  version "17.5.4"
+  resolved "https://registry.yarnpkg.com/hapi/-/hapi-17.5.4.tgz#f3c1070f9ee398d9c6ad8ebc5abf180f13914f3c"
   dependencies:
     accept "3.x.x"
     ammo "3.x.x"
@@ -6402,7 +6402,7 @@ indexof@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/indexof/-/indexof-0.0.1.tgz#82dc336d232b9062179d05ab3293a66059fd435d"
 
-inert@5.1.0:
+inert@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/inert/-/inert-5.1.0.tgz#e9f130dc3047ccd9ffaa64b157b4c1114611035d"
   dependencies:
@@ -7423,6 +7423,14 @@ joi@13.5.2:
 joi@13.x.x, joi@^13.4.0:
   version "13.4.0"
   resolved "https://registry.yarnpkg.com/joi/-/joi-13.4.0.tgz#afc359ee3d8bc5f9b9ba6cdc31b46d44af14cecc"
+  dependencies:
+    hoek "5.x.x"
+    isemail "3.x.x"
+    topo "3.x.x"
+
+joi@^13.5.2:
+  version "13.6.0"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-13.6.0.tgz#877d820e3ad688a49c32421ffefc746bfbe2d0a0"
   dependencies:
     hoek "5.x.x"
     isemail "3.x.x"
@@ -13830,9 +13838,9 @@ vise@3.x.x:
   dependencies:
     hoek "5.x.x"
 
-vision@5.3.3:
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/vision/-/vision-5.3.3.tgz#b1c644535f22556206b1d1f68249f5dba74e5675"
+vision@^5.3.3:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/vision/-/vision-5.4.0.tgz#fc620deb95227881ea8b8d8a044dc1d1fd40e584"
   dependencies:
     boom "7.x.x"
     hoek "5.x.x"
@@ -14076,9 +14084,16 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
 
-wreck@14.0.2, wreck@14.x.x:
+wreck@14.x.x:
   version "14.0.2"
   resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.0.2.tgz#89c17a9061c745ed1c3aebcb66ea181dbaab454c"
+  dependencies:
+    boom "7.x.x"
+    hoek "5.x.x"
+
+wreck@^14.0.2:
+  version "14.1.0"
+  resolved "https://registry.yarnpkg.com/wreck/-/wreck-14.1.0.tgz#b13e526b6a8318e5ebc6969c0b21075c06337067"
   dependencies:
     boom "7.x.x"
     hoek "5.x.x"
