@@ -17,4 +17,30 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
+export function SharePageProvider({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['visualize']);
+
+  class SharePage {
+    async clickShareTopNavButton() {
+      return testSubjects.click('shareTopNavButton');
+    }
+
+    async getSharedUrl() {
+      return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
+    }
+
+    async checkShortenUrl() {
+      const shareForm = await testSubjects.find('shareUrlForm');
+      await PageObjects.visualize.checkCheckbox('useShortUrl');
+      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+    }
+
+    async exportAsSavedObject() {
+      return await testSubjects.click('exportAsSavedObject');
+    }
+
+  }
+
+  return new SharePage();
+}

@@ -17,4 +17,29 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
+jest.mock('../lib/url_shortener', () => ({}));
+
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import {
+  ShareContextMenu,
+} from './share_context_menu';
+
+test('should render context menu panel when there are more than one panel', () => {
+  const component = shallow(<ShareContextMenu
+    allowEmbed
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should only render permalink panel when there are no other panels', () => {
+  const component = shallow(<ShareContextMenu
+    allowEmbed={false}
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
