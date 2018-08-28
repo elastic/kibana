@@ -96,7 +96,7 @@ export function FindProvider({ getService }) {
     async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
       return await this._withTimeout(timeout, async remote => {
         return await retry.try(async () => {
-          let elements = await findAllFunction(remote);
+          let elements = await findAllFunction(remote, timeout);
           if (!elements) elements = [];
           // Force isStale checks for all the retrieved elements.
           await Promise.all(elements.map(async element => await element.isEnabled()));
