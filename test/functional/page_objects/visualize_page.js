@@ -719,18 +719,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('saveVisualizationButton');
-      return await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
-      const successToast = await testSubjects.exist('saveVisualizationSuccess', defaultFindTimeout);
+      const successToast = await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
       expect(successToast).to.be(true);
     }
 
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
-      const errorToast = await testSubjects.exist('saveVisualizationError', defaultFindTimeout);
+      const errorToast = await testSubjects.exists('saveVisualizationError', defaultFindTimeout);
       expect(errorToast).to.be(true);
     }
 
