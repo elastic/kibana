@@ -29,7 +29,7 @@ const matrix = require('./matrix');
  */
 // set of shapes under a specific point
 const shapesAtPoint = (shapes, x, y) =>
-  shapes.map(shape => {
+  shapes.map((shape, index) => {
     const { transformMatrix, a, b } = shape;
 
     // Determine z (depth) by composing the x, y vector out of local unit x and unit y vectors; by knowing the
@@ -58,7 +58,7 @@ const shapesAtPoint = (shapes, x, y) =>
 
     // z is needed downstream, to tell which one is the closest shape hit by an x, y ray (shapes can be tilted in z)
     // it looks weird to even return items where inside === false, but it could be useful for hotspots outside the rectangle
-    return { z, intersection, inside: Math.abs(sx) <= a && Math.abs(sy) <= b, shape };
+    return { z, intersection, inside: Math.abs(sx) <= a && Math.abs(sy) <= b, shape, index };
   });
 
 // Z-order the possibly several shapes under the same point.
@@ -73,7 +73,7 @@ const shapesAtPoint = (shapes, x, y) =>
 const shapesAt = (shapes, { x, y }) =>
   shapesAtPoint(shapes, x, y)
     .filter(shape => shape.inside)
-    .sort((shape1, shape2) => shape2.z - shape1.z)
+    .sort((shape1, shape2) => shape2.z - shape1.z || shape2.index - shape1.index) // stable sort: DOM insertion order!!!
     .map(shape => shape.shape); // decreasing order, ie. from front (closest to viewer) to back
 
 const getExtremum = (transformMatrix, a, b) =>
