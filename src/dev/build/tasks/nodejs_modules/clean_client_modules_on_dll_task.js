@@ -207,7 +207,7 @@ export const CleanClientModulesOnDLLTask = {
     const optimizedBundlesFolder = build.resolvePath('optimize/bundles');
     const dllManifest = JSON.parse(
       await read(
-        build.resolvePath(optimizedBundlesFolder, 'vendor.manifest.dll.json')
+        build.resolvePath(optimizedBundlesFolder, 'vendors.manifest.dll.json')
       )
     );
 
