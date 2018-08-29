@@ -17,22 +17,28 @@
  * under the License.
  */
 
-import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import { DashboardState } from '../dashboard/selectors';
+jest.mock('../lib/url_shortener', () => ({}));
 
-export interface CoreKibanaState {
-  readonly dashboard: DashboardState;
-}
+import React from 'react';
+import { shallow } from 'enzyme';
 
-export interface KibanaAction<T, P> extends Action {
-  readonly type: T;
-  readonly payload: P;
-}
+import {
+  ShareUrlContent,
+} from './share_url_content';
 
-export type KibanaThunk<
-  R = Action | Promise<Action> | void,
-  S = CoreKibanaState,
-  E = any,
-  A extends Action = Action
-> = ThunkAction<R, S, E, A>;
+test('render', () => {
+  const component = shallow(<ShareUrlContent
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should enable saved object export option when objectId is provided', () => {
+  const component = shallow(<ShareUrlContent
+    objectId="id1"
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});

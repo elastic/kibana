@@ -17,22 +17,30 @@
  * under the License.
  */
 
-import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import { DashboardState } from '../dashboard/selectors';
+export function SharePageProvider({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['visualize']);
 
-export interface CoreKibanaState {
-  readonly dashboard: DashboardState;
+  class SharePage {
+    async clickShareTopNavButton() {
+      return testSubjects.click('shareTopNavButton');
+    }
+
+    async getSharedUrl() {
+      return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
+    }
+
+    async checkShortenUrl() {
+      const shareForm = await testSubjects.find('shareUrlForm');
+      await PageObjects.visualize.checkCheckbox('useShortUrl');
+      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+    }
+
+    async exportAsSavedObject() {
+      return await testSubjects.click('exportAsSavedObject');
+    }
+
+  }
+
+  return new SharePage();
 }
-
-export interface KibanaAction<T, P> extends Action {
-  readonly type: T;
-  readonly payload: P;
-}
-
-export type KibanaThunk<
-  R = Action | Promise<Action> | void,
-  S = CoreKibanaState,
-  E = any,
-  A extends Action = Action
-> = ThunkAction<R, S, E, A>;

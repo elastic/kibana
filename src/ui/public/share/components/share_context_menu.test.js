@@ -17,22 +17,29 @@
  * under the License.
  */
 
-import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import { DashboardState } from '../dashboard/selectors';
+jest.mock('../lib/url_shortener', () => ({}));
 
-export interface CoreKibanaState {
-  readonly dashboard: DashboardState;
-}
+import React from 'react';
+import { shallow } from 'enzyme';
 
-export interface KibanaAction<T, P> extends Action {
-  readonly type: T;
-  readonly payload: P;
-}
+import {
+  ShareContextMenu,
+} from './share_context_menu';
 
-export type KibanaThunk<
-  R = Action | Promise<Action> | void,
-  S = CoreKibanaState,
-  E = any,
-  A extends Action = Action
-> = ThunkAction<R, S, E, A>;
+test('should render context menu panel when there are more than one panel', () => {
+  const component = shallow(<ShareContextMenu
+    allowEmbed
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should only render permalink panel when there are no other panels', () => {
+  const component = shallow(<ShareContextMenu
+    allowEmbed={false}
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
