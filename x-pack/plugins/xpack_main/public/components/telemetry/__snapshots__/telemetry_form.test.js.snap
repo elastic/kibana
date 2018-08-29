@@ -7,66 +7,70 @@ exports[`TelemetryForm renders as expected 1`] = `
     hasShadow={false}
     paddingSize="m"
   >
-    <EuiText
-      grow={true}
+    <div
+      className="telemetryForm"
     >
-      <h2>
-        Usage Data
-      </h2>
-    </EuiText>
-    <EuiSpacer
-      size="l"
-    />
-    <EuiDescribedFormGroup
-      description={
-        <UNDEFINED>
-          <p>
-            Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
-          </p>
-          <p>
-            <EuiLink
-              color="primary"
-              onClick={[Function]}
-              type="button"
-            >
-              See an example of what we collect
-            </EuiLink>
-          </p>
-          <p>
-            <EuiLink
-              color="primary"
-              href="https://www.elastic.co/legal/telemetry-privacy-statement"
-              target="_blank"
-              type="button"
-            >
-              Read our usage data privacy statement
-            </EuiLink>
-          </p>
-        </UNDEFINED>
-      }
-      fullWidth={false}
-      gutterSize="l"
-      idAria="manage-telemetry-aria"
-      title={<div />}
-      titleSize="xs"
-    >
-      <EuiFormRow
-        describedByIds={
-          Array [
-            "manage-telemetry-aria",
-          ]
+      <EuiText
+        grow={true}
+      >
+        <h2>
+          Usage Data
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiDescribedFormGroup
+        description={
+          <UNDEFINED>
+            <p>
+              Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
+            </p>
+            <p>
+              <EuiLink
+                color="primary"
+                onClick={[Function]}
+                type="button"
+              >
+                See an example of what we collect
+              </EuiLink>
+            </p>
+            <p>
+              <EuiLink
+                color="primary"
+                href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                target="_blank"
+                type="button"
+              >
+                Read our usage data privacy statement
+              </EuiLink>
+            </p>
+          </UNDEFINED>
         }
         fullWidth={false}
-        hasEmptyLabelSpace={true}
+        gutterSize="l"
+        idAria="manage-telemetry-aria"
+        title={<div />}
+        titleSize="xs"
       >
-        <EuiSwitch
-          checked={null}
-          disabled={false}
-          label="Send usage data to Elastic"
-          onChange={[Function]}
-        />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+        <EuiFormRow
+          describedByIds={
+            Array [
+              "manage-telemetry-aria",
+            ]
+          }
+          fullWidth={false}
+          hasEmptyLabelSpace={true}
+        >
+          <EuiSwitch
+            checked={null}
+            disabled={false}
+            label="Send usage data to Elastic"
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    </div>
   </EuiPanel>
 </React.Fragment>
 `;
