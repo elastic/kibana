@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/* eslint-disable no-multi-str */
+
+import { i18n } from '@kbn/i18n';
+
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { createOnPremInstructions } from './on_prem';
 import { createElasticCloudInstructions } from './elastic_cloud';
@@ -27,12 +31,18 @@ export function netflowSpecProvider() {
     id: 'netflow',
     name: 'Netflow',
     category: TUTORIAL_CATEGORY.SECURITY,
-    shortDescription: 'Collect Netflow records sent by a Netflow exporter.',
-    longDescription:
-      'The Logstash Netflow module collects and parses network flow data, ' +
-      ' indexes the events into Elasticsearch, and installs a suite of Kibana dashboards.' +
-      ' This module support Netflow Version 5 and 9.' +
-      ' [Learn more]({config.docs.logstash}/netflow-module.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialShortDescription', {
+      defaultMessage: 'Collect Netflow records sent by a Netflow exporter.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialLongDescription', {
+      defaultMessage:
+        'The Logstash Netflow module collects and parses network flow data, \
+indexes the events into Elasticsearch, and installs a suite of Kibana dashboards. \
+This module support Netflow Version 5 and 9. [Learn more]({linkUrl}).',
+      values: {
+        linkUrl: '{config.docs.logstash}/netflow-module.html',
+      },
+    }),
     artifacts: {
       dashboards: [
         {
