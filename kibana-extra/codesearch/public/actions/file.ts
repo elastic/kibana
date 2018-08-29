@@ -27,6 +27,7 @@ export interface FetchFileResponse {
   content?: string;
   lang?: string;
   isImage?: boolean;
+  url?: string;
 }
 
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');

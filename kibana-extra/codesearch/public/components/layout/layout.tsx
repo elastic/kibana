@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
+import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
 
 import { parse as parseQuery } from 'query-string';
@@ -30,7 +31,6 @@ import {
   symbolSearchQueryChanged,
 } from '../../actions';
 import { RootState } from '../../reducers';
-
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { FileTree } from '../file_tree/file_tree';
@@ -39,6 +39,8 @@ import { NotFound } from './not_found';
 import { PathTypes } from '../routes';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
+
+import 'github-markdown-css/github-markdown.css';
 
 enum Tabs {
   FILE_TREE = 'file-tree',
@@ -63,6 +65,10 @@ interface Props {
   symbolSearchQueryChanged: (query: string) => void;
   isSymbolsLoading: boolean;
   isNotFound: boolean;
+  fileLanguage?: string;
+  fileContent?: string;
+  isImage?: boolean;
+  url?: string;
 }
 
 const DirectoryView = withRouter(props => {
@@ -88,7 +94,7 @@ const DirectoryView = withRouter(props => {
           </div>
         );
       } else {
-        throw new Error('invalid file tree item type');
+        throw new Error(`invalid file tree item type ${file.type}`);
       }
     });
   return <div className="directoryView">{fileList}</div>;
@@ -115,6 +121,10 @@ export class LayoutPage extends React.Component<Props, State> {
       showSearchBox: false,
       tab: parseQuery(props.location.search).tab,
     };
+  }
+
+  public componentDidMount() {
+    this.fetchTree(this.props.match.params.path);
   }
 
   public onClick = (node: Tree) => {
@@ -207,7 +217,21 @@ export class LayoutPage extends React.Component<Props, State> {
 
   public renderContent = () => {
     const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
+    const { fileLanguage, fileContent, url } = this.props;
     if (this.props.match.params.pathType === PathTypes.blob) {
+      if (fileLanguage === 'markdown') {
+        return (
+          <div className="markdown-body markdownContainer">
+            <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
+          </div>
+        );
+      } else if (this.props.isImage) {
+        return (
+          <div className="autoMargin">
+            <img src={url} alt={path} />
+          </div>
+        );
+      }
       return (
         <Editor
           file={path}
@@ -321,6 +345,10 @@ const mapStateToProps = (state: RootState) => ({
   openedPaths: state.file.openedPaths,
   loading: state.file.loading,
   isNotFound: state.file.isNotFound,
+  fileLanguage: state.file.fileLanguage,
+  fileContent: state.file.fileContent,
+  isImage: state.file.isImage,
+  url: state.file.url,
   symbols: state.symbolSearch.symbols,
   isSymbolsLoading: state.symbolSearch.isLoading,
   commits: state.file.commits,

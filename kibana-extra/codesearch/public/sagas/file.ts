@@ -144,6 +144,7 @@ export async function requestFile(
       return {
         isImage: true,
         content: await response.text(),
+        url,
       };
     }
   } else if (response.status === 404) {
