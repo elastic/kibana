@@ -272,17 +272,9 @@
                 "defaultValue": null
               },
               {
-                "name": "filters",
+                "name": "filterQuery",
                 "description": "",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": { "kind": "INPUT_OBJECT", "name": "InfraFilterInput", "ofType": null }
-                  }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -1112,62 +1104,6 @@
         ],
         "interfaces": null,
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "InfraFilterInput",
-        "description": "",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "type",
-            "description": "The type of filter to use",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraFilterType", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "value",
-            "description": "The filter value",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "field",
-            "description": "The field name for a match query",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraFilterType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "query_string",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "match", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "exists", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
         "possibleTypes": null
       },
       {

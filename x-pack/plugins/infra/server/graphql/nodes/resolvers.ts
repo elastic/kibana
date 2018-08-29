@@ -11,6 +11,7 @@ import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_
 import { extractPathsAndMetrics } from '../../lib/adapters/nodes/extract_paths_and_metrics';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type InfraSourceMapResolver = InfraResolverOf<
@@ -36,7 +37,7 @@ export const createNodeResolvers = (
       const { groupBy, nodeField } = extractGroupByAndNodeFromPath(path);
 
       const options: InfraNodeRequestOptions = {
-        filters: args.filters || [],
+        filterQuery: parseFilterQuery(args.filterQuery),
         groupBy,
         nodeField,
         sourceConfiguration: source.configuration,

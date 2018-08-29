@@ -108,27 +108,12 @@ export const nodesSchema: any = gql`
     query: String!
   }
 
-  enum InfraFilterType {
-    query_string
-    match
-    exists
-  }
-
-  input InfraFilterInput {
-    "The type of filter to use"
-    type: InfraFilterType!
-    "The filter value"
-    value: String!
-    "The field name for a match query"
-    field: String
-  }
-
   type InfraResponse {
     nodes(path: [InfraPathInput!]): [InfraNode!]!
   }
 
   extend type InfraSource {
     "A hierarchy of hosts, pods, containers, services or arbitrary groups"
-    map(timerange: InfraTimerangeInput!, filters: [InfraFilterInput!]): InfraResponse
+    map(timerange: InfraTimerangeInput!, filterQuery: String): InfraResponse
   }
 `;

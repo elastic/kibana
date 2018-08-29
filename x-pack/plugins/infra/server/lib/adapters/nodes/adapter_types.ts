@@ -5,7 +5,6 @@
  */
 
 import {
-  InfraFilterInput,
   InfraMetricInput,
   InfraNode,
   InfraPathFilterInput,
@@ -14,6 +13,7 @@ import {
   InfraResponse,
   InfraTimerangeInput,
 } from '../../../../common/graphql/types';
+import { JsonObject } from '../../../../common/typed_json';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
@@ -32,7 +32,8 @@ export type InfraESQuery =
   | InfraESRangeQuery
   | InfraESExistsQuery
   | InfraESQueryStringQuery
-  | InfraESMatchQuery;
+  | InfraESMatchQuery
+  | JsonObject;
 
 export interface InfraESExistsQuery {
   exists: { field: string };
@@ -90,7 +91,7 @@ export interface InfraNodeRequestOptions {
   timerange: InfraTimerangeInput;
   groupBy: InfraPathInput[];
   metrics: InfraMetricInput[];
-  filters: InfraFilterInput[];
+  filterQuery: InfraESQuery | undefined;
 }
 
 export enum InfraNodesKey {

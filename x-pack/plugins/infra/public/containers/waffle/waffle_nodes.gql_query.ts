@@ -6,17 +6,17 @@
 
 import gql from 'graphql-tag';
 
-export const mapQuery = gql`
-  query MapQuery(
+export const waffleNodesQuery = gql`
+  query WaffleNodesQuery(
     $sourceId: ID!
     $timerange: InfraTimerangeInput!
-    $filters: [InfraFilterInput!]
+    $filterQuery: String
     $metrics: [InfraMetricInput!]
     $path: [InfraPathInput!]
   ) {
     source(id: $sourceId) {
       id
-      map(timerange: $timerange, filters: $filters) {
+      map(timerange: $timerange, filterQuery: $filterQuery) {
         nodes(path: $path) {
           path {
             value

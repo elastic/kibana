@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraFilterInput,
-  InfraFilterType,
-  InfraPathFilterInput,
-  InfraPathInput,
-} from '../../../../../common/graphql/types';
+import { InfraPathFilterInput, InfraPathInput } from '../../../../../common/graphql/types';
 
 import {
   InfraESBoolQuery,
@@ -18,11 +13,10 @@ import {
   InfraNodeRequestOptions,
 } from '../adapter_types';
 
-import { convertInputFilterToESQuery } from './convert_input_filter_to_es_query';
 import { isGroupByFilters, isGroupByTerms } from './type_guards';
 
 export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
-  const { timerange, sourceConfiguration, groupBy, filters }: InfraNodeRequestOptions = options;
+  const { timerange, sourceConfiguration, groupBy, filterQuery }: InfraNodeRequestOptions = options;
   const mustClause: InfraESQuery[] = [];
   const shouldClause: InfraESQuery[] = [];
   const filterClause: InfraESQuery[] = [];
@@ -43,21 +37,22 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
     groupBy.forEach(
       (group: InfraPathInput): void => {
         if (isGroupByTerms(group) && group.field) {
-          const inputFilter: InfraFilterInput = {
-            type: InfraFilterType.exists,
-            value: group.field,
-          };
-          mustClause.push(convertInputFilterToESQuery(inputFilter));
+          mustClause.push({
+            exists: {
+              field: group.field,
+            },
+          });
         }
         if (isGroupByFilters(group) && group.filters) {
           group.filters!.forEach(
             (groupFilter: InfraPathFilterInput | null): void => {
               if (groupFilter != null && groupFilter.query) {
-                const inputFilter: InfraFilterInput = {
-                  type: InfraFilterType.query_string,
-                  value: groupFilter.query,
-                };
-                shouldClause.push(convertInputFilterToESQuery(inputFilter));
+                shouldClause.push({
+                  query_string: {
+                    analyze_wildcard: true,
+                    query: groupFilter.query,
+                  },
+                });
               }
             }
           );
@@ -66,12 +61,8 @@ export function createQuery(options: InfraNodeRequestOptions): InfraESQuery {
     );
   }
 
-  if (filters) {
-    filters.forEach(
-      (filter: InfraFilterInput): void => {
-        mustClause.push(convertInputFilterToESQuery(filter));
-      }
-    );
+  if (filterQuery) {
+    mustClause.push(filterQuery);
   }
 
   const query: InfraESBoolQuery = {

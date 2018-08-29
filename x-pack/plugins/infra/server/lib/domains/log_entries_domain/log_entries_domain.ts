@@ -10,6 +10,7 @@ import {
   InfraLogSummaryBucket,
 } from '../../../../common/graphql/types';
 import { TimeKey } from '../../../../common/time';
+import { JsonObject } from '../../../../common/typed_json';
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
 import { builtinRules } from './builtin_rules';
@@ -154,9 +155,7 @@ export interface LogEntriesAdapter {
   ): Promise<InfraDateRangeAggregationBucket[]>;
 }
 
-export interface LogEntryQuery {
-  [key: string]: any;
-}
+export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   fields: LogEntryDocumentFields;

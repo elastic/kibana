@@ -176,7 +176,7 @@ export namespace InfraSourceResolvers {
   export type MapResolver = Resolver<InfraResponse | null, MapArgs>;
   export interface MapArgs {
     timerange: InfraTimerangeInput;
-    filters?: InfraFilterInput[] | null;
+    filterQuery?: string | null;
   }
 }
 /** A set of configuration options for an infrastructure data source */
@@ -386,12 +386,6 @@ export interface InfraTimerangeInput {
   from: number /** The beginning of the timerange */;
 }
 
-export interface InfraFilterInput {
-  type: InfraFilterType /** The type of filter to use */;
-  value: string /** The filter value */;
-  field?: string | null /** The field name for a match query */;
-}
-
 export interface InfraPathInput {
   type: InfraPathType /** The type of path */;
   label?:
@@ -451,7 +445,7 @@ export interface LogSummaryBetweenInfraSourceArgs {
 }
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
-  filters?: InfraFilterInput[] | null;
+  filterQuery?: string | null;
 }
 export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
@@ -467,12 +461,6 @@ export enum InfraIndexType {
   ANY = 'ANY',
   LOGS = 'LOGS',
   METRICS = 'METRICS',
-}
-
-export enum InfraFilterType {
-  query_string = 'query_string',
-  match = 'match',
-  exists = 'exists',
 }
 
 export enum InfraPathType {
@@ -514,11 +502,11 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
-export namespace MapQuery {
+export namespace WaffleNodesQuery {
   export type Variables = {
     sourceId: string;
     timerange: InfraTimerangeInput;
-    filters?: InfraFilterInput[] | null;
+    filterQuery?: string | null;
     metrics?: InfraMetricInput[] | null;
     path?: InfraPathInput[] | null;
   };

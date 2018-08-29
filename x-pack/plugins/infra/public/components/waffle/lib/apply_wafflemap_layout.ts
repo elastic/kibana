@@ -7,7 +7,7 @@ import { first, sortBy } from 'lodash';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
-} from '../../../containers/map/type_guards';
+} from '../../../containers/waffle/type_guards';
 import { InfraWaffleMapGroup } from '../../../lib/lib';
 import { sizeOfSquares } from './size_of_squares';
 
