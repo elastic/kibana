@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       expect(isApplyButtonEnabled).to.be(true);
     });
 
-    it('should allow resseting changed params', async () => {
+    it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
       const interval = await PageObjects.visualize.getInputTypeParam('interval');
       expect(interval).to.be('2000');
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
       await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');

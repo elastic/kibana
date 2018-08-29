@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
+import { createElasticCloudInstructions } from './elastic_cloud';
 import { getSavedObjects } from './saved_objects/get_saved_objects';
 
 const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
@@ -47,10 +47,11 @@ export function apmSpecProvider(server) {
         linkLabel: i18n.translate('kbn.server.tutorials.apm.specProvider.artifacts.dashboards.linkLabel', {
           defaultMessage: 'APM dashboard',
         }),
-        isOverview: true
-      }
-    ]
+        isOverview: true,
+      },
+    ],
   };
+
   if (isEnabled(config)) {
     artifacts.application = {
       path: '/app/apm',
@@ -78,7 +79,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'apmApp',
     artifacts: artifacts,
     onPrem: onPremInstructions(apmIndexPattern),
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
+    elasticCloud: createElasticCloudInstructions(),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPattern),
     savedObjectsInstallMsg: i18n.translate('kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg', {

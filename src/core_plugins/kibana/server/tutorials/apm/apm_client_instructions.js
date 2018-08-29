@@ -17,11 +17,9 @@
  * under the License.
  */
 
-/* eslint-disable max-len */
+import { i18n } from '@kbn/i18n';
 
-import { i18n }  from '@kbn/i18n';
-
-export const NODE_CLIENT_INSTRUCTIONS = [
+export const createNodeClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.nodeClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -62,7 +60,9 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   serverUrl: ''
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPost', {
-      defaultMessage: 'See [the documentation]({documentationLink}) for advanced usage, including how to use with [Babel/ES Modules]({babelEsModulesLink}).',
+      // eslint-disable-next-line no-multi-str
+      defaultMessage: 'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
+[Babel/ES Modules]({babelEsModulesLink}).',
       values: {
         documentationLink: '{config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html',
         babelEsModulesLink: '{config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules',
@@ -71,7 +71,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   },
 ];
 
-export const DJANGO_CLIENT_INSTRUCTIONS = [
+export const createDjangoClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.djangoClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -133,7 +133,7 @@ MIDDLEWARE = (
   },
 ];
 
-export const FLASK_CLIENT_INSTRUCTIONS = [
+export const createFlaskClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.flaskClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -192,7 +192,7 @@ apm = ElasticAPM(app)`.split('\n'),
   },
 ];
 
-export const RAILS_CLIENT_INSTRUCTIONS = [
+export const createRailsClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.railsClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -228,7 +228,7 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
   },
 ];
 
-export const RACK_CLIENT_INSTRUCTIONS = [
+export const createRackClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.rackClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -302,7 +302,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   },
 ];
 
-export const JS_CLIENT_INSTRUCTIONS = [
+export const createJsClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.jsClient.enableRealUserMonitoring.title', {
       defaultMessage: 'Enable Real User Monitoring support in the APM server',
@@ -354,7 +354,7 @@ var apm = initApm({curlyOpen}
   },
 ];
 
-export const GO_CLIENT_INSTRUCTIONS = [
+export const createGoClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.goClient.install.title', {
       defaultMessage: 'Install the APM agent',
@@ -433,7 +433,7 @@ code.\n\n**Warning: The Go agent is currently in Beta and not meant for producti
   },
 ];
 
-export const JAVA_CLIENT_INSTRUCTIONS = [
+export const createJavaClientInstructions = () => [
   {
     title: i18n.translate('kbn.server.tutorials.apm.javaClient.download.title', {
       defaultMessage: 'Download the APM agent',

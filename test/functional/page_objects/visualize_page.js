@@ -35,6 +35,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    get index() {
+      return {
+        LOGSTASH_TIME_BASED: 'logstash-*',
+        LOGSTASH_NON_TIME_BASED: 'logstash*'
+      };
+    }
+
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize new');
       await PageObjects.common.navigateToUrl('visualize', 'new');
@@ -353,7 +360,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch(indexPattern = 'logstash-*') {
+    async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`paginatedListItem-${indexPattern}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -385,20 +392,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName) {
-      const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
-      log.debug('found bucket types ' + chartTypes.length);
+    async clickBucket(bucketName, type = 'bucket') {
+      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
+      await retry.try(async () => {
+        const chartTypes = await retry.try(
+          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
+        log.debug('found bucket types ' + chartTypes.length);
 
-      async function getChartType(chart) {
-        const chartString = await chart.getVisibleText();
-        if (chartString === bucketName) {
-          await chart.click();
-          await PageObjects.common.sleep(500);
+        async function getChartType(chart) {
+          const chartString = await chart.getVisibleText();
+          if (chartString === bucketName) {
+            await chart.click();
+            return true;
+          }
         }
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      await Promise.all(getChartTypesPromises);
+        const getChartTypesPromises = chartTypes.map(getChartType);
+        const clickResult = await Promise.all(getChartTypesPromises);
+        if (!clickResult.some(result => result === true)) {
+          throw new Error(`bucket ${bucketName} not found`);
+        }
+      });
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
@@ -540,6 +553,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
+      await input.type(newValue);
+      await remote.pressKeys(Keys.RETURN);
+    }
+
+    async setCustomInterval(newValue) {
+      await this.setInterval('Custom');
+      const input = await find.byCssSelector('input[name="customInterval"]');
+      await input.clearValue();
       await input.type(newValue);
     }
 

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
-export const EDIT_CONFIG = {
+export const createEditConfig = () => ({
   title: i18n.translate('kbn.server.tutorials.apm.editConfig.title', {
     defaultMessage: 'Edit the configuration',
   }),
@@ -34,38 +34,42 @@ credentials in the `apm-server.yml` config file.',
     '    username: <username>',
     '    password: <password>',
   ],
-};
+});
 
-const START_SERVER = {
+const createStartServer = () => ({
   title: i18n.translate('kbn.server.tutorials.apm.startServer.title', {
     defaultMessage: 'Start APM Server',
   }),
   textPre: i18n.translate('kbn.server.tutorials.apm.startServer.textPre', {
     defaultMessage: 'The server processes and stores application performance metrics in Elasticsearch.',
   }),
-};
+});
 
-export const START_SERVER_UNIX = {
-  title: START_SERVER.title,
-  textPre: START_SERVER.textPre,
-  commands: ['./apm-server -e'],
-};
+export function createStartServerUnix() {
+  const START_SERVER = createStartServer();
 
-const DOWNLOAD_SERVER_TITLE = i18n.translate('kbn.server.tutorials.apm.downloadServer.title', {
+  return {
+    title: START_SERVER.title,
+    textPre: START_SERVER.textPre,
+    commands: ['./apm-server -e'],
+  };
+}
+
+const createDownloadServerTitle = () => i18n.translate('kbn.server.tutorials.apm.downloadServer.title', {
   defaultMessage: 'Download and unpack APM Server',
 });
 
-export const DOWNLOAD_SERVER_OSX = {
-  title: DOWNLOAD_SERVER_TITLE,
+export const createDownloadServerOsx = () => ({
+  title: createDownloadServerTitle(),
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
     'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
     'cd apm-server-{config.kibana.version}-darwin-x86_64/',
   ],
-};
+});
 
-export const DOWNLOAD_SERVER_DEB = {
-  title: DOWNLOAD_SERVER_TITLE,
+export const createDownloadServerDeb = () => ({
+  title: createDownloadServerTitle(),
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
     'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
@@ -74,10 +78,10 @@ export const DOWNLOAD_SERVER_DEB = {
     defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
     values: { downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server' },
   }),
-};
+});
 
-export const DOWNLOAD_SERVER_RPM = {
-  title: DOWNLOAD_SERVER_TITLE,
+export const createDownloadServerRpm = () => ({
+  title: createDownloadServerTitle(),
   commands: [
     'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
     'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
@@ -86,40 +90,45 @@ export const DOWNLOAD_SERVER_RPM = {
     defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
     values: { downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server' },
   }),
-};
+});
 
-export const WINDOWS_SERVER_INSTRUCTIONS = [
-  {
-    title: DOWNLOAD_SERVER_TITLE,
-    textPre: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPre', {
-      // eslint-disable-next-line no-multi-str
-      defaultMessage: '1. Download the APM Server Windows zip file from the \
+export function createWindowsServerInstructions() {
+  const START_SERVER = createStartServer();
+
+  return [
+    {
+      title: createDownloadServerTitle(),
+      textPre: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPre', {
+        // eslint-disable-next-line no-multi-str
+        defaultMessage: '1. Download the APM Server Windows zip file from the \
 [Download page]({downloadPageLink}).\n2. Extract the contents of \
 the zip file into {zipFileExtractFolder}.\n3. Rename the {apmServerDirectory} \
 directory to `APM-Server`.\n4. Open a PowerShell prompt as an Administrator \
 (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install \
 PowerShell.\n5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',
-      values: {
-        downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
-        zipFileExtractFolder: '`C:\\Program Files`',
-        apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
-      }
-    }),
-    commands: [
-      `PS > cd 'C:\\Program Files\\APM-Server'`,
-      `PS C:\\Program Files\\APM-Server> .\\install-service-apm-server.ps1`,
-    ],
-    textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
-      // eslint-disable-next-line no-multi-str
-      defaultMessage: 'Note: If script execution is disabled on your system, you need to set the execution policy for the current session \
+        values: {
+          downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
+          zipFileExtractFolder: '`C:\\Program Files`',
+          apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
+        }
+      }),
+      commands: [
+        `PS > cd 'C:\\Program Files\\APM-Server'`,
+        `PS C:\\Program Files\\APM-Server> .\\install-service-apm-server.ps1`,
+      ],
+      textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
+        // eslint-disable-next-line no-multi-str
+        defaultMessage: 'Note: If script execution is disabled on your system, \
+you need to set the execution policy for the current session \
 to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
-    }),
-  },
-  EDIT_CONFIG,
-  {
-    title: START_SERVER.title,
-    textPre: START_SERVER.textPre,
-    commands: ['apm-server.exe -e'],
-  },
-];
+      }),
+    },
+    createEditConfig(),
+    {
+      title: START_SERVER.title,
+      textPre: START_SERVER.textPre,
+      commands: ['apm-server.exe -e'],
+    },
+  ];
+}
