@@ -65,7 +65,7 @@ function collectBucket(write, bucket, key, aggScale) {
             write.bucketBuffer.pop();
           }
         });
-      } else if (write.partialRows && write.metricsAtAllLevels) {
+      } else if (write.partialRows) {
         // we don't have any buckets, but we do have metrics at this
         // level, then pass all the empty buckets and jump back in for
         // the metrics.
@@ -85,7 +85,7 @@ function collectBucket(write, bucket, key, aggScale) {
       if (aggScale !== 1) {
         value *= aggScale;
       }
-      write.rowBuffer[column.id] = value;
+      write.metricBuffer.push({ id: column.id, value: value });
 
       if (!write.aggStack.length) {
         // row complete
@@ -94,6 +94,8 @@ function collectBucket(write, bucket, key, aggScale) {
         // process the next agg at this same level
         collectBucket(write, bucket, key, aggScale);
       }
+
+      write.metricBuffer.pop();
 
       break;
   }

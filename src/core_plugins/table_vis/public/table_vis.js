@@ -101,7 +101,7 @@ function TableVisTypeProvider(Private) {
       asAggConfigResults: true
     },
     hierarchicalData: function (vis) {
-      return vis.params.showMetricsAtAllLevels;
+      return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     }
   });
 }

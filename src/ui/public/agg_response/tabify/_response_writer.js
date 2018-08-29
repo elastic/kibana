@@ -30,6 +30,7 @@ import { tabifyGetColumns } from './_get_columns';
 function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false }) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
+  this.metricBuffer = [];
 
   this.metricsForAllBuckets = metricsAtAllLevels;
   this.partialRows = partialRows;
@@ -50,6 +51,10 @@ TabbedAggResponseWriter.prototype.isPartialRow = function (row) {
 TabbedAggResponseWriter.prototype.row = function () {
   this.bucketBuffer.forEach(bucket => {
     this.rowBuffer[bucket.id] = bucket.value;
+  });
+
+  this.metricBuffer.forEach(metric => {
+    this.rowBuffer[metric.id] = metric.value;
   });
 
   if (!toArray(this.rowBuffer).length || (!this.partialRows && this.isPartialRow(this.rowBuffer))) {
