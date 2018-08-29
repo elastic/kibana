@@ -52,6 +52,7 @@ export class LogsPage extends React.Component {
                         loadSuggestions={loadSuggestions}
                         onChange={setFilterQueryFromKueryExpression}
                         onSubmit={applyFilterQueryFromKueryExpression}
+                        placeholder="Search for log entries... (e.g. host.name:host-1)"
                         suggestions={suggestions}
                         value={filterQuery ? filterQuery.expression : ''}
                       />

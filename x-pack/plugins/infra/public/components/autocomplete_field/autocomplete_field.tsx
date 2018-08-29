@@ -24,6 +24,7 @@ interface AutocompleteFieldProps {
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
+  placeholder?: string;
   suggestions: AutocompleteSuggestion[];
   value: string;
 }
@@ -45,7 +46,7 @@ export class AutocompleteField extends React.Component<
   private inputElement: HTMLInputElement | null = null;
 
   public render() {
-    const { suggestions, isLoadingSuggestions, isValid, value } = this.props;
+    const { suggestions, isLoadingSuggestions, isValid, placeholder, value } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
     return (
@@ -60,6 +61,7 @@ export class AutocompleteField extends React.Component<
             onFocus={this.showSuggestions}
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
+            placeholder={placeholder}
             value={value}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
