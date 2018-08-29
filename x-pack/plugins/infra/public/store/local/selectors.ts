@@ -10,6 +10,7 @@ import { logMinimapSelectors as innerLogMinimapSelectors } from './log_minimap';
 import { logPositionSelectors as innerLogPositionSelectors } from './log_position';
 import { logTextviewSelectors as innerLogTextviewSelectors } from './log_textview';
 import { LocalState } from './reducer';
+import { waffleFilterSelectors as innerWaffleFilterSelectors } from './waffle_filter';
 
 export const logFilterSelectors = globalizeSelectors(
   (state: LocalState) => state.logFilter,
@@ -29,4 +30,9 @@ export const logPositionSelectors = globalizeSelectors(
 export const logTextviewSelectors = globalizeSelectors(
   (state: LocalState) => state.logTextview,
   innerLogTextviewSelectors
+);
+
+export const waffleFilterSelectors = globalizeSelectors(
+  (state: LocalState) => state.waffleFilter,
+  innerWaffleFilterSelectors
 );

@@ -8,3 +8,4 @@ export { logFilterActions } from './log_filter';
 export { logMinimapActions } from './log_minimap';
 export { logPositionActions } from './log_position';
 export { logTextviewActions } from './log_textview';
+export { waffleFilterActions } from './waffle_filter';

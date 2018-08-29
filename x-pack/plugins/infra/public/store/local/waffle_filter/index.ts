@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  logFilterActions,
-  logMinimapActions,
-  logPositionActions,
-  logTextviewActions,
-  waffleFilterActions,
-} from './local';
-export { logEntriesActions, logSummaryActions } from './remote';
+import * as waffleFilterActions from './actions';
+import * as waffleFilterSelectors from './selectors';
+
+export { waffleFilterActions, waffleFilterSelectors };
+export * from './reducer';
