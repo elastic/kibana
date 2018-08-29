@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_extract_default_translations');
+require('../src/dev/run_i18n_check');
