@@ -2720,13 +2720,6 @@ chownr@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.0.1.tgz#e2a75042a9551908bebd25b8523d5f9769d79181"
 
-chrome-remote-interface@0.24.2:
-  version "0.24.2"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.24.2.tgz#43a05440a1fa60b73769e72f3e7892ac11d66eba"
-  dependencies:
-    commander "2.1.x"
-    ws "2.0.x"
-
 chromedriver@2.41.0:
   version "2.41.0"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.41.0.tgz#2709d3544bc0c288b4738a6925a64c02a98a921f"
@@ -2996,10 +2989,6 @@ combined-stream@1.0.6, combined-stream@^1.0.5, combined-stream@~1.0.5:
 commander@2, commander@^2.12.1, commander@^2.9.0:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
-
-commander@2.1.x:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
 
 commander@2.8.1, commander@~2.8.1:
   version "2.8.1"
@@ -13413,10 +13402,6 @@ ultron@1.0.x:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/ultron/-/ultron-1.0.2.tgz#ace116ab557cd197386a4e88f4685378c8b2e4fa"
 
-ultron@~1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/ultron/-/ultron-1.1.1.tgz#9fe1536a10a664a65266a1e3ccf85fd36302bc9c"
-
 unbzip2-stream@1.0.9:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/unbzip2-stream/-/unbzip2-stream-1.0.9.tgz#9d107697a8d539d7bfdb9378a1cd832836bb7f8f"
@@ -14402,12 +14387,6 @@ ws@1.1.2:
   dependencies:
     options ">=0.0.5"
     ultron "1.0.x"
-
-ws@2.0.x:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-2.0.3.tgz#532fd499c3f7d7d720e543f1f807106cfc57d9cb"
-  dependencies:
-    ultron "~1.1.0"
 
 ws@^4.0.0, ws@^4.1.0:
   version "4.1.0"
