@@ -1054,7 +1054,7 @@ const bidirectionalCursors = {
   '315': 'nwse-resize',
 };
 
-const cursor = select(shape => {
+const cursor = select((shape, draggedPrimaryShape) => {
   if (!shape) return 'auto';
   switch (shape.subtype) {
     case config.rotationHandleName:
@@ -1065,9 +1065,9 @@ const cursor = select(shape => {
       const discretizedAngle = (Math.round(screenProjectedAngle / 45) * 45 + 360) % 360;
       return bidirectionalCursors[discretizedAngle];
     default:
-      return 'grab';
+      return draggedPrimaryShape.id === shape.id ? 'grabbing' : 'grab';
   }
-})(focusedShape);
+})(focusedShape, draggedPrimaryShape);
 
 // this is the core scenegraph update invocation: upon new cursor position etc. emit the new scenegraph
 // it's _the_ state representation (at a PoC level...) comprising of transient properties eg. draggedShape, and the
