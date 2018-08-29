@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { wrap as wrapBoom } from 'boom';
 
-export function wrapError(error: any) {
-  return wrapBoom(error, error.status);
-}
+export { convertSavedObjectToSpace } from './convert_saved_object_to_space';
+export { getSpaceById } from './get_space_by_id';
