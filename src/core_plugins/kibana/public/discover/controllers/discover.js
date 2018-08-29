@@ -55,6 +55,9 @@ import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { showShareContextMenu } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { Inspector } from 'ui/inspector';
+import { RequestAdapter } from 'ui/inspector/adapters';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -159,6 +162,9 @@ function discoverController(
     location: 'Discover'
   });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const inspectorAdapters = {
+    requests: new RequestAdapter()
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -199,6 +205,15 @@ function discoverController(
         getUnhashableStates,
         objectId: savedSearch.id,
         objectType: 'search',
+      });
+    }
+  }, {
+    key: 'inspect',
+    description: 'Open Inspector for search',
+    testId: 'openInspectorButton',
+    run() {
+      Inspector.open(inspectorAdapters, {
+        title: savedSearch.title
       });
     }
   }];
@@ -554,9 +569,38 @@ function discoverController(
     segmented.setSortFn(sortFn);
     segmented.setSize($scope.opts.sampleSize);
 
+    let inspectorRequests = [];
+    function logResponseInInspector(resp) {
+      if (inspectorRequests.length > 0) {
+        const inspectorRequest = inspectorRequests.shift();
+        inspectorRequest
+          .stats(getResponseInspectorStats($scope.searchSource, resp))
+          .ok({ json: resp });
+      }
+    }
+
     // triggered when the status updated
     segmented.on('status', function (status) {
       $scope.fetchStatus = status;
+      if (status.complete === 0) {
+        // starting new segmented search request
+        inspectorAdapters.requests.reset();
+        inspectorRequests = [];
+      }
+
+      if (status.remaining > 0) {
+        const inspectorRequest = inspectorAdapters.requests.start(
+          `Segment ${$scope.fetchStatus.complete}`,
+          {
+            description: `This request queries Elasticsearch to fetch the data for the search.`,
+          });
+        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+        $scope.searchSource.getSearchRequestBody().then(body => {
+          inspectorRequest.json(body);
+        });
+        inspectorRequests.push(inspectorRequest);
+      }
+
     });
 
     segmented.on('first', function () {
@@ -564,12 +608,17 @@ function discoverController(
     });
 
     segmented.on('segment', (resp) => {
+      logResponseInInspector(resp);
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
+    });
+
+    segmented.on('emptySegment', function (resp) {
+      logResponseInInspector(resp);
     });
 
     segmented.on('mergedSegment', function (merged) {
