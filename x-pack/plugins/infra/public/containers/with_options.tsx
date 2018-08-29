@@ -11,7 +11,7 @@ import {
   InfraOptions,
   InfraWaffleMapFormatterType,
   InfraWaffleMapLegendMode,
-  InfraWaffleMapRuleOperator,
+  // InfraWaffleMapRuleOperator,
   Omit,
 } from '../lib/lib';
 
@@ -31,11 +31,12 @@ const initialState = {
           .subtract(1, 'h')
           .valueOf(),
       },
-      formatter: InfraWaffleMapFormatterType.number,
+      formatter: InfraWaffleMapFormatterType.bytes,
       formatTemplate: '{{value}}',
       filters: [],
       metrics: [{ type: InfraMetricType.count }],
       path: [{ type: InfraPathType.hosts }],
+      /*
       legend: {
         type: InfraWaffleMapLegendMode.step,
         rules: [
@@ -53,7 +54,7 @@ const initialState = {
           },
         ],
       },
-      /*
+      */
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
         rules: [
@@ -75,7 +76,6 @@ const initialState = {
           },
         ],
       },
-      */
     },
   } as InfraOptions,
 };

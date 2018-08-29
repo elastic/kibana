@@ -7,7 +7,7 @@
 import { InfraWaffleMapDataFormat } from '../../lib/lib';
 import { formatNumber } from './number';
 
-const getUnitIndex = (val: number, base: number, labels: string[]) => {
+const getPowerFromValue = (val: number, base: number, labels: string[]) => {
   for (let i = 0; i < labels.length; i++) {
     if (val % Math.pow(base, i) === val) {
       return i - 1;
@@ -71,6 +71,6 @@ const BASES = {
 export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (val: number) => {
   const labels = LABELS[format];
   const base = BASES[format];
-  const unitIndex = getUnitIndex(val, base, labels);
-  return `${formatNumber(val / Math.pow(base, unitIndex))} ${labels[unitIndex]}`;
+  const power = getPowerFromValue(val, base, labels);
+  return `${formatNumber(val / Math.pow(base, power))} ${labels[power]}`;
 };
