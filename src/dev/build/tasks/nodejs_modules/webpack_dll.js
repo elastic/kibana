@@ -17,3 +17,77 @@
  * under the License.
  */
 
+import { deleteAll, read, write } from '../../lib';
+import { dirname, sep } from 'path';
+import pkgUp from 'pkg-up';
+import globby from 'globby';
+
+export function getDllEntries(manifest, whiteListedModules) {
+  if (!manifest || !manifest.content) {
+    // It should fails if we don't have modules
+    return [];
+  }
+
+  const modules = Object.keys(manifest.content);
+
+  // Only includes modules who are not in the black list of modules
+  // and there are not dll entry files
+  return modules.filter(entry => {
+    const isBlackListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
+    const isDllEntryFile = entry.includes('.entry.dll.js');
+
+    return !isBlackListed && !isDllEntryFile;
+  });
+}
+
+export async function cleanDllModuleFromEntryPath(logger, entryPath) {
+  const modulePkgPath = await pkgUp(entryPath);
+  const modulePkg = JSON.parse(await read(modulePkgPath));
+  const moduleDir = dirname(modulePkgPath);
+
+  // Cancel the cleanup for this module as it
+  // was already done.
+  if (modulePkg.cleaned) {
+    return;
+  }
+
+  // Clear dependencies from dll module package.json
+  if (modulePkg.dependencies) {
+    modulePkg.dependencies = [];
+  }
+
+  // Clear devDependencies from dll module package.json
+  if (modulePkg.devDependencies) {
+    modulePkg.devDependencies = [];
+  }
+
+  // Delete module contents. It will delete everything
+  // excepts package.json, images and css
+  //
+  // NOTE: We can't use cwd option with globby
+  // until the following issue gets closed
+  // https://github.com/sindresorhus/globby/issues/87
+  const deletePatterns = await globby([
+    `${moduleDir}/**`,
+    `!${moduleDir}/**/*.+(css)`,
+    `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+    `!${modulePkgPath}`,
+  ]);
+  await deleteAll(logger, deletePatterns);
+
+  // Mark this module as cleaned
+  modulePkg.cleaned = true;
+
+  // Rewrite modified package.json
+  await write(
+    modulePkgPath,
+    JSON.stringify(modulePkg, null, 2)
+  );
+}
+
+export async function writeEmptyFileForDllEntry(entryPath) {
+  await write(
+    entryPath,
+    ''
+  );
+}

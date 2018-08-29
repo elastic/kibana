@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { deleteAll, read, write } from '../../lib';
+import { read } from '../../lib';
+import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
 import { dirname, extname, isAbsolute, sep } from 'path';
 import { readFileSync } from 'fs';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 import globby from 'globby';
-import pkgUp from 'pkg-up';
 
 export const CleanClientModulesOnDLLTask = {
   description:
@@ -198,96 +198,32 @@ export const CleanClientModulesOnDLLTask = {
     }, {});
     const baseServerDeps = Object.keys(baseServerDepsMap);
 
-    // Consider this as our blackList for the modules we can't delete
-    const blackListModules = [
+    // TODO: REFACTOR EVERYTHING ABOVE
+    // THE TASK IS ALMOST ONLY THE THINGS
+    // BELOW THIS TODO
+
+    // Consider this as our whiteList for the modules we can't delete
+    const whiteListedModules = [
       ...baseServerDeps,
       ...kbnWebpackLoaders
     ];
 
-    const optimizedBundlesFolder = build.resolvePath('optimize/bundles');
+    // Read client vendors dll manifest content
     const dllManifest = JSON.parse(
       await read(
-        build.resolvePath(optimizedBundlesFolder, 'vendors.manifest.dll.json')
+        build.resolvePath('optimize/bundles/vendors.manifest.dll.json')
       )
     );
 
-    const getDllModules = (manifest) => {
-      if (!manifest || !manifest.content) {
-        // It should fails if we don't have modules
-        return [];
-      }
+    // Get dll entries filtering out the ones
+    // from any whitelisted module
+    const dllEntries = getDllEntries(dllManifest, whiteListedModules);
 
-      const modules = Object.keys(manifest.content);
+    for (const relativeEntryPath of dllEntries) {
+      const entryPath = build.resolvePath(relativeEntryPath);
 
-      // Only includes modules who are not in the black list of modules
-      // and there are not dll entry files
-      return modules.filter(entry => {
-        const isBlackListed = blackListModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
-        const isDllEntryFile = entry.includes('.entry.dll.js');
-
-        return !isBlackListed && !isDllEntryFile;
-      });
-    };
-
-    const cleanModule = async (moduleEntryPath) => {
-      const modulePkgPath = await pkgUp(moduleEntryPath);
-      const modulePkg = JSON.parse(await read(modulePkgPath));
-      const moduleDir = dirname(modulePkgPath);
-
-      // Cancel the cleanup for this module as it
-      // was already done.
-      if (modulePkg.cleaned) {
-        return;
-      }
-
-      // Clear dependencies from dll module package.json
-      if (modulePkg.dependencies) {
-        modulePkg.dependencies = [];
-      }
-
-      // Clear devDependencies from dll module package.json
-      if (modulePkg.devDependencies) {
-        modulePkg.devDependencies = [];
-      }
-
-      // Delete module contents. It will delete everything
-      // excepts package.json, images and css
-      //
-      // NOTE: We can't use cwd option with globby
-      // until the following issue gets closed
-      // https://github.com/sindresorhus/globby/issues/87
-      const deletePatterns = await globby([
-        `${moduleDir}/**`,
-        `!${moduleDir}/**/*.+(css)`,
-        `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
-        `!${modulePkgPath}`,
-      ]);
-      await deleteAll(log, deletePatterns);
-
-      // Mark this module as cleaned
-      modulePkg.cleaned = true;
-
-      // Rewrite modified package.json
-      await write(
-        modulePkgPath,
-        JSON.stringify(modulePkg, null, 2)
-      );
-    };
-
-    const buildEmptyEntryFile = async (moduleEntryPath) => {
-      await write(
-        moduleEntryPath,
-        ''
-      );
-    };
-
-    const modules = getDllModules(dllManifest);
-
-    for (const relativeModuleEntryPath of modules) {
-      const moduleEntryPath = build.resolvePath(relativeModuleEntryPath);
-
-      await cleanModule(moduleEntryPath);
-      await buildEmptyEntryFile(moduleEntryPath);
+      await cleanDllModuleFromEntryPath(log, entryPath);
+      await writeEmptyFileForDllEntry(entryPath);
     }
   }
 };
