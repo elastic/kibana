@@ -24,7 +24,7 @@ import HapiProxy from 'h2o2';
 const plugins = [HapiTemplates, HapiStaticFiles, HapiProxy];
 
 async function registerPlugins(server) {
-  return server.register(plugins);
+  return await server.register(plugins);
 }
 
 export function registerHapiPlugins(server) {

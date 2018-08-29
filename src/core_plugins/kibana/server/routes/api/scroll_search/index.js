@@ -35,7 +35,7 @@ export function scrollSearchApi(server) {
       };
 
       try {
-        return callWithRequest(req, 'search', params);
+        return await callWithRequest(req, 'search', params);
       } catch (err) {
         throw handleESError(err);
       }

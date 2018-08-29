@@ -91,9 +91,9 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       try {
         if (kbnServer.status.isGreen()) {
-          return h.renderApp(app);
+          return await h.renderApp(app);
         } else {
-          return h.renderStatusPage();
+          return await h.renderStatusPage();
         }
       } catch (err) {
         throw Boom.boomify(err);

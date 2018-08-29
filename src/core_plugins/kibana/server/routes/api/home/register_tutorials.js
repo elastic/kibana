@@ -22,7 +22,7 @@ export function registerTutorials(server) {
   server.route({
     path: '/api/kibana/home/tutorials',
     method: ['GET'],
-    handler: async function () {
+    handler: function () {
       return server.getTutorials();
     }
   });

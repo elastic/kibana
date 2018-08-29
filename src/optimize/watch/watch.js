@@ -39,11 +39,11 @@ export default async kbnServer => {
    */
   switch (process.env.kbnWorkerType) {
     case 'optmzr':
-      return kbnServer.mixin(require('./optmzr_role'));
+      await kbnServer.mixin(require('./optmzr_role'));
       break;
 
     case 'server':
-      return kbnServer.mixin(require('./proxy_role'));
+      await kbnServer.mixin(require('./proxy_role'));
       break;
 
     default:

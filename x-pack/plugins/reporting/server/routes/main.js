@@ -65,7 +65,7 @@ export function main(server) {
           const savedObjectId = request.params.savedId;
           const queryString = querystring.stringify(request.query);
 
-          return handler(exportTypeId, {
+          return await handler(exportTypeId, {
             objectType,
             savedObjectId,
             queryString
@@ -100,7 +100,7 @@ export function main(server) {
       const exportType = request.params.exportType;
       try {
         const jobParams = rison.decode(request.query.jobParams);
-        return handler(exportType, jobParams, request, h);
+        return await handler(exportType, jobParams, request, h);
       } catch (err) {
         throw handleError(exportType, err);
       }

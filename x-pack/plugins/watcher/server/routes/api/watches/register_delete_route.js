@@ -36,11 +36,11 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/watcher/watches',
     method: 'DELETE',
-    handler: (request) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const results = deleteWatches(callWithRequest, request.payload.watchIds);
+        const results = await deleteWatches(callWithRequest, request.payload.watchIds);
         return { results };
       } catch (err) {
         throw wrapUnknownError(err);

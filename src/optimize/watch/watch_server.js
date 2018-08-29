@@ -36,6 +36,6 @@ export default class WatchServer {
   async init() {
     await this.optimizer.init();
     this.optimizer.bindToServer(this.server, this.basePath);
-    return await this.server.start();
+    await this.server.start();
   }
 }

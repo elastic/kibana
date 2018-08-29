@@ -29,7 +29,7 @@ export default (server) => {
     method: 'GET',
     handler: async (req) => {
       try {
-        return getFields(req);
+        return await getFields(req);
       } catch (err) {
         if (err.isBoom && err.status === 401) {
           return err;
