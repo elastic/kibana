@@ -131,6 +131,13 @@ Array [
 ]
 `;
 
+exports[`dev/i18n/integrate_locale_files integrateLocaleFiles splits locale file by plugins and writes them into the right folders 3`] = `
+Array [
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1/translations",
+  "src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2/translations",
+]
+`;
+
 exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 1`] = `
 "Error in translations/fr.json:
 Missing translations:

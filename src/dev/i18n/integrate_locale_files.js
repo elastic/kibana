@@ -19,7 +19,7 @@
 
 import path from 'path';
 
-import { difference, globAsync, normalizePath, readFileAsync, writeFileAsync } from './utils';
+import { difference, globAsync, normalizePath, readFileAsync, writeFileAsync, accessAsync, makeDirAsync } from './utils';
 import { paths } from '../../../.i18nrc.json';
 import { getDefaultMessagesMap } from './extract_default_translations';
 
@@ -91,8 +91,15 @@ export async function integrateLocaleFiles(localesPath) {
     }
 
     for (const [namespace, messages] of localizedMessagesByNamespace) {
+      const destPath = paths[namespace];
+      try {
+        await accessAsync(path.resolve(destPath, 'translations'));
+      } catch (_) {
+        await makeDirAsync(path.resolve(destPath, 'translations'));
+      }
+
       await writeFileAsync(
-        path.resolve(paths[namespace], 'translations', path.basename(filePath)),
+        path.resolve(destPath, 'translations', path.basename(filePath)),
         JSON.stringify(messages, undefined, 2)
       );
     }

@@ -36,6 +36,8 @@ const LINE_BREAK_REGEX = /\n/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
+export const makeDirAsync = promisify(fs.mkdir);
+export const accessAsync = promisify(fs.access);
 export const globAsync = promisify(glob);
 
 export function normalizePath(inputPath) {

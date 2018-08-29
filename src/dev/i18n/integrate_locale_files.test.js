@@ -47,6 +47,7 @@ jest.mock('../../../.i18nrc.json', () => ({
 
 const utils = require('./utils');
 utils.writeFileAsync = jest.fn();
+utils.makeDirAsync = jest.fn();
 
 describe('dev/i18n/integrate_locale_files', () => {
   describe('verifyMessages', () => {
@@ -106,9 +107,11 @@ describe('dev/i18n/integrate_locale_files', () => {
       await integrateLocaleFiles(localesPath);
 
       const [[path1, json1], [path2, json2]] = utils.writeFileAsync.mock.calls;
+      const [[dirPath1], [dirPath2]] = utils.makeDirAsync.mock.calls;
 
       expect([normalizePath(path1), json1]).toMatchSnapshot();
       expect([normalizePath(path2), json2]).toMatchSnapshot();
+      expect([normalizePath(dirPath1), normalizePath(dirPath2)]).toMatchSnapshot();
     });
   });
 });
