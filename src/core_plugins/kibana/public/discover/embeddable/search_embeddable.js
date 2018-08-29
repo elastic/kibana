@@ -22,6 +22,7 @@ import { Embeddable } from 'ui/embeddable';
 import searchTemplate from './search_template.html';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getTime } from 'ui/timefilter/get_time';
+import { RequestAdapter } from 'ui/inspector/adapters';
 
 export class SearchEmbeddable extends Embeddable {
   constructor({ onEmbeddableStateChanged, savedSearch, editUrl, loader, $rootScope, $compile }) {
@@ -38,6 +39,13 @@ export class SearchEmbeddable extends Embeddable {
     this.$rootScope = $rootScope;
     this.$compile = $compile;
     this.customization = {};
+    this.inspectorAdaptors = {
+      requests: new RequestAdapter()
+    };
+  }
+
+  getInspectorAdapters() {
+    return this.inspectorAdaptors;
   }
 
   emitEmbeddableStateChange(embeddableState) {
@@ -84,6 +92,7 @@ export class SearchEmbeddable extends Embeddable {
 
     this.searchScope.description = this.savedSearch.description;
     this.searchScope.searchSource = this.savedSearch.searchSource;
+    this.searchScope.inspectorAdapters = this.inspectorAdaptors;
 
     const timeRangeSearchSource = this.searchScope.searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
