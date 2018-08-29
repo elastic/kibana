@@ -31,7 +31,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const remote = getService('remote');
   const es = getService('es');
   const retry = getService('retry');
@@ -60,7 +59,6 @@ export default function ({ getService, getPageObjects }) {
           type: 'doc',
           id: 'index-pattern:logstash-*',
           body: {
-            // put the partial document under the `doc` key
             "doc": {"index-pattern": {"fieldFormatMap":"{\"geo.src\":{\"id\":\"number\"}}"}}
             }
           });
@@ -88,7 +86,6 @@ export default function ({ getService, getPageObjects }) {
             type: 'doc',
             id: 'index-pattern:logstash-*',
             body: {
-              // put the partial document under the `doc` key
               "doc": {"index-pattern": {"fieldFormatMap":"{\"geo.dest\":{\"id\":\"number\"}}"}}
               }
             });
@@ -97,10 +94,6 @@ export default function ({ getService, getPageObjects }) {
               //await PageObjects.common.sleep(2000);
               const message = await PageObjects.common.closeToast();
               expect(message).to.contain('Unable');
-
-
-
-
             });
           });
   });
