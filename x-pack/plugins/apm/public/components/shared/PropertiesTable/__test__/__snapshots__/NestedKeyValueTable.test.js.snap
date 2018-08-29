@@ -1,81 +1,203 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FormattedKey component should render when the value is null or undefined 1`] = `
-<styled.span>
+exports[`FormattedKey component should render when the value is defined 1`] = `
+<FormattedKey
+  k="testKey"
+  value="hi"
+>
   testKey
-</styled.span>
+</FormattedKey>
+`;
+
+exports[`FormattedKey component should render when the value is defined 2`] = `
+<FormattedKey
+  k="testKey"
+  value={123}
+>
+  testKey
+</FormattedKey>
+`;
+
+exports[`FormattedKey component should render when the value is defined 3`] = `
+<FormattedKey
+  k="testKey"
+  value={Object {}}
+>
+  testKey
+</FormattedKey>
+`;
+
+exports[`FormattedKey component should render when the value is null or undefined 1`] = `
+.c0 {
+  color: #999999;
+}
+
+<FormattedKey
+  k="testKey"
+  value={null}
+>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      testKey
+    </span>
+  </styled.span>
+</FormattedKey>
 `;
 
 exports[`FormattedKey component should render when the value is null or undefined 2`] = `
-<styled.span>
-  testKey
-</styled.span>
+.c0 {
+  color: #999999;
+}
+
+<FormattedKey
+  k="testKey"
+>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      testKey
+    </span>
+  </styled.span>
+</FormattedKey>
 `;
 
 exports[`FormattedKey component should render when the value is null or undefined 3`] = `
-<styled.span>
-  testKey
-</styled.span>
+.c0 {
+  color: #999999;
+}
+
+<FormattedKey
+  k="testKey"
+>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      testKey
+    </span>
+  </styled.span>
+</FormattedKey>
 `;
 
 exports[`FormattedValue component should render a boolean 1`] = `
-<React.Fragment>
+<FormattedValue
+  value={true}
+>
   true
-</React.Fragment>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render a boolean 2`] = `
-<React.Fragment>
+<FormattedValue
+  value={false}
+>
   false
-</React.Fragment>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render a number 1`] = `
-<React.Fragment>
+<FormattedValue
+  value={243}
+>
   243
-</React.Fragment>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render a string 1`] = `
-<React.Fragment>
+<FormattedValue
+  value="hey ok cool"
+>
   hey ok cool
-</React.Fragment>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render an array 1`] = `
-<pre>
-  [
+<FormattedValue
+  value={
+    Array [
+      1,
+      2,
+      3,
+    ]
+  }
+>
+  <pre>
+    [
     1,
     2,
     3
 ]
-</pre>
+  </pre>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render an object 1`] = `
-<pre>
-  {
+<FormattedValue
+  value={
+    Object {
+      "a": "ok",
+    }
+  }
+>
+  <pre>
+    {
     "a": "ok"
 }
-</pre>
+  </pre>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render null 1`] = `
-<styled.span>
-  N/A
-</styled.span>
+.c0 {
+  color: #999999;
+}
+
+<FormattedValue
+  value={null}
+>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      N/A
+    </span>
+  </styled.span>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render undefined 1`] = `
-<styled.span>
-  N/A
-</styled.span>
+.c0 {
+  color: #999999;
+}
+
+<FormattedValue>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      N/A
+    </span>
+  </styled.span>
+</FormattedValue>
 `;
 
 exports[`FormattedValue component should render undefined 2`] = `
-<styled.span>
-  N/A
-</styled.span>
+.c0 {
+  color: #999999;
+}
+
+<FormattedValue>
+  <styled.span>
+    <span
+      className="c0"
+    >
+      N/A
+    </span>
+  </styled.span>
+</FormattedValue>
 `;
 
 exports[`NestedKeyValueTable component should render an empty table if there is no data 1`] = `

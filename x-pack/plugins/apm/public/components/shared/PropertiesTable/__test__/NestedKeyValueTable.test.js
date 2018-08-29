@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
+import 'jest-styled-components';
 import {
   NestedKeyValueTable,
   NestedValue,
@@ -58,46 +59,48 @@ describe('NestedValue component', () => {
 
 describe('FormattedValue component', () => {
   it('should render an object', () => {
-    expect(shallow(<FormattedValue value={{ a: 'ok' }} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={{ a: 'ok' }} />)).toMatchSnapshot();
   });
 
   it('should render an array', () => {
-    expect(shallow(<FormattedValue value={[1, 2, 3]} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={[1, 2, 3]} />)).toMatchSnapshot();
   });
 
   it('should render a boolean', () => {
-    expect(shallow(<FormattedValue value={true} />)).toMatchSnapshot();
-    expect(shallow(<FormattedValue value={false} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={true} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={false} />)).toMatchSnapshot();
   });
 
   it('should render a number', () => {
-    expect(shallow(<FormattedValue value={243} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={243} />)).toMatchSnapshot();
   });
 
   it('should render a string', () => {
-    expect(shallow(<FormattedValue value="hey ok cool" />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value="hey ok cool" />)).toMatchSnapshot();
   });
 
   it('should render null', () => {
-    expect(shallow(<FormattedValue value={null} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={null} />)).toMatchSnapshot();
   });
 
   it('should render undefined', () => {
     let b;
-    expect(shallow(<FormattedValue value={b} />)).toMatchSnapshot();
-    expect(shallow(<FormattedValue />)).toMatchSnapshot();
+    expect(mount(<FormattedValue value={b} />)).toMatchSnapshot();
+    expect(mount(<FormattedValue />)).toMatchSnapshot();
   });
 });
 
 describe('FormattedKey component', () => {
   it('should render when the value is null or undefined', () => {
     let nope;
-    expect(
-      shallow(<FormattedKey k="testKey" value={null} />)
-    ).toMatchSnapshot();
-    expect(
-      shallow(<FormattedKey k="testKey" value={nope} />)
-    ).toMatchSnapshot();
-    expect(shallow(<FormattedKey k="testKey" />)).toMatchSnapshot();
+    expect(mount(<FormattedKey k="testKey" value={null} />)).toMatchSnapshot();
+    expect(mount(<FormattedKey k="testKey" value={nope} />)).toMatchSnapshot();
+    expect(mount(<FormattedKey k="testKey" />)).toMatchSnapshot();
+  });
+
+  it('should render when the value is defined', () => {
+    expect(mount(<FormattedKey k="testKey" value="hi" />)).toMatchSnapshot();
+    expect(mount(<FormattedKey k="testKey" value={123} />)).toMatchSnapshot();
+    expect(mount(<FormattedKey k="testKey" value={{}} />)).toMatchSnapshot();
   });
 });
