@@ -101,7 +101,7 @@ export class SecureSavedObjectsClientWrapper {
 
   async _checkSavedObjectPrivileges(actions) {
     try {
-      if (!this._spaces) {
+      if (this._spaces) {
         const spaceId = this._spaces.getSpaceId(this._request);
         return await this._checkPrivileges.atSpace(spaceId, actions);
       }
@@ -158,7 +158,12 @@ export class SecureSavedObjectsClientWrapper {
       throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
     }
 
-    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
+    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, {
+      options: {
+        ...options,
+        type: authorizedTypes,
+      }
+    });
 
     return await this._baseClient.find({
       ...options,
