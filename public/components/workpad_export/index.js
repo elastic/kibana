@@ -6,8 +6,9 @@ import { jobCompletionNotifications } from 'plugins/reporting/services/job_compl
 import { getWorkpad, getPages } from '../../state/selectors/workpad';
 import { getReportingBrowserType } from '../../state/selectors/app';
 import { notify } from '../../lib/notify';
+import { getWindow } from '../../lib/get_window';
 import { WorkpadExport as Component } from './workpad_export';
-import { createPdf } from './utils';
+import { getPdfUrl, createPdf } from './utils';
 
 const mapStateToProps = state => ({
   workpad: getWorkpad(state),
@@ -15,17 +16,38 @@ const mapStateToProps = state => ({
   enabled: getReportingBrowserType(state) === 'chromium',
 });
 
+const getAbsoluteUrl = path => {
+  const { location } = getWindow();
+  if (!location) return path; // fallback for mocked window object
+
+  const { protocol, hostname, port } = location;
+  return `${protocol}//${hostname}:${port}${path}`;
+};
+
 export const WorkpadExport = compose(
   connect(mapStateToProps),
-  withProps(() => ({
-    onExport: (type, workpad, options) => {
+  withProps(({ workpad, pageCount }) => ({
+    getExportUrl: type => {
       if (type === 'pdf') {
-        return createPdf(workpad, options)
+        return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
+      }
+
+      throw new Error(`Unknown export type: ${type}`);
+    },
+    onCopy: type => {
+      if (type === 'pdf') {
+        return notify.info('The PDF generation URL was copied to your clipboard.');
+      }
+
+      throw new Error(`Unknown export type: ${type}`);
+    },
+    onExport: type => {
+      if (type === 'pdf') {
+        return createPdf(workpad, { pageCount })
           .then(({ data }) => {
-            notify.info(
-              `A PDF is being created. You will be notified on completion and can track its progress in Management`,
-              { title: `PDF export of workpad '${workpad.name}'` }
-            );
+            notify.info('Exporting PDF. You can track the progress in Management.', {
+              title: `PDF export of workpad '${workpad.name}'`,
+            });
 
             // register the job so a completion notification shows up when it's ready
             jobCompletionNotifications.add(data.job.id);

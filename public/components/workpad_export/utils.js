@@ -9,7 +9,7 @@ import { fetch } from '../../../common/lib/fetch';
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';
 
-export function createPdf({ id, name: title, width, height }, { pageCount }) {
+export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
   const reportingEntry = chrome.addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
   const exportType = exportTypesRegistry.getById('printablePdf');
@@ -41,10 +41,13 @@ export function createPdf({ id, name: title, width, height }, { pageCount }) {
     title,
   };
 
-  const createPdfUri = `${reportingEntry}/${exportType.id}?${QueryString.param(
+  return `${reportingEntry}/${exportType.id}?${QueryString.param(
     'jobParams',
     rison.encode(jobParams)
   )}`;
+}
 
+export function createPdf(...args) {
+  const createPdfUri = getPdfUrl(...args);
   return fetch.post(createPdfUri);
 }
