@@ -13,10 +13,14 @@ import {
 } from '@kbn/ui-framework/components';
 import { EuiLink } from '@elastic/eui';
 import { Status } from './status';
+import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
 
 
 const filterFields = [ 'beat.name' ];
 const columns = [
+  { title: 'Name', sortKey: 'beat.name', sortOrder: SORT_ASCENDING },
+  { title: 'Version', sortKey: 'beat.version', sortOrder: SORT_ASCENDING },
+  { title: 'Error Count', sortKey: 'errorCount', sortOrder: SORT_DESCENDING },
 ];
 const instanceRowFactory = (goToInstance) => {
   return function KibanaRow(props) {
@@ -29,6 +33,26 @@ const instanceRowFactory = (goToInstance) => {
               data-test-subj={`apmLink-${props.beat.name}`}
             >
               { props.beat.name }
+            </EuiLink>
+          </div>
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          <div className="monitoringTableCell__version">
+            <EuiLink
+              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
+              data-test-subj={`apmLink-${props.beat.version}`}
+            >
+              { props.beat.version }
+            </EuiLink>
+          </div>
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          <div className="monitoringTableCell__number">
+            <EuiLink
+              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
+              data-test-subj={`apmLink-errors`}
+            >
+              { props.errorCount }
             </EuiLink>
           </div>
         </KuiTableRowCell>

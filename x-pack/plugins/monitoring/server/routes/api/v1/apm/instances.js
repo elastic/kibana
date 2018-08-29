@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { getStats } from '../../../../lib/beats';
+import { getStats, getApms } from '../../../../lib/apm';
 import { handleError } from '../../../../lib/errors';
 
 export function apmInstancesRoute(server) {
@@ -35,12 +35,14 @@ export function apmInstancesRoute(server) {
 
       try {
 
-        const [ stats ] = await Promise.all([
+        const [ stats, apms ] = await Promise.all([
           getStats(req, apmIndexPattern, clusterUuid),
+          getApms(req, apmIndexPattern, clusterUuid),
         ]);
 
         reply({
           stats,
+          apms
         });
 
       } catch (err) {

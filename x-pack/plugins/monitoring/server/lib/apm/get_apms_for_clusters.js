@@ -75,6 +75,5 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
         timeOfLastEvent,
       }
     };
-
   }));
 }
