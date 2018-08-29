@@ -68,7 +68,7 @@ export class MonacoHelper {
         this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
           if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
             const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
-            history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
+            history.push(`${uri}!L${e.target.position.lineNumber}:0`);
           }
         });
         const hoverController: HoverController = new HoverController(this.editor);
