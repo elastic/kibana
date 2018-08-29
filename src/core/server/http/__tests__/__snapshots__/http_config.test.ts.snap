@@ -5,6 +5,7 @@ Object {
   "host1": "www.example.com",
   "host2": "8.8.8.8",
   "host3": "::1",
+  "host4": "localhost",
 }
 `;
 
