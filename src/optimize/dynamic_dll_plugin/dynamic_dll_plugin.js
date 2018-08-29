@@ -47,7 +47,7 @@ export class DynamicDllPlugin {
   async init() {
     await this.dllCompiler.init();
     this.entryPaths = await this.dllCompiler.readEntryFile();
-    this.log(['info', 'optimize'], 'Start dynamic dll plugin tasks');
+    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
   }
 
   apply(compiler) {
@@ -146,7 +146,7 @@ export class DynamicDllPlugin {
         this.entryPaths = this.afterCompilationEntryPaths;
 
         this.log(
-          ['info', 'optimize'],
+          ['info', 'optimize:dynamic_dll_plugin'],
           compilation.needsDLLCompilation
             ? 'Need to compile the client vendors dll'
             : 'No need to compile client vendors dll'
@@ -160,10 +160,10 @@ export class DynamicDllPlugin {
   registerDoneHook(compiler) {
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        await this.runDLLCompiler(compiler);
+        return await this.runDLLCompiler(compiler);
       }
 
-      this.log(['info', 'optimize'], 'All dynamic dll plugin tasks finished');
+      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
   }
 

@@ -23,7 +23,6 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import webpack from 'webpack';
-import supportsColor from 'supports-color';
 import { promisify } from 'util';
 import path from 'path';
 
@@ -113,7 +112,8 @@ export class DllCompiler {
   async run(dllEntries) {
     const dllConfig = this.dllConfigGenerator(this.rawDllConfig);
     await this.upsertEntryFile(dllEntries);
-    await this.runWebpack(dllConfig);
+
+    return await this.runWebpack(dllConfig);
   }
 
   dllConfigGenerator(dllConfig) {
@@ -121,26 +121,26 @@ export class DllCompiler {
   }
 
   async runWebpack(config) {
-    return new Promise((resolve) => {
-      this.log(['info', 'optimize'], 'Start compiling client vendors dll');
+    return new Promise((resolve, reject) => {
+      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
 
       webpack(config, (err, stats) => {
+        // If a critical error occurs
+        // reject the promise
         if (err) {
-          console.error(err.stack || err);
-          if (err.details) {
-            console.error(err.details);
-          }
-          return;
+          this.log(
+            ['fatal', 'optimize:dynamic_dll_plugin'],
+            `Client vendors dll compilation failed`
+          );
+          return reject(err);
         }
 
-        const statsColors = process.stdout.isTTY === true ? supportsColor.stdout : false;
-        const statsString = stats.toString({
-          colors: statsColors
-        });
-
-        process.stdout.write(`${statsString}\n`);
-
-        resolve();
+        // Otherwise let it proceed
+        this.log(
+          ['info', 'optimize:dynamic_dll_plugin'],
+          `Client vendors dll compilation finished with success and the following stats:\n\n${stats}`
+        );
+        return resolve(stats);
       });
     });
   }
