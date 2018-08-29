@@ -45,10 +45,10 @@ async function addCoveredIndices(policiesMap, callWithRequest) {
   };
 
   const policyExplanation = await callWithRequest('transport.request', params);
-  Object.entries(policyExplanation.indices).forEach(([indexName, { name: policyName = '' }]) => {
-    if (policyName) {
-      policiesMap[policyName] = policiesMap[policyName] || [];
-      policiesMap[policyName].push(indexName);
+  Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
+    if (policy) {
+      policiesMap[policy].coveredIndices = policiesMap[policy].coveredIndices || [];
+      policiesMap[policy].coveredIndices.push(indexName);
     }
   });
 }

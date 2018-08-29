@@ -9,6 +9,7 @@ import { i18n }  from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { NoMatch } from '../no_match';
 import {
+  EuiButton,
   EuiLink,
   EuiCheckbox,
   EuiFieldSearch,
@@ -31,6 +32,7 @@ import {
   EuiPageContent
 } from '@elastic/eui';
 
+import { ConfirmDelete } from './confirm_delete';
 const HEADERS = {
   name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
     defaultMessage: 'Name',
@@ -63,10 +65,25 @@ export class PolicyTableUi extends Component {
     super(props);
 
     this.state = {
-      selectedPoliciesMap: {}
+      selectedPoliciesMap: {},
+      showDeleteConfirmation: false
     };
   }
   componentDidMount() {
+    this.props.fetchPolicies(true);
+  }
+  deleteConfirmation() {
+    if (!this.state.showDeleteConfirmation) {
+      return null;
+    }
+    return (
+      <ConfirmDelete
+        policiesToDelete={this.getSelectedPolicies()}
+        callback={this.handleDelete}
+      />
+    );
+  }
+  handleDelete = () => {
     this.props.fetchPolicies(true);
   }
   onSort = column => {
@@ -108,13 +125,17 @@ export class PolicyTableUi extends Component {
   isItemSelected = name => {
     return !!this.state.selectedPoliciesMap[name];
   };
-
+  getSelectedPolicies() {
+    return this.props.policies.filter(({ name }) => {
+      return this.isItemSelected(name);
+    });
+  }
   areAllItemsSelected = () => {
     const { policies } = this.props;
-    const policyOfUnselectedItem = policies.find(
+    const unselectedItem = policies.find(
       policy => !this.isItemSelected(policy.name)
     );
-    return policyOfUnselectedItem === -1;
+    return !unselectedItem;
   };
 
   buildHeader() {
@@ -222,11 +243,14 @@ export class PolicyTableUi extends Component {
       policies,
       intl,
     } = this.props;
+    const { selectedPoliciesMap } = this.state;
+    const numSelected = Object.keys(selectedPoliciesMap).length;
 
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
+            {this.deleteConfirmation()}
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
@@ -250,6 +274,17 @@ export class PolicyTableUi extends Component {
             </EuiFlexGroup>
             <EuiSpacer />
             <EuiFlexGroup gutterSize="l" alignItems="center">
+              {numSelected > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="deletePolicyButton"
+                    color="danger"
+                    onClick={() => this.setState({ showDeleteConfirmation: true })}
+                  >
+                    Delete {numSelected} polic{numSelected > 1 ? 'ies' : 'y'}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem>
                 <EuiFieldSearch
                   fullWidth
@@ -276,7 +311,7 @@ export class PolicyTableUi extends Component {
                 <EuiTableHeader>
                   <EuiTableHeaderCellCheckbox>
                     <EuiCheckbox
-                      id="selectAllpolicyes"
+                      id="selectAllPolicies"
                       checked={this.areAllItemsSelected()}
                       onChange={this.toggleAll}
                       type="inList"
