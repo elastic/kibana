@@ -29,10 +29,10 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.loadIfNeeded('makelogs');
     });
 
-    // after(async function () {
-    //   await esArchiver.unload('makelogs');
-    //   await esArchiver.unload('empty_kibana');
-    // });
+    after(async function () {
+      await esArchiver.unload('makelogs');
+      await esArchiver.unload('empty_kibana');
+    });
 
     loadTestFile(require.resolve('./_create_index_pattern_wizard'));
     loadTestFile(require.resolve('./_index_pattern_create_delete'));
