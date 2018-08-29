@@ -74,7 +74,7 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
   if (_.isObject(value)) {
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
   } else if (_.isBoolean(value) || _.isNumber(value)) {
-    value = String(value);
+    return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
     return <EmptyValue>N/A</EmptyValue>;
   }
