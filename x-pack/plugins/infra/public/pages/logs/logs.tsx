@@ -19,7 +19,7 @@ import { LogTextScaleControls } from '../../components/logging/log_text_scale_co
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
-
+import { ColumnarPage, PageContent } from '../../components/page';
 import { WithLogFilter } from '../../containers/logs/with_log_filter';
 import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
@@ -109,7 +109,7 @@ export class LogsPage extends React.Component {
             </EuiFlexItem>
           </EuiFlexGroup>
         </Toolbar>
-        <LogPageContent>
+        <PageContent>
           <AutoSizer content>
             {({ measureRef, content: { width = 0, height = 0 } }) => (
               <LogPageEventStreamColumn innerRef={measureRef as any}>
@@ -195,18 +195,11 @@ export class LogsPage extends React.Component {
               );
             }}
           </AutoSizer>
-        </LogPageContent>
+        </PageContent>
       </ColumnarPage>
     );
   }
 }
-
-const LogPageContent = styled.div`
-  flex: 1 0 0;
-  display: flex;
-  flex-direction: row;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
-`;
 
 const LogPageEventStreamColumn = styled.div`
   flex: 1 0 0;
@@ -222,11 +215,4 @@ const LogPageMinimapColumn = styled.div`
   max-width: 100px;
   display: flex;
   flex-direction: column;
-`;
-
-const ColumnarPage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex: 1 0 0;
 `;
