@@ -19,7 +19,6 @@ import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { SecureSavedObjectsClient } from './server/lib/saved_objects_client/secure_saved_objects_client';
 import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
@@ -127,18 +126,12 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
-
       if (authorization.mode.useRbacForRequest(request)) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
-
-        return new SecureSavedObjectsClient({
-          errors: savedObjects.SavedObjectsClient.errors,
-          internalRepository,
-          request,
-        });
+        return new savedObjects.SavedObjectsClient(internalRepository);
       }
 
+      const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
