@@ -16,35 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from '../chrome';
-import { PersistedLog } from './';
+
 import { createLogKey } from './create_log_key';
 
-class RecentlyAccessed {
-  constructor() {
-    const historyOptions = {
-      maxLength: 20,
-      filterDuplicates: true,
-      isDuplicate: (oldItem, newItem) => {
-        return oldItem.id === newItem.id;
-      }
-    };
-    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
-    this.history = new PersistedLog(logKey, historyOptions);
-  }
+describe('createLogKey', () => {
+  it('should create a key starting with "kibana.history"', () => {
+    expect(createLogKey('foo', 'bar')).toMatch(/^kibana\.history/);
+  });
 
-  add(link, label, id) {
-    const historyItem = {
-      link: link,
-      label: label,
-      id: id
-    };
-    this.history.add(historyItem);
-  }
+  it('should include a hashed suffix of the identifier when present', () => {
+    const expectedSuffix = `/N4rLtula/QIYB+3If6bXDONEO5CnqBPrlURto+/j7k=`;
+    expect(createLogKey('foo', 'bar')).toMatch(`kibana.history.foo-${expectedSuffix}`);
+  });
 
-  get() {
-    return this.history.get();
-  }
-}
-
-export const recentlyAccessed = new RecentlyAccessed();
+  it('should not include a hashed suffix if the identifier is not present', () => {
+    expect(createLogKey('foo')).toEqual('kibana.history.foo');
+  });
+});
