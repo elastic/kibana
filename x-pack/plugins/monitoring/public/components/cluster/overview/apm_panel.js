@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 export function ApmPanel(props) {
-  if (!get(props, 'beats.total', 0) > 0) {
+  if (!get(props, 'apms.total', 0) > 0) {
     return null;
   }
 
@@ -48,11 +48,11 @@ export function ApmPanel(props) {
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>Total Events</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="beatsTotalEvents">
+              <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>Bytes Sent</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="beatsBytesSent">
+              <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
                 {formatMetric(props.bytesSent, 'byte')}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -64,10 +64,10 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={`Apm Instances: ${props.beats.total}`}
+                  aria-label={`Apm Instances: ${props.apms.total}`}
                   data-test-subj="apmListing"
                 >
-                  APM Servers: <span data-test-subj="beatsTotal">{props.beats.total}</span>
+                  APM Servers: <span data-test-subj="apmsTotal">{props.apms.total}</span>
                 </EuiLink>
               </h3>
             </EuiTitle>
