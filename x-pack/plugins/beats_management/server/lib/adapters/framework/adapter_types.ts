@@ -50,6 +50,7 @@ export interface FrameworkRouteOptions<
   path: string;
   method: string | string[];
   vhost?: string;
+  licenseRequired?: boolean;
   handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
   config?: {};
 }

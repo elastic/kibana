@@ -11,6 +11,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags',
+  licenseRequired: true,
   handler: async (request: any, reply: any) => {
     let tags: BeatTag[];
     try {

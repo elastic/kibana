@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import Boom from 'boom';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import { PLUGIN } from '../../../../common/constants/plugin';
@@ -70,10 +72,17 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ) {
-    const wrappedHandler = (request: any, reply: any) => route.handler(wrapRequest(request), reply);
+    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
+      const xpackMainPlugin = this.server.plugins.xpack_main;
+      const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
+      if (licenseRequired && !licenseCheckResults.licenseValid) {
+        reply(Boom.forbidden(licenseCheckResults.message));
+      }
+      return route.handler(wrapRequest(request), reply);
+    };
 
     this.server.route({
-      handler: wrappedHandler,
+      handler: wrappedHandler(route.licenseRequired),
       method: route.method,
       path: route.path,
       config: route.config,
@@ -98,10 +107,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // from Elasticsearch, assume worst case and disable the Logstash pipeline UI
     if (!xPackInfo || !xPackInfo.isAvailable()) {
       return {
-        showLinks: false,
-        isAvailable: false,
-        enableLinks: false,
-        isReadOnly: false,
+        securityEnabled: false,
+        licenseValid: false,
         message:
           'You cannot manage Beats centeral management because license information is not available at this time.',
       };

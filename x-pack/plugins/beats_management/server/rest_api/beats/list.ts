@@ -9,10 +9,10 @@ import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agents/{listByAndValue*}',
+  licenseRequired: true,
   handler: async (request: FrameworkRequest, reply: any) => {
     const listByAndValueParts = request.params.listByAndValue.split('/');
     let listBy: 'tag' | null = null;
