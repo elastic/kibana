@@ -1,4 +1,6 @@
 import { connect } from 'react-redux';
+import { compose, withProps } from 'recompose';
+import { notify } from '../../lib/notify';
 import { getAssets } from '../../state/selectors/assets';
 import { removeAsset } from '../../state/actions/assets';
 import { AssetManager as Component } from './asset_manager';
@@ -11,4 +13,7 @@ const mapDispatchToProps = {
   removeAsset,
 };
 
-export const AssetManager = connect(mapStateToProps, mapDispatchToProps)(Component);
+export const AssetManager = compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  withProps({ copyAsset: assetId => notify.success(`Copied '${assetId}' to clipboard`) })
+)(Component);

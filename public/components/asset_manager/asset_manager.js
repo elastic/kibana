@@ -28,6 +28,7 @@ export class AssetManager extends React.PureComponent {
   static propTypes = {
     assets: PropTypes.array,
     removeAsset: PropTypes.func,
+    copyAsset: PropTypes.func,
   };
 
   state = {
@@ -80,7 +81,10 @@ export class AssetManager extends React.PureComponent {
             </Download>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <Clipboard content={asset.id}>
+            <Clipboard
+              content={asset.id}
+              onCopy={result => result && this.props.copyAsset(asset.id)}
+            >
               <EuiButtonIcon
                 iconType="copyClipboard"
                 aria-label="Copy to clipboard"
