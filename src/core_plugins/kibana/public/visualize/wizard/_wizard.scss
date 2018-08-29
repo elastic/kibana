@@ -1,0 +1,18 @@
+/**
+ * This preserves backwards-compatibility with any plugins that are still specifying an `icon`
+ * class.
+ *
+ * 1. Size icon correctly.
+ */
+.visualizeWizardVisTypeIcon {
+  color: $euiColorEmptyShade;
+  font-size: 50px; /* 1 */
+}
+
+/**
+ * 1. Hack in some padding for these panels.
+ */
+.visualizeWizardPaginatedSelectableList,
+.visualizeWizardSavedObjectFinder {
+  padding: $euiSizeS; /* 1 */
+}
