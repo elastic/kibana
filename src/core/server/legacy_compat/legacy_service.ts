@@ -18,8 +18,8 @@
  */
 
 import { Server as HapiServer } from 'hapi-latest';
-import { combineLatest, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { combineLatest, ConnectableObservable, EMPTY, from, Subscription } from 'rxjs';
+import { catchError, first, map, mapTo, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
 import { Config, ConfigService, Env } from '../config';
 import { DevConfig } from '../dev';
@@ -50,31 +50,34 @@ export class LegacyService implements CoreService {
   public async start(httpServerInfo?: HttpServerInfo) {
     this.log.debug('starting legacy service');
 
-    this.configSubscription = this.configService.getConfig$().subscribe({
-      next: updatedConfig => {
-        if (this.kbnServer === undefined) {
-          return;
+    const update$ = this.configService.getConfig$().pipe(
+      tap(config => {
+        if (this.kbnServer !== undefined) {
+          this.kbnServer.applyLoggingConfiguration(config.toRaw());
         }
+      }),
+      catchError(err => {
+        this.log.error(err);
+        throw err;
+      }),
+      publishReplay(1)
+    ) as ConnectableObservable<Config>;
 
-        try {
-          this.kbnServer.applyLoggingConfiguration(updatedConfig.toRaw());
-        } catch (err) {
-          this.log.error(err);
-        }
-      },
-      error: err => this.log.error(err),
-    });
+    this.configSubscription = update$.connect();
 
-    const config = await this.configService
-      .getConfig$()
-      .pipe(first())
+    // Receive initial config and create kbnServer/ClusterManager.
+    this.kbnServer = await update$
+      .pipe(
+        first(),
+        mergeMap(config => {
+          if (this.env.isDevClusterMaster) {
+            return from(this.createClusterManager(config)).pipe(mapTo(undefined));
+          }
+
+          return from(this.createKbnServer(config, httpServerInfo));
+        })
+      )
       .toPromise();
-
-    if (this.env.isDevClusterMaster) {
-      return this.createClusterManager(config);
-    }
-
-    this.kbnServer = await this.createKbnServer(config, httpServerInfo);
   }
 
   public async stop() {
@@ -92,28 +95,26 @@ export class LegacyService implements CoreService {
   }
 
   private async createClusterManager(config: Config) {
-    const [devConfig, httpConfig] = await combineLatest(
-      this.configService.atPath('dev', DevConfig),
-      this.configService.atPath('server', HttpConfig)
-    )
-      .pipe(first())
-      .toPromise();
+    const basePathProxy$ = this.env.cliArgs.basePath
+      ? combineLatest(
+          this.configService.atPath('dev', DevConfig),
+          this.configService.atPath('server', HttpConfig)
+        ).pipe(
+          first(),
+          map(([devConfig, httpConfig]) => {
+            return new BasePathProxyServer(this.logger.get('server'), httpConfig, devConfig);
+          })
+        )
+      : EMPTY;
 
     require('../../../cli/cluster/cluster_manager').create(
       this.env.cliArgs,
       config.toRaw(),
-      this.env.cliArgs.basePath
-        ? new BasePathProxyServer(this.logger.get('server'), httpConfig, devConfig)
-        : undefined
+      await basePathProxy$.toPromise()
     );
   }
 
   private async createKbnServer(config: Config, httpServerInfo?: HttpServerInfo) {
-    const httpConfig = await this.configService
-      .atPath('server', HttpConfig)
-      .pipe(first())
-      .toPromise();
-
     const KbnServer = require('../../../server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(config.toRaw(), {
       // If core HTTP service is run we'll receive internal server reference and
@@ -136,6 +137,11 @@ export class LegacyService implements CoreService {
     if (this.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       require('../../../cli/repl').startRepl(kbnServer);
     }
+
+    const httpConfig = await this.configService
+      .atPath('server', HttpConfig)
+      .pipe(first())
+      .toPromise();
 
     if (httpConfig.autoListen) {
       try {

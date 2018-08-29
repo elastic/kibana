@@ -118,6 +118,8 @@ Array [
 ]
 `;
 
+exports[`once LegacyService is started with connection info throws if fails to retrieve initial config. 1`] = `"something failed"`;
+
 exports[`once LegacyService is started without connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
 Array [
   Array [

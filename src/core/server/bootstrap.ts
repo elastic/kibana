@@ -24,19 +24,19 @@ import { LegacyObjectToConfigAdapter } from './legacy_compat';
 import { Root } from './root';
 
 interface KibanaFeatures {
-  // If we can access `cluster_manager.js` that means we can run Kibana in a so called cluster
-  // mode when Kibana is run as a "worker" process together with optimizer "worker" process.
+  // Indicates whether we can run Kibana in a so called cluster mode in which
+  // Kibana is run as a "worker" process together with optimizer "worker" process
+  // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // X-Pack is installed in both dev and the distributable, it's optional if
-  // install is a link to the source, not an actual install.
+  // Indicates whether we can run Kibana without X-Pack plugin pack even if it's
+  // installed (dev mode only feature).
   isOssModeSupported: boolean;
 
-  // If we can access `repl/` that means we can run Kibana in REPL mode.
+  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
 
-  // X-Pack is considered as installed if it's available in `node_modules` folder and it
-  // looks the same for both dev and the distributable.
+  // Indicates whether X-Pack plugin pack is installed and available.
   isXPackInstalled: boolean;
 }
 
