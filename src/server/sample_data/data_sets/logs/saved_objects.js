@@ -24,7 +24,7 @@ export const savedObjects = [
   {
     "id": "e1d0f010-9ee7-11e7-8711-e7a007dcef99",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Unique Visitors vs. Average Bytes",
@@ -40,7 +40,7 @@ export const savedObjects = [
   {
     "id": "06cf9c40-9ee8-11e7-8711-e7a007dcef99",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Unique Visitors by Country",
@@ -56,7 +56,7 @@ export const savedObjects = [
   {
     "id": "935afa20-e0cd-11e7-9d07-1398ccfcefa3",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Heatmap",
@@ -72,11 +72,11 @@ export const savedObjects = [
   {
     "id": "4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
-    "version": 1,
+    "updated_at": "2018-08-29T13:23:20.897Z",
+    "version": 2,
     "attributes": {
       "title": "[Logs] Host, Visits and Bytes Table",
-      "visState": "{\"title\":\"[Logs] Host, Visits and Bytes Table\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"table\",\"series\":[{\"id\":\"bd09d600-e5b1-11e7-bfc2-a1f7e71965a1\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"sum\",\"field\":\"bytes\"},{\"sigma\":\"\",\"id\":\"c9514c90-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"sum_bucket\",\"field\":\"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"color_rules\":[{\"id\":\"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"label\":\"Bytes (Total)\"},{\"id\":\"b7672c30-a6df-11e8-8b18-1da1dfc50975\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"b7672c31-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"sum\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"color_rules\":[{\"id\":\"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"label\":\"Bytes (Last Hour)\"},{\"id\":\"f2c20700-a6df-11e8-8b18-1da1dfc50975\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"f2c20701-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"cardinality\",\"field\":\"ip\"},{\"sigma\":\"\",\"id\":\"f46333e0-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"sum_bucket\",\"field\":\"f2c20701-a6df-11e8-8b18-1da1dfc50975\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Unique Visits (Total)\",\"color_rules\":[{\"value\":1000,\"id\":\"2e963080-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(211,49,21,1)\",\"operator\":\"lt\"},{\"value\":1000,\"id\":\"3d4fb880-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(252,196,0,1)\",\"operator\":\"gte\"},{\"value\":1500,\"id\":\"435f8a20-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(104,188,0,1)\",\"operator\":\"gte\"}],\"offset_time\":\"\",\"value_template\":\"\"},{\"id\":\"46fd7fc0-e5b1-11e7-bfc2-a1f7e71965a1\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"46fd7fc1-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"cardinality\",\"field\":\"ip\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Unique Visits (Last Hour)\",\"color_rules\":[{\"value\":10,\"id\":\"4e90aeb0-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(211,49,21,1)\",\"operator\":\"lt\"},{\"value\":10,\"id\":\"6d59b1c0-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(252,196,0,1)\",\"operator\":\"gte\"},{\"value\":25,\"id\":\"77578670-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(104,188,0,1)\",\"operator\":\"gte\"}],\"offset_time\":\"\",\"value_template\":\"\"}],\"time_field\":\"timestamp\",\"index_pattern\":\"kibana_sample_data_logs\",\"interval\":\"1h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"e9b4e490-e1c6-11e7-b4f6-0f68c45f7387\"}],\"pivot_id\":\"extension.keyword\",\"pivot_label\":\"Type\",\"drilldown_url\":\"\",\"axis_scale\":\"normal\"},\"aggs\":[]}",
+      "visState": "{\"title\":\"[Logs] Host, Visits and Bytes Table\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"table\",\"series\":[{\"id\":\"bd09d600-e5b1-11e7-bfc2-a1f7e71965a1\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"sum\",\"field\":\"bytes\"},{\"sigma\":\"\",\"id\":\"c9514c90-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"sum_bucket\",\"field\":\"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"color_rules\":[{\"id\":\"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"label\":\"Bytes (Total)\"},{\"id\":\"b7672c30-a6df-11e8-8b18-1da1dfc50975\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"b7672c31-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"sum\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"color_rules\":[{\"id\":\"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1\"}],\"label\":\"Bytes (Last Hour)\"},{\"id\":\"f2c20700-a6df-11e8-8b18-1da1dfc50975\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"f2c20701-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"cardinality\",\"field\":\"ip\"},{\"sigma\":\"\",\"id\":\"f46333e0-a6df-11e8-8b18-1da1dfc50975\",\"type\":\"sum_bucket\",\"field\":\"f2c20701-a6df-11e8-8b18-1da1dfc50975\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Unique Visits (Total)\",\"color_rules\":[{\"value\":1000,\"id\":\"2e963080-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(211,49,21,1)\",\"operator\":\"lt\"},{\"value\":1000,\"id\":\"3d4fb880-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(252,196,0,1)\",\"operator\":\"gte\"},{\"value\":1500,\"id\":\"435f8a20-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(104,188,0,1)\",\"operator\":\"gte\"}],\"offset_time\":\"\",\"value_template\":\"\",\"trend_arrows\":1},{\"id\":\"46fd7fc0-e5b1-11e7-bfc2-a1f7e71965a1\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"46fd7fc1-e5b1-11e7-bfc2-a1f7e71965a1\",\"type\":\"cardinality\",\"field\":\"ip\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Unique Visits (Last Hour)\",\"color_rules\":[{\"value\":10,\"id\":\"4e90aeb0-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(211,49,21,1)\",\"operator\":\"lt\"},{\"value\":10,\"id\":\"6d59b1c0-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(252,196,0,1)\",\"operator\":\"gte\"},{\"value\":25,\"id\":\"77578670-a6e0-11e8-8b18-1da1dfc50975\",\"text\":\"rgba(104,188,0,1)\",\"operator\":\"gte\"}],\"offset_time\":\"\",\"value_template\":\"\",\"trend_arrows\":1}],\"time_field\":\"timestamp\",\"index_pattern\":\"kibana_sample_data_logs\",\"interval\":\"1h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"e9b4e490-e1c6-11e7-b4f6-0f68c45f7387\"}],\"pivot_id\":\"extension.keyword\",\"pivot_label\":\"Type\",\"drilldown_url\":\"\",\"axis_scale\":\"normal\"},\"aggs\":[]}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
@@ -88,11 +88,11 @@ export const savedObjects = [
   {
     "id": "69a34b00-9ee8-11e7-8711-e7a007dcef99",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
-    "version": 1,
+    "updated_at": "2018-08-29T13:24:46.136Z",
+    "version": 2,
     "attributes": {
       "title": "[Logs] Goals",
-      "visState": "{\"title\":\"[Logs] Goals\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":500},{\"from\":500,\"to\":1000},{\"from\":1000,\"to\":1500}],\"invertColors\":true,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":true,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"visitors\",\"fontSize\":60,\"labelColor\":true}},\"isDisplayWarning\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"clientip\",\"customLabel\":\"-\"}}]}",
+      "visState": "{\"title\":\"[Logs] Goals\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":500},{\"from\":500,\"to\":1000},{\"from\":1000,\"to\":1500}],\"invertColors\":true,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":true,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"visitors\",\"fontSize\":60,\"labelColor\":true}},\"isDisplayWarning\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"clientip\",\"customLabel\":\"Unique Visitors\"}}]}",
       "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 500\":\"rgb(165,0,38)\",\"500 - 1000\":\"rgb(255,255,190)\",\"1000 - 1500\":\"rgb(0,104,55)\"},\"colors\":{\"75 - 100\":\"#629E51\",\"50 - 75\":\"#EAB839\",\"0 - 50\":\"#E24D42\",\"0 - 100\":\"#E24D42\",\"200 - 300\":\"#7EB26D\",\"500 - 1000\":\"#E5AC0E\",\"0 - 500\":\"#E24D42\",\"1000 - 1500\":\"#7EB26D\"},\"legendOpen\":true}}",
       "description": "",
       "version": 1,
@@ -104,7 +104,7 @@ export const savedObjects = [
   {
     "id": "42b997f0-0c26-11e8-b0ec-3bb475f6b6ff",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] File Type Scatter Plot",
@@ -120,7 +120,7 @@ export const savedObjects = [
   {
     "id": "7cbd2350-2223-11e8-b802-5bcf64c2cfb4",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Source and Destination Sankey Chart",
@@ -136,8 +136,8 @@ export const savedObjects = [
   {
     "id": "314c6f60-2224-11e8-b802-5bcf64c2cfb4",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:10:11.794Z",
-    "version": 2,
+    "updated_at": "2018-08-29T13:22:17.617Z",
+    "version": 1,
     "attributes": {
       "title": "[Logs] Response Codes Over Time + Annotations",
       "visState": "{\"title\":\"[Logs] Response Codes Over Time + Annotations\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(115,216,255,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"cardinality\",\"field\":\"ip\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"percent\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"0\",\"fill\":\"0.5\",\"stacked\":\"percent\",\"terms_field\":\"response.keyword\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"label\":\"Response Code Count\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"timestamp\",\"index_pattern\":\"kibana_sample_data_logs\",\"interval\":\">=4h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"annotations\":[{\"fields\":\"geo.src, host\",\"template\":\"Security Error from {{geo.src}} on {{host}}\",\"index_pattern\":\"kibana_sample_data_logs\",\"query_string\":\"tags:error AND tags:security\",\"id\":\"bd7548a0-2223-11e8-832f-d5027f3c8a47\",\"color\":\"rgba(211,49,21,1)\",\"time_field\":\"timestamp\",\"icon\":\"fa-asterisk\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1}],\"legend_position\":\"bottom\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0},\"aggs\":[]}",
@@ -152,7 +152,7 @@ export const savedObjects = [
   {
     "id": "24a3e970-4257-11e8-b3aa-73fdaf54bfc9",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Input Controls",
@@ -168,7 +168,7 @@ export const savedObjects = [
   {
     "id": "14e2e710-4258-11e8-b3aa-73fdaf54bfc9",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Article Tags",
@@ -184,7 +184,7 @@ export const savedObjects = [
   {
     "id": "47f2c680-a6e3-11e8-94b4-c30c0228351b",
     "type": "visualization",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "[Logs] Markdown Instructions",
@@ -200,7 +200,7 @@ export const savedObjects = [
   {
     "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
     "type": "index-pattern",
-    "updated_at": "2018-08-28T15:05:59.923Z",
+    "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
     "attributes": {
       "title": "kibana_sample_data_logs",
@@ -212,14 +212,14 @@ export const savedObjects = [
   {
     "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
     "type": "dashboard",
-    "updated_at": "2018-08-28T15:10:18.790Z",
-    "version": 6,
+    "updated_at": "2018-08-29T13:26:13.463Z",
+    "version": 3,
     "attributes": {
       "title": "[Logs] Web Traffic",
       "hits": 0,
       "description": "Analyze mock web traffic log data for Elastic's website",
-      "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Avg. Bytes\":\"#6ED0E0\",\"Unique Visitors\":\"#0A437C\"},\"legendOpen\":false}},\"gridData\":{\"h\":13,\"i\":\"2\",\"w\":21,\"x\":27,\"y\":11},\"id\":\"e1d0f010-9ee7-11e7-8711-e7a007dcef99\",\"panelIndex\":\"2\",\"title\":\"Visitors & Bytes\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"gridData\":{\"h\":18,\"i\":\"4\",\"w\":24,\"x\":0,\"y\":49},\"id\":\"06cf9c40-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 22\":\"rgb(247,251,255)\",\"22 - 44\":\"rgb(208,225,242)\",\"44 - 66\":\"rgb(148,196,223)\",\"66 - 88\":\"rgb(74,152,201)\",\"88 - 110\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"gridData\":{\"h\":13,\"i\":\"7\",\"w\":24,\"x\":0,\"y\":36},\"id\":\"935afa20-e0cd-11e7-9d07-1398ccfcefa3\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"mapCenter\":[36.8092847020594,-96.94335937500001],\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":12,\"i\":\"9\",\"w\":21,\"x\":27,\"y\":24},\"id\":\"4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 500\":\"#BF1B00\",\"1000 - 1500\":\"#7EB26D\",\"500 - 1000\":\"#F2C96D\"},\"defaultColors\":{\"0 - 500\":\"rgb(165,0,38)\",\"1000 - 1500\":\"rgb(0,104,55)\",\"500 - 1000\":\"rgb(255,255,190)\"},\"legendOpen\":false}},\"gridData\":{\"h\":11,\"i\":\"11\",\"w\":9,\"x\":10,\"y\":0},\"id\":\"69a34b00-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"11\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"h\":12,\"i\":\"13\",\"w\":27,\"x\":0,\"y\":24},\"id\":\"42b997f0-0c26-11e8-b0ec-3bb475f6b6ff\",\"panelIndex\":\"13\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"h\":31,\"i\":\"14\",\"w\":24,\"x\":24,\"y\":36},\"id\":\"7cbd2350-2223-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"14\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"h\":13,\"i\":\"15\",\"w\":27,\"x\":0,\"y\":11},\"id\":\"314c6f60-2224-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"15\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"h\":11,\"i\":\"16\",\"w\":15,\"x\":19,\"y\":0},\"id\":\"24a3e970-4257-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"16\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":11,\"i\":\"17\",\"w\":14,\"x\":34,\"y\":0},\"id\":\"14e2e710-4258-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"17\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"18\",\"w\":10,\"x\":0,\"y\":0},\"id\":\"47f2c680-a6e3-11e8-94b4-c30c0228351b\",\"panelIndex\":\"18\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
-      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":true,\"useMargins\":true}",
+      "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Avg. Bytes\":\"#6ED0E0\",\"Unique Visitors\":\"#0A437C\"},\"legendOpen\":false}},\"gridData\":{\"x\":27,\"y\":11,\"w\":21,\"h\":13,\"i\":\"2\"},\"id\":\"e1d0f010-9ee7-11e7-8711-e7a007dcef99\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"gridData\":{\"x\":0,\"y\":49,\"w\":24,\"h\":18,\"i\":\"4\"},\"id\":\"06cf9c40-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 22\":\"rgb(247,251,255)\",\"22 - 44\":\"rgb(208,225,242)\",\"44 - 66\":\"rgb(148,196,223)\",\"66 - 88\":\"rgb(74,152,201)\",\"88 - 110\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"gridData\":{\"x\":0,\"y\":36,\"w\":24,\"h\":13,\"i\":\"7\"},\"id\":\"935afa20-e0cd-11e7-9d07-1398ccfcefa3\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"mapCenter\":[36.8092847020594,-96.94335937500001],\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"x\":27,\"y\":24,\"w\":21,\"h\":12,\"i\":\"9\"},\"id\":\"4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 500\":\"#BF1B00\",\"1000 - 1500\":\"#7EB26D\",\"500 - 1000\":\"#F2C96D\"},\"defaultColors\":{\"0 - 500\":\"rgb(165,0,38)\",\"1000 - 1500\":\"rgb(0,104,55)\",\"500 - 1000\":\"rgb(255,255,190)\"},\"legendOpen\":false}},\"gridData\":{\"x\":10,\"y\":0,\"w\":9,\"h\":11,\"i\":\"11\"},\"id\":\"69a34b00-9ee8-11e7-8711-e7a007dcef99\",\"panelIndex\":\"11\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":0,\"y\":24,\"w\":27,\"h\":12,\"i\":\"13\"},\"id\":\"42b997f0-0c26-11e8-b0ec-3bb475f6b6ff\",\"panelIndex\":\"13\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":24,\"y\":36,\"w\":24,\"h\":31,\"i\":\"14\"},\"id\":\"7cbd2350-2223-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"14\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":0,\"y\":11,\"w\":27,\"h\":13,\"i\":\"15\"},\"id\":\"314c6f60-2224-11e8-b802-5bcf64c2cfb4\",\"panelIndex\":\"15\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"gridData\":{\"x\":19,\"y\":0,\"w\":15,\"h\":11,\"i\":\"16\"},\"id\":\"24a3e970-4257-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"16\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"x\":34,\"y\":0,\"w\":14,\"h\":11,\"i\":\"17\"},\"id\":\"14e2e710-4258-11e8-b3aa-73fdaf54bfc9\",\"panelIndex\":\"17\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":10,\"h\":11,\"i\":\"18\"},\"id\":\"47f2c680-a6e3-11e8-94b4-c30c0228351b\",\"panelIndex\":\"18\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
+      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
       "timeTo": "now",

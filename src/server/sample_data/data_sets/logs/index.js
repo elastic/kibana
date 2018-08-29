@@ -23,7 +23,7 @@ import { savedObjects } from './saved_objects';
 export function logsSpecProvider() {
   return {
     id: 'logs',
-    name: 'Sample log data',
+    name: 'Sample web logs',
     description: 'Sample data, visualizations, and dashboards for monitoring web logs.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
