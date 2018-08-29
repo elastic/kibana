@@ -84,7 +84,7 @@ describe('TabbedAggResponseWriter class', function () {
     let responseWriter;
 
     beforeEach(() => {
-      responseWriter  = createResponseWritter(splitAggConfig);
+      responseWriter  = createResponseWritter(splitAggConfig, { partialRows: true });
     });
 
     it('adds the row to the array', () => {
