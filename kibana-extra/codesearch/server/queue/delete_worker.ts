@@ -83,7 +83,19 @@ export class DeleteWorker extends AbstractWorker {
         this.log.error(`Delete symbol es index of repository ${uri} error: ${error}`);
       });
 
-    const deleteDocumentESIndexPromise = this.client.indices
+    // Excecute all the promises above in parallel.
+    await Promise.all([
+      deleteRepoPromise,
+      deleteCloneStatusPromise,
+      deleteLspIndexStatusPromise,
+      deleteIndexStatusPromise,
+      deleteSymbolESIndexPromise,
+    ]);
+
+    // 4. Delete the document index where the repository document resides, so
+    // that you won't be able to import the same repositories until they are
+    // fully removed.
+    await this.client.indices
       .delete({ index: DocumentIndexName(uri) })
       .then(() => {
         this.log.info(`Delete document es index of repository ${uri} done.`);
@@ -91,15 +103,6 @@ export class DeleteWorker extends AbstractWorker {
       .catch((error: Error) => {
         this.log.error(`Delete document es index of repository ${uri} error: ${error}`);
       });
-
-    await Promise.all([
-      deleteRepoPromise,
-      deleteCloneStatusPromise,
-      deleteLspIndexStatusPromise,
-      deleteIndexStatusPromise,
-      deleteSymbolESIndexPromise,
-      deleteDocumentESIndexPromise,
-    ]);
 
     return {
       uri,
