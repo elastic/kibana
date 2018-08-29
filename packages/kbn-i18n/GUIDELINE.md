@@ -283,7 +283,11 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
 ### Unit tests
 
-When testing React component that use the injectI18n higher-order component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` to render the component. This will shallow render the component with Enzyme and inject the necessary context and props to use the intl mock defined in test_utils/mocks/intl.
+Testing React component that use the injectI18n higher-order component is more complicated because `injectI18n()` creates a wrapper component around the component defined in the app.
+
+Shallow rendering only tests one level deep and we want to test the rendering of the component defined for the app, so we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
+
+When testing such component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the intl mock defined in test_utils/mocks/intl.
 
 Use the `mountWithIntl` helper function to mount render the component.
 
@@ -291,7 +295,7 @@ For example, there is a component that is wrapped by `injectI18n`, like in the `
 
 ```js
 // ...
-export class AddFilterUi extends Component {
+class AddFilterUi extends Component {
   // ...
   render() {
     const { filter } = this.state;
@@ -316,13 +320,13 @@ export class AddFilterUi extends Component {
 export const AddFilter = injectI18n(AddFilterUi);
 ```
 
-To test the `AddFilterUi` component it is needed to render it using `shallowWithIntl` function to pass `intl` object into the `props`.
+To test the `AddFilter` component it is needed to render its `WrappedComponent` property using `shallowWithIntl` function to pass `intl` object into the `props`.
 
 ```js
 // ...
 it('should render normally', async () => {
     const component = shallowWithIntl(
-      <AddFilterUi onAddFilter={() => {}}/>
+      <AddFilter.WrappedComponent onAddFilter={() => {}}/>
     );
 
     expect(component).toMatchSnapshot();
