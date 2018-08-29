@@ -17,10 +17,10 @@ export const unsetSelectedPolicy = createAction('UNSET_SELECTED_POLICY');
 export const setSelectedPolicyName = createAction('SET_SELECTED_POLICY_NAME');
 export const setSaveAsNewPolicy = createAction('SET_SAVE_AS_NEW_POLICY');
 
-export const fetchPolicies = () => async dispatch => {
+export const fetchPolicies = (withIndices) => async dispatch => {
   let policies;
   try {
-    policies = await loadPolicies();
+    policies = await loadPolicies(withIndices);
   }
   catch (err) {
     return toastNotifications.addDanger(err.data.message);
@@ -32,6 +32,5 @@ export const fetchPolicies = () => async dispatch => {
   }
   return policies;
 };
-
 
 export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({ phase, key, value }));

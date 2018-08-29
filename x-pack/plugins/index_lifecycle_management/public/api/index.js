@@ -34,8 +34,8 @@ export async function loadIndexTemplate(templateName) {
   return response.data;
 }
 
-export async function loadPolicies() {
-  const response = await httpClient.get(`${apiPrefix}/policies`);
+export async function loadPolicies(withIndices) {
+  const response = await httpClient.get(`${apiPrefix}/policies${ withIndices ? '?withIndices=true' : ''}`);
   return response.data;
 }
 

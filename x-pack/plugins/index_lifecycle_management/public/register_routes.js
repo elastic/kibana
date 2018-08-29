@@ -12,6 +12,7 @@ import { setHttpClient } from './api';
 import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 import { indexLifecycleManagementStore } from './store';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import routes from 'ui/routes';
 
@@ -20,9 +21,11 @@ import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 
 const renderReact = async (elem) => {
   render(
-    <Provider store={indexLifecycleManagementStore()}>
-      <App />
-    </Provider>,
+    <I18nProvider>
+      <Provider store={indexLifecycleManagementStore()}>
+        <App />
+      </Provider>
+    </I18nProvider>,
     elem
   );
 };
