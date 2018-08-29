@@ -176,12 +176,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async switchToEditMode() {
       log.debug('Switching to edit mode');
       await testSubjects.click('dashboardEditMode');
-      await retry.waitFor('not in view mode', async () => (
-        !await this.getIsInViewMode()
-      ));
-      // TODO: use waitForRenderComplete instead of sleep after https://github.com/elastic/kibana/issues/22382 is fixed
-      // await this.waitForRenderComplete();
-      await PageObjects.common.sleep(1011);
+      await retry.waitFor('in edit mode', () => this.getIsInEditMode());
+    }
+
+    async getIsInEditMode() {
+      log.debug('getIsInEditMode');
+      const [panels, menuIcons] = await Promise.all([
+        testSubjects.findAll('dashboardPanel'),
+        testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+      ]);
+      return panels.length === menuIcons.length;
     }
 
     async getIsInViewMode() {
