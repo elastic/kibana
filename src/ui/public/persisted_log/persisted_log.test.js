@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import { PersistedLog } from './';
 
-jest.mock('../chrome', () => {
+jest.mock('ui/chrome', () => {
   return {
     getBasePath: () => `/some/base/path`
   };

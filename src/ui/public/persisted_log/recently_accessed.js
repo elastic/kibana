@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from '../chrome';
+import chrome from 'ui/chrome';
 import { PersistedLog } from './';
 import { createLogKey } from './create_log_key';
 
