@@ -18,7 +18,7 @@
  */
 
 
-/* Steps for version conflict test
+ /* Steps for version conflict test
  1. Create index pattern
  2. Click on  scripted field and fill in the values
  3. Use es to update the index pattern's title
@@ -40,61 +40,63 @@ export default function ({ getService, getPageObjects }) {
 
 
   describe('index version conflict', function describeIndexTests() {
-    before(async function () {
-      await remote.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
-    });
-
-
-    it('Should be able to surface version conflict notification and scripted field creation', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
-      await PageObjects.settings.clickScriptedFieldsTab();
-      await PageObjects.settings.clickAddScriptedField();
-      await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
-      await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
-      const response = await es.update({
-        index: '.kibana',
-        type: 'doc',
-        id: 'index-pattern:logstash-*',
-        body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
-        }
-      });
-      await PageObjects.settings.setFieldFormat('url');
-      await PageObjects.settings.clickSaveScriptedField();
-      await retry.try(async function () {
-        //await PageObjects.common.sleep(2000);
-        const message = await PageObjects.common.closeToast();
-        expect(message).to.contain('Unable');
+      before(async function () {
+        await remote.setWindowSize(1200, 800);
+        await esArchiver.load('discover');
       });
 
-    });
 
-    it('Should be able to surface version conflict notification and changing field format', async function () {
-      const fieldName = 'geo.srcdest';
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
-      log.debug('Starting openControlsByName (' + fieldName + ')');
-      await PageObjects.settings.openControlsByName(fieldName);
-      log.debug('controls are open');
-      await PageObjects.settings.setFieldFormat('url');
-      const response = await es.update({
-        index: '.kibana',
-        type: 'doc',
-        id: 'index-pattern:logstash-*',
-        body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }
-        }
-      });
-      await PageObjects.settings.controlChangeSave();
-      await retry.try(async function () {
-        //await PageObjects.common.sleep(2000);
-        const message = await PageObjects.common.closeToast();
-        expect(message).to.contain('Unable');
-      });
-    });
+      it('Should be able to surface version conflict notification while creating scripted field', async function() {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickOnOnlyIndexPattern();
+        await PageObjects.settings.clickScriptedFieldsTab();
+        await PageObjects.settings.clickAddScriptedField();
+        await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
+        await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
+        const response = await es.update({
+          index: '.kibana',
+          type: 'doc',
+          id: 'index-pattern:logstash-*',
+          body: {
+            "doc": {"index-pattern": {"fieldFormatMap":"{\"geo.src\":{\"id\":\"number\"}}"}}
+            }
+          });
+          log.debug(JSON.stringify(response));
+          expect(response.result).to.be('updated');
+          await PageObjects.settings.setFieldFormat('url');
+          await PageObjects.settings.clickSaveScriptedField();
+          await retry.try(async function () {
+           const message = await PageObjects.common.closeToast();
+           expect(message).to.contain('Unable');
+         });
+       });
+
+        it('Should be able to surface version conflict notification while changing field format', async function(){
+          const fieldName = 'geo.srcdest';
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.clickOnOnlyIndexPattern();
+          log.debug('Starting openControlsByName (' + fieldName + ')');
+          await PageObjects.settings.openControlsByName(fieldName);
+          log.debug('controls are open');
+          await PageObjects.settings.setFieldFormat('url');
+          const response = await es.update({
+            index: '.kibana',
+            type: 'doc',
+            id: 'index-pattern:logstash-*',
+            body: {
+              "doc": {"index-pattern": {"fieldFormatMap":"{\"geo.dest\":{\"id\":\"number\"}}"}}
+              }
+            });
+            log.debug(JSON.stringify(response));
+            expect(response.result).to.be('updated');
+            await PageObjects.settings.controlChangeSave();
+            await retry.try(async function () {
+              //await PageObjects.common.sleep(2000);
+              const message = await PageObjects.common.closeToast();
+              expect(message).to.contain('Unable');
+            });
+          });
   });
 }
