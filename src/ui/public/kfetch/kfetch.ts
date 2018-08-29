@@ -52,19 +52,9 @@ export async function kfetch(
   options: KFetchOptions,
   { prependBasePath = true }: KFetchKibanaOptions = {}
 ) {
-  const combinedOptions: KFetchOptions = {
-    method: 'GET',
-    credentials: 'same-origin',
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-version': metadata.version,
-      ...options.headers,
-    },
-  };
-
+  const combinedOptions = withDefaultOptions(options);
   const promise = requestInterceptors(combinedOptions).then(
-    ({ pathname, query, ...restOptions }: KFetchOptions) => {
+    ({ pathname, query, ...restOptions }) => {
       const fullUrl = url.format({
         pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
         query,
@@ -102,4 +92,17 @@ async function getBodyAsJson(res: Response) {
   } catch (e) {
     return null;
   }
+}
+
+function withDefaultOptions(options: KFetchOptions): KFetchOptions {
+  return {
+    method: 'GET',
+    credentials: 'same-origin',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'kbn-version': metadata.version,
+      ...options.headers,
+    },
+  };
 }
