@@ -5,7 +5,8 @@ export const repeatImage = () => ({
   displayName: 'Image Repeat',
   help: 'Repeats an image N times',
   image: header,
-  expression: `demodata
+  expression: `filters
+| demodata
 | math "mean(cost)"
 | repeatImage image=null
 | render`,

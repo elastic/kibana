@@ -5,7 +5,8 @@ export const revealImage = () => ({
   displayName: 'Image Reveal',
   help: 'Reveals a percentage of an image',
   image: header,
-  expression: `demodata
+  expression: `filters
+| demodata
 | math "sum(min(cost) / max(cost))"
 | revealImage origin=bottom image=null
 | render`,
