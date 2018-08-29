@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { KbnServer } from '../../../../../../../../src/server/index';
-import { Size } from '../../../../../types';
+import { KbnServer, Size } from '../../../../../types';
 import { CaptureConfig } from './index.d';
 import { Layout } from './layout';
 

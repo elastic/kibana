@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KbnServer } from '../../../../../../../../src/server/index';
-import { Size } from '../../../../../types';
+import { KbnServer, Size } from '../../../../../types';
 import { LayoutTypes } from '../../../common/constants';
 import { Layout } from './layout';
 import { PreserveLayout } from './preserve_layout';
