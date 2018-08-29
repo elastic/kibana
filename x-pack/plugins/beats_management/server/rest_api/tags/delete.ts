@@ -11,7 +11,6 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
   method: 'DELETE',
   path: '/api/beats/tags/{tagIds}',
   licenseRequired: true,
-
   handler: async (request: any, reply: any) => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
