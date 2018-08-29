@@ -7,7 +7,7 @@
 'use strict';
 
 import { editor as Editor, IRange } from 'monaco-editor';
-import { Hover, MarkedString } from 'vscode-languageserver-types';
+import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
@@ -37,7 +37,7 @@ export class ContentHoverWidget extends ContentWidget {
   }
 
   public startShowingAt(range: any, focus: boolean) {
-    if (this.lastRange && this.lastRange.equalsRange(range)) {
+    if (this.isVisible && this.lastRange && this.lastRange.containsRange(range)) {
       return;
     }
     this.hoverOperation.cancel();
@@ -110,16 +110,28 @@ export class ContentHoverWidget extends ContentWidget {
       fragment.appendChild(el);
     });
     // show
+
     const startColumn = Math.min(
       renderRange.startColumn,
-      result.range ? result.range.start.character : Number.MAX_VALUE
+      result.range ? result.range.start.character + 1 : Number.MAX_VALUE
     );
     this.showAt(
       new window.monaco.Position(renderRange.startLineNumber, startColumn),
       this.shouldFocus
     );
-
+    if (result.range) {
+      this.lastRange = this.toMonacoRange(result.range);
+    }
     this.updateContents(fragment);
+  }
+
+  private toMonacoRange(r: Range): IRange {
+    return new window.monaco.Range(
+      r.start.line + 1,
+      r.start.character + 1,
+      r.end.line + 1,
+      r.end.character + 1
+    );
   }
 
   private renderButtons() {
