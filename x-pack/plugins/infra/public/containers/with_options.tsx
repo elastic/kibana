@@ -7,7 +7,12 @@
 import moment from 'moment';
 import React from 'react';
 import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
-import { InfraOptions, Omit } from '../lib/lib';
+import {
+  InfraOptions,
+  InfraWaffleMapFormatterType,
+  InfraWaffleMapLegendMode,
+  Omit,
+} from '../lib/lib';
 
 interface WithOptionsInjectedProps {
   options: InfraOptions;
@@ -15,18 +20,62 @@ interface WithOptionsInjectedProps {
 
 const initialState = {
   options: {
-    sourceId: 'default',
-    timerange: {
-      interval: '1m',
-      to: moment.utc().valueOf(),
-      from: moment
-        .utc()
-        .subtract(1, 'h')
-        .valueOf(),
+    wafflemap: {
+      sourceId: 'default',
+      timerange: {
+        interval: '1m',
+        to: moment.utc().valueOf(),
+        from: moment
+          .utc()
+          .subtract(1, 'h')
+          .valueOf(),
+      },
+      formatter: InfraWaffleMapFormatterType.bytes,
+      formatTemplate: '{{value}}/s',
+      filters: [],
+      metrics: [{ type: InfraMetricType.count }],
+      path: [{ type: InfraPathType.hosts }],
+      /*
+      legend: {
+        type: InfraWaffleMapLegendMode.step,
+        rules: [
+          {
+            value: 0,
+            color: '#00B3A4',
+            operator: InfraWaffleMapRuleOperator.gte,
+            label: 'Ok',
+          },
+          {
+            value: 10000,
+            color: '#DB1374',
+            operator: InfraWaffleMapRuleOperator.gte,
+            label: 'Over 10,000',
+          },
+        ],
+      },
+      */
+      legend: {
+        type: InfraWaffleMapLegendMode.gradient,
+        rules: [
+          {
+            value: 0,
+            color: '#D9D9D9',
+          },
+          {
+            value: 0.65,
+            color: '#00B3A4',
+          },
+          {
+            value: 0.8,
+            color: '#E6C220',
+          },
+          {
+            value: 1,
+            color: '#DB1374',
+          },
+        ],
+      },
     },
-    filters: [],
-    metrics: [{ type: InfraMetricType.count }],
-    path: [{ type: InfraPathType.hosts }],
   } as InfraOptions,
 };
 

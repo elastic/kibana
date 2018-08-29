@@ -17,7 +17,6 @@ import {
   InfraNodePath,
   InfraPathInput,
   InfraTimerangeInput,
-  MapQuery,
 } from '../../common/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 
@@ -132,12 +131,78 @@ export interface InfraWaffleMapGroupOfNodes extends InfraWaffleMapGroupBase {
   nodes: InfraWaffleMapNode[];
 }
 
-export interface InfraOptions {
+export interface InfraWaffleMapStepRule {
+  value: number;
+  operator: InfraWaffleMapRuleOperator;
+  color: string;
+  label?: string;
+}
+
+export interface InfraWaffleMapGradientRule {
+  value: number;
+  color: string;
+}
+
+export enum InfraWaffleMapLegendMode {
+  step = 'step',
+  gradient = 'gradient',
+}
+
+export interface InfraWaffleMapStepLegend {
+  type: InfraWaffleMapLegendMode.step;
+  rules: InfraWaffleMapStepRule[];
+}
+
+export interface InfraWaffleMapGradientLegend {
+  type: InfraWaffleMapLegendMode.gradient;
+  rules: InfraWaffleMapGradientRule[];
+}
+
+export type InfraWaffleMapLegend = InfraWaffleMapStepLegend | InfraWaffleMapGradientLegend;
+
+export enum InfraWaffleMapRuleOperator {
+  gt = 'gt',
+  gte = 'gte',
+  lt = 'lt',
+  lte = 'lte',
+  eq = 'eq',
+}
+
+export interface InfraWaffleMapOptions {
   sourceId: string;
   timerange: InfraTimerangeInput;
   filters: InfraFilterInput[];
+  formatter: InfraWaffleMapFormatterType;
+  formatTemplate: string;
   metrics: InfraMetricInput[];
   path: InfraPathInput[];
+  legend: InfraWaffleMapLegend;
+}
+
+export interface InfraOptions {
+  wafflemap: InfraWaffleMapOptions;
 }
 
 export type Omit<T1, T2> = Pick<T1, Exclude<keyof T1, keyof T2>>;
+
+export interface InfraWaffleMapBounds {
+  min: number;
+  max: number;
+}
+
+export type InfraWaffleMapFormatter = (value: string | number) => string;
+export enum InfraWaffleMapFormatterType {
+  number = 'number',
+  bytes = 'bytes',
+  bits = 'bits',
+  percent = 'percent',
+}
+
+export enum InfraWaffleMapDataFormat {
+  bytesDecimal = 'bytesDecimal',
+  bytesBinaryIEC = 'bytesBinaryIEC',
+  bytesBinaryJEDEC = 'bytesBinaryJEDEC',
+  bitsDecimal = 'bitsDecimal',
+  bitsBinaryIEC = 'bitsBinaryIEC',
+  bitsBinaryJEDEC = 'bitsBinaryJEDEC',
+}

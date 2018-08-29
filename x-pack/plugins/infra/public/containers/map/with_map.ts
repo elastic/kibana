@@ -20,14 +20,14 @@ interface ChildProps extends IncomingProps {
 export const withMap = graphql<IncomingProps, MapQuery.Query, MapQuery.Variables, ChildProps>(
   mapQuery,
   {
-    options: ({ options }) => ({
+    options: ({ options: { wafflemap } }) => ({
       fetchPolicy: 'no-cache',
       variables: {
-        sourceId: options.sourceId,
-        filters: options.filters,
-        metrics: options.metrics,
-        path: options.path,
-        timerange: options.timerange,
+        sourceId: wafflemap.sourceId,
+        filters: wafflemap.filters,
+        metrics: wafflemap.metrics,
+        path: wafflemap.path,
+        timerange: wafflemap.timerange,
       },
     }),
     props: ({ data, ownProps }) => {

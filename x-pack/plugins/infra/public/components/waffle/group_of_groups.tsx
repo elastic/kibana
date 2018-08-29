@@ -6,15 +6,20 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraOptions, InfraWaffleMapGroupOfGroups } from '../../lib/lib';
+import {
+  InfraWaffleMapBounds,
+  InfraWaffleMapGroupOfGroups,
+  InfraWaffleMapOptions,
+} from '../../lib/lib';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
 
 interface Props {
   onDrilldown: () => void;
-  options: InfraOptions;
+  options: InfraWaffleMapOptions;
   group: InfraWaffleMapGroupOfGroups;
   formatter: (val: number) => string;
+  bounds: InfraWaffleMapBounds;
 }
 
 export const GroupOfGroups: React.SFC<Props> = props => {
@@ -30,6 +35,7 @@ export const GroupOfGroups: React.SFC<Props> = props => {
             options={props.options}
             group={group}
             formatter={props.formatter}
+            bounds={props.bounds}
           />
         ))}
       </Groups>

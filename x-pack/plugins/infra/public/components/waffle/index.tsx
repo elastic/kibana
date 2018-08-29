@@ -4,26 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { AutoSizer } from '../auto_sizer';
-import { GroupOfGroups } from './group_of_groups';
-import { GroupOfNodes } from './group_of_nodes';
-
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/map/type_guards';
-import { InfraOptions, InfraWaffleData, InfraWaffleMapGroup } from '../../lib/lib';
+import {
+  InfraWaffleData,
+  InfraWaffleMapBounds,
+  InfraWaffleMapGroup,
+  InfraWaffleMapOptions,
+} from '../../lib/lib';
+import { createFormatter } from '../../utils/formatters';
+import { AutoSizer } from '../auto_sizer';
+import { GroupOfGroups } from './group_of_groups';
+import { GroupOfNodes } from './group_of_nodes';
+import { Legend } from './legend';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
 interface Props {
-  options: InfraOptions;
+  options: InfraWaffleMapOptions;
   map: InfraWaffleData;
 }
 
+const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
+  return groups.reduce((acc: number[], group: InfraWaffleMapGroup) => {
+    if (isWaffleMapGroupWithGroups(group)) {
+      return acc.concat(extractValuesFromMap(group.groups, values));
+    }
+    if (isWaffleMapGroupWithNodes(group)) {
+      return acc.concat(group.nodes.map(node => last(node.metrics).value));
+    }
+    return acc;
+  }, values);
+};
+
+const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
+  const values = extractValuesFromMap(map);
+  return { min: min(values), max: max(values) };
+};
+
 export class Waffle extends React.Component<Props, {}> {
   public render() {
+    const bounds = calculateBoundsFromMap(this.props.map);
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
@@ -32,8 +57,13 @@ export class Waffle extends React.Component<Props, {}> {
           return (
             <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
               <WaffleMapInnerContainer>
-                {groupsWithLayout.map(this.renderGroup)}
+                {groupsWithLayout.map(this.renderGroup(bounds))}
               </WaffleMapInnerContainer>
+              <Legend
+                formatter={this.formatter}
+                bounds={bounds}
+                legend={this.props.options.legend}
+              />
             </WaffleMapOuterContiner>
           );
         }}
@@ -42,15 +72,20 @@ export class Waffle extends React.Component<Props, {}> {
   }
 
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
-  private formatter(val: string | number) {
-    return String(val);
-  }
+  private formatter = (val: string | number) => {
+    if (val == null) {
+      return '';
+    }
+    const { options } = this.props;
+    const formatter = createFormatter(options.formatter, options.formatTemplate);
+    return formatter(val);
+  };
 
   private handleDrilldown() {
     return;
   }
 
-  private renderGroup = (group: InfraWaffleMapGroup) => {
+  private renderGroup = (bounds: InfraWaffleMapBounds) => (group: InfraWaffleMapGroup) => {
     if (isWaffleMapGroupWithGroups(group)) {
       return (
         <GroupOfGroups
@@ -59,6 +94,7 @@ export class Waffle extends React.Component<Props, {}> {
           options={this.props.options}
           group={group}
           formatter={this.formatter}
+          bounds={bounds}
         />
       );
     }
@@ -71,6 +107,7 @@ export class Waffle extends React.Component<Props, {}> {
           onDrilldown={this.handleDrilldown}
           formatter={this.formatter}
           isChild={false}
+          bounds={bounds}
         />
       );
     }

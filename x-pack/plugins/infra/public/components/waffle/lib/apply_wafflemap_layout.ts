@@ -72,8 +72,10 @@ export function applyWaffleMapLayout(
     .map(group => {
       if (isWaffleMapGroupWithGroups(group)) {
         const columns = getColumns(largestCount, width, height);
-        const subGroups = sortBy(group.groups, getTotalItemsOfGroup)
+        const groupOfNodes = group.groups;
+        const subGroups = sortBy(groupOfNodes, getTotalItemsOfGroup)
           .reverse()
+          .filter(isWaffleMapGroupWithNodes)
           .map(subGroup => {
             return {
               ...subGroup,

@@ -6,10 +6,10 @@
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import React from 'react';
-import { InfraOptions, InfraWaffleMapNode } from '../../lib/lib';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
-  options: InfraOptions;
+  options: InfraWaffleMapOptions;
   node: InfraWaffleMapNode;
   isPopoverOpen: boolean;
   closePopover: () => void;

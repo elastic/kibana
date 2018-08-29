@@ -22,7 +22,7 @@ export const HomePage = withOptions(
       public render() {
         return (
           <MainLayout>
-            <Waffle map={this.props.map} options={this.props.options} />
+            <Waffle map={this.props.map} options={this.props.options.wafflemap} />
           </MainLayout>
         );
       }
