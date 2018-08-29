@@ -107,8 +107,12 @@ export class Timepicker extends Component {
     this.setTime(timeNavigation.stepBackward(this.getBounds()));
   }
 
-  applyTimeChanges = () => {
+  applyTimeFromState = () => {
     this.props.setTime(this.state.from, this.state.to);
+  }
+
+  applyTime = ({ from, to }) => {
+    this.props.setTime(from, to);
   }
 
   toTimeString = (timeValue) => {
@@ -162,7 +166,7 @@ export class Timepicker extends Component {
       updateButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
-            onClick={this.applyTimeChanges}
+            onClick={this.applyTimeFromState}
             fill
             disabled={this.state.isInvalid || !this.state.hasChanged}
           >
@@ -178,6 +182,7 @@ export class Timepicker extends Component {
             prepend={(
               <QuickForm
                 setTime={this.setTime}
+                applyTime={this.applyTime}
                 stepForward={this.stepForward}
                 stepBackward={this.stepBackward}
               />

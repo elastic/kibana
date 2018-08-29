@@ -115,8 +115,18 @@ export class QuickForm extends Component {
     });
   }
 
+
+
   setTime = ({ from, to }) => {
     this.props.setTime({
+      from: from,
+      to: to
+    });
+    this.closePopover();
+  }
+
+  applyTime = ({ from, to }) => {
+    this.props.applyTime({
       from: from,
       to: to
     });
@@ -197,12 +207,12 @@ export class QuickForm extends Component {
 
     const renderSectionItems = (section) => {
       return section.map(({ from, to, display }) => {
-        const setTime = () => {
-          this.setTime({ from, to });
+        const applyTime = () => {
+          this.applyTime({ from, to });
         };
         return (
           <EuiFlexItem key={display}>
-            <EuiLink onClick={setTime}>{display}</EuiLink>
+            <EuiLink onClick={applyTime}>{display}</EuiLink>
           </EuiFlexItem>
         );
       });
@@ -238,13 +248,13 @@ export class QuickForm extends Component {
 
   renderRecentlyUsed = () => {
     const links = timeHistory.get().map(({ from, to }) => {
-      const setTime = () => {
-        this.setTime({ from, to });
+      const applyTime = () => {
+        this.applyTime({ from, to });
       };
       const display = prettyDuration(from, to, (...args) => chrome.getUiSettingsClient().get(...args));
       return (
         <EuiFlexItem key={display}>
-          <EuiLink onClick={setTime}>{display}</EuiLink>
+          <EuiLink onClick={applyTime}>{display}</EuiLink>
         </EuiFlexItem>
       );
     });
@@ -302,6 +312,7 @@ export class QuickForm extends Component {
 }
 
 QuickForm.propTypes = {
+  applyTime: PropTypes.func.isRequired,
   setTime: PropTypes.func.isRequired,
   stepForward: PropTypes.func.isRequired,
   stepBackward: PropTypes.func.isRequired,
