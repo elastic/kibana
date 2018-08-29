@@ -7,3 +7,4 @@
 export { getApmsForClusters } from './get_apms_for_clusters';
 export { getStats } from './get_stats';
 export { getApms } from './get_apms';
+export { getApmInfo } from './get_apm_info';

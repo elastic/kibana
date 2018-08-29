@@ -9,6 +9,7 @@ import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import { getApmInfo } from '../../../../lib/apm';
 
 export function apmInstanceRoute(server) {
   server.route({
@@ -30,18 +31,21 @@ export function apmInstanceRoute(server) {
       }
     },
     async handler(req, reply) {
-      const beatUuid = req.params.beatUuid;
+      const apmUuid = req.params.apmUuid;
       const config = server.config();
+      const clusterUuid = req.params.clusterUuid;
       const ccs = req.payload.ccs;
-      const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
 
       try {
-        const [ metrics ] = await Promise.all([
-          getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
+        const [ metrics, apmSummary ] = await Promise.all([
+          getMetrics(req, apmIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': apmUuid } }]),
+          getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 
         reply({
           metrics,
+          apmSummary,
         });
       } catch (err) {
         reply(handleError(err, req));
