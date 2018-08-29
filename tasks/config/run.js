@@ -102,6 +102,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
