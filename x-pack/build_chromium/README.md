@@ -83,7 +83,13 @@ Find the Chromium revision (modify the following command to be wherever you have
 - Grab the SHA from there
   - (For example, rev 575458 has sha 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479)
 
-Run the build, replacing the sha with the one you wish to build:
+Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
+
+- SSH into the server
+- Run `tmux list-sessions`
+- Run `tmux switch -t {session_id}`, replacing {session_id} with the value from the list-sessions output
+
+To run the build, replace the sha in the following commands with the sha that you wish to build:
 
 - Mac: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
 - Linux: `python ~/chromium/build_chromium/build.py 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479`
