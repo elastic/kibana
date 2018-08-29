@@ -296,9 +296,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await this.getIndexPatternIdFromUrl();
     }
 
-
-
-
     //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
 
     async clickOptionalAddNewButton() {
