@@ -30,7 +30,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       log.debug(`createAndAddTSVBVisualization(${name})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.ensureAddPanelIsShowing();
       await dashboardAddPanel.clickAddNewEmbeddableLink();
@@ -68,7 +68,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
 
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.addSavedSearch(name);
     }
@@ -77,7 +77,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.ensureAddPanelIsShowing();
       await dashboardAddPanel.clickAddNewEmbeddableLink();

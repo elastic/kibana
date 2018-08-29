@@ -6,7 +6,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { KuiTableInfo } from '@kbn/ui-framework/components';
 import _ from 'lodash';
 import STATIC_PROPS from './staticProperties.json';
 import {
@@ -58,10 +57,12 @@ const Cell = styled.td`
   }
 `;
 
-const TableInfo = styled(KuiTableInfo)`
+const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
+  color: ${colors.gray2};
+  line-height: 1.5;
 `;
 
 const EmptyValue = styled.span`

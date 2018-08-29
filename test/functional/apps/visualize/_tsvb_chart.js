@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
   describe('visual builder', function describeIndexTests() {
@@ -111,10 +112,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify gauge label and count display', async function () {
-        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
-        expect(labelString).to.be('Count');
-        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+        await retry.try(async () => {
+          const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+          expect(labelString).to.be('Count');
+          const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+          expect(gaugeCount).to.be('156');
+        });
       });
     });
 
