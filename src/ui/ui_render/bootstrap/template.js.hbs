@@ -33,7 +33,7 @@ window.onload = function () {
       err.style['text-align'] = 'center';
       err.style['background'] = '#F44336';
       err.style['padding'] = '25px';
-      err.innerText = '{{i18n 'UI-WELCOME_ERROR' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
+      err.innerText = '{{i18n 'common.ui.welcomeError' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
 
       document.body.innerHTML = err.outerHTML;
     }

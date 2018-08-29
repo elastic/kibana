@@ -23,7 +23,6 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
@@ -43,6 +42,8 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
+import { showShareContextMenu } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -115,6 +116,7 @@ function VisEditor(
 ) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
@@ -156,8 +158,16 @@ function VisEditor(
   }, {
     key: 'share',
     description: 'Share Visualization',
-    template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    testId: 'visualizeShareButton',
+    testId: 'shareTopNavButton',
+    run: (menuItem, navController, anchorElement) => {
+      showShareContextMenu({
+        anchorElement,
+        allowEmbed: true,
+        getUnhashableStates,
+        objectId: savedVis.id,
+        objectType: 'visualization',
+      });
+    }
   }, {
     key: 'inspect',
     description: 'Open Inspector for visualization',
@@ -251,7 +261,7 @@ function VisEditor(
     $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.timeRange = timefilter.getTime();
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
