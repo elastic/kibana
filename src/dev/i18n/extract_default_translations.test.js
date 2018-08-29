@@ -76,10 +76,7 @@ describe('dev/i18n/extract_default_translations', () => {
     const [, , pluginPath] = pluginsPaths;
     await expect(
       extractDefaultTranslations({ paths: [pluginPath], output: pluginPath })
-    ).rejects.toMatchObject({
-      message: `Error in ${path.join(pluginPath, 'test_file.jsx')}
-There is more than one default message for the same id "plugin_3.duplicate_id": "Message 1" and "Message 2"`,
-    });
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('validates message namespace', () => {

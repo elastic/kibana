@@ -31,7 +31,6 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/share';
 import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
@@ -54,6 +53,8 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { showShareContextMenu } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -157,6 +158,7 @@ function discoverController(
   const notify = new Notifier({
     location: 'Discover'
   });
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -166,6 +168,10 @@ function discoverController(
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
   };
+
+  // the saved savedSearch
+  const savedSearch = $route.current.locals.savedSearch;
+  $scope.$on('$destroy', savedSearch.destroy);
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -185,13 +191,17 @@ function discoverController(
   }, {
     key: 'share',
     description: 'Share Search',
-    template: require('plugins/kibana/discover/partials/share_search.html'),
-    testId: 'discoverShareButton',
+    testId: 'shareTopNavButton',
+    run: (menuItem, navController, anchorElement) => {
+      showShareContextMenu({
+        anchorElement,
+        allowEmbed: false,
+        getUnhashableStates,
+        objectId: savedSearch.id,
+        objectType: 'search',
+      });
+    }
   }];
-
-  // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
-  $scope.$on('$destroy', savedSearch.destroy);
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;

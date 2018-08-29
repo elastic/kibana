@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import { DashboardState } from '../dashboard/selectors';
-
-export interface CoreKibanaState {
-  readonly dashboard: DashboardState;
-}
-
-export interface KibanaAction<T, P> extends Action {
-  readonly type: T;
-  readonly payload: P;
-}
-
-export type KibanaThunk<
-  R = Action | Promise<Action> | void,
-  S = CoreKibanaState,
-  E = any,
-  A extends Action = Action
-> = ThunkAction<R, S, E, A>;
+export function unhashUrl(url: string, kbnStates: any[]): any;
