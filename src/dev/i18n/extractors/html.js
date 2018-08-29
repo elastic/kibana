@@ -22,9 +22,9 @@ import { jsdom } from 'jsdom';
 import { parse } from '@babel/parser';
 import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { isPropertyWithKey, formatHTMLString, formatJSString, traverseNodes } from './utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
-import { createFailError } from '../run';
+import { isPropertyWithKey, formatHTMLString, formatJSString, traverseNodes } from '../utils';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from '../constants';
+import { createFailError } from '../../run';
 
 /**
  * Find all substrings of "{{ any text }}" pattern

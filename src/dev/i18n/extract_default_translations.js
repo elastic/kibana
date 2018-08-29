@@ -18,20 +18,19 @@
  */
 
 import path from 'path';
-import { i18n } from '@kbn/i18n';
-import JSON5 from 'json5';
 import normalize from 'normalize-path';
 import chalk from 'chalk';
 
-import { extractHtmlMessages } from './extract_html_messages';
-import { extractCodeMessages } from './extract_code_messages';
-import { extractPugMessages } from './extract_pug_messages';
-import { extractHandlebarsMessages } from './extract_handlebars_messages';
+import {
+  extractHtmlMessages,
+  extractCodeMessages,
+  extractPugMessages,
+  extractHandlebarsMessages,
+} from './extractors';
 import { globAsync, readFileAsync, writeFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError } from '../run';
-
-const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
+import { serializeToJson, serializeToJson5 } from './serializers';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -140,45 +139,6 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       }
     })
   );
-}
-
-function serializeToJson5(defaultMessages) {
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
-    const formattedContext = mapValue.context
-      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-      : '';
-
-    jsonBuffer = Buffer.concat([
-      jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
-      Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
-    ]);
-  }
-
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  return jsonBuffer;
-}
-
-function serializeToJson(defaultMessages) {
-  const resultJsonObject = { formats: i18n.formats };
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    if (mapValue.context) {
-      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
-    } else {
-      resultJsonObject[mapKey] = mapValue.message;
-    }
-  }
-
-  return JSON.stringify(resultJsonObject, undefined, 2);
 }
 
 export async function validateDefaultMessages(inputPath) {

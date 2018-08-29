@@ -20,9 +20,9 @@
 import { isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
 import chalk from 'chalk';
 
-import { isPropertyWithKey, formatJSString, formatHTMLString } from './utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
-import { createFailError } from '../run';
+import { isPropertyWithKey, formatJSString, formatHTMLString } from '../utils';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from '../constants';
+import { createFailError } from '../../run';
 
 function extractMessageId(value) {
   if (!isStringLiteral(value)) {

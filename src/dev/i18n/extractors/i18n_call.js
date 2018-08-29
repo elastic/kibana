@@ -20,9 +20,9 @@
 import chalk from 'chalk';
 import { isObjectExpression, isStringLiteral } from '@babel/types';
 
-import { isPropertyWithKey, formatJSString } from './utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
-import { createFailError } from '../run';
+import { isPropertyWithKey, formatJSString } from '../utils';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from '../constants';
+import { createFailError } from '../../run';
 
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST

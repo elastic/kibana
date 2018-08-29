@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractPugMessages } from './extract_pug_messages';
+import { extractPugMessages } from './pug';
 
 describe('extractPugMessages', () => {
   test('extracts messages from pug template', () => {
