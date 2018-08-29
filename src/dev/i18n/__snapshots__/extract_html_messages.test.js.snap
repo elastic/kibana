@@ -26,6 +26,6 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extract_html_messages throws on empty i18n-id 1`] = `"Empty \\"i18n-id\\" value in angular directive is not allowed."`;
+exports[`dev/i18n/extract_html_messages throws on empty i18n-id 1`] = `"[37m[41m I18N ERROR [49m[39m Empty \\"i18n-id\\" value in angular directive is not allowed."`;
 
-exports[`dev/i18n/extract_html_messages throws on missing i18n-default-message attribute 1`] = `"Empty defaultMessage in angular directive is not allowed (\\"message-id\\")."`;
+exports[`dev/i18n/extract_html_messages throws on missing i18n-default-message attribute 1`] = `"[37m[41m I18N ERROR [49m[39m Empty defaultMessage in angular directive is not allowed (\\"message-id\\")."`;
