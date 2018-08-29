@@ -38,8 +38,8 @@ export interface KFetchKibanaOptions {
 }
 
 export interface Interceptor {
-  request?: (config: KFetchOptions) => KFetchOptions;
-  requestError?: (e: any) => any;
+  request?: (config: KFetchOptions) => Promise<KFetchOptions> | KFetchOptions;
+  requestError?: (e: any) => Promise<KFetchOptions> | KFetchOptions;
   response?: (res: any) => any;
   responseError?: (e: any) => any;
 }
@@ -82,7 +82,7 @@ export async function kfetch(
   return responseInterceptors(promise);
 }
 
-function requestInterceptors(config: KFetchOptions) {
+function requestInterceptors(config: KFetchOptions): Promise<KFetchOptions> {
   return interceptors.reduceRight((acc, interceptor) => {
     return acc.then(interceptor.request || noop, interceptor.requestError);
   }, Promise.resolve(config));
