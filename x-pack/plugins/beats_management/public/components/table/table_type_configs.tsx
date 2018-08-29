@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { EuiBadge, EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { flatten, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -70,11 +70,13 @@ export const BeatsTableType: TableType = {
       field: 'full_tags',
       name: 'Tags',
       render: (value: string, beat: CMPopulatedBeat) => (
-        <EuiFlexGroup wrap responsive={true}>
+        <EuiFlexGroup wrap responsive={true} gutterSize="xs">
           {(beat.full_tags || []).map(tag => (
-            <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
-              {tag.id}
-            </EuiBadge>
+            <EuiFlexItem grow={false}>
+              <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
+                {tag.id}
+              </EuiBadge>
+            </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       ),

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiGlobalToastList } from '@elastic/eui';
 import { get } from 'lodash';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
@@ -17,6 +18,7 @@ interface BeatTagsViewProps {
 }
 
 interface BeatTagsViewState {
+  notifications: any[];
   tags: ClientSideBeatTag[];
 }
 
@@ -27,6 +29,7 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
     super(props);
 
     this.state = {
+      notifications: [],
       tags: [],
     };
 
@@ -45,6 +48,11 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
           showAssignmentOptions={false}
           type={BeatDetailTagsTable}
         />
+        <EuiGlobalToastList
+          toasts={this.state.notifications}
+          dismissToast={() => this.setState({ notifications: [] })}
+          toastLifeTimeMs={5000}
+        />
       </div>
     );
   }
@@ -53,7 +61,26 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
     return get(this.tableRef, 'current.state.selection', []);
   };
 
-  // TODO: add notification of successful removal/addition
+  private setUpdatedTagNotification = (
+    numRemoved: number,
+    totalTags: number,
+    action: 'remove' | 'add'
+  ) => {
+    const actionName = action === 'remove' ? 'Removed' : 'Added';
+    const preposition = action === 'remove' ? 'from' : 'to';
+    this.setState({
+      notifications: this.state.notifications.concat({
+        title: `Tags ${actionName} ${preposition} Beat`,
+        color: 'success',
+        text: (
+          <p>{`${actionName} ${numRemoved} of ${totalTags} tags ${preposition} ${
+            this.props.beat ? this.props.beat.id : 'beat'
+          }`}</p>
+        ),
+      }),
+    });
+  };
+
   private handleTableAction = async (action: string, payload: any) => {
     switch (action) {
       case 'add':
@@ -64,6 +91,7 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
         break;
       case 'search':
         // TODO: add search filtering for tag names
+        // awaiting an ES filter endpoint
         break;
     }
     this.props.reloadBeat();
@@ -87,6 +115,7 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
     });
 
     await this.props.libs.beats.assignTagsToBeats(assignments);
+    this.setUpdatedTagNotification(assignments.length, tagsToAssign.length, 'add');
   };
 
   private disassociateTagsFromBeat = async () => {
@@ -107,6 +136,7 @@ export class BeatTagsView extends React.PureComponent<BeatTagsViewProps, BeatTag
     });
 
     await this.props.libs.beats.removeTagsFromBeats(assignments);
+    this.setUpdatedTagNotification(assignments.length, tagsToDisassociate.length, 'remove');
   };
 
   private getTags = async () => {
