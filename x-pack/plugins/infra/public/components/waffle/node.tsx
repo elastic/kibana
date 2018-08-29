@@ -123,7 +123,7 @@ const ValueInner = styled.div`
 
 const Value = styled<ColorProps, 'div'>('div')`
   font-weight: bold;
-  font-size: 1.5em;
+  font-size: 0.9em;
   text-align: center;
   width: 100%;
   flex: 1 0 auto;

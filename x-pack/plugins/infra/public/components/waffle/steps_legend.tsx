@@ -27,13 +27,16 @@ interface Props {
   formatter: InfraWaffleMapFormatter;
 }
 
-const createStep = (formatter: InfraWaffleMapFormatter) => (rule: InfraWaffleMapStepRule) => {
+const createStep = (formatter: InfraWaffleMapFormatter) => (
+  rule: InfraWaffleMapStepRule,
+  index: number
+) => {
   const label =
     rule.label != null ? rule.label : `${OPERATORS[rule.operator]} ${formatter(rule.value)}`;
   const squareStyle = { backgroundColor: darken(0.4, rule.color) };
   const squareInnerStyle = { backgroundColor: rule.color };
   return (
-    <StepContainer>
+    <StepContainer key={`legend-step-${index}`}>
       <StepSquare style={squareStyle}>
         <StepSquareInner style={squareInnerStyle} />
       </StepSquare>
