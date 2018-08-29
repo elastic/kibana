@@ -17,4 +17,28 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
+jest.mock('../lib/url_shortener', () => ({}));
+
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import {
+  ShareUrlContent,
+} from './share_url_content';
+
+test('render', () => {
+  const component = shallow(<ShareUrlContent
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should enable saved object export option when objectId is provided', () => {
+  const component = shallow(<ShareUrlContent
+    objectId="id1"
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
