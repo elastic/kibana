@@ -303,6 +303,7 @@ export class DashboardListing extends React.Component {
         {deleteBtn}
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
+            aria-label="Filter dashboards"
             placeholder="Search..."
             fullWidth
             value={this.state.filter}
