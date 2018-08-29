@@ -36,6 +36,26 @@
         },
         {
           "_source": {
+            "type": "beats_state",
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "beats_state": {
+              "state": {
+                "host": {
+                  "name": "Elastic-MBP.local",
+                  "architecture": "x86_64",
+                  "os": {
+                    "platform": "darwin",
+                    "version": "10.13.6",
+                    "family": "darwin",
+                    "build": "17G65"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source": {
             "type": "beats_stats",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_stats": {

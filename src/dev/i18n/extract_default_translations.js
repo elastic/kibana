@@ -20,6 +20,7 @@
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import JSON5 from 'json5';
+import chalk from 'chalk';
 
 import { extractHtmlMessages } from './extract_html_messages';
 import { extractCodeMessages } from './extract_code_messages';
@@ -27,16 +28,16 @@ import { extractPugMessages } from './extract_pug_messages';
 import { extractHandlebarsMessages } from './extract_handlebars_messages';
 import { globAsync, normalizePath, readFileAsync, writeFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
+import { createFailError } from '../run';
 
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw new Error(
-      `There is more than one default message for the same id "${key}": \
-"${existingValue.message}" and "${value.message}"`
-    );
+    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
+There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`);
   }
   targetMap.set(key, value);
 }
@@ -73,7 +74,8 @@ export function validateMessageNamespace(id, filePath) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw new Error(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
+Expected "${id}" id to have "${expectedNamespace}" namespace. \
 See i18nrc.json for the list of supported namespaces.`);
   }
 }
@@ -126,7 +128,9 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
-          throw new Error(`Error in ${name}\n${error.message || error}`);
+          throw createFailError(
+            `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
+          );
         }
       }
     })
