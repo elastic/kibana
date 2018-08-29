@@ -42,19 +42,19 @@ export class LogsPage extends React.Component {
                   <WithLogFilter>
                     {({
                       applyFilterQueryFromKueryExpression,
-                      filterQuery,
-                      isFilterQueryValid,
-                      setFilterQueryFromKueryExpression,
+                      filterQueryDraft,
+                      isFilterQueryDraftValid,
+                      setFilterQueryDraftFromKueryExpression,
                     }) => (
                       <AutocompleteField
                         isLoadingSuggestions={isLoadingSuggestions}
-                        isValid={isFilterQueryValid}
+                        isValid={isFilterQueryDraftValid}
                         loadSuggestions={loadSuggestions}
-                        onChange={setFilterQueryFromKueryExpression}
+                        onChange={setFilterQueryDraftFromKueryExpression}
                         onSubmit={applyFilterQueryFromKueryExpression}
                         placeholder="Search for log entries... (e.g. host.name:host-1)"
                         suggestions={suggestions}
-                        value={filterQuery ? filterQuery.expression : ''}
+                        value={filterQueryDraft ? filterQueryDraft.expression : ''}
                       />
                     )}
                   </WithLogFilter>

@@ -10,6 +10,6 @@ import { FilterQuery } from './reducer';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/log_filter');
 
-export const setLogFilterQuery = actionCreator<FilterQuery>('SET_LOG_FILTER_QUERY');
+export const setLogFilterQueryDraft = actionCreator<FilterQuery>('SET_LOG_FILTER_QUERY_DRAFT');
 
 export const applyLogFilterQuery = actionCreator<FilterQuery>('APPLY_LOG_FILTER_QUERY');

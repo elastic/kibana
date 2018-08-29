@@ -6,7 +6,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { applyLogFilterQuery, setLogFilterQuery } from './actions';
+import { applyLogFilterQuery, setLogFilterQueryDraft } from './actions';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -17,15 +17,22 @@ export type FilterQuery = KueryFilterQuery;
 
 export interface LogFilterState {
   filterQuery: KueryFilterQuery | null;
+  filterQueryDraft: KueryFilterQuery | null;
 }
 
 export const initialLogFilterState: LogFilterState = {
   filterQuery: null,
+  filterQueryDraft: null,
 };
 
 export const logFilterReducer = reducerWithInitialState(initialLogFilterState)
-  .cases([applyLogFilterQuery, setLogFilterQuery], (state, filterQuery) => ({
+  .case(setLogFilterQueryDraft, (state, filterQueryDraft) => ({
+    ...state,
+    filterQueryDraft,
+  }))
+  .case(applyLogFilterQuery, (state, filterQuery) => ({
     ...state,
     filterQuery,
+    filterQueryDraft: filterQuery,
   }))
   .build();

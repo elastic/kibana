@@ -12,14 +12,19 @@ import { LogFilterState } from './reducer';
 
 export const selectLogFilterQuery = (state: LogFilterState) => state.filterQuery;
 
-export const selectIsLogFilterQueryValid = createSelector(selectLogFilterQuery, filterQuery => {
-  if (filterQuery && filterQuery.kind === 'kuery') {
-    try {
-      fromKueryExpression(filterQuery.expression);
-    } catch (err) {
-      return false;
-    }
-  }
+export const selectLogFilterQueryDraft = (state: LogFilterState) => state.filterQueryDraft;
 
-  return true;
-});
+export const selectIsLogFilterQueryDraftValid = createSelector(
+  selectLogFilterQueryDraft,
+  filterQueryDraft => {
+    if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
+      try {
+        fromKueryExpression(filterQueryDraft.expression);
+      } catch (err) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+);

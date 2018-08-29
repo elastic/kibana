@@ -13,7 +13,8 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 export const withLogFilter = connect(
   (state: State) => ({
     filterQuery: logFilterSelectors.selectLogFilterQuery(state),
-    isFilterQueryValid: logFilterSelectors.selectIsLogFilterQueryValid(state),
+    filterQueryDraft: logFilterSelectors.selectLogFilterQueryDraft(state),
+    isFilterQueryDraftValid: logFilterSelectors.selectIsLogFilterQueryDraftValid(state),
   }),
   bindPlainActionCreators({
     applyFilterQuery: logFilterActions.applyLogFilterQuery,
@@ -22,9 +23,9 @@ export const withLogFilter = connect(
         kind: 'kuery',
         expression,
       }),
-    setFilterQuery: logFilterActions.setLogFilterQuery,
-    setFilterQueryFromKueryExpression: (expression: string) =>
-      logFilterActions.setLogFilterQuery({
+    setFilterQueryDraft: logFilterActions.setLogFilterQueryDraft,
+    setFilterQueryDraftFromKueryExpression: (expression: string) =>
+      logFilterActions.setLogFilterQueryDraft({
         kind: 'kuery',
         expression,
       }),
