@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['console', 'common', 'settings', 'visualize']);
+  const kibanaServer = getService('kibanaServer');
 
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await kibanaServer.uiSettings.update({ 'telemetry:optIn': false });
     });
 
     it('should create shakespeare index pattern', async function () {
@@ -138,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Max aggregation metric on speech_number', async function () {
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metrics');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();
