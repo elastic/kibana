@@ -29,8 +29,11 @@ const LegacyResponseHandlerProvider = function () {
     handler: function (vis, response) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
+        const metricsAtAllLevels = vis.params.hasOwnProperty('showMetricsAtAllLevels') ?
+          vis.params.showMetricsAtAllLevels : vis.isHierarchical();
+
         const table = tabifyAggResponse(vis.getAggConfig(), response, {
-          metricsAtAllLevels: vis.isHierarchical(),
+          metricsAtAllLevels: metricsAtAllLevels,
           partialRows: vis.params.showPartialRows,
         });
 
