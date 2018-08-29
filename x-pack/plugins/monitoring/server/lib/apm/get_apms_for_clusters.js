@@ -67,8 +67,6 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
       })
     ]);
 
-    console.log('timeOfLastEvent', timeOfLastEvent);
-
     const formattedResponse = handleResponse(clusterUuid, response);
     return {
       ...formattedResponse,
