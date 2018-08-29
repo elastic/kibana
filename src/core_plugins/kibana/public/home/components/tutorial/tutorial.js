@@ -44,7 +44,7 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
 
-export class TutorialUi extends React.Component {
+class TutorialUi extends React.Component {
 
   constructor(props) {
     super(props);

@@ -42,7 +42,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-export class TutorialDirectoryUi extends React.Component {
+class TutorialDirectoryUi extends React.Component {
 
   constructor(props) {
     super(props);

@@ -36,7 +36,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-export const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
+const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
   const renderCards = () => {
     const apmTitle = intl.formatMessage({

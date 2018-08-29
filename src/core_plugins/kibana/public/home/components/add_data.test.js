@@ -18,11 +18,11 @@
  */
 
 import React from 'react';
-import { AddDataUi } from './add_data';
+import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 test('render', () => {
-  const component = shallowWithIntl(<AddDataUi
+  const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={false}
     isNewKibanaInstance={false}
   />);
@@ -30,7 +30,7 @@ test('render', () => {
 });
 
 test('apmUiEnabled', () => {
-  const component = shallowWithIntl(<AddDataUi
+  const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={true}
     isNewKibanaInstance={false}
   />);
@@ -38,7 +38,7 @@ test('apmUiEnabled', () => {
 });
 
 test('isNewKibanaInstance', () => {
-  const component = shallowWithIntl(<AddDataUi
+  const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={false}
     isNewKibanaInstance={true}
   />);

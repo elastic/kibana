@@ -21,10 +21,10 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { SavedObjectsInstallerUi } from './saved_objects_installer';
+import { SavedObjectsInstaller } from './saved_objects_installer';
 
 test('renders', () => {
-  const component = shallowWithIntl(<SavedObjectsInstallerUi
+  const component = shallowWithIntl(<SavedObjectsInstaller.WrappedComponent
     bulkCreate={() => {}}
     savedObjects={[]}
   />);
@@ -43,7 +43,7 @@ describe('bulkCreate', () => {
         savedObjects: [savedObject]
       });
     };
-    const component = mountWithIntl(<SavedObjectsInstallerUi
+    const component = mountWithIntl(<SavedObjectsInstaller.WrappedComponent
       bulkCreate={bulkCreateMock}
       savedObjects={[savedObject]}
     />);
@@ -62,7 +62,7 @@ describe('bulkCreate', () => {
     const bulkCreateMock = () => {
       return Promise.reject(new Error('simulated bulkRequest error'));
     };
-    const component = mountWithIntl(<SavedObjectsInstallerUi
+    const component = mountWithIntl(<SavedObjectsInstaller.WrappedComponent
       bulkCreate={bulkCreateMock}
       savedObjects={[savedObject]}
     />);

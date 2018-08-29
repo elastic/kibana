@@ -8,7 +8,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -142,7 +142,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -295,7 +295,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -448,7 +448,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -582,7 +582,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -716,7 +716,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
     />
@@ -850,7 +850,7 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1000,7 +1000,7 @@ exports[`home should render home component 1`] = `
         size="l"
       />
     </React.Fragment>
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1134,7 +1134,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1268,7 +1268,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1409,7 +1409,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <InjectIntl(Component)
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
     />

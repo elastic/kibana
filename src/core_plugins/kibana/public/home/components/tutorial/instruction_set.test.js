@@ -21,7 +21,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
-  InstructionSetUi,
+  InstructionSet,
 } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
 
@@ -52,7 +52,7 @@ const instructionVariants = [
 ];
 
 test('render', () => {
-  const component = shallowWithIntl(<InstructionSetUi
+  const component = shallowWithIntl(<InstructionSet.WrappedComponent
     title="title1"
     instructionVariants={instructionVariants}
     onStatusCheck={() => {}}
@@ -73,7 +73,7 @@ describe('statusCheckState', () => {
   };
 
   test('initial state - no check has been attempted', () => {
-    const component = shallowWithIntl(<InstructionSetUi
+    const component = shallowWithIntl(<InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
       onStatusCheck={() => {}}
@@ -87,7 +87,7 @@ describe('statusCheckState', () => {
   });
 
   test('checking status', () => {
-    const component = shallowWithIntl(<InstructionSetUi
+    const component = shallowWithIntl(<InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
       onStatusCheck={() => {}}
@@ -101,7 +101,7 @@ describe('statusCheckState', () => {
   });
 
   test('failed status check - error', () => {
-    const component = shallowWithIntl(<InstructionSetUi
+    const component = shallowWithIntl(<InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
       onStatusCheck={() => {}}
@@ -115,7 +115,7 @@ describe('statusCheckState', () => {
   });
 
   test('failed status check - no data', () => {
-    const component = shallowWithIntl(<InstructionSetUi
+    const component = shallowWithIntl(<InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
       onStatusCheck={() => {}}
@@ -129,7 +129,7 @@ describe('statusCheckState', () => {
   });
 
   test('successful status check', () => {
-    const component = shallowWithIntl(<InstructionSetUi
+    const component = shallowWithIntl(<InstructionSet.WrappedComponent
       title="title1"
       instructionVariants={instructionVariants}
       onStatusCheck={() => {}}

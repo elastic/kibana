@@ -22,7 +22,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
-  TutorialUi,
+  Tutorial,
 } from './tutorial';
 
 function buildInstructionSet(type) {
@@ -65,7 +65,7 @@ const replaceTemplateStrings = (text) => {
 
 describe('isCloudEnabled is false', () => {
   test('should render ON_PREM instructions with instruction toggle', () => {
-    const component = shallowWithIntl(<TutorialUi
+    const component = shallowWithIntl(<Tutorial.WrappedComponent
       addBasePath={addBasePath}
       isCloudEnabled={false}
       getTutorial={getTutorial}
@@ -89,7 +89,7 @@ describe('isCloudEnabled is false', () => {
     const getBasicTutorial = () => {
       return loadBasicTutorialPromise;
     };
-    const component = shallowWithIntl(<TutorialUi
+    const component = shallowWithIntl(<Tutorial.WrappedComponent
       addBasePath={addBasePath}
       isCloudEnabled={false}
       getTutorial={getBasicTutorial}
@@ -104,7 +104,7 @@ describe('isCloudEnabled is false', () => {
   });
 
   test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', () => {
-    const component = mountWithIntl(<TutorialUi
+    const component = mountWithIntl(<Tutorial.WrappedComponent
       addBasePath={addBasePath}
       isCloudEnabled={false}
       getTutorial={getTutorial}
@@ -122,7 +122,7 @@ describe('isCloudEnabled is false', () => {
 });
 
 test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', () => {
-  const component = shallowWithIntl(<TutorialUi
+  const component = shallowWithIntl(<Tutorial.WrappedComponent
     addBasePath={addBasePath}
     isCloudEnabled={true}
     getTutorial={getTutorial}

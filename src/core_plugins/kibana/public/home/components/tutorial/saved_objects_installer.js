@@ -34,7 +34,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-export class SavedObjectsInstallerUi extends React.Component {
+class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
     id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
     defaultMessage: 'Load Kibana objects'
