@@ -56,7 +56,7 @@ export class StringType extends Type<string> {
       case 'string.max':
         return `value is [${value}] but it must have a maximum length of [${limit}].`;
       case 'string.hostname':
-        return `value is [${value}] but it must be a valid hostname.`;
+        return `value is [${value}] but it must be a valid hostname (see RFC 1123).`;
     }
   }
 }

@@ -53,7 +53,7 @@ exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must 
 
 exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
 
-exports[`throws if invalid hostname 1`] = `"[host]: value is [asdf$%^] but it must be a valid hostname."`;
+exports[`throws if invalid hostname 1`] = `"[host]: value is [asdf$%^] but it must be a valid hostname (see RFC 1123)."`;
 
 exports[`with TLS should accept known protocols\` 1`] = `
 "[ssl.supportedProtocols.0]: types that failed validation:

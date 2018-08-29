@@ -1,12 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#hostname returns error when value is not a valid hostname 1`] = `"value is [host:name] but it must be a valid hostname."`;
+exports[`#hostname returns error when value is not a valid hostname 1`] = `"value is [host:name] but it must be a valid hostname (see RFC 1123)."`;
 
-exports[`#hostname returns error when value is not a valid hostname 2`] = `"value is [-] but it must be a valid hostname."`;
+exports[`#hostname returns error when value is not a valid hostname 2`] = `"value is [localhost:5601] but it must be a valid hostname (see RFC 1123)."`;
 
-exports[`#hostname returns error when value is not a valid hostname 3`] = `"value is [0:?:0:0:0:0:0:1] but it must be a valid hostname."`;
+exports[`#hostname returns error when value is not a valid hostname 3`] = `"value is [-] but it must be a valid hostname (see RFC 1123)."`;
 
-exports[`#hostname returns error when value is not a valid hostname 4`] = `"value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid hostname."`;
+exports[`#hostname returns error when value is not a valid hostname 4`] = `"value is [0:?:0:0:0:0:0:1] but it must be a valid hostname (see RFC 1123)."`;
+
+exports[`#hostname returns error when value is not a valid hostname 5`] = `"value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid hostname (see RFC 1123)."`;
 
 exports[`#maxLength returns error when longer string 1`] = `"value is [foo] but it must have a maximum length of [2]."`;
 

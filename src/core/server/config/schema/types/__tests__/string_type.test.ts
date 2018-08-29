@@ -67,9 +67,7 @@ describe('#hostname', () => {
       'xn----ascii-7gg5ei7b1i.xn--90a3a'
     );
 
-    const hostNameWithMaxAllowedLength = Array(255)
-      .fill('a')
-      .join('');
+    const hostNameWithMaxAllowedLength = 'a'.repeat(255);
     expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
       hostNameWithMaxAllowedLength
     );
@@ -79,12 +77,11 @@ describe('#hostname', () => {
     const hostNameSchema = schema.string({ hostname: true });
 
     expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingSnapshot();
+    expect(() => hostNameSchema.validate('localhost:5601')).toThrowErrorMatchingSnapshot();
     expect(() => hostNameSchema.validate('-')).toThrowErrorMatchingSnapshot();
     expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingSnapshot();
 
-    const tooLongHostName = Array(256)
-      .fill('a')
-      .join('');
+    const tooLongHostName = 'a'.repeat(256);
     expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingSnapshot();
   });
 });
