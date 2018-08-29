@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { read } from '../../lib';
 import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
 import { dirname, extname, isAbsolute, sep } from 'path';
 import { readFileSync } from 'fs';
@@ -196,7 +195,7 @@ export const CleanClientModulesOnDLLTask = {
 
       return baseDeps;
     }, {});
-    const baseServerDeps = Object.keys(baseServerDepsMap);
+    const baseServerDependencies = Object.keys(baseServerDepsMap);
 
     // TODO: REFACTOR EVERYTHING ABOVE
     // THE TASK IS ALMOST ONLY THE THINGS
@@ -204,20 +203,16 @@ export const CleanClientModulesOnDLLTask = {
 
     // Consider this as our whiteList for the modules we can't delete
     const whiteListedModules = [
-      ...baseServerDeps,
+      ...baseServerDependencies,
       ...kbnWebpackLoaders
     ];
 
-    // Read client vendors dll manifest content
-    const dllManifest = JSON.parse(
-      await read(
-        build.resolvePath('optimize/bundles/vendors.manifest.dll.json')
-      )
-    );
+    // Resolve the client vendors dll manifest path
+    const dllManifestPath = build.resolvePath('optimize/bundles/vendors.manifest.dll.json');
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
-    const dllEntries = getDllEntries(dllManifest, whiteListedModules);
+    const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
 
     for (const relativeEntryPath of dllEntries) {
       const entryPath = build.resolvePath(relativeEntryPath);

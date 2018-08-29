@@ -22,10 +22,14 @@ import { dirname, sep } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
 
-export function getDllEntries(manifest, whiteListedModules) {
+export async function getDllEntries(manifestPath, whiteListedModules) {
+  const manifest = JSON.parse(await read(manifestPath));
+
   if (!manifest || !manifest.content) {
-    // It should fails if we don't have modules
-    return [];
+    // It should fails because if we don't have any
+    // module inside the client vendors dll something
+    // wrong is happening and we should stop
+    throw new Error(`The following dll manifest is reporting an empty dll: ${manifestPath}`);
   }
 
   const modules = Object.keys(manifest.content);
@@ -53,12 +57,12 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
 
   // Clear dependencies from dll module package.json
   if (modulePkg.dependencies) {
-    modulePkg.dependencies = [];
+    modulePkg.dependencies = {};
   }
 
   // Clear devDependencies from dll module package.json
   if (modulePkg.devDependencies) {
-    modulePkg.devDependencies = [];
+    modulePkg.devDependencies = {};
   }
 
   // Delete module contents. It will delete everything
