@@ -38,7 +38,7 @@ export interface KFetchKibanaOptions {
 }
 
 export interface Interceptor {
-  request?: (config: any) => any;
+  request?: (config: KFetchOptions) => KFetchOptions;
   requestError?: (e: any) => any;
   response?: (res: any) => any;
   responseError?: (e: any) => any;
@@ -52,7 +52,7 @@ export async function kfetch(
   options: KFetchOptions,
   { prependBasePath = true }: KFetchKibanaOptions = {}
 ) {
-  const combinedOptions = {
+  const combinedOptions: KFetchOptions = {
     method: 'GET',
     credentials: 'same-origin',
     ...options,
@@ -82,22 +82,19 @@ export async function kfetch(
   return responseInterceptors(promise);
 }
 
-function requestInterceptors(config: any) {
-  return [...interceptors].reverse().reduce((acc, interceptor) => {
-    return acc.then(interceptor.request || noop, interceptor.requestError || noopError);
+function requestInterceptors(config: KFetchOptions) {
+  return interceptors.reduceRight((acc, interceptor) => {
+    return acc.then(interceptor.request || noop, interceptor.requestError);
   }, Promise.resolve(config));
 }
 
 function responseInterceptors(responsePromise: Promise<any>) {
   return interceptors.reduce((acc, interceptor) => {
-    return acc.then(interceptor.response || noop, interceptor.responseError || noopError);
+    return acc.then(interceptor.response || noop, interceptor.responseError);
   }, responsePromise);
 }
 
 const noop = (v: any) => v;
-const noopError = (e: Error) => {
-  throw e;
-};
 
 async function getBodyAsJson(res: Response) {
   try {
