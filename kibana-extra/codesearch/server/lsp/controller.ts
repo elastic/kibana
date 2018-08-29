@@ -131,7 +131,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     proxy.awaitServerConnection();
     const javaLangserverPath = path.resolve(
       __dirname,
-      '../../../../lsp/eclipse.jdt.ls/org.eclipse.jdt.ls.product/target/repository'
+      '../../../../lsp/eclipse.jdt.ls/org.elastic.jdt.ls.product/target/repository'
     );
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: javaLangserverPath,
