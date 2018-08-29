@@ -9,7 +9,12 @@ export const Error = ({ payload }) => {
   const message = get(payload, 'error.message');
 
   return (
-    <EuiCallOut color="danger" iconType="cross" title="Whoops! Expression failed">
+    <EuiCallOut
+      style={{ maxWidth: 500 }}
+      color="danger"
+      iconType="cross"
+      title="Whoops! Expression failed"
+    >
       <p>
         The function <strong>"{functionName}"</strong> failed
         {message ? ' with the following message:' : '.'}

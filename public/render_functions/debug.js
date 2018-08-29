@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { EuiCode } from '@elastic/eui';
+import { Debug } from '../components/debug';
 
 export const debug = () => ({
   name: 'debug',
@@ -9,11 +9,9 @@ export const debug = () => ({
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const renderDebug = () => (
-      <EuiCode>
-        <pre style={{ overflow: 'auto', height: domNode.offsetHeight, width: domNode.offsetWidth }}>
-          {JSON.stringify(config, null, 2)}
-        </pre>
-      </EuiCode>
+      <div style={{ width: domNode.offsetWidth, height: domNode.offsetHeight }}>
+        <Debug payload={config} />
+      </div>
     );
 
     ReactDOM.render(renderDebug(), domNode, () => handlers.done());

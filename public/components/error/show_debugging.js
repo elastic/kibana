@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withState } from 'recompose';
-import { EuiCode, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { Debug } from '../debug';
 
 const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
   process.env.NODE_ENV === 'production' ? null : (
@@ -13,9 +14,9 @@ const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
         See Details
       </EuiButtonEmpty>
       {expanded && (
-        <EuiCode className="canvasErrorDebug">
-          <pre>{JSON.stringify(payload, null, 2)}</pre>
-        </EuiCode>
+        <div style={{ height: 260 }}>
+          <Debug payload={payload} />
+        </div>
       )}
     </div>
   );
