@@ -290,7 +290,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   })}
 # secret_token: ''
 
-# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment', {
+# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.setCustomApmServerComment', {
     defaultMessage: 'Set custom APM Server URL (default: {defaultServerUrl})',
     values: { defaultServerUrl: 'http://localhost:8200' },
   })}
