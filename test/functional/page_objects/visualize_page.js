@@ -598,11 +598,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
+      const time1 = Date.now();
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
       const countOfDataCompleteFlags = 2;
       await renderable.waitForRender(countOfDataCompleteFlags);
+      log.debug('ClickGo time', (Date.now() - time1) / 1000);
     }
 
     async clickReset() {

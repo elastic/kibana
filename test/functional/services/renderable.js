@@ -18,7 +18,6 @@
  */
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
-const DATA_LOADING_SELECTOR = '[data-loading]';
 
 export function RenderableProvider({ getService }) {
   const log = getService('log');
@@ -40,11 +39,6 @@ export function RenderableProvider({ getService }) {
         const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
         if (completedElements.length < count) {
           throw new Error(`${completedElements.length} elements completed rendering, waiting on a total of ${count}`);
-        }
-
-        const stillLoadingElements = await find.allByCssSelector(DATA_LOADING_SELECTOR);
-        if (stillLoadingElements.length > 0) {
-          throw new Error(`${stillLoadingElements.length} elements still loading contents`);
         }
       });
     }
