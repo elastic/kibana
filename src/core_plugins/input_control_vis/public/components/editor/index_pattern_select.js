@@ -27,7 +27,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-export class IndexPatternSelectUi extends Component {
+class IndexPatternSelectUi extends Component {
   constructor(props) {
     super(props);
 

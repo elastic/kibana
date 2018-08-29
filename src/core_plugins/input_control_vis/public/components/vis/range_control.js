@@ -50,7 +50,7 @@ const toState = ({ control }) => {
   return state;
 };
 
-export class RangeControlUi extends Component {
+class RangeControlUi extends Component {
   constructor(props) {
     super(props);
 

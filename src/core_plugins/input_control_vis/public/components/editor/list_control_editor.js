@@ -34,7 +34,7 @@ function filterField(field) {
   return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
 }
 
-export class ListControlEditorUi extends Component {
+class ListControlEditorUi extends Component {
   state = {
     isLoadingFieldType: true,
     isStringField: false,

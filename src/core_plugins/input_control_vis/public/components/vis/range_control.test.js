@@ -22,7 +22,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
-  RangeControlUi,
+  RangeControl,
 } from './range_control';
 
 const control = {
@@ -43,7 +43,7 @@ const control = {
 };
 
 test('renders RangeControl', () => {
-  const component = shallowWithIntl(<RangeControlUi
+  const component = shallowWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
     stageFilter={() => {}}
@@ -66,7 +66,7 @@ test('disabled', () => {
       return false;
     }
   };
-  const component = shallowWithIntl(<RangeControlUi
+  const component = shallowWithIntl(<RangeControl.WrappedComponent
     control={disabledRangeControl}
     controlIndex={0}
     stageFilter={() => {}}
@@ -75,7 +75,7 @@ test('disabled', () => {
 });
 
 describe('min and max input values', () => {
-  const component = mountWithIntl(<RangeControlUi
+  const component = mountWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
     stageFilter={() => {}}

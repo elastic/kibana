@@ -23,7 +23,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 import {
-  ControlsTabUi,
+  ControlsTab,
 } from './controls_tab';
 
 const savedObjectsClientMock = {
@@ -87,7 +87,7 @@ beforeEach(() => {
 });
 
 test('renders ControlsTab', () => {
-  const component = shallowWithIntl(<ControlsTabUi
+  const component = shallowWithIntl(<ControlsTab.WrappedComponent
     scope={scopeMock}
     editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
@@ -98,7 +98,7 @@ test('renders ControlsTab', () => {
 describe('behavior', () => {
 
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTabUi
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -114,7 +114,7 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTabUi
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -139,7 +139,7 @@ describe('behavior', () => {
 
 
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTabUi
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -176,7 +176,7 @@ describe('behavior', () => {
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTabUi
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}

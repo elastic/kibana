@@ -34,7 +34,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-export class ControlsTabUi extends Component {
+class ControlsTabUi extends Component {
 
   state = {
     type: 'list'

@@ -35,7 +35,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export class ControlEditorUi extends Component {
+class ControlEditorUi extends Component {
 
   changeLabel = (evt) => {
     this.props.handleLabelChange(this.props.controlIndex, evt);

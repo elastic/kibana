@@ -27,7 +27,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-export class FieldSelectUi extends Component {
+class FieldSelectUi extends Component {
   constructor(props) {
     super(props);
 

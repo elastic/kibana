@@ -28,7 +28,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-export class ListControlUi extends Component {
+class ListControlUi extends Component {
 
   state = {
     isLoading: false

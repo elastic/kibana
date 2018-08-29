@@ -25,7 +25,7 @@ import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
-  ListControlEditorUi,
+  ListControlEditor,
 } from './list_control_editor';
 
 const controlParams = {
@@ -67,7 +67,7 @@ describe('renders', () => {
         size: 5,
       }
     };
-    const component = shallowWithIntl(<ListControlEditorUi
+    const component = shallowWithIntl(<ListControlEditor.WrappedComponent
       getIndexPatterns={getIndexPatternsMock}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
@@ -93,7 +93,7 @@ describe('renders', () => {
       { value: '1', text: 'fieldA' },
       { value: '2', text: 'fieldB' }
     ];
-    const component = shallowWithIntl(<ListControlEditorUi
+    const component = shallowWithIntl(<ListControlEditor.WrappedComponent
       getIndexPatterns={getIndexPatternsMock}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
@@ -128,7 +128,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditorUi
+      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
         getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
@@ -162,7 +162,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditorUi
+      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
         getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
@@ -196,7 +196,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditorUi
+      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
         getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
@@ -220,7 +220,7 @@ describe('renders', () => {
 });
 
 test('handleCheckboxOptionChange - multiselect', async () => {
-  const component = mountWithIntl(<ListControlEditorUi
+  const component = mountWithIntl(<ListControlEditor.WrappedComponent
     getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
@@ -258,7 +258,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
 });
 
 test('handleNumberOptionChange - size', async () => {
-  const component = mountWithIntl(<ListControlEditorUi
+  const component = mountWithIntl(<ListControlEditor.WrappedComponent
     getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
