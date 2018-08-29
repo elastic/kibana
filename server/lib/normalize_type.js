@@ -1,6 +1,3 @@
-// copied over from canvas
-// TODO: remove this, maybe just expose this from the canvas plugin?
-
 export function normalizeType(type) {
   const normalTypes = {
     string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
@@ -17,6 +14,8 @@ export function normalizeType(type) {
       '_version',
     ],
     date: ['date'],
+    boolean: ['boolean'],
+    null: ['null'],
   };
 
   const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));

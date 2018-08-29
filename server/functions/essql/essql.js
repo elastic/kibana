@@ -1,6 +1,6 @@
 import { map, zipObject } from 'lodash';
+import { normalizeType } from '../../lib/normalize_type';
 import { buildBoolArray } from './build_bool_array';
-import { normalizeType } from './normalize_type';
 import { sanitizeName } from './sanitize_name';
 
 export const essql = () => ({

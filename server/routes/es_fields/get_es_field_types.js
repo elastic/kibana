@@ -1,5 +1,5 @@
 import { mapValues, keys } from 'lodash';
-import { normalizeType } from './normalize_type';
+import { normalizeType } from '../../lib/normalize_type';
 
 export function getESFieldTypes(index, fields, elasticsearchClient) {
   const config = {
