@@ -193,6 +193,7 @@ export class WarmPhase extends PureComponent {
                         options={[
                           { value: 'd', text: 'days' },
                           { value: 'h', text: 'hours' },
+                          { value: 's', text: 'seconds' },
                         ]}
                       />
                     </EuiFormRow>
