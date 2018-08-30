@@ -6,9 +6,12 @@
 
 import { createSelector } from 'reselect';
 
+import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
+
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
+  logFilterSelectors as localLogFilterSelectors,
   logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
   logTextviewSelectors as localLogTextviewSelectors,
@@ -26,6 +29,7 @@ import {
 
 const selectLocal = (state: State) => state.local;
 
+export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
 export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
@@ -62,5 +66,20 @@ export const sharedSelectors = {
     logPositionSelectors.selectLastVisiblePosition,
     (entries, lastVisiblePosition) =>
       lastVisiblePosition ? getLogEntryAtTime(entries, lastVisiblePosition) : null
+  ),
+  selectLogFilterQueryAsJson: createSelector(
+    logFilterSelectors.selectLogFilterQuery,
+    sourceSelectors.selectDerivedIndexPattern,
+    (filterQuery, indexPattern) => {
+      try {
+        return filterQuery
+          ? JSON.stringify(
+              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
+            )
+          : null;
+      } catch (err) {
+        return null;
+      }
+    }
   ),
 };

@@ -4,24 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const initialSourceState: SourceState = {
-  coreFields: {
-    message: 'message',
-    tiebreaker: '_doc',
-    time: '@timestamp',
-  },
-  indices: ['xpack-infra-default-logs'],
-  name: 'Unnamed Source',
-};
+import reduceReducers from 'reduce-reducers';
+import { Reducer } from 'redux';
 
-export interface SourceState {
-  name: string;
-  coreFields: {
-    message: string;
-    tiebreaker: string;
-    time: string;
-  };
-  indices: string[];
-}
+import { loadSourceReducer } from './operations/load';
+import { SourceState } from './state';
 
-export const sourceReducer = (state: SourceState = initialSourceState): SourceState => state;
+export const sourceReducer = reduceReducers(loadSourceReducer) as Reducer<SourceState>;

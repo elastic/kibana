@@ -19,4 +19,10 @@ export const sharedSchema = gql`
     time: Float!
     tiebreaker: Float!
   }
+
+  enum InfraIndexType {
+    ANY
+    LOGS
+    METRICS
+  }
 `;

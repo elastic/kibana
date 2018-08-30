@@ -5,11 +5,7 @@
  */
 
 import { InfraSourceResolvers, QueryResolvers } from '../../../common/graphql/types';
-import {
-  InfraResolvedResult,
-  InfraResolverOf,
-  InfraResolverWithFields,
-} from '../../lib/adapters/framework';
+import { InfraResolvedResult, InfraResolverWithFields } from '../../lib/adapters/framework';
 import { InfraContext } from '../../lib/infra_types';
 import { InfraSourceStatus } from '../../lib/source_status';
 import { InfraSources } from '../../lib/sources';
@@ -20,16 +16,19 @@ export type QuerySourceResolver = InfraResolverWithFields<
   InfraContext,
   'id' | 'configuration'
 >;
+
 export type QueryAllSourcesResolver = InfraResolverWithFields<
   QueryResolvers.AllSourcesResolver,
   null,
   InfraContext,
   'id' | 'configuration'
 >;
-export type InfraSourceStatusResolver = InfraResolverOf<
+
+export type InfraSourceStatusResolver = InfraResolverWithFields<
   InfraSourceResolvers.StatusResolver,
   InfraResolvedResult<QuerySourceResolver>,
-  InfraContext
+  InfraContext,
+  never
 >;
 
 interface SourcesResolversDeps {
@@ -67,21 +66,8 @@ export const createSourcesResolvers = (
     },
   },
   InfraSource: {
-    async status(source, args, { req }) {
-      return {
-        metricAliasExists: async () => {
-          return await libs.sourceStatus.hasMetricAlias(req, source.id);
-        },
-        metricIndices: async () => {
-          return await libs.sourceStatus.getMetricIndexNames(req, source.id);
-        },
-        logAliasExists: async () => {
-          return await libs.sourceStatus.hasLogAlias(req, source.id);
-        },
-        logIndices: async () => {
-          return await libs.sourceStatus.getLogIndexNames(req, source.id);
-        },
-      };
+    async status(source) {
+      return source;
     },
   },
 });

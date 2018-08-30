@@ -9,16 +9,8 @@ type Resolver<Result, Args = any> = (
 ) => Promise<Result> | Result;
 
 export interface Query {
-  fields?: (InfraField | null)[] | null;
   source: InfraSource /** Get an infrastructure data source by id */;
   allSources: InfraSource[] /** Get a list of all infrastructure data sources */;
-}
-
-export interface InfraField {
-  name?: string | null;
-  type?: string | null;
-  searchable?: boolean | null;
-  aggregatable?: boolean | null;
 }
 /** A source of infrastructure data */
 export interface InfraSource {
@@ -51,6 +43,14 @@ export interface InfraSourceStatus {
   logAliasExists: boolean /** Whether the configured log alias exists */;
   metricIndices: string[] /** The list of indices in the metric alias */;
   logIndices: string[] /** The list of indices in the log alias */;
+  indexFields: InfraIndexField[] /** The list of fields defined in the index mappings */;
+}
+/** A descriptor of a field in an index */
+export interface InfraIndexField {
+  name: string /** The name of the field */;
+  type: string /** The type of the field's values as recognized by Kibana */;
+  searchable: boolean /** Whether the field's values can be efficiently searched for */;
+  aggregatable: boolean /** Whether the field's values can be aggregated */;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -122,14 +122,8 @@ export interface InfraNodeMetric {
 
 export namespace QueryResolvers {
   export interface Resolvers {
-    fields?: FieldsResolver;
     source?: SourceResolver /** Get an infrastructure data source by id */;
     allSources?: AllSourcesResolver /** Get a list of all infrastructure data sources */;
-  }
-
-  export type FieldsResolver = Resolver<(InfraField | null)[] | null, FieldsArgs>;
-  export interface FieldsArgs {
-    indexPattern?: InfraIndexPatternInput | null;
   }
 
   export type SourceResolver = Resolver<InfraSource, SourceArgs>;
@@ -138,20 +132,6 @@ export namespace QueryResolvers {
   }
 
   export type AllSourcesResolver = Resolver<InfraSource[]>;
-}
-
-export namespace InfraFieldResolvers {
-  export interface Resolvers {
-    name?: NameResolver;
-    type?: TypeResolver;
-    searchable?: SearchableResolver;
-    aggregatable?: AggregatableResolver;
-  }
-
-  export type NameResolver = Resolver<string | null>;
-  export type TypeResolver = Resolver<string | null>;
-  export type SearchableResolver = Resolver<boolean | null>;
-  export type AggregatableResolver = Resolver<boolean | null>;
 }
 /** A source of infrastructure data */
 export namespace InfraSourceResolvers {
@@ -236,12 +216,31 @@ export namespace InfraSourceStatusResolvers {
     logAliasExists?: LogAliasExistsResolver /** Whether the configured log alias exists */;
     metricIndices?: MetricIndicesResolver /** The list of indices in the metric alias */;
     logIndices?: LogIndicesResolver /** The list of indices in the log alias */;
+    indexFields?: IndexFieldsResolver /** The list of fields defined in the index mappings */;
   }
 
   export type MetricAliasExistsResolver = Resolver<boolean>;
   export type LogAliasExistsResolver = Resolver<boolean>;
   export type MetricIndicesResolver = Resolver<string[]>;
   export type LogIndicesResolver = Resolver<string[]>;
+  export type IndexFieldsResolver = Resolver<InfraIndexField[], IndexFieldsArgs>;
+  export interface IndexFieldsArgs {
+    indexType?: InfraIndexType | null;
+  }
+}
+/** A descriptor of a field in an index */
+export namespace InfraIndexFieldResolvers {
+  export interface Resolvers {
+    name?: NameResolver /** The name of the field */;
+    type?: TypeResolver /** The type of the field's values as recognized by Kibana */;
+    searchable?: SearchableResolver /** Whether the field's values can be efficiently searched for */;
+    aggregatable?: AggregatableResolver /** Whether the field's values can be aggregated */;
+  }
+
+  export type NameResolver = Resolver<string>;
+  export type TypeResolver = Resolver<string>;
+  export type SearchableResolver = Resolver<boolean>;
+  export type AggregatableResolver = Resolver<boolean>;
 }
 /** A consecutive sequence of log entries */
 export namespace InfraLogEntryIntervalResolvers {
@@ -376,11 +375,6 @@ export namespace InfraNodeMetricResolvers {
   export type ValueResolver = Resolver<number>;
 }
 
-export interface InfraIndexPatternInput {
-  pattern: string /** The index pattern to use, defaults to '*' */;
-  timeFieldName: string /** The timefield to use, defaults to @timestamp */;
-}
-
 export interface InfraTimeKeyInput {
   time: number;
   tiebreaker: number;
@@ -433,9 +427,6 @@ export interface InfraMetricAggInput {
     | null /** Additional settings for pipeline aggregations in a key:value comma delimited format */;
   script?: string | null /** Script field for bucket_script aggregations */;
 }
-export interface FieldsQueryArgs {
-  indexPattern?: InfraIndexPatternInput | null;
-}
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
@@ -462,11 +453,20 @@ export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
   filters?: InfraFilterInput[] | null;
 }
+export interface IndexFieldsInfraSourceStatusArgs {
+  indexType?: InfraIndexType | null;
+}
 export interface NodesInfraResponseArgs {
   path?: InfraPathInput[] | null;
 }
 export interface MetricsInfraNodeArgs {
   metrics?: InfraMetricInput[] | null;
+}
+
+export enum InfraIndexType {
+  ANY = 'ANY',
+  LOGS = 'LOGS',
+  METRICS = 'METRICS',
 }
 
 export enum InfraFilterType {
@@ -514,12 +514,55 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
+export namespace MapQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: InfraTimerangeInput;
+    filters?: InfraFilterInput[] | null;
+    metrics?: InfraMetricInput[] | null;
+    path?: InfraPathInput[] | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    map?: Map | null;
+  };
+
+  export type Map = {
+    __typename?: 'InfraResponse';
+    nodes: Nodes[];
+  };
+
+  export type Nodes = {
+    __typename?: 'InfraNode';
+    path: Path[];
+    metrics: Metrics[];
+  };
+
+  export type Path = {
+    __typename?: 'InfraNodePath';
+    value: string;
+  };
+
+  export type Metrics = {
+    __typename?: 'InfraNodeMetric';
+    name: string;
+    value: number;
+  };
+}
 export namespace LogEntries {
   export type Variables = {
     sourceId?: string | null;
     timeKey: InfraTimeKeyInput;
     countBefore?: number | null;
     countAfter?: number | null;
+    filterQuery?: string | null;
   };
 
   export type Query = {
@@ -580,6 +623,7 @@ export namespace LogSummary {
     start: number;
     end: number;
     bucketSize: number;
+    filterQuery?: string | null;
   };
 
   export type Query = {
@@ -607,13 +651,9 @@ export namespace LogSummary {
     entriesCount: number;
   };
 }
-export namespace MapQuery {
+export namespace SourceQuery {
   export type Variables = {
-    sourceId: string;
-    timerange: InfraTimerangeInput;
-    filters?: InfraFilterInput[] | null;
-    metrics?: InfraMetricInput[] | null;
-    path?: InfraPathInput[] | null;
+    sourceId?: string | null;
   };
 
   export type Query = {
@@ -623,30 +663,27 @@ export namespace MapQuery {
 
   export type Source = {
     __typename?: 'InfraSource';
-    id: string;
-    map?: Map | null;
+    configuration: Configuration;
+    status: Status;
   };
 
-  export type Map = {
-    __typename?: 'InfraResponse';
-    nodes: Nodes[];
+  export type Configuration = {
+    __typename?: 'InfraSourceConfiguration';
+    metricAlias: string;
+    logAlias: string;
   };
 
-  export type Nodes = {
-    __typename?: 'InfraNode';
-    path: Path[];
-    metrics: Metrics[];
+  export type Status = {
+    __typename?: 'InfraSourceStatus';
+    indexFields: IndexFields[];
   };
 
-  export type Path = {
-    __typename?: 'InfraNodePath';
-    value: string;
-  };
-
-  export type Metrics = {
-    __typename?: 'InfraNodeMetric';
+  export type IndexFields = {
+    __typename?: 'InfraIndexField';
     name: string;
-    value: number;
+    type: string;
+    searchable: boolean;
+    aggregatable: boolean;
   };
 }
 

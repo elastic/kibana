@@ -14,10 +14,16 @@ export const logEntriesQuery = gql`
     $timeKey: InfraTimeKeyInput!
     $countBefore: Int = 0
     $countAfter: Int = 0
+    $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
-      logEntriesAround(key: $timeKey, countBefore: $countBefore, countAfter: $countAfter) {
+      logEntriesAround(
+        key: $timeKey
+        countBefore: $countBefore
+        countAfter: $countAfter
+        filterQuery: $filterQuery
+      ) {
         start {
           ...InfraTimeKeyFields
         }

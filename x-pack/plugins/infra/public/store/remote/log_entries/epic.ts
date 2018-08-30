@@ -9,8 +9,8 @@ import { combineEpics, Epic, EpicWithState } from 'redux-observable';
 import { merge } from 'rxjs';
 import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
+import { logFilterActions, logPositionActions } from '../..';
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { logPositionActions } from '../../local/log_position';
 import { loadEntries, loadMoreEntries } from './actions';
 import { loadEntriesEpic } from './operations/load';
 import { loadMoreEntriesEpic } from './operations/load_more';
@@ -19,12 +19,14 @@ const LOAD_CHUNK_SIZE = 200;
 const DESIRED_BUFFER_PAGES = 2;
 
 interface ManageEntriesDependencies<State> {
-  selectEntriesStart: (state: State) => TimeKey | null;
-  selectEntriesEnd: (state: State) => TimeKey | null;
-  selectHasMoreBeforeStart: (state: State) => boolean;
-  selectHasMoreAfterEnd: (state: State) => boolean;
-  selectIsAutoReloading: (state: State) => boolean;
-  selectIsLoadingEntries: (state: State) => boolean;
+  selectLogEntriesStart: (state: State) => TimeKey | null;
+  selectLogEntriesEnd: (state: State) => TimeKey | null;
+  selectHasMoreLogEntriesBeforeStart: (state: State) => boolean;
+  selectHasMoreLogEntriesAfterEnd: (state: State) => boolean;
+  selectIsAutoReloadingLogEntries: (state: State) => boolean;
+  selectIsLoadingLogEntries: (state: State) => boolean;
+  selectLogFilterQueryAsJson: (state: State) => string | null;
+  selectVisibleLogMidpointOrTarget: (state: State) => TimeKey | null;
 }
 
 export const createLogEntriesEpic = <State>() =>
@@ -43,20 +45,29 @@ export const createEntriesEffectsEpic = <State>(): Epic<
   action$,
   state$,
   {
-    selectEntriesStart,
-    selectEntriesEnd,
-    selectHasMoreBeforeStart,
-    selectHasMoreAfterEnd,
-    selectIsAutoReloading,
-    selectIsLoadingEntries,
+    selectLogEntriesStart,
+    selectLogEntriesEnd,
+    selectHasMoreLogEntriesBeforeStart,
+    selectHasMoreLogEntriesAfterEnd,
+    selectIsAutoReloadingLogEntries,
+    selectIsLoadingLogEntries,
+    selectLogFilterQueryAsJson,
+    selectVisibleLogMidpointOrTarget,
   }
 ) => {
-  const shouldLoadAround$ = action$.pipe(
+  const filterQuery$ = state$.pipe(map(selectLogFilterQueryAsJson));
+  const visibleMidpointOrTarget$ = state$.pipe(
+    map(selectVisibleLogMidpointOrTarget),
+    filter(isNotNull),
+    map(pickTimeKey)
+  );
+
+  const shouldLoadAroundNewPosition$ = action$.pipe(
     filter(logPositionActions.jumpToTargetPosition.match),
     withLatestFrom(state$),
     filter(([{ payload }, state]) => {
-      const entriesStart = selectEntriesStart(state);
-      const entriesEnd = selectEntriesEnd(state);
+      const entriesStart = selectLogEntriesStart(state);
+      const entriesEnd = selectLogEntriesEnd(state);
 
       return entriesStart && entriesEnd
         ? !timeKeyIsBetween(entriesStart, entriesEnd, payload)
@@ -65,15 +76,23 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     map(([{ payload }]) => pickTimeKey(payload))
   );
 
+  const shouldLoadWithNewFilter$ = action$.pipe(
+    filter(logFilterActions.applyLogFilterQuery.match),
+    withLatestFrom(filterQuery$, (filterQuery, filterQueryString) => filterQueryString)
+  );
+
   const shouldLoadMoreBefore$ = action$.pipe(
     filter(logPositionActions.reportVisiblePositions.match),
     filter(({ payload: { pagesBeforeStart } }) => pagesBeforeStart < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
-    filter(([action, state]) => !selectIsAutoReloading(state)),
-    filter(([action, state]) => !selectIsLoadingEntries(state)),
-    filter(([action, state]) => selectHasMoreBeforeStart(state)),
-    map(([action, state]) => selectEntriesStart(state)),
-    filter((entriesStart): entriesStart is TimeKey => entriesStart != null),
+    filter(
+      ([action, state]) =>
+        !selectIsAutoReloadingLogEntries(state) &&
+        !selectIsLoadingLogEntries(state) &&
+        selectHasMoreLogEntriesBeforeStart(state)
+    ),
+    map(([action, state]) => selectLogEntriesStart(state)),
+    filter(isNotNull),
     map(pickTimeKey)
   );
 
@@ -81,44 +100,67 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     filter(logPositionActions.reportVisiblePositions.match),
     filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
     withLatestFrom(state$),
-    filter(([action, state]) => !selectIsAutoReloading(state)),
-    filter(([action, state]) => !selectIsLoadingEntries(state)),
-    filter(([action, state]) => selectHasMoreAfterEnd(state)),
-    map(([action, state]) => selectEntriesEnd(state)),
-    filter((entriesEnd): entriesEnd is TimeKey => entriesEnd != null),
+    filter(
+      ([action, state]) =>
+        !selectIsAutoReloadingLogEntries(state) &&
+        !selectIsLoadingLogEntries(state) &&
+        selectHasMoreLogEntriesAfterEnd(state)
+    ),
+    map(([action, state]) => selectLogEntriesEnd(state)),
+    filter(isNotNull),
     map(pickTimeKey)
   );
 
   return merge(
-    shouldLoadAround$.pipe(
-      exhaustMap(target => [
+    shouldLoadAroundNewPosition$.pipe(
+      withLatestFrom(filterQuery$),
+      exhaustMap(([timeKey, filterQuery]) => [
         loadEntries({
           sourceId: 'default',
-          timeKey: target,
+          timeKey,
           countBefore: LOAD_CHUNK_SIZE,
           countAfter: LOAD_CHUNK_SIZE,
+          filterQuery,
+        }),
+      ])
+    ),
+    shouldLoadWithNewFilter$.pipe(
+      withLatestFrom(visibleMidpointOrTarget$),
+      exhaustMap(([filterQuery, timeKey]) => [
+        loadEntries({
+          sourceId: 'default',
+          timeKey,
+          countBefore: LOAD_CHUNK_SIZE,
+          countAfter: LOAD_CHUNK_SIZE,
+          filterQuery,
         }),
       ])
     ),
     shouldLoadMoreAfter$.pipe(
-      exhaustMap(target => [
+      withLatestFrom(filterQuery$),
+      exhaustMap(([timeKey, filterQuery]) => [
         loadMoreEntries({
           sourceId: 'default',
-          timeKey: target,
+          timeKey,
           countBefore: 0,
           countAfter: LOAD_CHUNK_SIZE,
+          filterQuery,
         }),
       ])
     ),
     shouldLoadMoreBefore$.pipe(
-      exhaustMap(target => [
+      withLatestFrom(filterQuery$),
+      exhaustMap(([timeKey, filterQuery]) => [
         loadMoreEntries({
           sourceId: 'default',
-          timeKey: target,
+          timeKey,
           countBefore: LOAD_CHUNK_SIZE,
           countAfter: 0,
+          filterQuery,
         }),
       ])
     )
   );
 };
+
+const isNotNull = <T>(value: T | null): value is T => value !== null;
