@@ -26,7 +26,7 @@ interface ManageEntriesDependencies<State> {
   selectIsAutoReloadingLogEntries: (state: State) => boolean;
   selectIsLoadingLogEntries: (state: State) => boolean;
   selectLogFilterQueryAsJson: (state: State) => string | null;
-  selectLogTargetPosition: (state: State) => TimeKey | null;
+  selectVisibleLogMidpointOrTarget: (state: State) => TimeKey | null;
 }
 
 export const createLogEntriesEpic = <State>() =>
@@ -52,13 +52,14 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     selectIsAutoReloadingLogEntries,
     selectIsLoadingLogEntries,
     selectLogFilterQueryAsJson,
-    selectLogTargetPosition,
+    selectVisibleLogMidpointOrTarget,
   }
 ) => {
   const filterQuery$ = state$.pipe(map(selectLogFilterQueryAsJson));
-  const targetPosition$ = state$.pipe(
-    map(selectLogTargetPosition),
-    filter(isNotNull)
+  const visibleMidpointOrTarget$ = state$.pipe(
+    map(selectVisibleLogMidpointOrTarget),
+    filter(isNotNull),
+    map(pickTimeKey)
   );
 
   const shouldLoadAroundNewPosition$ = action$.pipe(
@@ -124,7 +125,7 @@ export const createEntriesEffectsEpic = <State>(): Epic<
       ])
     ),
     shouldLoadWithNewFilter$.pipe(
-      withLatestFrom(targetPosition$),
+      withLatestFrom(visibleMidpointOrTarget$),
       exhaustMap(([filterQuery, timeKey]) => [
         loadEntries({
           sourceId: 'default',

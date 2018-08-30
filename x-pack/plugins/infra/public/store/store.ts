@@ -45,6 +45,7 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     selectIsAutoReloadingLogEntries: logPositionSelectors.selectIsAutoReloading,
     selectLogFilterQueryAsJson: sharedSelectors.selectLogFilterQueryAsJson,
     selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
+    selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
     selectVisibleLogSummary: logPositionSelectors.selectVisibleSummary,
   };
 
