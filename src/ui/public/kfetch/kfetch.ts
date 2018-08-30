@@ -77,18 +77,16 @@ export async function kfetch(
 // Request hooks start from the newest interceptor and end with the oldest.
 function requestInterceptors(config: KFetchOptions): Promise<KFetchOptions> {
   return interceptors.reduceRight((acc, interceptor) => {
-    return acc.then(interceptor.request || noop, interceptor.requestError);
+    return acc.then(interceptor.request, interceptor.requestError);
   }, Promise.resolve(config));
 }
 
 // Response hooks start from the oldest interceptor and end with the newest.
 function responseInterceptors(responsePromise: Promise<any>) {
   return interceptors.reduce((acc, interceptor) => {
-    return acc.then(interceptor.response || noop, interceptor.responseError);
+    return acc.then(interceptor.response, interceptor.responseError);
   }, responsePromise);
 }
-
-const noop = (v: any) => v;
 
 async function getBodyAsJson(res: Response) {
   try {
