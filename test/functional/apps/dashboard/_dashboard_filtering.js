@@ -276,9 +276,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         await queryBar.setQuery('');
-        await filterBar.removeFilter('grr');
+        await filterBar.removeFilter('sound.keyword');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dashboardExpect.pieSliceCount(5);
+        await dashboardExpect.pieSliceCount(3);
 
         await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
