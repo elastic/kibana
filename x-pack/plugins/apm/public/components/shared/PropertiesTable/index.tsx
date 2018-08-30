@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon } from '@elastic/eui';
+import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import _ from 'lodash';
-import { PROPERTY_CONFIG } from './propertyConfig';
-import { colors, units, px, unit, fontSize } from '../../../style/variables';
-import { EuiIcon } from '@elastic/eui';
-
+import { colors, fontSize, px, unit, units } from '../../../style/variables';
 import { getFeatureDocs } from '../../../utils/documentation';
+// @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { NestedKeyValueTable } from './NestedKeyValueTable';
+import PROPERTY_CONFIG from './propertyConfig.json';
 
 const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
 
@@ -29,13 +29,20 @@ const TableInfo = styled.div`
   line-height: 1.5;
 `;
 
-export function getLevelOneProps(selected) {
+export function getLevelOneProps(selected: string[]): string[] {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || selected.includes(key)
-  ).map(({ key }) => key);
+    ({ key, required }: { key: string; required: boolean }) =>
+      required || selected.includes(key)
+  ).map(({ key }: { key: string }) => key);
 }
 
-export function AgentFeatureTipMessage({ featureName, agentName }) {
+export function AgentFeatureTipMessage({
+  featureName,
+  agentName
+}: {
+  featureName: string;
+  agentName: string;
+}): JSX.Element | null {
   const docs = getFeatureDocs(featureName, agentName);
 
   if (!docs) {
@@ -55,17 +62,25 @@ export function AgentFeatureTipMessage({ featureName, agentName }) {
   );
 }
 
-export function sortKeysByConfig(object, currentKey) {
+export const sortKeysByConfig: KeySorter = (object, currentKey) => {
   const presorted = _.get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
     []
   );
   return _.uniq([...presorted, ...Object.keys(object).sort()]);
-}
+};
 
-export function PropertiesTable({ propData, propKey, agentName }) {
-  if (!propData || Object.keys(propData).length === 0) {
+export function PropertiesTable({
+  propData,
+  propKey,
+  agentName
+}: {
+  propData: StringMap<any>;
+  propKey: string;
+  agentName: string;
+}) {
+  if (Object.keys(propData).length === 0) {
     return (
       <TableContainer>
         <TableInfo>

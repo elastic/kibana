@@ -15,12 +15,6 @@ import {
   units
 } from '../../../style/variables';
 
-interface StringMap<T> {
-  [key: string]: T;
-}
-
-type KeySorter = (data: StringMap<any>, parentKey?: string) => string[];
-
 const Table = styled.table`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.small};
@@ -121,7 +115,7 @@ export function NestedKeyValueTable({
   return (
     <Table>
       <tbody>
-        {keySorter(data, parentKey).map((key: string) => (
+        {keySorter(data, parentKey).map(key => (
           <Row key={key}>
             <Cell>
               <FormattedKey k={key} value={data[key]} />
