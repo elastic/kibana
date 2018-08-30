@@ -119,6 +119,35 @@ describe('callClient', () => {
         expect(results).to.eql([1]);
       });
     });
+
+    it(`resolves the promise despite the request failing`, () => {
+      addSearchStrategy({
+        id: 'fail',
+        isViable: indexPattern => {
+          return indexPattern.type === 'fail';
+        },
+        search: () => {
+          return {
+            searching: Promise.reject(new Error('Search failed')),
+            failedSearchRequests: [],
+            abort: () => {},
+          };
+        },
+      });
+
+      const searchRequestFail = createSearchRequest('fail', {
+        source: {
+          getField: () => ({ type: 'fail' }),
+        },
+      });
+
+      searchRequests = [ searchRequestFail ];
+      const callingClient = callClient(searchRequests);
+
+      return callingClient.then(results => {
+        expect(results).to.eql(undefined);
+      });
+    });
   });
 
   describe('implementation', () => {
