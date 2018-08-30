@@ -39,11 +39,12 @@ echo " -- Running on OS: $OS"
 
 nodeVersion="$(cat $dir/.node-version)"
 nodeDir="$cacheDir/node/$nodeVersion"
-nodeBin="$nodeDir/bin"
-nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 if [[ $OS == 'win' ]]; then
   nodeBin="$nodeDir"
   nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+else 
+  nodeBin="$nodeDir/bin"
+  nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 fi
 
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
