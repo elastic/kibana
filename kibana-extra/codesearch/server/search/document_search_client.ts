@@ -11,11 +11,13 @@ import {
   Document,
   DocumentSearchRequest,
   DocumentSearchResult,
+  SearchResultItem,
   SourceHit,
   SourceRange,
 } from '../../model';
 import { DocumentIndexNamePrefix } from '../indexer/schema';
 import { Log } from '../log';
+import { CompositeSourceContentConstructor } from '../utils/composite_source_content_constructor';
 import { AbstractSearchClient } from './abstract_search_client';
 
 export class DocumentSearchClient extends AbstractSearchClient {
@@ -175,40 +177,45 @@ export class DocumentSearchClient extends AbstractSearchClient {
 
     const hits: any[] = rawRes.hits.hits;
     const aggregations = rawRes.aggregations;
-    const docs: Document[] = hits.map(hit => {
+    const results: SearchResultItem[] = hits.map(hit => {
       const doc: Document = hit._source;
-      return doc;
-    });
-    const highlights: SourceHit[][] = hits.map(hit => {
-      const doc: Document = hit._source;
+      const { repoUri, path, language } = doc;
+
       const highlight = hit.highlight;
-      if (highlight) {
-        // Similar to https://github.com/lambdalab/lambdalab/blob/master/services/liaceservice/src/main/scala/com/lambdalab/liaceservice/LiaceServiceImpl.scala#L147
-        // Might need refactoring.
-        const content: string[] = highlight.content;
-        let termContent: string[] = [];
-        if (content) {
-          content.forEach((c: string) => {
-            termContent = termContent.concat(this.extractKeywords(c));
-          });
-        }
-        const hitsContent = this.termsToHits(doc.content, termContent);
-        return hitsContent;
+      // Similar to https://github.com/lambdalab/lambdalab/blob/master/services/liaceservice/src/main/scala/com/lambdalab/liaceservice/LiaceServiceImpl.scala#L147
+      // Might need refactoring.
+      const highlightContent: string[] = highlight.content;
+      let termContent: string[] = [];
+      if (highlightContent) {
+        highlightContent.forEach((c: string) => {
+          termContent = termContent.concat(this.extractKeywords(c));
+        });
       }
-      return [];
+      const hitsContent = this.termsToHits(doc.content, termContent);
+      const sourceContent = new CompositeSourceContentConstructor(
+        hitsContent,
+        doc.content
+      ).construct();
+      const item: SearchResultItem = {
+        uri: repoUri,
+        filePath: path,
+        language: language!,
+        hits: hitsContent.length,
+        compositeContent: sourceContent,
+      };
+      return item;
     });
-    const result: DocumentSearchResult = {
+    return {
+      query: req.query,
       from,
       page: req.page,
       totalPage: Math.ceil(rawRes.hits.total / resultsPerPage),
-      documents: docs,
-      highlights,
+      results,
       repoAggregations: aggregations.repoUri.buckets,
       langAggregations: aggregations.language.buckets,
       took: rawRes.took,
       total: rawRes.hits.total,
     };
-    return result;
   }
 
   private termsToHits(source: string, terms: string[]): SourceHit[] {

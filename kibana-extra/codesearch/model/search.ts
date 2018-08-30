@@ -5,6 +5,7 @@
  */
 
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
+import { IRange } from 'monaco-editor';
 
 import { Repository, SourceHit } from '../model';
 import { RepositoryUri } from './repository';
@@ -65,13 +66,6 @@ export interface RepositorySearchResult extends SearchResult {
   repositories: Repository[];
 }
 
-export interface DocumentSearchResult extends SearchResult {
-  documents: Document[];
-  highlights: SourceHit[][];
-  repoAggregations: any[];
-  langAggregations: any[];
-}
-
 export interface SymbolSearchResult extends SearchResult {
   // TODO: we migit need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
@@ -95,18 +89,29 @@ export interface SearchResultStats {
   languageStats: SearchResultStatsItem[];
 }
 
+export interface CompositeSourceContent {
+  content: string;
+  lineMapping: string[];
+  ranges: IRange[];
+}
+
 export interface SearchResultItem {
   uri: string;
   hits: number;
   filePath: string;
-  content: string;
-  // TODO: add more in here.
+  language: string;
+  compositeContent: CompositeSourceContent;
 }
 
-export interface DocumentSearchResult {
+export interface DocumentSearchResult extends SearchResult {
   query: string;
-  stats: SearchResultStats;
-  result: SearchResultItem[];
+  from?: number;
+  page?: number;
+  totalPage?: number;
+  stats?: SearchResultStats;
+  results?: SearchResultItem[];
+  repoAggregations?: any[];
+  langAggregations?: any[];
 }
 
 export interface SourceLocation {

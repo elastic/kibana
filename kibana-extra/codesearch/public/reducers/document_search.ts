@@ -15,7 +15,6 @@ import {
   DocumentSearchPayload,
   documentSearchSuccess,
 } from '../actions';
-import { CompositeSearchResult } from '../utils/composite_search_result';
 
 export interface DocumentSearchState {
   query: string;
@@ -64,8 +63,7 @@ export const documentSearch = handleActions(
           from,
           page,
           totalPage,
-          documents,
-          highlights,
+          results,
           total,
           repoAggregations,
           langAggregations,
@@ -86,31 +84,19 @@ export const documentSearch = handleActions(
           };
         });
 
-        const result = Array.from(documents).map((document, index) => {
-          const { repoUri, path, content, language } = document;
-          const fileHighlights = highlights[index];
-          const processedResult = new CompositeSearchResult(fileHighlights, content);
-          return {
-            uri: repoUri,
-            hits: fileHighlights.length,
-            filePath: path,
-            processedResult,
-            language,
-          };
-        });
         draft.searchResult = {
           ...draft.searchResult,
           query: state.query,
           stats: {
             total,
             from: from + 1,
-            to: from + documents.length,
+            to: from + results.length,
             page,
             totalPage,
             repoStats,
             languageStats,
           },
-          result,
+          results,
         };
       }),
     [String(documentSearchFailed)]: (state: DocumentSearchState, action: Action<any>) => {

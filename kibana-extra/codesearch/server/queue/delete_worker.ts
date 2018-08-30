@@ -83,14 +83,11 @@ export class DeleteWorker extends AbstractWorker {
     // 4. Delete the document index where the repository document resides, so
     // that you won't be able to import the same repositories until they are
     // fully removed.
-    await this.client.indices
-      .delete({ index: DocumentIndexName(uri) })
-      .then(() => {
-        this.log.info(`Delete document es index of repository ${uri} done.`);
-      })
-      .catch((error: Error) => {
-        this.log.error(`Delete document es index of repository ${uri} error: ${error}`);
-      });
+    await this.deletePromiseWrapper(
+      this.client.indices.delete({ index: DocumentIndexName(uri) }),
+      'document ES index',
+      uri
+    );
 
     return {
       uri,

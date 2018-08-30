@@ -6,12 +6,12 @@
 import { IRange } from 'monaco-editor';
 
 import { LineMapper } from '../../common/line_mapper';
-import { SourceHit } from '../../model';
+import { CompositeSourceContent, SourceHit } from '../../model';
 
 type MergedHit = [number, number];
 
 // The processed search result with all data processed for monaco to render.
-export class CompositeSearchResult {
+export class CompositeSourceContentConstructor {
   private HIT_MERGE_LINE_INTERVAL = 2; // Inclusive
   private mergedHits: MergedHit[];
   private lineMapper: LineMapper;
@@ -33,12 +33,24 @@ export class CompositeSearchResult {
     this.buildLineMapping();
   }
 
+  public construct(): CompositeSourceContent {
+    const content = this.getSearchResultContent();
+    const lineMapping = this.getLineNumberMapping(content);
+    const ranges = this.getHighlightRanges();
+    return {
+      content,
+      lineMapping,
+      ranges,
+    };
+  }
+
   /*
-   * Returns a Monaco line number function.
+   * The line numbers for the condensed code snippets.
    */
-  public getLineNumberFunc(): (line: number) => string {
-    return (line: number) => {
-      const l = this.lineMapping.get(line);
+  private getLineNumberMapping(content: string): string[] {
+    const lines = content.split('\n');
+    return [...lines.keys()].map((line: number) => {
+      const l = this.lineMapping.get(line + 1);
       if (l) {
         return String(l);
       } else {
@@ -46,13 +58,13 @@ export class CompositeSearchResult {
         // then it must be a separator line.
         return '..';
       }
-    };
+    });
   }
 
   /*
-   * Returns the content for Monaco editor to render the search code snippet.
+   * Returns the condensed content of the code snippet.
    */
-  public getSearchResultContent(): string {
+  private getSearchResultContent(): string {
     const lines: string[] = [];
     if (this.mergedHits.length === 0) {
       return '';
@@ -83,7 +95,7 @@ export class CompositeSearchResult {
   /*
    * Convert highlights into Monaco decoration ranges (IRange).
    */
-  public getHighlightRanges(): IRange[] {
+  private getHighlightRanges(): IRange[] {
     return this.highlights.map(h => {
       const range: IRange = {
         startLineNumber: this.invertedLineMapping.get(h.range.startLoc.line + 1)!,

@@ -136,7 +136,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     const { query, searchResult, languages, repositories } = this.props;
 
     if (searchResult) {
-      const { stats, result } = searchResult!;
+      const { stats, results } = searchResult!;
       const { total, from, to, page, totalPage, repoStats, languageStats } = stats;
 
       const repoStatsComp = repoStats.map((item, index) => {
@@ -206,30 +206,35 @@ class SearchPage extends React.PureComponent<Props, State> {
         </div>
       );
 
-      const resultComp = result.map(item => {
-        const repoLinkUrl = `/${item.uri}/tree/HEAD/`;
-        const fileLinkUrl = `/${item.uri}/blob/HEAD/${item.filePath}`;
-        const key = `${query}${item.uri}${item.filePath}`;
+      const resultComps = results!.map(item => {
+        const { uri, filePath, hits, compositeContent } = item;
+        const { content, lineMapping, ranges } = compositeContent;
+        const repoLinkUrl = `/${uri}/tree/HEAD/`;
+        const fileLinkUrl = `/${uri}/blob/HEAD/${filePath}`;
+        const key = `${query}${uri}${filePath}`;
+        const lineMappingFunc = (l: number) => {
+          return lineMapping[l - 1];
+        };
         return (
           <div key={`resultitem${key}`}>
             <p>
               <Link to={repoLinkUrl}>
-                <strong>{RepositoryUtils.repoFullNameFromUri(item.uri)}</strong>
+                <strong>{RepositoryUtils.repoFullNameFromUri(uri)}</strong>
               </Link>
             </p>
             <p>
               &nbsp;&nbsp;&nbsp;&nbsp;
-              {item.hits} hits from
-              <Link to={fileLinkUrl}>{item.filePath}</Link>
+              {hits} hits from
+              <Link to={fileLinkUrl}>{filePath}</Link>
             </p>
             <CodeBlock
               key={`code${key}`}
               language={item.language}
               startLine={0}
-              code={item.processedResult.getSearchResultContent()}
-              highlightRanges={item.processedResult.getHighlightRanges()}
+              code={content}
+              highlightRanges={ranges}
               folding={false}
-              lineNumbersFunc={item.processedResult.getLineNumberFunc()}
+              lineNumbersFunc={lineMappingFunc}
             />
             <EuiSpacer />
           </div>
@@ -255,7 +260,7 @@ class SearchPage extends React.PureComponent<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
             <div>{statsComp}</div>
-            <div>{resultComp}</div>
+            <div>{resultComps}</div>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
