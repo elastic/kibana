@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Table } from './table';
-export { ControlBar } from './controls';
-export {
-  ActionDefinition,
-  BeatDetailTagsTable,
-  BeatsTableType,
-  FilterDefinition,
-  TagsTableType,
-} from './table_type_configs';
+import React from 'react';
+import { FrontendLibs } from '../../lib/lib';
+
+interface BeatActivityPageProps {
+  libs: FrontendLibs;
+}
+
+export const BeatActivityPage = (props: BeatActivityPageProps) => <div>Beat Activity View</div>;

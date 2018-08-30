@@ -93,7 +93,7 @@ export interface MetricbeatModuleConfig {
 }
 
 export interface FrameworkAdapter {
-  // Insstance vars
+  // Instance vars
   appState?: object;
   kbnVersion?: string;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;

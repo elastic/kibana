@@ -60,6 +60,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         assignmentOptions={this.state.beats}
         assignmentTitle={'Assign Beats'}
         items={this.state.tags}
+        renderAssignmentOptions={item => item}
         ref={this.tableRef}
         showAssignmentOptions={true}
         type={TagsTableType}
@@ -114,7 +115,10 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       const tagIcons = tags.map((tagId: string) => {
         const associatedTag = this.state.tags.find(tag => tag.id === tagId);
         return (
-          <EuiToolTip title={tagId}>
+          <EuiToolTip
+            content={<p>Last updated: {associatedTag ? associatedTag.last_updated : null}</p>}
+            title={tagId}
+          >
             <EuiIcon
               key={tagId}
               type="stopFilled"
@@ -128,8 +132,8 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       return (
         <EuiFlexItem key={beat.id}>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            {tagIcons.map(icon => (
-              <EuiFlexItem component="span" grow={false}>
+            {tagIcons.map((icon, index) => (
+              <EuiFlexItem component="span" grow={false} key={icon.key || index}>
                 {icon}
               </EuiFlexItem>
             ))}

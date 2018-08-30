@@ -90,8 +90,8 @@
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
     "@kbn/datemath": "link:../packages/kbn-datemath",
-    "@kbn/i18n": "link:../packages/kbn-i18n",
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework",
+    "@kbn/i18n": "link:../packages/kbn-i18n",
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@slack/client": "^4.2.2",
     "@types/uuid": "^3.4.3",
@@ -137,6 +137,7 @@
     "moment-timezone": "^0.5.14",
     "ngreact": "^0.5.1",
     "nodemailer": "^4.6.4",
+    "path-match": "1.2.4",
     "pdfmake": "0.1.33",
     "pivotal-ui": "13.0.1",
     "pluralize": "3.1.0",
@@ -173,6 +174,7 @@
     "unbzip2-stream": "1.0.9",
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
+    "webcola": "3.3.6",
     "xregexp": "3.2.0"
   },
   "engines": {

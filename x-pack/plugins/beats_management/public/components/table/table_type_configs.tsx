@@ -5,13 +5,14 @@
  */
 
 // @ts-ignore
-import { EuiBadge, EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { flatten, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { ClientSideConfigurationBlock } from '../../lib/lib';
 import { ConnectedLink } from '../connected_link';
 
 export interface ColumnDefinition {
@@ -44,6 +45,7 @@ export interface FilterDefinition {
 export interface ControlDefinitions {
   actions: ActionDefinition[];
   filters: FilterDefinition[];
+  primaryActions?: ActionDefinition[];
 }
 
 export interface TableType {
@@ -68,11 +70,13 @@ export const BeatsTableType: TableType = {
       field: 'full_tags',
       name: 'Tags',
       render: (value: string, beat: CMPopulatedBeat) => (
-        <EuiFlexGroup wrap responsive={true}>
+        <EuiFlexGroup wrap responsive={true} gutterSize="xs">
           {(beat.full_tags || []).map(tag => (
-            <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
-              {tag.id}
-            </EuiBadge>
+            <EuiFlexItem grow={false}>
+              <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
+                {tag.id}
+              </EuiBadge>
+            </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       ),
@@ -122,6 +126,17 @@ export const BeatsTableType: TableType = {
   }),
 };
 
+const TagBadge = (props: { tag: { color?: string; id: string } }) => {
+  const { tag } = props;
+  return (
+    <EuiBadge color={tag.color ? tag.color : 'primary'}>
+      {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
+        ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
+        : tag.id}
+    </EuiBadge>
+  );
+};
+
 export const TagsTableType: TableType = {
   columnDefinitions: [
     {
@@ -129,11 +144,7 @@ export const TagsTableType: TableType = {
       name: 'Tag name',
       render: (id: string, tag: BeatTag) => (
         <ConnectedLink path={`/tag/edit/${tag.id}`}>
-          <EuiBadge color={tag.color ? tag.color : 'primary'}>
-            {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
-              ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
-              : tag.id}
-          </EuiBadge>
+          <TagBadge tag={tag} />
         </ConnectedLink>
       ),
       sortable: true,
@@ -165,5 +176,49 @@ export const TagsTableType: TableType = {
       },
     ],
     filters: [],
+  }),
+};
+
+export const BeatDetailTagsTable: TableType = {
+  columnDefinitions: [
+    {
+      field: 'id',
+      name: 'Tag name',
+      render: (id: string, tag: BeatTag) => <TagBadge tag={tag} />,
+      sortable: true,
+      width: '55%',
+    },
+    {
+      align: 'right',
+      field: 'configurations',
+      name: 'Configurations',
+      render: (configurations: ClientSideConfigurationBlock[]) => (
+        <span>{configurations.length}</span>
+      ),
+      sortable: true,
+    },
+    {
+      align: 'right',
+      field: 'last_updated',
+      name: 'Last update',
+      render: (lastUpdate: string) => <span>{moment(lastUpdate).fromNow()}</span>,
+      sortable: true,
+    },
+  ],
+  controlDefinitions: (data: any) => ({
+    actions: [],
+    filters: [],
+    primaryActions: [
+      {
+        name: 'Add Tag',
+        action: 'add',
+        danger: false,
+      },
+      {
+        name: 'Remove Selected',
+        action: 'remove',
+        danger: true,
+      },
+    ],
   }),
 };
