@@ -707,7 +707,7 @@ const draggedPrimaryShape = select(
 
 const alignmentGuideAnnotations = select((shapes, draggedPrimaryShape, draggedShape) => {
   const guidedShapes = draggedPrimaryShape
-    ? [shapes.find(s => s.id === draggedPrimaryShape.id)]
+    ? [shapes.find(s => s.id === draggedPrimaryShape.id)].filter(identity)
     : [];
   return guidedShapes.length
     ? alignmentGuides(shapes, guidedShapes, draggedShape).map(shape => ({
