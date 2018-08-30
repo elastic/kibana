@@ -45,6 +45,7 @@ interface ShowProps {
   objectId?: string;
   objectType: string;
   shareContextMenuExtensions?: any[];
+  title?: string;
 }
 
 export function showShareContextMenu({
@@ -54,6 +55,7 @@ export function showShareContextMenu({
   objectId,
   objectType,
   shareContextMenuExtensions,
+  title,
 }: ShowProps) {
   if (isOpen) {
     onClose();
@@ -79,6 +81,7 @@ export function showShareContextMenu({
         objectId={objectId}
         objectType={objectType}
         shareContextMenuExtensions={shareContextMenuExtensions}
+        title={title}
       />
     </EuiWrappingPopover>
   );

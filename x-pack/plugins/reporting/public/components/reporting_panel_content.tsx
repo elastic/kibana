@@ -24,9 +24,16 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import moment from 'moment-timezone';
 import React, { Component } from 'react';
+import rison from 'rison-node';
+import chrome from 'ui/chrome';
+import { QueryString } from 'ui/utils/query_string';
+import url from 'url';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
+
+import { unhashUrl } from 'ui/state_management/state_hashing';
 
 // TODO: Remove once EuiIconTip supports "content" prop
 const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
@@ -40,10 +47,13 @@ interface Props {
   reportType: ReportType;
   objectId?: string;
   objectType: string;
+  getUnhashableStates: () => object[];
+  title: string;
 }
 
 interface State {
   usePrintLayout: boolean;
+  url?: string;
 }
 
 export class ReportingPanelContent extends Component<Props, State> {
@@ -87,12 +97,43 @@ export class ReportingPanelContent extends Component<Props, State> {
           </p>
         </EuiText>
 
-        <EuiButton>Copy POST URL</EuiButton>
+        <EuiCopy textToCopy={this.getAbsoluteReportGenerationUrl()}>
+          {(copy: () => void) => <EuiButton onClick={copy}>Copy POST URL</EuiButton>}
+        </EuiCopy>
       </EuiForm>
     );
   }
 
   private isNotSaved = () => {
     return this.props.objectId === undefined || this.props.objectId === '';
+  };
+
+  private getAbsoluteReportGenerationUrl = () => {
+    return url.resolve(window.location.href, this.getRelativeReportGenerationUrl());
+  };
+
+  private getRelativeReportGenerationUrl = () => {
+    // Replace hashes with original RISON values.
+    const unhashedUrl = unhashUrl(window.location.href, this.props.getUnhashableStates());
+    const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+
+    const browserTimezone =
+      chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        ? moment.tz.guess()
+        : chrome.getUiSettingsClient().get('dateFormat:tz');
+
+    const jobParams = {
+      title: this.props.title,
+      objectType: this.props.objectType,
+      browserTimezone,
+      relativeUrls: [relativeUrl],
+      layout: { id: 'print' },
+    };
+
+    const reportPrefix = chrome.addBasePath('/api/reporting/generate');
+    return `${reportPrefix}/printablePdf?${QueryString.param(
+      'jobParams',
+      rison.encode(jobParams)
+    )}`;
   };
 }

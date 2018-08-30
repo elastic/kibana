@@ -412,6 +412,7 @@ app.directive('dashboardApp', function ($injector) {
           objectId: dash.id,
           objectType: 'dashboard',
           shareContextMenuExtensions,
+          title: dash.title,
         });
       };
 

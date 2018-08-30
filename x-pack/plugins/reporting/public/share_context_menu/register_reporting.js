@@ -11,7 +11,7 @@ import { ReportingPanelContent } from '../components/reporting_panel_content';
 
 function reportingProvider(Private, dashboardConfig) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = (objectType, objectId) => {
+  const getMenuItems = ({ objectType, objectId, getUnhashableStates, title }) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -39,6 +39,8 @@ function reportingProvider(Private, dashboardConfig) {
               reportType="PDF"
               objectType={objectType}
               objectId={objectId}
+              getUnhashableStates={getUnhashableStates}
+              title={title}
             />
           )
         }
