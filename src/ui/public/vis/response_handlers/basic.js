@@ -19,6 +19,7 @@
 
 import { AggResponseIndexProvider } from '../../agg_response';
 import { TabifyTable } from '../../agg_response/tabify/_table';
+import { getTime } from 'ui/timefilter/get_time';
 
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
@@ -71,10 +72,13 @@ const BasicResponseHandlerProvider = function (Private) {
           resolve(aggResponse.hierarchical(vis, response));
         }
 
+        const time = getTime(vis.indexPattern, vis.filters.timeRange);
+
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: true,
-          isHierarchical: vis.isHierarchical()
+          isHierarchical: vis.isHierarchical(),
+          timeRange: time ? time.range : undefined
         });
 
         let converted = convertTableGroup(vis, tableGroup);
