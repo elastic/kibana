@@ -43,6 +43,7 @@ function canRequire(build, entry) {
 }
 
 function getSingleFileDependencies(filePath) {
+  // Retrieve native nodeJS modules
   const natives = process.binding('natives');
   const dependencies = [];
 
@@ -54,7 +55,9 @@ function getSingleFileDependencies(filePath) {
   // Read the file
   const content = readFileSync(filePath, { encoding: 'utf8' });
 
-  // Parse and get AST
+  // Parse and get the code AST
+  // All the babel parser plugins
+  // were enabled
   const ast = parser.parse(content, {
     sourceType: 'unambiguous',
     plugins: [
@@ -68,9 +71,15 @@ function getSingleFileDependencies(filePath) {
     ]
   });
 
-  // Traverse and found dependencies on require + require.resolve
+  // Visitors to traverse and found dependencies
+  // raw values on require + require.resolve
   const visitors = {
     CallExpression: ({ node }) => {
+      // This was built based on two main tools: an ast explorer and the
+      // main docs for the Esprima
+      //
+      // https://astexplorer.net
+      // https://esprima.readthedocs.io/en/latest/syntax-tree-format.html
       const isRequire = (node) => {
         return node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require';
       };
@@ -96,9 +105,12 @@ function getSingleFileDependencies(filePath) {
       }
     }
   };
+
+  // Loop through the code AST with
+  // the defined visitors
   traverse(ast, visitors);
 
-  // Filter node native modules from the result
+  // Filter out node native modules from the result
   return dependencies.filter(dep => !natives[dep]);
 }
 
@@ -161,6 +173,9 @@ export async function getDependencies(build, entries) {
   // the top level path
   const baseServerDepsMap = serverDeps.reduce((baseDeps, dep) => {
     const calculateTLDep = (inputDep, outputDep = '') => {
+      // The path separator will be always the forward slash
+      // as at this point we only have the found entries into
+      // the provided source code entries where we just use it
       const pathSeparator = '/';
       const depSplitPaths = inputDep.split(pathSeparator);
       const firstPart = depSplitPaths.shift();
