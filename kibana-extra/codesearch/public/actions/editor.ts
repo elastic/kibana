@@ -5,7 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
+import { Hover, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver';
 
 export interface CodeAndLocation {
   repo: string;
@@ -22,3 +22,4 @@ export const findReferencesSuccess = createAction<CodeAndLocation[]>('FIND REFER
 export const findReferencesFailed = createAction<Error>('FIND REFERENCES ERROR');
 export const closeReferences = createAction('CLOSE REFERENCES');
 export const hoverResult = createAction<Hover>('HOVER RESULT');
+export const revealPosition = createAction<Position>('REVEAL POSITION');

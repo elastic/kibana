@@ -7,6 +7,7 @@
 import { EuiAccordion, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { entries, groupBy } from 'lodash';
 import { IPosition } from 'monaco-editor';
+import queryString from 'query-string';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
 import { CodeAndLocation } from '../../actions';
@@ -17,6 +18,7 @@ interface Props {
   isLoading: boolean;
   title: string;
   references: CodeAndLocation[];
+  refUrl?: string;
   onClose(): void;
 }
 
@@ -60,6 +62,7 @@ export class ReferencesPanel extends React.Component<Props> {
         buttonClassName="euiAccordionForm__button"
         buttonContent={repo}
         paddingSize="l"
+        initialIsOpen={true}
       >
         {references.map(ref => this.renderReference(ref))}
       </EuiAccordion>
@@ -86,6 +89,13 @@ export class ReferencesPanel extends React.Component<Props> {
 
   private onCodeClick(url: string, pos: IPosition) {
     const { uri } = parseSchema(url)!;
-    history.push(`${uri}!L${pos.lineNumber}:0`);
+
+    const queries = queryString.parse(history.location.search);
+    const query = queryString.stringify({
+      ...queries,
+      tab: 'references',
+      refUrl: this.props.refUrl,
+    });
+    history.push(`${uri}!L${pos.lineNumber}:0?${query}`);
   }
 }

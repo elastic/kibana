@@ -13,7 +13,9 @@ import { WorkspaceHandler } from './workspace_handler';
 export class LspService {
   public readonly controller: LanguageServerController;
   public readonly workspaceHandler: WorkspaceHandler;
+  private log: Log;
   constructor(targetHost: string, server: Hapi.Server, serverOptions: ServerOptions) {
+    this.log = new Log(server, ['LSP']);
     this.workspaceHandler = new WorkspaceHandler(
       serverOptions.repoPath,
       serverOptions.workspacePath,
@@ -31,7 +33,15 @@ export class LspService {
 
   public async launchServers() {
     // TODO read from config which LSP should be used
-    await this.controller.launchTypescript();
-    await this.controller.launchJava();
+    try {
+      await this.controller.launchTypescript();
+    } catch (e) {
+      this.log.error(e);
+    }
+    try {
+      await this.controller.launchJava();
+    } catch (e) {
+      this.log.error(e);
+    }
   }
 }

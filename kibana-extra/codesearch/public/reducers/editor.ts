@@ -5,7 +5,7 @@
  */
 import produce from 'immer';
 import { handleActions } from 'redux-actions';
-import { Hover } from 'vscode-languageserver';
+import { Hover, TextDocumentPositionParams } from 'vscode-languageserver';
 import {
   closeReferences,
   CodeAndLocation,
@@ -13,6 +13,7 @@ import {
   findReferencesFailed,
   findReferencesSuccess,
   hoverResult,
+  revealPosition,
 } from '../actions';
 
 export interface EditorState {
@@ -21,6 +22,8 @@ export interface EditorState {
   references: CodeAndLocation[];
   hover?: Hover;
   currentHover?: Hover;
+  refPayload?: TextDocumentPositionParams;
+  revealPosition?: Position;
 }
 const initialState: EditorState = {
   loading: false,
@@ -30,8 +33,9 @@ const initialState: EditorState = {
 
 export const editor = handleActions(
   {
-    [String(findReferences)]: (state: EditorState) =>
+    [String(findReferences)]: (state: EditorState, action: any) =>
       produce<EditorState>(state, draft => {
+        draft.refPayload = action.payload;
         draft.showing = true;
         draft.loading = true;
         draft.hover = state.currentHover;
@@ -45,15 +49,21 @@ export const editor = handleActions(
       produce<EditorState>(state, draft => {
         draft.references = [];
         draft.loading = false;
-        draft.showing = false;
+        draft.refPayload = undefined;
       }),
     [String(closeReferences)]: (state: EditorState) =>
       produce<EditorState>(state, draft => {
         draft.showing = false;
+        draft.loading = false;
+        draft.refPayload = undefined;
       }),
     [String(hoverResult)]: (state: EditorState, action: any) =>
       produce<EditorState>(state, draft => {
         draft.currentHover = action.payload;
+      }),
+    [String(revealPosition)]: (state: EditorState, action: any) =>
+      produce<EditorState>(state, draft => {
+        draft.revealPosition = action.payload;
       }),
   },
   initialState

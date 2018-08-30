@@ -7,7 +7,7 @@
 import { fork } from 'redux-saga/effects';
 
 import { watchDocumentSearch } from './document_search';
-import { watchLspMethods } from './editor';
+import { watchCloseReference, watchLspMethods } from './editor';
 import { watchFetchBranchesAndCommits, watchFetchRepoTree } from './file';
 import { watchDeleteRepo, watchFetchRepos, watchImportRepo, watchIndexRepo } from './repository';
 import { watchLocationChange } from './route';
@@ -26,4 +26,5 @@ export function* rootSaga() {
   yield fork(watchDocumentSearch);
   yield fork(watchLoadStructure);
   yield fork(watchLspMethods);
+  yield fork(watchCloseReference);
 }

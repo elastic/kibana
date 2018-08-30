@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { editor } from 'monaco-editor';
-import { EditorActions } from '../../components/editor/editor';
 import ICodeEditor = editor.ICodeEditor;
+import queryString from 'query-string';
+import { parseSchema } from '../../../common/uri_util';
+import { history } from '../../utils/url';
 
-export function registerReferencesAction(
-  e: editor.IStandaloneCodeEditor,
-  editorActions: EditorActions
-) {
+export function registerReferencesAction(e: editor.IStandaloneCodeEditor) {
   e.addAction({
     id: 'editor.action.referenceSearch.trigger',
     label: 'Find All References',
@@ -18,16 +17,15 @@ export function registerReferencesAction(
     contextMenuOrder: 1.5,
     run(ed: ICodeEditor) {
       const position = ed.getPosition();
-      const uri = ed.getModel().uri;
-      editorActions.findReferences({
-        textDocument: {
-          uri: uri.toString(),
-        },
-        position: {
-          line: position.lineNumber - 1,
-          character: position.column - 1,
-        },
+      const { uri } = parseSchema(ed.getModel().uri.toString());
+      const refUrl = `git:/${uri}!L${position.lineNumber - 1}:${position.column - 1}`;
+      const queries = queryString.parse(location.search);
+      const query = queryString.stringify({
+        ...queries,
+        tab: 'references',
+        refUrl,
       });
+      history.push(`${uri}?${query}`);
     },
   });
 }

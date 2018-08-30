@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import queryString from 'query-string';
 import { Action } from 'redux-actions';
-import { call, put, takeEvery } from 'redux-saga/effects';
+import { call, put, takeLatest } from 'redux-saga/effects';
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { parseLspUrl } from '../../common/uri_util';
-import { CodeAndLocation, findReferences, findReferencesSuccess } from '../actions';
+import {
+  closeReferences,
+  CodeAndLocation,
+  findReferences,
+  findReferencesSuccess,
+} from '../actions';
+import { history } from '../utils/url';
 import { requestFile } from './file';
 
 const lspClient = new LspRestClient('../api/lsp');
@@ -47,15 +54,15 @@ function requestCode(location: Location): Promise<CodeAndLocation> {
   return requestFile(
     {
       revision,
-      path: file,
+      path: file!,
       uri: repoUri,
     },
     line
   ).then(response => ({
     location,
     repo: repoUri,
-    path: file,
-    code: response.content,
+    path: file!,
+    code: response.content!,
     language: response.lang,
     startLine,
     endLine,
@@ -63,5 +70,26 @@ function requestCode(location: Location): Promise<CodeAndLocation> {
 }
 
 export function* watchLspMethods() {
-  yield takeEvery(String(findReferences), handleReferences);
+  yield takeLatest(String(findReferences), handleReferences);
+}
+
+function handleCloseReferences() {
+  const { pathname, search } = history.location;
+  const queryParams = queryString.parse(search);
+  if (queryParams.tab) {
+    queryParams.tab = undefined;
+  }
+  if (queryParams.refUrl) {
+    queryParams.refUrl = undefined;
+  }
+  const query = queryString.stringify(queryParams);
+  if (query) {
+    history.push(`${pathname}?${query}`);
+  } else {
+    history.push(pathname);
+  }
+}
+
+export function* watchCloseReference() {
+  yield takeLatest(String(closeReferences), handleCloseReferences);
 }

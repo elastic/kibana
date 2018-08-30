@@ -75,3 +75,14 @@ const structureTreeSelector: (symbols: SymbolInformation[]) => any = symbols => 
 };
 
 export const symbolTreeSelector = createSelector(symbolsSelector, structureTreeSelector);
+
+export const refUrlSelector = (state: RootState) => {
+  const payload = state.editor.refPayload;
+  if (payload) {
+    const { line, character } = payload.position;
+    return `${payload.textDocument.uri}!L${line}:${character}`;
+  }
+  return undefined;
+};
+
+export const fileSelector = (state: RootState) => state.file.file;

@@ -38,7 +38,7 @@ export function parseSchema(url: string): { uri: string; schema?: string } {
   return { uri, schema };
 }
 
-function parseGoto(goto: string): Position | undefined {
+export function parseGoto(goto: string): Position | undefined {
   const regex = /L(\d+)(:\d+)?$/;
   const m = regex.exec(goto);
   if (m) {
@@ -64,7 +64,7 @@ export function parseLspUrl(url: Uri | string): CompleteParsedUrl {
       position = parseGoto(goto);
     }
     return {
-      uri,
+      uri: uri.replace(goto, ''),
       repoUri: `${resource}/${org}/${repo}`,
       pathType,
       revision,

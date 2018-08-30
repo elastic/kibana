@@ -8,17 +8,11 @@ import React from 'react';
 
 import { EuiFlexItem } from '@elastic/eui';
 import { connect } from 'react-redux';
-import { Hover, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
-import {
-  closeReferences,
-  CodeAndLocation,
-  fetchFile,
-  FetchFilePayload,
-  findReferences,
-  hoverResult,
-} from '../../actions';
+import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
+import { closeReferences, CodeAndLocation, findReferences, hoverResult } from '../../actions';
 import { MonacoHelper } from '../../monaco/monaco_helper';
 import { RootState } from '../../reducers';
+import { refUrlSelector } from '../../selectors';
 import { ReferencesPanel } from './references_panel';
 
 export interface EditorActions {
@@ -31,14 +25,14 @@ interface Props extends EditorActions {
   file: string;
   repoUri: string;
   revision: string;
-  goto?: string;
+  revealPosition?: Position;
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
   references: CodeAndLocation[];
   fileContent?: string;
   fileLanguage?: string;
   hover?: Hover;
-  fetchFile(payload: FetchFilePayload): void;
+  refUrl?: string;
 }
 
 export class EditorComponent extends React.Component<Props> {
@@ -52,23 +46,23 @@ export class EditorComponent extends React.Component<Props> {
   public componentDidMount(): void {
     this.container = document.getElementById('mainEditor') as HTMLElement;
     this.monaco = new MonacoHelper(this.container, this.props);
-    this.props.fetchFile({
-      uri: this.props.repoUri,
-      path: this.props.file,
-      revision: this.props.revision,
-    });
+    if (this.props.fileContent) {
+      this.loadText(
+        this.props.fileContent!,
+        this.props.repoUri,
+        this.props.file,
+        this.props.fileLanguage!
+      ).then(() => {
+        if (this.props.revealPosition) {
+          this.revealPosition(this.props.revealPosition);
+        }
+      });
+    }
   }
 
   public componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.file !== this.props.file || nextProps.revision !== this.props.revision) {
-      this.props.fetchFile({
-        uri: nextProps.repoUri,
-        path: nextProps.file,
-        revision: nextProps.revision,
-      });
-    }
-    if (nextProps.goto && nextProps.goto !== this.props.goto) {
-      this.revealPosition(nextProps.goto);
+    if (nextProps.revealPosition && nextProps.revealPosition !== this.props.revealPosition) {
+      this.revealPosition(nextProps.revealPosition);
     }
     if (nextProps.fileContent !== this.props.fileContent) {
       this.loadText(
@@ -76,7 +70,11 @@ export class EditorComponent extends React.Component<Props> {
         nextProps.repoUri,
         nextProps.file,
         nextProps.fileLanguage!
-      );
+      ).then(() => {
+        if (nextProps.revealPosition) {
+          this.revealPosition(nextProps.revealPosition);
+        }
+      });
     }
   }
 
@@ -95,23 +93,12 @@ export class EditorComponent extends React.Component<Props> {
   private async loadText(text: string, repo: string, file: string, lang: string) {
     if (this.monaco) {
       await this.monaco.loadFile(repo, file, text, lang);
-      if (this.props.goto) {
-        this.revealPosition(this.props.goto);
-      }
     }
   }
 
-  private revealPosition(goto: string) {
-    const regex = /L(\d+)(:\d+)?$/;
-    const m = regex.exec(goto);
-    if (this.monaco && m) {
-      const line = parseInt(m[1], 10);
-      if (m[2]) {
-        const pos = parseInt(m[2].substring(1), 10);
-        this.monaco.revealPosition(line, pos);
-      } else {
-        this.monaco.revealLine(line);
-      }
+  private revealPosition({ line, character }: Position) {
+    if (this.monaco) {
+      this.monaco.revealPosition(line, character);
     }
   }
 
@@ -141,6 +128,7 @@ export class EditorComponent extends React.Component<Props> {
           references={this.props.references}
           isLoading={this.props.isReferencesLoading}
           title={this.getTitleFromHover()}
+          refUrl={this.props.refUrl}
         />
       )
     );
@@ -154,12 +142,13 @@ const mapStateToProps = (state: RootState) => ({
   isReferencesLoading: state.editor.loading,
   references: state.editor.references,
   hover: state.editor.hover,
+  refUrl: refUrlSelector(state),
+  revealPosition: state.editor.revealPosition,
 });
 
 const mapDispatchToProps = {
   closeReferences,
   findReferences,
-  fetchFile,
   hoverResult,
 };
 

@@ -64,7 +64,7 @@ export class MonacoHelper {
             this.editor!.layout();
           });
         });
-        registerReferencesAction(this.editor, this.editorActions);
+        registerReferencesAction(this.editor);
         this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
           if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
             const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
