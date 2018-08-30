@@ -57,7 +57,11 @@ exports[`props exportedFieldsUrl 1`] = `
         target="_blank"
         type="button"
       >
-        View exported fields
+        <FormattedMessage
+          defaultMessage="View exported fields"
+          id="kbn.home.tutorial.introduction.viewButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </div>
   </EuiFlexItem>

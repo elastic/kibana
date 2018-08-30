@@ -187,6 +187,7 @@ export const CleanExtraBrowsersTask = {
         if (platforms.windows) {
           paths.push(phantomPath('phantomjs-*-windows.zip'));
           paths.push(chromiumPath('chromium-*-win32.zip'));
+          paths.push(chromiumPath('chromium-*-windows.zip'));
         }
 
         if (platforms.darwin) {
