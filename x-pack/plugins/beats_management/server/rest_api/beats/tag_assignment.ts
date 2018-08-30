@@ -11,11 +11,11 @@ import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/assignments',
+  licenseRequired: true,
   config: {
     validate: {
       payload: Joi.object({

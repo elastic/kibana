@@ -35,7 +35,14 @@ export function compose(): FrontendLibs {
   };
   const pluginUIModule = uiModules.get('app/beats_management');
 
-  const framework = new KibanaFrameworkAdapter(pluginUIModule, management, routes);
+  const framework = new KibanaFrameworkAdapter(
+    pluginUIModule,
+    management,
+    routes,
+    null,
+    null,
+    null
+  );
   const libs: FrontendLibs = {
     ...domainLibs,
     framework,

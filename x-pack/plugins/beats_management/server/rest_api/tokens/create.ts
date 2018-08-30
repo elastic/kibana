@@ -9,12 +9,13 @@ import { get } from 'lodash';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
-// TODO: add license check pre-hook
+
 // TODO: write to Kibana audit log file
 const DEFAULT_NUM_TOKENS = 1;
 export const createTokensRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/enrollment_tokens',
+  licenseRequired: true,
   config: {
     validate: {
       payload: Joi.object({

@@ -9,11 +9,11 @@ import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/removals',
+  licenseRequired: true,
   config: {
     validate: {
       payload: Joi.object({
