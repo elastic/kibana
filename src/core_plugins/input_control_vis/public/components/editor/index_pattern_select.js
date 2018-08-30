@@ -123,24 +123,24 @@ class IndexPatternSelectUi extends Component {
   render() {
     const selectId = `indexPatternSelect-${this.props.controlIndex}`;
     const selectedOptions = [];
+    const { intl } = this.props;
     if (this.state.selectedIndexPattern) {
       selectedOptions.push(this.state.selectedIndexPattern);
     }
-    const formLabel = this.props.intl.formatMessage({
-      id: 'inputControl.editor.indexPatternLabel',
-      defaultMessage: 'Index Pattern'
-    });
-    const formPlaceholder = this.props.intl.formatMessage({
-      id: 'inputControl.editor.indexPatternPlaceholder',
-      defaultMessage: 'Select index pattern...'
-    });
+
     return (
       <EuiFormRow
         id={selectId}
-        label={formLabel}
+        label={intl.formatMessage({
+          id: 'inputControl.editor.indexPatternLabel',
+          defaultMessage: 'Index Pattern'
+        })}
       >
         <EuiComboBox
-          placeholder={formPlaceholder}
+          placeholder={intl.formatMessage({
+            id: 'inputControl.editor.indexPatternPlaceholder',
+            defaultMessage: 'Select index pattern...'
+          })}
           singleSelection={true}
           isLoading={this.state.isLoading}
           onSearchChange={this.fetchOptions}

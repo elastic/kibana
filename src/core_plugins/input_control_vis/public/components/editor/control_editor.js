@@ -119,21 +119,27 @@ class ControlEditorUi extends Component {
     return (
       <div>
         <EuiButtonIcon
-          aria-label={this.props.intl.formatMessage({ id: 'inputControl.editor.moveControlUpAria', defaultMessage: 'Move control up' })}
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.moveControlUpAriaLabel',
+            defaultMessage: 'Move control up'
+          })}
           color="primary"
           onClick={this.moveUpControl}
           iconType="sortUp"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
-          aria-label={this.props.intl.formatMessage({ id: 'inputControl.editor.moveControlDownAria', defaultMessage: 'Move control down' })}
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.moveControlDownAriaLabel',
+            defaultMessage: 'Move control down'
+          })}
           color="primary"
           onClick={this.moveDownControl}
           iconType="sortDown"
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
-          aria-label={this.props.intl.formatMessage({ id: 'inputControl.editor.removeControlAria', defaultMessage: 'Remove control' })}
+          aria-label={this.props.intl.formatMessage({ id: 'inputControl.editor.removeControlAriaLabel', defaultMessage: 'Remove control' })}
           color="danger"
           onClick={this.removeControl}
           iconType="cross"

@@ -66,13 +66,12 @@ class ListControlUi extends Component {
     const { intl } = this.props;
 
     if (this.props.disableMsg) {
-      const listControlTextPlaceholder = intl.formatMessage({
-        id: 'inputControl.vis.listControl.selectTextPlaceholder',
-        defaultMessage: 'Select...'
-      });
       return (
         <EuiFieldText
-          placeholder={listControlTextPlaceholder}
+          placeholder={intl.formatMessage({
+            id: 'inputControl.vis.listControl.selectTextPlaceholder',
+            defaultMessage: 'Select...'
+          })}
           disabled={true}
         />
       );
@@ -85,14 +84,13 @@ class ListControlUi extends Component {
         ['data-test-subj']: `option_${option.value.replace(' ', '_')}`
       };
     });
-    const listControlPlaceholder = intl.formatMessage({
-      id: 'inputControl.vis.listControl.selectPlaceholder',
-      defaultMessage: 'Select...'
-    });
 
     return (
       <EuiComboBox
-        placeholder={listControlPlaceholder}
+        placeholder={intl.formatMessage({
+          id: 'inputControl.vis.listControl.selectPlaceholder',
+          defaultMessage: 'Select...'
+        })}
         options={options}
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}

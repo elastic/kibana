@@ -110,20 +110,17 @@ class ListControlEditorUi extends Component {
         ...this.props.parentCandidates,
       ];
 
-      const parentControlLabel = intl.formatMessage({
-        id: 'inputControl.editor.listControl.parentLabel',
-        defaultMessage: 'Parent control'
-      });
-      const parentControlText = intl.formatMessage({
-        id: 'inputControl.editor.listControl.parentHelpText',
-        defaultMessage: 'Options are based on the value of parent control. Disabled if parent is not set.'
-      });
-
       options.push(
         <EuiFormRow
           id={`parentSelect-${this.props.controlIndex}`}
-          label={parentControlLabel}
-          helpText={parentControlText}
+          label={intl.formatMessage({
+            id: 'inputControl.editor.listControl.parentLabel',
+            defaultMessage: 'Parent control'
+          })}
+          helpText={intl.formatMessage({
+            id: 'inputControl.editor.listControl.parentDescription',
+            defaultMessage: 'Options are based on the value of parent control. Disabled if parent is not set.'
+          })}
           key="parentSelect"
         >
           <EuiSelect
@@ -137,22 +134,20 @@ class ListControlEditorUi extends Component {
       );
     }
 
-    const multiselectText = intl.formatMessage({
-      id: 'inputControl.editor.listControl.multiselectText',
-      defaultMessage: 'Allow multiple selection'
-    });
-    const multiselectLabel = intl.formatMessage({
-      id: 'inputControl.editor.listControl.multiselectLabel',
-      defaultMessage: 'Multiselect'
-    });
     options.push(
       <EuiFormRow
         id={`multiselect-${this.props.controlIndex}`}
         key="multiselect"
-        helpText={multiselectText}
+        helpText={intl.formatMessage({
+          id: 'inputControl.editor.listControl.multiselectDescription',
+          defaultMessage: 'Allow multiple selection'
+        })}
       >
         <EuiSwitch
-          label={multiselectLabel}
+          label={intl.formatMessage({
+            id: 'inputControl.editor.listControl.multiselectLabel',
+            defaultMessage: 'Multiselect'
+          })}
           checked={this.props.controlParams.options.multiselect}
           onChange={(evt) => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
@@ -164,17 +159,13 @@ class ListControlEditorUi extends Component {
 
     const dynamicOptionsHelpText = this.state.isStringField
       ? intl.formatMessage({
-        id: 'inputControl.editor.listControl.dynamicOptions.updateHelpText',
+        id: 'inputControl.editor.listControl.dynamicOptions.updateDescription',
         defaultMessage: 'Update options in response to user input'
       })
       : intl.formatMessage({
-        id: 'inputControl.editor.listControl.dynamicOptions.stringHelpText',
+        id: 'inputControl.editor.listControl.dynamicOptions.stringFieldDescription',
         defaultMessage: 'Only available for "string" fields'
       });
-    const dynamicOptionsLabel = intl.formatMessage({
-      id: 'inputControl.editor.listControl.dynamicOptionsLabel',
-      defaultMessage: 'Dynamic Options'
-    });
     options.push(
       <EuiFormRow
         id={`dynamicOptions-${this.props.controlIndex}`}
@@ -182,7 +173,10 @@ class ListControlEditorUi extends Component {
         helpText={dynamicOptionsHelpText}
       >
         <EuiSwitch
-          label={dynamicOptionsLabel}
+          label={intl.formatMessage({
+            id: 'inputControl.editor.listControl.dynamicOptionsLabel',
+            defaultMessage: 'Dynamic Options'
+          })}
           checked={this.props.controlParams.options.dynamicOptions}
           onChange={(evt) => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
@@ -195,20 +189,18 @@ class ListControlEditorUi extends Component {
 
     // size is not used when dynamic options is set
     if (!this.props.controlParams.options.dynamicOptions || !this.state.isStringField) {
-      const sizeLabel = intl.formatMessage({
-        id: 'inputControl.editor.listControl.sizeLabel',
-        defaultMessage: 'Size'
-      });
-      const sizeHelpText = intl.formatMessage({
-        id: 'inputControl.editor.listControl.sizeHelpText',
-        defaultMessage: 'Number of options'
-      });
       options.push(
         <EuiFormRow
           id={`size-${this.props.controlIndex}`}
-          label={sizeLabel}
+          label={intl.formatMessage({
+            id: 'inputControl.editor.listControl.sizeLabel',
+            defaultMessage: 'Size'
+          })}
           key="size"
-          helpText={sizeHelpText}
+          helpText={intl.formatMessage({
+            id: 'inputControl.editor.listControl.sizeDescription',
+            defaultMessage: 'Number of options'
+          })}
         >
           <EuiFieldNumber
             min={1}

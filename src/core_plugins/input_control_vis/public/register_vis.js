@@ -31,25 +31,17 @@ import { i18n } from '@kbn/i18n';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const controlsTitle = i18n.translate('inputControl.register.controlsTitle', {
-    defaultMessage: 'Controls'
-  });
-  const controlsDescription = i18n.translate('inputControl.register.controlsDescription', {
-    defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
-  });
-  const tabControls = i18n.translate('inputControl.register.tabs.controlsTitle', {
-    defaultMessage: 'Controls'
-  });
-  const tabOptions = i18n.translate('inputControl.register.tabs.optionsTitle', {
-    defaultMessage: 'Options'
-  });
 
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
   return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
-    title: controlsTitle,
+    title: i18n.translate('inputControl.register.controlsTitle', {
+      defaultMessage: 'Controls'
+    }),
     image,
-    description: controlsDescription,
+    description: i18n.translate('inputControl.register.controlsDescription', {
+      defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
+    }),
     category: CATEGORY.OTHER,
     stage: 'lab',
     requiresUpdateStatus: [Status.PARAMS, Status.TIME],
@@ -68,12 +60,16 @@ function InputControlVisProvider(Private) {
       optionTabs: [
         {
           name: 'controls',
-          title: tabControls,
+          title: i18n.translate('inputControl.register.tabs.controlsTitle', {
+            defaultMessage: 'Controls'
+          }),
           editor: ControlsTab
         },
         {
           name: 'options',
-          title: tabOptions,
+          title: i18n.translate('inputControl.register.tabs.optionsTitle', {
+            defaultMessage: 'Options'
+          }),
           editor: OptionsTab
         }
       ]

@@ -133,26 +133,24 @@ class FieldSelectUi extends Component {
     const selectId = `fieldSelect-${this.props.controlIndex}`;
 
     const selectedOptions = [];
+    const { intl } = this.props;
     if (this.props.fieldName) {
       selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
     }
 
-    const formLabel = this.props.intl.formatMessage({
-      id: 'inputControl.editor.fieldLabel',
-      defaultMessage: 'Field'
-    });
-    const formPlaceholder = this.props.intl.formatMessage({
-      id: 'inputControl.editor.selectFieldPlaceholder',
-      defaultMessage: 'Select field...'
-    });
-
     return (
       <EuiFormRow
         id={selectId}
-        label={formLabel}
+        label={intl.formatMessage({
+          id: 'inputControl.editor.fieldLabel',
+          defaultMessage: 'Field'
+        })}
       >
         <EuiComboBox
-          placeholder={formPlaceholder}
+          placeholder={intl.formatMessage({
+            id: 'inputControl.editor.selectFieldPlaceholder',
+            defaultMessage: 'Select field...'
+          })}
           singleSelection={true}
           isLoading={this.state.isLoading}
           options={this.state.fields}

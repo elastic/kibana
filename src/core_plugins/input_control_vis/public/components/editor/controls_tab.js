@@ -140,22 +140,6 @@ class ControlsTabUi extends Component {
 
   render() {
     const { intl } = this.props;
-    const rangeSliderOption = intl.formatMessage({
-      id: 'inputControl.editor.select.rangeDropDown',
-      defaultMessage: 'Range slider'
-    });
-    const optionsListOption = intl.formatMessage({
-      id: 'inputControl.editor.select.listDropDown',
-      defaultMessage: 'Options list'
-    });
-    const selectAriaLabel = intl.formatMessage({
-      id: 'inputControl.editor.select.controlTypeAria',
-      defaultMessage: 'Select control type'
-    });
-    const addControlAriaLabel = intl.formatMessage({
-      id: 'inputControl.editor.select.addControlAria',
-      defaultMessage: 'Add control'
-    });
 
     return (
       <div>
@@ -170,12 +154,21 @@ class ControlsTabUi extends Component {
               >
                 <EuiSelect
                   options={[
-                    { value: 'range', text: rangeSliderOption },
-                    { value: 'list', text: optionsListOption },
+                    { value: 'range', text: intl.formatMessage({
+                      id: 'inputControl.editor.select.rangeDropDownOption',
+                      defaultMessage: 'Range slider'
+                    }) },
+                    { value: 'list', text: intl.formatMessage({
+                      id: 'inputControl.editor.select.listDropDownOption',
+                      defaultMessage: 'Options list'
+                    }) },
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
-                  aria-label={selectAriaLabel}
+                  aria-label={intl.formatMessage({
+                    id: 'inputControl.editor.select.controlTypeAriaLabel',
+                    defaultMessage: 'Select control type'
+                  })}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -188,7 +181,10 @@ class ControlsTabUi extends Component {
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
-                  aria-label={addControlAriaLabel}
+                  aria-label={intl.formatMessage({
+                    id: 'inputControl.editor.select.addControlAriaLabel',
+                    defaultMessage: 'Add control'
+                  })}
                 >
                   <FormattedMessage id="inputControl.editor.addButtonLabel" defaultMessage="Add"/>
                 </EuiButton>
