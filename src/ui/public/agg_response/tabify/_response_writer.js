@@ -25,9 +25,10 @@ import { tabifyGetColumns } from './_get_columns';
  * produces a table, or a series of tables.
  *
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} minimalColumns - setting to false will produce metrics for every bucket
+ * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
+ * @param {boolean} partialRows - setting to true will not remove rows with missing values
  */
-function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false }) {
+function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false } = {}) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];

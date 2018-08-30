@@ -39,7 +39,7 @@ describe('Vislib Vis Type', function () {
   }));
 
   describe('initialization', () => {
-    it('should set the basic response handler if not set', () => {
+    it('should set the vislib response handler if not set', () => {
       const visType = new VislibVisType(visConfig);
       expect(visType.responseHandler).to.equal('vislib');
     });
