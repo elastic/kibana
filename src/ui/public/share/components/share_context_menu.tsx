@@ -18,11 +18,12 @@
  */
 
 import React, { Component } from 'react';
+import './share_panel_content.less';
 
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
-import { ShareUrlContent } from './share_url_content';
+import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
   allowEmbed: boolean;
@@ -46,7 +47,7 @@ export class ShareContextMenu extends Component<Props> {
       id: panels.length + 1,
       title: 'Permalink',
       content: (
-        <ShareUrlContent
+        <UrlPanelContent
           objectId={this.props.objectId}
           objectType={this.props.objectType}
           getUnhashableStates={this.props.getUnhashableStates}
@@ -65,7 +66,7 @@ export class ShareContextMenu extends Component<Props> {
         id: panels.length + 1,
         title: 'Embed Code',
         content: (
-          <ShareUrlContent
+          <UrlPanelContent
             isEmbedded
             objectId={this.props.objectId}
             objectType={this.props.objectType}
@@ -84,7 +85,7 @@ export class ShareContextMenu extends Component<Props> {
     if (this.props.shareContextMenuExtensions) {
       this.props.shareContextMenuExtensions.forEach((provider: any) => {
         provider
-          .getMenuItems(this.props.objectType)
+          .getMenuItems(this.props.objectType, this.props.objectId)
           .forEach(
             ({
               shareMenuItem,

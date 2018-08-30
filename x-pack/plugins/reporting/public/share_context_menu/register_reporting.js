@@ -7,10 +7,11 @@
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
+import { ReportingPanelContent } from '../components/reporting_panel_content';
 
 function reportingProvider(Private, dashboardConfig) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = (objectType) => {
+  const getMenuItems = (objectType, objectId) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -34,9 +35,11 @@ function reportingProvider(Private, dashboardConfig) {
         panel: {
           title: panelTitle,
           content: (
-            <div>
-              Reporting panel content goes here
-            </div>
+            <ReportingPanelContent
+              reportType="PDF"
+              objectType={objectType}
+              objectId={objectId}
+            />
           )
         }
       });
