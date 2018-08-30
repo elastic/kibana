@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`accepts valid hostnames: valid host names 1`] = `
+Object {
+  "host1": "www.example.com",
+  "host2": "8.8.8.8",
+  "host3": "::1",
+  "host4": "localhost",
+}
+`;
+
 exports[`has defaults for config 1`] = `
 Object {
   "cors": false,
@@ -44,7 +53,7 @@ exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must 
 
 exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
 
-exports[`throws if invalid hostname 1`] = `"[host]: must be a valid hostname"`;
+exports[`throws if invalid hostname 1`] = `"[host]: value is [asdf$%^] but it must be a valid hostname (see RFC 1123)."`;
 
 exports[`with TLS should accept known protocols\` 1`] = `
 "[ssl.supportedProtocols.0]: types that failed validation:
