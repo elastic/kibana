@@ -36,7 +36,8 @@ import { createFailError } from '../run';
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 const LINE_BREAK_REGEX = /\n/g;
-const VALUES_REFERENCES_REGEX = /(?<=\{)\S+(?=\})/g;
+const VALUES_REFERENCES_REGEX = /{\w+([,\s\w]||({.*}))*}/g;
+const EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX = /(?<=^{)\w+(?=[},])/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -102,18 +103,23 @@ export function* traverseNodes(nodes) {
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
 export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
-  const valuesReferences = defaultMessage.match(VALUES_REFERENCES_REGEX);
-  if (!valuesReferences) {
+  const defaultMessageReferences = defaultMessage.match(VALUES_REFERENCES_REGEX);
+
+  if (!defaultMessageReferences) {
     return;
   }
 
-  const unusedKeys = difference(valuesReferences, valuesKeys);
-  const missingKeys = difference(valuesKeys, valuesReferences);
+  const defaultMessageReferencesKeys = defaultMessageReferences.map(
+    message => message.match(EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX)[0]
+  );
+
+  const unusedKeys = difference(defaultMessageReferencesKeys, valuesKeys);
+  const missingKeys = difference(valuesKeys, defaultMessageReferencesKeys);
 
   if (unusedKeys.length) {
     throw createFailError(
       `${chalk.white.bgRed(' I18N ERROR ')} \
-"values" object contains unused properties (${messageId}):
+"values" object contains unused properties ("${messageId}"):
 [${unusedKeys}].`
     );
   }
@@ -122,7 +128,7 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     throw createFailError(
       `${chalk.white.bgRed(
         ' I18N ERROR '
-      )} some properties are missing in "values" object (${messageId}):
+      )} some properties are missing in "values" object ("${messageId}"):
 [${missingKeys}].`
     );
   }
@@ -167,5 +173,7 @@ export function extractValuesKeysFromNode(node, id) {
     );
   }
 
-  return node.properties.map(valuesProperty => valuesProperty.key);
+  return node.properties.map(
+    property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
+  );
 }

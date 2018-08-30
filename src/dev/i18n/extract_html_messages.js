@@ -163,7 +163,10 @@ Empty defaultMessage in angular directive is not allowed ("${messageId}").`
     const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
 
     if (element.hasAttribute('i18n-values')) {
-      const valuesKeys = Object.keys(JSON.parse(element.getAttribute('i18n-values')));
+      const nodes = parse(`+${element.getAttribute('i18n-values')}`).program.body;
+      const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
+      const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
+
       checkValuesProperty(valuesKeys, message, messageId);
     }
 

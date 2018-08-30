@@ -17,7 +17,7 @@
  * under the License.
 */
 
-import { isJSXIdentifier, isObjectExpression } from '@babel/types';
+import { isJSXIdentifier, isObjectExpression, isJSXExpressionContainer } from '@babel/types';
 import chalk from 'chalk';
 
 import {
@@ -95,15 +95,15 @@ Empty defaultMessage in intl.formatMessage() is not allowed ("${messageId}").`
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  const [messageIdProperty, messageProperty, contextProperty, valuesProperty] = [
+  const [messageIdAttribute, messageAttribute, contextAttribute, valuesAttribute] = [
     'id',
     DEFAULT_MESSAGE_KEY,
     CONTEXT_KEY,
     VALUES_KEY,
   ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
 
-  const messageId = messageIdProperty
-    ? formatHTMLString(extractMessageIdFromNode(messageIdProperty.value))
+  const messageId = messageIdAttribute
+    ? formatHTMLString(extractMessageIdFromNode(messageIdAttribute.value))
     : undefined;
 
   if (!messageId) {
@@ -112,12 +112,12 @@ export function extractFormattedMessages(node) {
     );
   }
 
-  const message = messageProperty
-    ? formatHTMLString(extractMessageValueFromNode(messageProperty.value, messageId))
+  const message = messageAttribute
+    ? formatHTMLString(extractMessageValueFromNode(messageAttribute.value, messageId))
     : undefined;
 
-  const context = contextProperty
-    ? formatHTMLString(extractContextValueFromNode(contextProperty.value, messageId))
+  const context = contextAttribute
+    ? formatHTMLString(extractContextValueFromNode(contextAttribute.value, messageId))
     : undefined;
 
   if (!message) {
@@ -127,8 +127,18 @@ Empty default message in <FormattedMessage> is not allowed ("${messageId}").`
     );
   }
 
-  if (valuesProperty) {
-    const valuesKeys = extractValuesKeysFromNode(valuesProperty.value, messageId);
+  if (valuesAttribute) {
+    if (
+      !isJSXExpressionContainer(valuesAttribute.value) ||
+      !isObjectExpression(valuesAttribute.value.expression)
+    ) {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} \
+"values" value in <FormattedMessage> should be an object ("${messageId}").`
+      );
+    }
+
+    const valuesKeys = extractValuesKeysFromNode(valuesAttribute.value.expression, messageId);
     checkValuesProperty(valuesKeys, message, messageId);
   }
 
