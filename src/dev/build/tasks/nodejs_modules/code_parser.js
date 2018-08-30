@@ -17,27 +17,32 @@
  * under the License.
  */
 
-import { extname } from 'path';
+import { dirname, extname, isAbsolute } from 'path';
 import { readFileSync } from 'fs';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 
-const canRequire = (entry) => {
+function canRequire(build, entry) {
   try {
-    let resolvedEntry = require.resolve(entry);
+    const resolvedEntry = require.resolve(entry);
 
-    if (resolvedEntry === entry) {
-      resolvedEntry = require.resolve(build.resolvePath('node_modules', entry));
+    if (resolvedEntry !== entry) {
+      // The entry is resolved and we can
+      // just return it
+      return resolvedEntry;
     }
 
-    return resolvedEntry;
-
+    // We will try to test if we can resolve
+    // this entry against the node_modules path.
+    // An error will be thrown and we'll return false
+    // in case the entry wasn't found on node_modules
+    return require.resolve(build.resolvePath('node_modules', entry));
   } catch (e) {
     return false;
   }
-};
+}
 
-const getDepsFromFile = (filePath) => {
+function getSingleFileDependencies(filePath) {
   const natives = process.binding('natives');
   const dependencies = [];
 
@@ -95,4 +100,86 @@ const getDepsFromFile = (filePath) => {
 
   // Filter node native modules from the result
   return dependencies.filter(dep => !natives[dep]);
-};
+}
+
+async function getRawDependencies(build, entries, entriesMap = {}, deps = {}, wasParsed = {}) {
+  return new Promise((resolve) => {
+    if (!entries.length) {
+      return resolve(Object.keys(deps));
+    }
+
+    const dep = entries.shift();
+    if (typeof dep !== 'string' || wasParsed[dep]) {
+      return process.nextTick(async () => {
+        resolve(await getRawDependencies(build, entries, entriesMap, deps, wasParsed));
+      });
+    }
+
+    wasParsed[dep] = true;
+
+    const newEntries = getSingleFileDependencies(dep).reduce((filteredEntries, entry) => {
+      const absEntryPath = build.resolvePath(dirname(dep), entry);
+      const requiredPath = canRequire(build, absEntryPath);
+      const relativeFile = !isAbsolute(entry);
+      const requiredRelativePath = canRequire(build, entry);
+      const isNodeModuleDep = relativeFile && !requiredPath && requiredRelativePath;
+      const isNewEntry = relativeFile && requiredPath;
+
+      if (isNodeModuleDep) {
+        deps[entry] = true;
+        if (!entriesMap[requiredRelativePath]) {
+          filteredEntries.push(requiredRelativePath);
+          entriesMap[requiredRelativePath] = true;
+        }
+      }
+
+      if (isNewEntry && !wasParsed[requiredPath]) {
+        if (!entriesMap[requiredPath]) {
+          filteredEntries.push(requiredPath);
+          entriesMap[requiredPath] = true;
+        }
+      }
+
+      return filteredEntries;
+    }, []);
+
+    return process.nextTick(async () => {
+      resolve(await getRawDependencies(build, [...entries, ...newEntries], entriesMap, deps, wasParsed));
+    });
+  });
+}
+
+export async function getDependencies(build, entries) {
+  // Test each entry against canRequire function
+  const sanitizedEntries = entries.map(entry => canRequire(build, entry));
+
+  // Retrieve the raw dependencies from the provided
+  // code entries
+  const serverDeps = await getRawDependencies(build, sanitizedEntries);
+
+  // Delete repeated dependencies by mapping them to
+  // the top level path
+  const baseServerDepsMap = serverDeps.reduce((baseDeps, dep) => {
+    const calculateTLDep = (inputDep, outputDep = '') => {
+      const pathSeparator = '/';
+      const depSplitPaths = inputDep.split(pathSeparator);
+      const firstPart = depSplitPaths.shift();
+      const outputDepFirstArgAppend = outputDep ? pathSeparator : '';
+
+      outputDep += `${outputDepFirstArgAppend}${firstPart}`;
+
+      if (firstPart.charAt(0) !== '@') {
+        return outputDep;
+      }
+
+      return calculateTLDep(depSplitPaths.join(pathSeparator, outputDep));
+    };
+
+    const tlDEP = calculateTLDep(dep);
+    baseDeps[tlDEP] = true;
+
+    return baseDeps;
+  }, {});
+
+  return Object.keys(baseServerDepsMap);
+}
