@@ -34,7 +34,6 @@ const STATUS = {
 export default class WatchOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
-    this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
     this.status$ = new Rx.ReplaySubject(1);
   }

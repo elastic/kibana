@@ -38,10 +38,14 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
-const STATS_WARNINGS_FILTER = /export .* was not found in/;
+const STATS_WARNINGS_FILTER = new RegExp([
+  '(export .* was not found in)',
+  '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
+].join(''));
 
 export default class BaseOptimizer {
   constructor(opts) {
+    this.log = opts.log || (() => null);
     this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
 
@@ -448,12 +452,19 @@ export default class BaseOptimizer {
 
     const { warnings } = stats.toJson({ all: false, warnings: true });
 
-    // when typescript doesn't do a full type check, as we have the ts-loader
+    // 1 - when typescript doesn't do a full type check, as we have the ts-loader
     // configured here, it does not have enough information to determine
     // whether an imported name is a type or not, so when the name is then
     // exported, typescript has no choice but to emit the export. Fortunately,
     // the extraneous export should not be harmful, so we just suppress these warnings
     // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+    //
+    // 2 - Mini Css Extract plugin tracks the order for each css import we have
+    // through the project (and it's successive imports) since version 0.4.2.
+    // In case we have the same imports more than one time with different
+    // sequences, this plugin will throw a warning. This should not be harmful,
+    // but the an issue was opened and can be followed on:
+    // https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250#issuecomment-415345126
     const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
 
     return filteredWarnings.length > 0;

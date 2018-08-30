@@ -34,7 +34,7 @@ const writeFileAsync = promisify(fs.writeFile);
 export class DllCompiler {
   constructor(uiBundles, log) {
     this.rawDllConfig = this.createRawDllConfig(uiBundles);
-    this.log = log || (() => {});
+    this.log = log || (() => null);
   }
 
   createRawDllConfig(uiBundles) {
@@ -54,26 +54,23 @@ export class DllCompiler {
   }
 
   async init() {
-    await this.upsertEntryFile();
-    await this.upsertManifestFile(
-      JSON.stringify({
-        name: this.rawDllConfig.entryName,
-        content: {},
-      })
-    );
+    await this.ensureEntryFileExists();
+    await this.ensureManifestFileExists();
   }
 
   async upsertEntryFile(content) {
     await this.upsertFile(this.getEntryPath(), content);
   }
 
-  async upsertManifestFile(content) {
-    await this.upsertFile(this.getManifestPath(), content);
+  async upsertFile(filePath, content = '') {
+    await this.ensurePathExists(filePath);
+    await writeFileAsync(filePath, content, 'utf8');
   }
 
-  async upsertFile(filePath, content = '') {
-    await this.ensurePathExists();
-    await writeFileAsync(filePath, content, 'utf8');
+  getDllBundlePath() {
+    return this.resolvePath(
+      `${this.rawDllConfig.entryName}${this.rawDllConfig.dllExt}`
+    );
   }
 
   getEntryPath() {
@@ -88,32 +85,70 @@ export class DllCompiler {
     );
   }
 
+  getStylePath() {
+    return this.resolvePath(
+      `${this.rawDllConfig.entryName}${this.rawDllConfig.styleExt}`
+    );
+  }
+
+  async ensureEntryFileExists() {
+    await this.ensureFileExists(this.getEntryPath());
+  }
+
+  async ensureManifestFileExists() {
+    await this.ensureFileExists(
+      this.getManifestPath(),
+      JSON.stringify({
+        name: this.rawDllConfig.entryName,
+        content: {}
+      })
+    );
+  }
+
+  async ensureStyleFileExists() {
+    await this.ensureFileExists(this.getStylePath());
+  }
+
+  async ensureFileExists(filePath, content) {
+    const exists = await this.ensurePathExists(filePath);
+
+    if (!exists) {
+      await this.upsertFile(filePath, content);
+    }
+  }
+
   async ensurePathExists(filePath) {
     const exists = await existsAsync(filePath);
 
     if (!exists) {
       await mkdirpAsync(path.dirname(filePath));
     }
+
+    return exists;
   }
 
   resolvePath() {
     return path.resolve(this.rawDllConfig.outputPath, ...arguments);
   }
 
-  async readEntryFile(filePath) {
-    return await this.readFile(filePath);
+  async readEntryFile() {
+    return await this.readFile(this.getEntryPath());
   }
 
   async readFile(filePath, content) {
-    await this.upsertEntryFile(filePath, content);
+    await this.upsertFile(filePath, content);
     return await readFileAsync(filePath, 'utf8');
   }
 
   async run(dllEntries) {
     const dllConfig = this.dllConfigGenerator(this.rawDllConfig);
     await this.upsertEntryFile(dllEntries);
+    await this.runWebpack(dllConfig());
 
-    return await this.runWebpack(dllConfig);
+    // Style dll file isn't always created but we are
+    // expecting it to exist always as we are referencing
+    // it from the bootstrap template
+    await this.ensureStyleFileExists();
   }
 
   dllConfigGenerator(dllConfig) {

@@ -18,7 +18,7 @@
  */
 
 import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
-import { getDependencies } from './code_parser';
+import { getDependencies } from './get_dependencies';
 import globby from 'globby';
 
 export const CleanClientModulesOnDLLTask = {

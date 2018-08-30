@@ -21,6 +21,7 @@ import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 function generateDLL(config) {
   const {
@@ -76,7 +77,13 @@ function generateDLL(config) {
       new MiniCssExtractPlugin({
         filename: dllStyleFilename
       })
-    ]
+    ],
+    performance: {
+      // NOTE: we are disabling this as those hints
+      // are more tailored for the final bundles result
+      // and not for the webpack compilations performance itself
+      hints: false
+    }
   };
 }
 
@@ -99,7 +106,9 @@ function extendRawConfig(rawConfig) {
   const dllStyleFilename = `${dllStyleName}${dllStyleExt}`;
 
   // Create webpack entry object key with the provided dllEntryName
-  dllEntry[dllEntryName] = `${dllOutputPath}/${dllEntryName}${dllEntryExt}`;
+  dllEntry[dllEntryName] = [
+    `${dllOutputPath}/${dllEntryName}${dllEntryExt}`
+  ];
 
   // Export dll config map
   return {
@@ -123,7 +132,49 @@ function common(rawConfig) {
 function optimized() {
   return webpackMerge(
     {
-      mode: 'production'
+      mode: 'production',
+      optimization: {
+        minimize: true,
+        minimizer: [
+          new UglifyJsPlugin({
+            parallel: true,
+            sourceMap: false,
+            uglifyOptions: {
+              compress: {
+                // The following is required for dead-code the removal
+                // check in React DevTools
+                //
+                // default
+                unused: true,
+                dead_code: true,
+                conditionals: true,
+                evaluate: true,
+
+                // changed
+                keep_fnames: true,
+                keep_infinity: true,
+                comparisons: false,
+                sequences: false,
+                properties: false,
+                drop_debugger: false,
+                booleans: false,
+                loops: false,
+                toplevel: false,
+                top_retain: false,
+                hoist_funs: false,
+                if_return: false,
+                join_vars: false,
+                collapse_vars: false,
+                reduce_vars: false,
+                warnings: false,
+                negate_iife: false,
+                side_effects: false
+              },
+              mangle: false
+            }
+          }),
+        ]
+      }
     }
   );
 }

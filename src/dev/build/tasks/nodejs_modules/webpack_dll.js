@@ -37,10 +37,10 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
   // Only includes modules who are not in the black list of modules
   // and there are not dll entry files
   return modules.filter(entry => {
-    const isBlackListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
+    const isWhiteListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
     const isDllEntryFile = entry.includes('.entry.dll.js');
 
-    return !isBlackListed && !isDllEntryFile;
+    return !isWhiteListed && !isDllEntryFile;
   });
 }
 

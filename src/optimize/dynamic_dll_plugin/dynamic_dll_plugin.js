@@ -38,7 +38,7 @@ function inPluginNodeModules(checkPath) {
 
 export class DynamicDllPlugin {
   constructor({ uiBundles, log }) {
-    this.log = log || (() => {});
+    this.log = log || (() => null);
     this.dllCompiler = new DllCompiler(uiBundles, log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
@@ -57,10 +57,12 @@ export class DynamicDllPlugin {
 
   bindDllReferencePlugin(compiler) {
     const rawDllConfig = this.dllCompiler.rawDllConfig;
+    const dllContext = rawDllConfig.context;
+    const dllManifestPath = this.dllCompiler.getManifestPath();
 
     new webpack.DllReferencePlugin({
-      context: rawDllConfig.context,
-      manifest: rawDllConfig.manifestPath,
+      context: dllContext,
+      manifest: dllManifestPath,
     }).apply(compiler);
   }
 
@@ -114,10 +116,11 @@ export class DynamicDllPlugin {
     compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
         // Verify if we must proceed and check if a dll compilation is needed.
-        // In case we are under a distributable environment we can just discard
-        // the dllCompilation (and the subsequent additional compilation)
-        // and return false right away.
-        if (IS_KIBANA_DISTRIBUTABLE) {
+        // We must compile the dll, at least run the procedures to understand)
+        // if we already have everything we need inside the dll, everytime
+        // we are not under a distributable environment, or dll wasn't
+        // yet created.
+        if (!this.mustCompileDll()) {
           return compilation.needsDLLCompilation = false;
         }
 
@@ -165,6 +168,17 @@ export class DynamicDllPlugin {
 
       this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
+  }
+
+  mustCompileDll() {
+    if (!IS_KIBANA_DISTRIBUTABLE) {
+      return true;
+    }
+
+    // TODO: we need to think about maybe moving the DLLs
+    // outside the optimize bundles folder because it's
+    // a common use case to some users delete the optimize folder
+    return !fs.existsSync(this.dllCompiler.getDllBundlePath());
   }
 
   async runDLLCompiler(mainCompiler) {
