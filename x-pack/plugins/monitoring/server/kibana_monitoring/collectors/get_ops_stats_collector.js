@@ -7,13 +7,11 @@
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_STATS_TYPE_MONITORING
+  KIBANA_STATS_TYPE_MONITORING,
 } from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
-
-const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
 
 class OpsMonitor {
@@ -64,11 +62,17 @@ export function getOpsStatsCollector(server, kbnServer) {
 
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    server.log(['info', ...LOGGING_TAGS], 'Re-initializing Kibana Monitoring due to SIGHUP');
+    server.log(
+      ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+      'Re-initializing Kibana Monitoring due to SIGHUP'
+    );
     setTimeout(() => {
       opsMonitor.stop();
       opsMonitor.start();
-      server.log(['info', ...LOGGING_TAGS], 'Re-initialized Kibana Monitoring due to SIGHUP');
+      server.log(
+        ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+        'Re-initializing Kibana Monitoring due to SIGHUP'
+      );
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 

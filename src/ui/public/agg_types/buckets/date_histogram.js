@@ -28,6 +28,7 @@ import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
+import dropPartialTemplate from '../controls/drop_partials.html';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = tzDetect.determine().name();
@@ -147,6 +148,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
         return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
       },
     },
+    {
+      name: 'drop_partials',
+      default: false,
+      write: _.noop,
+      editor: dropPartialTemplate,
+    },
+
     {
       name: 'customInterval',
       default: '2h',

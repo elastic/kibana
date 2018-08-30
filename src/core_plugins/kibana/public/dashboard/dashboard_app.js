@@ -43,6 +43,7 @@ import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
+import { showShareContextMenu } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -50,6 +51,7 @@ import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_fa
 import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -83,6 +85,7 @@ app.directive('dashboardApp', function ($injector) {
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+      const getUnhashableStates = Private(getUnhashableStatesProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
@@ -399,6 +402,16 @@ app.directive('dashboardApp', function ($injector) {
           },
         });
       };
+      navActions[TopNavIds.SHARE] = (menuItem, navController, anchorElement) => {
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: true,
+          getUnhashableStates,
+          objectId: dash.id,
+          objectType: 'dashboard',
+        });
+      };
+
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
@@ -438,11 +451,6 @@ app.directive('dashboardApp', function ($injector) {
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
-
-      // TODO remove opts once share has been converted to react
-      $scope.opts = {
-        dashboard: dash, // used in share.html
-      };
     }
   };
 });
