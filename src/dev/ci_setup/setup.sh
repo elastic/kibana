@@ -74,11 +74,7 @@ fi
 ###
 ### "install" node into this shell
 ###
-if [[ $OS == 'win' ]]; then
-  export PATH="$PATH:$nodeBin"
-else
-  export PATH="$nodeBin:$PATH"
-fi
+export PATH="$nodeBin:$PATH"
 hash -r
 
 
