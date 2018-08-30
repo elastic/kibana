@@ -20,6 +20,7 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
@@ -55,14 +56,38 @@ export class ReportingPanelContent extends Component<Props, State> {
   }
 
   public render() {
+    if (this.isNotSaved()) {
+      return (
+        <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
+          <EuiFormRow helpText="Please save your work before generating a report.">
+            <EuiButton disabled>Generate {this.props.reportType}</EuiButton>
+          </EuiFormRow>
+        </EuiForm>
+      );
+    }
+
     const reportMsg = `${
       this.props.reportType
-    }s can take a minute or two to generate based upon the size of your ${this.props.objectType}`;
+    }s can take a minute or two to generate based upon the size of your ${this.props.objectType}.`;
+
     return (
       <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
         <EuiText>
           <p>{reportMsg}</p>
         </EuiText>
+
+        <EuiButton fill>Generate {this.props.reportType}</EuiButton>
+
+        <EuiSpacer />
+
+        <EuiText>
+          <p>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from
+            Watcher.
+          </p>
+        </EuiText>
+
+        <EuiButton>Copy POST URL</EuiButton>
       </EuiForm>
     );
   }
