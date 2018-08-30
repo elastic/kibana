@@ -115,10 +115,9 @@ export interface TaskDefinition {
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
-   * This defaults to 1. 'max' is a special value that indicates this task
-   * occupies 100% of the slots.
+   * This defaults to 1.
    */
-  workersOccupied?: number | 'max';
+  workersOccupied?: number;
 
   /**
    * A function which, does the work this task is built to do. Note,
@@ -142,7 +141,7 @@ export const validateTaskDefinition = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeOut: Joi.string().default('5m'),
-  workersOccupied: [Joi.string().regex(/^max$/), Joi.number().default(1)],
+  workersOccupied: Joi.number().default(1),
   run: Joi.func().required(),
 }).default();
 

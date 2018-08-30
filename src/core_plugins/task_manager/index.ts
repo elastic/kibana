@@ -120,8 +120,7 @@ function extractTaskDefinitions(
 
       logger.debug(`Registering task "${k}" from plugin "${id}".`);
       const definition = Joi.attempt(taskDefinitions[k], validateTaskDefinition) as TaskDefinition;
-      const workersOccupied =
-        definition.workersOccupied === 'max' ? numWorkers : definition.workersOccupied || 1;
+      const workersOccupied = Math.min(numWorkers, definition.workersOccupied || 1);
 
       definitions[k] = {
         ...definition,
