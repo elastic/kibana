@@ -37,7 +37,7 @@ export const reporting = (kibana) => {
         'plugins/reporting/controls/visualize',
         'plugins/reporting/controls/dashboard',
       ],
-      hacks: [ 'plugins/reporting/hacks/job_completion_notifier'],
+      hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
       injectDefaultVars(server, options) {
@@ -77,7 +77,6 @@ export const reporting = (kibana) => {
           timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
-          record: Joi.boolean().default(false),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),

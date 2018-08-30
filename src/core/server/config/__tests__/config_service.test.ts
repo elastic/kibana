@@ -27,7 +27,7 @@ jest.mock('../../../../utils/package_json', () => ({ pkg: mockPackage }));
 
 import { schema, Type, TypeOf } from '../schema';
 
-import { ConfigService, ObjectToRawConfigAdapter } from '..';
+import { ConfigService, ObjectToConfigAdapter } from '..';
 import { logger } from '../../logging/__mocks__';
 import { Env } from '../env';
 import { getEnvOptions } from './__mocks__/env';
@@ -36,7 +36,7 @@ const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
 
 test('returns config at path as observable', async () => {
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ key: 'foo' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'foo' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
@@ -48,7 +48,7 @@ test('returns config at path as observable', async () => {
 test('throws if config at path does not match schema', async () => {
   expect.assertions(1);
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ key: 123 }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 123 }));
 
   const configService = new ConfigService(config$, defaultEnv, logger);
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
@@ -61,7 +61,7 @@ test('throws if config at path does not match schema', async () => {
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ foo: 'bar' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: 'bar' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
@@ -71,7 +71,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 });
 
 test('returns observable config at optional path if it exists', async () => {
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ value: 'bar' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ value: 'bar' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
@@ -82,7 +82,7 @@ test('returns observable config at optional path if it exists', async () => {
 });
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ key: 'value' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
@@ -90,13 +90,13 @@ test("does not push new configs when reloading if config at path hasn't changed"
     valuesReceived.push(config.value);
   });
 
-  config$.next(new ObjectToRawConfigAdapter({ key: 'value' }));
+  config$.next(new ObjectToConfigAdapter({ key: 'value' }));
 
   expect(valuesReceived).toEqual(['value']);
 });
 
 test('pushes new config when reloading and config at path has changed', async () => {
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ key: 'value' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
@@ -104,7 +104,7 @@ test('pushes new config when reloading and config at path has changed', async ()
     valuesReceived.push(config.value);
   });
 
-  config$.next(new ObjectToRawConfigAdapter({ key: 'new value' }));
+  config$.next(new ObjectToConfigAdapter({ key: 'new value' }));
 
   expect(valuesReceived).toEqual(['value', 'new value']);
 });
@@ -114,7 +114,7 @@ test("throws error if config class does not implement 'schema'", async () => {
 
   class ExampleClass {}
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ key: 'value' }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.atPath('key', ExampleClass as any);
@@ -147,7 +147,7 @@ test('tracks unhandled paths', async () => {
     },
   };
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter(initialConfig));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   configService.atPath('foo', createClassWithSchema(schema.string()));
@@ -178,7 +178,7 @@ test('correctly passes context', async () => {
 
   const env = new Env('/kibana', getEnvOptions());
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({ foo: {} }));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: {} }));
   const configService = new ConfigService(config$, env, logger);
   const configs = configService.atPath(
     'foo',
@@ -213,7 +213,7 @@ test('handles enabled path, but only marks the enabled path as used', async () =
     },
   };
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter(initialConfig));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const isEnabled = await configService.isEnabledAtPath('pid');
@@ -231,7 +231,7 @@ test('handles enabled path when path is array', async () => {
     },
   };
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter(initialConfig));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const isEnabled = await configService.isEnabledAtPath(['pid']);
@@ -249,7 +249,7 @@ test('handles disabled path and marks config as used', async () => {
     },
   };
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter(initialConfig));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const isEnabled = await configService.isEnabledAtPath('pid');
@@ -262,7 +262,7 @@ test('handles disabled path and marks config as used', async () => {
 test('treats config as enabled if config path is not present in config', async () => {
   const initialConfig = {};
 
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter(initialConfig));
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const isEnabled = await configService.isEnabledAtPath('pid');

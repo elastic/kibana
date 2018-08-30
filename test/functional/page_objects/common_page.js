@@ -332,7 +332,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async closeToast() {
       const toast = await find.byCssSelector('.euiToast');
       await remote.moveMouseTo(toast);
+      const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+      log.debug(title);
       await find.clickByCssSelector('.euiToast__closeButton');
+      return title;
     }
 
     async clearAllToasts() {

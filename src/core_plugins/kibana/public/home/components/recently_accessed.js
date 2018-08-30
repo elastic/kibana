@@ -34,6 +34,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const NUM_LONG_LINKS = 5;
 
 export class RecentlyAccessed extends Component {
@@ -197,7 +199,10 @@ export class RecentlyAccessed extends Component {
         <EuiTitle size="xs">
           <h3>
             <EuiTextColor color="subdued">
-              Recently viewed
+              <FormattedMessage
+                id="kbn.home.recentlyAccessed.recentlyViewedTitle"
+                defaultMessage="Recently viewed"
+              />
             </EuiTextColor>
           </h3>
         </EuiTitle>
