@@ -53,13 +53,11 @@ exports[`it renders without crashing 1`] = `
         <div
           className="euiSpacer euiSpacer--l"
         />
-        <span
-          className="euiTextColor euiTextColor--ghost euiTitle euiTitle--large"
+        <p
+          className="euiTitle euiTitle--large euiTextColor--ghost"
         >
-          <p>
-            Select your space
-          </p>
-        </span>
+          Select your space
+        </p>
       </div>
     </div>
     <div
