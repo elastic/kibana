@@ -96,7 +96,7 @@ export function FindProvider({ getService }) {
     async allByCustom(findAllFunction, timeout = defaultFindTimeout) {
       return await this._withTimeout(timeout, async remote => {
         return await retry.try(async () => {
-          let elements = await findAllFunction(remote, timeout);
+          let elements = await findAllFunction(remote);
           if (!elements) elements = [];
           // Force isStale checks for all the retrieved elements.
           await Promise.all(elements.map(async element => await element.isEnabled()));
@@ -111,8 +111,8 @@ export function FindProvider({ getService }) {
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
-      log.debug('in findAllByCssSelector: ' + selector);
-      return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
+      log.debug(`find.allByCssSelector(selector: ${selector}, timeout: ${timeout})`);
+      return await this.allByCustom(async remote => await remote.findAllByCssSelector(selector), timeout);
     }
 
     async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {

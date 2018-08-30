@@ -33,6 +33,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
+        console.error('Rendering timelion chart');
         const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
@@ -163,6 +164,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
         });
 
         $scope.$on('$destroy', function () {
+          console.error('Destroying timelion chart');
           cancelResize();
           $elem.off('plothover');
           $elem.off('plotselected');
@@ -340,6 +342,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
           if ($scope.plot) {
+            console.error('Timelion Schema: Emitting timelionChartRendered');
             $scope.$emit('timelionChartRendered');
           }
 

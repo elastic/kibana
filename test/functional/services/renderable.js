@@ -33,7 +33,6 @@ export function RenderableProvider({ getService }) {
      * visualizations also add a DATA_LOADING_SELECTOR when the internal data is loading. This test will not
      * return if any of those tags are found.
      * @param count {Number} Number of RENDER_COMPLETE_SELECTORs to wait for.
-     * @param findTimeout {Number} Optional custom timeout to use
      */
     async waitForRender(count = 1) {
       log.debug(`Renderable.waitForRender for ${count} elements`);

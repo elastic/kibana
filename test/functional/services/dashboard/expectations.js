@@ -254,5 +254,13 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         expect(tableCells.length).to.be(expectedCount);
       });
     }
+
+    async countOfNoResultFoundMessages(expectedCount) {
+      log.debug(`DashboardExpect.countOfNoResultFoundMessages(${expectedCount})`);
+      await retry.try(async () => {
+        const noResultsMessages = await testSubjects.findAll('noVisResultsFoundMessage');
+        expect(noResultsMessages.length).to.be(expectedCount);
+      });
+    }
   };
 }
