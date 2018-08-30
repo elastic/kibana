@@ -142,10 +142,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
   };
 
   const unselectShape = page => {
-    // TODO add a dedicated action type in `aeroelastic` for element selection (incl. null)
-    const commit = aero.commit;
-    commit(page, 'mouseEvent', { event: 'mouseDown', x: Infinity, y: Infinity }, { silent: true });
-    commit(page, 'mouseEvent', { event: 'mouseUp', x: Infinity, y: Infinity }, { silent: true });
+    aero.commit(page, 'shapeSelect', { shapes: [] });
   };
 
   return next => action => {
@@ -216,10 +213,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
         }
         break;
 
+      case removeElement.toString():
       case addElement.toString():
       case duplicateElement.toString():
       case elementLayer.toString():
-      case removeElement.toString():
       case setPosition.toString():
         const page = getSelectedPage(getState());
         const elements = getElements(getState(), page);
@@ -229,6 +226,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
           prevPage !== page || !shallowEqual(prevElements.map(id), elements.map(id));
         if (shouldResetState) {
           populateWithElements(page);
+        }
+        if (action.type !== setPosition.toString()) {
+          unselectShape(prevPage);
         }
         break;
     }

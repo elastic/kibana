@@ -181,6 +181,8 @@ const restateShapesEvent = select(
   action => (action && action.type === 'restateShapesEvent' ? action.payload : null)
 )(primaryUpdate);
 
+// directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
+// is selected, as otherwise selection is driven by gestures and knowledge of element positions
 const directSelect = select(
   action => (action && action.type === 'shapeSelect' ? action.payload : null)
 )(primaryUpdate);
@@ -200,10 +202,6 @@ const singleSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
     config.depthSelect && metaHeld
       ? (prev.depthIndex + (down && !prev.down ? 1 : 0)) % hoveredShapes.length
       : 0;
-  if (!down) {
-    // take action on mouse down only, ie. bail otherwise
-    return { ...prev, down, uid, metaHeld };
-  }
   return hoveredShapes.length
     ? {
         shapes: [hoveredShapes[depthIndex]],
@@ -217,7 +215,6 @@ const singleSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
 };
 
 const multiSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
-  if (!down) return { ...prev, uid };
   return {
     shapes: hoveredShapes.length
       ? disjunctiveUnion(shape => shape.id, prev.shapes, hoveredShapes)
@@ -228,6 +225,7 @@ const multiSelect = (prev, hoveredShapes, metaHeld, down, uid) => {
 
 const selectedShapes = selectReduce(
   (prev, hoveredShapes, { down, uid }, metaHeld, directSelect, allShapes) => {
+    const mouseButtonUp = !down;
     if (
       directSelect &&
       directSelect.shapes &&
@@ -236,7 +234,8 @@ const selectedShapes = selectReduce(
       const { shapes, uid } = directSelect;
       return { ...prev, shapes: shapes.map(id => allShapes.find(shape => shape.id === id)), uid };
     }
-    if (uid === prev.uid) return prev;
+    if (uid === prev.uid && !directSelect) return prev;
+    if (mouseButtonUp) return { ...prev, down, uid, metaHeld }; // take action on mouse down only, ie. bail otherwise
     const selectFunction = config.singleSelect ? singleSelect : multiSelect;
     const result = selectFunction(prev, hoveredShapes, metaHeld, down, uid);
     return result;
