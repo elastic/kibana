@@ -98,7 +98,7 @@ async function getBodyAsJson(res: Response) {
   }
 }
 
-function withDefaultOptions(options: KFetchOptions): KFetchOptions {
+export function withDefaultOptions(options?: KFetchOptions): KFetchOptions {
   return merge(
     {
       method: 'GET',

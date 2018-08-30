@@ -28,7 +28,13 @@ jest.mock('../metadata', () => ({
 }));
 
 import fetchMock from 'fetch-mock';
-import { addInterceptor, Interceptor, kfetch, resetInterceptors } from './kfetch';
+import {
+  addInterceptor,
+  Interceptor,
+  kfetch,
+  resetInterceptors,
+  withDefaultOptions,
+} from './kfetch';
 import { KFetchError } from './kfetch_error';
 
 describe('kfetch', () => {
@@ -443,3 +449,25 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
 
   return interceptorCalls;
 }
+
+describe('withDefaultOptions', () => {
+  it('should remove undefined query params', () => {
+    const { query } = withDefaultOptions({
+      query: {
+        foo: 'bar',
+        param1: (undefined as any) as string,
+        param2: (null as any) as string,
+        param3: '',
+      },
+    });
+    expect(query).toEqual({ foo: 'bar', param2: null, param3: '' });
+  });
+
+  it('should add default options', () => {
+    expect(withDefaultOptions({})).toEqual({
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'kbn-version': 'my-version' },
+      method: 'GET',
+    });
+  });
+});
