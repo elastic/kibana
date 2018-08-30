@@ -5,15 +5,15 @@
  */
 import path from 'path';
 import { KbnServer, Size } from '../../../../../types';
-import { CaptureConfig } from './index.d';
 import { Layout } from './layout';
+import { CaptureConfig } from './types';
 
 type EvalArgs = any[];
 
 interface EvaluateOptions {
   // 'fn' is a function in string form to avoid tslint from auto formatting it into a version not
   // underfood by transform_fn safeWrap.
-  fn: ((...evalArgs: EvalArgs) => any) | string;
+  fn: ((...evalArgs: EvalArgs) => any);
   args: EvalArgs; // Arguments to be passed into the function defined by fn.
 }
 

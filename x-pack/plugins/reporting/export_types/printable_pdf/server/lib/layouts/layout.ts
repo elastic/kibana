@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Size } from '../../../../../types';
-import { ViewZoomWidthHeight } from './index.d';
+import { ViewZoomWidthHeight } from './types';
 
 export interface PageSizeParams {
   pageMarginTop: number;
