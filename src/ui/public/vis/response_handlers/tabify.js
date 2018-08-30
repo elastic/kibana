@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { AggResponseIndexProvider } from '../../agg_response';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
+import { getTime } from 'ui/timefilter/get_time';
 
 const TabifyResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
@@ -28,11 +29,13 @@ const TabifyResponseHandlerProvider = function (Private) {
     name: 'tabify',
     handler: function (vis, response) {
       return new Promise((resolve) => {
+        const time = getTime(vis.indexPattern, vis.filters.timeRange);
 
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
           canSplit: true,
           asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
-          isHierarchical: vis.isHierarchical()
+          isHierarchical: vis.isHierarchical(),
+          timeRange: time ? time.range : undefined
         });
 
         resolve(tableGroup);
