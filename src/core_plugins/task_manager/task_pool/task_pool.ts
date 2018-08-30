@@ -18,62 +18,54 @@
  */
 
 import { Logger } from './logger';
-import { ElasticJs, TaskDefinition, TaskDictionary } from './task';
+import { ConcreteTaskInstance, ElasticJs, SanitizedTaskDefinition, TaskDictionary } from './task';
+import { TaskRunner } from './task_runner';
 import { TaskStore } from './task_store';
-import { TypePool } from './type_pool';
 
 interface Opts {
   callCluster: ElasticJs;
   logger: Logger;
-  maxConcurrency: number;
+  numWorkers: number;
   pollInterval: number;
-  definitions: TaskDictionary;
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
   store: TaskStore;
-}
-
-interface PoolDictionary {
-  [type: string]: TypePool;
 }
 
 export class TaskPool {
   private callCluster: ElasticJs;
-  private pools: PoolDictionary;
-  private maxConcurrency: number;
+  private running = new Set<TaskRunner>();
+  private cancelling = new Set<TaskRunner>();
+  private numWorkers: number;
   private logger: Logger;
   private pollInterval: number;
   private store: TaskStore;
   private isChecking = false;
   private isPolling = false;
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private availableTypes: string[];
 
   constructor(opts: Opts) {
     this.callCluster = opts.callCluster;
-    this.maxConcurrency = opts.maxConcurrency;
+    this.numWorkers = opts.numWorkers;
     this.logger = opts.logger;
     this.pollInterval = opts.pollInterval;
     this.store = opts.store;
-    this.pools = Object.values(opts.definitions).reduce(
-      (acc: PoolDictionary, definition: TaskDefinition) => {
-        acc[definition.type] = new TypePool({
-          definition,
-          logger: opts.logger,
-          store: this.store,
-        });
-        return acc;
-      },
-      {}
-    );
-  }
-
-  get availableTypes() {
-    return Object.keys(this.pools).filter(type => !this.pools[type].isFull);
+    this.definitions = opts.definitions;
+    this.availableTypes = Object.values(opts.definitions).map(d => d.type);
   }
 
   get occupiedSlots() {
-    return Object.values(this.pools).reduce((x, pool) => x + pool.occupiedSlots, 0);
+    let total = 0;
+
+    this.running.forEach(t => {
+      total += this.definitions[t.type].workersOccupied;
+    });
+
+    return total;
   }
 
   get availableSlots() {
-    return this.maxConcurrency - this.occupiedSlots;
+    return this.numWorkers - this.occupiedSlots;
   }
 
   public start() {
@@ -103,27 +95,62 @@ export class TaskPool {
 
     this.isChecking = true;
 
-    while (this.availableSlots > 0) {
-      const instances = await this.store.availableTasks({
-        types: this.availableTypes,
-        size: this.availableSlots,
-      });
+    try {
+      while (true) {
+        const instances = await this.store.availableTasks({
+          types: this.availableTypes,
+          size: this.availableSlots,
+        });
 
-      // There's no more work for us in the index
-      if (!instances.length) {
-        break;
-      }
+        // There's no more work for us in the index
+        if (!instances.length) {
+          return;
+        }
 
-      // Try to claim tasks
-      for (const instance of instances) {
-        await this.pools[instance.type].run(this.callCluster, instance, this.checkForWork);
+        // Try to claim tasks
+        for (const instance of instances) {
+          if (this.availableSlots < this.definitions[instance.type].workersOccupied) {
+            return;
+          }
+
+          await this.run(instance);
+        }
       }
+    } finally {
+      this.isChecking = false;
     }
-
-    this.isChecking = false;
   };
 
+  private async run(instance: ConcreteTaskInstance) {
+    const task = new TaskRunner({
+      instance,
+      callCluster: this.callCluster,
+      definition: this.definitions[instance.type],
+      logger: this.logger,
+      store: this.store,
+    });
+
+    if (await task.claimOwnership()) {
+      this.running.add(task);
+
+      task.run().then(() => {
+        this.running.delete(task);
+        this.checkForWork();
+      });
+    }
+  }
+
   private checkForExpiredTasks() {
-    Object.values(this.pools).forEach(p => p.checkForExpiredTasks());
+    for (const task of this.running) {
+      if (task.isTimedOut) {
+        this.cancelling.add(task);
+        this.running.delete(task);
+
+        task
+          .cancel()
+          .catch(error => this.logger.warning(`Failed to cancel task ${task}. ${error.stack}`))
+          .then(() => this.cancelling.delete(task));
+      }
+    }
   }
 }

@@ -114,10 +114,11 @@ export interface TaskDefinition {
   timeOut?: string;
 
   /**
-   * The maximum number of tasks of this type that any single task manager
-   * will allow to run concurrently.
+   * The numer of workers / slots a running instance of this task occupies.
+   * This defaults to 1. 'max' is a special value that indicates this task
+   * occupies 100% of the slots.
    */
-  maxConcurrency: number;
+  workersOccupied?: number | 'max';
 
   /**
    * A function which, does the work this task is built to do. Note,
@@ -129,20 +130,27 @@ export interface TaskDefinition {
   run: RunFunction;
 }
 
+/**
+ * A task definition with all of its properties set to a valid value.
+ */
+export interface SanitizedTaskDefinition extends TaskDefinition {
+  workersOccupied: number;
+}
+
 export const validateTaskDefinition = Joi.object({
   type: Joi.string().required(),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeOut: Joi.string().default('5m'),
-  maxConcurrency: Joi.number().default(0), // Unlimited, as <= 0 is invalid
+  workersOccupied: [Joi.string().regex(/^max$/), Joi.number().default(1)],
   run: Joi.func().required(),
 }).default();
 
 /**
  * A dictionary mapping task types to their definitions.
  */
-export interface TaskDictionary {
-  [taskType: string]: TaskDefinition;
+export interface TaskDictionary<T extends TaskDefinition> {
+  [taskType: string]: T;
 }
 
 export type TaskStatus = 'idle' | 'running';

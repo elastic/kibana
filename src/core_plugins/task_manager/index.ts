@@ -27,15 +27,16 @@ import {
   TaskStore,
   validateTaskDefinition,
 } from './task_pool';
+import { SanitizedTaskDefinition } from './task_pool/task';
 
 // tslint:disable-next-line:no-default-export
 export default function taskManager(kibana: any) {
   return new kibana.Plugin({
     id: 'taskManager',
 
-    configPrefix: 'xpack.task_manager',
+    configPrefix: 'task_manager',
 
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch'],
 
     config() {
       return Joi.object({
@@ -51,7 +52,7 @@ export default function taskManager(kibana: any) {
         index: Joi.string()
           .description('The name of the index used to store task information.')
           .default('.kibana_task_manager'),
-        max_concurrency: Joi.number()
+        num_workers: Joi.number()
           .description(
             'The maximum number of tasks that this Kibana instance will run simultaneously.'
           )
@@ -63,23 +64,23 @@ export default function taskManager(kibana: any) {
       const config = server.config();
       const logger = new Logger((...args) => server.log(...args));
       const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-      const maxConcurrency = config.get('xpack.task_manager.max_concurrency');
+      const numWorkers = config.get('task_manager.num_workers');
       const store = new TaskStore({
-        index: config.get('xpack.task_manager.index'),
+        index: config.get('task_manager.index'),
         callCluster,
-        maxAttempts: config.get('xpack.task_manager.max_attempts'),
+        maxAttempts: config.get('task_manager.max_attempts'),
       });
 
       logger.debug('Initializing the task manager index');
       await store.init();
 
-      const definitions = extractTaskDefinitions(logger, this.kbnServer.plugins, maxConcurrency);
+      const definitions = extractTaskDefinitions(logger, this.kbnServer.plugins, numWorkers);
 
       const pool = new TaskPool({
         logger,
         callCluster,
-        pollInterval: config.get('xpack.task_manager.poll_interval'),
-        maxConcurrency,
+        pollInterval: config.get('task_manager.poll_interval'),
+        numWorkers,
         store,
         definitions,
       });
@@ -99,8 +100,15 @@ export default function taskManager(kibana: any) {
 }
 
 // TODO, move this to a file and properly test it, validate the taskDefinition via Joi or something
-function extractTaskDefinitions(logger: Logger, plugins: any[], maxConcurrency: number) {
-  function mergeTaskDefinitions(definitions: TaskDictionary, { id, taskDefinitions }: any) {
+function extractTaskDefinitions(
+  logger: Logger,
+  plugins: any[],
+  numWorkers: number
+): TaskDictionary<SanitizedTaskDefinition> {
+  function mergeTaskDefinitions(
+    definitions: TaskDictionary<TaskDefinition>,
+    { id, taskDefinitions }: any
+  ) {
     if (!taskDefinitions) {
       return definitions;
     }
@@ -112,9 +120,12 @@ function extractTaskDefinitions(logger: Logger, plugins: any[], maxConcurrency: 
 
       logger.debug(`Registering task "${k}" from plugin "${id}".`);
       const definition = Joi.attempt(taskDefinitions[k], validateTaskDefinition) as TaskDefinition;
+      const workersOccupied =
+        definition.workersOccupied === 'max' ? numWorkers : definition.workersOccupied || 1;
+
       definitions[k] = {
         ...definition,
-        maxConcurrency: definition.maxConcurrency || maxConcurrency,
+        workersOccupied,
       };
     });
 
