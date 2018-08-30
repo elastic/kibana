@@ -44,12 +44,8 @@ export default async function (kbnServer, server, config) {
     listener: kbnServer.newPlatform.proxyListener,
     state: {
       strictHeader: false,
-
-      // Remain compat with Hapi v14
-      // TODO: see if we can remove this
-      isHttpOnly: false,
-      isSecure: false,
-      isSameSite: false
+      isHttpOnly: true,
+      isSameSite: false  // necessary to allow using Kibana inside an iframe
     },
     routes: {
       log: {

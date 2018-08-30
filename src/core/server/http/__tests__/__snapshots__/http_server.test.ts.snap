@@ -16,6 +16,8 @@ Object {
     },
   },
   "state": Object {
+    "isHttpOnly": true,
+    "isSameSite": false,
     "strictHeader": false,
   },
 }

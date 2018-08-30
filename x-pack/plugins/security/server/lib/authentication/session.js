@@ -112,6 +112,8 @@ export class Session {
       clearInvalid: true,
       validateFunc: Session._validateCookie,
       isSecure: config.get('xpack.security.secureCookies'),
+      isHttpOnly: true,
+      isSameSite: false,
       path: `${config.get('server.basePath')}/`
     });
 

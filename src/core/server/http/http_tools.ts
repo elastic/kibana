@@ -46,6 +46,8 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     },
     state: {
       strictHeader: false,
+      isHttpOnly: true,
+      isSameSite: false, // necessary to allow using Kibana inside an iframe
     },
   };
 

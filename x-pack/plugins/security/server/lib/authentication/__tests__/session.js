@@ -45,6 +45,8 @@ describe('Session', () => {
         clearInvalid: true,
         validateFunc: sinon.match.func,
         isSecure: 'secure-cookies',
+        isHttpOnly: true,
+        isSameSite: false,
         path: 'base/path/'
       });
     });
