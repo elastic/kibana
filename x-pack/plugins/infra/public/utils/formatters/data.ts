@@ -21,9 +21,9 @@ const getPowerFromValue = (val: number, base: number, labels: string[]) => {
  * https://en.wikipedia.org/wiki/Kilobyte
  */
 const LABELS = {
-  [InfraWaffleMapDataFormat.bytesDecimal]: ['', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+  [InfraWaffleMapDataFormat.bytesDecimal]: ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
   [InfraWaffleMapDataFormat.bytesBinaryIEC]: [
-    '',
+    'b',
     'Kib',
     'Mib',
     'Gib',
@@ -33,9 +33,9 @@ const LABELS = {
     'Zib',
     'Yib',
   ],
-  [InfraWaffleMapDataFormat.bytesBinaryJEDEC]: ['', 'KB', 'MB', 'GB'],
+  [InfraWaffleMapDataFormat.bytesBinaryJEDEC]: ['B', 'KB', 'MB', 'GB'],
   [InfraWaffleMapDataFormat.bitsDecimal]: [
-    '',
+    'bit',
     'kbit',
     'Mbit',
     'Gbit',
@@ -46,7 +46,7 @@ const LABELS = {
     'Ybit',
   ],
   [InfraWaffleMapDataFormat.bitsBinaryIEC]: [
-    '',
+    'bit',
     'Kibit',
     'Mibit',
     'Gibit',
@@ -56,7 +56,7 @@ const LABELS = {
     'Zibit',
     'Yibit',
   ],
-  [InfraWaffleMapDataFormat.bitsBinaryJEDEC]: ['', 'Kbit', 'Mbit', 'Gbit'],
+  [InfraWaffleMapDataFormat.bitsBinaryJEDEC]: ['bit', 'Kbit', 'Mbit', 'Gbit'],
 };
 
 const BASES = {
