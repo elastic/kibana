@@ -77,7 +77,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         >
           <FormattedMessage
             defaultMessage="Clear form"
-            id="inputControl.vis.clearFormButtonLabel"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -103,7 +103,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel changes"
-            id="inputControl.vis.cancelChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -129,7 +129,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         >
           <FormattedMessage
             defaultMessage="Apply changes"
-            id="inputControl.vis.applyChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -216,7 +216,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         >
           <FormattedMessage
             defaultMessage="Clear form"
-            id="inputControl.vis.clearFormButtonLabel"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -242,7 +242,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel changes"
-            id="inputControl.vis.cancelChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -268,7 +268,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         >
           <FormattedMessage
             defaultMessage="Apply changes"
-            id="inputControl.vis.applyChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -355,7 +355,7 @@ exports[`Renders list control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Clear form"
-            id="inputControl.vis.clearFormButtonLabel"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -381,7 +381,7 @@ exports[`Renders list control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel changes"
-            id="inputControl.vis.cancelChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -407,7 +407,7 @@ exports[`Renders list control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Apply changes"
-            id="inputControl.vis.applyChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -494,7 +494,7 @@ exports[`Renders range control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Clear form"
-            id="inputControl.vis.clearFormButtonLabel"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -520,7 +520,7 @@ exports[`Renders range control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel changes"
-            id="inputControl.vis.cancelChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -546,7 +546,7 @@ exports[`Renders range control 1`] = `
         >
           <FormattedMessage
             defaultMessage="Apply changes"
-            id="inputControl.vis.applyChangesButtonLabel"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>

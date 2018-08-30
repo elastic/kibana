@@ -142,7 +142,7 @@ exports[`renders ControlsTab 1`] = `
           >
             <FormattedMessage
               defaultMessage="Add"
-              id="inputControl.editor.addButtonLabel"
+              id="inputControl.editor.controlsTab.addButtonLabel"
               values={Object {}}
             />
           </EuiButton>
