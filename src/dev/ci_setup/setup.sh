@@ -30,7 +30,7 @@ fi
 ###
 ### download node
 ###
-UNAME=`uname`
+UNAME=$(uname)
 OS='linux'
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS='win'
