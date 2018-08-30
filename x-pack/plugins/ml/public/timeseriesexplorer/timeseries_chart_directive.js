@@ -102,6 +102,36 @@ module.directive('mlTimeseriesChart', function (
 
     let fieldFormat = undefined;
 
+    // Annotations Brush
+    const annotateBrush = d3.svg.brush()
+      .x(focusXScale)
+      .y(focusYScale)
+      .on('brush', brushmove)
+      .on('brushend', brushend);
+
+    function brushmove() {
+      //const extent = annotateBrush.extent();
+    }
+
+    function brushend() {
+      const extent = annotateBrush.extent();
+      console.warn(`x: ${extent[0][0].getTime()} - ${extent[1][0].getTime()} \ny: ${extent[0][1]} - ${extent[1][1]}`);
+      const data = scope.focusChartData.filter((d) => {
+        let match = false;
+        if (
+          (d.value >= extent[0][1] && d.value <= extent[1][1]) &&
+          (d.date.getTime() >= extent[0][0].getTime() && d.date.getTime() <= extent[1][0].getTime())
+        ) {
+          match = true;
+        }
+        return match;
+      }).map((d) => {
+        return d.value;
+      });
+      console.warn('anomalies', data);
+    }
+
+    // brush for focus brushing
     const brush = d3.svg.brush();
     let mask;
 
@@ -290,6 +320,12 @@ module.directive('mlTimeseriesChart', function (
         .attr('height', focusZoomPanelHeight)
         .attr('class', 'chart-border');
       createZoomInfoElements(zoomGroup, fcsWidth);
+
+      fcsGroup.append('g')
+        .attr('class', 'annotate-brush')
+        .call(annotateBrush)
+        .selectAll('rect')
+        .attr('height', focusChartHeight);
 
       // Add border round plot area.
       fcsGroup.append('rect')
