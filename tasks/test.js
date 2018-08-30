@@ -68,10 +68,10 @@ module.exports = function (grunt) {
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:tslint',
         !grunt.option('quick') && 'run:typeCheck',
+        !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
         'licenses',
         'test:quick',
-        'verifyTranslations',
       ])
     );
   });
