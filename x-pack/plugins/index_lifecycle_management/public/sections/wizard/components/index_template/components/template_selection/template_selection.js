@@ -114,7 +114,7 @@ export class TemplateSelection extends Component {
           />
         </ErrableFormRow>
         <ErrableFormRow
-          label="Write alias name"
+          label="Alias name"
           errorKey={STRUCTURE_ALIAS_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}

@@ -113,7 +113,7 @@ export class Configuration extends Component {
                 await setSelectedNodeAttrs(e.target.value);
                 validate();
               }}
-              options={[{ text: 'Default allocation (don\'t use attributes)', value: '' }, ...nodeOptions]}
+              options={nodeOptions}
             />
           </ErrableFormRow>
           <EuiCallOut

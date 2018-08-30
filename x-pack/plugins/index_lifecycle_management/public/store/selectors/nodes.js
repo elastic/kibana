@@ -20,7 +20,7 @@ export const getNodeOptions = createSelector(
     }));
 
     options.sort((a, b) => a.value.localeCompare(b.value));
-    return options;
+    return [{ text: 'Default allocation (don\'t use attributes)', value: '' }, ...options];
   }
 );
 
