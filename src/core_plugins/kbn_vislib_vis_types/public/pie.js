@@ -21,7 +21,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from './editors/pie.html';
-import image from './images/icon-donut.svg';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -29,7 +28,7 @@ export default function HistogramVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'pie',
     title: 'Pie',
-    image,
+    icon: 'visPie',
     description: 'Compare parts of a whole',
     category: CATEGORY.BASIC,
     visConfig: {

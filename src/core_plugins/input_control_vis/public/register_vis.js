@@ -25,7 +25,6 @@ import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-import image from './images/icon-input-control.svg';
 import { Status } from 'ui/vis/update_status';
 
 function InputControlVisProvider(Private) {
@@ -35,7 +34,7 @@ function InputControlVisProvider(Private) {
   return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
     title: 'Controls',
-    image,
+    icon: 'visControls',
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
     stage: 'lab',

@@ -37,6 +37,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   SortableProperties,
+  EuiIcon,
 } from '@elastic/eui';
 
 export class VisualizeListingTable extends Component {
@@ -148,8 +149,14 @@ export class VisualizeListingTable extends Component {
         src={item.type.image}
       /> :
       <span
+        aria-hidden="true"
         className={`kuiStatusText__icon kuiIcon ${item.icon}`}
-      />;
+      >
+        <EuiIcon
+          type={item.icon}
+          size="m"
+        />
+      </span>;
   }
 
   sortByTitle = () => this.sortOn('title');

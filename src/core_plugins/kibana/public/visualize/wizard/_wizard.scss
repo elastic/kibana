@@ -36,9 +36,14 @@
  * class.
  *
  * 1. Size icon correctly.
+ * 2. Font icons will display as pseudo elements, leaving the normal EuiIcon still there
+ *    but empty of any SVG causing extra space issues, just remove it in this case
  */
  .visWizard__visTypeIcon {
   color: $euiColorFullShade;
   font-size: 50px; /* 1 */
 
+  .euiIcon:empty {
+    display: none; /* 2 */
+  }
 }
