@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server.js';
+import { startTestServers } from '../../../../../test_utils/kbn_server.js';
 import manageUuid from '../manage_uuid';
 
 describe('core_plugins/kibana/server/lib', function () {
@@ -30,7 +30,7 @@ describe('core_plugins/kibana/server/lib', function () {
     let servers;
 
     before(async function () {
-      servers = await kbnTestServer.startTestServers({
+      servers = await startTestServers({
         adjustTimeout: (t) => {
           this.timeout(t);
         },
