@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { AggResponseIndexProvider } from '../../agg_response';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 import { getTime } from 'ui/timefilter/get_time';
@@ -32,10 +31,9 @@ const TabifyResponseHandlerProvider = function (Private) {
         const time = getTime(vis.indexPattern, vis.filters.timeRange);
 
         const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
-          canSplit: true,
-          asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
-          isHierarchical: vis.isHierarchical(),
-          timeRange: time ? time.range : undefined
+          metricsAtAllLevels: vis.isHierarchical(),
+          partialRows: vis.params.showPartialRows,
+          timeRange: time ? time.range : undefined,
         });
 
         resolve(tableGroup);
