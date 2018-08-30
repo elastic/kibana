@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
 import { ShareUrlContent } from './share_url_content';
@@ -28,6 +29,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getUnhashableStates: () => object[];
+  shareContextMenuExtensions?: any[];
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -37,8 +39,8 @@ export class ShareContextMenu extends Component<Props> {
   }
 
   private getPanels = () => {
-    const panels = [];
-    const menuItems = [];
+    const panels: EuiContextMenuPanelDescriptor[] = [];
+    const menuItems: EuiContextMenuPanelItemDescriptor[] = [];
 
     const permalinkPanel = {
       id: panels.length + 1,
@@ -79,7 +81,31 @@ export class ShareContextMenu extends Component<Props> {
       });
     }
 
-    // TODO add plugable panels here
+    if (this.props.shareContextMenuExtensions) {
+      this.props.shareContextMenuExtensions.forEach((provider: any) => {
+        provider
+          .getMenuItems(this.props.objectType)
+          .forEach(
+            ({
+              shareMenuItem,
+              panel,
+            }: {
+              shareMenuItem: EuiContextMenuPanelItemDescriptor;
+              panel: EuiContextMenuPanelDescriptor;
+            }) => {
+              const panelId = panels.length + 1;
+              panels.push({
+                ...panel,
+                id: panelId,
+              });
+              menuItems.push({
+                ...shareMenuItem,
+                panel: panelId,
+              });
+            }
+          );
+      });
+    }
 
     if (menuItems.length > 1) {
       const topLevelMenuPanel = {

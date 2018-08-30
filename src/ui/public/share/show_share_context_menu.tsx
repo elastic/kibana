@@ -44,6 +44,7 @@ interface ShowProps {
   getUnhashableStates: () => object[];
   objectId?: string;
   objectType: string;
+  shareContextMenuExtensions?: any[];
 }
 
 export function showShareContextMenu({
@@ -52,6 +53,7 @@ export function showShareContextMenu({
   getUnhashableStates,
   objectId,
   objectType,
+  shareContextMenuExtensions,
 }: ShowProps) {
   if (isOpen) {
     onClose();
@@ -76,6 +78,7 @@ export function showShareContextMenu({
         getUnhashableStates={getUnhashableStates}
         objectId={objectId}
         objectType={objectType}
+        shareContextMenuExtensions={shareContextMenuExtensions}
       />
     </EuiWrappingPopover>
   );

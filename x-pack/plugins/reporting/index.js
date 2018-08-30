@@ -37,6 +37,9 @@ export const reporting = (kibana) => {
         'plugins/reporting/controls/visualize',
         'plugins/reporting/controls/dashboard',
       ],
+      shareContextMenuExtensions: [
+        'plugins/reporting/share_context_menu/register_reporting',
+      ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],

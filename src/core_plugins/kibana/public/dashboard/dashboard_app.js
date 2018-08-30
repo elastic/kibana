@@ -52,6 +52,7 @@ import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_action
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -86,6 +87,7 @@ app.directive('dashboardApp', function ($injector) {
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
       const getUnhashableStates = Private(getUnhashableStatesProvider);
+      const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
@@ -409,6 +411,7 @@ app.directive('dashboardApp', function ($injector) {
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
+          shareContextMenuExtensions,
         });
       };
 
