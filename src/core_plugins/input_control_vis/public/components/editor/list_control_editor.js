@@ -109,7 +109,6 @@ class ListControlEditorUi extends Component {
         { value: '', text: '' },
         ...this.props.parentCandidates,
       ];
-
       options.push(
         <EuiFormRow
           id={`parentSelect-${this.props.controlIndex}`}

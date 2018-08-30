@@ -155,18 +155,18 @@ class ControlsTabUi extends Component {
                 <EuiSelect
                   options={[
                     { value: 'range', text: intl.formatMessage({
-                      id: 'inputControl.editor.select.rangeDropDownOption',
-                      defaultMessage: 'Range slider'
-                    }) },
+                      id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
+                      defaultMessage: 'Range slider' })
+                    },
                     { value: 'list', text: intl.formatMessage({
-                      id: 'inputControl.editor.select.listDropDownOption',
-                      defaultMessage: 'Options list'
-                    }) },
+                      id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
+                      defaultMessage: 'Options list' })
+                    },
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
                   aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.select.controlTypeAriaLabel',
+                    id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
                     defaultMessage: 'Select control type'
                   })}
                 />
@@ -182,11 +182,11 @@ class ControlsTabUi extends Component {
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
                   aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.select.addControlAriaLabel',
+                    id: 'inputControl.editor.controlsTab.select.addControlAriaLabel',
                     defaultMessage: 'Add control'
                   })}
                 >
-                  <FormattedMessage id="inputControl.editor.addButtonLabel" defaultMessage="Add"/>
+                  <FormattedMessage id="inputControl.editor.controlsTab.addButtonLabel" defaultMessage="Add"/>
                 </EuiButton>
               </EuiFormRow>
             </EuiFlexItem>

@@ -102,7 +102,7 @@ class ControlEditorUi extends Component {
       <EuiForm>
         <EuiFormRow
           id={labelId}
-          label={<FormattedMessage id="inputControl.editor.controlLabel" defaultMessage="Control Label"/>}
+          label={<FormattedMessage id="inputControl.editor.controlEditor.controlLabel" defaultMessage="Control Label"/>}
         >
           <EuiFieldText
             value={this.props.controlParams.label}
@@ -120,7 +120,7 @@ class ControlEditorUi extends Component {
       <div>
         <EuiButtonIcon
           aria-label={this.props.intl.formatMessage({
-            id: 'inputControl.editor.moveControlUpAriaLabel',
+            id: 'inputControl.editor.controlEditor.moveControlUpAriaLabel',
             defaultMessage: 'Move control up'
           })}
           color="primary"
@@ -130,7 +130,7 @@ class ControlEditorUi extends Component {
         />
         <EuiButtonIcon
           aria-label={this.props.intl.formatMessage({
-            id: 'inputControl.editor.moveControlDownAriaLabel',
+            id: 'inputControl.editor.controlEditor.moveControlDownAriaLabel',
             defaultMessage: 'Move control down'
           })}
           color="primary"
@@ -139,7 +139,10 @@ class ControlEditorUi extends Component {
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
-          aria-label={this.props.intl.formatMessage({ id: 'inputControl.editor.removeControlAriaLabel', defaultMessage: 'Remove control' })}
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.controlEditor.removeControlAriaLabel',
+            defaultMessage: 'Remove control'
+          })}
           color="danger"
           onClick={this.removeControl}
           iconType="cross"

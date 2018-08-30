@@ -142,13 +142,13 @@ class FieldSelectUi extends Component {
       <EuiFormRow
         id={selectId}
         label={intl.formatMessage({
-          id: 'inputControl.editor.fieldLabel',
+          id: 'inputControl.editor.fieldSelect.fieldLabel',
           defaultMessage: 'Field'
         })}
       >
         <EuiComboBox
           placeholder={intl.formatMessage({
-            id: 'inputControl.editor.selectFieldPlaceholder',
+            id: 'inputControl.editor.fieldSelect.selectFieldPlaceholder',
             defaultMessage: 'Select field...'
           })}
           singleSelection={true}

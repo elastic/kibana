@@ -33,7 +33,7 @@ index pattern. Choose a different field or index documents that contain values f
 export function noIndexPatternMsg(indexPatternId) {
   return i18n.translate('inputControl.control.noIndexPatternTootip', {
     defaultMessage: 'Could not locate index-pattern id: {indexPatternId}.',
-    values: { indexPatternId: indexPatternId }
+    values: { indexPatternId }
   });
 }
 

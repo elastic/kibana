@@ -132,13 +132,13 @@ class IndexPatternSelectUi extends Component {
       <EuiFormRow
         id={selectId}
         label={intl.formatMessage({
-          id: 'inputControl.editor.indexPatternLabel',
+          id: 'inputControl.editor.indexPatternSelect.patternLabel',
           defaultMessage: 'Index Pattern'
         })}
       >
         <EuiComboBox
           placeholder={intl.formatMessage({
-            id: 'inputControl.editor.indexPatternPlaceholder',
+            id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
             defaultMessage: 'Select index pattern...'
           })}
           singleSelection={true}
