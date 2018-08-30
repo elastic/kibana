@@ -44,6 +44,7 @@ import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -117,6 +118,7 @@ function VisEditor(
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
@@ -166,6 +168,7 @@ function VisEditor(
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
+        shareContextMenuExtensions,
       });
     }
   }, {
