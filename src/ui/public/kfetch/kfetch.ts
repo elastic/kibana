@@ -18,6 +18,7 @@
  */
 
 import 'isomorphic-fetch';
+import { merge } from 'lodash';
 // @ts-ignore not really worth typing
 import { metadata } from 'ui/metadata';
 import url from 'url';
@@ -98,14 +99,15 @@ async function getBodyAsJson(res: Response) {
 }
 
 function withDefaultOptions(options: KFetchOptions): KFetchOptions {
-  return {
-    method: 'GET',
-    credentials: 'same-origin',
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-version': metadata.version,
-      ...options.headers,
+  return merge(
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'kbn-version': metadata.version,
+      },
     },
-  };
+    options
+  );
 }
