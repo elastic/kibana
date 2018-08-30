@@ -20,21 +20,31 @@
 import {
   isCallExpression,
   isIdentifier,
-  isObjectProperty,
   isMemberExpression,
   isNode,
+  isObjectExpression,
+  isObjectProperty,
+  isStringLiteral,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import chalk from 'chalk';
+
+import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 const LINE_BREAK_REGEX = /\n/g;
+const VALUES_REFERENCES_REGEX = /(?<=\{)\S+(?=\})/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
+
+export function difference(left = [], right = []) {
+  return left.filter(value => !right.includes(value));
+}
 
 export function isPropertyWithKey(property, identifierName) {
   return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
@@ -84,4 +94,78 @@ export function* traverseNodes(nodes) {
       yield* traverseNodes(Object.values(node).filter(value => value && typeof value === 'object'));
     }
   }
+}
+
+/**
+ * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string} defaultMessage "defaultMessage" value
+ * @throws if "values" and "defaultMessage" don't correspond to each other
+ */
+export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
+  const valuesReferences = defaultMessage.match(VALUES_REFERENCES_REGEX);
+  if (!valuesReferences) {
+    return;
+  }
+
+  const unusedKeys = difference(valuesReferences, valuesKeys);
+  const missingKeys = difference(valuesKeys, valuesReferences);
+
+  if (unusedKeys.length) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+"values" object contains unused properties (${messageId}):
+[${unusedKeys}].`
+    );
+  }
+
+  if (missingKeys.length) {
+    throw createFailError(
+      `${chalk.white.bgRed(
+        ' I18N ERROR '
+      )} some properties are missing in "values" object (${messageId}):
+[${missingKeys}].`
+    );
+  }
+}
+
+export function extractMessageIdFromNode(node) {
+  if (!isStringLiteral(node)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} Message id should be a string literal.`
+    );
+  }
+
+  return node.value;
+}
+
+export function extractMessageValueFromNode(node, id) {
+  if (!isStringLiteral(node)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+defaultMessage value should be a string literal ("${id}").`
+    );
+  }
+
+  return node.value;
+}
+
+export function extractContextValueFromNode(node, id) {
+  if (!isStringLiteral(node)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal ("${id}").`
+    );
+  }
+
+  return node.value;
+}
+
+export function extractValuesKeysFromNode(node, id) {
+  if (!isObjectExpression(node)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+"values" value should be an object expression ("${id}").`
+    );
+  }
+
+  return node.properties.map(valuesProperty => valuesProperty.key);
 }

@@ -20,10 +20,19 @@
 import chalk from 'chalk';
 import { jsdom } from 'jsdom';
 import { parse } from '@babel/parser';
-import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
+import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
 
-import { isPropertyWithKey, formatHTMLString, formatJSString, traverseNodes } from './utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
+import {
+  isPropertyWithKey,
+  formatHTMLString,
+  formatJSString,
+  traverseNodes,
+  checkValuesProperty,
+  extractMessageValueFromNode,
+  extractValuesKeysFromNode,
+  extractContextValueFromNode,
+} from './utils';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from './constants';
 import { createFailError } from '../run';
 
 /**
@@ -38,7 +47,7 @@ const I18N_FILTER_MARKER = '| i18n: ';
  * @param {string} expression JavaScript code containing a filter object
  * @returns {string} Default message
  */
-function parseFilterObjectExpression(expression) {
+function parseFilterObjectExpression(expression, messageId) {
   // parse an object expression instead of block statement
   const nodes = parse(`+${expression}`).program.body;
 
@@ -47,30 +56,25 @@ function parseFilterObjectExpression(expression) {
       continue;
     }
 
-    let message;
-    let context;
+    const [messageProperty, contextProperty, valuesProperty] = [
+      DEFAULT_MESSAGE_KEY,
+      CONTEXT_KEY,
+      VALUES_KEY,
+    ].map(key => node.properties.find(property => isPropertyWithKey(property, key)));
 
-    for (const property of node.properties) {
-      if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
-        if (!isStringLiteral(property.value)) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} defaultMessage value should be a string literal.`
-          );
-        }
+    const message = messageProperty
+      ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
+      : undefined;
 
-        message = formatJSString(property.value.value);
-      } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
-        if (!isStringLiteral(property.value)) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal.`
-          );
-        }
+    const context = contextProperty
+      ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+      : undefined;
 
-        context = formatJSString(property.value.value);
-      }
-    }
+    const valuesKeys = valuesProperty
+      ? extractValuesKeysFromNode(valuesProperty.value, messageId)
+      : undefined;
 
-    return { message, context };
+    return { message, context, valuesKeys };
   }
 
   return null;
@@ -116,13 +120,18 @@ Empty "id" value in angular filter expression is not allowed.`
       );
     }
 
-    const { message, context } = parseFilterObjectExpression(filterObjectExpression) || {};
+    const { message, context, valuesKeys } =
+      parseFilterObjectExpression(filterObjectExpression, messageId) || {};
 
     if (!message) {
       throw createFailError(
         `${chalk.white.bgRed(' I18N ERROR ')} \
 Empty defaultMessage in angular filter expression is not allowed ("${messageId}").`
       );
+    }
+
+    if (valuesKeys) {
+      checkValuesProperty(valuesKeys, message, messageId);
     }
 
     yield [messageId, { message, context }];
@@ -152,6 +161,12 @@ Empty defaultMessage in angular directive is not allowed ("${messageId}").`
     }
 
     const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
+
+    if (element.hasAttribute('i18n-values')) {
+      const valuesKeys = Object.keys(JSON.parse(element.getAttribute('i18n-values')));
+      checkValuesProperty(valuesKeys, message, messageId);
+    }
+
     yield [messageId, { message, context }];
   }
 }

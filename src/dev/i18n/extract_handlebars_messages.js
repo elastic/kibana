@@ -19,7 +19,7 @@
 
 import chalk from 'chalk';
 
-import { formatJSString } from './utils';
+import { formatJSString, checkValuesProperty } from './utils';
 import { createFailError } from '../run';
 
 const HBS_REGEX = /(?<=\{\{)([\s\S]*?)(?=\}\})/g;
@@ -66,14 +66,23 @@ Properties string in Handlebars i18n should be a string literal ("${messageId}")
     }
 
     const properties = JSON.parse(propertiesString.slice(1, -1));
-    const message = formatJSString(properties.defaultMessage);
 
-    if (typeof message !== 'string') {
+    if (typeof properties.defaultMessage !== 'string') {
       throw createFailError(
         `${chalk.white.bgRed(' I18N ERROR ')} \
 defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
       );
     }
+
+    if (properties.context != null && typeof properties.context !== 'string') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} \
+Context value in Handlebars i18n should be a string ("${messageId}").`
+      );
+    }
+
+    const message = formatJSString(properties.defaultMessage);
+    const context = formatJSString(properties.context);
 
     if (!message) {
       throw createFailError(
@@ -82,13 +91,17 @@ Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`
       );
     }
 
-    const context = formatJSString(properties.context);
+    const valuesObject = properties.values;
 
-    if (context != null && typeof context !== 'string') {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Context value in Handlebars i18n should be a string ("${messageId}").`
-      );
+    if (valuesObject) {
+      if (typeof valuesObject !== 'object') {
+        throw createFailError(
+          `${chalk.white.bgRed(' I18N ERROR ')} \
+"values" value should be an object in Handlebars i18n ("${messageId}").`
+        );
+      }
+
+      checkValuesProperty(Object.keys(valuesObject), message, messageId);
     }
 
     yield [messageId, { message, context }];

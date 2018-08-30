@@ -17,43 +17,21 @@
  * under the License.
 */
 
-import { isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
+import { isJSXIdentifier, isObjectExpression } from '@babel/types';
 import chalk from 'chalk';
 
-import { isPropertyWithKey, formatJSString, formatHTMLString } from './utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
+import {
+  isPropertyWithKey,
+  formatJSString,
+  formatHTMLString,
+  extractMessageIdFromNode,
+  extractMessageValueFromNode,
+  extractContextValueFromNode,
+  extractValuesKeysFromNode,
+  checkValuesProperty,
+} from './utils';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from './constants';
 import { createFailError } from '../run';
-
-function extractMessageId(value) {
-  if (!isStringLiteral(value)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} Message id should be a string literal.`
-    );
-  }
-
-  return value.value;
-}
-
-function extractMessageValue(value, id) {
-  if (!isStringLiteral(value)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-defaultMessage value should be a string literal ("${id}").`
-    );
-  }
-
-  return value.value;
-}
-
-function extractContextValue(value, id) {
-  if (!isStringLiteral(value)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal ("${id}").`
-    );
-  }
-
-  return value.value;
-}
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST
@@ -70,14 +48,15 @@ Object with defaultMessage property is not passed to intl.formatMessage().`
     );
   }
 
-  const [messageIdProperty, messageProperty, contextProperty] = [
+  const [messageIdProperty, messageProperty, contextProperty, valuesProperty] = [
     'id',
     DEFAULT_MESSAGE_KEY,
     CONTEXT_KEY,
+    VALUES_KEY,
   ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
 
   const messageId = messageIdProperty
-    ? formatJSString(extractMessageId(messageIdProperty.value))
+    ? formatJSString(extractMessageIdFromNode(messageIdProperty.value))
     : undefined;
 
   if (!messageId) {
@@ -88,7 +67,11 @@ Empty "id" value in intl.formatMessage() is not allowed.`
   }
 
   const message = messageProperty
-    ? formatJSString(extractMessageValue(messageProperty.value, messageId))
+    ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
+    : undefined;
+
+  const context = contextProperty
+    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
     : undefined;
 
   if (!message) {
@@ -98,9 +81,10 @@ Empty defaultMessage in intl.formatMessage() is not allowed ("${messageId}").`
     );
   }
 
-  const context = contextProperty
-    ? formatJSString(extractContextValue(contextProperty.value, messageId))
-    : undefined;
+  if (valuesProperty) {
+    const valuesKeys = extractValuesKeysFromNode(valuesProperty.value, messageId);
+    checkValuesProperty(valuesKeys, message, messageId);
+  }
 
   return [messageId, { message, context }];
 }
@@ -111,14 +95,15 @@ Empty defaultMessage in intl.formatMessage() is not allowed ("${messageId}").`
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  const [messageIdProperty, messageProperty, contextProperty] = [
+  const [messageIdProperty, messageProperty, contextProperty, valuesProperty] = [
     'id',
     DEFAULT_MESSAGE_KEY,
     CONTEXT_KEY,
+    VALUES_KEY,
   ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
 
   const messageId = messageIdProperty
-    ? formatHTMLString(extractMessageId(messageIdProperty.value))
+    ? formatHTMLString(extractMessageIdFromNode(messageIdProperty.value))
     : undefined;
 
   if (!messageId) {
@@ -128,7 +113,11 @@ export function extractFormattedMessages(node) {
   }
 
   const message = messageProperty
-    ? formatHTMLString(extractMessageValue(messageProperty.value, messageId))
+    ? formatHTMLString(extractMessageValueFromNode(messageProperty.value, messageId))
+    : undefined;
+
+  const context = contextProperty
+    ? formatHTMLString(extractContextValueFromNode(contextProperty.value, messageId))
     : undefined;
 
   if (!message) {
@@ -138,9 +127,10 @@ Empty default message in <FormattedMessage> is not allowed ("${messageId}").`
     );
   }
 
-  const context = contextProperty
-    ? formatHTMLString(extractContextValue(contextProperty.value, messageId))
-    : undefined;
+  if (valuesProperty) {
+    const valuesKeys = extractValuesKeysFromNode(valuesProperty.value, messageId);
+    checkValuesProperty(valuesKeys, message, messageId);
+  }
 
   return [messageId, { message, context }];
 }

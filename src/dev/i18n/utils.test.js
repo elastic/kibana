@@ -20,7 +20,13 @@
 import { parse } from '@babel/parser';
 import { isExpressionStatement, isObjectExpression } from '@babel/types';
 
-import { isI18nTranslateFunction, isPropertyWithKey, traverseNodes, formatJSString } from './utils';
+import {
+  isI18nTranslateFunction,
+  isPropertyWithKey,
+  traverseNodes,
+  formatJSString,
+  checkValuesProperty,
+} from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
   callee => `
@@ -80,5 +86,29 @@ line-breaks and \n\n
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
     expect(isPropertyWithKey(objectExpresssionProperty, 'not_id')).toBe(false);
+  });
+
+  test('should validate conformity of "values" and "defaultMessage"', () => {
+    const valuesKeys = ['url', 'username', 'password'];
+    const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
+    const messageId = 'namespace.message.id';
+
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
+  });
+
+  test('should throw if "values" has a value that is unused in the message', () => {
+    const valuesKeys = ['username', 'url', 'password'];
+    const defaultMessage = 'Test message with {username} and {password}.';
+    const messageId = 'namespace.message.id';
+
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should throw if some key is missing in "values"', () => {
+    const valuesKeys = ['url', 'username'];
+    const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
+    const messageId = 'namespace.message.id';
+
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).toThrowErrorMatchingSnapshot();
   });
 });
