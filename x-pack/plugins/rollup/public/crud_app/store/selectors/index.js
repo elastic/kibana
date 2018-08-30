@@ -16,9 +16,11 @@ export const getFilteredIds = (state) => state.jobs.filteredIds;
 export const getTableState = (state) => state.tableState;
 
 export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
+export const isDetailPanelOpen = (state) => state.detailPanel.isOpen;
 export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPanel.jobId);
+export const getDetailPanelJobId = (state) => state.detailPanel.jobId;
 
+export const isLoading = (state) => state.jobs.isLoading;
 export const isSaving = (state) => state.createJob.isSaving;
 export const getCreateJobError = (state) => state.createJob.error;
 

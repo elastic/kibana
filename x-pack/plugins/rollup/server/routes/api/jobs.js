@@ -40,12 +40,15 @@ export function registerJobsRoute(server) {
 
         const callWithRequest = callWithRequestFactory(server, request);
 
-        const results = await callWithRequest('rollup.createJob', {
+        // Create job.
+        await callWithRequest('rollup.createJob', {
           id,
           body: rest,
         });
 
-        reply(results);
+        // Then request the newly created job.
+        const results = await callWithRequest('rollup.job', { id });
+        reply(results.jobs[0]);
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
@@ -104,12 +107,14 @@ export function registerJobsRoute(server) {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
         const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
-         reply(results);
+
+        reply(results);
       } catch(err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
         }
-         reply(wrapUnknownError(err));
+
+        reply(wrapUnknownError(err));
       }
     },
   });

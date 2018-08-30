@@ -7,12 +7,13 @@
 export {
   loadJobs,
   loadJobsSuccess,
+  loadJobsFailure,
   clearJobs,
-  clearAndLoadJobs,
 } from './load_jobs';
 
 export {
   createJob,
+  createJobSuccess,
 } from './create_job';
 
 export {
@@ -43,7 +44,3 @@ export {
   openDetailPanel,
   closeDetailPanel,
 } from './detail_panel';
-
-export {
-  showDeepLinkedJob,
-} from './show_deep_linked_job';

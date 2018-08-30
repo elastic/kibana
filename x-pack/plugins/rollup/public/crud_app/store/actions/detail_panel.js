@@ -5,28 +5,12 @@
  */
 
 import { extractQueryParams, getRouter } from '../../services';
-import { rollupJobsStore } from '..';
-import { isDetailPanelOpen } from '../selectors';
 
 export const closeDetailPanel = () => async (dispatch) => {
-  // Prevent infinite loop, which would be caused by changing the state -> triggering a re-render
-  // of the jobs list -> showing deep-linked job -> closing the detail panel.
-  if (!isDetailPanelOpen(rollupJobsStore.getState()))  {
-    return;
-  }
-
-  const { history } = getRouter();
-
-  // Remove deep link from URL.
-  history.replace({
-    search: '',
-  });
-
   dispatch({
     type: 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL',
   });
 };
-
 
 export const openDetailPanel = ({ panelType, jobId }) => async (dispatch) => {
   const { history } = getRouter();

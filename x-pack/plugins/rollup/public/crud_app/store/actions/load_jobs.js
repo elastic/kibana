@@ -11,6 +11,7 @@ import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services
 export const clearJobs = createAction('CLEAR_JOBS');
 
 export const loadJobsSuccess = createAction('LOAD_JOBS_SUCCESS');
+export const loadJobsFailure = createAction('LOAD_JOBS_FAILURE');
 
 export const loadJobs = () => async (dispatch) => {
   let jobs;
@@ -21,9 +22,4 @@ export const loadJobs = () => async (dispatch) => {
   }
 
   dispatch(loadJobsSuccess({ jobs: deserializeJobs(jobs) }));
-};
-
-export const clearAndLoadJobs = () => async (dispatch) => {
-  dispatch(clearJobs());
-  dispatch(loadJobs());
 };

@@ -16,11 +16,11 @@ export function createJob(state = initialState, action) {
     case 'CREATE_JOB_START':
       return { isSaving: true, error: undefined };
 
-    case 'CREATE_JOB_COMPLETE':
+    case 'CREATE_JOB_SUCCESS':
       return { ...state, isSaving: false };
 
     case 'CREATE_JOB_FAILURE':
-      return { ...state, error: payload.error };
+      return { ...state, error: payload.error, isSaving: false };
 
     default:
       return state;

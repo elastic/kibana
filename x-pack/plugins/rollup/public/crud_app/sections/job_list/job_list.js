@@ -20,7 +20,7 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
 
-import { getRouterLinkProps } from '../../services';
+import { getRouter, getRouterLinkProps, extractQueryParams } from '../../services';
 
 import {
   JobTable,
@@ -35,15 +35,18 @@ const REFRESH_RATE_MS = 30000;
 export class JobListUi extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
-    hasJobs: PropTypes.bool,
-    showDeepLinkedJob: PropTypes.func,
+    openDetailPanel: PropTypes.func,
   }
 
   static getDerivedStateFromProps(props) {
-    const { hasJobs, showDeepLinkedJob } = props;
+    const { openDetailPanel } = props;
 
-    if (hasJobs) {
-      showDeepLinkedJob();
+    const search = getRouter().history.location.search;
+    const { job: jobId } = extractQueryParams(search);
+
+    // Show deeplinked job whenever jobs get loaded or the URL changes.
+    if (jobId != null) {
+      openDetailPanel(jobId);
     }
 
     return null;
@@ -54,7 +57,7 @@ export class JobListUi extends Component {
 
     this.state = {};
 
-    props.clearAndLoadJobs();
+    props.loadJobs();
   }
 
   componentDidMount() {

@@ -5,6 +5,7 @@
  */
 
 const initialState = {
+  isOpen: false,
   panelType: undefined,
   jobId: undefined,
 };
@@ -20,12 +21,17 @@ export function detailPanel(state = initialState, action) {
       } = payload;
 
       return {
-        panelType: panelType || state.panelType || 'Summary',
+        panelType,
         jobId,
+        isOpen: true,
       };
 
     case 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL':
-      return {};
+      return {
+        panelType: undefined,
+        jobId: undefined,
+        isOpen: false,
+      };
 
     default:
       return state;

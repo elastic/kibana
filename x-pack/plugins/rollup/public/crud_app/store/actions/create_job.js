@@ -10,17 +10,24 @@ import { toastNotifications } from 'ui/notify';
 import { EuiCode } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../../common';
-import { createJob as sendCreateJobRequest, serializeJob, getRouter } from '../../services';
+import {
+  createJob as sendCreateJobRequest,
+  serializeJob,
+  deserializeJob,
+  getRouter,
+} from '../../services';
 
 export const createJobStart = createAction('CREATE_JOB_START');
-export const createJobComplete = createAction('CREATE_JOB_COMPLETE');
+export const createJobSuccess = createAction('CREATE_JOB_SUCCESS');
 export const createJobFailure = createAction('CREATE_JOB_FAILURE');
 
 export const createJob = (jobConfig) => async (dispatch) => {
   dispatch(createJobStart());
 
+  let newJob;
+
   try {
-    await Promise.all([
+    [ newJob ] = await Promise.all([
       sendCreateJobRequest(serializeJob(jobConfig)),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
       new Promise(resolve => setTimeout(resolve, 500)),
@@ -40,16 +47,15 @@ export const createJob = (jobConfig) => async (dispatch) => {
         });
     }
 
-    dispatch(createJobComplete());
     return;
   }
+
+  toastNotifications.addSuccess(`Rollup job '${jobConfig.id}' was created`);
+  dispatch(createJobSuccess({ job: deserializeJob(newJob.data) }));
 
   // This will open the new job in the detail panel.
   getRouter().history.push({
     pathname: CRUD_APP_BASE_PATH,
     search: `?job=${jobConfig.id}`,
   });
-
-  toastNotifications.addSuccess(`Rollup job '${jobConfig.id}' was created`);
-  dispatch(createJobComplete());
 };
