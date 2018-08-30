@@ -195,6 +195,9 @@ function populateCommonSettings(jobSettings, scope) {
   if (Array.isArray(jobSettings.influencers)) {
     scope.formConfig.influencerFields = jobSettings.influencers.map((i) => scope.ui.fields.find(f => f.id === i));
   }
+
+  scope.formConfig.useDedicatedIndex = (jobSettings.resultsIndexName !== 'shared');
+  scope.ui.showAdvanced = scope.formConfig.useDedicatedIndex;
 }
 
 function runEstimateBucketSpan(scope) {

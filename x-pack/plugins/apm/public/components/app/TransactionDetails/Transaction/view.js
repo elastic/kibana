@@ -15,7 +15,7 @@ import {
   borderRadius
 } from '../../../../style/variables';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import { isEmpty, capitalize, get } from 'lodash';
+import { isEmpty, capitalize, get, sortBy, last } from 'lodash';
 
 import { ContextProperties } from '../../../shared/ContextProperties';
 import {
@@ -27,7 +27,10 @@ import DiscoverButton from '../../../shared/DiscoverButton';
 import {
   TRANSACTION_ID,
   PROCESSOR_EVENT,
-  SERVICE_AGENT_NAME
+  SERVICE_AGENT_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_RESULT,
+  USER_ID
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 import { asTime } from '../../../../utils/formatters';
@@ -62,6 +65,48 @@ const PropertiesTableContainer = styled.div`
 
 const DEFAULT_TAB = 'timeline';
 
+export function getAgentMarks(transaction) {
+  const duration = get(transaction, TRANSACTION_DURATION);
+  const threshold = (duration / 100) * 2;
+
+  return sortBy(
+    Object.entries(get(transaction, 'transaction.marks.agent', [])),
+    '1'
+  )
+    .map(([name, ms]) => ({
+      name,
+      timeLabel: ms * 1000,
+      timeAxis: ms * 1000
+    }))
+    .reduce((acc, curItem) => {
+      const prevTime = get(last(acc), 'timeAxis');
+      const nextValidTime = prevTime + threshold;
+      const isTooClose = prevTime != null && nextValidTime > curItem.timeAxis;
+      const canFit = nextValidTime <= duration;
+
+      if (isTooClose && canFit) {
+        acc.push({ ...curItem, timeAxis: nextValidTime });
+      } else {
+        acc.push(curItem);
+      }
+      return acc;
+    }, [])
+    .reduceRight((acc, curItem) => {
+      const prevTime = get(last(acc), 'timeAxis');
+      const nextValidTime = prevTime - threshold;
+      const isTooClose = prevTime != null && nextValidTime < curItem.timeAxis;
+      const canFit = nextValidTime >= 0;
+
+      if (isTooClose && canFit) {
+        acc.push({ ...curItem, timeAxis: nextValidTime });
+      } else {
+        acc.push(curItem);
+      }
+      return acc;
+    }, [])
+    .reverse();
+}
+
 // Ensure the selected tab exists or use the default
 function getCurrentTab(tabs = [], detailTab) {
   return tabs.includes(detailTab) ? detailTab : DEFAULT_TAB;
@@ -78,30 +123,30 @@ function Transaction({ transaction, location, urlParams }) {
   if (isEmpty(transaction)) {
     return (
       <EmptyMessage
-        heading="No transaction sample available for this time range."
-        subheading="Please select another time range or another bucket from the distribution histogram."
+        heading="No transaction sample available."
+        subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
       />
     );
   }
 
   const timestamp = get(transaction, '@timestamp');
   const url = get(transaction, 'context.request.url.full', 'N/A');
-  const duration = get(transaction, 'transaction.duration.us');
+  const duration = get(transaction, TRANSACTION_DURATION);
   const stickyProperties = [
     {
       label: 'Duration',
-      fieldName: 'transaction.duration.us',
+      fieldName: TRANSACTION_DURATION,
       val: duration ? asTime(duration) : 'N/A'
     },
     {
       label: 'Result',
-      fieldName: 'transaction.result',
-      val: get(transaction, 'transaction.result', 'N/A')
+      fieldName: TRANSACTION_RESULT,
+      val: get(transaction, TRANSACTION_RESULT, 'N/A')
     },
     {
       label: 'User ID',
-      fieldName: 'context.user.id',
-      val: get(transaction, 'context.user.id', 'N/A')
+      fieldName: USER_ID,
+      val: get(transaction, USER_ID, 'N/A')
     }
   ];
 
@@ -168,6 +213,7 @@ function Transaction({ transaction, location, urlParams }) {
         {currentTab === DEFAULT_TAB ? (
           <Spans
             agentName={agentName}
+            agentMarks={getAgentMarks(transaction)}
             droppedSpans={get(
               transaction,
               'transaction.spanCount.dropped.total',

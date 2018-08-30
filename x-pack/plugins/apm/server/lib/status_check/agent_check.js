@@ -10,7 +10,10 @@ export async function getAgentStatus({ setup }) {
   const { client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: [
+      config.get('apm_oss.errorIndices'),
+      config.get('apm_oss.transactionIndices')
+    ],
     body: {
       size: 0,
       query: {

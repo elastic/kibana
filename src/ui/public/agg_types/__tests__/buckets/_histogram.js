@@ -18,10 +18,13 @@
  */
 
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
+import chrome from '../../../chrome';
 import AggParamWriterProvider from '../agg_param_writer';
 
+const config = chrome.getUiSettingsClient();
 const histogram = aggTypes.byName.histogram;
 describe('Histogram Agg', function () {
 
@@ -45,6 +48,13 @@ describe('Histogram Agg', function () {
       const AggParamWriter = Private(AggParamWriterProvider);
       paramWriter = new AggParamWriter({ aggType: 'histogram' });
     }));
+
+    describe('intervalBase', () => {
+      it('should not be written to the DSL', () => {
+        const output = paramWriter.write({ intervalBase: 100 });
+        expect(output.params).not.to.have.property('intervalBase');
+      });
+    });
 
     describe('interval', function () {
       // reads aggConfig.params.interval, writes to dsl.interval
@@ -73,6 +83,57 @@ describe('Histogram Agg', function () {
         // template validation prevents this from users, not devs
         const output = paramWriter.write({ interval: [] });
         expect(isNaN(output.params.interval)).to.be.ok();
+      });
+
+      describe('interval scaling', () => {
+
+        beforeEach(() => {
+          sinon.stub(config, 'get');
+        });
+
+        it('will respect the histogram:maxBars setting', () => {
+          config.get.withArgs('histogram:maxBars').returns(5);
+          const output = paramWriter.write({ interval: 5 },
+            aggConfig => aggConfig.setAutoBounds({ min: 0, max: 10000 }));
+          expect(output.params).to.have.property('interval', 2000);
+        });
+
+        it('will return specified interval, if bars are below histogram:maxBars config', () => {
+          config.get.withArgs('histogram:maxBars').returns(10000);
+          const output = paramWriter.write({ interval: 5 },
+            aggConfig => aggConfig.setAutoBounds({ min: 0, max: 10000 }));
+          expect(output.params).to.have.property('interval', 5);
+        });
+
+        it('will set to intervalBase if interval is below base', () => {
+          const output = paramWriter.write({ interval: 3, intervalBase: 8 });
+          expect(output.params).to.have.property('interval', 8);
+        });
+
+        it('will round to nearest intervalBase multiple if interval is above base', () => {
+          const roundUp = paramWriter.write({ interval: 46, intervalBase: 10 });
+          expect(roundUp.params).to.have.property('interval', 50);
+          const roundDown = paramWriter.write({ interval: 43, intervalBase: 10 });
+          expect(roundDown.params).to.have.property('interval', 40);
+        });
+
+        it('will not change interval if it is a multiple of base', () => {
+          const output = paramWriter.write({ interval: 35, intervalBase: 5 });
+          expect(output.params).to.have.property('interval', 35);
+        });
+
+        it('will round to intervalBase after scaling histogram:maxBars', () => {
+          config.get.withArgs('histogram:maxBars').returns(100);
+          const output = paramWriter.write({ interval: 5, intervalBase: 6 },
+            aggConfig => aggConfig.setAutoBounds({ min: 0, max: 1000 }));
+          // 100 buckets in 0 to 1000 would result in an interval of 10, so we should
+          // round to the next multiple of 6 -> 12
+          expect(output.params).to.have.property('interval', 12);
+        });
+
+        afterEach(() => {
+          config.get.restore();
+        });
       });
     });
 

@@ -29,7 +29,11 @@ exports[`LoadingIndices should render normally 1`] = `
         color="subdued"
         component="span"
       >
-        Looking for matching indices...
+        <FormattedMessage
+          defaultMessage="Looking for matching indices..."
+          id="kbn.management.createIndexPattern.step.loadingHeader"
+          values={Object {}}
+        />
       </EuiTextColor>
     </EuiText>
     <EuiText
@@ -45,7 +49,11 @@ exports[`LoadingIndices should render normally 1`] = `
         color="subdued"
         component="span"
       >
-        Just a sec...
+        <FormattedMessage
+          defaultMessage="Just a sec..."
+          id="kbn.management.createIndexPattern.step.loadingLabel"
+          values={Object {}}
+        />
       </EuiTextColor>
     </EuiText>
   </EuiFlexItem>

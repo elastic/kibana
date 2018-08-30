@@ -3,7 +3,7 @@
 exports[`CollapsibleStatement component renders child components 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"

@@ -18,7 +18,6 @@
  */
 
 import 'ngreact';
-import './no_results.less';
 import { uiModules } from 'ui/modules';
 
 import {

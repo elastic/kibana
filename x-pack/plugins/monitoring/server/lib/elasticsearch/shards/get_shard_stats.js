@@ -38,7 +38,6 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
-  const nodeResolver = config.get('xpack.monitoring.node_resolver');
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: esIndexPattern,
@@ -53,7 +52,7 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
         filters: [ { term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } } ]
       }),
       aggs: {
-        ...getShardAggs(config, includeNodes, nodeResolver)
+        ...getShardAggs(config, includeNodes)
       }
     }
   };

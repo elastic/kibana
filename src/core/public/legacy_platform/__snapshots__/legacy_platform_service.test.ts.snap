@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement 1`] = `
+<div
+  class="ng-scope"
+/>
+`;
+
+exports[`#stop() does nothing if angular was not bootstrapped to targetDomElement 1`] = `
+<div>
+  
+      
+  <h1>
+    this should not be removed
+  </h1>
+  
+    
+</div>
+`;

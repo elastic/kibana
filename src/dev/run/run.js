@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { isFailError } from './fail';
 import { getFlags, getHelp } from './flags';
 
@@ -29,8 +29,10 @@ export async function run(body) {
     process.exit(1);
   }
 
-  const log = createToolingLog(pickLevelFromFlags(flags));
-  log.pipe(process.stdout);
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(flags),
+    writeTo: process.stdout
+  });
 
   try {
     await body({ log, flags });

@@ -33,7 +33,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -50,6 +50,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
+        emsHotLink: '',
         selectedJoinField: selectedJoinField,
         isDisplayWarning: true,
         wms: config.get('visualization:tileMap:WMSdefaults'),
@@ -78,8 +79,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           text: 'top right',
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
-        vectorLayers: vectorLayers,
-        baseLayers: []
+        vectorLayers: vectorLayers
       },
       schemas: new Schemas([
         {

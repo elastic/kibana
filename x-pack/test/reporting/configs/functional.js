@@ -12,7 +12,6 @@ export async function getFunctionalConfig({ readConfigFile }) {
     services: xPackFunctionalTestsConfig.get('services'),
     pageObjects: xPackFunctionalTestsConfig.get('pageObjects'),
     servers: xPackFunctionalTestsConfig.get('servers'),
-    env: xPackFunctionalTestsConfig.get('env'),
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
     apps: xPackFunctionalTestsConfig.get('apps'),
     esArchiver: {

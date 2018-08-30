@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
+import { checkPermission } from '../../../privilege/check_privilege';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 
@@ -44,10 +45,12 @@ UsedByIcon.propTypes = {
 };
 
 function NewFilterButton() {
+  const canCreateFilter = checkPermission('canCreateFilter');
   return (
     <EuiButton
       key="new_filter_list"
       href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
+      isDisabled={(canCreateFilter === false)}
     >
       New
     </EuiButton>

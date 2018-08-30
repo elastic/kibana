@@ -19,8 +19,9 @@
 
 import _ from 'lodash';
 
-export function mapToLayerWithId(prefix, layer) {
+export function mapToLayerWithId(prefix, isEMS, layer) {
   const clonedLayer = _.cloneDeep(layer);
   clonedLayer.layerId = prefix + '.' + layer.name;
+  clonedLayer.isEMS = isEMS;
   return clonedLayer;
 }

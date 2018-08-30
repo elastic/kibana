@@ -6,7 +6,11 @@ exports[`Header should render normally 1`] = `
     size="s"
   >
     <h2>
-      Step 2 of 2: Configure settings
+      <FormattedMessage
+        defaultMessage="Step 2 of 2: Configure settings"
+        id="kbn.management.createIndexPattern.stepTimeHeader"
+        values={Object {}}
+      />
     </h2>
   </EuiTitle>
   <EuiSpacer
@@ -16,13 +20,17 @@ exports[`Header should render normally 1`] = `
     color="subdued"
     grow={true}
   >
-    <span>
-      You've defined 
-      <strong>
-        ki*
-      </strong>
-       as your index pattern. Now you can specify some settings before we create it.
-    </span>
+    <FormattedMessage
+      defaultMessage="You've defined {indexPattern} as your index pattern. Now you can specify some settings before we create it."
+      id="kbn.management.createIndexPattern.stepTimeLabel"
+      values={
+        Object {
+          "indexPattern": <strong>
+            ki*
+          </strong>,
+        }
+      }
+    />
   </EuiText>
 </div>
 `;

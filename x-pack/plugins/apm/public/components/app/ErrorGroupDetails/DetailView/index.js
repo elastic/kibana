@@ -29,7 +29,8 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
   SERVICE_AGENT_NAME,
-  SERVICE_LANGUAGE_NAME
+  SERVICE_LANGUAGE_NAME,
+  USER_ID
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 
@@ -101,8 +102,8 @@ function DetailView({ errorGroup, urlParams, location }) {
     },
     {
       label: 'User ID',
-      fieldName: 'context.user.id',
-      val: get(errorGroup.data, 'error.context.user.id', 'N/A')
+      fieldName: USER_ID,
+      val: get(errorGroup.data.error, USER_ID, 'N/A')
     }
   ];
 

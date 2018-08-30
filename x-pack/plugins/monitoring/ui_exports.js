@@ -18,6 +18,7 @@ export const uiExports = {
     icon: 'plugins/monitoring/icons/monitoring.svg',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
+    styleSheetPath: `${__dirname}/public/index.scss`,
   },
   injectDefaultVars(server) {
     const config = server.config();

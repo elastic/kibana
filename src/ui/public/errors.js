@@ -231,6 +231,17 @@ export class PersistedStateError extends KbnError {
 }
 
 /**
+ * This error is for scenarios where a saved object is detected that has invalid JSON properties.
+ * There was a scenario where we were importing objects with double-encoded JSON, and the system
+ * was silently failing. This error is now thrown in those scenarios.
+ */
+export class InvalidJSONProperty extends KbnError {
+  constructor(message) {
+    super(message);
+  }
+}
+
+/**
  * UI Errors
  */
 export class VislibError extends KbnError {

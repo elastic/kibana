@@ -18,13 +18,17 @@
 */
 
 import { isJSXIdentifier, isObjectExpression, isStringLiteral } from '@babel/types';
+import chalk from 'chalk';
 
 import { isPropertyWithKey, formatJSString, formatHTMLString } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
+import { createFailError } from '../run';
 
 function extractMessageId(value) {
   if (!isStringLiteral(value)) {
-    throw new Error('Message id should be a string literal.');
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} Message id should be a string literal.`
+    );
   }
 
   return value.value;
@@ -32,7 +36,10 @@ function extractMessageId(value) {
 
 function extractMessageValue(value, id) {
   if (!isStringLiteral(value)) {
-    throw new Error(`defaultMessage value should be a string literal for id: ${id}.`);
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+defaultMessage value should be a string literal ("${id}").`
+    );
   }
 
   return value.value;
@@ -40,7 +47,9 @@ function extractMessageValue(value, id) {
 
 function extractContextValue(value, id) {
   if (!isStringLiteral(value)) {
-    throw new Error(`context value should be a string literal for id: ${id}.`);
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal ("${id}").`
+    );
   }
 
   return value.value;
@@ -55,7 +64,10 @@ export function extractIntlMessages(node) {
   const options = node.arguments[0];
 
   if (!isObjectExpression(options)) {
-    throw new Error('Object with defaultMessage property is not passed to intl.formatMessage().');
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Object with defaultMessage property is not passed to intl.formatMessage().`
+    );
   }
 
   const [messageIdProperty, messageProperty, contextProperty] = [
@@ -69,7 +81,10 @@ export function extractIntlMessages(node) {
     : undefined;
 
   if (!messageId) {
-    throw new Error('Empty "id" value in intl.formatMessage() is not allowed.');
+    createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty "id" value in intl.formatMessage() is not allowed.`
+    );
   }
 
   const message = messageProperty
@@ -77,7 +92,10 @@ export function extractIntlMessages(node) {
     : undefined;
 
   if (!message) {
-    throw new Error(`Default message is required for id: ${messageId}.`);
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty defaultMessage in intl.formatMessage() is not allowed ("${messageId}").`
+    );
   }
 
   const context = contextProperty
@@ -104,7 +122,9 @@ export function extractFormattedMessages(node) {
     : undefined;
 
   if (!messageId) {
-    throw new Error('Empty "id" value in <FormattedMessage> is not allowed.');
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} Empty "id" value in <FormattedMessage> is not allowed.`
+    );
   }
 
   const message = messageProperty
@@ -112,7 +132,10 @@ export function extractFormattedMessages(node) {
     : undefined;
 
   if (!message) {
-    throw new Error(`Default message is required for id: ${messageId}.`);
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty default message in <FormattedMessage> is not allowed ("${messageId}").`
+    );
   }
 
   const context = contextProperty

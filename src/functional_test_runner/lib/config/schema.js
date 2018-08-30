@@ -73,6 +73,7 @@ export const schema = Joi.object().keys({
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
     try: Joi.number().default(40000),
+    waitFor: Joi.number().default(20000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
@@ -93,6 +94,10 @@ export const schema = Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
     rootDirectory: Joi.string(),
+  }).default(),
+
+  mochaReporter: Joi.object().keys({
+    captureLogOutput: Joi.boolean().default(!!process.env.CI),
   }).default(),
 
   users: Joi.object().pattern(
@@ -120,9 +125,6 @@ export const schema = Joi.object().keys({
     serverArgs: Joi.array(),
   }).default(),
 
-  // env allows generic data, but should be removed
-  env: Joi.object().default(),
-
   chromedriver: Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
@@ -140,7 +142,12 @@ export const schema = Joi.object().keys({
 
   // settings for the esArchiver module
   esArchiver: Joi.object().keys({
-    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver'))
+    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+  }).default(),
+
+  // settings for the kibanaServer.uiSettings module
+  uiSettings: Joi.object().keys({
+    defaults: Joi.object().unknown(true)
   }).default(),
 
   // settings for the screenshots module

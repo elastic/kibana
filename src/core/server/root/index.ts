@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { Observable } from '../../lib/kbn_observable';
+import { ConnectableObservable, Observable, Subscription } from 'rxjs';
+import { catchError, first, map, publishReplay } from 'rxjs/operators';
 
 import { Server } from '..';
-import { ConfigService, Env, RawConfig } from '../config';
+import { Config, ConfigService, Env } from '../config';
 
-import { Logger } from '../logging';
-import { LoggerFactory, MutableLoggerFactory } from '../logging/logger_factory';
-import { LoggingConfig } from '../logging/logging_config';
-import { LoggingService } from '../logging/logging_service';
+import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 
 export type OnShutdown = (reason?: Error) => void;
 
@@ -33,53 +31,48 @@ export type OnShutdown = (reason?: Error) => void;
  * Top-level entry point to kick off the app and start the Kibana server.
  */
 export class Root {
-  public configService: ConfigService;
-  public readonly log: Logger;
   public readonly logger: LoggerFactory;
+  protected readonly configService: ConfigService;
+  private readonly log: Logger;
   private server?: Server;
   private readonly loggingService: LoggingService;
+  private loggingConfigSubscription?: Subscription;
 
   constructor(
-    rawConfig$: Observable<RawConfig>,
+    config$: Observable<Config>,
     private readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {
       // noop
     }
   ) {
-    const loggerFactory = new MutableLoggerFactory(env);
-    this.loggingService = new LoggingService(loggerFactory);
-    this.logger = loggerFactory;
+    this.loggingService = new LoggingService();
+    this.logger = this.loggingService.asLoggerFactory();
 
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(rawConfig$, env, this.logger);
+    this.configService = new ConfigService(config$, env, this.logger);
   }
 
   public async start() {
-    try {
-      const loggingConfig$ = this.configService.atPath('logging', LoggingConfig);
-      this.loggingService.upgrade(loggingConfig$);
-    } catch (e) {
-      // This specifically console.logs because we were not able to configure
-      // the logger.
-      // tslint:disable no-console
-      console.error('Configuring logger failed:', e.message);
-
-      await this.shutdown(e);
-      throw e;
-    }
+    this.log.debug('starting root');
 
     try {
+      await this.setupLogging();
       await this.startServer();
     } catch (e) {
-      this.log.error(e);
-
       await this.shutdown(e);
       throw e;
     }
   }
 
   public async shutdown(reason?: Error) {
+    this.log.debug('shutting root down');
+
     await this.stopServer();
+
+    if (this.loggingConfigSubscription !== undefined) {
+      this.loggingConfigSubscription.unsubscribe();
+      this.loggingConfigSubscription = undefined;
+    }
 
     await this.loggingService.stop();
 
@@ -98,5 +91,36 @@ export class Root {
 
     await this.server.stop();
     this.server = undefined;
+  }
+
+  private async setupLogging() {
+    // Stream that maps config updates to logger updates, including update failures.
+    const update$ = this.configService.atPath('logging', LoggingConfig).pipe(
+      map(config => this.loggingService.upgrade(config)),
+      catchError(err => {
+        // This specifically console.logs because we were not able to configure the logger.
+        // tslint:disable-next-line no-console
+        console.error('Configuring logger failed:', err);
+
+        throw err;
+      }),
+      publishReplay(1)
+    ) as ConnectableObservable<void>;
+
+    // Subscription and wait for the first update to complete and throw if it fails.
+    const connectSubscription = update$.connect();
+    await update$.pipe(first()).toPromise();
+
+    // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
+    this.loggingConfigSubscription = update$.subscribe({
+      error: err => this.shutdown(err),
+    });
+
+    // Add subscription we got from `connect` so that we can dispose both of them
+    // at once. We can't inverse this and add consequent updates subscription to
+    // the one we got from `connect` because in the error case the latter will be
+    // automatically disposed before the error is forwarded to the former one so
+    // the shutdown logic won't be called.
+    this.loggingConfigSubscription.add(connectSubscription);
   }
 }

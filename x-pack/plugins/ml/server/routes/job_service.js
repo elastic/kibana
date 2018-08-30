@@ -126,4 +126,20 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/update_groups',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { updateGroups } = jobServiceProvider(callWithRequest);
+      const { jobs } = request.payload;
+      return updateGroups(jobs)
+        .then(resp => reply(resp))
+        .catch(resp => reply(wrapError(resp)));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

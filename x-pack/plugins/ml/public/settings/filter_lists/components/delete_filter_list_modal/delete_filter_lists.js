@@ -5,7 +5,7 @@
  */
 
 import { toastNotifications } from 'ui/notify';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../../services/ml_api_service';
 
 
 export async function deleteFilterLists(filterListsToDelete) {

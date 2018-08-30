@@ -22,6 +22,7 @@ import 'ui/notify';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify'
 ]);
@@ -33,8 +34,9 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Promise, config, kbnIndex, createNotifier, SavedSearch, kbnUrl, $http, chrome) {
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, kbnUrl, $http, chrome);
+module.service('savedSearches', function (Private, Promise, config, kbnIndex, createNotifier, SavedSearch, kbnUrl, $http, chrome) {
+  const savedObjectClient = Private(SavedObjectsClientProvider);
+  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',

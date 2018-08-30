@@ -22,11 +22,11 @@ import { getSavedObjects } from './get_saved_objects';
 
 const indexPatternTitle = 'dynamic index pattern title';
 
-test('should dynamically set index title to "xpack.apm.indexPattern" yaml config value', () => {
+test('should dynamically set index title to "apm_oss.indexPattern" yaml config value', () => {
   const savedObjects = getSavedObjects(indexPatternTitle);
   const indexPattern = savedObjects[0];
   expect(indexPattern.type).to.be('index-pattern');
   // if index pattern id changes, ensure other saved objects point to the new id
-  expect(indexPattern.id).to.be('12e52550-6354-11e8-9d01-ed6a4badd083');
+  expect(indexPattern.id).to.be('apm-*');
   expect(indexPattern.attributes.title).to.be(indexPatternTitle);
 });

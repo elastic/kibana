@@ -18,7 +18,7 @@ export function WeTried() {
         <h2>We couldn&apos;t activate monitoring</h2>
       </EuiTitle>
       <EuiHorizontalRule size="half" />
-      <EuiText className="noData__alignLeft">
+      <EuiText className="eui-textLeft">
         <p>
           No monitoring data found. Try setting the time filter to &quot;Last 1
           hour&quot; or check if data is available for a different time period.

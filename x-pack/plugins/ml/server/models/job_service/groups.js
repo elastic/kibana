@@ -60,7 +60,22 @@ export function groupsProvider(callWithRequest) {
     return Object.keys(groups).map(g => groups[g]);
   }
 
+  async function updateGroups(jobs) {
+    const results = {};
+    for (const job of jobs) {
+      const { job_id: jobId, groups } = job;
+      try {
+        await callWithRequest('ml.updateJob', { jobId, body: { groups } });
+        results[jobId] = { success: true };
+      } catch (error) {
+        results[jobId] = { success: false, error };
+      }
+    }
+    return results;
+  }
+
   return {
-    getAllGroups
+    getAllGroups,
+    updateGroups,
   };
 }

@@ -30,6 +30,7 @@
             </li>
             <li class="col-xs-4 col-md-3 ng-scope">
               <a
+                ng-if="(canCreateFilter === true)"
                 data-test-subj=""
                 class="management-panel__link ng-binding"
                 tooltip=""
@@ -39,6 +40,16 @@
                 href="ml#/settings/filter_lists">
                  Filter Lists
               </a>
+              <span
+                ng-if="(canCreateFilter === false)"
+                class="management-panel__link disabled  ng-binding"
+                tooltip="You do not have permission to manage filter lists"
+                tooltip-placement="bottom"
+                tooltip-popup-delay="400"
+                tooltip-append-to-body="1"
+              >
+                Filter Lists
+              </span>
             </li>
           </ul>
         </div>

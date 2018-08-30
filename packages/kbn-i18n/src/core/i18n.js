@@ -73,6 +73,12 @@ export function addMessages(newMessages = {}, locale = newMessages.locale) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
 
+  if (newMessages.locale && newMessages.locale !== locale) {
+    throw new Error(
+      '[I18n] A `locale` in the messages object is different from the one provided as a second argument.'
+    );
+  }
+
   const normalizedLocale = normalizeLocale(locale);
 
   messages[normalizedLocale] = {

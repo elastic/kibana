@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import url from 'url';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
@@ -31,12 +32,14 @@ export default function (plugin, server) {
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, url) {
+  function waitForPong(callWithInternalUser, elasticsearchUrl) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(`Unable to connect to Elasticsearch at ${url}.`);
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
+      const displayUrl = url.format({ ...url.parse(elasticsearchUrl), auth: undefined });
+      plugin.status.red(`Unable to connect to Elasticsearch at ${displayUrl}.`);
+
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
     });
   }
 

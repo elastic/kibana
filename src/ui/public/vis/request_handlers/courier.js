@@ -35,10 +35,8 @@ const CourierRequestHandlerProvider = function () {
    */
   async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
     const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
-      canSplit: false,
-      asAggConfigResults: false,
       partialRows: true,
-      isHierarchical: vis.isHierarchical(),
+      metricsAtAllLevels: vis.isHierarchical(),
     });
     const columns = table.columns.map((col, index) => {
       const field = col.aggConfig.getField();
@@ -46,7 +44,7 @@ const CourierRequestHandlerProvider = function () {
         col.aggConfig.isFilterable()
         && (!field || field.filterable);
       return ({
-        name: col.title,
+        name: col.name,
         field: `col${index}`,
         filter: isCellContentFilterable && ((value) => {
           const filter = col.aggConfig.createFilter(value.raw);
@@ -61,9 +59,10 @@ const CourierRequestHandlerProvider = function () {
       });
     });
     const rows = table.rows.map(row => {
-      return row.reduce((prev, cur, index) => {
-        const fieldFormatter = table.columns[index].aggConfig.fieldFormatter('text');
-        prev[`col${index}`] = new FormattedData(cur, fieldFormatter(cur));
+      return table.columns.reduce((prev, cur, index) => {
+        const value = row[cur.id];
+        const fieldFormatter = cur.aggConfig.fieldFormatter('text');
+        prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
         return prev;
       }, {});
     });
@@ -104,9 +103,11 @@ const CourierRequestHandlerProvider = function () {
         return aggs.onSearchRequestStart(searchSource, searchRequest);
       });
 
-      timeFilterSearchSource.setField('filter', () => {
-        return getTime(searchSource.getField('index'), timeRange);
-      });
+      if (timeRange) {
+        timeFilterSearchSource.setField('filter', () => {
+          return getTime(searchSource.getField('index'), timeRange);
+        });
+      }
 
       requestSearchSource.setField('filter', filters);
       requestSearchSource.setField('query', query);

@@ -7,46 +7,64 @@
 import { get } from 'lodash';
 import React from 'react';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function Stats({ stats }) {
   const types = stats.types.map(({ type, count }, index) => {
     return (
-      <div
+      <EuiFlexItem
         key={`type-${index}`}
         data-test-subj="typeCount"
         data-test-type-count={type + ':' + count}
+        grow={false}
       >
-        {type}: <strong>{formatMetric(count, 'int_commas')}</strong>
-      </div>
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {type ? type + ': ' : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <strong>{formatMetric(count, 'int_commas')}</strong>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   });
 
   return (
-    <div className="monitoring-summary-status" role="status">
-      <div
-        className="monitoring-summary-status__content"
-        data-test-subj="beatsSummaryStatus"
-      >
-        <div>
+    <div className="monSummaryStatus" role="status" data-test-subj="beatsSummaryStatus">
+
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
           Total Beats:&nbsp;
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <strong data-test-subj="totalBeats">
             {formatMetric(get(stats, 'total'), 'int_commas')}
           </strong>
-        </div>
+        </EuiFlexItem>
+
         {types}
-        <div>
+
+        <EuiFlexItem grow={false}>
           Total Events:&nbsp;
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <strong data-test-subj="totalEvents">
             {formatMetric(get(stats, 'stats.totalEvents'), '0.[0]a')}
           </strong>
-        </div>
-        <div>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           Bytes Sent:&nbsp;
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <strong data-test-subj="bytesSent">
             {formatMetric(get(stats, 'stats.bytesSent'), 'byte')}
           </strong>
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
     </div>
   );
 }

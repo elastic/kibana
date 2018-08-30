@@ -10,6 +10,7 @@ import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 
+import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 
 // work out the default frequency based on the bucket_span in seconds
@@ -182,8 +183,12 @@ export function mlFunctionToESAggregation(functionName) {
     return functionName;
   }
 
+  if (functionName === 'rare') {
+    return 'count';
+  }
+
   // Return null if ML function does not map to an ES aggregation.
-  // i.e. median, low_median, high_median, rare, freq_rare,
+  // i.e. median, low_median, high_median, freq_rare,
   // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
   // info_content, low_info_content, high_info_content
   return null;
@@ -235,7 +240,7 @@ export function uniqWithIsEqual(arr) {
 // check job without manipulating UI and return a list of messages
 // job and fields get passed as arguments and are not accessed as $scope.* via the outer scope
 // because the plan is to move this function to the common code area so that it can be used on the server side too.
-export function basicJobValidation(job, fields, limits) {
+export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   const messages = [];
   let valid = true;
 
@@ -251,20 +256,14 @@ export function basicJobValidation(job, fields, limits) {
       messages.push({ id: 'job_id_valid' });
     }
 
-    if (job.groups !== undefined) {
-      let groupIdValid = true;
-      job.groups.forEach(group => {
-        if (isJobIdValid(group) === false) {
-          groupIdValid = false;
-          valid = false;
-        }
-      });
-      if (job.groups.length > 0 && groupIdValid) {
-        messages.push({ id: 'job_group_id_valid' });
-      } else if (job.groups.length > 0 && !groupIdValid) {
-        messages.push({ id: 'job_group_id_invalid' });
-      }
-    }
+    // group names
+    const {
+      messages: groupsMessages,
+      valid: groupsValid,
+    } = validateGroupNames(job);
+
+    messages.push(...groupsMessages);
+    valid = (valid && groupsValid);
 
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
@@ -356,7 +355,10 @@ export function basicJobValidation(job, fields, limits) {
         messages.push({ id: 'bucket_span_invalid' });
         valid = false;
       } else {
-        messages.push({ id: 'bucket_span_valid' });
+        messages.push({
+          id: 'bucket_span_valid',
+          bucketSpan: job.analysis_config.bucket_span
+        });
       }
     }
 
@@ -371,21 +373,26 @@ export function basicJobValidation(job, fields, limits) {
       }
     }
 
-    // model memory limit
-    if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-      if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
-        const max = limits.max_model_memory_limit.toUpperCase();
-        const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    if (skipMmlChecks === false) {
+      // model memory limit
+      const {
+        messages: mmlUnitMessages,
+        valid: mmlUnitValid,
+      } = validateModelMemoryLimitUnits(job);
 
-        const mmlBytes = numeral(mml).value();
-        const maxBytes = numeral(max).value();
+      messages.push(...mmlUnitMessages);
+      valid = (valid && mmlUnitValid);
 
-        if(mmlBytes > maxBytes) {
-          messages.push({ id: 'model_memory_limit_invalid' });
-          valid = false;
-        } else {
-          messages.push({ id: 'model_memory_limit_valid' });
-        }
+      if (mmlUnitValid) {
+        // if mml is a valid format,
+        // run the validation against max mml
+        const {
+          messages: mmlMessages,
+          valid: mmlValid,
+        } = validateModelMemoryLimit(job, limits);
+
+        messages.push(...mmlMessages);
+        valid = (valid && mmlValid);
       }
     }
 
@@ -396,7 +403,84 @@ export function basicJobValidation(job, fields, limits) {
   return {
     messages,
     valid,
-    contains(id) { return _.some(messages, { id }); },
-    find(id) { return _.find(messages, { id }); }
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimit(job, limits) {
+  const messages = [];
+  let valid = true;
+  // model memory limit
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
+      const max = limits.max_model_memory_limit.toUpperCase();
+      const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+
+      const mmlBytes = numeral(mml).value();
+      const maxBytes = numeral(max).value();
+
+      if(mmlBytes > maxBytes) {
+        messages.push({ id: 'model_memory_limit_invalid' });
+        valid = false;
+      } else {
+        messages.push({ id: 'model_memory_limit_valid' });
+      }
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateModelMemoryLimitUnits(job) {
+  const messages = [];
+  let valid = true;
+
+  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+    const mmlSplit = mml.match(/\d+(\w+)/);
+    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
+
+    if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
+      messages.push({ id: 'model_memory_limit_units_invalid' });
+      valid = false;
+    } else {
+      messages.push({ id: 'model_memory_limit_units_valid' });
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function validateGroupNames(job) {
+  const messages = [];
+  let valid = true;
+  if (job.groups !== undefined) {
+    let groupIdValid = true;
+    job.groups.forEach(group => {
+      if (isJobIdValid(group) === false) {
+        groupIdValid = false;
+        valid = false;
+      }
+    });
+    if (job.groups.length > 0 && groupIdValid) {
+      messages.push({ id: 'job_group_id_valid' });
+    } else if (job.groups.length > 0 && !groupIdValid) {
+      messages.push({ id: 'job_group_id_invalid' });
+    }
+  }
+  return {
+    valid,
+    messages,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
   };
 }

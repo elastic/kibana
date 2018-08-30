@@ -10,7 +10,7 @@ exports[`Queue component renders default elements 1`] = `
     size="s"
   />
   <EuiText
-    className="pipelineViewer__queueMessage"
+    className="monPipelineViewer__queueMessage"
     grow={true}
   >
     Queue metrics not available

@@ -104,8 +104,8 @@ class Span extends React.Component {
       location
     } = this.props;
 
-    const width = get({ span }, SPAN_DURATION) / totalDuration * 100;
-    const left = get({ span }, SPAN_START) / totalDuration * 100;
+    const width = (get({ span }, SPAN_DURATION) / totalDuration) * 100;
+    const left = (get({ span }, SPAN_START) / totalDuration) * 100;
 
     const spanId = get({ span }, SPAN_ID);
     const spanName = get({ span }, SPAN_NAME);
@@ -132,7 +132,9 @@ class Span extends React.Component {
           }}
         />
         <SpanLabel style={{ left: `${left}%`, width: `${100 - left}%` }}>
-          &lrm;{spanName}&lrm;
+          &lrm;
+          {spanName}
+          &lrm;
         </SpanLabel>
 
         <Modal

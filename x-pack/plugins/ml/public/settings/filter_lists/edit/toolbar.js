@@ -7,7 +7,7 @@
 
 /*
  * React component for the toolbar section of the edit filter list page,
- * holding a search bar,, and buttons for adding and deleting items from the list.
+ * holding a search bar, and buttons for adding and deleting items from the list.
  */
 
 import PropTypes from 'prop-types';

@@ -23,8 +23,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSpacer
+  EuiSpacer,
+  EuiText
 } from '@elastic/eui';
+
+import { metadata } from 'ui/metadata';
+// metadata.branch corresponds to the version used in documentation links.
+const jobTipsUrl = `https://www.elastic.co/guide/en/kibana/${metadata.branch}/job-tips.html`;
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -101,9 +106,11 @@ const Callout = ({ message }) => (
     <EuiCallOut
       color={statusToEuiColor(message.status)}
       size="s"
-      title={<Message message={message} />}
+      title={message.heading || <Message message={message} />}
       iconType={statusToEuiIconType(message.status)}
-    />
+    >
+      {message.heading && <Message message={message} />}
+    </EuiCallOut>
     <EuiSpacer size="m" />
   </React.Fragment>
 );
@@ -212,7 +219,6 @@ class ValidateJob extends Component {
     const isCurrentJobConfig = (this.props.isCurrentJobConfig !== true) ? false : true;
     const isDisabled = (this.props.isDisabled !== true) ? false : true;
 
-
     return (
       <div>
         <EuiButton
@@ -235,6 +241,13 @@ class ValidateJob extends Component {
             {this.state.data.messages.map(
               (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
             )}
+            <EuiText>
+              Job validation performs certain checks against job configurations and underlying source data
+              and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+            </EuiText>
+            <EuiText>
+              For more information, see <EuiLink href={jobTipsUrl} target="_blank">Machine Learning Job Tips</EuiLink>.
+            </EuiText>
           </Modal>
         }
       </div>
