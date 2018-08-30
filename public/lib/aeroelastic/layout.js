@@ -721,8 +721,11 @@ const alignmentGuideAnnotations = select((shapes, draggedPrimaryShape, draggedSh
     : [];
 })(transformedShapes, draggedPrimaryShape, draggedShape);
 
-const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds) => {
-  return hoveredShape && hoveredShape.type !== 'annotation' && !selectedPrimaryShapeIds.length
+const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds, draggedShape) => {
+  return hoveredShape &&
+    hoveredShape.type !== 'annotation' &&
+    selectedPrimaryShapeIds.indexOf(hoveredShape.id) === -1 &&
+    !draggedShape
     ? [
         {
           ...hoveredShape,
@@ -737,7 +740,7 @@ const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds) => {
         },
       ]
     : [];
-})(hoveredShape, selectedPrimaryShapeIds);
+})(hoveredShape, selectedPrimaryShapeIds, draggedShape);
 
 const rotationAnnotation = (shapes, selectedShapes, shape, i) => {
   const foundShape = shapes.find(s => shape.id === s.id);
@@ -1065,7 +1068,7 @@ const cursor = select((shape, draggedPrimaryShape) => {
       const discretizedAngle = (Math.round(screenProjectedAngle / 45) * 45 + 360) % 360;
       return bidirectionalCursors[discretizedAngle];
     default:
-      return draggedPrimaryShape.id === shape.id ? 'grabbing' : 'grab';
+      return draggedPrimaryShape ? 'grabbing' : 'grab';
   }
 })(focusedShape, draggedPrimaryShape);
 
