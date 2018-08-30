@@ -66,6 +66,8 @@ export default function ({ getService, getPageObjects }) {
     };
 
     describe('Dashboard', () => {
+      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
