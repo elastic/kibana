@@ -61,6 +61,7 @@ export class AutocompleteField extends React.Component<
             onFocus={this.showSuggestions}
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
+            onSearch={this.submit}
             placeholder={placeholder}
             value={value}
           />
@@ -129,7 +130,6 @@ export class AutocompleteField extends React.Component<
           this.applySelectedSuggestion();
         } else {
           this.submit();
-          this.setState(withSuggestionsHidden);
         }
         break;
       case 'Escape':
@@ -206,6 +206,8 @@ export class AutocompleteField extends React.Component<
     if (isValid && onSubmit) {
       onSubmit(value);
     }
+
+    this.setState(withSuggestionsHidden);
   };
 
   private updateSuggestions = () => {
@@ -268,6 +270,7 @@ const FixedEuiFieldSearch: React.SFC<
   React.InputHTMLAttributes<HTMLInputElement> &
     EuiFieldSearchProps & {
       inputRef?: (element: HTMLInputElement | null) => void;
+      onSearch: (value: string) => void;
     }
 > = EuiFieldSearch as any;
 
