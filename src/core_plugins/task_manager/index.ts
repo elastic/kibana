@@ -28,7 +28,8 @@ import {
   validateTaskDefinition,
 } from './task_pool';
 
-export function taskManager(kibana: any) {
+// tslint:disable-next-line:no-default-export
+export default function taskManager(kibana: any) {
   return new kibana.Plugin({
     id: 'taskManager',
 
@@ -46,7 +47,7 @@ export function taskManager(kibana: any) {
           .default(3),
         poll_interval: Joi.number()
           .description('How often, in milliseconds, the task manager will look for more work.')
-          .default(30000),
+          .default(3000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
           .default('.kibana_task_manager'),
