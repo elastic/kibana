@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric', 'metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metrics');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
       await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
