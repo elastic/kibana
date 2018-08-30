@@ -16,9 +16,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@elastic/eui@3.2.1":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.2.1.tgz#43bed65a6751d8d99d59570f7e04292d2f276e5a"
+"@elastic/eui@3.7.0":
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.7.0.tgz#276d2a8e724778d15192b3847247d3731c7ff738"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -35,6 +35,7 @@
     react-input-autosize "^2.2.1"
     react-virtualized "^9.18.5"
     react-vis "1.10.2"
+    resize-observer-polyfill "^1.5.0"
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
@@ -61,6 +62,10 @@
   uid ""
 
 "@kbn/es@link:../packages/kbn-es":
+  version "0.0.0"
+  uid ""
+
+"@kbn/i18n@link:../packages/kbn-i18n":
   version "0.0.0"
   uid ""
 
@@ -211,7 +216,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-router-dom@^4.3.0":
+"@types/react-router-dom@^4.2.7":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.0.tgz#c91796d02deb3a5b24bc1c5db4a255df0d18b8b5"
   dependencies:
@@ -336,10 +341,6 @@ angular-sanitize@1.4.9:
 angular-ui-ace@0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/angular-ui-ace/-/angular-ui-ace-0.2.3.tgz#3cb903428100621a367fc7f641440e97a42a26d0"
-
-angular-ui-bootstrap@1.2.5:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/angular-ui-bootstrap/-/angular-ui-bootstrap-1.2.5.tgz#b0c1eff0bf3b7a65668984a1b81820a90dc60995"
 
 ansi-cyan@^0.1.1:
   version "0.1.1"
@@ -3628,6 +3629,26 @@ interpret@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.1.0.tgz#7ed1b1410c6a0e0f78cf95d3b8440c63f78b8614"
 
+intl-format-cache@^2.0.5, intl-format-cache@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/intl-format-cache/-/intl-format-cache-2.1.0.tgz#04a369fecbfad6da6005bae1f14333332dcf9316"
+
+intl-messageformat-parser@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/intl-messageformat-parser/-/intl-messageformat-parser-1.4.0.tgz#b43d45a97468cadbe44331d74bb1e8dea44fc075"
+
+intl-messageformat@^2.0.0, intl-messageformat@^2.1.0, intl-messageformat@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/intl-messageformat/-/intl-messageformat-2.2.0.tgz#345bcd46de630b7683330c2e52177ff5eab484fc"
+  dependencies:
+    intl-messageformat-parser "1.4.0"
+
+intl-relativeformat@^2.0.0, intl-relativeformat@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/intl-relativeformat/-/intl-relativeformat-2.1.0.tgz#010f1105802251f40ac47d0e3e1a201348a255df"
+  dependencies:
+    intl-messageformat "^2.0.0"
+
 into-stream@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/into-stream/-/into-stream-3.1.0.tgz#96fb0a936c12babd6ff1752a17d05616abd094c6"
@@ -3635,7 +3656,7 @@ into-stream@^3.1.0:
     from2 "^2.1.1"
     p-is-promise "^1.1.0"
 
-invariant@^2.0.0, invariant@^2.2.0, invariant@^2.2.1, invariant@^2.2.2, invariant@^2.2.4:
+invariant@^2.0.0, invariant@^2.1.1, invariant@^2.2.0, invariant@^2.2.1, invariant@^2.2.2, invariant@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
   dependencies:
@@ -4438,6 +4459,12 @@ json3@3.3.2:
 json5@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/json5/-/json5-0.5.1.tgz#1eade7acc012034ad84e2396767ead9fa5495821"
+
+json5@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.1.tgz#779fb0018604fa854eacbf6252180d83543e3dbe"
+  dependencies:
+    minimist "^1.2.0"
 
 jsonify@~0.0.0:
   version "0.0.0"
@@ -6272,6 +6299,15 @@ react-input-autosize@^2.1.2, react-input-autosize@^2.2.1:
   dependencies:
     prop-types "^15.5.8"
 
+react-intl@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-2.4.0.tgz#66c14dc9df9a73b2fbbfbd6021726e80a613eb15"
+  dependencies:
+    intl-format-cache "^2.0.5"
+    intl-messageformat "^2.1.0"
+    intl-relativeformat "^2.0.0"
+    invariant "^2.1.1"
+
 react-is@^16.3.1, react-is@^16.4.2:
   version "16.4.2"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.4.2.tgz#84891b56c2b6d9efdee577cc83501dfc5ecead88"
@@ -6742,6 +6778,10 @@ require-main-filename@^1.0.1:
 reselect@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/reselect/-/reselect-3.0.1.tgz#efdaa98ea7451324d092b2b2163a6a1d7a9a2147"
+
+resize-observer-polyfill@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.0.tgz#660ff1d9712a2382baa2cad450a4716209f9ca69"
 
 resolve-cwd@^2.0.0:
   version "2.0.0"
