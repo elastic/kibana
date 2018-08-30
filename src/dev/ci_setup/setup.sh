@@ -35,7 +35,7 @@ OS='linux'
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS='win'
 fi
-echo "Running on OS: $OS"
+echo " -- Running on OS: $OS"
 
 nodeVersion="$(cat $dir/.node-version)"
 nodeDir="$cacheDir/node/$nodeVersion"
