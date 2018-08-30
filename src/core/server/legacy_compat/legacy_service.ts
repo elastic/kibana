@@ -19,7 +19,7 @@
 
 import { Server as HapiServer } from 'hapi-latest';
 import { combineLatest, ConnectableObservable, EMPTY, from, Subscription } from 'rxjs';
-import { catchError, first, map, mapTo, mergeMap, publishReplay, tap } from 'rxjs/operators';
+import { first, map, mapTo, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
 import { Config, ConfigService, Env } from '../config';
 import { DevConfig } from '../dev';
@@ -56,10 +56,7 @@ export class LegacyService implements CoreService {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
         }
       }),
-      catchError(err => {
-        this.log.error(err);
-        throw err;
-      }),
+      tap({ error: err => this.log.error(err) }),
       publishReplay(1)
     ) as ConnectableObservable<Config>;
 

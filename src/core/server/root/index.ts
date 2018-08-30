@@ -18,7 +18,7 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { catchError, first, map, publishReplay } from 'rxjs/operators';
+import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { Server } from '..';
 import { Config, ConfigService, Env } from '../config';
@@ -90,13 +90,9 @@ export class Root {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = this.configService.atPath('logging', LoggingConfig).pipe(
       map(config => this.loggingService.upgrade(config)),
-      catchError(err => {
-        // This specifically console.logs because we were not able to configure the logger.
-        // tslint:disable-next-line no-console
-        console.error('Configuring logger failed:', err);
-
-        throw err;
-      }),
+      // This specifically console.logs because we were not able to configure the logger.
+      // tslint:disable-next-line no-console
+      tap({ error: err => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;
 
