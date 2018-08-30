@@ -53,20 +53,36 @@ interface Props {
 
 interface State {
   usePrintLayout: boolean;
+  isDirty: boolean;
   url?: string;
 }
 
 export class ReportingPanelContent extends Component<Props, State> {
+  private mounted?: boolean;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       usePrintLayout: false,
+      isDirty: false,
     };
   }
 
+  public componentWillUnmount() {
+    window.removeEventListener('hashchange', this.markAsDirty);
+
+    this.mounted = false;
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+
+    window.addEventListener('hashchange', this.markAsDirty, false);
+  }
+
   public render() {
-    if (this.isNotSaved()) {
+    if (this.isNotSaved() || this.state.isDirty) {
       return (
         <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
           <EuiFormRow helpText="Please save your work before generating a report.">
@@ -103,6 +119,14 @@ export class ReportingPanelContent extends Component<Props, State> {
       </EuiForm>
     );
   }
+
+  private markAsDirty = () => {
+    if (!this.mounted) {
+      return;
+    }
+
+    this.setState({ isDirty: true });
+  };
 
   private isNotSaved = () => {
     return this.props.objectId === undefined || this.props.objectId === '';
