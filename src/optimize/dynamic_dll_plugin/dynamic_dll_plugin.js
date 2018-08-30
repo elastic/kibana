@@ -177,7 +177,9 @@ export class DynamicDllPlugin {
 
     // TODO: we need to think about maybe moving the DLLs
     // outside the optimize bundles folder because it's
-    // a common use case to some users delete the optimize folder
+    // a common use case to some users delete the optimize folder.
+    // If they just do it during the distributable,
+    // they won't be able to build kibana anymore
     return !fs.existsSync(this.dllCompiler.getDllBundlePath());
   }
 
