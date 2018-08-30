@@ -97,6 +97,35 @@ describe('TabbedAggResponseWriter class', function () {
       expect(writer.splitStack).to.have.length(1);
       expect(writer.splitStack[0]).to.be(writer.root);
     });
+
+    describe('sets timeRange', function () {
+      it('to the first nested object\'s range', function () {
+        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        const range = {
+          gte: 0,
+          lte: 100
+        };
+
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
+          timeRange: {
+            '@timestamp': range
+          }
+        });
+
+        expect(writer.timeRange.gte).to.be(range.gte);
+        expect(writer.timeRange.lte).to.be(range.lte);
+        expect(writer.timeRange.name).to.be('@timestamp');
+      });
+
+      it('to undefined if no nested object', function () {
+        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+
+        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
+          timeRange: {}
+        });
+        expect(writer).to.have.property('timeRange', undefined);
+      });
+    });
   });
 
   describe('', function () {

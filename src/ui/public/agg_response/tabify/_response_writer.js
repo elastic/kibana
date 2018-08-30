@@ -70,6 +70,15 @@ function TabbedAggResponseWriter(aggs, opts) {
   this.root = new TabifyTableGroup();
   this.acrStack = [];
   this.splitStack = [this.root];
+
+  // Extract the time range object if provided
+  if (this.opts.timeRange) {
+    const timeRangeKey = Object.keys(this.opts.timeRange)[0];
+    this.timeRange = this.opts.timeRange[timeRangeKey];
+    if (this.timeRange) {
+      this.timeRange.name = timeRangeKey;
+    }
+  }
 }
 
 /**

@@ -49,7 +49,7 @@ function collectBucket(write, bucket, key, aggScale) {
 
   switch (agg.type.type) {
     case 'buckets':
-      const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
+      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
         const splitting = write.canSplit && agg.schema.name === 'split';
         if (splitting) {
