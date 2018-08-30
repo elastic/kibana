@@ -148,6 +148,11 @@ export class DllCompiler {
     // Style dll file isn't always created but we are
     // expecting it to exist always as we are referencing
     // it from the bootstrap template
+    //
+    // NOTE: We should review the way we deal with the css extraction
+    // in ours webpack builds. The industry standard is about to
+    // only extract css for production but we are extracting it
+    // in every single compilation.
     await this.ensureStyleFileExists();
   }
 
