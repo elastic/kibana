@@ -8,7 +8,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -37,7 +37,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -63,7 +67,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -97,7 +105,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -110,7 +122,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -126,7 +142,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -155,7 +171,11 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -181,7 +201,11 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -234,7 +258,11 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -247,7 +275,11 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -263,7 +295,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -292,7 +324,11 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -337,7 +373,11 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -371,7 +411,11 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -384,7 +428,11 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -400,7 +448,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -429,7 +477,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -455,7 +507,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -489,7 +545,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -502,7 +562,11 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -518,7 +582,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -547,7 +611,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -573,7 +641,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -607,7 +679,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -620,7 +696,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -636,7 +716,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
     />
@@ -665,7 +745,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -691,7 +775,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -725,7 +813,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -738,7 +830,11 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -754,7 +850,7 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -783,7 +879,11 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -809,7 +909,11 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -843,7 +947,11 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -856,7 +964,11 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -888,7 +1000,7 @@ exports[`home should render home component 1`] = `
         size="l"
       />
     </React.Fragment>
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -917,7 +1029,11 @@ exports[`home should render home component 1`] = `
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -943,7 +1059,11 @@ exports[`home should render home component 1`] = `
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -977,7 +1097,11 @@ exports[`home should render home component 1`] = `
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -990,7 +1114,11 @@ exports[`home should render home component 1`] = `
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -1006,7 +1134,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1035,7 +1163,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1061,7 +1193,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1095,7 +1231,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -1108,7 +1248,11 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -1124,7 +1268,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
     />
@@ -1153,7 +1297,11 @@ exports[`home welcome should show the normal home page if welcome screen is disa
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1179,7 +1327,11 @@ exports[`home welcome should show the normal home page if welcome screen is disa
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1213,7 +1365,11 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -1226,7 +1382,11 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -1249,7 +1409,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-    <AddData
+    <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
     />
@@ -1278,7 +1438,11 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
             size="m"
           >
             <h3>
-              Visualize and Explore Data
+              <FormattedMessage
+                defaultMessage="Visualize and Explore Data"
+                id="kbn.home.directories.visualize.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1304,7 +1468,11 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
             size="m"
           >
             <h3>
-              Manage and Administer the Elastic Stack
+              <FormattedMessage
+                defaultMessage="Manage and Administer the Elastic Stack"
+                id="kbn.home.directories.manage.nameTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -1338,7 +1506,11 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           grow={true}
         >
           <p>
-            Didn’t find what you were looking for?
+            <FormattedMessage
+              defaultMessage="Didn’t find what you were looking for?"
+              id="kbn.home.directories.notFound.description"
+              values={Object {}}
+            />
           </p>
         </EuiText>
         <EuiSpacer
@@ -1351,7 +1523,11 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           iconSide="left"
           type="button"
         >
-          View full directory of Kibana plugins
+          <FormattedMessage
+            defaultMessage="View full directory of Kibana plugins"
+            id="kbn.home.directories.notFound.viewFullButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
