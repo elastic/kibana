@@ -15,6 +15,7 @@ import {
   logEntriesSelectors,
   logPositionSelectors,
   reducer,
+  sharedSelectors,
   State,
 } from '.';
 import { InfraApolloClient, InfraObservableApi } from '../lib/lib';
@@ -36,12 +37,16 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     apolloClient$: apolloClient,
-    selectIsLoadingEntries: logEntriesSelectors.selectIsLoadingEntries,
-    selectEntriesEnd: logEntriesSelectors.selectEntriesEnd,
-    selectEntriesStart: logEntriesSelectors.selectEntriesStart,
-    selectHasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd,
-    selectHasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart,
-    selectIsAutoReloading: logPositionSelectors.selectIsAutoReloading,
+    selectIsLoadingLogEntries: logEntriesSelectors.selectIsLoadingEntries,
+    selectLogEntriesEnd: logEntriesSelectors.selectEntriesEnd,
+    selectLogEntriesStart: logEntriesSelectors.selectEntriesStart,
+    selectHasMoreLogEntriesAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd,
+    selectHasMoreLogEntriesBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart,
+    selectIsAutoReloadingLogEntries: logPositionSelectors.selectIsAutoReloading,
+    selectLogFilterQueryAsJson: sharedSelectors.selectLogFilterQueryAsJson,
+    selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
+    selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
+    selectVisibleLogSummary: logPositionSelectors.selectVisibleSummary,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(

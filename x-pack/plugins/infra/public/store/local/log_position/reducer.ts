@@ -85,7 +85,10 @@ const visiblePositionReducer = reducerWithInitialState(
 
 const visibleSummaryReducer = reducerWithInitialState(initialLogPositionState.visibleSummary).case(
   reportVisibleSummary,
-  state => ({ ...state })
+  (state, { start, end }) => ({
+    start,
+    end,
+  })
 );
 
 export const logPositionReducer = combineReducers<LogPositionState>({

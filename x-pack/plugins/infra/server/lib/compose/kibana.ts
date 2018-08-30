@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 
 import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kibana_configuration_adapter';
-import { ElasticsearchFieldsAdapter } from '../adapters/fields/elasticsearch_fields_adapter';
+import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
 import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
 import { ElasticsearchNodesAdapter } from '../adapters/nodes/elasticsearch_nodes_adapter';
@@ -29,7 +29,9 @@ export function compose(server: Server): InfraBackendLibs {
   });
 
   const domainLibs: InfraDomainLibs = {
-    fields: new InfraFieldsDomain(new ElasticsearchFieldsAdapter(framework)),
+    fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
+      sources,
+    }),
     logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
       sources,
     }),

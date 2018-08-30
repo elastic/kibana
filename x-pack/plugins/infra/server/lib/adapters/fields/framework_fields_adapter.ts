@@ -5,24 +5,24 @@
  */
 
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
-import { FieldCapsResponse, FieldsAdapter } from './adapter_types';
+import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 
-export class ElasticsearchFieldsAdapter implements FieldsAdapter {
+export class FrameworkFieldsAdapter implements FieldsAdapter {
   private framework: InfraBackendFrameworkAdapter;
 
   constructor(framework: InfraBackendFrameworkAdapter) {
     this.framework = framework;
   }
 
-  public async getFieldCaps(
-    req: InfraFrameworkRequest,
-    indexPattern: string | string[]
-  ): Promise<FieldCapsResponse> {
-    return await this.framework.callWithRequest(req, 'fieldCaps', {
-      allowNoIndices: false,
-      fields: '*',
-      ignoreUnavailable: false,
-      index: indexPattern,
+  public async getIndexFields(
+    request: InfraFrameworkRequest,
+    indices: string[]
+  ): Promise<IndexFieldDescriptor[]> {
+    const indexPatternsService = this.framework.getIndexPatternsService(request);
+    const response = await indexPatternsService.getFieldsForWildcard({
+      pattern: indices,
     });
+
+    return response;
   }
 }

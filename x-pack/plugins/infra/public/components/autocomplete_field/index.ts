@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createFieldResolvers } from './resolvers';
-export { fieldsSchema } from './schema.gql';
+export * from './autocomplete_field';

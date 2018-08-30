@@ -9,28 +9,25 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
+import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui';
 import { Header } from '../../components/header';
 import { LogCustomizationMenu } from '../../components/logging/log_customization_menu';
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
-import { LogPositionText } from '../../components/logging/log_position_text';
-// import { LogSearchControls } from '../../components/logging/log_search_controls';
-// import { LogStatusbar, LogStatusbarItem } from '../../components/logging/log_statusbar';
 import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 
-// import { withLogSearchControlsProps } from '../../containers/logs/with_log_search_controls_props';
+import { WithLogFilter } from '../../containers/logs/with_log_filter';
 import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
 import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
 import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_props';
-
-// const ConnectedLogSearchControls = withLogSearchControlsProps(LogSearchControls);
+import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 export class LogsPage extends React.Component {
   public render() {
@@ -40,14 +37,29 @@ export class LogsPage extends React.Component {
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
             <EuiFlexItem>
-              <WithLogPosition>
-                {({ firstVisiblePosition, lastVisiblePosition }) => (
-                  <LogPositionText
-                    firstVisiblePosition={firstVisiblePosition}
-                    lastVisiblePosition={lastVisiblePosition}
-                  />
+              <WithKueryAutocompletion>
+                {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                  <WithLogFilter>
+                    {({
+                      applyFilterQueryFromKueryExpression,
+                      filterQueryDraft,
+                      isFilterQueryDraftValid,
+                      setFilterQueryDraftFromKueryExpression,
+                    }) => (
+                      <AutocompleteField
+                        isLoadingSuggestions={isLoadingSuggestions}
+                        isValid={isFilterQueryDraftValid}
+                        loadSuggestions={loadSuggestions}
+                        onChange={setFilterQueryDraftFromKueryExpression}
+                        onSubmit={applyFilterQueryFromKueryExpression}
+                        placeholder="Search for log entries... (e.g. host.name:host-1)"
+                        suggestions={suggestions}
+                        value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                      />
+                    )}
+                  </WithLogFilter>
                 )}
-              </WithLogPosition>
+              </WithKueryAutocompletion>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogCustomizationMenu>
@@ -184,11 +196,6 @@ export class LogsPage extends React.Component {
             }}
           </AutoSizer>
         </LogPageContent>
-        {/*<LogStatusbar>
-          <LogStatusbarItem>
-            <ConnectedLogSearchControls />
-          </LogStatusbarItem>
-        </LogStatusbar>*/}
       </ColumnarPage>
     );
   }

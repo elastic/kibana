@@ -22,18 +22,23 @@ export const selectMiddleVisiblePosition = (state: LogPositionState) =>
 export const selectLastVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.endKey ? state.visiblePositions.endKey : null;
 
-export const selectVisibleMidpointOrTargetTime = createSelector(
+export const selectVisibleMidpointOrTarget = createSelector(
   selectMiddleVisiblePosition,
   selectTargetPosition,
   (middleVisiblePosition, targetPosition) => {
     if (middleVisiblePosition) {
-      return middleVisiblePosition.time;
+      return middleVisiblePosition;
     } else if (targetPosition) {
-      return targetPosition.time;
+      return targetPosition;
     } else {
       return null;
     }
   }
+);
+
+export const selectVisibleMidpointOrTargetTime = createSelector(
+  selectVisibleMidpointOrTarget,
+  visibleMidpointOrTarget => (visibleMidpointOrTarget ? visibleMidpointOrTarget.time : null)
 );
 
 export const selectVisibleTimeInterval = createSelector(
@@ -47,3 +52,5 @@ export const selectVisibleTimeInterval = createSelector(
         }
       : null
 );
+
+export const selectVisibleSummary = (state: LogPositionState) => state.visibleSummary;

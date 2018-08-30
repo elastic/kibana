@@ -49,6 +49,7 @@ export interface InfraBackendFrameworkAdapter {
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
+  getIndexPatternsService(req: InfraFrameworkRequest<any>): InfraFrameworkIndexPatternsService;
 }
 
 export interface InfraFrameworkRequest<
@@ -152,4 +153,18 @@ export interface InfraFieldDetails {
 
 export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
+}
+
+interface InfraFrameworkIndexFieldDescriptor {
+  name: string;
+  type: string;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues: boolean;
+}
+
+export interface InfraFrameworkIndexPatternsService {
+  getFieldsForWildcard(options: {
+    pattern: string[];
+  }): Promise<InfraFrameworkIndexFieldDescriptor[]>;
 }
