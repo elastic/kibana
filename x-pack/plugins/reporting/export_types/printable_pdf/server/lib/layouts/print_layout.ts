@@ -13,7 +13,7 @@ type EvalArgs = any[];
 interface EvaluateOptions {
   // 'fn' is a function in string form to avoid tslint from auto formatting it into a version not
   // underfood by transform_fn safeWrap.
-  fn: ((evalArgs: EvalArgs) => any) | string;
+  fn: ((...evalArgs: EvalArgs) => any) | string;
   args: EvalArgs; // Arguments to be passed into the function defined by fn.
 }
 
@@ -65,22 +65,22 @@ export class PrintLayout extends Layout {
       height: this.captureConfig.viewport.height / this.captureConfig.zoom,
     };
     const evalOptions: EvaluateOptions = {
-      fn: `function(selector, height, width) {
-      const visualizations = document.querySelectorAll(selector);
-      const visualizationsLength = visualizations.length;
-      
-      for (let i = 0; i < visualizationsLength; i++) {
-      const visualization = visualizations[i];
-      const style = visualization.style;
-      style.position = 'fixed';
-      style.top = \`\${height * i}px\`;
-      style.left = 0;
-      style.width = \`\${width}px\`;
-      style.height = \`\${height}px\`;
-      style.zIndex = 1;
-      style.backgroundColor = 'inherit';
-      }
-      }`,
+      fn: (selector: string, height: number, width: number) => {
+        const visualizations = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
+        const visualizationsLength = visualizations.length;
+
+        for (let i = 0; i < visualizationsLength; i++) {
+          const visualization = visualizations[i];
+          const style = visualization.style;
+          style.position = 'fixed';
+          style.top = `${height * i}px`;
+          style.left = '0';
+          style.width = `${width}px`;
+          style.height = `${height}px`;
+          style.zIndex = '1';
+          style.backgroundColor = 'inherit';
+        }
+      },
       args: [this.selectors.screenshot, elementSize.height, elementSize.width],
     };
 
