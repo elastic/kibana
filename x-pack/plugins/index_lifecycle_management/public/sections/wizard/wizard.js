@@ -79,8 +79,8 @@ export class Wizard extends Component {
       return;
     }
 
-    const response = await bootstrap(indexName, aliasName);
-    if (response && response.acknowledged) {
+    const bootstrapSuccess = await bootstrap(indexName, aliasName);
+    if (bootstrapSuccess) {
       toastNotifications.addSuccess(
         'Successfully bootstrapped an index and alias'
       );

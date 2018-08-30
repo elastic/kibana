@@ -46,7 +46,7 @@ export async function saveLifecycle(lifecycle, indexTemplatePatch) {
 
 export async function bootstrap(indexName, aliasName) {
   const response = await httpClient.post(`${apiPrefix}/indices/bootstrap`, { indexName, aliasName });
-  return response.data;
+  return response.status === 200;
 }
 
 export async function getAffectedIndices(indexTemplateName, policyName) {
