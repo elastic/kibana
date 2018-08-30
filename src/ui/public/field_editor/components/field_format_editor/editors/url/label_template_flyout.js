@@ -27,9 +27,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export const LabelTemplateFlyout = ({
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export const LabelTemplateFlyoutComponent = ({
   isVisible = false,
   onClose = () => {},
+  intl,
 }) => {
   return isVisible ? (
     <EuiFlyout
@@ -37,54 +40,67 @@ export const LabelTemplateFlyout = ({
     >
       <EuiFlyoutBody>
         <EuiText>
-          <h3>Label Template</h3>
+          <h3>
+            <FormattedMessage id="common.ui.fieldEditor.labelTemplateHeader" defaultMessage="Label Template" />
+          </h3>
           <p>
-            If the URL in this field is large, it might be useful to provide an alternate template for the text
-            version of the URL. This will be displayed instead of the url, but will still link to the URL. The
-            format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-            to inject values. The following values can be accessed:
+            <FormattedMessage
+              id="common.ui.fieldEditor.labelTemplateLabel"
+              defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version
+              of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses
+              double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+              values={{ doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode> }}
+            />
           </p>
           <ul>
             <li>
-              <EuiCode>value</EuiCode> &mdash; The fields value
+              <EuiCode>value</EuiCode> &mdash;&nbsp;
+              <FormattedMessage id="common.ui.fieldEditor.labelTemplate.valueLabel" defaultMessage="The fields value" />
             </li>
             <li>
-              <EuiCode>url</EuiCode> &mdash; The formatted URL
+              <EuiCode>url</EuiCode> &mdash;&nbsp;
+              <FormattedMessage id="common.ui.fieldEditor.labelTemplate.urlLabel" defaultMessage="The formatted URL" />
             </li>
           </ul>
-          <h4>Examples</h4>
+          <h4>
+            <FormattedMessage id="common.ui.fieldEditor.labelTemplate.examplesHeader" defaultMessage="Examples" />
+          </h4>
           <EuiBasicTable
             items={[
               {
                 input: 1234,
                 urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-                labelTemplate: 'User #{{value}}',
-                output: '<a href="http://company.net/profiles?user_id=1234">User #1234</a>',
+                labelTemplate: intl.formatMessage(
+                  { id: 'common.ui.fieldEditor.labelTemplate.example.idLabel', defaultMessage: 'User #{value}' },
+                  { value: '{{value}}' }),
+                output: '<a href="http://company.net/profiles?user_id=1234">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.idLabel', defaultMessage: 'User' }) + ' #1234</a>',
               },
               {
                 input: '/assets/main.css',
                 urlTemplate: 'http://site.com{{rawValue}}',
-                labelTemplate: 'View Asset',
-                output: '<a href="http://site.com/assets/main.css">View Asset</a>',
+                labelTemplate: intl.formatMessage(
+                  { id: 'common.ui.fieldEditor.labelTemplate.example.pathLabel', defaultMessage: 'View Asset' }),
+                output: '<a href="http://site.com/assets/main.css">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.pathLabel', defaultMessage: 'View Asset' }) + '</a>',
               },
             ]}
             columns={[
               {
                 field: 'input',
-                name: 'Input',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.inputHeader', defaultMessage: 'Input' }),
                 width: '160px',
               },
               {
                 field: 'urlTemplate',
-                name: 'URL Template',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.urlHeader', defaultMessage: 'URL Template' }),
               },
               {
                 field: 'labelTemplate',
-                name: 'Label Template',
+                name: intl.formatMessage(
+                  { id: 'common.ui.fieldEditor.labelTemplate.labelHeader', defaultMessage: 'Label Template' }),
               },
               {
                 field: 'output',
-                name: 'Output',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.outputHeader', defaultMessage: 'Output' }),
                 render: (value) => {
                   return (
                     <span
@@ -105,4 +121,6 @@ export const LabelTemplateFlyout = ({
   ) : null;
 };
 
-LabelTemplateFlyout.displayName = 'LabelTemplateFlyout';
+LabelTemplateFlyoutComponent.displayName = 'LabelTemplateFlyout';
+
+export const LabelTemplateFlyout = injectI18n(LabelTemplateFlyoutComponent);

@@ -18,19 +18,29 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { AddData } from './add_data';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 test('render', () => {
-  const component = shallow(<AddData
+  const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={false}
+    isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('apmUiEnabled', () => {
-  const component = shallow(<AddData
+  const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={true}
+    isNewKibanaInstance={false}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+test('isNewKibanaInstance', () => {
+  const component = shallowWithIntl(<AddData.WrappedComponent
+    apmUiEnabled={false}
+    isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });

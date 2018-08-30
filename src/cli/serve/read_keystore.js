@@ -18,6 +18,7 @@
  */
 
 import path from 'path';
+import { set } from 'lodash';
 
 import { Keystore } from '../../server/keystore';
 import { getData } from '../../server/path';
@@ -26,5 +27,12 @@ export function readKeystore(dataPath = getData()) {
   const keystore = new Keystore(path.join(dataPath, 'kibana.keystore'));
   keystore.load();
 
-  return keystore.data;
+  const keys = Object.keys(keystore.data);
+  const data = {};
+
+  keys.forEach(key => {
+    set(data, key, keystore.data[key]);
+  });
+
+  return data;
 }

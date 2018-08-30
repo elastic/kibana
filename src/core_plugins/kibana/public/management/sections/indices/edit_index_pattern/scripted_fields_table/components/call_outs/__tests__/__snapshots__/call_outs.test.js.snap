@@ -9,17 +9,22 @@ exports[`CallOuts should render normally 1`] = `
     title="Deprecation languages in use"
   >
     <p>
-      The following deprecated languages are in use: 
-      php
-      . Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to 
-      <EuiLink
-        color="primary"
-        href="http://www.elastic.co/painlessDocs"
-        type="button"
-      >
-        Painless
-      </EuiLink>
-       to avoid any problems.
+      <FormattedMessage
+        defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+        id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
+        values={
+          Object {
+            "deprecatedLangsInUse": "php",
+            "link": <EuiLink
+              color="primary"
+              href="http://www.elastic.co/painlessDocs"
+              type="button"
+            >
+              Painless
+            </EuiLink>,
+          }
+        }
+      />
     </p>
   </EuiCallOut>
   <EuiSpacer

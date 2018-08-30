@@ -2,6 +2,10 @@
   class="typeahead"
   ng-keydown="typeahead.onKeyDown($event)"
   ng-keypress="typeahead.onKeyPress($event)"
+  role="combobox"
+  aria-haspopup="true"
+  aria-owns="{{typeahead.elementID}}-typeahead-items"
+  aria-expanded="{{typeahead.isVisible() ? true : false}}"
 >
   <ng-transclude></ng-transclude>
   <div
@@ -13,6 +17,8 @@
     <div
       class="typeahead-items"
       kbn-scroll-bottom="typeahead.increaseLimit()"
+      role="listbox"
+      id="{{typeahead.elementID}}-typeahead-items"
     >
       <div
         class="typeahead-item"
@@ -20,6 +26,8 @@
         ng-class="{active: $index === typeahead.selectedIndex}"
         ng-click="typeahead.onItemClick()"
         ng-mouseenter="typeahead.selectedIndex = $index"
+        role="option"
+        id="{{typeahead.elementID}}-typeahead-item-{{$index}}"
       >
         <kbn-typeahead-item
           item="item"

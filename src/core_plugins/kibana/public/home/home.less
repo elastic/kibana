@@ -1,24 +1,7 @@
-@import (reference) "~ui/styles/variables.less";
-
-home-app {
-  background-color: @globalColorLightestGray;
+.homWelcome::before {
+  content: url(../assets/bg_top_branded.svg);
 }
 
-.home {
-  min-height: 100vh;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.homeDirectory {
-  background: @white;
-  margin: 0;
-  border-left: 1px solid @globalColorLightGray;
-  border-right: 1px solid @globalColorLightGray;
-  border-bottom: 1px solid @globalColorLightGray;
-  padding: 16px;
-}
-
-.homeDirectoryTab {
-  background-color: @globalColorLightestGray;
+.homWelcome::after {
+  content: url(../assets/bg_bottom_branded.svg);
 }

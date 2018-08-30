@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    align="left"
+    compressed={false}
+    listItems={
+      Array [
+        Object {
+          "description": "skip result when actual is less than 1",
+          "title": "rule",
+        },
+        Object {
+          "description": <EuiLink
+            color="primary"
+            onClick={[Function]}
+            type="button"
+          >
+            Edit rule
+          </EuiLink>,
+          "title": "actions",
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[Function]}
+            ruleIndex={0}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    textStyle="normal"
+    type="column"
+  />
+</EuiPanel>
+`;
+
+exports[`RuleActionPanel renders panel for rule with a condition and scope  1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    align="left"
+    compressed={false}
+    listItems={
+      Array [
+        Object {
+          "description": "skip model update when actual is greater than 500 AND instance is not in eu-airlines",
+          "title": "rule",
+        },
+        Object {
+          "description": <EuiLink
+            color="primary"
+            onClick={[Function]}
+            type="button"
+          >
+            Edit rule
+          </EuiLink>,
+          "title": "actions",
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[Function]}
+            ruleIndex={2}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    textStyle="normal"
+    type="column"
+  />
+</EuiPanel>
+`;
+
+exports[`RuleActionPanel renders panel for rule with scope  1`] = `
+<EuiPanel
+  className="select-rule-action-panel"
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiDescriptionList
+    align="left"
+    compressed={false}
+    listItems={
+      Array [
+        Object {
+          "description": "skip model update when instance is not in eu-airlines",
+          "title": "rule",
+        },
+        Object {
+          "description": <EuiLink
+            color="primary"
+            onClick={[Function]}
+            type="button"
+          >
+            Edit rule
+          </EuiLink>,
+          "title": "actions",
+        },
+        Object {
+          "description": <DeleteRuleModal
+            deleteRuleAtIndex={[Function]}
+            ruleIndex={1}
+          />,
+          "title": "",
+        },
+      ]
+    }
+    textStyle="normal"
+    type="column"
+  />
+</EuiPanel>
+`;

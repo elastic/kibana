@@ -13,7 +13,7 @@ export function Queue() {
     <div>
       <StatementListHeading iconType="logstashQueue" title="Queue" />
       <EuiSpacer size="s" />
-      <EuiText className="pipelineViewer__queueMessage">
+      <EuiText className="monPipelineViewer__queueMessage">
         Queue metrics not available
       </EuiText>
     </div>

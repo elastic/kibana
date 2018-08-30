@@ -36,6 +36,8 @@ import {
   sample
 } from './sample';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class TruncateFormatEditor extends DefaultFormatEditor {
   static formatId = 'truncate';
 
@@ -51,7 +53,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label="Field length"
+          label={<FormattedMessage id="common.ui.fieldEditor.truncate.lengthLabel" defaultMessage="Field length"/>}
           isInvalid={!!error}
           error={error}
         >

@@ -114,14 +114,13 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
     }
 
     getHeatmapColors(cfg) {
-      const colorsNumber = cfg.get('colorsNumber');
       const invertColors = cfg.get('invertColors');
       const colorSchema = cfg.get('colorSchema');
       const labels = this.getHeatmapLabels(cfg);
       const colors = {};
       for (const i in labels) {
         if (labels[i]) {
-          const val = invertColors ? 1 - i / colorsNumber : i / colorsNumber;
+          const val = invertColors ? 1 - i / labels.length : i / labels.length;
           colors[labels[i]] = getHeatmapColors(val, colorSchema);
         }
       }

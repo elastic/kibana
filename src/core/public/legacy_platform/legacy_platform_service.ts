@@ -17,14 +17,21 @@
  * under the License.
  */
 
+import angular from 'angular';
+import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+import { LoadingCountStartContract } from '../loading_count';
+import { NotificationsStartContract } from '../notifications';
 
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
+  fatalErrors: FatalErrorsStartContract;
+  notifications: NotificationsStartContract;
+  loadingCount: LoadingCountStartContract;
 }
 
 export interface LegacyPlatformParams {
-  rootDomElement: HTMLElement;
+  targetDomElement: HTMLElement;
   requireLegacyFiles: () => void;
   useLegacyTestHarness?: boolean;
 }
@@ -39,10 +46,13 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata }: Deps) {
+  public start({ injectedMetadata, fatalErrors, notifications, loadingCount }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
+    require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
+    require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -51,16 +61,33 @@ export class LegacyPlatformService {
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
 
-    bootstrapModule.bootstrap(this.params.rootDomElement);
+    bootstrapModule.bootstrap(this.params.targetDomElement);
+  }
+
+  public stop() {
+    const angularRoot = angular.element(this.params.targetDomElement);
+    const injector$ = angularRoot.injector();
+
+    // if we haven't gotten to the point of bootstraping
+    // angular, injector$ won't be defined
+    if (!injector$) {
+      return;
+    }
+
+    // destroy the root angular scope
+    injector$.get('$rootScope').$destroy();
+
+    // clear the inner html of the root angular element
+    this.params.targetDomElement.textContent = '';
   }
 
   private loadBootstrapModule(): {
-    bootstrap: (rootDomElement: HTMLElement) => void;
+    bootstrap: (targetDomElement: HTMLElement) => void;
   } {
     if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
       // is not included in the distributable
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {
         return require('ui/test_harness');
       }
 

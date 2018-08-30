@@ -19,8 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Table } from '../table';
+import { TableComponent } from '../table';
 
 const indexPattern = {
   fieldFormatMap: {
@@ -36,8 +37,8 @@ const items = [{ id: 1, name: 'Elastic' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -50,8 +51,8 @@ describe('Table', () => {
   });
 
   it('should render the format', async () => {
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -67,8 +68,8 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={editField}
@@ -85,8 +86,8 @@ describe('Table', () => {
   it('should allow deletes', () => {
     const deleteField = jest.fn();
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}

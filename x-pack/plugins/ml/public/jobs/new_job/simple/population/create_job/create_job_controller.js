@@ -374,7 +374,6 @@ module
       const $frontCard = angular.element(`.population-job-container .detector-container.card-${fieldIndex} .card-front`);
       $frontCard.addClass('card');
       $frontCard.find('.card-title').text(labels[0]);
-      const w = $frontCard.width();
 
       let marginTop = (labels.length > 1) ? 54 : 0;
       $frontCard.css('margin-top', marginTop);
@@ -390,33 +389,24 @@ module
       angular.element(`.detector-container.card-${fieldIndex} .card-behind`).remove();
 
       for (let i = 0; i < labels.length; i++) {
-        let el = '<div class="card card-behind"><div class="card-title">';
+        let el = `<div class="card card-behind card-behind-${i}"><div class="card-title">`;
         el += mlEscape(labels[i]);
         el += '</div><label class="kuiFormLabel">';
         el += mlEscape(backCardTitle);
         el += '</label></div>';
 
         const $backCard = angular.element(el);
-        $backCard.css('width', w);
-        $backCard.css('height', 100);
-        $backCard.css('display', 'auto');
         $backCard.css('z-index', (9 - i));
 
         $backCard.insertBefore($frontCard);
       }
 
       const cardsBehind = angular.element(`.detector-container.card-${fieldIndex} .card-behind`);
-      let marginLeft = 0;
-      let backWidth = w;
 
       for (let i = 0; i < cardsBehind.length; i++) {
         cardsBehind[i].style.marginTop = marginTop + 'px';
-        cardsBehind[i].style.marginLeft = marginLeft + 'px';
-        cardsBehind[i].style.width = backWidth + 'px';
 
         marginTop -= (10 - (i * (10 / labels.length))) * (10 / labels.length);
-        marginLeft += (5 - (i / 2));
-        backWidth -= (5 - (i / 2)) * 2;
       }
       let i = 0;
       let then = window.performance.now();
@@ -665,21 +655,6 @@ module
       moveToAdvancedJobCreation(job);
     };
 
-    // resize the spilt cards on page resize.
-    // when the job starts the 'Analysis running' label appearing can cause a scroll bar to appear
-    // which will cause the split cards to look odd
-    // TODO - all charts should resize correctly on page resize
-    function resize() {
-      if ($scope.formConfig.splitField !== undefined) {
-        let width = angular.element('.card-front').width();
-        const cardsBehind = angular.element('.card-behind');
-        for (let i = 0; i < cardsBehind.length; i++) {
-          cardsBehind[i].style.width = width + 'px';
-          width -= (5 - (i / 2)) * 2;
-        }
-      }
-    }
-
     $scope.setFullTimeRange = function () {
       return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
@@ -694,10 +669,6 @@ module
     });
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
-
-    angular.element(window).resize(() => {
-      resize();
-    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;

@@ -33,7 +33,11 @@ exports[`EmptyState should render normally 1`] = `
               }
             }
           >
-            Couldn't find any Elasticsearch data
+            <FormattedMessage
+              defaultMessage="Couldn't find any Elasticsearch data"
+              id="kbn.management.createIndexPattern.emptyStateHeader"
+              values={Object {}}
+            />
           </h2>
         </EuiTextColor>
       </EuiTitle>
@@ -44,28 +48,46 @@ exports[`EmptyState should render normally 1`] = `
         grow={true}
       >
         <p>
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            You'll need to index some data into Elasticsearch before you can create an index pattern.
-          </EuiTextColor>
-           
-          <EuiLink
-            color="primary"
-            href="#/home/tutorial_directory"
-            type="button"
-          >
-            Learn how
-          </EuiLink>
-           or 
-          <EuiLink
-            color="primary"
-            href="#/home/tutorial_directory/sampleData"
-            type="button"
-          >
-            get started with some sample data sets.
-          </EuiLink>
+          <FormattedMessage
+            defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
+            id="kbn.management.createIndexPattern.emptyStateLabel.emptyStateDetail"
+            values={
+              Object {
+                "getStartedLink": <EuiLink
+                  color="primary"
+                  href="#/home/tutorial_directory/sampleData"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="get started with some sample data sets."
+                    id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+                "learnHowLink": <EuiLink
+                  color="primary"
+                  href="#/home/tutorial_directory"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Learn how"
+                    id="kbn.management.createIndexPattern.emptyStateLabel.learnHowLink"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+                "needToIndex": <EuiTextColor
+                  color="subdued"
+                  component="span"
+                >
+                  <FormattedMessage
+                    defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
+                    id="kbn.management.createIndexPattern.emptyStateLabel.needToIndexLabel"
+                    values={Object {}}
+                  />
+                </EuiTextColor>,
+              }
+            }
+          />
         </p>
       </EuiText>
       <EuiSpacer
@@ -93,7 +115,11 @@ exports[`EmptyState should render normally 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Check for new data
+            <FormattedMessage
+              defaultMessage="Check for new data"
+              id="kbn.management.createIndexPattern.emptyState.checkDataButton"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

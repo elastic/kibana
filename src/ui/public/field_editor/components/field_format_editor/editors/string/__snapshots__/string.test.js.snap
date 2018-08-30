@@ -8,7 +8,13 @@ exports[`StringFormatEditor should render normally 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
-    label="Transform"
+    label={
+      <FormattedMessage
+        defaultMessage="Transform"
+        id="common.ui.fieldEditor.string.transformLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -28,7 +34,7 @@ exports[`StringFormatEditor should render normally 1`] = `
       }
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {

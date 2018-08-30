@@ -1,0 +1,10 @@
+extends ./chrome.pug
+
+block content
+  .kibanaWelcomeView
+    .kibanaLoaderWrap
+      .kibanaLoader
+      .kibanaWelcomeLogoCircle
+        .kibanaWelcomeLogo
+    .kibanaWelcomeText
+      | #{i18n('plugin_1.id_5', { defaultMessage: 'Message 5' })}

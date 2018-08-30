@@ -42,7 +42,7 @@ function getInterval(agg) {
 }
 
 function getBounds(vis) {
-  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters) {
+  if (vis.filters && vis.filters.timeRange) {
     return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
   }
 }
@@ -128,13 +128,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        if (isDefaultTimezone) {
-          output.params.time_zone = detectedTimezone || tzOffset;
-        } else {
-          output.params.time_zone = config.get('dateFormat:tz');
-        }
-
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
@@ -147,13 +140,18 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
       }
     },
-
+    {
+      name: 'time_zone',
+      default: () => {
+        const isDefaultTimezone = config.isDefault('dateFormat:tz');
+        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      },
+    },
     {
       name: 'customInterval',
       default: '2h',
       write: _.noop
     },
-
     {
       name: 'format'
     },

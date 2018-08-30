@@ -26,11 +26,9 @@ chrome
     const self = this;
 
     function setupScope() {
-      const defaultLoginMessage = 'Login is currently disabled because the license could not be determined. '
-    + 'Please check that Elasticsearch is running, then refresh this page.';
-
+      self.layout = loginState.layout;
       self.allowLogin = loginState.allowLogin;
-      self.loginMessage = loginState.loginMessage || defaultLoginMessage;
+      self.loginMessage = loginState.loginMessage;
       self.infoMessage = get(messageMap, parse($window.location.href, true).query.msg);
       self.isDisabled = !isSecure && secureCookies;
       self.isLoading = false;

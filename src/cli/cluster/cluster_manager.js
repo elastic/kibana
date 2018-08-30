@@ -31,7 +31,7 @@ process.env.kbnWorkerType = 'managr';
 export default class ClusterManager {
   static async create(opts = {}, settings = {}) {
     const transformedSettings = transformDeprecations(settings);
-    const config = await Config.withDefaultSchema(transformedSettings);
+    const config = Config.withDefaultSchema(transformedSettings);
 
     const basePathProxy = opts.basePath
       ? await configureBasePathProxy(config)

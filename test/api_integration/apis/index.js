@@ -21,6 +21,7 @@ export default function ({ loadTestFile }) {
   describe('apis', () => {
     loadTestFile(require.resolve('./elasticsearch'));
     loadTestFile(require.resolve('./general'));
+    loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./index_patterns'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./saved_objects'));

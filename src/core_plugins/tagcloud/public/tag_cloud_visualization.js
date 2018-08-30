@@ -67,6 +67,7 @@ export class TagCloudVisualization {
   }
 
   async render(data, status) {
+    if (!(status.resize || status.data || status.params)) return;
 
     if (status.params || status.aggs) {
       this._updateParams();

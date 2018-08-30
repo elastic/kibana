@@ -138,6 +138,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
     }
 
+    async clearToastNotifications() {
+      const toasts = await testSubjects.findAll('toastCloseButton');
+      await Promise.all(toasts.map(t => t.click()));
+    }
+
     async getUnsavedChangesWarningExists() {
       return await testSubjects.exists('unsavedChangesReportingWarning');
     }

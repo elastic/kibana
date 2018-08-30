@@ -31,10 +31,9 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/share';
 import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
-import { toastNotifications, getPainlessError } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -53,6 +52,12 @@ import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
+import { getPainlessError } from './get_painless_error';
+import { showShareContextMenu } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { Inspector } from 'ui/inspector';
+import { RequestAdapter } from 'ui/inspector/adapters';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -156,6 +161,10 @@ function discoverController(
   const notify = new Notifier({
     location: 'Discover'
   });
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const inspectorAdapters = {
+    requests: new RequestAdapter()
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -165,6 +174,10 @@ function discoverController(
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
   };
+
+  // the saved savedSearch
+  const savedSearch = $route.current.locals.savedSearch;
+  $scope.$on('$destroy', savedSearch.destroy);
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -184,13 +197,26 @@ function discoverController(
   }, {
     key: 'share',
     description: 'Share Search',
-    template: require('plugins/kibana/discover/partials/share_search.html'),
-    testId: 'discoverShareButton',
+    testId: 'shareTopNavButton',
+    run: (menuItem, navController, anchorElement) => {
+      showShareContextMenu({
+        anchorElement,
+        allowEmbed: false,
+        getUnhashableStates,
+        objectId: savedSearch.id,
+        objectType: 'search',
+      });
+    }
+  }, {
+    key: 'inspect',
+    description: 'Open Inspector for search',
+    testId: 'openInspectorButton',
+    run() {
+      Inspector.open(inspectorAdapters, {
+        title: savedSearch.title
+      });
+    }
   }];
-
-  // the saved savedSearch
-  const savedSearch = $route.current.locals.savedSearch;
-  $scope.$on('$destroy', savedSearch.destroy);
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
@@ -543,9 +569,38 @@ function discoverController(
     segmented.setSortFn(sortFn);
     segmented.setSize($scope.opts.sampleSize);
 
+    let inspectorRequests = [];
+    function logResponseInInspector(resp) {
+      if (inspectorRequests.length > 0) {
+        const inspectorRequest = inspectorRequests.shift();
+        inspectorRequest
+          .stats(getResponseInspectorStats($scope.searchSource, resp))
+          .ok({ json: resp });
+      }
+    }
+
     // triggered when the status updated
     segmented.on('status', function (status) {
       $scope.fetchStatus = status;
+      if (status.complete === 0) {
+        // starting new segmented search request
+        inspectorAdapters.requests.reset();
+        inspectorRequests = [];
+      }
+
+      if (status.remaining > 0) {
+        const inspectorRequest = inspectorAdapters.requests.start(
+          `Segment ${$scope.fetchStatus.complete}`,
+          {
+            description: `This request queries Elasticsearch to fetch the data for the search.`,
+          });
+        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+        $scope.searchSource.getSearchRequestBody().then(body => {
+          inspectorRequest.json(body);
+        });
+        inspectorRequests.push(inspectorRequest);
+      }
+
     });
 
     segmented.on('first', function () {
@@ -553,12 +608,17 @@ function discoverController(
     });
 
     segmented.on('segment', (resp) => {
+      logResponseInInspector(resp);
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
+    });
+
+    segmented.on('emptySegment', function (resp) {
+      logResponseInInspector(resp);
     });
 
     segmented.on('mergedSegment', function (merged) {
@@ -571,7 +631,7 @@ function discoverController(
           .then(resp => {
             $scope.visData = resp;
             const visEl = $element.find('#discoverHistogram')[0];
-            visualizationLoader(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+            visualizationLoader.render(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
           });
       }
 

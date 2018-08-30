@@ -200,15 +200,21 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
-    if (!_.isEqual(
-      FilterUtils.cleanFiltersForComparison(this.appState.filters),
-      FilterUtils.cleanFiltersForComparison(getFilters(state))
-    )) {
-      store.dispatch(updateFilters(this.appState.filters));
-    }
-
     if (getQuery(state) !== this.getQuery()) {
       store.dispatch(updateQuery(this.getQuery()));
+    }
+
+    this._pushFiltersToStore();
+  }
+
+  _pushFiltersToStore() {
+    const state = store.getState();
+    const dashboardFilters = this.getDashboardFilterBars();
+    if (!_.isEqual(
+      FilterUtils.cleanFiltersForComparison(dashboardFilters),
+      FilterUtils.cleanFiltersForComparison(getFilters(state))
+    )) {
+      store.dispatch(updateFilters(dashboardFilters));
     }
   }
 
@@ -582,6 +588,8 @@ export class DashboardStateManager {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
+    this._pushFiltersToStore();
   }
 
   /**

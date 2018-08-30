@@ -21,6 +21,18 @@
       </div>
     </div>
 
+    <div class="kuiSideBarFormRow" ng-hide="!editorState.params.emsHotLink">
+        <a
+          class="ems-hotlink"
+          target="_blank"
+          rel="noopener noreferrer"
+          ng-href="{{editorState.params.emsHotLink}}"
+          target="_blank"
+          title="Preview {{editorState.params.selectedLayer.name}} on the Elastic Maps Service"
+        >Preview on EMS
+        </a>
+    </div>
+
     <div class="kuiSideBarFormRow">
       <label class="kuiSideBarFormRow__label" for="joinField">
         Join field

@@ -32,15 +32,28 @@ import { extractIntlMessages, extractFormattedMessages } from './extract_react_m
 
 /**
  * Detect Intl.formatMessage() function call (React).
- *
- * Example: `intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });`
+ * @param {Object} node
+ * @returns {boolean}
+ * @example
+ * formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * props.intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
+ * this.props.intl.formatMessage({ id: 'message-id', defaultMessage: 'Message text' });
  */
-function isIntlFormatMessageFunction(node) {
+export function isIntlFormatMessageFunction(node) {
   return (
     isCallExpression(node) &&
-    isMemberExpression(node.callee) &&
-    isIdentifier(node.callee.object, { name: 'intl' }) &&
-    isIdentifier(node.callee.property, { name: 'formatMessage' })
+    (
+      isIdentifier(node.callee, { name: 'formatMessage' }) ||
+      (
+        isMemberExpression(node.callee) &&
+        (
+          isIdentifier(node.callee.object, { name: 'intl' }) ||
+          isIdentifier(node.callee.object.property, { name: 'intl' })
+        ) &&
+        isIdentifier(node.callee.property, { name: 'formatMessage' })
+      )
+    )
   );
 }
 
@@ -49,7 +62,7 @@ function isIntlFormatMessageFunction(node) {
  *
  * Example: `<FormattedMessage id="message-id" defaultMessage="Message text"/>`
  */
-function isFormattedMessageElement(node) {
+export function isFormattedMessageElement(node) {
   return isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' });
 }
 

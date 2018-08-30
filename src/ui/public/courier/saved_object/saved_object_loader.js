@@ -19,10 +19,9 @@
 
 import { Scanner } from '../../utils/scanner';
 import { StringUtils } from '../../utils/string_utils';
-import { SavedObjectsClient } from '../../saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome, savedObjectClient) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
@@ -41,9 +40,7 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient({
-      $http
-    });
+    this.savedObjectsClient = savedObjectClient;
   }
 
   /**

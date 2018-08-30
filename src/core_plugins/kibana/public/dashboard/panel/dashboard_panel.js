@@ -125,12 +125,12 @@ export class DashboardPanel extends React.Component {
 
   render() {
     const { viewOnlyMode, panel } = this.props;
-    const classes = classNames('panel panel-default', this.props.className, {
-      'panel--edit-mode': !viewOnlyMode
+    const classes = classNames('dshPanel__panel', this.props.className, {
+      'dshPanel__panel--editing': !viewOnlyMode
     });
     return (
       <div
-        className="dashboard-panel"
+        className="dshPanel"
         onFocus={this.onFocus}
         onBlur={this.onBlur}
       >

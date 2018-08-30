@@ -42,6 +42,7 @@ import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
+import 'uiExports/autocompleteProviders';
 
 import 'ui/autoload/all';
 import './home';
@@ -56,7 +57,7 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import { Notifier } from 'ui/notify';
+import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { KibanaRootController } from './kibana_root_controller';
 
@@ -69,4 +70,4 @@ routes
 
 chrome.setRootController('kibana', KibanaRootController);
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(showAppRedirectNotification);

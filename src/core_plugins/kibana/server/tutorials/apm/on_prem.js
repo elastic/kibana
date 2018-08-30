@@ -19,26 +19,27 @@
 
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 import {
-  WINDOWS_SERVER_INSTRUCTIONS,
-  IMPORT_DASHBOARD_UNIX,
-  EDIT_CONFIG,
-  START_SERVER_UNIX,
-  DOWNLOAD_SERVER_RPM,
-  DOWNLOAD_SERVER_DEB,
-  DOWNLOAD_SERVER_OSX,
+  createWindowsServerInstructions,
+  createEditConfig,
+  createStartServerUnix,
+  createDownloadServerRpm,
+  createDownloadServerDeb,
+  createDownloadServerOsx,
 } from './apm_server_instructions';
 import {
-  NODE_CLIENT_INSTRUCTIONS,
-  DJANGO_CLIENT_INSTRUCTIONS,
-  FLASK_CLIENT_INSTRUCTIONS,
-  RAILS_CLIENT_INSTRUCTIONS,
-  RACK_CLIENT_INSTRUCTIONS,
-  JS_CLIENT_INSTRUCTIONS,
-  GO_CLIENT_INSTRUCTIONS,
-  JAVA_CLIENT_INSTRUCTIONS,
+  createNodeClientInstructions,
+  createDjangoClientInstructions,
+  createFlaskClientInstructions,
+  createRailsClientInstructions,
+  createRackClientInstructions,
+  createJsClientInstructions,
+  createGoClientInstructions,
+  createJavaClientInstructions,
 } from './apm_client_instructions';
 
 export function onPremInstructions(apmIndexPattern) {
+  const EDIT_CONFIG = createEditConfig();
+  const START_SERVER_UNIX = createStartServerUnix();
 
   return {
     instructionSets: [
@@ -47,40 +48,24 @@ export function onPremInstructions(apmIndexPattern) {
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
-            instructions: [
-              DOWNLOAD_SERVER_OSX,
-              IMPORT_DASHBOARD_UNIX,
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
+            instructions: [createDownloadServerOsx(), EDIT_CONFIG, START_SERVER_UNIX],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
-            instructions: [
-              DOWNLOAD_SERVER_DEB,
-              IMPORT_DASHBOARD_UNIX,
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
+            instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
-            instructions: [
-              DOWNLOAD_SERVER_RPM,
-              IMPORT_DASHBOARD_UNIX,
-              EDIT_CONFIG,
-              START_SERVER_UNIX,
-            ],
+            instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: WINDOWS_SERVER_INSTRUCTIONS,
+            instructions: createWindowsServerInstructions(),
           },
         ],
         statusCheck: {
           title: 'APM Server status',
-          text:
-            'Make sure APM Server is running before you start implementing the APM agents.',
+          text: 'Make sure APM Server is running before you start implementing the APM agents.',
           btnLabel: 'Check APM Server status',
           success: 'You have correctly setup APM-Server',
           error: 'APM-Server has still not connected to Elasticsearch',
@@ -103,41 +88,40 @@ export function onPremInstructions(apmIndexPattern) {
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.NODE,
-            instructions: NODE_CLIENT_INSTRUCTIONS,
+            instructions: createNodeClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.DJANGO,
-            instructions: DJANGO_CLIENT_INSTRUCTIONS,
+            instructions: createDjangoClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.FLASK,
-            instructions: FLASK_CLIENT_INSTRUCTIONS,
+            instructions: createFlaskClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.RAILS,
-            instructions: RAILS_CLIENT_INSTRUCTIONS,
+            instructions: createRailsClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.RACK,
-            instructions: RACK_CLIENT_INSTRUCTIONS,
+            instructions: createRackClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: JS_CLIENT_INSTRUCTIONS,
+            instructions: createJsClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.GO,
-            instructions: GO_CLIENT_INSTRUCTIONS,
+            instructions: createGoClientInstructions(),
           },
           {
             id: INSTRUCTION_VARIANT.JAVA,
-            instructions: JAVA_CLIENT_INSTRUCTIONS,
+            instructions: createJavaClientInstructions(),
           },
         ],
         statusCheck: {
           title: 'Agent status',
-          text:
-            'Make sure your application is running and the agents are sending data.',
+          text: 'Make sure your application is running and the agents are sending data.',
           btnLabel: 'Check agent status',
           success: 'Data successfully received from one or more agents',
           error: `No data has been received from agents yet`,

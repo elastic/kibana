@@ -49,7 +49,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
-    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/test.xml')), cb));
+    const report = await fcb(cb => parseString(readFileSync(resolve(PROJECT_DIR, 'target/junit/TEST-test.xml')), cb));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({
@@ -93,7 +93,8 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE works',
         time: testPass.$.time,
-      }
+      },
+      'system-out': testPass['system-out']
     });
 
     expect(testFail.$.time).to.match(DURATION_REGEX);
@@ -104,6 +105,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE fails',
         time: testFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         testFail.failure[0]
       ]
@@ -118,6 +120,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         beforeEachFail.failure[0]
       ]
@@ -128,6 +131,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',
       },
+      'system-out': testFail['system-out'],
       skipped: ['']
     });
   });

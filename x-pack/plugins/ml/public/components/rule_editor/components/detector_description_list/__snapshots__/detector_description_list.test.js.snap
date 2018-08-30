@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetectorDescriptionList render for farequote detector 1`] = `
+<EuiDescriptionList
+  align="left"
+  className="rule-detector-description-list"
+  compressed={false}
+  listItems={
+    Array [
+      Object {
+        "description": "farequote",
+        "title": "job ID",
+      },
+      Object {
+        "description": "mean response time",
+        "title": "detector",
+      },
+    ]
+  }
+  textStyle="normal"
+  type="column"
+/>
+`;

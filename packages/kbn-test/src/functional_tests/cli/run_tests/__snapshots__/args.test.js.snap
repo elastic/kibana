@@ -110,7 +110,7 @@ Object {
   ],
   "createLogger": [Function],
   "extraKbnOpts": undefined,
-  "kibana-install-dir": "foo",
+  "installDir": "foo",
 }
 `;
 

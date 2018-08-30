@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import chalk from 'chalk';
 import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, formatJSString } from './utils';
 import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from './constants';
+import { createFailError } from '../run';
 
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST
@@ -29,32 +31,46 @@ export function extractI18nCallMessages(node) {
   const [idSubTree, optionsSubTree] = node.arguments;
 
   if (!isStringLiteral(idSubTree)) {
-    throw new Error('Message id should be a string literal.');
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Message id in i18n() or i18n.translate() should be a string literal.`
+    );
   }
 
   const messageId = idSubTree.value;
+
+  if (!messageId) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty "id" value in i18n() or i18n.translate() is not allowed.`
+    );
+  }
+
   let message;
   let context;
 
   if (!isObjectExpression(optionsSubTree)) {
-    throw new Error(
-      `Cannot parse "${messageId}" message: object with defaultMessage property is not provided.`
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
     );
   }
 
   for (const prop of optionsSubTree.properties) {
     if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
       if (!isStringLiteral(prop.value)) {
-        throw new Error(
-          `Cannot parse "${messageId}" message: defaultMessage value should be a string literal.`
+        throw createFailError(
+          `${chalk.white.bgRed(' I18N ERROR ')} \
+defaultMessage value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
       message = formatJSString(prop.value.value);
     } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
       if (!isStringLiteral(prop.value)) {
-        throw new Error(
-          `Cannot parse "${messageId}" message: context value should be a string literal.`
+        throw createFailError(
+          `${chalk.white.bgRed(' I18N ERROR ')} \
+context value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
@@ -63,7 +79,10 @@ export function extractI18nCallMessages(node) {
   }
 
   if (!message) {
-    throw new Error(`Cannot parse "${messageId}" message: defaultMessage is required`);
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
+Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
+    );
   }
 
   return [messageId, { message, context }];

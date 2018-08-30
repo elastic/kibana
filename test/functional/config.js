@@ -32,6 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
+  SharePageProvider
 } from './page_objects';
 
 import {
@@ -49,6 +50,9 @@ import {
   DashboardAddPanelProvider,
   DashboardPanelActionsProvider,
   FlyoutProvider,
+  ComboBoxProvider,
+  EmbeddingProvider,
+  RenderableProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -82,7 +86,8 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
+      timelion: TimelionPageProvider,
+      share: SharePageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
@@ -103,10 +108,11 @@ export default async function ({ readConfigFile }) {
       dashboardAddPanel: DashboardAddPanelProvider,
       dashboardPanelActions: DashboardPanelActionsProvider,
       flyout: FlyoutProvider,
+      comboBox: ComboBoxProvider,
+      embedding: EmbeddingProvider,
+      renderable: RenderableProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
 
@@ -116,6 +122,12 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
     },
 
     apps: {

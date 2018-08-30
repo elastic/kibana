@@ -57,6 +57,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('DurationFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(DurationFormatEditor.formatId).toEqual('duration');
+  });
+
   it('should render human readable output normally', async () => {
     const component = shallow(
       <DurationFormatEditor

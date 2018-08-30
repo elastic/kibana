@@ -1,64 +1,142 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dev/i18n/extract_default_translations extracts messages to en.json 1`] = `
+"{
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
+      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
+    },
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
+      },
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
+    },
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
+      },
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
+      },
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    }
+  },
+  \\"plugin_1.id_1\\": \\"Message 1\\",
+  \\"plugin_1.id_2\\": {
+    \\"text\\": \\"Message 2\\",
+    \\"comment\\": \\"Message context\\"
+  },
+  \\"plugin_1.id_3\\": \\"Message 3\\",
+  \\"plugin_1.id_4\\": \\"Message 4\\",
+  \\"plugin_1.id_5\\": \\"Message 5\\",
+  \\"plugin_1.id_6\\": \\"Message 6\\",
+  \\"plugin_1.id_7\\": \\"Message 7\\"
+}"
+`;
+
 exports[`dev/i18n/extract_default_translations injects default formats into en.json 1`] = `
 "{
-  formats: {
-    number: {
-      currency: {
-        style: 'currency',
+  \\"formats\\": {
+    \\"number\\": {
+      \\"currency\\": {
+        \\"style\\": \\"currency\\"
       },
-      percent: {
-        style: 'percent',
-      },
+      \\"percent\\": {
+        \\"style\\": \\"percent\\"
+      }
     },
-    date: {
-      short: {
-        month: 'numeric',
-        day: 'numeric',
-        year: '2-digit',
+    \\"date\\": {
+      \\"short\\": {
+        \\"month\\": \\"numeric\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"2-digit\\"
       },
-      medium: {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+      \\"medium\\": {
+        \\"month\\": \\"short\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
       },
-      long: {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
+      \\"long\\": {
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
       },
-      full: {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      },
+      \\"full\\": {
+        \\"weekday\\": \\"long\\",
+        \\"month\\": \\"long\\",
+        \\"day\\": \\"numeric\\",
+        \\"year\\": \\"numeric\\"
+      }
     },
-    time: {
-      short: {
-        hour: 'numeric',
-        minute: 'numeric',
+    \\"time\\": {
+      \\"short\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\"
       },
-      medium: {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
+      \\"medium\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\"
       },
-      long: {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        timeZoneName: 'short',
+      \\"long\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
       },
-      full: {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        timeZoneName: 'short',
-      },
-    },
+      \\"full\\": {
+        \\"hour\\": \\"numeric\\",
+        \\"minute\\": \\"numeric\\",
+        \\"second\\": \\"numeric\\",
+        \\"timeZoneName\\": \\"short\\"
+      }
+    }
   },
-  'test-plugin.message-id': 'Message text',
-}
-"
+  \\"plugin_2.message-id\\": \\"Message text\\"
+}"
 `;
+
+exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `
+"[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
+Error: [37m[41m I18N ERROR [49m[39m There is more than one default message for the same id \\"plugin_3.duplicate_id\\":
+\\"Message 1\\" and \\"Message 2\\""
+`;
+
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"[37m[41m I18N ERROR [49m[39m Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See i18nrc.json for the list of supported namespaces."`;

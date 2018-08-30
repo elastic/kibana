@@ -13,7 +13,7 @@ import DetailView from './DetailView';
 import Distribution from './Distribution';
 import { KueryBar } from '../../shared/KueryBar';
 
-import { EuiText, EuiBadge } from '@elastic/eui';
+import { EuiText, EuiBadge, EuiSpacer } from '@elastic/eui';
 import {
   unit,
   units,
@@ -88,6 +88,8 @@ function ErrorGroupDetails({ urlParams, location }) {
             </HeaderLarge>
 
             <KueryBar />
+
+            <EuiSpacer size="s" />
 
             {showDetails && (
               <Titles>

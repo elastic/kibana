@@ -24,9 +24,10 @@ import { ContainerState, Embeddable } from 'ui/embeddable';
  */
 export interface PanelActionAPI {
   /**
-   * The embeddable that resides inside this action.
+   * The embeddable that resides inside this action. It's possible it's undefined if the embeddable has not been returned from
+   * the EmbeddableFactory yet.
    */
-  embeddable: Embeddable;
+  embeddable?: Embeddable;
 
   /**
    * Information about the current state of the panel and dashboard.
