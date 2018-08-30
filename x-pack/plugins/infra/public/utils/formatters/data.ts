@@ -7,14 +7,6 @@
 import { InfraWaffleMapDataFormat } from '../../lib/lib';
 import { formatNumber } from './number';
 
-const getPowerFromValue = (val: number, base: number, labels: string[]) => {
-  for (let i = 0; i < labels.length; i++) {
-    if (val % Math.pow(base, i) === val) {
-      return i - 1;
-    }
-  }
-  return 0;
-};
 /**
  * The labels are derived from these two Wikipedia articles.
  * https://en.wikipedia.org/wiki/Kilobit
@@ -71,6 +63,6 @@ const BASES = {
 export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (val: number) => {
   const labels = LABELS[format];
   const base = BASES[format];
-  const power = getPowerFromValue(val, base, labels);
+  const power = Math.floor(Math.log(val) / Math.log(base));
   return `${formatNumber(val / Math.pow(base, power))} ${labels[power]}`;
 };
