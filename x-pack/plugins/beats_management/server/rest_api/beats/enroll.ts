@@ -10,11 +10,11 @@ import { CMServerLibs } from '../../lib/lib';
 import { BeatEnrollmentStatus } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agent/{beatId}',
+  licenseRequired: true,
   config: {
     auth: false,
     validate: {

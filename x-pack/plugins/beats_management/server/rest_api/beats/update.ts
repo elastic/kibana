@@ -9,11 +9,11 @@ import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: add license check pre-hook
 // TODO: write to Kibana audit log file (include who did the verification as well)
 export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/agent/{beatId}',
+  licenseRequired: true,
   config: {
     auth: {
       mode: 'optional',

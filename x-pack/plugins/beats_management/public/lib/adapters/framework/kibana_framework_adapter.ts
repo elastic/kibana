@@ -23,13 +23,28 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private rootComponent: React.ReactElement<any> | null = null;
   private uiModule: IModule;
   private routes: any;
+  private XPackInfoProvider: any;
+  private xpackInfo: null | any;
+  private notifier: any;
+  private kbnUrlService: any;
+  private chrome: any;
 
-  constructor(uiModule: IModule, management: any, routes: any) {
+  constructor(
+    uiModule: IModule,
+    management: any,
+    routes: any,
+    chrome: any,
+    XPackInfoProvider: any,
+    Notifier: any
+  ) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.management = management;
     this.uiModule = uiModule;
     this.routes = routes;
+    this.chrome = chrome;
+    this.XPackInfoProvider = XPackInfoProvider;
     this.appState = {};
+    this.notifier = new Notifier({ location: 'Beats' });
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -42,24 +57,48 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.rootComponent = component;
   };
 
+  public hadValidLicense() {
+    if (!this.xpackInfo) {
+      return false;
+    }
+    return this.xpackInfo.get('features.beats_management.licenseValid', false);
+  }
+
+  public securityEnabled() {
+    if (!this.xpackInfo) {
+      return false;
+    }
+
+    return this.xpackInfo.get('features.beats_management.securityEnabled', false);
+  }
+
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    const registerSection = () =>
-      this.management.register(pluginId, {
-        display: displayName,
-        order: 30,
-      });
-    const getSection = () => this.management.getSection(pluginId);
-
-    const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
-
-    section.register(pluginId, {
-      visible: true,
-      display: displayName,
-      order: 30,
-      url: `#${basePath}`,
-    });
-
     this.register(this.uiModule);
+
+    this.hookAngular(() => {
+      if (this.hadValidLicense() && this.securityEnabled()) {
+        const registerSection = () =>
+          this.management.register(pluginId, {
+            display: displayName,
+            order: 30,
+          });
+        const getSection = () => this.management.getSection(pluginId);
+
+        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+
+        section.register(pluginId, {
+          visible: true,
+          display: displayName,
+          order: 30,
+          url: `#${basePath}`,
+        });
+      }
+
+      if (!this.securityEnabled()) {
+        this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
+        this.kbnUrlService.redirect('/management');
+      }
+    });
   }
 
   private manageAngularLifecycle($scope: any, $route: any, elem: any) {
@@ -80,6 +119,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
       }
+    });
+  }
+
+  private hookAngular(done: () => any) {
+    this.chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
+      const Private = $injector.get('Private');
+      const xpackInfo = Private(this.XPackInfoProvider);
+      const kbnUrlService = $injector.get('kbnUrl');
+
+      this.xpackInfo = xpackInfo;
+      this.kbnUrlService = kbnUrlService;
+      done();
     });
   }
 
