@@ -64,7 +64,7 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
 
       await $scope.updateUrl();
     },
-    controller($scope, $document, $window, $timeout, globalState) {
+    controller($scope, $document, $window, $timeout, globalState, i18n) {
       const stateMonitor = stateMonitorFactory.create(globalState);
       stateMonitor.onChange(() => {
         if ($scope.exportConfig.isDirty()) {
@@ -91,25 +91,40 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
           })
           .then(() => {
             toastNotifications.addSuccess({
-              title: `Queued report for ${this.objectType}`,
-              text: 'Track its progress in Management',
+              title: i18n(
+                'xpack.reporting.exportConfig.queuedReport.successTitle',
+                { values: { objectType: this.objectType }, defaultMessage: 'Queued report for {objectType}' }
+              ),
+              text: i18n(
+                'xpack.reporting.exportConfig.queuedReport.successDescription',
+                { defaultMessage: 'Track its progress in Management' }
+              ),
               'data-test-subj': 'queueReportSuccess',
             });
           })
           .catch((err) => {
             if (err.message === 'not exportable') {
               return toastNotifications.addWarning({
-                title: 'Only saved dashboards can be exported',
-                text: 'Please save your work first',
+                title: i18n(
+                  'xpack.reporting.exportConfig.queuedReport.error.notExportableTitle',
+                  { defaultMessage: 'Only saved dashboards can be exported' }
+                ),
+                text: i18n(
+                  'xpack.reporting.exportConfig.queuedReport.error.notExportableDescription',
+                  { defaultMessage: 'Please save your work first' }
+                ),
               });
             }
 
             const defaultMessage = err.status === 403
-              ? `You don't have permission to generate this report.`
-              : `Can't reach the server. Please try again.`;
+              ? i18n('xpack.reporting.exportConfig.queuedReport.error.accessDeniedDescription',
+                { defaultMessage: 'You don\'t have permission to generate this report.' })
+              : i18n('xpack.reporting.exportConfig.queuedReport.error.cannotReachServerDescription',
+                { defaultMessage: 'Can\'t reach the server. Please try again.' });
 
             toastNotifications.addDanger({
-              title: 'Reporting error',
+              title: i18n('xpack.reporting.exportConfig.queuedReport.error.reportingTitle',
+                { defaultMessage: 'Reporting error' }),
               text: err.message || defaultMessage,
               'data-test-subj': 'queueReportError',
             });
@@ -130,12 +145,18 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
               try {
                 const isCopied = document.execCommand('copy');
                 if (isCopied) {
-                  toastNotifications.add('URL copied to clipboard');
+                  toastNotifications.add(
+                    i18n('xpack.reporting.exportConfig.copy.urlCopiedDescription', { defaultMessage: 'URL copied to clipboard' })
+                  );
                 } else {
-                  toastNotifications.add('Press Ctrl+C to copy URL');
+                  toastNotifications.add(
+                    i18n('xpack.reporting.exportConfig.copy.pressToCopyDescription', { defaultMessage: 'Press Ctrl+C to copy URL' })
+                  );
                 }
               } catch (err) {
-                toastNotifications.add('Press Ctrl+C to copy URL');
+                toastNotifications.add(
+                  i18n('xpack.reporting.exportConfig.copyError.pressToCopyDescription', { defaultMessage: 'Press Ctrl+C to copy URL' })
+                );
               }
             });
           });

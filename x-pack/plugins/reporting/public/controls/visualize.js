@@ -9,20 +9,20 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 
-function visualizeReportProvider(Private, $location) {
+function visualizeReportProvider(Private, $location, i18n) {
   const xpackInfo = Private(XPackInfoProvider);
   return {
     appName: 'visualize',
 
     key: 'reporting-visualize',
-    label: 'Reporting',
+    label: i18n('xpack.reporting.visualize.reportingTitle', { defaultMessage: 'Reporting' }),
     template: `
       <export-config
         object-type="Visualization"
         enabled-export-type="printablePdf"
         options="{ layoutId: 'preserve_layout' }"
       ></export-config>`,
-    description: 'Visualization Report',
+    description: i18n('xpack.reporting.visualize.reportAriaLabel', { defaultMessage: 'Visualization Report' }),
     hideButton: () => (
       $location.path() === VisualizeConstants.LANDING_PAGE_PATH
       || $location.path() === VisualizeConstants.WIZARD_STEP_1_PAGE_PATH

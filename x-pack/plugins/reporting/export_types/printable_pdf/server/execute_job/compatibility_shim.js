@@ -6,6 +6,7 @@
 
 import url from 'url';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
+import { i18n } from '@kbn/i18n';
 
 export function compatibilityShimFactory(server) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
@@ -24,7 +25,10 @@ export function compatibilityShimFactory(server) {
       return savedObj.url;
     }
 
-    throw new Error(`Unable to generate report for url ${savedObj.url}, it's not a Kibana URL`);
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.server.compShim.unableToGenerateErrorMessage', {
+      defaultMessage: 'Unable to generate report for url {savedObjUrl}, it\'s not a Kibana URL',
+      values: { savedObjUrl: savedObj.url }
+    }));
   };
 
   return function (executeJob) {

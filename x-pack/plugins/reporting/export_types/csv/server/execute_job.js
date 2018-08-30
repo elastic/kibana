@@ -9,6 +9,7 @@ import { oncePerServer } from '../../../server/lib/once_per_server';
 import { createTaggedLogger } from '../../../server/lib/create_tagged_logger';
 import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
+import { i18n } from '@kbn/i18n';
 
 function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -24,9 +25,9 @@ function executeJobFn(server) {
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
     } catch (e) {
-      throw new Error(
-        'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report.'
-      );
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.server.executeJob.failedToDecryptErrorMessage', {
+        defaultMessage: 'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report.' // eslint-disable-line max-len
+      }));
     }
 
     const fakeRequest = {

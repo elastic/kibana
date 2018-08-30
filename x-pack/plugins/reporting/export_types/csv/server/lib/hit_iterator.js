@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 async function parseResponse(request) {
   const response = await request;
   if (!response._scroll_id) {
-    throw new Error('Expected _scroll_id in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.server.hitIterator.expectedScrollIdErrorMessage', {
+      defaultMessage: 'Expected _scroll_id in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response) }
+    }));
   }
 
   if (!response.hits) {
-    throw new Error('Expected hits in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.server.hitIterator.expectedHitsErrorMessage', {
+      defaultMessage: 'Expected hits in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response) }
+    }));
   }
 
   return {

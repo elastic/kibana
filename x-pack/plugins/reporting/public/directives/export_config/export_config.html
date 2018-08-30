@@ -1,8 +1,6 @@
 <div ng-show="!exportConfig.isDirty()">
   <div class="kuiLocalDropdownSection">
-    <h2 class="kuiLocalDropdownTitle">
-      Reporting
-    </h2>
+    <h2 class="kuiLocalDropdownTitle" i18n-id="xpack.reporting.exportConfig.reportingTitle" i18n-default-message="Reporting"></h2>
 
     <div class="input-group generate-controls">
       <div class="options"></div>
@@ -11,7 +9,9 @@
         data-test-subj="generateReportButton"
         ng-click="exportConfig.export()"
       >
-        Generate {{ exportConfig.exportType.name }}
+        <span i18n-id="xpack.reporting.exportConfig.generateButtonLabel"
+        i18n-default-message="Generate {name}"
+        i18n-values="{ name: exportConfig.exportType.name }"></span>
       </button>
     </div>
   </div>
@@ -23,16 +23,18 @@
       <label
         class="kuiLocalDropdownHeader__label"
         for="reportGenerationUrl"
+        i18n-id="xpack.reporting.exportConfig.generationUrl.label"
+        i18n-default-message="Generation URL"
       >
-        Generation URL
       </label>
       <div class="kuiLocalDropdownHeader__actions">
         <a
           class="kuiLocalDropdownHeader__action"
           ng-click="exportConfig.copyToClipboard('#reportGenerationUrl')"
           kbn-accessible-click
+          i18n-id="xpack.reporting.exportConfig.generationUrl.copyLinkLabel"
+          i18n-default-message="Copy"
         >
-          Copy
         </a>
       </div>
     </div>
@@ -44,12 +46,13 @@
       type="text"
       readonly
       data-test-subj="reportGenerationUrl"
-      value="{{ exportConfig.absoluteUrl || 'Loading...' }}"
+      value="{{ exportConfig.absoluteUrl || ('xpack.reporting.exportConfig.generationUrl.loadingPlaceholder' | i18n: { defaultMessage: 'Loading...' }) }}"
       ng-click="updateUrl()"
     />
   </div>
 </div>
 
-<div ng-show="exportConfig.isDirty()" data-test-subj="unsavedChangesReportingWarning">
-  Please save your work before generating a report.
+<div ng-show="exportConfig.isDirty()" data-test-subj="unsavedChangesReportingWarning"
+  i18n-id="xpack.reporting.exportConfig.saveWorkDescription"
+  i18n-default-message="Please save your work before generating a report.">
 </div>
