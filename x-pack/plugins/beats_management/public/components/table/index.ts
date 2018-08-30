@@ -7,6 +7,7 @@
 export { Table } from './table';
 export { ControlBar } from './controls';
 export {
+  ActionDefinition,
   BeatDetailTagsTable,
   BeatsTableType,
   FilterDefinition,

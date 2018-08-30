@@ -5,22 +5,21 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   // @ts-ignore types for EuiTab not currently available
   EuiTab,
   // @ts-ignore types for EuiTabs not currently available
   EuiTabs,
-  EuiText,
 } from '@elastic/eui';
-import moment from 'moment';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
-import { BeatActivityView, BeatDetailView, BeatTagsView } from '../../components/beat';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { FrontendLibs } from '../../lib/lib';
+import { BeatDetailsActionSection } from './action_section';
+import { BeatActivityPage } from './activity';
+import { BeatDetailPage } from './detail';
+import { BeatTagsPage } from './tags';
 
 interface Match {
   params: any;
@@ -57,14 +56,10 @@ export class BeatDetailsPage extends React.PureComponent<
 
   public render() {
     const { beat } = this.state;
-    let lastUpdated: string | undefined;
     let id;
-    let version: string | undefined;
 
     if (beat) {
       id = beat.id;
-      version = beat.version;
-      lastUpdated = beat.last_updated;
     }
     const title = this.state.isLoading ? 'Loading' : `Beat: ${id}`;
     const tabs = [
@@ -86,36 +81,7 @@ export class BeatDetailsPage extends React.PureComponent<
     ];
 
     return (
-      <PrimaryLayout
-        title={title}
-        actionSection={
-          <div>
-            {beat ? (
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    Version:&nbsp;
-                    <strong>{version}</strong>.
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {/* TODO: What field is used to populate this value? */}
-                  <EuiText size="xs">
-                    Uptime: <strong>12min.</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    Last Config Update: <strong>{moment(lastUpdated).fromNow()}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <div>Beat not found</div>
-            )}
-          </div>
-        }
-      >
+      <PrimaryLayout title={title} actionSection={<BeatDetailsActionSection beat={beat} />}>
         <EuiTabs>
           {tabs.map((tab, index) => (
             <EuiTab
@@ -132,18 +98,27 @@ export class BeatDetailsPage extends React.PureComponent<
         </EuiTabs>
         <EuiSpacer size="l" />
         <Switch>
-          <Route path="/beat/:beatId/activity" render={(props: any) => <BeatActivityView />} />
+          <Route
+            path="/beat/:beatId/activity"
+            render={(props: any) => <BeatActivityPage libs={this.props.libs} {...props} />}
+          />
           <Route
             path="/beat/:beatId/tags"
-            render={() => (
-              <BeatTagsView
+            render={(props: any) => (
+              <BeatTagsPage
                 beat={this.state.beat}
                 libs={this.props.libs}
-                reloadBeat={() => this.loadBeat()}
+                refreshBeat={() => this.loadBeat()}
+                {...props}
               />
             )}
           />
-          <Route path="/beat/:beatId" render={() => <BeatDetailView beat={this.state.beat} />} />
+          <Route
+            path="/beat/:beatId"
+            render={(props: any) => (
+              <BeatDetailPage beat={this.state.beat} libs={this.props.libs} {...props} />
+            )}
+          />
         </Switch>
       </PrimaryLayout>
     );
