@@ -16,21 +16,19 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
-import { explorerChartConfigBuilder } from './explorer_chart_config_builder';
+import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits } from 'plugins/ml/util/chart_utils';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
-module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
-  const Private = $injector.get('Private');
-  const mlExplorerDashboardService = $injector.get('mlExplorerDashboardService');
-  const mlSelectSeverityService = $injector.get('mlSelectSeverityService');
+export function explorerChartsContainerDataFactory(
+  mlSelectSeverityService,
+  callback
+) {
+  const $scope = {};
 
   $scope.seriesToPlot = [];
-
   const $chartContainer = $('.explorer-charts');
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
@@ -39,6 +37,12 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
 
+  // default values, will update on every re-render
+  $scope.chartsPerRow = 1;
+  $scope.layoutCellsPerChart = 12;
+  $scope.tooManyBuckets = false;
+  callback($scope);
+
   const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
     const threshold = mlSelectSeverityService.state.get('threshold');
     const filteredRecords = _.filter(anomalyRecords, (record) => {
@@ -46,7 +50,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
-    const chartsContainerWidth = $chartContainer.width();
+    const chartsContainerWidth = Math.floor($chartContainer.width());
     const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), 4);
 
     $scope.chartsPerRow = chartsPerRow;
@@ -70,6 +74,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       loading: true,
       chartData: null
     }));
+    callback($scope);
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
@@ -260,17 +265,12 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
           selectedLatest: latestMs,
           chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i])
         }));
+        callback($scope);
       })
       .catch(error => {
         console.error(error);
       });
   };
-
-  mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
-
-  $scope.$on('$destroy', () => {
-    mlExplorerDashboardService.anomalyDataChange.unwatch(anomalyDataChangeListener);
-  });
 
   function processRecordsForDisplay(anomalyRecords) {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
@@ -409,8 +409,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
 
   function buildDataConfigs(anomalyRecords) {
     // Build the chart configuration for each anomaly record.
-    const configBuilder = Private(explorerChartConfigBuilder);
-    return anomalyRecords.map(configBuilder.buildConfig);
+    return anomalyRecords.map(buildConfig);
   }
 
   function calculateChartRange(seriesConfigs, earliestMs, latestMs, chartWidth, recordsToPlot) {
@@ -429,8 +428,10 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
     // at optimal point spacing.
     const plotPoints = Math.max(optimumNumPoints, pointsToPlotFullSelection);
     const halfPoints = Math.ceil(plotPoints / 2);
-    let chartRange =  { min: midpointMs - (halfPoints * maxBucketSpanMs),
-      max: midpointMs + (halfPoints * maxBucketSpanMs) };
+    let chartRange = {
+      min: midpointMs - (halfPoints * maxBucketSpanMs),
+      max: midpointMs + (halfPoints * maxBucketSpanMs)
+    };
 
     if (plotPoints > CHART_MAX_POINTS) {
       $scope.tooManyBuckets = true;
@@ -469,4 +470,6 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
     return chartRange;
   }
 
-});
+  return anomalyDataChangeListener;
+
+}

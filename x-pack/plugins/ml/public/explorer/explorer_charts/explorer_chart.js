@@ -4,43 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
- * AngularJS directive for rendering a chart of anomalies in the raw data in
+ * React component for rendering a chart of anomalies in the raw data in
  * the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_chart_directive.less';
+import './styles/explorer_chart.less';
+
+import PropTypes from 'prop-types';
+import React from 'react';
 
 import _ from 'lodash';
 import d3 from 'd3';
-import angular from 'angular';
+import $ from 'jquery';
 import moment from 'moment';
 
 import { formatValue } from 'plugins/ml/formatters/format_value';
 import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import loadingIndicatorWrapperTemplate from 'plugins/ml/components/loading_indicator/loading_indicator_wrapper.html';
+import { LoadingIndicator } from 'plugins/ml/components/loading_indicator/loading_indicator';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+export class ExplorerChart extends React.Component {
+  static propTypes = {
+    seriesConfig: PropTypes.object.isRequired
+  }
 
-module.directive('mlExplorerChart', function (
-  mlChartTooltipService,
-  Private,
-  mlSelectSeverityService) {
+  componentDidUpdate() {
+    const {
+      mlSelectSeverityService,
+      mlChartTooltipService
+    } = this.props;
 
-  function link(scope, element) {
-    console.log('ml-explorer-chart directive link series config:', scope.seriesConfig);
-    if (typeof scope.seriesConfig === 'undefined') {
+    const element = this._rootNode;
+    const config = this.props.seriesConfig;
+
+    if (
+      typeof config === 'undefined' ||
+      Array.isArray(config.chartData) === false
+    ) {
       // just return so the empty directive renders without an error later on
       return;
     }
-    const config = scope.seriesConfig;
+
     const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
 
     let vizWidth = 0;
@@ -56,35 +64,22 @@ module.directive('mlExplorerChart', function (
     let lineChartGroup;
     let lineChartValuesLine = null;
 
-    // create a chart loading placeholder
-    scope.isLoading = config.loading;
-    if (Array.isArray(config.chartData)) {
-      // make sure we wait for the previous digest cycle to finish
-      // or the chart's wrapping elements might not have their
-      // right widths yet and we need them to define the SVG's width
-      scope.$evalAsync(() => {
-        init(config.chartLimits);
-        drawLineChart(config.chartData);
-      });
-    }
-
-    element.on('$destroy', function () {
-      scope.$destroy();
-    });
+    init(config.chartLimits);
+    drawLineChart(config.chartData);
 
     function init(chartLimits) {
-      const $el = angular.element('ml-explorer-chart');
+      const $el = $('.ml-explorer-chart');
 
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
-      const chartElement = d3.select(element.get(0)).select('.content-wrapper');
+      const chartElement = d3.select(element).select('.content-wrapper');
       chartElement.select('svg').remove();
 
       const svgWidth = $el.width();
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement.append('svg')
-        .attr('width',  svgWidth)
+        .attr('width', svgWidth)
         .attr('height', svgHeight);
 
       // Set the size of the left margin according to the width of the largest y axis tick label.
@@ -122,7 +117,7 @@ module.directive('mlExplorerChart', function (
       d3.select('.temp-axis-label').remove();
 
       margin.left = (Math.max(maxYAxisLabelWidth, 40));
-      vizWidth  = svgWidth  - margin.left - margin.right;
+      vizWidth = svgWidth - margin.left - margin.right;
 
       // Set the x axis domain to match the request plot range.
       // This ensures ranges on different charts will match, even when there aren't
@@ -319,12 +314,37 @@ module.directive('mlExplorerChart', function (
     }
   }
 
-  return {
-    restrict: 'E',
-    scope: {
-      seriesConfig: '='
-    },
-    link: link,
-    template: loadingIndicatorWrapperTemplate
-  };
-});
+  shouldComponentUpdate() {
+    // Prevents component re-rendering
+    return true;
+  }
+
+  _setRef(componentNode) {
+    this._rootNode = componentNode;
+  }
+
+  render() {
+    const {
+      seriesConfig
+    } = this.props;
+
+    if (typeof seriesConfig === 'undefined') {
+      // just return so the empty directive renders without an error later on
+      return null;
+    }
+
+    // create a chart loading placeholder
+    const isLoading = seriesConfig.loading;
+
+    return (
+      <div className="ml-explorer-chart" ref={this._setRef.bind(this)}>
+        {isLoading && (
+          <LoadingIndicator />
+        )}
+        {!isLoading && (
+          <div className="content-wrapper" ref={this._setRef.bind(this)} />
+        )}
+      </div>
+    );
+  }
+}
