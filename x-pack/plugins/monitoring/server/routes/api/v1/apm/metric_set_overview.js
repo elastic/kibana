@@ -26,12 +26,17 @@ export const metricSet = [
   {
     keys: [
       'apm_output_events_total',
-      'apm_output_events_failed',
-      'apm_output_events_dropped',
       'apm_output_events_active',
       'apm_output_events_acked'
     ],
-    name: 'apm_output_events_rate'
+    name: 'apm_output_events_rate_success'
+  },
+  {
+    keys: [
+      'apm_output_events_failed',
+      'apm_output_events_dropped',
+    ],
+    name: 'apm_output_events_rate_failure'
   },
   {
     keys: ['apm_responses_failure', 'apm_responses_success'],

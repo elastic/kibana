@@ -13,12 +13,18 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
   const metricsToShow = [
     metrics.apm_cpu,
     metrics.apm_os_load,
-    metrics.apm_output_events_rate,
-    metrics.apm_requests,
-    metrics.apm_incoming_requests_size,
+
     metrics.apm_memory,
+    metrics.apm_requests,
+
+    metrics.apm_incoming_requests_size,
     metrics.apm_transformations,
-    metrics.apm_responses_success_failure
+
+    metrics.apm_output_events_rate_success,
+    metrics.apm_output_events_rate_failure,
+
+    metrics.apm_responses_valid,
+    metrics.apm_responses_errors,
   ];
 
   return (

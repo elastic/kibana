@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import { MonitoringTable } from '../../table';
 import {
   KuiTableRowCell,
@@ -13,48 +12,59 @@ import {
 } from '@kbn/ui-framework/components';
 import { EuiLink } from '@elastic/eui';
 import { Status } from './status';
-import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
+import { SORT_ASCENDING, SORT_DESCENDING, TABLE_ACTION_UPDATE_FILTER } from '../../../../common/constants';
+import { formatMetric } from '../../../lib/format_number';
 
 
-const filterFields = [ 'beat.name' ];
+const filterFields = [ 'name', 'type', 'version', 'output' ];
 const columns = [
-  { title: 'Name', sortKey: 'beat.name', sortOrder: SORT_ASCENDING },
-  { title: 'Version', sortKey: 'beat.version', sortOrder: SORT_ASCENDING },
-  { title: 'Error Count', sortKey: 'errorCount', sortOrder: SORT_DESCENDING },
+  { title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING },
+  { title: 'Output Enabled', sortKey: 'output' },
+  { title: 'Total Events Rate', sortKey: 'total_events_rate', secondarySortOrder: SORT_DESCENDING },
+  { title: 'Bytes Sent Rate', sortKey: 'bytes_sent_rate' },
+  { title: 'Output Errors', sortKey: 'errors' },
+  { title: 'Allocated Memory', sortKey: 'memory' },
+  { title: 'Version', sortKey: 'version' },
 ];
 const instanceRowFactory = (goToInstance) => {
   return function KibanaRow(props) {
+    const applyFiltering = filterText => () => {
+      props.dispatchTableAction(TABLE_ACTION_UPDATE_FILTER, filterText);
+    };
+
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-${props.beat.name}`}
+              onClick={() => goToInstance(props.uuid)}
+              data-test-subj={`apmLink-${props.name}`}
             >
-              { props.beat.name }
+              {props.name}
             </EuiLink>
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__version">
-            <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-${props.beat.version}`}
-            >
-              { props.beat.version }
-            </EuiLink>
-          </div>
+          {props.output}
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
-            <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-errors`}
-            >
-              { props.errorCount }
-            </EuiLink>
-          </div>
+          {formatMetric(props.total_events_rate, '', '/s')}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          {formatMetric(props.bytes_sent_rate, 'byte', '/s')}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          {formatMetric(props.errors, '0')}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          {formatMetric(props.memory, 'byte')}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          <EuiLink
+            onClick={applyFiltering(props.version)}
+          >
+            {props.version}
+          </EuiLink>
         </KuiTableRowCell>
       </KuiTableRow>
     );
