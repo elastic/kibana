@@ -40,7 +40,9 @@ import {
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
-export class InstructionSet extends React.Component {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+class InstructionSetUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -93,12 +95,18 @@ export class InstructionSet extends React.Component {
       case StatusCheckStates.FETCHING:
         return null; // Don't show any message while fetching or if you haven't yet checked.
       case StatusCheckStates.HAS_DATA:
-        message = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
+        message = this.props.statusCheckConfig.success
+          ? this.props.statusCheckConfig.success
+          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.successLabel',
+            defaultMessage: 'Success' });
         color = 'success';
         break;
       case StatusCheckStates.ERROR:
       case StatusCheckStates.NO_DATA:
-        message = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
+        message = this.props.statusCheckConfig.error
+          ? this.props.statusCheckConfig.error
+          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.noDataLabel',
+            defaultMessage: 'No data found' });
         color = 'warning';
         break;
     }
@@ -145,7 +153,10 @@ export class InstructionSet extends React.Component {
               onClick={onStatusCheck}
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
-              {statusCheckConfig.btnLabel || 'Check status'}
+              {statusCheckConfig.btnLabel || <FormattedMessage
+                id="kbn.home.tutorial.instractionSet.checkStatusButtonLabel"
+                defaultMessage="Check status"
+              />}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -157,7 +168,9 @@ export class InstructionSet extends React.Component {
     );
 
     return {
-      title: statusCheckConfig.title || 'Status Check',
+      title: statusCheckConfig.title || this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.statusCheckTitle',
+        defaultMessage: 'Status Check'
+      }),
       status: this.getStepStatus(statusCheckState),
       children: checkStatusStep,
       key: 'checkStatusStep'
@@ -208,16 +221,22 @@ export class InstructionSet extends React.Component {
         'fa-caret-right': !this.state.isParamFormVisible,
         'fa-caret-down': this.state.isParamFormVisible
       });
+      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.toggleAriaLabel',
+        defaultMessage: 'toggle command parameters visibility'
+      });
       paramsVisibilityToggle = (
         <div className="kuiSideBarCollapsibleTitle" style={{ cursor: 'pointer' }}>
           <div
-            aria-label="toggle command parameters visibility"
+            aria-label={ariaLabel}
             className="kuiSideBarCollapsibleTitle__label"
             onClick={this.handleToggleVisibility}
           >
             <span className={visibilityToggleClasses} />
             <span className="kuiSideBarCollapsibleTitle__text">
-              Customize your code snippets
+              <FormattedMessage
+                id="kbn.home.tutorial.instractionSet.customizeLabel"
+                defaultMessage="Customize your code snippets"
+              />
             </span>
           </div>
         </div>
@@ -291,7 +310,7 @@ const statusCheckConfigShape = PropTypes.shape({
   btnLabel: PropTypes.string,
 });
 
-InstructionSet.propTypes = {
+InstructionSetUi.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheckConfig: statusCheckConfigShape,
@@ -309,3 +328,5 @@ InstructionSet.propTypes = {
   setParameter: PropTypes.func,
   replaceTemplateStrings: PropTypes.func.isRequired,
 };
+
+export const InstructionSet = injectI18n(InstructionSetUi);
