@@ -28,7 +28,7 @@ import { tabifyGetColumns } from './_get_columns';
  * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
  * @param {boolean} partialRows - setting to true will not remove rows with missing values
  */
-function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false } = {}) {
+function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false, timeRange } = {}) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];
@@ -40,6 +40,15 @@ function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows
   this.aggStack = [...this.columns];
 
   this.rows = [];
+
+  // Extract the time range object if provided
+  if (timeRange) {
+    const timeRangeKey = Object.keys(timeRange)[0];
+    this.timeRange = timeRange[timeRangeKey];
+    if (this.timeRange) {
+      this.timeRange.name = timeRangeKey;
+    }
+  }
 }
 
 TabbedAggResponseWriter.prototype.isPartialRow = function (row) {

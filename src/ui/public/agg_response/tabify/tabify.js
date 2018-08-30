@@ -50,7 +50,7 @@ function collectBucket(write, bucket, key, aggScale) {
 
   switch (agg.type.type) {
     case 'buckets':
-      const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
+      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
         buckets.forEach(function (subBucket, key) {
           // if the bucket doesn't have value don't add it to the row
