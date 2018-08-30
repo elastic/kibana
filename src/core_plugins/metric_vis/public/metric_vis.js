@@ -100,6 +100,7 @@ function MetricVisProvider(Private) {
         }
       ])
     },
+    responseHandler: 'tabify',
   });
 }
 
