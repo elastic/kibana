@@ -27,8 +27,9 @@ const fsp = {
 export async function installBrowser(logger, browserConfig, browserType, installsPath) {
   const browser = BROWSERS_BY_TYPE[browserType];
   const pkg = browser.paths.packages.find(p => p.platforms.includes(process.platform));
+
   if (!pkg) {
-    throw new Error('Unsupported platform: platform');
+    throw new Error(`Unsupported platform: ${JSON.stringify(browser, null, 2)}`);
   }
 
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
