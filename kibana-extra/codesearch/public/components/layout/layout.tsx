@@ -34,6 +34,7 @@ import { Editor } from '../editor/editor';
 import { FileTree } from '../file_tree/file_tree';
 import { NotFound } from './not_found';
 
+import { PathTypes } from '../routes';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
@@ -140,6 +141,7 @@ export class LayoutPage extends React.Component<Props, State> {
         <EuiTab
           onClick={clickStructureTreeHandler}
           isSelected={Tabs.STRUCTURE_TREE === this.state.tab}
+          disabled={this.props.match.params.pathType === PathTypes.tree}
         >
           Structure Tree
         </EuiTab>
