@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OptInDetailsComponent should render normally 1`] = `
+exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiPortal>
   <EuiFlyout
     closeButtonAriaLabel="Closes this dialog"

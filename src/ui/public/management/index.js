@@ -26,6 +26,8 @@ export {
 
 export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
 
+export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
+
 export const management = new ManagementSection('management', {
   display: 'Management'
 });
