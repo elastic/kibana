@@ -178,6 +178,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
+        await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.security.logout();
         await PageObjects.security.login('mixeduser', '123456');
 

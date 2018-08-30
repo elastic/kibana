@@ -87,6 +87,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       // long it takes the home screen to query Elastic to see if it's a
       // new Kibana instance.
       if (isWelcomeShowing) {
+        log.debug('welcome screen showing when attempting logout');
         await PageObjects.home.hideWelcomeScreen();
       }
 
