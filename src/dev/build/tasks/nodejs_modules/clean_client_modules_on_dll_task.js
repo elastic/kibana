@@ -30,24 +30,24 @@ export const CleanClientModulesOnDLLTask = {
     const kbnPkg = config.getKibanaPkg();
     const kbnPkgDependencies = (kbnPkg && kbnPkg.dependencies) || {};
     const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(dep => !!dep.includes('-loader'));
-    const entries = [
+    const mainCodeEntries = [
       build.resolvePath('src/cli'),
       build.resolvePath('src/cli_keystore'),
       build.resolvePath('src/cli_plugin'),
       build.resolvePath('node_modules/x-pack'),
       ...kbnWebpackLoaders.map(loader => build.resolvePath(`node_modules/${loader}`))
     ];
-
     const discoveredPluginEntries = await globby([
       `${baseDir}/src/core_plugins/*/index.js`,
       `!${baseDir}/src/core_plugins/**/public`
     ]);
 
-    entries.push(...discoveredPluginEntries);
+    // Compose all the needed entries
+    const serverEntries = [ ...mainCodeEntries, ...discoveredPluginEntries];
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
-    const serverDependencies = await getDependencies(build, entries);
+    const serverDependencies = await getDependencies(build, serverEntries);
 
     // Consider this as our whiteList for the modules we can't delete
     const whiteListedModules = [
