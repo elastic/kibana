@@ -34,7 +34,6 @@ export function etcdMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Etcd server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
       values: {

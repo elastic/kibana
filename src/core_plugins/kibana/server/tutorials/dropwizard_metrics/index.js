@@ -34,7 +34,6 @@ export function dropwizardMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Dropwizard Java application.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.dropwizardMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `dropwizard` Metricbeat module fetches internal metrics from Dropwizard Java Application. \
 [Learn more]({learnMoreLink}).',
       values: {
