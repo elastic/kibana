@@ -26,6 +26,8 @@ import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
 import { buildQueryFilter } from 'ui/filter_manager/lib';
+import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
+import rison from 'rison-node';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -37,6 +39,7 @@ const vegaFunctions = {
   kibanaRemoveFilter: 'removeFilterHandler',
   kibanaRemoveAllFilters: 'removeAllFiltersHandler',
   kibanaSetTimeFilter: 'setTimeFilterHandler',
+  kibanaOpenDashboard: 'openDashboardHandler',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
@@ -69,6 +72,9 @@ export class VegaBaseView {
     this._queryfilter = opts.queryfilter;
     this._timefilter = opts.timefilter;
     this._findIndex = opts.findIndex;
+    this._kbnUrl = opts.kbnUrl;
+    this._savedObjectsClient = opts.savedObjectsClient;
+    this._getAppState = opts.getAppState;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -328,6 +334,124 @@ export class VegaBaseView {
     }
 
     return { from, to, mode };
+  }
+
+  /**
+   * Open dashboard with a given title
+   * @param {object} [options]
+   * @param {string} [options.id] dashboard ID (must be set, unless title is given)
+   * @param {string} [options.title] dashboard title
+   * @param {boolean} [options.openInSameWindow] by default, opens in a new tab
+   * @param {object|object[]} [options.addFilters] one or several filters to add
+   * @param {boolean} [options.clearFilters] if true, does not preserve current filters
+   * @param {object} [options.setTime] if set, overrides current time range with new values
+   * @param {number|string|Date} [options.setTime.start]
+   * @param {number|string|Date} [options.setTime.end]
+   */
+  async openDashboardHandler(options) {
+    // Ideally, this method should use internal Kibana API
+    // to create the encoded URL and pass proper state params.
+    // Unfortunately, Kibana is not well suited for that yet (per @gammon),
+    // who suggested to use the URL method (_g and _a parameters),
+    // as they tend to be stable between different versions.
+    // Also note that unless user sets dashboard id parameter, this code
+    // does a server-call to resolve title -> id. This is ok when opening
+    // dashboard in the same window, but will cause popup browser block
+    // if opening in a new tab.
+    // One solution is to allow src/core_plugins/kibana/public/dashboard/index.js
+    // to preserve the _a and _g params when handling LANDING_PAGE_PATH with tile=...
+    try {
+      options = options || {};
+
+      let dashboardId = options.id;
+      if (!dashboardId) {
+        if (!options.title) {
+          throw new Error('kibanaOpenDashboard() cannot open dashboard without an id or title');
+        }
+        dashboardId = await this._titleToDashboardId(options.title);
+      }
+
+      const appState = this._getAppState();
+
+      const globalData = {};
+      const appData = {};
+
+      const time = options.setTime;
+      if (!time) {
+        // Preserve current dashboard timerange
+        const tf = this._timefilter;
+        globalData.time = {
+          from: tf.time.from,
+          to: tf.time.to,
+        };
+      } else {
+        if (typeof time !== 'object') {
+          throw new Error('kibanaOpenDashboard() setTime parameter must be an object with start, end');
+        }
+        // set new time values
+        globalData.time = VegaBaseView._parseTimeRange(time.start, time.end);
+      }
+
+      if (!options.clearFilters) {
+        // Preserve current dashboard filters and query string
+        if (appState.filters && appState.filters.length > 0) {
+          appData.filters = appState.filters;
+        }
+        if (appState.query.query) {
+          appData.query = appState.query;
+        }
+      }
+
+      let addFilters = options.addFilters;
+      if (addFilters) {
+        if (typeof addFilters !== 'object') {
+          throw new Error(`"addFilters" parameter must be an object or an array of objects`);
+        }
+        if (!Array.isArray(addFilters)) {
+          addFilters = [addFilters];
+        }
+        const indexId = await this._findIndex();
+        addFilters = addFilters.map(query => buildQueryFilter(query, indexId));
+        appData.filters = [...(appData.filters || []), ...addFilters];
+      }
+
+      const gParam = rison.encode(globalData);
+      const aParam = rison.encode(appData);
+
+      const url = `${createDashboardEditUrl(dashboardId)}?_g=${gParam}&_a=${aParam}`;
+
+      if (!options.openInSameWindow) {
+        window.open('#' + url, '_blank');
+      } else {
+        this._kbnUrl.change(url);
+      }
+    } catch (err) {
+      this.onError(err);
+    }
+  }
+
+  async _titleToDashboardId(title) {
+    // Adapted from src/core_plugins/kibana/public/dashboard/index.js
+    const results = await this._savedObjectsClient.find({
+      search: `"${title}"`,
+      search_fields: 'title',
+      type: 'dashboard',
+    });
+
+    // The search isn't an exact match,
+    // lets see if we can find a single exact match to use
+    let matchingDashboards = results.savedObjects.filter(
+      dashboard => dashboard.attributes.title === title);
+    if (matchingDashboards.length === 0) {
+      const titleLower = title.toLowerCase();
+      matchingDashboards = results.savedObjects.filter(
+        dashboard => dashboard.attributes.title.toLowerCase() === titleLower);
+    }
+    if (matchingDashboards.length !== 1) {
+      throw new Error(`Unable to find dashboard "${title}"`);
+    }
+
+    return matchingDashboards[0].id;
   }
 
   /**

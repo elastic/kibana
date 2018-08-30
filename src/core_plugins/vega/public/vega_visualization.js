@@ -23,7 +23,7 @@ import { VegaMapView } from './vega_view/vega_map_view';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 
 // $rootScope is for the removeFilter() workaround, see vega_view/vega_base_view.js
-export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, $rootScope) {
+export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, $rootScope, kbnUrl, getAppState) {
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const notify = new Notifier({ location: 'Vega' });
@@ -94,6 +94,9 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
           timefilter: this._vis.API.timeFilter,
           findIndex: this.findIndex.bind(this),
           $rootScope,
+          kbnUrl,
+          savedObjectsClient,
+          getAppState,
         };
 
         if (vegaParser.useMap) {
