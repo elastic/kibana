@@ -45,6 +45,16 @@ export const esPersistMiddleware = ({ getState }) => next => action => {
           title: `Couldn't save your changes to Elasticsearch`,
         });
       }
+      if (err.response.status === 413) {
+        return notify.error(
+          `The server gave a response that the workpad data was too large. This
+          usually means uploaded image assets that are too large for Kibana or
+          a proxy. Try removing some assets in the asset manager.`,
+          {
+            title: `Couldn't save your changes to Elasticsearch`,
+          }
+        );
+      }
       return notify.error(err.response, {
         title: `Couldn't update workpad`,
       });
