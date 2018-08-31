@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { AggResponseIndexProvider } from '../../agg_response';
+import { tabifyAggResponse } from '../../agg_response/tabify';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 import { getTime } from 'ui/timefilter/get_time';
 
-const TabifyResponseHandlerProvider = function (Private) {
-  const aggResponse = Private(AggResponseIndexProvider);
+const TabifyResponseHandlerProvider = function () {
 
   return {
     name: 'tabify',
@@ -30,7 +29,7 @@ const TabifyResponseHandlerProvider = function (Private) {
       return new Promise((resolve) => {
         const time = getTime(vis.indexPattern, vis.filters.timeRange);
 
-        const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
+        const tableGroup = tabifyAggResponse(vis.getAggConfig(), response, {
           metricsAtAllLevels: vis.isHierarchical(),
           partialRows: vis.params.showPartialRows,
           timeRange: time ? time.range : undefined,
