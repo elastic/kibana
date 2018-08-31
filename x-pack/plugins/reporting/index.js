@@ -34,8 +34,6 @@ export const reporting = (kibana) => {
     uiExports: {
       navbarExtensions: [
         'plugins/reporting/controls/discover',
-        'plugins/reporting/controls/visualize',
-        'plugins/reporting/controls/dashboard',
       ],
       shareContextMenuExtensions: [
         'plugins/reporting/share_context_menu/register_reporting',

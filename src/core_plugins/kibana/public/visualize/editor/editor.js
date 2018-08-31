@@ -165,6 +165,7 @@ function VisEditor(
         objectId: savedVis.id,
         objectType: 'visualization',
         shareContextMenuExtensions,
+        title: savedVis.title,
       });
     }
   }, {
@@ -195,14 +196,6 @@ function VisEditor(
 
   const $appStatus = this.appStatus = {
     dirty: !savedVis.id
-  };
-
-  this.getSharingTitle = () => {
-    return savedVis.title;
-  };
-
-  this.getSharingType = () => {
-    return 'visualization';
   };
 
   if (savedVis.id) {

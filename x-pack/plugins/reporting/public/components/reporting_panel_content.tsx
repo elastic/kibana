@@ -13,10 +13,11 @@ declare module '@elastic/eui' {
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
-import rison from 'rison-node';
 import chrome from 'ui/chrome';
-import { QueryString } from 'ui/utils/query_string';
+import { KFetchError } from 'ui/kfetch/kfetch_error';
+import { toastNotifications } from 'ui/notify';
 import url from 'url';
+import { reportingClient } from '../lib/reporting_client';
 
 import { unhashUrl } from 'ui/state_management/state_hashing';
 
@@ -96,7 +97,9 @@ export class ReportingPanelContent extends Component<Props, State> {
         </EuiFormRow>
 
         <EuiFormRow>
-          <EuiButton fill>Generate {this.props.reportType}</EuiButton>
+          <EuiButton fill onClick={this.createReportingJob}>
+            Generate {this.props.reportType}
+          </EuiButton>
         </EuiFormRow>
 
         <EuiFormRow>
@@ -108,7 +111,7 @@ export class ReportingPanelContent extends Component<Props, State> {
           </EuiText>
         </EuiFormRow>
 
-        <EuiCopy textToCopy={this.getAbsoluteReportGenerationUrl()}>
+        <EuiCopy textToCopy={this.getAbsoluteReportGenerationUrl()} anchorClassName="fullWidth">
           {(copy: () => void) => (
             <EuiFormRow>
               <EuiButton onClick={copy}>Copy POST URL</EuiButton>
@@ -152,10 +155,14 @@ export class ReportingPanelContent extends Component<Props, State> {
   };
 
   private getAbsoluteReportGenerationUrl = () => {
-    return url.resolve(window.location.href, this.getRelativeReportGenerationUrl());
+    const relativePath = reportingClient.getReportingJobPath(
+      'printablePdf',
+      this.getReportingJobParams()
+    );
+    return url.resolve(window.location.href, relativePath);
   };
 
-  private getRelativeReportGenerationUrl = () => {
+  private getReportingJobParams = () => {
     // Replace hashes with original RISON values.
     const unhashedUrl = unhashUrl(window.location.href, this.props.getUnhashableStates());
     const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
@@ -165,18 +172,43 @@ export class ReportingPanelContent extends Component<Props, State> {
         ? moment.tz.guess()
         : chrome.getUiSettingsClient().get('dateFormat:tz');
 
-    const jobParams = {
+    return {
       title: this.props.title,
       objectType: this.props.objectType,
       browserTimezone,
       relativeUrls: [relativeUrl],
       layout: this.getLayout(),
     };
+  };
 
-    const reportPrefix = chrome.addBasePath('/api/reporting/generate');
-    return `${reportPrefix}/printablePdf?${QueryString.param(
-      'jobParams',
-      rison.encode(jobParams)
-    )}`;
+  private createReportingJob = () => {
+    return reportingClient
+      .createReportingJob('printablePdf', this.getReportingJobParams())
+      .then(() => {
+        toastNotifications.addSuccess({
+          title: `Queued report for ${this.props.objectType}`,
+          text: 'Track its progress in Management',
+          'data-test-subj': 'queueReportSuccess',
+        });
+      })
+      .catch((kfetchError: KFetchError) => {
+        if (kfetchError.message === 'not exportable') {
+          return toastNotifications.addWarning({
+            title: 'Only saved dashboards can be exported',
+            text: 'Please save your work first',
+          });
+        }
+
+        const defaultMessage =
+          kfetchError.res.status === 403
+            ? `You don't have permission to generate this report.`
+            : `Can't reach the server. Please try again.`;
+
+        toastNotifications.addDanger({
+          title: 'Reporting error',
+          text: kfetchError.message || defaultMessage,
+          'data-test-subj': 'queueReportError',
+        });
+      });
   };
 }
