@@ -20,6 +20,7 @@ import {
   CREATE_JOB_START,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_FAILURE,
+  CLEAR_CREATE_JOB_ERRORS,
 } from '../action_types';
 
 export const createJob = (jobConfig) => async (dispatch) => {
@@ -69,5 +70,11 @@ export const createJob = (jobConfig) => async (dispatch) => {
   getRouter().history.push({
     pathname: CRUD_APP_BASE_PATH,
     search: `?job=${jobConfig.id}`,
+  });
+};
+
+export const clearCreateJobErrors = () => (dispatch) => {
+  dispatch({
+    type: CLEAR_CREATE_JOB_ERRORS,
   });
 };

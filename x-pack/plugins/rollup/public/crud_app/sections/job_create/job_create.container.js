@@ -14,6 +14,7 @@ import {
 
 import {
   createJob,
+  clearCreateJobErrors,
 } from '../../store/actions';
 
 const mapStateToProps = (state) => {
@@ -27,6 +28,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     createJob: jobConfig => {
       dispatch(createJob(jobConfig));
+    },
+    clearCreateJobErrors: () => {
+      dispatch(clearCreateJobErrors());
     },
   };
 };

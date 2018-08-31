@@ -13,37 +13,37 @@ import {
   SORT_CHANGED,
 } from '../action_types';
 
-export const applyFilters = () => async (dispatch) => {
+export const applyFilters = () => (dispatch) => {
   dispatch({
     type: APPLY_FILTERS,
   });
 };
 
-export const filtersApplied = () => async (dispatch) => {
+export const filtersApplied = () => (dispatch) => {
   dispatch({
     type: FILTERS_APPLIED,
   });
 };
 
-export const filterChanged = () => async (dispatch) => {
+export const filterChanged = () => (dispatch) => {
   dispatch({
     type: FILTER_CHANGED,
   });
 };
 
-export const pageChanged = () => async (dispatch) => {
+export const pageChanged = () => (dispatch) => {
   dispatch({
     type: PAGE_CHANGED,
   });
 };
 
-export const pageSizeChanged = () => async (dispatch) => {
+export const pageSizeChanged = () => (dispatch) => {
   dispatch({
     type: PAGE_SIZE_CHANGED,
   });
 };
 
-export const sortChanged = () => async (dispatch) => {
+export const sortChanged = () => (dispatch) => {
   dispatch({
     type: SORT_CHANGED,
   });
