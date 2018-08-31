@@ -7,8 +7,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCodeBlock,
-  EuiFieldText,
   EuiHorizontalRule,
+  EuiFormRow,
 } from '@elastic/eui';
 import { Popover } from '../popover';
 import { Clipboard } from '../clipboard';
@@ -29,39 +29,42 @@ export class WorkpadExport extends React.PureComponent {
     const pdfUrl = this.props.getExportUrl('pdf');
     return (
       <div>
-        Export this workpad as a PDF. You'll be notified when the PDF is complete.
-        <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => {
-                this.exportPdf();
-                closePopover();
-              }}
-            >
-              Export as PDF
-            </EuiButton>
+          <EuiFlexItem grow>
+            <EuiFormRow label="Click below to create a PDF. You'll be notified when the export is complete">
+              <EuiButton
+                onClick={() => {
+                  this.exportPdf();
+                  closePopover();
+                }}
+              >
+                Export as PDF
+              </EuiButton>
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="half" />
-        To generate a PDF from a script or with Watcher, use this URL.
-        <EuiSpacer />
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiFieldText aria-label="PDF Generation URL" value={pdfUrl} readOnly />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Clipboard
-              content={pdfUrl}
-              onCopy={() => {
-                this.props.onCopy('pdf');
-                closePopover();
-              }}
-            >
-              <EuiButtonIcon aria-label="Copy to clipboard" iconType="copy" />
-            </Clipboard>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFormRow label="To generate a PDF from a script or with Watcher, use this URL.">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem style={{ overflow: 'auto' }}>
+              <EuiCodeBlock style={{ whiteSpace: 'nowrap' }} paddingSize="s">
+                {pdfUrl}
+              </EuiCodeBlock>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <Clipboard
+                content={pdfUrl}
+                onCopy={() => {
+                  this.props.onCopy('pdf');
+                  closePopover();
+                }}
+              >
+                <EuiButtonIcon aria-label="Copy to clipboard" iconType="copy" />
+              </Clipboard>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       </div>
     );
   };
