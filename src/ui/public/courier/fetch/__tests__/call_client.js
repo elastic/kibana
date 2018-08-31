@@ -42,7 +42,7 @@ describe('callClient', () => {
   let esShouldError;
   let esPromiseAbortSpy;
 
-  const createSearchRequest = (id, overrides = {}) => {
+  const createSearchRequest = (id, overrides = {}, errorHandler = () => {}) => {
     const { source: overrideSource, ...rest } = overrides;
 
     const source = {
@@ -51,8 +51,6 @@ describe('callClient', () => {
       getField: () => 'indexPattern',
       ...overrideSource
     };
-
-    const errorHandler = () => {};
 
     const searchRequest = new SearchRequest({ source, errorHandler, ...rest });
     searchRequest.__testId__ = id;
@@ -113,39 +111,56 @@ describe('callClient', () => {
 
     it(`resolves the promise with the 'responses' property of the es.msearch() result`, () => {
       searchRequests = [ createSearchRequest(1) ];
-      const callingClient = callClient(searchRequests);
 
-      return callingClient.then(results => {
+      return callClient(searchRequests).then(results => {
         expect(results).to.eql([1]);
       });
     });
 
-    it(`resolves the promise despite the request failing`, () => {
-      addSearchStrategy({
-        id: 'fail',
-        isViable: indexPattern => {
-          return indexPattern.type === 'fail';
-        },
-        search: () => {
-          return {
-            searching: Promise.reject(new Error('Search failed')),
-            failedSearchRequests: [],
-            abort: () => {},
-          };
-        },
+    describe('for failing requests', () => {
+      beforeEach(() => {
+        addSearchStrategy({
+          id: 'fail',
+          isViable: indexPattern => {
+            return indexPattern.type === 'fail';
+          },
+          search: () => {
+            return {
+              searching: Promise.reject(new Error('Search failed')),
+              failedSearchRequests: [],
+              abort: () => {},
+            };
+          },
+        });
       });
 
-      const searchRequestFail = createSearchRequest('fail', {
-        source: {
-          getField: () => ({ type: 'fail' }),
-        },
+      it(`still resolves the promise in spite of the failure`, () => {
+        const searchRequestFail = createSearchRequest('fail', {
+          source: {
+            getField: () => ({ type: 'fail' }),
+          },
+        });
+
+        searchRequests = [ searchRequestFail ];
+
+        return callClient(searchRequests).then(results => {
+          expect(results).to.eql(undefined);
+        });
       });
 
-      searchRequests = [ searchRequestFail ];
-      const callingClient = callClient(searchRequests);
+      it(`calls the errorHandler provided to the searchRequest`, () => {
+        const errorHandlerSpy = sinon.spy();
+        const searchRequestFail = createSearchRequest('fail', {
+          source: {
+            getField: () => ({ type: 'fail' }),
+          },
+        }, errorHandlerSpy);
 
-      return callingClient.then(results => {
-        expect(results).to.eql(undefined);
+        searchRequests = [ searchRequestFail ];
+
+        return callClient(searchRequests).then(() => {
+          sinon.assert.calledOnce(errorHandlerSpy);
+        });
       });
     });
   });
@@ -153,11 +168,9 @@ describe('callClient', () => {
   describe('implementation', () => {
     it('calls es.msearch() once, regardless of number of searchRequests', () => {
       expect(fakeSearch.callCount).to.be(0);
-
       searchRequests = [ createSearchRequest(), createSearchRequest(), createSearchRequest() ];
-      const callingClient = callClient(searchRequests);
 
-      return callingClient.then(() => {
+      return callClient(searchRequests).then(() => {
         expect(fakeSearch.callCount).to.be(1);
       });
     });
@@ -167,8 +180,10 @@ describe('callClient', () => {
       const searchRequest = createSearchRequest();
       searchRequest.whenAborted = whenAbortedSpy;
       searchRequests = [ searchRequest ];
-      await callClient(searchRequests);
-      expect(whenAbortedSpy.callCount).to.be(1);
+
+      return callClient(searchRequests).then(() => {
+        expect(whenAbortedSpy.callCount).to.be(1);
+      });
     });
 
     it(`calls searchRequest.handleFailure() with the ES error that's thrown`, async () => {
@@ -177,13 +192,11 @@ describe('callClient', () => {
 
       const handleFailureSpy = sinon.spy();
       searchRequest.handleFailure = handleFailureSpy;
-
       searchRequests = [ searchRequest ];
-      try {
-        await callClient(searchRequests);
-      } catch(e) {
+
+      return callClient(searchRequests).then(() => {
         sinon.assert.calledWith(handleFailureSpy, 'fake es error');
-      }
+      });
     });
   });
 
@@ -196,9 +209,8 @@ describe('callClient', () => {
       });
 
       searchRequests = [ searchRequest ];
-      const callingClient = callClient(searchRequests);
 
-      return callingClient.then(results => {
+      return callClient(searchRequests).then(results => {
         // The result is ABORTED because it was never included in the body sent to es.msearch().
         expect(results).to.eql([ ABORTED ]);
       });
