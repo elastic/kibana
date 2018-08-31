@@ -128,6 +128,7 @@ exports[`render 1`] = `
   </EuiFormRow>
   <EuiCopy
     afterMessage="Copied"
+    anchorClassName="sharePanel__copyAnchor"
     textToCopy="about:blank"
   />
 </EuiForm>
@@ -260,6 +261,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   </EuiFormRow>
   <EuiCopy
     afterMessage="Copied"
+    anchorClassName="sharePanel__copyAnchor"
     textToCopy="about:blank"
   />
 </EuiForm>

@@ -103,17 +103,19 @@ export class UrlPanelContent extends Component<Props, State> {
 
         {this.renderShortUrlSwitch()}
 
-        <EuiCopy textToCopy={this.state.url}>
+        <EuiCopy textToCopy={this.state.url} anchorClassName="sharePanel__copyAnchor">
           {(copy: () => void) => (
-            <EuiButton
-              fill
-              onClick={copy}
-              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-              data-share-url={this.state.url}
-              data-test-subj="copyShareUrlButton"
-            >
-              Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
-            </EuiButton>
+            <EuiFormRow>
+              <EuiButton
+                fill
+                onClick={copy}
+                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+                data-share-url={this.state.url}
+                data-test-subj="copyShareUrlButton"
+              >
+                Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
+              </EuiButton>
+            </EuiFormRow>
           )}
         </EuiCopy>
       </EuiForm>

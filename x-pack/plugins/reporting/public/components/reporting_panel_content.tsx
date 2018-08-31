@@ -111,7 +111,10 @@ export class ReportingPanelContent extends Component<Props, State> {
           </EuiText>
         </EuiFormRow>
 
-        <EuiCopy textToCopy={this.getAbsoluteReportGenerationUrl()} anchorClassName="fullWidth">
+        <EuiCopy
+          textToCopy={this.getAbsoluteReportGenerationUrl()}
+          anchorClassName="sharePanel__copyAnchor"
+        >
           {(copy: () => void) => (
             <EuiFormRow>
               <EuiButton onClick={copy}>Copy POST URL</EuiButton>
