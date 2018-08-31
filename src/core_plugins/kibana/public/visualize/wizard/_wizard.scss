@@ -26,7 +26,7 @@
 /**
  * 1. Hack in some padding for these panels.
  */
-.visWizard__paginatedSelectableList,
+.visWizard__list--paginated--selectable,
 .visWizard__savedObjectFinder {
   padding: $euiSizeS; /* 1 */
 }

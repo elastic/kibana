@@ -35,7 +35,7 @@ vis-editor-agg-group {
 
 .vis-editor-agg-group {
   @include flex-parent(0, 1, auto);
-  color: $euiColorMediumShade;
+  color: $euiColorDarkShade;
 }
 
 .vis-editor-agg-header {
