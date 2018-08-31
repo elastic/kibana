@@ -87,18 +87,18 @@ export async function buildDistributables(options) {
     buildDefaultDist,
   });
 
-  // /**
-  //  * verify, reset, and initialize the build environment
-  //  */
+  /**
+   * verify, reset, and initialize the build environment
+   */
   await run(VerifyEnvTask);
   await run(CleanTask);
   await run(BootstrapTask);
   await run(downloadFreshNode ? DownloadNodeBuildsTask : VerifyExistingNodeBuildsTask);
   await run(ExtractNodeBuildsTask);
-  //
-  // /**
-  //  * run platform-generic build tasks
-  //  */
+
+  /**
+   * run platform-generic build tasks
+   */
   await run(CopySourceTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
