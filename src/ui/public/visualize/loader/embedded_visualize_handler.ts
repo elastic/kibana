@@ -95,9 +95,7 @@ export class EmbeddedVisualizeHandler {
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
-    if (process.env.NODE_ENV !== 'production') {
-      element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
-    }
+    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
@@ -232,9 +230,6 @@ export class EmbeddedVisualizeHandler {
   };
 
   private incrementRenderingCount = () => {
-    if (process.env.NODE_ENV === 'production') {
-      return;
-    }
     const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
     this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
   };
