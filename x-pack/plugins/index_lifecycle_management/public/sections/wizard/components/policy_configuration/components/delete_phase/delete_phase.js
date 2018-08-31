@@ -21,7 +21,7 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiDescribedFormGroup,
-  EuiBetaBadge,
+  EuiIcon,
   EuiButton,
 } from '@elastic/eui';
 import {
@@ -63,7 +63,7 @@ export class DeletePhase extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Delete phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBetaBadge label="Enabled" iconType="check" className="eui-alignMiddle" />
+              <EuiIcon label="Enabled" type="checkInCircleFilled" color="blue" className="eui-alignMiddle" />
             ) : null}
           </div>
         }
