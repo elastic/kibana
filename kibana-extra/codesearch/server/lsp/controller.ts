@@ -28,7 +28,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   private languageServers: { [name: string]: ILanguageServerHandler } = {};
   private readonly targetHost: string;
   private log: Log;
-  private readonly detach: boolean = !!process.env.LSP_DETACH;
+  private readonly detach: boolean = process.env.LSP_DETACH === 'true';
   private readonly server: Hapi.Server;
 
   constructor(targetHost: string, server: Hapi.Server) {
