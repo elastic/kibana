@@ -20,13 +20,11 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 import pieTemplate from './editors/pie.html';
 import image from './images/icon-donut.svg';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
@@ -100,6 +98,6 @@ export default function HistogramVisType(Private) {
       ])
     },
     hierarchicalData: true,
-    responseConverter: buildHierarchicalData,
+    responseHandler: 'vislib_slices',
   });
 }

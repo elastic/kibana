@@ -86,9 +86,7 @@ export class VisualizeDataLoader {
       this.previousRequestHandlerResponse = requestHandlerResponse;
 
       if (!canSkipResponseHandler) {
-        this.visData = await Promise.resolve(
-          this.responseHandler(this.vis, requestHandlerResponse)
-        );
+        this.visData = await Promise.resolve(this.responseHandler(requestHandlerResponse));
       }
       return this.visData;
     } catch (e) {

@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { tabifyAggResponse } from '../../agg_response/tabify';
 import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
@@ -26,18 +25,9 @@ const LegacyResponseHandlerProvider = function () {
 
   return {
     name: 'legacy',
-    handler: function (vis, response) {
+    handler: function (table) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
-        const metricsAtAllLevels = vis.params.hasOwnProperty('showMetricsAtAllLevels') ?
-          vis.params.showMetricsAtAllLevels : vis.isHierarchical();
-
-        const table = tabifyAggResponse(vis.getAggConfig(), response, {
-          metricsAtAllLevels: metricsAtAllLevels,
-          partialRows: vis.params.showPartialRows,
-        });
-
-        const asAggConfigResults = _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false);
 
         const splitColumn = table.columns.find(column => column.aggConfig.schema.name === 'split');
         const numberOfMetrics = table.columns.filter(column => column.aggConfig.type.type === 'metrics').length;
@@ -83,7 +73,7 @@ const LegacyResponseHandlerProvider = function () {
               if (column.aggConfig.type.type === 'buckets') {
                 previousSplitAgg = aggConfigResult;
               }
-              return asAggConfigResults ? aggConfigResult : value;
+              return aggConfigResult;
             });
 
             converted.tables[tableIndex].tables[0].rows.push(newRow);
@@ -100,7 +90,7 @@ const LegacyResponseHandlerProvider = function () {
                 if (column.aggConfig.type.type === 'buckets') {
                   previousSplitAgg = aggConfigResult;
                 }
-                return asAggConfigResults ? aggConfigResult : value;
+                return aggConfigResult;
               });
             }),
             aggConfig: (column) => column.aggConfig
