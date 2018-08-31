@@ -399,7 +399,7 @@ export class JobCreateUi extends Component {
           <EuiPageBody>
             <EuiPageContent
               horizontalPosition="center"
-              style={{ maxWidth: 1200, width: '100%', marginTop: 16, marginBottom: 16 }}
+              className="rollupJobWizardPage"
             >
               <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
               <EuiSpacer size="xs" />

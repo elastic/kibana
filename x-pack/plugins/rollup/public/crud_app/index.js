@@ -17,6 +17,7 @@ import { setHttpClient } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
+import './index.less';
 
 const esSection = management.getSection('elasticsearch');
 
