@@ -33,10 +33,9 @@ export function makeFakeXAspect() {
     type: allAgg
   };
 
-    return {
-      i: -1,
-      aggConfig: fake,
-      title: fake.makeLabel(),
-    };
+  return {
+    i: -1,
+    aggConfig: fake,
+    title: fake.makeLabel(),
   };
 }
