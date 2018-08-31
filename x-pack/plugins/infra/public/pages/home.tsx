@@ -40,7 +40,7 @@ export class HomePage extends React.PureComponent {
                         loadSuggestions={loadSuggestions}
                         onChange={setFilterQueryDraftFromKueryExpression}
                         onSubmit={applyFilterQueryFromKueryExpression}
-                        placeholder="Search for log entries... (e.g. host.name:host-1)"
+                        placeholder="Search for infrastructure data... (e.g. host.name:host-1)"
                         suggestions={suggestions}
                         value={filterQueryDraft ? filterQueryDraft.expression : ''}
                       />
