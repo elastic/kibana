@@ -67,12 +67,6 @@ export class DllCompiler {
     await writeFileAsync(filePath, content, 'utf8');
   }
 
-  getDllBundlePath() {
-    return this.resolvePath(
-      `${this.rawDllConfig.entryName}${this.rawDllConfig.dllExt}`
-    );
-  }
-
   getEntryPath() {
     return this.resolvePath(
       `${this.rawDllConfig.entryName}${this.rawDllConfig.entryExt}`
