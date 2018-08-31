@@ -22,13 +22,26 @@ import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
+let currentRequests = 0;
+let latestCall = 0;
+
+function getData() {
+  const data = {};
+
+  data.seriesToPlot = [];
+
+  // default values, will update on every re-render
+  data.layoutCellsPerChart = 12;
+  data.tooManyBuckets = false;
+  data.timeFieldName = 'timestamp';
+
+  return data;
+}
+
 export function explorerChartsContainerDataFactory(
   mlSelectSeverityService,
   callback
 ) {
-  const $scope = {};
-
-  $scope.seriesToPlot = [];
   const $chartContainer = $('.explorer-charts');
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
@@ -37,13 +50,14 @@ export function explorerChartsContainerDataFactory(
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
 
-  // default values, will update on every re-render
-  $scope.chartsPerRow = 1;
-  $scope.layoutCellsPerChart = 12;
-  $scope.tooManyBuckets = false;
-  callback($scope);
+  callback(_.cloneDeep(getData()));
 
-  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+  const anomalyDataChangeListener = function (anomalyRecordsOrig, earliestMs, latestMs) {
+    const anomalyRecords = _.cloneDeep(anomalyRecordsOrig);
+    const data = getData();
+    const t = new Date().getTime();
+    latestCall = t + 0;
+
     const threshold = mlSelectSeverityService.state.get('threshold');
     const filteredRecords = _.filter(anomalyRecords, (record) => {
       return Number(record.record_score) >= threshold.val;
@@ -53,8 +67,7 @@ export function explorerChartsContainerDataFactory(
     const chartsContainerWidth = Math.floor($chartContainer.width());
     const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), 4);
 
-    $scope.chartsPerRow = chartsPerRow;
-    $scope.layoutCellsPerChart = 12 / $scope.chartsPerRow;
+    data.layoutCellsPerChart = 12 / chartsPerRow;
 
     // Build the data configs of the anomalies to be displayed.
     // TODO - implement paging?
@@ -64,17 +77,20 @@ export function explorerChartsContainerDataFactory(
     const seriesConfigs = buildDataConfigs(recordsToPlot);
 
     // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
-    $scope.tooManyBuckets = false;
-    const chartRange = calculateChartRange(seriesConfigs, earliestMs, latestMs,
-      Math.floor(chartsContainerWidth / chartsPerRow), recordsToPlot);
+    data.tooManyBuckets = false;
+    const { chartRange, tooManyBuckets } = calculateChartRange(seriesConfigs, earliestMs, latestMs,
+      Math.floor(chartsContainerWidth / chartsPerRow), recordsToPlot, data.timeFieldName);
+    data.tooManyBuckets = tooManyBuckets;
 
     // initialize the charts with loading indicators
-    $scope.seriesToPlot = seriesConfigs.map(config => ({
+    data.seriesToPlot = seriesConfigs.map(config => ({
       ...config,
       loading: true,
       chartData: null
     }));
-    callback($scope);
+    
+    callback(_.cloneDeep(data));
+    currentRequests = currentRequests + 1;
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
@@ -247,6 +263,15 @@ export function explorerChartsContainerDataFactory(
 
     Promise.all(seriesPromises)
       .then(response => {
+        currentRequests = currentRequests - 1;
+        const delta = latestCall - t;
+        if (currentRequests > 0) {
+          console.error('RACE CONDITION');
+        }
+        if (delta > 0) {
+          return;
+        }
+
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {
@@ -255,7 +280,7 @@ export function explorerChartsContainerDataFactory(
         }, []);
         const overallChartLimits = chartLimits(allDataPoints);
 
-        $scope.seriesToPlot = response.map((d, i) => ({
+        data.seriesToPlot = response.map((d, i) => ({
           ...seriesConfigs[i],
           loading: false,
           chartData: processedData[i],
@@ -265,7 +290,7 @@ export function explorerChartsContainerDataFactory(
           selectedLatest: latestMs,
           chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i])
         }));
-        callback($scope);
+        callback(_.cloneDeep(data));
       })
       .catch(error => {
         console.error(error);
@@ -412,7 +437,8 @@ export function explorerChartsContainerDataFactory(
     return anomalyRecords.map(buildConfig);
   }
 
-  function calculateChartRange(seriesConfigs, earliestMs, latestMs, chartWidth, recordsToPlot) {
+  function calculateChartRange(seriesConfigs, earliestMs, latestMs, chartWidth, recordsToPlot, timeFieldName) {
+    let tooManyBuckets = false;
     // Calculate the time range for the charts.
     // Fit in as many points in the available container width plotted at the job bucket span.
     const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
@@ -434,16 +460,16 @@ export function explorerChartsContainerDataFactory(
     };
 
     if (plotPoints > CHART_MAX_POINTS) {
-      $scope.tooManyBuckets = true;
+      tooManyBuckets = true;
       // For each series being plotted, display the record with the highest score if possible.
       const maxTimeSpan = maxBucketSpanMs * CHART_MAX_POINTS;
-      let minMs = recordsToPlot[0][$scope.timeFieldName];
-      let maxMs = recordsToPlot[0][$scope.timeFieldName];
+      let minMs = recordsToPlot[0][timeFieldName];
+      let maxMs = recordsToPlot[0][timeFieldName];
 
       _.each(recordsToPlot, (record) => {
         const diffMs = maxMs - minMs;
         if (diffMs < maxTimeSpan) {
-          const recordTime = record[$scope.timeFieldName];
+          const recordTime = record[timeFieldName];
           if (recordTime < minMs) {
             if (maxMs - recordTime <= maxTimeSpan) {
               minMs = recordTime;
@@ -467,7 +493,10 @@ export function explorerChartsContainerDataFactory(
       chartRange = { min: minMs, max: maxMs };
     }
 
-    return chartRange;
+    return {
+      chartRange,
+      tooManyBuckets
+    };
   }
 
   return anomalyDataChangeListener;

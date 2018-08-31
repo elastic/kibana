@@ -7,7 +7,7 @@
 
 
 import d3 from 'd3';
-import { calculateTextWidth } from 'plugins/ml/util/string_utils';
+import { calculateTextWidth } from '../util/string_utils';
 import moment from 'moment';
 
 const MAX_LABEL_WIDTH = 100;

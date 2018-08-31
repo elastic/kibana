@@ -22,9 +22,11 @@ function CompiledTooltip({
       job ID: {jobId}<br />
       aggregation interval: {aggregationInterval}<br />
       chart function: {chartFunction}
-      {entityFields.map((entityField) => {
+      {entityFields.map((entityField, i) => {
         return (
-          <span><br />{entityField.fieldName}: {entityField.fieldValue}</span>
+          <span key={`${entityField.fieldName}_${entityField.fieldValue}_${i}`}>
+            <br />{entityField.fieldName}: {entityField.fieldValue}
+          </span>
         );
       })}
     </div>
@@ -43,8 +45,7 @@ export function ExplorerChartsContainer({
   seriesToPlot,
   layoutCellsPerChart,
   tooManyBuckets,
-  mlSelectSeverityService,
-  mlChartTooltipService
+  mlSelectSeverityService
 }) {
   return (
     <div className="explorer-charts">
@@ -96,7 +97,6 @@ export function ExplorerChartsContainer({
               <ExplorerChart
                 seriesConfig={series}
                 mlSelectSeverityService={mlSelectSeverityService}
-                mlChartTooltipService={mlChartTooltipService}
               />
             </div>
           );
@@ -108,7 +108,8 @@ export function ExplorerChartsContainer({
 ExplorerChartsContainer.propTypes = {
   exploreSeries: PropTypes.func.isRequired,
   seriesToPlot: PropTypes.array.isRequired,
-  chartsPerRow: PropTypes.number.isRequired,
   layoutCellsPerChart: PropTypes.number.isRequired,
-  tooManyBuckets: PropTypes.bool.isRequired
+  tooManyBuckets: PropTypes.bool.isRequired,
+  mlSelectSeverityService: PropTypes.object.isRequired,
+  mlChartTooltipService: PropTypes.object.isRequired
 };

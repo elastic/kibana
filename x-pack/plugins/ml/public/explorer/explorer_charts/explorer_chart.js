@@ -19,23 +19,36 @@ import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-import { formatValue } from 'plugins/ml/formatters/format_value';
-import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
-import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
+// don't use something like plugins/ml/../common
+// because it won't work with the jest tests
+import { formatValue } from '../../formatters/format_value';
+import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
+import { drawLineChartDots, numTicksForDateFormat } from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import { LoadingIndicator } from 'plugins/ml/components/loading_indicator/loading_indicator';
-import { mlEscape } from 'plugins/ml/util/string_utils';
-import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
+import { mlEscape } from '../../util/string_utils';
+import { mlFieldFormatService } from '../../services/field_format_service';
+import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+
+const CONTENT_WRAPPER_HEIGHT = 215;
 
 export class ExplorerChart extends React.Component {
   static propTypes = {
-    seriesConfig: PropTypes.object.isRequired
+    seriesConfig: PropTypes.object,
+    mlSelectSeverityService: PropTypes.object.isRequired
+  }
+
+  componentDidMount() {
+    this.renderChart();
   }
 
   componentDidUpdate() {
+    this.renderChart();
+  }
+
+  renderChart() {
     const {
-      mlSelectSeverityService,
-      mlChartTooltipService
+      mlSelectSeverityService
     } = this.props;
 
     const element = this._rootNode;
@@ -111,7 +124,7 @@ export class ExplorerChart extends React.Component {
           }
         })
         .each(function () {
-          maxYAxisLabelWidth = Math.max(this.getBBox().width + yAxis.tickPadding(), maxYAxisLabelWidth);
+          maxYAxisLabelWidth = Math.max(((this.getBBox && this.getBBox().width) || 0) + yAxis.tickPadding(), maxYAxisLabelWidth);
         })
         .remove();
       d3.select('.temp-axis-label').remove();
@@ -339,7 +352,7 @@ export class ExplorerChart extends React.Component {
     return (
       <div className="ml-explorer-chart" ref={this._setRef.bind(this)}>
         {isLoading && (
-          <LoadingIndicator />
+          <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />
         )}
         {!isLoading && (
           <div className="content-wrapper" ref={this._setRef.bind(this)} />

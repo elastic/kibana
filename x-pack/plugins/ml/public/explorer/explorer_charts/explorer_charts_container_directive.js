@@ -20,12 +20,12 @@ import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import { exploreSeriesFactory } from './explore_series';
 import { explorerChartsContainerDataFactory } from './explorer_charts_container_data';
+import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlExplorerChartsContainer', function (
-  mlChartTooltipService,
   mlExplorerDashboardService,
   mlSelectSeverityService,
   $window
@@ -74,12 +74,7 @@ module.directive('mlExplorerChartsContainer', function (
   return {
     restrict: 'E',
     replace: false,
-    scope: {
-      seriesToPlot: '=',
-      chartsPerRow: '=',
-      layoutCellsPerChart: '=',
-      tooManyBuckets: '='
-    },
+    scope: false,
     link: link
   };
 });
