@@ -58,7 +58,7 @@ class AggConfigs extends IndexedArray {
     this.indexPattern = indexPattern;
     this.schemas = schemas;
 
-    configStates.forEach(params => this.createAggregation(params));
+    configStates.forEach(params => this.createAggConfig(params));
 
     if (this.schemas) {
       this.initializeDefaultsFromSchemas(schemas);
@@ -87,15 +87,23 @@ class AggConfigs extends IndexedArray {
       .commit();
   }
 
-  createAggregation(params, pushToArray = true) {
-    let aggConfig;
-    if (params instanceof AggConfig) {
-      aggConfig = params;
-      params.parent = this;
-    } else {
-      aggConfig = new AggConfig(this, params);
+  setTimeRange(timeRange) {
+    this.timeRange = timeRange;
+  }
+
+  clone({ onlyEnabled = false } = {}) {
+    let states = this.map(agg => agg.toJSON());
+    if (onlyEnabled) {
+      states = states.filter(state => state.enabled);
     }
-    if (pushToArray) {
+    const aggConfigs = new AggConfigs(this.indexPattern, states, this.schemas);
+    aggConfigs.setTimeRange(this.timeRange);
+    return aggConfigs;
+  }
+
+  createAggConfig(params, { addToAggConfigs = true } = {}) {
+    const aggConfig = new AggConfig(this, params);
+    if (addToAggConfigs) {
       this.push(aggConfig);
     }
     return aggConfig;

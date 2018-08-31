@@ -55,7 +55,7 @@ describe('Geohash Agg', () => {
     parent: [],
     type: 'geohash_grid',
   };
-  aggMock.parent.createAggregation = createAggregationMock;
+  aggMock.parent.createAggConfig = createAggregationMock;
 
 
   before(function () {

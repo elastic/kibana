@@ -52,7 +52,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig._indexPattern = indexPattern;
+    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)
@@ -74,7 +74,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig._indexPattern = indexPattern;
+    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)

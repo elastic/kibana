@@ -54,7 +54,7 @@ const parentPipelineAggHelper = {
         makeAgg: function (termsAgg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
-          const metricAgg = termsAgg.parent.createAggregation(state, false);
+          const metricAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           metricAgg.id = termsAgg.id + '-metric';
           return metricAgg;
         },
@@ -79,7 +79,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.parent.byId[agg.params.metricAgg];
+      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
     }
     return subAgg.type.getFormat(subAgg);
   }

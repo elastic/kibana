@@ -62,10 +62,9 @@ class AggConfig {
     }, 0);
   }
 
-  constructor(parent, opts = {}) {
-    this.parent = parent;
-    this.id = String(opts.id || AggConfig.nextId(parent));
-    this._indexPattern = parent.indexPattern;
+  constructor(aggConfigs, opts = {}) {
+    this.aggConfigs = aggConfigs;
+    this.id = String(opts.id || AggConfig.nextId(aggConfigs));
     this._opts = opts;
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
@@ -271,7 +270,11 @@ class AggConfig {
   }
 
   getIndexPattern() {
-    return this._indexPattern;
+    return _.get(this.aggConfigs, 'indexPattern', null);
+  }
+
+  getTimeRange() {
+    return _.get(this.aggConfigs, 'timeRange', null);
   }
 
   getFieldOptions() {
@@ -304,7 +307,7 @@ class AggConfig {
   }
 
   fieldIsTimeField() {
-    const timeFieldName = this._indexPattern.timeFieldName;
+    const timeFieldName = this.getIndexPattern().timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
   }
 
@@ -347,8 +350,8 @@ class AggConfig {
   }
 
   set schema(schema) {
-    if (_.isString(schema) && this.parent.schemas) {
-      schema = this.parent.schemas.byName[schema];
+    if (_.isString(schema) && this.aggConfigs.schemas) {
+      schema = this.aggConfigs.schemas.byName[schema];
     }
 
     this.__schema = schema;

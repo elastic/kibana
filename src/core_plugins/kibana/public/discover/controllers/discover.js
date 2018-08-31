@@ -768,8 +768,7 @@ function discoverController(
         schema: 'segment',
         params: {
           field: $scope.opts.timefield,
-          interval: $state.interval,
-          timeRange: timefilter.getTime(),
+          interval: $state.interval
         }
       }
     ];
@@ -790,6 +789,8 @@ function discoverController(
         },
         aggs: visStateAggs
       });
+
+      $scope.vis.aggs.setTimeRange(timefilter.getTime());
 
       $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
         return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);

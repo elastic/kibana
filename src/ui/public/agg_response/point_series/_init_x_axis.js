@@ -25,12 +25,12 @@ export function initXAxis(chart) {
 
   if (!x.aggConfig || !x.aggConfig.type.ordered) return;
 
-  chart.indexPattern = x.aggConfig._indexPattern;
+  chart.indexPattern = x.aggConfig.getIndexPattern();
   chart.xAxisField = x.aggConfig.params.field;
 
   chart.ordered = {};
   const xAggOutput = x.aggConfig.write();
-  if (xAggOutput.params.interval) {
+  if (xAggOutput.params.interval && xAggOutput.params.interval !== '0ms') {
     chart.ordered.interval = xAggOutput.params.interval;
   }
 }

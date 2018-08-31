@@ -36,7 +36,7 @@ describe('params', function () {
   let paramWriter;
   let writeInterval;
 
-  let getTimeBounds;
+  let setTimeBounds;
   let timeField;
 
   beforeEach(ngMock.module('kibana'));
@@ -47,18 +47,19 @@ describe('params', function () {
     timeField = indexPattern.timeFieldName;
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
-    writeInterval = function (interval, timeRange) {
-      return paramWriter.write({ interval: interval, field: timeField, timeRange: timeRange });
+    writeInterval = function (interval) {
+      return paramWriter.write({ interval: interval, field: timeField });
     };
 
     const now = moment();
-    getTimeBounds = function (n, units) {
+    setTimeBounds = function (n, units) {
       timefilter.enableAutoRefreshSelector();
       timefilter.enableTimeRangeSelector();
-      return {
+      const timeRange = {
         from: now.clone().subtract(n, units),
         to: now.clone()
       };
+      paramWriter.vis.aggs.setTimeRange(timeRange);
     };
   }));
 
@@ -74,22 +75,22 @@ describe('params', function () {
     });
 
     it('automatically picks an interval', function () {
-      const timeBounds = getTimeBounds(15, 'm');
-      const output = writeInterval('auto', timeBounds);
+      setTimeBounds(15, 'm');
+      const output = writeInterval('auto');
       expect(output.params.interval).to.be('30s');
     });
 
     it('scales up the interval if it will make too many buckets', function () {
-      const timeBounds = getTimeBounds(30, 'm');
-      const output = writeInterval('s', timeBounds);
+      setTimeBounds(30, 'm');
+      const output = writeInterval('s');
       expect(output.params.interval).to.be('10s');
       expect(output.metricScaleText).to.be('second');
       expect(output.metricScale).to.be(0.1);
     });
 
     it('does not scale down the interval', function () {
-      const timeBounds = getTimeBounds(1, 'm');
-      const output = writeInterval('h', timeBounds);
+      setTimeBounds(1, 'm');
+      const output = writeInterval('h');
       expect(output.params.interval).to.be('1h');
       expect(output.metricScaleText).to.be(undefined);
       expect(output.metricScale).to.be(undefined);
@@ -107,7 +108,7 @@ describe('params', function () {
         const typeNames = test.slice();
 
         it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
-          const timeBounds = getTimeBounds(1, 'y');
+          setTimeBounds(1, 'y');
 
           const vis = paramWriter.vis;
           vis.aggs.splice(0);
@@ -115,7 +116,7 @@ describe('params', function () {
           const histoConfig = new AggConfig(vis.aggs, {
             type: aggTypes.byName.date_histogram,
             schema: 'segment',
-            params: { interval: 's', field: timeField, timeRange: timeBounds }
+            params: { interval: 's', field: timeField }
           });
 
           vis.aggs.push(histoConfig);

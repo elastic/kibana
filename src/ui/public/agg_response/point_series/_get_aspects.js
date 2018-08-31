@@ -34,11 +34,11 @@ function columnToAspect(aspects, col, i) {
   const name = map[schema];
   if (!name) throw new TypeError('unknown schema name "' + schema + '"');
 
-    const aspect = {
-      i: i,
-      title: col.title,
-      aggConfig: col.aggConfig
-    };
+  const aspect = {
+    i: i,
+    title: col.title,
+    aggConfig: col.aggConfig
+  };
 
   if (!aspects[name]) aspects[name] = [];
   aspects[name].push(aspect);

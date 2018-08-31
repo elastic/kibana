@@ -84,12 +84,9 @@ const CourierRequestHandlerProvider = function () {
       const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
       const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
-      // if date_histogram agg exists we need to set the timeRange parameter on it
-      aggs.forEach(agg => {
-        if (agg.type.name === 'date_histogram') {
-          agg.params.timeRange = timeRange;
-        }
-      });
+      // todo: this will soon be removed from vis comletely
+      vis.aggs.setTimeRange(timeRange);
+      aggs.setTimeRange(timeRange);
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -129,7 +126,7 @@ const CourierRequestHandlerProvider = function () {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
-            const lastAggConfig = vis.getAggConfig();
+            const lastAggConfig = aggs;
             vis.API.inspectorAdapters.requests.reset();
             const request = vis.API.inspectorAdapters.requests.start('Data', {
               description: `This request queries Elasticsearch to fetch the data for the visualization.`,
