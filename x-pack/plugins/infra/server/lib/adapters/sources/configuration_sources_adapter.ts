@@ -58,7 +58,7 @@ const DEFAULT_FIELDS = {
 };
 
 const DEFAULT_SOURCE = {
-  metricAlias: 'xpack-infra-default-metrics',
-  logAlias: 'xpack-infra-default-logs',
+  metricAlias: 'metricbeat-*',
+  logAlias: 'filebeat-*',
   fields: DEFAULT_FIELDS,
 };
