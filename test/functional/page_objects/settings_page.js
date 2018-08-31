@@ -186,14 +186,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getSavedObjectsCount() {
-      return retry.try(async () => {
-        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
-      });
-    }
-
-
     async getScriptedFieldsTabCount() {
       const selector = '[data-test-subj="tab-count-scriptedFields"]';
       return await retry.try(async () => {

@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }) {
     beforeEach(async function () {
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
-
     });
 
     afterEach(async function () {
