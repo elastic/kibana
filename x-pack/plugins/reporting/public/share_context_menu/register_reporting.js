@@ -7,7 +7,7 @@
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
-import { ReportingPanelContent } from '../components/reporting_panel_content';
+import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 import moment from 'moment-timezone';
 import { unhashUrl } from 'ui/state_management/state_hashing';
 import chrome from 'ui/chrome';
@@ -24,26 +24,28 @@ function reportingProvider(Private, dashboardConfig) {
       return [];
     }
 
+    const getReportingJobParams = () => {
+      // Replace hashes with original RISON values.
+      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
+      const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+
+      const browserTimezone =
+      chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        ? moment.tz.guess()
+        : chrome.getUiSettingsClient().get('dateFormat:tz');
+
+      return {
+        title: title,
+        objectType: objectType,
+        browserTimezone,
+        relativeUrls: [relativeUrl],
+      };
+    };
+
     const menuItems = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = 'PDF Reports';
-      const getReportingJobParams = () => {
-        // Replace hashes with original RISON values.
-        const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
-        const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
 
-        const browserTimezone =
-        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
-          ? moment.tz.guess()
-          : chrome.getUiSettingsClient().get('dateFormat:tz');
-
-        return {
-          title: title,
-          objectType: objectType,
-          browserTimezone,
-          relativeUrls: [relativeUrl],
-        };
-      };
       menuItems.push({
         shareMenuItem: {
           name: panelTitle,
@@ -55,8 +57,8 @@ function reportingProvider(Private, dashboardConfig) {
         panel: {
           title: panelTitle,
           content: (
-            <ReportingPanelContent
-              reportType="PDF"
+            <ScreenCapturePanelContent
+              reportType="printablePdf"
               objectType={objectType}
               objectId={objectId}
               getJobParams={getReportingJobParams}
@@ -66,7 +68,7 @@ function reportingProvider(Private, dashboardConfig) {
       });
     }
 
-    // TODO add PNG menu item once PNG reporting is supported
+    // TODO register PNG menu item once PNG is supported on server side
 
     return menuItems;
   };

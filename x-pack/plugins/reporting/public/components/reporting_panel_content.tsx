@@ -10,28 +10,22 @@ declare module '@elastic/eui' {
   export const EuiForm: React.SFC<any>;
 }
 
-import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiText } from '@elastic/eui';
 import React, { Component } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { reportingClient } from '../lib/reporting_client';
 
-enum ReportType {
-  CSV = 'CSV',
-  PDF = 'PDF',
-  PNG = 'PNG',
-}
-
 interface Props {
-  reportType: ReportType;
+  reportType: string;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
+  options: any;
 }
 
 interface State {
-  usePrintLayout: boolean;
   isDirty: boolean;
   url?: string;
 }
@@ -43,7 +37,6 @@ export class ReportingPanelContent extends Component<Props, State> {
     super(props);
 
     this.state = {
-      usePrintLayout: false,
       isDirty: false,
     };
   }
@@ -71,9 +64,9 @@ export class ReportingPanelContent extends Component<Props, State> {
       );
     }
 
-    const reportMsg = `${
-      this.props.reportType
-    }s can take a minute or two to generate based upon the size of your ${this.props.objectType}.`;
+    const reportMsg = `${this.prettyPrintReportingType()}s can take a minute or two to generate based upon the size of your ${
+      this.props.objectType
+    }.`;
 
     return (
       <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
@@ -83,18 +76,11 @@ export class ReportingPanelContent extends Component<Props, State> {
           </EuiText>
         </EuiFormRow>
 
-        <EuiFormRow>
-          <EuiSwitch
-            label="Optimize for printing"
-            checked={this.state.usePrintLayout}
-            onChange={this.handlePrintLayoutChange}
-            data-test-subj="usePrintLayout"
-          />
-        </EuiFormRow>
+        {this.props.options}
 
         <EuiFormRow>
           <EuiButton fill onClick={this.createReportingJob}>
-            Generate {this.props.reportType}
+            Generate {this.prettyPrintReportingType()}
           </EuiButton>
         </EuiFormRow>
 
@@ -121,8 +107,15 @@ export class ReportingPanelContent extends Component<Props, State> {
     );
   }
 
-  private handlePrintLayoutChange = async (evt: any) => {
-    this.setState({ usePrintLayout: evt.target.checked });
+  private prettyPrintReportingType = () => {
+    switch (this.props.reportType) {
+      case 'printablePdf':
+        return 'PDF';
+      case 'csv':
+        return 'CSV';
+      default:
+        return this.props.reportType;
+    }
   };
 
   private markAsDirty = () => {
@@ -137,41 +130,17 @@ export class ReportingPanelContent extends Component<Props, State> {
     return this.props.objectId === undefined || this.props.objectId === '';
   };
 
-  private getLayout = () => {
-    if (this.state.usePrintLayout) {
-      return { id: 'print' };
-    }
-
-    const el = document.querySelector('[data-shared-items-container]');
-    const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    return {
-      id: 'preserve_layout',
-      dimensions: {
-        height: bounds.height,
-        width: bounds.width,
-      },
-    };
-  };
-
   private getAbsoluteReportGenerationUrl = () => {
     const relativePath = reportingClient.getReportingJobPath(
-      'printablePdf',
-      this.getReportingJobParams()
+      this.props.reportType,
+      this.props.getJobParams()
     );
     return url.resolve(window.location.href, relativePath);
   };
 
-  private getReportingJobParams = () => {
-    const jobParams = this.props.getJobParams();
-    if (this.props.reportType === ReportType.PDF) {
-      jobParams.layout = this.getLayout();
-    }
-    return jobParams;
-  };
-
   private createReportingJob = () => {
     return reportingClient
-      .createReportingJob('printablePdf', this.getReportingJobParams())
+      .createReportingJob(this.props.reportType, this.props.getJobParams())
       .then(() => {
         toastNotifications.addSuccess({
           title: `Queued report for ${this.props.objectType}`,
