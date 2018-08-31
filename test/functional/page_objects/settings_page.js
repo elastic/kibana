@@ -573,7 +573,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async associateIndexPattern(oldIndexPatternId, newIndexPatternTitle) {
       await find.clickByCssSelector(
         `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
-        [data-test-subj="indexPatternOption-${newIndexPatternTitle}"])`
+        [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
       );
     }
 
