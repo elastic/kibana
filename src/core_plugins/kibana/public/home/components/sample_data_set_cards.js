@@ -39,6 +39,8 @@ import {
   uninstallSampleDataSet
 } from '../sample_data_sets';
 
+import { i18n } from '@kbn/i18n';
+
 export class SampleDataSetCards extends React.Component {
 
   constructor(props) {
@@ -66,7 +68,9 @@ export class SampleDataSetCards extends React.Component {
       sampleDataSets = await listSampleDataSets();
     } catch (fetchError) {
       toastNotifications.addDanger({
-        title: `Unable to load sample data sets list`,
+        title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
+          defaultMessage: 'Unable to load sample data sets list' }
+        ),
         text: `${fetchError.message}`,
       });
       sampleDataSets = [];
@@ -109,7 +113,9 @@ export class SampleDataSetCards extends React.Component {
         }));
       }
       toastNotifications.addDanger({
-        title: `Unable to install sample data set: ${targetSampleDataSet.name}`,
+        title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
+          defaultMessage: 'Unable to install sample data set: {name}', values: { name: targetSampleDataSet.name } }
+        ),
         text: `${fetchError.message}`,
       });
       return;
@@ -125,7 +131,9 @@ export class SampleDataSetCards extends React.Component {
       }),
     }));
     toastNotifications.addSuccess({
-      title: `${targetSampleDataSet.name} installed`,
+      title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
+        defaultMessage: '{name} installed', values: { name: targetSampleDataSet.name } }
+      ),
       ['data-test-subj']: 'sampleDataSetInstallToast'
     });
   }
@@ -154,7 +162,9 @@ export class SampleDataSetCards extends React.Component {
         }));
       }
       toastNotifications.addDanger({
-        title: `Unable to uninstall sample data set: ${targetSampleDataSet.name}`,
+        title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
+          defaultMessage: 'Unable to uninstall sample data set: {name}', values: { name: targetSampleDataSet.name } }
+        ),
         text: `${fetchError.message}`,
       });
       return;
@@ -170,7 +180,9 @@ export class SampleDataSetCards extends React.Component {
       }),
     }));
     toastNotifications.addSuccess({
-      title: `${targetSampleDataSet.name} uninstalled`,
+      title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
+        defaultMessage: '{name} uninstalled', values: { name: targetSampleDataSet.name } }
+      ),
       ['data-test-subj']: 'sampleDataSetUninstallToast'
     });
   }

@@ -176,9 +176,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async switchToEditMode() {
       log.debug('Switching to edit mode');
       await testSubjects.click('dashboardEditMode');
-      await retry.waitFor('not in view mode', async () => (
-        !await this.getIsInViewMode()
-      ));
+      // wait until the count of dashboard panels equals the count of toggle menu icons
+      await retry.waitFor('in edit mode', async () => {
+        const [panels, menuIcons] = await Promise.all([
+          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+        ]);
+        return panels.length === menuIcons.length;
+      });
     }
 
     async getIsInViewMode() {
