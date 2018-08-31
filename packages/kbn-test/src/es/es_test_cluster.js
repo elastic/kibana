@@ -35,6 +35,7 @@ export function createEsTestCluster(options = {}) {
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    esInstallDir,
   } = options;
 
   const randomHash = Math.random()
@@ -61,10 +62,15 @@ export function createEsTestCluster(options = {}) {
     }
 
     async start(esArgs = []) {
-      const { installPath } =
-        esFrom === 'source'
-          ? await cluster.installSource(config)
-          : await cluster.installSnapshot(config);
+      let installPath;
+
+      if (esInstallDir) {
+        installPath = esInstallDir;
+      } else if (esFrom === 'source') {
+        installPath = await cluster.installSource(config);
+      } else {
+        installPath = await cluster.installSnapshot(config);
+      }
 
       await cluster.start(installPath, {
         esArgs: [

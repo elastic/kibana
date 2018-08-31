@@ -36,6 +36,10 @@ const options = {
     arg: '<dir>',
     desc: 'Run Kibana from existing install directory instead of from source.',
   },
+  'es-install-dir': {
+    arg: '<dir>',
+    desc: 'Run Elasticsearch from existing install directory instead of from source or snapshot.',
+  },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
   quiet: { desc: 'Only log errors.' },
@@ -83,6 +87,11 @@ export function processOptions(userOptions, defaultConfigPath) {
   if (userOptions['kibana-install-dir']) {
     userOptions.installDir = userOptions['kibana-install-dir'];
     delete userOptions['kibana-install-dir'];
+  }
+
+  if (userOptions['es-install-dir']) {
+    userOptions.esInstallDir = userOptions['es-install-dir'];
+    delete userOptions['es-install-dir'];
   }
 
   function createLogger() {
