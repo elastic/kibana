@@ -11,17 +11,14 @@ declare module '@elastic/eui' {
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
-import moment from 'moment-timezone';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { reportingClient } from '../lib/reporting_client';
 
-import { unhashUrl } from 'ui/state_management/state_hashing';
-
 enum ReportType {
+  CSV = 'CSV',
   PDF = 'PDF',
   PNG = 'PNG',
 }
@@ -30,8 +27,7 @@ interface Props {
   reportType: ReportType;
   objectId?: string;
   objectType: string;
-  getUnhashableStates: () => object[];
-  title: string;
+  getJobParams: () => any;
 }
 
 interface State {
@@ -147,7 +143,7 @@ export class ReportingPanelContent extends Component<Props, State> {
     }
 
     const el = document.querySelector('[data-shared-items-container]');
-    const bounds = el.getBoundingClientRect();
+    const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
     return {
       id: 'preserve_layout',
       dimensions: {
@@ -166,22 +162,11 @@ export class ReportingPanelContent extends Component<Props, State> {
   };
 
   private getReportingJobParams = () => {
-    // Replace hashes with original RISON values.
-    const unhashedUrl = unhashUrl(window.location.href, this.props.getUnhashableStates());
-    const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
-
-    const browserTimezone =
-      chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
-        ? moment.tz.guess()
-        : chrome.getUiSettingsClient().get('dateFormat:tz');
-
-    return {
-      title: this.props.title,
-      objectType: this.props.objectType,
-      browserTimezone,
-      relativeUrls: [relativeUrl],
-      layout: this.getLayout(),
-    };
+    const jobParams = this.props.getJobParams();
+    if (this.props.reportType === ReportType.PDF) {
+      jobParams.layout = this.getLayout();
+    }
+    return jobParams;
   };
 
   private createReportingJob = () => {
