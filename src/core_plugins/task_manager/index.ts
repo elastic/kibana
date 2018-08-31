@@ -74,7 +74,10 @@ export default function taskManager(kibana: any) {
       logger.debug('Initializing the task manager index');
       await store.init();
 
-      const definitions = extractTaskDefinitions(logger, this.kbnServer.plugins, numWorkers);
+      const definitions = extractTaskDefinitions(
+        numWorkers,
+        this.kbnServer.uiExports.taskDefinitions
+      );
 
       const pool = new TaskPool({
         logger,
@@ -101,35 +104,23 @@ export default function taskManager(kibana: any) {
 
 // TODO, move this to a file and properly test it, validate the taskDefinition via Joi or something
 function extractTaskDefinitions(
-  logger: Logger,
-  plugins: any[],
-  numWorkers: number
+  numWorkers: number,
+  taskDefinitions: TaskDictionary<TaskDefinition> = {}
 ): TaskDictionary<SanitizedTaskDefinition> {
-  function mergeTaskDefinitions(
-    definitions: TaskDictionary<TaskDefinition>,
-    { id, taskDefinitions }: any
-  ) {
-    if (!taskDefinitions) {
-      return definitions;
-    }
-
-    Object.keys(taskDefinitions).forEach(k => {
-      if (definitions[k]) {
-        throw new Error(`Duplicate task definition "${k}" in plugin "${id}"`);
-      }
-
-      logger.debug(`Registering task "${k}" from plugin "${id}".`);
-      const definition = Joi.attempt(taskDefinitions[k], validateTaskDefinition) as TaskDefinition;
+  return Object.keys(taskDefinitions).reduce(
+    (acc, type) => {
+      const rawDefinition = taskDefinitions[type];
+      rawDefinition.type = type;
+      const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
       const workersOccupied = Math.min(numWorkers, definition.workersOccupied || 1);
 
-      definitions[k] = {
+      acc[type] = {
         ...definition,
         workersOccupied,
       };
-    });
 
-    return definitions;
-  }
-
-  return plugins.reduce(mergeTaskDefinitions, {});
+      return acc;
+    },
+    {} as TaskDictionary<SanitizedTaskDefinition>
+  );
 }

@@ -27,6 +27,10 @@ export {
 } from './saved_object_mappings';
 
 export {
+  taskDefinitions
+} from './task_definitions';
+
+export {
   app,
   apps,
 } from './ui_apps';
