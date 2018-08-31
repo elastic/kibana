@@ -16,9 +16,9 @@ import {
   asDecimal,
   tpmUnit
 } from '../../../../utils/formatters';
+import { ImpactBar } from '../../../shared/ImpactBar';
 
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import ImpactSparkline from './ImpactSparkLine';
 
 function tpmLabel(type) {
   return type === 'request' ? 'Req. per minute' : 'Trans. per minute';
@@ -102,7 +102,7 @@ class List extends Component {
         name: 'Impact',
         sortable: true,
         dataType: 'number',
-        render: value => <ImpactSparkline impact={value} />
+        render: value => <ImpactBar value={value} />
       }
     ];
 
