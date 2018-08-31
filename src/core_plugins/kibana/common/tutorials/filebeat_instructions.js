@@ -74,7 +74,7 @@ export const createFilebeatInstructions = () => ({
         'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-x86_64.rpm',
         'sudo rpm -vi filebeat-{config.kibana.version}-x86_64.rpm',
       ],
-      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.debTextPost', {
+      textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
         values: {
           linkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
