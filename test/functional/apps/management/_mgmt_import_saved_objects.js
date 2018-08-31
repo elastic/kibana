@@ -24,6 +24,9 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
 
+  //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
+  //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
+
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
       await esArchiver.load('discover');
@@ -39,17 +42,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'mgmt_import_objects.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.settings.associateIndexPattern('logstash-*');
+      await PageObjects.settings.associateIndexPattern('6aea5700-ac94-11e8-a651-614b2788174a', 'logstash-*');
       await PageObjects.settings.clickConfirmChanges();
       await PageObjects.settings.clickImportDone();
       await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       //instead of asserting on count- am asserting on the titles- which is more accurate than count.
       const objects = await PageObjects.settings.getSavedObjectsInTable();
-      const isSearchImported = objects.includes('mysavedsearch');
-      const isVizImported = objects.includes('mysavedviz');
-      expect(isSearchImported).to.be(true);
-      expect(isVizImported).to.be(true);
+      expect(objects.includes('mysavedsearch')).to.be(true);
+      expect(objects.includes('mysavedviz')).to.be(true);
 
     });
 

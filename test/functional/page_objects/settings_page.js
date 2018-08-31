@@ -570,38 +570,15 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
-    //This method is used when importing saved objects to associate it with Index Patterns .This method sets the association.
-    async associateIndexPattern(indexPatternTitle) {
-      await testSubjects.click(`indexPatternOption${indexPatternTitle}`);
-    }
-
-    async setImportIndexFieldOption(id, child) {
+    async associateIndexPattern(oldIndexPatternId, newIndexPatternTitle) {
       await find.clickByCssSelector(
-        `select[data-test-subj="managementChangeIndexSelection-${id}"] > option:nth-child(${child})`
+        `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] > [data-test-subj="indexPatternOption-${newIndexPatternTitle}"])`
       );
     }
 
     async clickChangeIndexConfirmButton() {
       await testSubjects.click('changeIndexConfirmButton');
     }
-
-    async clickVisualizationsTab() {
-      await testSubjects.click('objectsTab-visualizations');
-    }
-
-    async clickSearchesTab() {
-      await testSubjects.click('objectsTab-searches');
-    }
-
-    async getVisualizationRows() {
-      return await testSubjects.findAll(`objectsTableRow`);
-    }
-
-    async clickIndexPattern() {
-      await testSubjects.click('objectsTab-visualizations');
-    }
-
-
 
     async waitUntilSavedObjectsTableIsNotLoading() {
       return retry.try(async () => {

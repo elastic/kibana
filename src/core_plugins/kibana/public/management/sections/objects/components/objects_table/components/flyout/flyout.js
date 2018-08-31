@@ -324,7 +324,7 @@ export class Flyout extends Component {
           const options = this.state.indexPatterns.map(indexPattern => ({
             text: indexPattern.get('title'),
             value: indexPattern.id,
-            ['data-test-subj']: `indexPatternOption${indexPattern.get('title')}`,
+            ['data-test-subj']: `indexPatternOption-${indexPattern.get('title')}`,
           }));
 
           options.unshift({
