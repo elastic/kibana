@@ -171,7 +171,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           <EuiFlexItem>
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={'Grant read privileges to specific documents.'}
+              label={'Grant read privileges to specific documents'}
               // @ts-ignore
               compressed={true}
               // @ts-ignore

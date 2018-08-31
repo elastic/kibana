@@ -49,11 +49,11 @@ export class SpaceValidator {
     if (isReservedSpace(space)) return valid();
 
     if (!space.id) {
-      return invalid(`URL Identifier is required`);
+      return invalid(`URL identifier is required`);
     }
 
     if (!isValidSpaceIdentifier(space.id)) {
-      return invalid('URL Identifier only allows a-z, 0-9, "_", and the "-" character');
+      return invalid('URL identifier can only contain a-z, 0-9, and the characters "_" and "-"');
     }
 
     return valid();

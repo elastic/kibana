@@ -36,7 +36,7 @@ export class SpaceIdentifier extends Component {
             placeholder={
               this.state.editing || !this.props.editable
                 ? null
-                : 'The URL Identifier is generated from the space name'
+                : 'The URL identifier is generated from the space name.'
             }
             value={id}
             onChange={this.onChange}
@@ -49,15 +49,15 @@ export class SpaceIdentifier extends Component {
 
   getLabel = () => {
     if (!this.props.editable) {
-      return (<p>URL Identifier</p>);
+      return (<p>URL identifier</p>);
     }
 
     const editLinkText = this.state.editing ? `[stop editing]` : `[edit]`;
-    return (<p>URL Identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
+    return (<p>URL identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
   };
 
   getHelpText = () => {
-    return (<p>If the identifier is <strong>engineering</strong>, the Kibana URL is <br /> https://my-kibana.example<strong>/s/engineering/</strong>app/kibana</p>);
+    return (<p>If the identifier is <strong>engineering</strong>, the Kibana URL is <br /> https://my-kibana.example<strong>/s/engineering/</strong>app/kibana.</p>);
   };
 
   onEditClick = () => {

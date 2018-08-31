@@ -18,13 +18,13 @@ exports[`renders without crashing 1`] = `
         <strong>
           /s/engineering/
         </strong>
-        app/kibana
+        app/kibana.
       </p>
     }
     isInvalid={false}
     label={
       <p>
-        URL Identifier 
+        URL identifier 
         <EuiLink
           color="primary"
           onClick={[Function]}
@@ -41,7 +41,7 @@ exports[`renders without crashing 1`] = `
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}
-      placeholder="The URL Identifier is generated from the space name"
+      placeholder="The URL identifier is generated from the space name."
       readOnly={true}
       value=""
     />

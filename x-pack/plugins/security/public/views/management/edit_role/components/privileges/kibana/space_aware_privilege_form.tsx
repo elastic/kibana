@@ -79,25 +79,23 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     const basePrivilege =
       assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
-    const description = (
-      <p>
-        Control the actions users can perform in your spaces. Individual space privileges override
-        this setting.
-      </p>
-    );
+    const description = <p>Specify the minimum actions users can perform in your spaces.</p>;
 
     let helptext;
     if (basePrivilege === NO_PRIVILEGE_VALUE) {
       helptext = 'No access to spaces';
     } else if (basePrivilege === 'all') {
-      helptext = 'View, edit, and share objects and apps';
+      helptext = 'View, edit, and share objects and apps within all spaces';
     } else if (basePrivilege === 'read') {
-      helptext = 'View objects and apps';
+      helptext = 'View objects and apps within all spaces';
     }
 
     return (
       <Fragment>
-        <EuiDescribedFormGroup title={<h3>All space privileges</h3>} description={description}>
+        <EuiDescribedFormGroup
+          title={<h3>Minimum privileges for all spaces</h3>}
+          description={description}
+        >
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
             <PrivilegeSelector
               data-test-subj={'kibanaMinimumPrivilege'}
@@ -136,7 +134,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     return (
       <Fragment>
         <EuiTitle size={'xs'}>
-          <h3>Space privileges</h3>
+          <h3>Higher privileges for individual spaces</h3>
         </EuiTitle>
         <EuiSpacer size={'s'} />
         <EuiText
@@ -146,8 +144,8 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           color={'subdued'}
         >
           <p>
-            Customize permission levels per space. If a space is not customized, its permissions
-            will default to the minimum privilege specified above.
+            Grant more privileges on a per space basis. For example, if users have read privileges
+            in all spaces, you can grant all privileges to an individual space.
           </p>
         </EuiText>
         <EuiSpacer size={'s'} />

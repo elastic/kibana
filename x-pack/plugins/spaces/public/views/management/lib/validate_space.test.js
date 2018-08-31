@@ -69,7 +69,7 @@ describe('validateURLIdentifier', () => {
       id: ''
     };
 
-    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: true, error: `URL Identifier is required` });
+    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: true, error: `URL identifier is required` });
   });
 
   test('it requires a valid Space Identifier', () => {
@@ -78,7 +78,7 @@ describe('validateURLIdentifier', () => {
     };
 
     expect(validator.validateURLIdentifier(space))
-      .toEqual({ isInvalid: true, error: 'URL Identifier only allows a-z, 0-9, "_", and the "-" character' });
+      .toEqual({ isInvalid: true, error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"' });
   });
 
   test('it allows a valid Space Identifier', () => {
