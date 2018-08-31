@@ -112,7 +112,11 @@ export function screenshotsObservableFactory(server) {
 
         function waitForRender(visualization) {
           return new Promise(function (resolve) {
-            visualization.addEventListener('renderComplete', () => resolve());
+            // The renderComplete fires before the visualizations are in the DOM, so
+            // we wait for the event loop to flush before resolving the promise. This
+            // seems to correct the timing issue and prevents us from capturing
+            // visualization screenshots before they're rendered.
+            visualization.addEventListener('renderComplete', () => setTimeout(resolve));
           });
         }
 
