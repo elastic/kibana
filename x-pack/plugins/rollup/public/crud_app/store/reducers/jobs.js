@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  LOAD_JOBS_START,
+  LOAD_JOBS_SUCCESS,
+  LOAD_JOBS_FAILURE,
+  CREATE_JOB_SUCCESS,
+} from '../action_types';
+
 const initialState = {
   isLoading: false,
   byId: {},
@@ -14,13 +21,13 @@ export function jobs(state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case 'LOAD_JOBS_START':
+    case LOAD_JOBS_START:
       return {
         ...state,
         isLoading: true,
       };
 
-    case 'LOAD_JOBS_SUCCESS':
+    case LOAD_JOBS_SUCCESS:
       const { jobs } = payload;
 
       const newById = {};
@@ -34,13 +41,13 @@ export function jobs(state = initialState, action) {
         isLoading: false,
       };
 
-    case 'LOAD_JOBS_FAILURE':
+    case LOAD_JOBS_FAILURE:
       return {
         ...state,
         isLoading: false,
       };
 
-    case 'CREATE_JOB_SUCCESS':
+    case CREATE_JOB_SUCCESS:
       const { job } = payload;
 
       return {
@@ -49,12 +56,6 @@ export function jobs(state = initialState, action) {
           [job.id]: job,
         },
         allIds: state.allIds.concat(job.id),
-      };
-
-    case 'CLEAR_JOBS':
-      return {
-        byId: {},
-        allIds: [],
       };
 
     default:

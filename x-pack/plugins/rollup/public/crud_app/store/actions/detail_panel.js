@@ -5,14 +5,12 @@
  */
 
 import { extractQueryParams, getRouter } from '../../services';
+import {
+  OPEN_DETAIL_PANEL,
+  CLOSE_DETAIL_PANEL,
+} from '../action_types';
 
-export const closeDetailPanel = () => async (dispatch) => {
-  dispatch({
-    type: 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL',
-  });
-};
-
-export const openDetailPanel = ({ panelType, jobId }) => async (dispatch) => {
+export const openDetailPanel = ({ panelType, jobId }) => (dispatch) => {
   const { history } = getRouter();
   const search = history.location.search;
   const { job: deepLinkedJobId } = extractQueryParams(search);
@@ -25,8 +23,13 @@ export const openDetailPanel = ({ panelType, jobId }) => async (dispatch) => {
   }
 
   dispatch({
-    type: 'INDEX_ROLLUP_JOB_OPEN_DETAIL_PANEL',
+    type: OPEN_DETAIL_PANEL,
     payload: { panelType, jobId },
   });
 };
 
+export const closeDetailPanel = () => (dispatch) => {
+  dispatch({
+    type: CLOSE_DETAIL_PANEL,
+  });
+};

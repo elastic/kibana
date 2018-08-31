@@ -5,10 +5,11 @@
  */
 
 import { getRouter } from '../../services';
+import { CLOSE_DETAIL_PANEL } from '../action_types';
 
 export const detailPanel = () => next => action => {
   switch (action.type) {
-    case 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL':
+    case CLOSE_DETAIL_PANEL:
       const { history } = getRouter();
 
       // Persist state to query params by removing deep link.

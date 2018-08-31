@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { EuiCode } from '@elastic/eui';
 
@@ -17,12 +16,16 @@ import {
   getRouter,
 } from '../../services';
 
-export const createJobStart = createAction('CREATE_JOB_START');
-export const createJobSuccess = createAction('CREATE_JOB_SUCCESS');
-export const createJobFailure = createAction('CREATE_JOB_FAILURE');
+import {
+  CREATE_JOB_START,
+  CREATE_JOB_SUCCESS,
+  CREATE_JOB_FAILURE,
+} from '../action_types';
 
 export const createJob = (jobConfig) => async (dispatch) => {
-  dispatch(createJobStart());
+  dispatch({
+    type: CREATE_JOB_START,
+  });
 
   let newJob;
 
@@ -37,7 +40,12 @@ export const createJob = (jobConfig) => async (dispatch) => {
 
     switch (status) {
       case 409:
-        dispatch(createJobFailure({ error: `A job named '${jobConfig.id}' already exists.` }));
+        dispatch({
+          type: CREATE_JOB_FAILURE,
+          payload: {
+            error: `A job named '${jobConfig.id}' already exists.`
+          }
+        });
         break;
 
       default:
@@ -51,7 +59,11 @@ export const createJob = (jobConfig) => async (dispatch) => {
   }
 
   toastNotifications.addSuccess(`Rollup job '${jobConfig.id}' was created`);
-  dispatch(createJobSuccess({ job: deserializeJob(newJob.data) }));
+
+  dispatch({
+    type: CREATE_JOB_SUCCESS,
+    payload: { job: deserializeJob(newJob.data) },
+  });
 
   // This will open the new job in the detail panel.
   getRouter().history.push({

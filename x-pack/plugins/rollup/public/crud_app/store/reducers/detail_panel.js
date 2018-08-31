@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  OPEN_DETAIL_PANEL,
+  CLOSE_DETAIL_PANEL,
+} from '../action_types';
+
 const initialState = {
   isOpen: false,
   panelType: undefined,
@@ -14,7 +19,7 @@ export function detailPanel(state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case 'INDEX_ROLLUP_JOB_OPEN_DETAIL_PANEL':
+    case OPEN_DETAIL_PANEL:
       const {
         panelType,
         jobId,
@@ -26,7 +31,7 @@ export function detailPanel(state = initialState, action) {
         isOpen: true,
       };
 
-    case 'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL':
+    case CLOSE_DETAIL_PANEL:
       return {
         panelType: undefined,
         jobId: undefined,
