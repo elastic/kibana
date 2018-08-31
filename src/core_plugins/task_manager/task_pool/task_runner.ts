@@ -59,7 +59,7 @@ export class TaskRunner {
   }
 
   public get type() {
-    return this.instance.type;
+    return this.instance.taskType;
   }
 
   public get isTimedOut() {
@@ -67,7 +67,7 @@ export class TaskRunner {
   }
 
   public toString() {
-    return `${this.instance.type} "${this.instance.id}"`;
+    return `${this.instance.taskType} "${this.instance.id}"`;
   }
 
   public async run(): Promise<RunResult> {

@@ -162,7 +162,7 @@ export interface TaskInstance {
   /**
    * The task definition type whose run function will execute this instance.
    */
-  type: string;
+  taskType: string;
 
   /**
    * The date and time that this task is scheduled to be run. It is not guaranteed

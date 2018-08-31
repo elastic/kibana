@@ -45,14 +45,17 @@ interface RawTaskDoc {
   _version: number;
   _source: {
     type: string;
-    runAt: Date;
-    interval?: string;
-    attempts: number;
-    status: TaskStatus;
-    params: string;
-    state: string;
-    user: string;
-    scope: string | string[];
+    task: {
+      taskType: string;
+      runAt: Date;
+      interval?: string;
+      attempts: number;
+      status: TaskStatus;
+      params: string;
+      state: string;
+      user: string;
+      scope: string | string[];
+    };
   };
 }
 
@@ -86,14 +89,19 @@ export class TaskStore {
   public async init() {
     const properties = {
       type: { type: 'keyword' },
-      runAt: { type: 'date' },
-      interval: { type: 'text' },
-      attempts: { type: 'integer' },
-      status: { type: 'keyword' },
-      params: { type: 'text' },
-      state: { type: 'text' },
-      user: { type: 'keyword' },
-      scope: { type: 'keyword' },
+      task: {
+        properties: {
+          taskType: { type: 'keyword' },
+          runAt: { type: 'date' },
+          interval: { type: 'text' },
+          attempts: { type: 'integer' },
+          status: { type: 'keyword' },
+          params: { type: 'text' },
+          state: { type: 'text' },
+          user: { type: 'keyword' },
+          scope: { type: 'keyword' },
+        },
+      },
     };
 
     try {
@@ -167,14 +175,14 @@ export class TaskStore {
         query: {
           bool: {
             must: [
-              { terms: { type: types } },
-              { range: { attempts: { lte: this.maxAttempts } } },
-              { range: { runAt: { lte: 'now' } } },
+              { terms: { 'task.taskType': types } },
+              { range: { 'task.attempts': { lte: this.maxAttempts } } },
+              { range: { 'task.runAt': { lte: 'now' } } },
             ],
           },
         },
         size,
-        sort: { runAt: { order: 'asc' } },
+        sort: { 'task.runAt': { order: 'asc' } },
         version: true,
       },
     });
@@ -265,8 +273,12 @@ function rawSource(doc: TaskInstance) {
 
   delete (source as any).id;
   delete (source as any).version;
+  delete (source as any).type;
 
-  return source;
+  return {
+    type: 'task',
+    task: source,
+  };
 }
 
 function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
@@ -281,11 +293,11 @@ function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
 
 function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
   return {
-    ...doc._source,
+    ...doc._source.task,
     id: doc._id,
     version: doc._version,
-    params: parseJSONField(doc._source.params, 'params', doc),
-    state: parseJSONField(doc._source.state, 'state', doc),
+    params: parseJSONField(doc._source.task.params, 'params', doc),
+    state: parseJSONField(doc._source.task.state, 'state', doc),
   };
 }
 

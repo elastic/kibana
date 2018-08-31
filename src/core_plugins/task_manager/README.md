@@ -138,7 +138,7 @@ The data stored for a task instance looks something like this:
 ```js
 {
   // The type of task that will run this instance.
-  type: 'clusterMonitoring',
+  taskType: 'clusterMonitoring',
 
   // The next time this task instance should run. It is not guaranteed
   // to run at this time, but it is guaranteed not to run earlier than
@@ -224,7 +224,7 @@ const results = manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
   // Tasks is an array of task instances
   tasks: [{
     id: '3242342',
-    type: 'reporting',
+    taskType: 'reporting',
     // etc
   }]
 }

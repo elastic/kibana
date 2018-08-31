@@ -109,7 +109,7 @@ export class TaskPool {
 
         // Try to claim tasks
         for (const instance of instances) {
-          if (this.availableSlots < this.definitions[instance.type].workersOccupied) {
+          if (this.availableSlots < this.definitions[instance.taskType].workersOccupied) {
             return;
           }
 
@@ -125,7 +125,7 @@ export class TaskPool {
     const task = new TaskRunner({
       instance,
       callCluster: this.callCluster,
-      definition: this.definitions[instance.type],
+      definition: this.definitions[instance.taskType],
       logger: this.logger,
       store: this.store,
     });
