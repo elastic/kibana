@@ -10,20 +10,7 @@ declare module '@elastic/eui' {
   export const EuiForm: React.SFC<any>;
 }
 
-import {
-  EuiButton,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiIconTip,
-  EuiLoadingSpinner,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import rison from 'rison-node';
@@ -31,12 +18,7 @@ import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
 import url from 'url';
 
-import { format as formatUrl, parse as parseUrl } from 'url';
-
 import { unhashUrl } from 'ui/state_management/state_hashing';
-
-// TODO: Remove once EuiIconTip supports "content" prop
-const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
 enum ReportType {
   PDF = 'PDF',
@@ -98,27 +80,48 @@ export class ReportingPanelContent extends Component<Props, State> {
 
     return (
       <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
-        <EuiText>
-          <p>{reportMsg}</p>
-        </EuiText>
+        <EuiFormRow>
+          <EuiText>
+            <p>{reportMsg}</p>
+          </EuiText>
+        </EuiFormRow>
 
-        <EuiButton fill>Generate {this.props.reportType}</EuiButton>
+        <EuiFormRow>
+          <EuiSwitch
+            label="Optimize for printing"
+            checked={this.state.usePrintLayout}
+            onChange={this.handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+        </EuiFormRow>
 
-        <EuiSpacer />
+        <EuiFormRow>
+          <EuiButton fill>Generate {this.props.reportType}</EuiButton>
+        </EuiFormRow>
 
-        <EuiText>
-          <p>
-            Alternatively, copy this POST URL to call generation from outside Kibana or from
-            Watcher.
-          </p>
-        </EuiText>
+        <EuiFormRow>
+          <EuiText>
+            <p>
+              Alternatively, copy this POST URL to call generation from outside Kibana or from
+              Watcher.
+            </p>
+          </EuiText>
+        </EuiFormRow>
 
         <EuiCopy textToCopy={this.getAbsoluteReportGenerationUrl()}>
-          {(copy: () => void) => <EuiButton onClick={copy}>Copy POST URL</EuiButton>}
+          {(copy: () => void) => (
+            <EuiFormRow>
+              <EuiButton onClick={copy}>Copy POST URL</EuiButton>
+            </EuiFormRow>
+          )}
         </EuiCopy>
       </EuiForm>
     );
   }
+
+  private handlePrintLayoutChange = async (evt: any) => {
+    this.setState({ usePrintLayout: evt.target.checked });
+  };
 
   private markAsDirty = () => {
     if (!this.mounted) {
@@ -130,6 +133,22 @@ export class ReportingPanelContent extends Component<Props, State> {
 
   private isNotSaved = () => {
     return this.props.objectId === undefined || this.props.objectId === '';
+  };
+
+  private getLayout = () => {
+    if (this.state.usePrintLayout) {
+      return { id: 'print' };
+    }
+
+    const el = document.querySelector('[data-shared-items-container]');
+    const bounds = el.getBoundingClientRect();
+    return {
+      id: 'preserve_layout',
+      dimensions: {
+        height: bounds.height,
+        width: bounds.width,
+      },
+    };
   };
 
   private getAbsoluteReportGenerationUrl = () => {
@@ -151,7 +170,7 @@ export class ReportingPanelContent extends Component<Props, State> {
       objectType: this.props.objectType,
       browserTimezone,
       relativeUrls: [relativeUrl],
-      layout: { id: 'print' },
+      layout: this.getLayout(),
     };
 
     const reportPrefix = chrome.addBasePath('/api/reporting/generate');
