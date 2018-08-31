@@ -111,12 +111,11 @@ export class TaskRunner {
   }
 
   private validateResult(result?: RunResult): RunResult {
-    if (typeof result !== 'object' || !result) {
-      this.logger.warning(`Task ${this} returned unexpected result ${result}`);
-      return {};
+    if (typeof result !== 'undefined' && typeof result !== 'object') {
+      this.logger.warning(`Task ${this} returned unexpected result type ${typeof result}`);
     }
 
-    return result;
+    return result || {};
   }
 
   private async processResult(result: RunResult): Promise<RunResult> {
