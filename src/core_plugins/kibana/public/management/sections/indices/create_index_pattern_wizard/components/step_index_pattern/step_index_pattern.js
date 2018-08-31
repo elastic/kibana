@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS as ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
   containsIllegalCharacters,
