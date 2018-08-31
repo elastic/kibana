@@ -165,7 +165,9 @@ function VisEditor(
         objectId: savedVis.id,
         objectType: 'visualization',
         shareContextMenuExtensions,
-        title: savedVis.title,
+        sharingData: {
+          title: savedVis.title,
+        },
       });
     }
   }, {

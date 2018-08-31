@@ -22,7 +22,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
-  options: any;
+  options?: any;
 }
 
 interface State {

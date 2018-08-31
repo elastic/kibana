@@ -14,7 +14,7 @@ import chrome from 'ui/chrome';
 
 function reportingProvider(Private, dashboardConfig) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = ({ objectType, objectId, getUnhashableStates, title }) => {
+  const getMenuItems = ({ objectType, objectId, getUnhashableStates, sharingData }) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -35,7 +35,7 @@ function reportingProvider(Private, dashboardConfig) {
         : chrome.getUiSettingsClient().get('dateFormat:tz');
 
       return {
-        title: title,
+        ...sharingData,
         objectType: objectType,
         browserTimezone,
         relativeUrls: [relativeUrl],
@@ -52,7 +52,7 @@ function reportingProvider(Private, dashboardConfig) {
           icon: 'document',
           toolTipContent: xpackInfo.get('features.reporting.printablePdf.message'),
           disabled: !xpackInfo.get('features.reporting.printablePdf.enableLinks', false) ? true : false,
-          ['data-test-subj']: 'pedReportMenuItem',
+          ['data-test-subj']: 'pdfReportMenuItem',
         },
         panel: {
           title: panelTitle,

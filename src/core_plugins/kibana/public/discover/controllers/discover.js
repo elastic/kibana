@@ -58,6 +58,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -162,6 +163,7 @@ function discoverController(
     location: 'Discover'
   });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
     requests: new RequestAdapter()
   };
@@ -198,13 +200,19 @@ function discoverController(
     key: 'share',
     description: 'Share Search',
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: async (menuItem, navController, anchorElement) => {
+      const sharingData = await this.getSharingData();
       showShareContextMenu({
         anchorElement,
         allowEmbed: false,
         getUnhashableStates,
         objectId: savedSearch.id,
         objectType: 'search',
+        shareContextMenuExtensions,
+        sharingData: {
+          ...sharingData,
+          title: savedSearch.title,
+        },
       });
     }
   }, {
@@ -304,14 +312,6 @@ function discoverController(
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
       indexPatternId: searchSource.getField('index').id
     };
-  };
-
-  this.getSharingType = () => {
-    return 'search';
-  };
-
-  this.getSharingTitle = () => {
-    return savedSearch.title;
   };
 
   $scope.uiState = $state.makeStateful('uiState');
