@@ -46,7 +46,7 @@ describe('Spaces Public API', () => {
       description: 'with a description',
     };
 
-    const { mockSavedObjectsClient, response } = await request('PUT', '/api/spaces/a-space', {
+    const { mockSavedObjectsClient, response } = await request('PUT', '/api/spaces/space/a-space', {
       payload,
     });
 
@@ -67,7 +67,7 @@ describe('Spaces Public API', () => {
       description: 'with a description',
     };
 
-    const { response } = await request('PUT', '/api/spaces/a-new-space', { payload });
+    const { response } = await request('PUT', '/api/spaces/space/a-new-space', { payload });
 
     const { statusCode } = response;
 

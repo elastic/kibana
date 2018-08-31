@@ -14,7 +14,7 @@ export function initGetSpacesApi(server: any) {
 
   server.route({
     method: 'GET',
-    path: '/api/spaces',
+    path: '/api/spaces/space',
     async handler(request: any, reply: any) {
       const client = request.getSavedObjectsClient();
 
@@ -40,7 +40,7 @@ export function initGetSpacesApi(server: any) {
 
   server.route({
     method: 'GET',
-    path: '/api/spaces/{id}',
+    path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
       const spaceId = request.params.id;
 

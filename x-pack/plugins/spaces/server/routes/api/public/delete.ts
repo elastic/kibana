@@ -15,7 +15,7 @@ export function initDeleteSpacesApi(server: any) {
 
   server.route({
     method: 'DELETE',
-    path: '/api/spaces/{id}',
+    path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
       const client = request.getSavedObjectsClient();
 

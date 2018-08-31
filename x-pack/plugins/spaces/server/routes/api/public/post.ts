@@ -16,7 +16,7 @@ export function initPostSpacesApi(server: any) {
 
   server.route({
     method: 'POST',
-    path: '/api/spaces',
+    path: '/api/spaces/space',
     async handler(request: any, reply: any) {
       const client = request.getSavedObjectsClient();
 

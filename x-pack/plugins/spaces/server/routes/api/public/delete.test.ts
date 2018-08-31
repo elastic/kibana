@@ -41,7 +41,7 @@ describe('Spaces Public API', () => {
   });
 
   test(`'DELETE spaces/{id}' deletes the space`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/a-space');
+    const { response } = await request('DELETE', '/api/spaces/space/a-space');
 
     const { statusCode } = response;
 
@@ -49,7 +49,7 @@ describe('Spaces Public API', () => {
   });
 
   test('DELETE spaces/{id} pretends to delete a non-existent space', async () => {
-    const { response } = await request('DELETE', '/api/spaces/not-a-space');
+    const { response } = await request('DELETE', '/api/spaces/space/not-a-space');
 
     const { statusCode } = response;
 
@@ -57,7 +57,7 @@ describe('Spaces Public API', () => {
   });
 
   test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/default');
+    const { response } = await request('DELETE', '/api/spaces/space/default');
 
     const { statusCode, payload } = response;
 

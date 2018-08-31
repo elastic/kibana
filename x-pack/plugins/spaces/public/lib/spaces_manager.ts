@@ -21,24 +21,24 @@ export class SpacesManager extends EventEmitter {
 
   public async getSpaces(): Promise<Space[]> {
     return await this.httpAgent
-      .get(`${this.baseUrl}`)
+      .get(`${this.baseUrl}/space`)
       .then((response: IHttpResponse<Space[]>) => response.data);
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await this.httpAgent.get(`${this.baseUrl}/${id}`);
+    return await this.httpAgent.get(`${this.baseUrl}/space/${id}`);
   }
 
   public async createSpace(space: Space) {
-    return await this.httpAgent.post(`${this.baseUrl}`, space);
+    return await this.httpAgent.post(`${this.baseUrl}/space`, space);
   }
 
   public async updateSpace(space: Space) {
-    return await this.httpAgent.put(`${this.baseUrl}/${space.id}?overwrite=true`, space);
+    return await this.httpAgent.put(`${this.baseUrl}/space/${space.id}?overwrite=true`, space);
   }
 
   public async deleteSpace(space: Space) {
-    return await this.httpAgent.delete(`${this.baseUrl}/${space.id}`);
+    return await this.httpAgent.delete(`${this.baseUrl}/space/${space.id}`);
   }
 
   public async changeSelectedSpace(space: Space) {

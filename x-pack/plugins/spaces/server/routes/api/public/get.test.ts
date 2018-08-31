@@ -43,7 +43,7 @@ describe('GET spaces', () => {
   });
 
   test(`'GET spaces' returns all available spaces`, async () => {
-    const { response } = await request('GET', '/api/spaces');
+    const { response } = await request('GET', '/api/spaces/space');
 
     const { statusCode, payload } = response;
 
@@ -53,7 +53,7 @@ describe('GET spaces', () => {
   });
 
   test(`'GET spaces/{id}' returns the space with that id`, async () => {
-    const { response } = await request('GET', '/api/spaces/default');
+    const { response } = await request('GET', '/api/spaces/space/default');
 
     const { statusCode, payload } = response;
 
@@ -63,7 +63,7 @@ describe('GET spaces', () => {
   });
 
   test(`'GET spaces/{id}' returns 404 when retrieving a non-existent space`, async () => {
-    const { response } = await request('GET', '/api/spaces/not-a-space');
+    const { response } = await request('GET', '/api/spaces/space/not-a-space');
 
     const { statusCode } = response;
 
