@@ -32,6 +32,7 @@ interface Opts {
   definition: TaskDefinition;
   instance: ConcreteTaskInstance;
   store: TaskStore;
+  kbnServer: object;
 }
 
 export class TaskRunner {
@@ -51,6 +52,7 @@ export class TaskRunner {
       callCluster: opts.callCluster,
       params: opts.instance.params || {},
       state: opts.instance.state || {},
+      kbnServer: opts.kbnServer,
     };
   }
 

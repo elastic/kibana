@@ -40,6 +40,14 @@ export interface RunContext {
   callCluster: ElasticJs;
 
   /**
+   * The Kibana server object. This gives tasks full-access to the server object,
+   * but if the task needs to query ES in the context of the user who scheduled
+   * the task, it hsould use `callCluster` rather than the various ES options
+   * available in kbnServer.
+   */
+  kbnServer: object;
+
+  /**
    * Task-specific parameters. e.g. for a monitoring task, this might
    * look something like { cluster: 'elasticsearch-1', email: 'admin@example.com' }.
    * As far as the task manager is concerned, this is just a data blob.

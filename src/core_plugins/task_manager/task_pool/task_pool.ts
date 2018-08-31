@@ -29,6 +29,7 @@ interface Opts {
   pollInterval: number;
   definitions: TaskDictionary<SanitizedTaskDefinition>;
   store: TaskStore;
+  kbnServer: object;
 }
 
 export class TaskPool {
@@ -43,6 +44,7 @@ export class TaskPool {
   private isPolling = false;
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private availableTypes: string[];
+  private kbnServer: object;
 
   constructor(opts: Opts) {
     this.callCluster = opts.callCluster;
@@ -52,6 +54,7 @@ export class TaskPool {
     this.store = opts.store;
     this.definitions = opts.definitions;
     this.availableTypes = Object.values(opts.definitions).map(d => d.type);
+    this.kbnServer = opts.kbnServer;
   }
 
   get occupiedSlots() {
@@ -128,6 +131,7 @@ export class TaskPool {
       definition: this.definitions[instance.taskType],
       logger: this.logger,
       store: this.store,
+      kbnServer: this.kbnServer,
     });
 
     if (await task.claimOwnership()) {

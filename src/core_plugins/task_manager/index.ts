@@ -82,10 +82,11 @@ export default function taskManager(kibana: any) {
       const pool = new TaskPool({
         logger,
         callCluster,
-        pollInterval: config.get('task_manager.poll_interval'),
         numWorkers,
         store,
         definitions,
+        pollInterval: config.get('task_manager.poll_interval'),
+        kbnServer: this.kbnServer,
       });
 
       pool.start();
