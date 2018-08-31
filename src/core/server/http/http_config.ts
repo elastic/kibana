@@ -21,7 +21,6 @@ import { Env } from '../config';
 import { ByteSizeValue, schema, TypeOf } from '../config/schema';
 import { SslConfig } from './ssl_config';
 
-const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
@@ -51,7 +50,7 @@ const createHttpSchema = schema.object(
     ),
     host: schema.string({
       defaultValue: 'localhost',
-      validate: match(validHostnameRegex, 'must be a valid hostname'),
+      hostname: true,
     }),
     maxPayload: schema.byteSize({
       defaultValue: '1048576b',

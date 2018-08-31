@@ -18,14 +18,13 @@
  */
 
 import _ from 'lodash';
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-import { CoreKibanaState, getEmbeddableCustomization, getPanel } from '../../selectors';
+import { getEmbeddableCustomization, getPanel } from '../../selectors';
 import { PanelId, PanelState } from '../selectors';
 import { updatePanel } from './panels';
 
 import { EmbeddableMetadata, EmbeddableState } from 'ui/embeddable';
-import { KibanaAction } from '../../selectors/types';
+import { KibanaAction, KibanaThunk } from '../../selectors/types';
 
 export enum EmbeddableActionTypeKeys {
   EMBEDDABLE_IS_INITIALIZING = 'EMBEDDABLE_IS_INITIALIZING',
@@ -100,9 +99,9 @@ export const embeddableError = createAction<EmbeddableErrorActionPayload>(
 export function embeddableStateChanged(changeData: {
   panelId: PanelId;
   embeddableState: EmbeddableState;
-}) {
+}): KibanaThunk {
   const { panelId, embeddableState } = changeData;
-  return (dispatch: Dispatch<CoreKibanaState>, getState: () => CoreKibanaState) => {
+  return (dispatch, getState) => {
     // Translate embeddableState to things redux cares about.
     const customization = getEmbeddableCustomization(getState(), panelId);
     if (!_.isEqual(embeddableState.customization, customization)) {
