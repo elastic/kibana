@@ -47,6 +47,9 @@ export const OptimizeBuildTask = {
 
     await exec(log, kibanaScript, kibanaArgs, {
       cwd: build.resolvePath('.'),
+      env: {
+        FORCE_DLL_CREATION: true
+      },
       exitAfter: /Optimization .+ complete/
     });
 
