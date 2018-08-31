@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { call, put, takeEvery } from 'redux-saga/effects';
-
 import { Action } from 'redux-actions';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
 

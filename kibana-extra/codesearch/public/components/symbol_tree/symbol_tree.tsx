@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
 import { Location } from 'vscode-languageserver-types/lib/esm/main';
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { symbolTreeSelector, SymbolWithMembers } from '../../selectors';
+import { SymbolWithMembers } from '../../reducers/symbol';
+import { structureSelector } from '../../selectors';
 
 interface Props {
   structureTree: any;
@@ -55,7 +56,7 @@ class SymbolTreeComponent extends React.PureComponent<Props> {
 }
 
 const mapStateToProps = (state: any) => {
-  return { structureTree: symbolTreeSelector(state) };
+  return { structureTree: structureSelector(state) };
 };
 
 export const SymbolTree = withRouter(connect(mapStateToProps)(SymbolTreeComponent));

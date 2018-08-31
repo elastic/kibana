@@ -6,11 +6,15 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
-import { SymbolInformation } from 'vscode-languageserver-types';
+import { Location, SymbolInformation, SymbolKind } from 'vscode-languageserver-types/lib/esm/main';
 import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
 
+export interface SymbolWithMembers extends SymbolInformation {
+  members?: Set<SymbolInformation>;
+}
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
+  structureTree: { [key: string]: SymbolWithMembers[] };
   error?: Error;
   loading: boolean;
   lastRequestPath?: string;
@@ -19,6 +23,59 @@ export interface SymbolState {
 const initialState: SymbolState = {
   symbols: {},
   loading: false,
+  structureTree: {},
+};
+
+const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
+  const structureTree: SymbolWithMembers[] = [];
+
+  function isOneLocationInAnotherLocation(oneLocation: Location, anotherLocation: Location) {
+    const {
+      line: oneLocationStartLine,
+      character: oneLocationStartCharacter,
+    } = oneLocation.range.start;
+    const { line: oneLocationEndLine, character: oneLocationEndCharacter } = oneLocation.range.end;
+    const {
+      line: anotherLocationStartLine,
+      character: anotherLocationStartCharacter,
+    } = anotherLocation.range.start;
+    const {
+      line: anotherLocationEndLine,
+      character: anotherLocationEndCharacter,
+    } = anotherLocation.range.end;
+    return (
+      (oneLocationStartLine > anotherLocationStartLine ||
+        (oneLocationStartLine === anotherLocationStartLine &&
+          oneLocationStartCharacter >= anotherLocationStartCharacter)) &&
+      (oneLocationEndLine < anotherLocationEndLine ||
+        (oneLocationEndLine === anotherLocationEndLine &&
+          oneLocationEndCharacter <= anotherLocationEndCharacter))
+    );
+  }
+
+  function findContainer(containerName: string, location: Location): SymbolInformation | undefined {
+    return symbols.find(
+      (s: SymbolInformation) =>
+        s.name === containerName && isOneLocationInAnotherLocation(location, s.location)
+    );
+  }
+
+  symbols.forEach((s: SymbolInformation) => {
+    if (s.containerName && s.kind !== SymbolKind.Class) {
+      const container = findContainer(s.containerName, s.location);
+      if (container) {
+        if (container.members) {
+          container.members.add(s);
+        } else {
+          container.members = new Set([s]);
+        }
+      }
+    } else {
+      structureTree.push(s);
+    }
+  });
+
+  return structureTree;
 };
 
 export const symbol = handleActions(
@@ -32,6 +89,7 @@ export const symbol = handleActions(
       produce<SymbolState>(state, draft => {
         draft.loading = false;
         const { path, data } = action.payload;
+        draft.structureTree[path] = generateStructureTree(data);
         draft.symbols = {
           ...state.symbols,
           [path]: data,

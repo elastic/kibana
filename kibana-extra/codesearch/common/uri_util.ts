@@ -86,7 +86,7 @@ export function toCanonicalUrl(lspUrl: CompleteParsedUrl) {
   }
   let goto;
   if (lspUrl.position) {
-    goto = `!L${lspUrl.position.line}:${lspUrl.position.character}`;
+    goto = `!L${lspUrl.position.line + 1}:${lspUrl.position.character}`;
   }
   const data = { resource, org, repo, path: lspUrl.file, goto, ...lspUrl };
   const uri = decodeURIComponent(compiled(data));
