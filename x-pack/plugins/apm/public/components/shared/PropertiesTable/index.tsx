@@ -29,7 +29,7 @@ const TableInfo = styled.div`
   line-height: 1.5;
 `;
 
-export function getLevelOneProps(selected: string[]): string[] {
+export function getPropertyTabNames(selected: string[]): string[] {
   return PROPERTY_CONFIG.filter(
     ({ key, required }: { key: string; required: boolean }) =>
       required || selected.includes(key)
@@ -80,7 +80,7 @@ export function PropertiesTable({
   propKey: string;
   agentName: string;
 }) {
-  if (Object.keys(propData).length === 0) {
+  if (_.isEmpty(propData)) {
     return (
       <TableContainer>
         <TableInfo>

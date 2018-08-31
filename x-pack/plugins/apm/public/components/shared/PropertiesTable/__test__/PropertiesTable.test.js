@@ -10,7 +10,7 @@ import {
   PropertiesTable,
   AgentFeatureTipMessage,
   sortKeysByConfig,
-  getLevelOneProps
+  getPropertyTabNames
 } from '..';
 import { getFeatureDocs } from '../../../../utils/documentation';
 
@@ -97,9 +97,9 @@ describe('sortKeysByConfig', () => {
   });
 });
 
-describe('getLevelOneProps', () => {
+describe('getPropertyTabNames', () => {
   it('should return selected and required keys only', () => {
-    expect(getLevelOneProps(['testProperty'])).toEqual([
+    expect(getPropertyTabNames(['testProperty'])).toEqual([
       'testProperty',
       'requiredProperty'
     ]);
