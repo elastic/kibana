@@ -19,7 +19,7 @@
 
 import { extractPugMessages } from './pug';
 
-describe('extractPugMessages', () => {
+describe('dev/i18n/extractors/pug', () => {
   test('extracts messages from pug template', () => {
     const source = Buffer.from(`\
 #{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}

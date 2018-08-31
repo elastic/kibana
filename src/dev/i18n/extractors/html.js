@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import { jsdom } from 'jsdom';
 import { parse } from '@babel/parser';
 import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
@@ -53,17 +52,13 @@ function parseFilterObjectExpression(expression) {
     for (const property of node.properties) {
       if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
         if (!isStringLiteral(property.value)) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} defaultMessage value should be a string literal.`
-          );
+          throw createFailError(`defaultMessage value should be a string literal.`);
         }
 
         message = formatJSString(property.value.value);
       } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
         if (!isStringLiteral(property.value)) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal.`
-          );
+          throw createFailError(`context value should be a string literal.`);
         }
 
         context = formatJSString(property.value.value);
@@ -101,27 +96,20 @@ function* getFilterMessages(htmlContent) {
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Cannot parse i18n filter expression: {{ ${expression} }}`
-      );
+      throw createFailError(`Cannot parse i18n filter expression: {{ ${expression} }}`);
     }
 
     const messageId = parseIdExpression(idExpression);
 
     if (!messageId) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty "id" value in angular filter expression is not allowed.`
-      );
+      throw createFailError(`Empty "id" value in angular filter expression is not allowed.`);
     }
 
     const { message, context } = parseFilterObjectExpression(filterObjectExpression) || {};
 
     if (!message) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty defaultMessage in angular filter expression is not allowed ("${messageId}").`
+        `Empty defaultMessage in angular filter expression is not allowed ("${messageId}").`
       );
     }
 
@@ -137,17 +125,13 @@ function* getDirectiveMessages(htmlContent) {
   for (const element of document.querySelectorAll('[i18n-id]')) {
     const messageId = formatHTMLString(element.getAttribute('i18n-id'));
     if (!messageId) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty "i18n-id" value in angular directive is not allowed.`
-      );
+      throw createFailError(`Empty "i18n-id" value in angular directive is not allowed.`);
     }
 
     const message = formatHTMLString(element.getAttribute('i18n-default-message'));
     if (!message) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty defaultMessage in angular directive is not allowed ("${messageId}").`
+        `Empty defaultMessage in angular directive is not allowed ("${messageId}").`
       );
     }
 

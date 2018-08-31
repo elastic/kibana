@@ -65,7 +65,7 @@ function f() {
 }
 `;
 
-describe('extractCodeMessages', () => {
+describe('dev/i18n/extractors/code', () => {
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
     expect(actual.sort()).toMatchSnapshot();

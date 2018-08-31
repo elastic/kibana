@@ -27,18 +27,18 @@ import {
   extractPugMessages,
   extractHandlebarsMessages,
 } from './extractors';
-import { globAsync, readFileAsync, writeFileAsync } from './utils';
+import { globAsync, readFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError } from '../run';
-import { serializeToJson, serializeToJson5 } from './serializers';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
+
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
-There is more than one default message for the same id "${key}":
+    throw createFailError(`There is more than one default message for the same id "${key}":
 "${existingValue.message}" and "${value.message}"`);
   }
+
   targetMap.set(key, value);
 }
 
@@ -78,13 +78,13 @@ export function validateMessageNamespace(id, filePath) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
-Expected "${id}" id to have "${expectedNamespace}" namespace. \
+    throw createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
 See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap) {
+export async function extractMessagesFromPathToMap(inputPath) {
+  const targetMap = new Map();
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -139,30 +139,17 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       }
     })
   );
+
+  return targetMap;
 }
 
-export async function validateDefaultMessages(inputPath) {
-  await extractMessagesFromPathToMap(inputPath, new Map());
-}
-
-export async function extractDefaultTranslations({ paths, output, outputFormat }) {
-  const defaultMessagesMap = new Map();
-
-  for (const inputPath of filterPaths(paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
+export async function extractDefaultTranslations(inputPath) {
+  for (const mapEntry of await extractMessagesFromPathToMap(inputPath)) {
+    await new Promise((resolve, reject) => {
+      process.stdout.write(
+        Buffer.from(`${JSON.stringify(mapEntry)}\n`),
+        err => (err ? reject(err) : resolve())
+      );
+    });
   }
-
-  // messages shouldn't be extracted to a file if output is not supplied
-  if (!output || !defaultMessagesMap.size) {
-    return;
-  }
-
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) =>
-    key1.localeCompare(key2)
-  );
-
-  await writeFileAsync(
-    path.resolve(output, 'en.json'),
-    outputFormat === 'json5' ? serializeToJson5(defaultMessages) : serializeToJson(defaultMessages)
-  );
 }

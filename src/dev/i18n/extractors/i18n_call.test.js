@@ -31,7 +31,7 @@ const translateCallMessageSource = `
 i18n.translate('message-id-2', { defaultMessage: 'Default message 2', context: 'Message context 2' });
 `;
 
-describe('extractI18nCallMessages', () => {
+describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
     let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
       node => isCallExpression(node)

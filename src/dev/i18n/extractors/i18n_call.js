@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import { isPropertyWithKey, formatJSString } from '../utils';
@@ -31,19 +30,13 @@ export function extractI18nCallMessages(node) {
   const [idSubTree, optionsSubTree] = node.arguments;
 
   if (!isStringLiteral(idSubTree)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-Message id in i18n() or i18n.translate() should be a string literal.`
-    );
+    throw createFailError(`Message id in i18n() or i18n.translate() should be a string literal.`);
   }
 
   const messageId = idSubTree.value;
 
   if (!messageId) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty "id" value in i18n() or i18n.translate() is not allowed.`
-    );
+    throw createFailError(`Empty "id" value in i18n() or i18n.translate() is not allowed.`);
   }
 
   let message;
@@ -51,8 +44,7 @@ Empty "id" value in i18n() or i18n.translate() is not allowed.`
 
   if (!isObjectExpression(optionsSubTree)) {
     throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
+      `Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
     );
   }
 
@@ -60,8 +52,7 @@ Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}
     if (isPropertyWithKey(prop, DEFAULT_MESSAGE_KEY)) {
       if (!isStringLiteral(prop.value)) {
         throw createFailError(
-          `${chalk.white.bgRed(' I18N ERROR ')} \
-defaultMessage value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
+          `defaultMessage value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
@@ -69,8 +60,7 @@ defaultMessage value in i18n() or i18n.translate() should be a string literal ("
     } else if (isPropertyWithKey(prop, CONTEXT_KEY)) {
       if (!isStringLiteral(prop.value)) {
         throw createFailError(
-          `${chalk.white.bgRed(' I18N ERROR ')} \
-context value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
+          `context value in i18n() or i18n.translate() should be a string literal ("${messageId}").`
         );
       }
 
@@ -80,8 +70,7 @@ context value in i18n() or i18n.translate() should be a string literal ("${messa
 
   if (!message) {
     throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
+      `Empty defaultMessage in i18n() or i18n.translate() is not allowed ("${messageId}").`
     );
   }
 

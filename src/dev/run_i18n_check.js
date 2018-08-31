@@ -20,50 +20,56 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 import execa from 'execa';
+import readline from 'readline';
+import { resolve } from 'path';
 
 import { run, createFailError } from './run';
-import {
-  extractDefaultTranslations,
-  filterPaths,
-  validateDefaultMessages,
-} from './i18n/extract_default_translations';
+import { extractDefaultTranslations, filterPaths } from './i18n/extract_default_translations';
+import { writeFileAsync } from './i18n/utils';
+import { serializeToJson, serializeToJson5 } from './i18n/serializers';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
   const paths = Array.isArray(path) ? path : [path || './'];
+  const filteredPaths = filterPaths(paths);
 
-  if (output) {
-    await extractDefaultTranslations({
-      paths,
-      output,
-      outputFormat,
-    });
-  } else {
-    const filteredPaths = filterPaths(paths);
-
-    if (filteredPaths.length === 0) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
+  if (filteredPaths.length === 0) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} \
 None of input paths is available for extraction or validation. See .i18nrc.json.`
-      );
+    );
+  }
+
+  if (filteredPaths.length === 1) {
+    await extractDefaultTranslations(filteredPaths[0]);
+  } else {
+    const list = new Listr(
+      filteredPaths.map(filteredPath => ({
+        task: messages => {
+          const child = execa('node', ['scripts/i18n_check', '--path', filteredPath], {
+            env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+          });
+
+          readline.createInterface({ input: child.stdout }).on('line', buffer => {
+            messages.push(JSON.parse(buffer.toString()));
+          });
+
+          return child;
+        },
+        title: filteredPath,
+      })),
+      { concurrent: 5 }
+    );
+
+    const messages = await list.run([]);
+    if (!output || !messages.size) {
+      return;
     }
 
-    if (filteredPaths.length === 1) {
-      await validateDefaultMessages(filteredPaths[0]);
-    } else {
-      const list = new Listr(
-        filteredPaths.map(filteredPath => ({
-          task: () =>
-            execa('node', ['scripts/i18n_check', '--path', filteredPath], {
-              env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
-            }),
-          title: filteredPath,
-        })),
-        {
-          concurrent: true,
-        }
-      );
+    const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
 
-      await list.run();
-    }
+    await writeFileAsync(
+      resolve(output, 'en.json'),
+      outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
+    );
   }
 });
