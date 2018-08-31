@@ -5,16 +5,16 @@
  */
 
 import 'plugins/spaces/views/management/page_routes';
-import routes from 'ui/routes';
-
+// @ts-ignore
 import { management } from 'ui/management';
+// @ts-ignore
+import routes from 'ui/routes';
 
 const MANAGE_SPACES_KEY = 'manage_spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection: function () {
-
+    spacesManagementSection() {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -24,7 +24,6 @@ routes.defaults(/\/management/, {
       }
 
       function ensureSpagesRegistered() {
-
         const kibanaSection = getKibanaSection();
 
         if (!kibanaSection.hasItem(MANAGE_SPACES_KEY)) {
@@ -40,6 +39,6 @@ routes.defaults(/\/management/, {
       deregisterSpaces();
 
       ensureSpagesRegistered();
-    }
-  }
+    },
+  },
 });
