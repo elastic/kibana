@@ -113,15 +113,23 @@ export async function deleteAll(log, patterns) {
   log.verbose('Deleted:', longInspect(files));
 }
 
-export async function deleteEmptyFolders(log, rootFolderPath) {
+export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {
   if (typeof rootFolderPath !== 'string') {
     throw new TypeError('Expected root folder to be a string path');
   }
 
   log.debug('Deleting all empty folders and their children recursively starting on ', rootFolderPath);
-
   assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
-  const deletedEmptyFolders = await deleteEmpty(rootFolderPath);
+
+  // Delete empty is used to gather all the empty folders and
+  // then we use del to actually delete them
+  const emptyFoldersList = await deleteEmpty(rootFolderPath, { dryRun: true });
+  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
+    return !foldersToKeep.some(folderToKeep => folderToDelete.includes(folderToKeep));
+  });
+  const deletedEmptyFolders = await del(foldersToDelete, {
+    concurrency: 4
+  });
 
   log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
   log.verbose('Deleted:', longInspect(deletedEmptyFolders));

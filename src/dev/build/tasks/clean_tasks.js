@@ -219,8 +219,15 @@ export const CleanEmptyFoldersTask = {
 
   async run(config, log, build) {
     // Delete every single empty folder from
-    // the distributable. Plugins and Data folder
-    // will also be deleted!
-    await deleteEmptyFolders(log, build.resolvePath('.'));
+    // the distributable except the plugins
+    // and data folder.
+    await deleteEmptyFolders(
+      log,
+      build.resolvePath('.'),
+      [
+        build.resolvePath('plugins'),
+        build.resolvePath('data')
+      ]
+    );
   },
 };
