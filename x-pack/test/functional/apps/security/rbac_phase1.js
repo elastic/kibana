@@ -90,8 +90,7 @@ export default function ({ getService, getPageObjects }) {
       // we have two rendering calls: one because we are closing the time picker
       // the second one is because we updated the data
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount, 2);
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(true);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();
 
     });
@@ -114,8 +113,7 @@ export default function ({ getService, getPageObjects }) {
       // we have two rendering calls: one because we are closing the time picker
       // the second one is because we updated the data
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount, 2);
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(false);
+      await PageObjects.visualize.saveVisualizationExpectFail(vizName1);
       await PageObjects.security.logout();
 
     });

@@ -43,31 +43,33 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
  * @returns {undefined}
  */
 function collectBucket(write, bucket, key, aggScale) {
-  const agg = write.aggStack.shift();
+  const column = write.aggStack.shift();
+  const agg = column.aggConfig;
   const aggInfo = agg.write(write.aggs);
   aggScale *= aggInfo.metricScale || 1;
 
   switch (agg.type.type) {
     case 'buckets':
-      const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
+      const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
-        const splitting = write.canSplit && agg.schema.name === 'split';
-        if (splitting) {
-          write.split(agg, buckets, function forEachBucket(subBucket, key) {
-            collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
-          });
-        } else {
-          buckets.forEach(function (subBucket, key) {
-            write.cell(agg, agg.getKey(subBucket, key), function () {
-              collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
-            }, subBucket.filters);
-          });
-        }
-      } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {
+        buckets.forEach(function (subBucket, key) {
+          // if the bucket doesn't have value don't add it to the row
+          // we don't want rows like: { column1: undefined, column2: 10 }
+          const bucketValue = agg.getKey(subBucket, key);
+          const hasBucketValue = typeof bucketValue !== 'undefined';
+          if (hasBucketValue) {
+            write.bucketBuffer.push({ id: column.id, value: bucketValue });
+          }
+          collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
+          if (hasBucketValue) {
+            write.bucketBuffer.pop();
+          }
+        });
+      } else if (write.partialRows) {
         // we don't have any buckets, but we do have metrics at this
         // level, then pass all the empty buckets and jump back in for
         // the metrics.
-        write.aggStack.unshift(agg);
+        write.aggStack.unshift(column);
         passEmptyBuckets(write, bucket, key, aggScale);
         write.aggStack.shift();
       } else {
@@ -83,39 +85,41 @@ function collectBucket(write, bucket, key, aggScale) {
       if (aggScale !== 1) {
         value *= aggScale;
       }
-      write.cell(agg, value, function () {
-        if (!write.aggStack.length) {
-          // row complete
-          write.row();
-        } else {
-          // process the next agg at this same level
-          collectBucket(write, bucket, key, aggScale);
-        }
-      });
+      write.metricBuffer.push({ id: column.id, value: value });
+
+      if (!write.aggStack.length) {
+        // row complete
+        write.row();
+      } else {
+        // process the next agg at this same level
+        collectBucket(write, bucket, key, aggScale);
+      }
+
+      write.metricBuffer.pop();
+
       break;
   }
 
-  write.aggStack.unshift(agg);
+  write.aggStack.unshift(column);
 }
 
 // write empty values for each bucket agg, then write
 // the metrics from the initial bucket using collectBucket()
 function passEmptyBuckets(write, bucket, key, aggScale) {
-  const agg = write.aggStack.shift();
+  const column = write.aggStack.shift();
+  const agg = column.aggConfig;
 
   switch (agg.type.type) {
     case 'metrics':
       // pass control back to collectBucket()
-      write.aggStack.unshift(agg);
+      write.aggStack.unshift(column);
       collectBucket(write, bucket, key, aggScale);
       return;
 
     case 'buckets':
-      write.cell(agg, '', function () {
-        passEmptyBuckets(write, bucket, key, aggScale);
-      });
+      passEmptyBuckets(write, bucket, key, aggScale);
   }
 
-  write.aggStack.unshift(agg);
+  write.aggStack.unshift(column);
 }
 
