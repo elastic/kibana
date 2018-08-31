@@ -376,7 +376,7 @@ class IndexActionsContextMenuUi extends Component {
           <div>
             <p>
               <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.deleteEntity.forceMergeDescription"
+                id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteDescription"
                 defaultMessage="You are about to delete {mergedKeyword}"
                 values={{ mergedKeyword: oneIndexSelected ? 'this' : 'these' }}
               />

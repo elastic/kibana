@@ -88,7 +88,7 @@ declare module '@elastic/eui' {
   interface EuiOutsideClickDetectorProps {
     children: React.ReactNode;
     isDisabled?: boolean;
-    onOutsideClick: React.MouseEventHandler;
+    onOutsideClick: React.MouseEventHandler<Element>;
   }
   export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 }

@@ -23,7 +23,7 @@ import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
 
@@ -82,8 +82,10 @@ if (flags.help) {
   process.exit(1);
 }
 
-const log = createToolingLog(pickLevelFromFlags(flags));
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: pickLevelFromFlags(flags),
+  writeTo: process.stdout
+});
 
 function isOsPackageDesired(name) {
   if (flags['skip-os-packages']) {

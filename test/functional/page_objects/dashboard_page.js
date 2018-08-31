@@ -173,9 +173,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('titleDupicateWarnMsg');
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      // wait until the count of dashboard panels equals the count of toggle menu icons
+      await retry.waitFor('in edit mode', async () => {
+        const [panels, menuIcons] = await Promise.all([
+          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+        ]);
+        return panels.length === menuIcons.length;
+      });
     }
 
     async getIsInViewMode() {
@@ -278,7 +286,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
