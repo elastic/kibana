@@ -3,11 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InfraPathInput } from '../../../../common/graphql/types';
+import { InfraPathInput, InfraPathType } from '../../../../common/graphql/types';
+import { InfraNodeType } from './adapter_types';
 import { DOMAIN_TO_FIELD } from './constants';
+
+const getNodeType = (type: InfraPathType): InfraNodeType => {
+  switch (type) {
+    case InfraPathType.pods:
+      return InfraNodeType.pod;
+    case InfraPathType.containers:
+      return InfraNodeType.container;
+    case InfraPathType.hosts:
+      return InfraNodeType.host;
+    default:
+      throw new Error('Invalid InfraPathType');
+  }
+};
+
 export function extractGroupByAndNodeFromPath(path: InfraPathInput[]) {
   const nodePart = path[path.length - 1];
+  const nodeType = getNodeType(nodePart.type);
   const nodeField = DOMAIN_TO_FIELD[nodePart.type];
   const groupBy = path.slice(0, path.length - 1);
-  return { nodeField, groupBy };
+  return { nodeField, groupBy, nodeType };
 }

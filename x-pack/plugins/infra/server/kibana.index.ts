@@ -19,12 +19,12 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     metricAlias: Joi.string(),
     logAlias: Joi.string(),
     fields: Joi.object({
-      container: Joi.string(),
-      hostname: Joi.string(),
+      containers: Joi.string(),
+      hosts: Joi.string(),
       message: Joi.array()
         .items(Joi.string())
         .single(),
-      pod: Joi.string(),
+      pods: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),
     }),

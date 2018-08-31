@@ -33,13 +33,13 @@ export const sourcesSchema = gql`
   "A mapping of semantic fields to their document counterparts"
   type InfraSourceFields {
     "The field to identify a container by"
-    container: String!
+    containers: String!
     "The fields to identify a host by"
-    hostname: String!
+    hosts: String!
     "The fields that may contain the log event message. The first field found win."
     message: [String!]!
     "The field to identify a pod by"
-    pod: String!
+    pods: String!
     "The field to use as a tiebreaker for log events that have identical timestamps"
     tiebreaker: String!
     "The field to use as a timestamp for metrics and logs"

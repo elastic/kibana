@@ -41,44 +41,15 @@ export const nodesSchema: any = gql`
   enum InfraMetricType {
     count
     cpu
+    load
     memory
     tx
     rx
-    disk
-    custom
-  }
-
-  enum InfraMetricAggregationType {
-    avg
-    min
-    max
-    sum
-    bucket_script
-    derivative
-    moving_average
-    positive_only
-  }
-
-  input InfraMetricAggInput {
-    "The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput"
-    id: ID!
-    "The type of aggregation"
-    type: InfraMetricAggregationType!
-    "The field to use for the aggregation, this is only used for metric aggregations"
-    field: String
-    "The metric to referece for the aggregation, this is only used for pipeline aggreations"
-    metric: ID
-    "Additional settings for pipeline aggregations in a key:value comma delimited format"
-    settings: String
-    "Script field for bucket_script aggregations"
-    script: String
   }
 
   input InfraMetricInput {
     "The type of metric"
     type: InfraMetricType!
-    "The aggregations for custom metrics"
-    aggs: [InfraMetricAggInput!]
   }
 
   enum InfraPathType {

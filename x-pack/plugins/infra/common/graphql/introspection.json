@@ -352,7 +352,7 @@
         "description": "A mapping of semantic fields to their document counterparts",
         "fields": [
           {
-            "name": "container",
+            "name": "containers",
             "description": "The field to identify a container by",
             "args": [],
             "type": {
@@ -364,7 +364,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hostname",
+            "name": "hosts",
             "description": "The fields to identify a host by",
             "args": [],
             "type": {
@@ -397,7 +397,7 @@
             "deprecationReason": null
           },
           {
-            "name": "pod",
+            "name": "pods",
             "description": "The field to identify a pod by",
             "args": [],
             "type": {
@@ -1363,20 +1363,6 @@
               "ofType": { "kind": "ENUM", "name": "InfraMetricType", "ofType": null }
             },
             "defaultValue": null
-          },
-          {
-            "name": "aggs",
-            "description": "The aggregations for custom metrics",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "INPUT_OBJECT", "name": "InfraMetricAggInput", "ofType": null }
-              }
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -1393,109 +1379,10 @@
         "enumValues": [
           { "name": "count", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "cpu", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "load", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "memory", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "tx", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "disk", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "InfraMetricAggInput",
-        "description": "",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "id",
-            "description":
-              "The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "type",
-            "description": "The type of aggregation",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraMetricAggregationType", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "field",
-            "description":
-              "The field to use for the aggregation, this is only used for metric aggregations",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "metric",
-            "description":
-              "The metric to referece for the aggregation, this is only used for pipeline aggreations",
-            "type": { "kind": "SCALAR", "name": "ID", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "settings",
-            "description":
-              "Additional settings for pipeline aggregations in a key:value comma delimited format",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "script",
-            "description": "Script field for bucket_script aggregations",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraMetricAggregationType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "avg", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "min", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "max", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "sum", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "bucket_script",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "derivative",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "moving_average",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "positive_only",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
+          { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

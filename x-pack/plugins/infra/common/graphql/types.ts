@@ -30,10 +30,10 @@ export interface InfraSourceConfiguration {
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
-  container: string /** The field to identify a container by */;
-  hostname: string /** The fields to identify a host by */;
+  containers: string /** The field to identify a container by */;
+  hosts: string /** The fields to identify a host by */;
   message: string[] /** The fields that may contain the log event message. The first field found win. */;
-  pod: string /** The field to identify a pod by */;
+  pods: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
@@ -194,18 +194,18 @@ export namespace InfraSourceConfigurationResolvers {
 /** A mapping of semantic fields to their document counterparts */
 export namespace InfraSourceFieldsResolvers {
   export interface Resolvers {
-    container?: ContainerResolver /** The field to identify a container by */;
-    hostname?: HostnameResolver /** The fields to identify a host by */;
+    containers?: ContainersResolver /** The field to identify a container by */;
+    hosts?: HostsResolver /** The fields to identify a host by */;
     message?: MessageResolver /** The fields that may contain the log event message. The first field found win. */;
-    pod?: PodResolver /** The field to identify a pod by */;
+    pods?: PodsResolver /** The field to identify a pod by */;
     tiebreaker?: TiebreakerResolver /** The field to use as a tiebreaker for log events that have identical timestamps */;
     timestamp?: TimestampResolver /** The field to use as a timestamp for metrics and logs */;
   }
 
-  export type ContainerResolver = Resolver<string>;
-  export type HostnameResolver = Resolver<string>;
+  export type ContainersResolver = Resolver<string>;
+  export type HostsResolver = Resolver<string>;
   export type MessageResolver = Resolver<string[]>;
-  export type PodResolver = Resolver<string>;
+  export type PodsResolver = Resolver<string>;
   export type TiebreakerResolver = Resolver<string>;
   export type TimestampResolver = Resolver<string>;
 }
@@ -404,22 +404,6 @@ export interface InfraPathFilterInput {
 
 export interface InfraMetricInput {
   type: InfraMetricType /** The type of metric */;
-  aggs?: InfraMetricAggInput[] | null /** The aggregations for custom metrics */;
-}
-
-export interface InfraMetricAggInput {
-  id: string /** The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput */;
-  type: InfraMetricAggregationType /** The type of aggregation */;
-  field?:
-    | string
-    | null /** The field to use for the aggregation, this is only used for metric aggregations */;
-  metric?:
-    | string
-    | null /** The metric to referece for the aggregation, this is only used for pipeline aggreations */;
-  settings?:
-    | string
-    | null /** Additional settings for pipeline aggregations in a key:value comma delimited format */;
-  script?: string | null /** Script field for bucket_script aggregations */;
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
@@ -474,22 +458,10 @@ export enum InfraPathType {
 export enum InfraMetricType {
   count = 'count',
   cpu = 'cpu',
+  load = 'load',
   memory = 'memory',
   tx = 'tx',
   rx = 'rx',
-  disk = 'disk',
-  custom = 'custom',
-}
-
-export enum InfraMetricAggregationType {
-  avg = 'avg',
-  min = 'min',
-  max = 'max',
-  sum = 'sum',
-  bucket_script = 'bucket_script',
-  derivative = 'derivative',
-  moving_average = 'moving_average',
-  positive_only = 'positive_only',
 }
 
 export enum InfraOperator {

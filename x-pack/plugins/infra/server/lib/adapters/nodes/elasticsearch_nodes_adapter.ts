@@ -40,7 +40,7 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
       return infraResponse;
     }
 
-    const body = createPartitionBodies(totalNodes, options.nodeField, options);
+    const body = createPartitionBodies(totalNodes, options.nodeType, options.nodeField, options);
 
     const response = await msearch<InfraNodesAggregations>({
       body,

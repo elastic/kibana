@@ -86,6 +86,7 @@ export interface InfraESSearchBody {
 export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 
 export interface InfraNodeRequestOptions {
+  nodeType: InfraNodeType;
   nodeField: string;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
@@ -98,14 +99,12 @@ export enum InfraNodesKey {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
-  services = 'services',
 }
 
 export enum InfraNodeType {
   host = 'host',
   pod = 'pod',
   container = 'container',
-  service = 'service',
 }
 
 export interface InfraNodesAggregations {
@@ -125,6 +124,7 @@ export type InfraProcessorChainFn<T> = (
 export type InfraProcessor<O, T> = (options: O) => InfraProcessorChainFn<T>;
 
 export interface InfraProcesorRequestOptions {
+  nodeType: InfraNodeType;
   nodeOptions: InfraNodeRequestOptions;
   partitionId: number;
   numberOfPartitions: number;
@@ -187,3 +187,37 @@ export interface InfraNodesOnlyResponse {
   total: number;
   nodes: InfraNode[];
 }
+
+export interface InfraAvgAgg {
+  avg: { field: string };
+}
+
+export interface InfraMaxAgg {
+  max: { field: string };
+}
+
+export interface InfraDerivativeAgg {
+  derivative: {
+    buckets_path: string;
+    gap_policy: string;
+    unit: string;
+  };
+}
+
+export interface InfraBucketScriptAgg {
+  bucket_script: {
+    buckets_path: { [key: string]: string };
+    script: {
+      source: string;
+      lang: string;
+    };
+    gap_policy: string;
+  };
+}
+
+export type InfraAgg = InfraBucketScriptAgg | InfraDerivativeAgg | InfraAvgAgg | InfraMaxAgg;
+export interface InfraNodeMetricAgg {
+  [key: string]: InfraAgg;
+}
+
+export type InfraNodeMetricFn = (nodeType: InfraNodeType) => InfraNodeMetricAgg | undefined;

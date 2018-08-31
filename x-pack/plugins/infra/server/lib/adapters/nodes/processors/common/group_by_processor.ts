@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash';
+import { set } from 'lodash';
 
 import { InfraPathFilterInput, InfraPathInput } from '../../../../../../common/graphql/types';
 import {
   InfraESQueryStringQuery,
   InfraESSearchBody,
   InfraProcesorRequestOptions,
-  InfraProcessor,
-  InfraProcessorChainFn,
-  InfraProcessorTransformer,
 } from '../../adapter_types';
 import { isGroupByFilters, isGroupByTerms } from '../../lib/type_guards';
 
-export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
-  options: InfraProcesorRequestOptions
-): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
-    const result = cloneDeep(doc);
+export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
+  return (doc: InfraESSearchBody) => {
     const { groupBy } = options.nodeOptions;
     let aggs = {};
-    set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
+    set(doc, 'aggs.waffle.aggs.nodes.aggs', aggs);
     groupBy.forEach((grouping: InfraPathInput, index: number) => {
       if (isGroupByTerms(grouping)) {
         const termsAgg = {
@@ -58,6 +52,6 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
         aggs = filtersAgg.aggs;
       }
     });
-    return next(result);
+    return doc;
   };
 };

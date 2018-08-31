@@ -4,27 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pipe } from 'lodash/fp';
 import {
   InfraESSearchBody,
   InfraProcesorRequestOptions,
-  InfraProcessor,
   InfraProcessorTransformer,
 } from '../../adapter_types';
-import { createProcessorFunction } from '../../lib/create_processor_function';
 import { fieldsFilterProcessor } from '../common/field_filter_processor';
 import { groupByProcessor } from '../common/group_by_processor';
 import { nodesProcessor } from '../common/nodes_processor';
 import { queryProcessor } from '../common/query_procssor';
-
-const chain: Array<InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody>> = [
-  fieldsFilterProcessor,
-  nodesProcessor,
-  queryProcessor,
-  groupByProcessor,
-];
+import { dateHistogramProcessor } from './date_histogram_processor';
+import { metricBucketsProcessor } from './metric_buckets_processor';
 
 export const createLastNProcessor = (
   options: InfraProcesorRequestOptions
 ): InfraProcessorTransformer<InfraESSearchBody> => {
-  return createProcessorFunction(chain, options);
+  return pipe(
+    fieldsFilterProcessor(options),
+    nodesProcessor(options),
+    queryProcessor(options),
+    groupByProcessor(options),
+    dateHistogramProcessor(options),
+    metricBucketsProcessor(options)
+  );
 };

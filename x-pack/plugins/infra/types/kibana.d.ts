@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Moment } from 'moment';
+
 declare module '*.json' {
   const content: any;
   export default content;

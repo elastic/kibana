@@ -49,10 +49,10 @@ export class InfraConfigurationSourcesAdapter implements InfraSourcesAdapter {
 }
 
 const DEFAULT_FIELDS = {
-  container: 'docker.container.name',
-  hostname: 'beat.hostname',
+  containers: 'docker.container.name',
+  hosts: 'beat.hostname',
   message: ['message', '@message'],
-  pod: 'kubernetes.pod.name',
+  pods: 'kubernetes.pod.name',
   tiebreaker: '_doc',
   timestamp: '@timestamp',
 };

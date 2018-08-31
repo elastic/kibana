@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash';
+import { set } from 'lodash';
 
-import {
-  InfraESSearchBody,
-  InfraProcesorRequestOptions,
-  InfraProcessor,
-  InfraProcessorChainFn,
-  InfraProcessorTransformer,
-} from '../../adapter_types';
+import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
 
-export const fieldsFilterProcessor: InfraProcessor<
-  InfraProcesorRequestOptions,
-  InfraESSearchBody
-> = (options: InfraProcesorRequestOptions): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
-    const result = cloneDeep(doc);
+export const fieldsFilterProcessor = (options: InfraProcesorRequestOptions) => {
+  return (doc: InfraESSearchBody) => {
     /*
      TODO: Need to add the filter logic to find all the fields the user is requesting
      and then add an exists filter for each. That way we are only looking at documents
@@ -27,7 +17,7 @@ export const fieldsFilterProcessor: InfraProcessor<
      terms agg at the top level. Normally we wouldn't need to do this because they would
      get filter out natually.
      */
-    set(result, 'aggs.waffle.filter.match_all', {});
-    return next(result);
+    set(doc, 'aggs.waffle.filter.match_all', {});
+    return doc;
   };
 };
