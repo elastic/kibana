@@ -32,7 +32,8 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_ENABLED,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-  MAX_SIZE_TYPE_DOCUMENT
+  MAX_SIZE_TYPE_DOCUMENT,
+  WARM_PHASE_ON_ROLLOVER
 } from '../constants';
 import { getIndexTemplates } from '.';
 
@@ -94,11 +95,15 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   policy[PHASE_ROLLOVER_ENABLED] = false;
 
   if (phase.after) {
-    const { size: after, units: afterUnits } = splitSizeAndUnits(
-      phase.after
-    );
-    policy[PHASE_ROLLOVER_AFTER] = after;
-    policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
+    if (phaseName === PHASE_WARM && phase.after === '0s') {
+      policy[WARM_PHASE_ON_ROLLOVER] = true;
+    } else {
+      const { size: after, units: afterUnits } = splitSizeAndUnits(
+        phase.after
+      );
+      policy[PHASE_ROLLOVER_AFTER] = after;
+      policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
+    }
   }
 
   if (phase.actions) {
