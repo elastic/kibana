@@ -16,9 +16,10 @@ import {
 import React from 'react';
 import { connect } from 'react-redux';
 
+import { parse as parseQuery } from 'query-string';
 import { match } from 'react-router-dom';
+import { QueryString } from 'ui/utils/query_string';
 import { Location } from 'vscode-languageserver';
-
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import {
@@ -39,8 +40,8 @@ import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 enum Tabs {
-  FILE_TREE,
-  STRUCTURE_TREE,
+  FILE_TREE = 'file-tree',
+  STRUCTURE_TREE = 'structure-tree',
 }
 
 const noMarginStyle = {
@@ -68,7 +69,7 @@ export class LayoutPage extends React.Component<Props, State> {
     super(props);
     this.state = {
       showSearchBox: false,
-      tab: Tabs.FILE_TREE,
+      tab: parseQuery(props.location.search).tab,
     };
   }
 
@@ -128,6 +129,8 @@ export class LayoutPage extends React.Component<Props, State> {
 
   public onSelectedTabChanged = (tab: Tabs) => {
     this.setState({ tab });
+    const { pathname, search } = history.location;
+    history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'tab', tab));
   };
 
   public renderTabs = () => {
