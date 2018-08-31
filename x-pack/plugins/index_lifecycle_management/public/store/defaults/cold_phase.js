@@ -16,7 +16,7 @@ export const defaultColdPhase = {
   [PHASE_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
   [PHASE_ROLLOVER_AFTER]: '',
-  [PHASE_ROLLOVER_AFTER_UNITS]: 's',
+  [PHASE_ROLLOVER_AFTER_UNITS]: 'd',
   [PHASE_NODE_ATTRS]: '',
   [PHASE_REPLICA_COUNT]: ''
 };

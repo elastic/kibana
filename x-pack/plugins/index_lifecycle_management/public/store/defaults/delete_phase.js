@@ -16,5 +16,5 @@ export const defaultDeletePhase = {
   [PHASE_ROLLOVER_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
   [PHASE_ROLLOVER_AFTER]: '',
-  [PHASE_ROLLOVER_AFTER_UNITS]: 's'
+  [PHASE_ROLLOVER_AFTER_UNITS]: 'd'
 };
