@@ -33,7 +33,8 @@ import {
   PHASE_ENABLED,
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
   MAX_SIZE_TYPE_DOCUMENT,
-  WARM_PHASE_ON_ROLLOVER
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_SHRINK_ENABLED
 } from '../constants';
 import { getIndexTemplates } from '.';
 
@@ -105,7 +106,9 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
       policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
     }
   }
-
+  if (phaseName === PHASE_WARM) {
+    phase[PHASE_SHRINK_ENABLED] = phase.actions && phase.actions.shrink;
+  }
   if (phase.actions) {
     const actions = phase.actions;
 
@@ -221,7 +224,7 @@ export const phaseToES = (state, phase) => {
     };
   }
 
-  if (isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
+  if (phase[PHASE_SHRINK_ENABLED] && isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
     esPhase.actions.shrink = {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
     };
