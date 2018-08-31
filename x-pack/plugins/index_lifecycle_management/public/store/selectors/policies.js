@@ -107,7 +107,7 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     }
   }
   if (phaseName === PHASE_WARM) {
-    phase[PHASE_SHRINK_ENABLED] = phase.actions && phase.actions.shrink;
+    policy[PHASE_SHRINK_ENABLED] = !!(phase.actions && phase.actions.shrink);
   }
   if (phase.actions) {
     const actions = phase.actions;
@@ -157,7 +157,6 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
       policy[PHASE_REPLICA_COUNT] = replicas.number_of_replicas;
     }
   }
-
   return policy;
 };
 
