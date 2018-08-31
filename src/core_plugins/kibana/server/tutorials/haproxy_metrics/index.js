@@ -34,7 +34,6 @@ export function haproxyMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the HAProxy server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `haproxy` Metricbeat module fetches internal metrics from HAProxy. \
 [Learn more]({learnMoreLink}).',
       values: {
