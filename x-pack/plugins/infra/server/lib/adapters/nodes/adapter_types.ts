@@ -160,7 +160,11 @@ export interface InfraBucketWithAggs {
   };
 }
 
-export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey;
+export interface InfraBucketWithValues {
+  [name: string]: { value: number };
+}
+
+export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey & InfraBucketWithValues;
 
 export interface InfraGroupWithNodes {
   name: string;
