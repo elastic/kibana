@@ -30,7 +30,10 @@ uiModules.get('kibana/region_map')
       template: regionMapVisParamsTemplate,
       link: function ($scope) {
 
-        $scope.collections = $scope.vis.type.editorConfig.collections;
+        $scope.collections = {
+          ...$scope.vis.type.editorConfig.collections,
+          tmsLayers: []
+        };
         $scope.onLayerChange = onLayerChange;
 
         if (regionmapsConfig.includeElasticMapsService) {
