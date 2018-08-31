@@ -23,6 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS } from '../../../constants';
 import { logisticalDetailsUrl } from '../../../services';
 
 export class StepLogisticsUi extends Component {
@@ -50,7 +51,7 @@ export class StepLogisticsUi extends Component {
       rollupPageSize: errorRollupPageSize,
     } = fieldErrors;
 
-    const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|'].join(', ');
+    const illegalCharacters = INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS.join(', ');
 
     return (
       <Fragment>

@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 
-import { CRUD_APP_BASE_PATH } from '../../common/constants';
+import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter } from './services';
 import { JobList, JobCreate } from './sections';
 

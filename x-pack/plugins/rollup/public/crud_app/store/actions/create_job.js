@@ -8,7 +8,7 @@ import React from 'react';
 import { toastNotifications } from 'ui/notify';
 import { EuiCode } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../../../common';
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   createJob as sendCreateJobRequest,
   serializeJob,

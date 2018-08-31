@@ -18,8 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
-
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps, extractQueryParams } from '../../services';
 
 import {

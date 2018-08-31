@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 
-import { CRUD_APP_BASE_PATH } from '../../common/constants';
+import { CRUD_APP_BASE_PATH } from './constants';
 import { setHttpClient } from './services';
 import { App } from './app';
 import template from './main.html';

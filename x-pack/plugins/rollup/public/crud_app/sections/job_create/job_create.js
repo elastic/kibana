@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
+import { INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS, CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
@@ -66,8 +66,8 @@ const stepIdToStepMap = {
       if (!id || !id.trim()) {
         errors.id = (
           <FormattedMessage
-            id="xpack.rollupJobs.create.errors.name"
-            defaultMessage="You must provide a name"
+            id="xpack.rollupJobs.create.errors.idMissing"
+            defaultMessage="You must provide an ID"
           />
         );
       }
@@ -75,16 +75,43 @@ const stepIdToStepMap = {
       if (!indexPattern || !indexPattern.trim()) {
         errors.indexPattern = (
           <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPattern"
+            id="xpack.rollupJobs.create.errors.indexPatternMissing"
             defaultMessage="You must provide an index pattern"
           />
         );
+      } else {
+        const illegalCharacters = INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS.reduce((chars, char) => {
+          if (indexPattern.includes(char)) {
+            chars.push(char);
+          }
+
+          return chars;
+        }, []);
+
+        if (illegalCharacters.length) {
+          errors.indexPattern = (
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
+              defaultMessage="You must remove these characters from your index pattern: {characterList}"
+              values={{ characterList: <strong>{illegalCharacters.join(', ')}</strong> }}
+            />
+          );
+        } else {
+          if (indexPattern.includes(' ')) {
+            errors.indexPattern = (
+              <FormattedMessage
+                id="xpack.rollupJobs.create.errors.indexPatternSpaces"
+                defaultMessage="You must remove spaces from your index pattern"
+              />
+            );
+          }
+        }
       }
 
       if (!rollupIndex || !rollupIndex.trim()) {
         errors.rollupIndex = (
           <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupIndex"
+            id="xpack.rollupJobs.create.errors.rollupIndexMissing"
             defaultMessage="You must provide a rollup index"
           />
         );
@@ -93,7 +120,7 @@ const stepIdToStepMap = {
       if (!rollupCron || !rollupCron.trim()) {
         errors.rollupCron = (
           <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupCron"
+            id="xpack.rollupJobs.create.errors.rollupCronMissing"
             defaultMessage="You must provide an interval"
           />
         );
@@ -102,7 +129,7 @@ const stepIdToStepMap = {
       if (!rollupPageSize) {
         errors.rollupPageSize = (
           <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupPageSize"
+            id="xpack.rollupJobs.create.errors.rollupPageSizeMissing"
             defaultMessage="You must provide a page size"
           />
         );
