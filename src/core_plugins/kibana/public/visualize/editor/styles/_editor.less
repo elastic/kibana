@@ -9,14 +9,14 @@
 // @vis-editor-sidebar-bg: @globalColorLightestGray;
 
 
-// @vis-editor-agg-error-color: @btn-danger-color;
-// @vis-editor-agg-error-bg: @btn-danger-bg;
+// @visEditorAgg__error-color: @btn-danger-color;
+// @visEditorAgg__error-bg: @btn-danger-bg;
 
-// @vis-editor-agg-wide-btn-border: @gray-lighter;
-// @vis-editor-agg-wide-btn-bg: @body-bg;
+// @visEditorAgg__addButton--wide-border: @gray-lighter;
+// @visEditorAgg__addButton--wide-bg: @body-bg;
 
-// @vis-editor-agg-wide-btn-hover-bg: @gray-lighter;
-// @vis-editor-agg-wide-btn-hover-color: @gray3;
+// @visEditorAgg__addButton--wide-hover-bg: @gray-lighter;
+// @visEditorAgg__addButton--wide-hover-color: @gray3;
 
 // @vis-editor-agg-editor-order-bg: transparent;
 // @vis-editor-agg-editor-order-border: @gray-lighter;
@@ -269,14 +269,14 @@
 //       color: @kibanaGray2;
 //     }
 
-//     .vis-editor-agg-header {
+//     .visEditorAggHeader {
 //       display: flex;
 //       align-items: center;
 //       flex: 1 0 auto;
 //       margin-bottom: @vis-editor-agg-editor-spacing;
 //     }
 
-//       .vis-editor-agg-header-toggle {
+//       .visEditorAggHeader__toggle {
 //         flex: 0 0 auto;
 //         margin-right: @vis-editor-agg-editor-spacing;
 //         min-width: 22px;
@@ -284,22 +284,22 @@
 //         text-align: center;
 //       }
 
-//       .vis-editor-agg-header-subagg-icon {
+//       .visEditorAggHeader__subagg-icon {
 //         flex: 0 1 auto;
 //         padding-right: @padding-base-vertical;
 //       }
 
-//       .vis-editor-agg-header-title {
+//       .visEditorAggHeader__title {
 //         flex: 0 0 auto;
 //         .ellipsis();
 //         font-weight: bold;
 //       }
 
-//       .vis-editor-agg-header-title--grow {
+//       .visEditorAggHeader__title--grow {
 //         flex-grow: 1;
 //       }
 
-//       .vis-editor-agg-header-description {
+//       .visEditorAggHeader__description {
 //         font-weight: normal;
 //         padding-right: @vis-editor-agg-editor-spacing;
 //         padding-left: 5px;
@@ -312,20 +312,20 @@
 //         }
 //       }
 
-//       .vis-editor-agg-header-controls {
+//       .visEditorAggHeader__controls {
 //         flex: 0 0 auto;
 //       }
 
-//     .vis-editor-agg-error {
+//     .visEditorAgg__error {
 //       margin: @vis-editor-agg-editor-spacing 0;
 //       padding: @vis-editor-agg-editor-spacing;
 //       text-align: center;
-//       background: @vis-editor-agg-error-bg;
-//       color: @vis-editor-agg-error-color;
+//       background: @visEditorAgg__error-bg;
+//       color: @visEditorAgg__error-color;
 //       line-height: 1.5;
 //     }
 
-//     .vis-editor-agg-editor-ranges {
+//     .visEditorAgg__ranges {
 //       td {
 //         padding: 0 @vis-editor-agg-editor-spacing @vis-editor-agg-editor-spacing 0;
 //         &:last-child {
@@ -334,11 +334,11 @@
 //       }
 //     }
 
-//     .vis-editor-agg-editor-advanced-toggle {
+//     .visEditorAggAdvanced__toggle {
 //       text-align: right;
 //     }
 
-//     .vis-editor-agg-form-row {
+//     .visEditorAgg__formRow {
 //       display: flex;
 
 //       > * {
@@ -354,36 +354,36 @@
 //       /**
 //        * 1. Hack to split child elements evenly.
 //        */
-//       .vis-editor-agg-form-row__even-split {
+//       .visEditorAgg__formRow--evenSplit {
 //         flex: 1 1 0 !important; /* 1 */
 //       }
 
-//     .vis-editor-agg-form-value {
+//     .visEditorAgg__formValue {
 //       align-self: center;
 //       margin: 0 0 0 @vis-editor-agg-editor-spacing;
 //       font-size: 1.2em;
 //     }
 
-//     .vis-editor-agg-wide-btn {
+//     .visEditorAgg__addButton--wide {
 //       text-align: center;
 //     }
 
-//       .vis-editor-agg-wide-btn-add {
+//       .visEditorAgg__addButton--wide-add {
 //         width: 140px;
 //         margin: -2px auto 5px auto;
 //         text-align: center;
 //         border: 2px solid;
-//         border-color: @vis-editor-agg-wide-btn-border;
+//         border-color: @visEditorAgg__addButton--wide-border;
 //         border-top: 0px;
 //         padding: 3px;
 //         border-bottom-right-radius: @border-radius-base;
 //         border-bottom-left-radius: @border-radius-base;
-//         background-color: @vis-editor-agg-wide-btn-bg;
+//         background-color: @visEditorAgg__addButton--wide-bg;
 //         font-weight: bold;
 
 //         &:hover {
-//           color: @vis-editor-agg-wide-btn-hover-color;
-//           background-color: @vis-editor-agg-wide-btn-hover-bg;
+//           color: @visEditorAgg__addButton--wide-hover-color;
+//           background-color: @visEditorAgg__addButton--wide-hover-bg;
 //         }
 //       }
 
@@ -395,7 +395,7 @@
 //         margin-bottom: 10px;
 //       }
 
-//     .vis-editor-agg-order-agg {
+//     .visEditorAgg__orderAgg {
 //       border: 2px solid;
 //       border-color: @vis-editor-agg-editor-order-border;
 //       border-radius: @border-radius-base;
@@ -407,7 +407,7 @@
 //   /**
 //   * 1. Show invalid state if the user has interacted with the input without selecting an option.
 //   */
-//   .vis-editor-field-ui-select {
+//   .visEditorAggSelect__field {
 
 //     .vis-editor-field-ui-select__field-entry {
 //       .ellipsis();
@@ -503,11 +503,11 @@
 //   }
 // }
 
-// .agg-select-label {
+// .visEditorAggSelect__label {
 //   display: inline !important;
 // }
 
-// .agg-select-help {
+// .visEditorAggSelect__help {
 //   float: right;
 // }
 
