@@ -8,20 +8,24 @@ import React from 'react';
 import { MainLayout } from '../components/layouts/main';
 import { Waffle } from '../components/waffle';
 import { withMap } from '../containers/map';
-import { InfraWaffleMapGroup } from '../lib/lib';
+import { withOptions } from '../containers/with_options';
+import { InfraOptions, InfraWaffleMapGroup } from '../lib/lib';
 
 interface HomePageProps {
   map: InfraWaffleMapGroup[];
+  options: InfraOptions;
 }
 
-export const HomePage = withMap(
-  class extends React.PureComponent<HomePageProps> {
-    public render() {
-      return (
-        <MainLayout>
-          <Waffle map={this.props.map} options={{}} />
-        </MainLayout>
-      );
+export const HomePage = withOptions(
+  withMap(
+    class extends React.PureComponent<HomePageProps> {
+      public render() {
+        return (
+          <MainLayout>
+            <Waffle map={this.props.map} options={this.props.options.wafflemap} />
+          </MainLayout>
+        );
+      }
     }
-  }
+  )
 );

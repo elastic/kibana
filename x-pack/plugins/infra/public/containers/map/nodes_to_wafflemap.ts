@@ -12,7 +12,6 @@ import {
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapNode,
 } from '../../lib/lib';
-
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
 function createId(path: InfraNodePath[]) {
@@ -89,12 +88,13 @@ function withoutGroup(group: InfraWaffleMapGroup) {
 
 export function nodesToWaffleMap(nodes: InfraNode[]): InfraWaffleMapGroup[] {
   return nodes.reduce((groups: InfraWaffleMapGroup[], node: InfraNode) => {
+    const waffleNode = createWaffleMapNode(node);
     if (node.path.length === 2) {
       const parentGroup = findOrCreateGroupWithNodes(
         groups,
         node.path.slice(0, node.path.length - 1)
       );
-      parentGroup.nodes.push(createWaffleMapNode(node));
+      parentGroup.nodes.push(waffleNode);
       return groups.filter(withoutGroup(parentGroup)).concat([parentGroup]);
     }
     if (node.path.length === 3) {
@@ -102,7 +102,7 @@ export function nodesToWaffleMap(nodes: InfraNode[]): InfraWaffleMapGroup[] {
         groups,
         node.path.slice(0, node.path.length - 1)
       );
-      parentGroup.nodes.push(createWaffleMapNode(node));
+      parentGroup.nodes.push(waffleNode);
       const topGroup = findOrCreateGroupWithGroups(
         groups,
         node.path.slice(0, node.path.length - 2)
@@ -111,7 +111,7 @@ export function nodesToWaffleMap(nodes: InfraNode[]): InfraWaffleMapGroup[] {
       return groups.filter(withoutGroup(topGroup)).concat([topGroup]);
     }
     const allGroup = findOrCreateGroupWithNodes(groups, []);
-    allGroup.nodes.push(createWaffleMapNode(node));
+    allGroup.nodes.push(waffleNode);
     return groups.filter(withoutGroup(allGroup)).concat([allGroup]);
   }, []);
 }
