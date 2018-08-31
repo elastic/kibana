@@ -108,7 +108,7 @@ export class WarmPhase extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Warm phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiIcon label="Enabled" type="checkInCircleFilled" color="blue" className="eui-alignMiddle" />
+              <EuiIcon label="Enabled" type="checkInCircleFilled" color="currentColor" className="eui-alignMiddle" />
             ) : null}
           </div>
         }
