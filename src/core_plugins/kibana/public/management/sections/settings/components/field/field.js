@@ -542,7 +542,7 @@ export class Field extends PureComponent {
       return;
     }
     return (
-      <EuiFormRow className="advancedSettings__field__actions" hasEmptyLabelSpace>
+      <EuiFormRow className="advancedSettings__field__actions">
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
