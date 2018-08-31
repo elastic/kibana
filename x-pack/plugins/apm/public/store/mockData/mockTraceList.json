@@ -1,0 +1,30 @@
+[
+  {
+    "name": "log",
+    "serviceName": "flask-server",
+    "averageResponseTime": 1329,
+    "tracesPerMinute": 3201,
+    "impact": 70
+  },
+  {
+    "name": "products/item",
+    "serviceName": "client",
+    "averageResponseTime": 2301,
+    "tracesPerMinute": 5432,
+    "impact": 42
+  },
+  {
+    "name": "billing/payment",
+    "serviceName": "client",
+    "averageResponseTime": 789,
+    "tracesPerMinute": 1201,
+    "impact": 14
+  },
+  {
+    "name": "user/profile",
+    "serviceName": "client",
+    "averageResponseTime": 1212,
+    "tracesPerMinute": 904,
+    "impact": 92
+  }
+]
