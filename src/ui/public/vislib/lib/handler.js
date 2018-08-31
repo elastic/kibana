@@ -170,8 +170,12 @@ export function VisHandlerProvider(Private) {
         binder.on(chart.events, 'rendered', () => {
           loadedCount++;
           if (loadedCount === chartSelection.length) {
-            // events from all charts are propagated to vis, we only need to fire renderComplete once they all finish
-            self.vis.emit('renderComplete');
+            // Events from all charts are propagated to vis, we only need to fire renderComplete once they all finish.
+            // Without setTimeout, this will fire *before* the DOM has been updated properly, causing occasional failures
+            // in reporting.
+            setTimeout(() => {
+              self.vis.emit('renderComplete');
+            });
           }
         });
 
