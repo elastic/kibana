@@ -183,17 +183,18 @@ export function CallClientProvider(Private, Promise, es) {
       }
     });
 
-    // If there are any errors, notify the searchRequests of them.
-    defer.promise.catch((err) => {
+    // Return the promise which acts as our vehicle for providing search responses to the consumer.
+    // However, if there are any errors, notify the searchRequests of them *instead* of bubbling
+    // them up to the consumer.
+    return defer.promise.catch((err) => {
+      // By returning the return value of this catch() without rethrowing the error, we delegate
+      // error-handling to the searchRequest instead of the consumer.
       searchRequests.forEach((searchRequest, index) => {
         if (searchRequestsAndStatuses[index] !== ABORTED) {
           searchRequest.handleFailure(err);
         }
       });
     });
-
-    // Return the promise which acts as our vehicle for providing search responses to the consumer.
-    return defer.promise;
   }
 
   return callClient;
