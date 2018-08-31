@@ -377,7 +377,7 @@ export class JobCreateUi extends Component {
                   <h1>
                     <FormattedMessage
                       id="xpack.rollupJobs.create.title"
-                      defaultMessage=" Create rollup job"
+                      defaultMessage="Create rollup job"
                     />
                   </h1>
                 </EuiTitle>

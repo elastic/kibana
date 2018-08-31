@@ -13,7 +13,7 @@ export function extractQueryParams(queryString) {
   const queryParamPairs = queryString.split('?')[1].split('&').map(paramString => paramString.split('='));
 
   queryParamPairs.forEach(([ key, value ]) => {
-    extractedQueryParams[key] = value;
+    extractedQueryParams[key] = decodeURIComponent(value);
   });
 
   return extractedQueryParams;

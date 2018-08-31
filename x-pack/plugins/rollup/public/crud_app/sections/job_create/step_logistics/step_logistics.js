@@ -97,8 +97,8 @@ export class StepLogisticsUi extends Component {
           <EuiFormRow
             label={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.fieldName.label"
-                defaultMessage="Rollup job name"
+                id="xpack.rollupJobs.create.stepLogistical.fieldId.label"
+                defaultMessage="Rollup job ID"
               />
             )}
             error={errorId}

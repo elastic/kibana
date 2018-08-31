@@ -20,7 +20,7 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../../common/constants';
 
-import { getRouter, getRouterLinkProps, extractQueryParams } from '../../services';
+import { getRouterLinkProps, extractQueryParams } from '../../services';
 
 import {
   JobTable,
@@ -39,9 +39,15 @@ export class JobListUi extends Component {
   }
 
   static getDerivedStateFromProps(props) {
-    const { openDetailPanel } = props;
+    const {
+      openDetailPanel,
+      history: {
+        location: {
+          search,
+        },
+      },
+    } = props;
 
-    const search = getRouter().history.location.search;
     const { job: jobId } = extractQueryParams(search);
 
     // Show deeplinked job whenever jobs get loaded or the URL changes.
