@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
-
 // This isn't ideal. We want to avoid searching for 20 indices
 // then filtering out the majority of them because they are system indices.
 // We'd like to filter system indices out in the query
