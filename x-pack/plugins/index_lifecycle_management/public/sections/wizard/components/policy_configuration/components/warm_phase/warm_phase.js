@@ -71,14 +71,8 @@ export class WarmPhase extends PureComponent {
       [PHASE_ROLLOVER_AFTER_UNITS]: PropTypes.string.isRequired,
     }).isRequired,
 
-    hotPhaseReplicaCount: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ]).isRequired,
-    hotPhasePrimaryShardCount: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ]).isRequired,
+    hotPhaseReplicaCount: PropTypes.number.isRequired,
+    hotPhasePrimaryShardCount: PropTypes.number.isRequired,
 
     nodeOptions: PropTypes.array.isRequired,
   };
@@ -266,30 +260,33 @@ export class WarmPhase extends PureComponent {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiSpacer />
+              {hotPhaseReplicaCount > 1 ? (
+                <Fragment>
+                  <EuiSpacer />
+                  <EuiTitle size="s">
+                    <p>Shrink</p>
+                  </EuiTitle>
+                  <EuiTitle size="xs">
+                    <EuiTextColor color="subdued">
+                      Shrink the index into a new index with fewer primary shards.{' '}
+                      <LearnMoreLink
+                        docPath="indices-shrink-index.html#indices-shrink-index"
+                      />
+                    </EuiTextColor>
+                  </EuiTitle>
 
-              <EuiTitle size="s">
-                <p>Shrink</p>
-              </EuiTitle>
-              <EuiTitle size="xs">
-                <EuiTextColor color="subdued">
-                  Shrink the index into a new index with fewer primary shards.{' '}
-                  <LearnMoreLink
-                    docPath="indices-shrink-index.html#indices-shrink-index"
+                  <EuiSpacer />
+
+                  <EuiSwitch
+                    checked={phaseData[PHASE_SHRINK_ENABLED]}
+                    onChange={async e => {
+                      await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
+                      validate();
+                    }}
+                    label="Shrink index"
                   />
-                </EuiTextColor>
-              </EuiTitle>
-
-              <EuiSpacer />
-
-              <EuiSwitch
-                checked={phaseData[PHASE_SHRINK_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
-                  validate();
-                }}
-                label="Shrink index"
-              />
+                </Fragment>
+              ) : null }
 
               <EuiSpacer size="m" />
 

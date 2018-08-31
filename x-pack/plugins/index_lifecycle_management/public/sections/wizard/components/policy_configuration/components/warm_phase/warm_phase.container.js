@@ -21,8 +21,8 @@ import { PHASE_WARM, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../../..
 export const WarmPhase = connect(
   state => ({
     phaseData: getPhase(state, PHASE_WARM),
-    hotPhaseReplicaCount: getSelectedReplicaCount(state),
-    hotPhasePrimaryShardCount: getSelectedPrimaryShardCount(state),
+    hotPhaseReplicaCount: Number(getSelectedReplicaCount(state)),
+    hotPhasePrimaryShardCount: Number(getSelectedPrimaryShardCount(state)),
     hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
     nodeOptions: getNodeOptions(state)
   }),
