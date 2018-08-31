@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable no-multi-str */
-
 import { i18n } from '@kbn/i18n';
 
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
