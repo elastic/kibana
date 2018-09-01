@@ -269,6 +269,13 @@ You can get all build options using the following command:
 yarn build --help
 ```
 
+macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator's GPU settings. In iTerm2:
+- Open Preferences (Command + ,)
+- In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
+- Open "Advanced GPU Settings..."
+- Uncheck the "Prefer integrated to discrete GPU" option
+- Restart iTerm
+
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
 

@@ -32,6 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
+  SharePageProvider
 } from './page_objects';
 
 import {
@@ -85,7 +86,8 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
+      timelion: TimelionPageProvider,
+      share: SharePageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
@@ -120,6 +122,12 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
       ],
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
     },
 
     apps: {

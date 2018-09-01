@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
 import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -141,7 +142,7 @@ export class Home extends Component {
     }
 
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
           {recentlyAccessedPanel}
 
@@ -156,7 +157,12 @@ export class Home extends Component {
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle>
-                  <h3>Visualize and Explore Data</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="kbn.home.directories.visualize.nameTitle"
+                      defaultMessage="Visualize and Explore Data"
+                    />
+                  </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
@@ -167,7 +173,12 @@ export class Home extends Component {
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle>
-                  <h3>Manage and Administer the Elastic Stack</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="kbn.home.directories.manage.nameTitle"
+                      defaultMessage="Manage and Administer the Elastic Stack"
+                    />
+                  </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
@@ -182,11 +193,19 @@ export class Home extends Component {
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <p>Didn’t find what you were looking for?</p>
+                <p>
+                  <FormattedMessage
+                    id="kbn.home.directories.notFound.description"
+                    defaultMessage="Didn’t find what you were looking for?"
+                  />
+                </p>
               </EuiText>
               <EuiSpacer size="s" />
               <EuiButton href="#/home/feature_directory">
-                View full directory of Kibana plugins
+                <FormattedMessage
+                  id="kbn.home.directories.notFound.viewFullButtonLabel"
+                  defaultMessage="View full directory of Kibana plugins"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

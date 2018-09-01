@@ -28,6 +28,7 @@ import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
+import dropPartialTemplate from '../controls/drop_partials.html';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = tzDetect.determine().name();
@@ -42,7 +43,7 @@ function getInterval(agg) {
 }
 
 function getBounds(vis) {
-  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters && vis.filters.timeRange) {
+  if (vis.filters && vis.filters.timeRange) {
     return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
   }
 }
@@ -147,6 +148,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
         return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
       },
     },
+    {
+      name: 'drop_partials',
+      default: false,
+      write: _.noop,
+      editor: dropPartialTemplate,
+    },
+
     {
       name: 'customInterval',
       default: '2h',

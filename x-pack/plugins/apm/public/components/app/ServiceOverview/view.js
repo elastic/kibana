@@ -35,8 +35,9 @@ class ServiceOverview extends Component {
     this.checkForHistoricalData(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.checkForHistoricalData(nextProps);
+  componentDidUpdate() {
+    // QUESTION: Do we want to check on ANY update, or only if serviceList status/data have changed?
+    this.checkForHistoricalData(this.props);
   }
 
   render() {

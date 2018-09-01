@@ -66,6 +66,8 @@ export default function ({ getService, getPageObjects }) {
     };
 
     describe('Dashboard', () => {
+      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
@@ -86,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
           // report than phantom.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
 
@@ -124,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
           // report than phantom.
           this.timeout(360000);
 
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
           await PageObjects.dashboard.saveDashboard('report test');
           await PageObjects.reporting.openReportingPanel();
@@ -224,7 +226,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickBucket('X-Axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('my viz');
           await expectEnabledGenerateReportButton();
         });
 

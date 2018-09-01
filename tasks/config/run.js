@@ -99,6 +99,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
+      ]
+    },
+
     // used by the test:server task
     //    runs all node.js/server mocha tests
     mocha: {
@@ -175,14 +184,17 @@ module.exports = function (grunt) {
       ],
     },
 
-    panelActionTests: {
+    pluginFunctionalTestsRelease: {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/panel_actions/config.js',
+        '--config', 'test/plugin_functional/config.js',
         '--esFrom', 'source',
         '--bail',
         '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
       ],
     },
 

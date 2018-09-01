@@ -244,8 +244,4 @@ export default () => Joi.object({
     locale: Joi.string().default('en'),
   }).default(),
 
-  // This is a configuration node that is specifically handled by the config system
-  // in the new platform, and that the current platform doesn't need to handle at all.
-  __newPlatform: Joi.any(),
-
 }).default();
