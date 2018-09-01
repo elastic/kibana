@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { addInterceptor } from 'ui/kfetch';
 import { isSystemApiRequest } from 'ui/system_api';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import 'plugins/security/services/auto_logout';
@@ -20,7 +20,7 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5000;
 
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout) => {
+  $httpProvider.interceptors.push(($timeout, $q, $injector, sessionTimeout, Notifier, Private, autoLogout) => {
     const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
     const notifier = new Notifier();
     const notificationLifetime = 60 * 1000;
@@ -59,19 +59,26 @@ module.config(($httpProvider) => {
       });
     }
 
-    function interceptorFactory(responseHandler) {
-      return function interceptor(response) {
-        if (!isLoginOrLogout && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
-          clearNotifications();
-          scheduleNotification();
-        }
-        return responseHandler(response);
-      };
+    function updateNotifications(config) {
+      if (!isLoginOrLogout && !isSystemApiRequest(config) && sessionTimeout !== null) {
+        clearNotifications();
+        scheduleNotification();
+      }
     }
 
-    return {
-      response: interceptorFactory(_.identity),
-      responseError: interceptorFactory($q.reject)
+    const interceptor = {
+      response: (response) => {
+        updateNotifications(response.config);
+        return response;
+      },
+      responseError: (error) => {
+        updateNotifications(error.config);
+        return $q.reject(error);
+      },
     };
+
+    // Ensure parity between kfetch and $http interceptors.
+    addInterceptor(interceptor);
+    return interceptor;
   });
 });

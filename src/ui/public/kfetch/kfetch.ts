@@ -47,7 +47,9 @@ export interface Interceptor {
 
 const interceptors: Interceptor[] = [];
 export const resetInterceptors = () => (interceptors.length = 0);
-export const addInterceptor = (interceptor: Interceptor) => interceptors.push(interceptor);
+export const addInterceptor = (interceptor: Interceptor) => {
+  interceptors.push(interceptor);
+};
 
 export async function kfetch(
   options: KFetchOptions,
