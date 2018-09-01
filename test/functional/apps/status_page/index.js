@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('status page @ciGroup08', function () {
+  describe('status page @ciGroup01', function () {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('status_page');
     });
