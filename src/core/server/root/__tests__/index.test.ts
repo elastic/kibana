@@ -33,12 +33,12 @@ jest.mock('../../', () => ({ Server: jest.fn(() => mockServer) }));
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { Root } from '../';
-import { Env, RawConfig } from '../../config';
+import { Config, Env } from '../../config';
 import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
 import { logger } from '../../logging/__mocks__';
 
 const env = new Env('.', getEnvOptions());
-const config$ = new BehaviorSubject({} as RawConfig);
+const config$ = new BehaviorSubject({} as Config);
 
 const mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {
   // noop

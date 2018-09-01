@@ -18,8 +18,9 @@
  */
 
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
-import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
+import expect from 'expect.js';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -712,13 +713,24 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
-      log.debug('click submit button');
-      await testSubjects.click('saveVisualizationButton');
       if (saveAsNew) {
+        log.debug('Check save as new visualization');
         await testSubjects.click('saveAsNewCheckbox');
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      return await testSubjects.exists('saveVisualizationSuccess');
+      log.debug('Click Save Visualization button');
+      await testSubjects.click('saveVisualizationButton');
+    }
+
+    async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const successToast = await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
+      expect(successToast).to.be(true);
+    }
+
+    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const errorToast = await testSubjects.exists('saveVisualizationError', defaultFindTimeout);
+      expect(errorToast).to.be(true);
     }
 
     async clickLoadSavedVisButton() {

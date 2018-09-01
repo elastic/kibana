@@ -33,7 +33,6 @@ export function mongodbMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from MongoDB.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
 [Learn more]({learnMoreLink}).',
       values: {

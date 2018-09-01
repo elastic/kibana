@@ -23,11 +23,10 @@ import thunk from 'redux-thunk';
 import { QueryLanguageType } from 'ui/embeddable/types';
 import { DashboardViewMode } from './dashboard/dashboard_view_mode';
 import { reducers } from './reducers';
-import { CoreKibanaState } from './selectors';
 
 const enhancers = [applyMiddleware(thunk)];
 
-export const store = createStore<CoreKibanaState>(
+export const store = createStore(
   reducers,
   {
     dashboard: {
