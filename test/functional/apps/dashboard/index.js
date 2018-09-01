@@ -42,7 +42,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
       // This has to be first since the other tests create some embeddables as side affects and our counting assumes
       // a fresh index.
-      describe('@ciGroup3', function () {
+      describe('dashboard @ciGroup02', function () {
         loadTestFile(require.resolve('./_empty_dashboard'));
         loadTestFile(require.resolve('./_dark_theme'));
         loadTestFile(require.resolve('./_embeddable_rendering'));
@@ -53,29 +53,34 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
         loadTestFile(require.resolve('./_embed_mode'));
       });
 
-      describe('@ciGroup4', function () {
+      describe('dashboard @ciGroup03', function () {
         loadTestFile(require.resolve('./_full_screen_mode'));
         loadTestFile(require.resolve('./_dashboard_filter_bar'));
-      });
-      // TODO: unskip when https://github.com/elastic/kibana/issues/20442 is fixed
-      //loadTestFile(require.resolve('./_dashboard_filtering'));
+        // TODO: unskip when https://github.com/elastic/kibana/issues/20442 is fixed
+        //loadTestFile(require.resolve('./_dashboard_filtering'));
 
-      loadTestFile(require.resolve('./_panel_expand_toggle'));
-      loadTestFile(require.resolve('./_dashboard_grid'));
-      loadTestFile(require.resolve('./_dashboard_snapshots'));
-      loadTestFile(require.resolve('./_view_edit'));
+        loadTestFile(require.resolve('./_panel_expand_toggle'));
+        loadTestFile(require.resolve('./_dashboard_grid'));
+        loadTestFile(require.resolve('./_dashboard_snapshots'));
+        loadTestFile(require.resolve('./_view_edit'));
+      });
+
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
-    describe('using legacy data @ciGroup5', function () {
+    describe('using legacy data @ciGroup04', function () {
       before(() => remote.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
       loadTestFile(require.resolve('./_panel_controls'));
       loadTestFile(require.resolve('./_dashboard_state'));
+    });
+
+    describe('using legacy data @ciGroup05', function () {
+      before(() => remote.setWindowSize(1200, 900));
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));
       loadTestFile(require.resolve('./_dashboard_listing'));

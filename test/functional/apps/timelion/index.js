@@ -23,7 +23,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('timelion app @ciGroup8', function () {
+  describe('timelion app @ciGroup08', function () {
     before(async function () {
       log.debug('Starting timelion before method');
       remote.setWindowSize(1280, 800);

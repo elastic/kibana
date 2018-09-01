@@ -20,7 +20,7 @@
 export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
 
-  describe('management @ciGroup8', function () {
+  describe('management @ciGroup07', function () {
     // on setup, we create an settingsPage instance
     // that we will use for all the tests
     before(async function () {

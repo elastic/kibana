@@ -206,7 +206,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup1',
+        '--grep', '@ciGroup01',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -220,7 +220,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup2',
+        '--grep', '@ciGroup02',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -234,7 +234,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup3',
+        '--grep', '@ciGroup03',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -248,7 +248,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup4',
+        '--grep', '@ciGroup04',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -262,7 +262,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup5',
+        '--grep', '@ciGroup05',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -276,7 +276,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup6',
+        '--grep', '@ciGroup06',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -290,7 +290,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup7',
+        '--grep', '@ciGroup07',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -304,7 +304,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup8',
+        '--grep', '@ciGroup08',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -318,7 +318,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--grep', '@ciGroup9',
+        '--grep', '@ciGroup09',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',
@@ -347,6 +347,20 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--grep', '@ciGroup11',
+        '--config', 'test/functional/config.js',
+        '--esFrom', 'source',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--',
+        '--server.maxPayloadBytes=1648576',
+      ],
+    },
+    functionalTestsReleaseGroup12: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--grep', '@ciGroup12',
         '--config', 'test/functional/config.js',
         '--esFrom', 'source',
         '--bail',

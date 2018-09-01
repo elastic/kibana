@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
 
-  describe('context app @ciGroup2', function () {
+  describe('context app @ciGroup01', function () {
     before(async function () {
       await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');

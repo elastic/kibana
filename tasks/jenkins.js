@@ -52,6 +52,7 @@ module.exports = function (grunt) {
     'run:functionalTestsReleaseGroup9',
     'run:functionalTestsReleaseGroup10',
     'run:functionalTestsReleaseGroup11',
+    'run:functionalTestsReleaseGroup12',
   ]);
 
 };
