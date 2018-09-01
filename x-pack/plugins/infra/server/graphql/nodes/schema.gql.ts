@@ -8,7 +8,7 @@ import gql from 'graphql-tag';
 
 export const nodesSchema: any = gql`
   type InfraNodeMetric {
-    name: String!
+    name: InfraMetricType!
     value: Float!
   }
 

@@ -47,7 +47,7 @@ export const GradientLegend: React.SFC<Props> = ({ legend, bounds, formatter }) 
   };
   return (
     <GradientLegendContainer style={style}>
-      {legend.rules.map(createTickRender(bounds, formatter))}
+      {legend.rules.map(createTickRender(legend.bounds || bounds, formatter))}
     </GradientLegendContainer>
   );
 };

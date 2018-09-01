@@ -116,7 +116,7 @@ export interface InfraNodePath {
 }
 
 export interface InfraNodeMetric {
-  name: string;
+  name: InfraMetricType;
   value: number;
 }
 
@@ -371,7 +371,7 @@ export namespace InfraNodeMetricResolvers {
     value?: ValueResolver;
   }
 
-  export type NameResolver = Resolver<string>;
+  export type NameResolver = Resolver<InfraMetricType>;
   export type ValueResolver = Resolver<number>;
 }
 
@@ -512,7 +512,7 @@ export namespace WaffleNodesQuery {
 
   export type Metrics = {
     __typename?: 'InfraNodeMetric';
-    name: string;
+    name: InfraMetricType;
     value: number;
   };
 }

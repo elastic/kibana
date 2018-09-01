@@ -28,9 +28,9 @@ const initialState = {
           .subtract(1, 'h')
           .valueOf(),
       },
-      formatter: InfraWaffleMapFormatterType.bytes,
+      formatter: InfraWaffleMapFormatterType.percent,
       formatTemplate: '{{value}}',
-      metrics: [{ type: InfraMetricType.count }],
+      metrics: [{ type: InfraMetricType.cpu }],
       path: [{ type: InfraPathType.hosts }],
       /*
       legend: {
@@ -53,6 +53,10 @@ const initialState = {
       */
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
+        bounds: {
+          min: 0,
+          max: 1,
+        },
         rules: [
           {
             value: 0,
