@@ -56,7 +56,7 @@ export const CleanClientModulesOnDLLTask = {
     ];
 
     // Resolve the client vendors dll manifest path
-    const dllManifestPath = build.resolvePath('optimize/bundles/vendors.manifest.dll.json');
+    const dllManifestPath = build.resolvePath('dlls/vendors.manifest.dll.json');
 
     // Get dll entries filtering out the ones
     // from any whitelisted module

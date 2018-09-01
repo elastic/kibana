@@ -17,12 +17,11 @@
  * under the License.
  */
 
+import BaseOptimizer from '../base_optimizer';
+import { createBundlesRoute } from '../bundles_route';
+import { DllCompiler } from '../dynamic_dll_plugin';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-
-import BaseOptimizer from '../base_optimizer';
-
-import { createBundlesRoute } from '../bundles_route';
 
 const STATUS = {
   RUNNING: 'optimizer running',
@@ -113,7 +112,8 @@ export default class WatchOptimizer extends BaseOptimizer {
     });
 
     server.route(createBundlesRoute({
-      bundlesPath: this.compiler.outputPath,
+      regularBundlesPath: this.compiler.outputPath,
+      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
       basePublicPath: basePath
     }));
   }

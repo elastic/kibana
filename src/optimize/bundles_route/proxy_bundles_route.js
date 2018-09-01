@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { DynamicDllPlugin } from './dynamic_dll_plugin';
-export { DllCompiler } from './dll_compiler';
+export function createProxyBundlesRoute({ host, port }) {
+  return [
+    buildProxyRouteForBundles('/bundles/', host, port),
+    buildProxyRouteForBundles('dlls', host, port)
+  ];
+}
+
+function buildProxyRouteForBundles(routePath, host, port) {
+  return {
+    path: [
+      `${routePath}{path*}`,
+      `${routePath}{path*}`
+    ],
+    method: 'GET',
+    handler: {
+      proxy: {
+        host,
+        port,
+        passThrough: true,
+        xforward: true
+      }
+    },
+    config: { auth: false }
+  };
+}

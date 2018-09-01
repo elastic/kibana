@@ -70,18 +70,19 @@ module.exports = function (grunt) {
 
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/vendors.bundle.js',
+        'http://localhost:5610/dlls/vendors.bundle.dll.js',
         'http://localhost:5610/bundles/commons.bundle.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
-        'http://localhost:5610/bundles/vendors.style.css',
+        'http://localhost:5610/dlls/vendors.style.dll.css',
         'http://localhost:5610/bundles/commons.style.css',
         'http://localhost:5610/bundles/tests.style.css'
       ],
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/bundles/': 'http://localhost:5610/bundles/',
+        '/dlls/': 'http://localhost:5610/dlls/'
       },
 
       client: {
@@ -162,11 +163,11 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
-          'http://localhost:5610/bundles/vendors.bundle.js',
+          'http://localhost:5610/dlls/vendors.bundle.dll.js',
           'http://localhost:5610/bundles/commons.bundle.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
 
-          'http://localhost:5610/bundles/vendors.style.css',
+          'http://localhost:5610/dlls/vendors.style.dll.css',
           'http://localhost:5610/bundles/commons.style.css',
           'http://localhost:5610/bundles/tests.style.css'
         ]

@@ -32,12 +32,7 @@ const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  constructor(uiBundles, log) {
-    this.rawDllConfig = this.createRawDllConfig(uiBundles);
-    this.log = log || (() => null);
-  }
-
-  createRawDllConfig(uiBundles) {
+  static getRawDllConfig() {
     return {
       context: fromRoot('.'),
       entryName: 'vendors',
@@ -48,14 +43,20 @@ export class DllCompiler {
       dllExt: '.bundle.dll.js',
       manifestExt: '.manifest.dll.json',
       styleExt: '.style.dll.css',
-      outputPath: `${uiBundles.getWorkingDir()}`,
+      outputPath: fromRoot('./dlls'),
       publicPath: PUBLIC_PATH_PLACEHOLDER
     };
+  }
+
+  constructor(log) {
+    this.rawDllConfig = DllCompiler.getRawDllConfig();
+    this.log = log || (() => null);
   }
 
   async init() {
     await this.ensureEntryFileExists();
     await this.ensureManifestFileExists();
+    await this.ensureOutputPathExists();
   }
 
   async upsertEntryFile(content) {
@@ -119,6 +120,10 @@ export class DllCompiler {
     }
 
     return exists;
+  }
+
+  async ensureOutputPathExists() {
+    await this.ensurePathExists(this.rawDllConfig.outputPath);
   }
 
   resolvePath() {

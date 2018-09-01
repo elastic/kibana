@@ -19,6 +19,7 @@
 
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
+import { DllCompiler } from './dynamic_dll_plugin';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -28,9 +29,9 @@ export default async (kbnServer, server, config) => {
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* requests to
-  // the other server. The server on 5602 is long running, in order to prevent
-  // complete rebuilds of the optimize content.
+  // on the watch setup managed by the cli. It proxies all bundles/* and dlls/*
+  // requests to the other server. The server on 5602 is long running, in order
+  // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
   if (watch) {
     return await kbnServer.mixin(require('./watch/watch'));
@@ -38,7 +39,8 @@ export default async (kbnServer, server, config) => {
 
   const { uiBundles } = kbnServer;
   server.route(createBundlesRoute({
-    bundlesPath: uiBundles.getWorkingDir(),
+    regularBundlesPath: uiBundles.getWorkingDir(),
+    dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
     basePublicPath: config.get('server.basePath')
   }));
 
