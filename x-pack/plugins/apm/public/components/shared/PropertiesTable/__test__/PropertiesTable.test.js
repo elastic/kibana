@@ -15,23 +15,21 @@ import {
 import { getFeatureDocs } from '../../../../utils/documentation';
 
 jest.mock('../../../../utils/documentation');
-jest.mock('../propertyConfig', () => ({
-  PROPERTY_CONFIG: [
-    {
-      key: 'testProperty',
-      required: false,
-      presortedKeys: ['name', 'age']
-    },
-    {
-      key: 'optionalProperty',
-      required: false
-    },
-    {
-      key: 'requiredProperty',
-      required: true
-    }
-  ]
-}));
+jest.mock('../propertyConfig.json', () => [
+  {
+    key: 'testProperty',
+    required: false,
+    presortedKeys: ['name', 'age']
+  },
+  {
+    key: 'optionalProperty',
+    required: false
+  },
+  {
+    key: 'requiredProperty',
+    required: true
+  }
+]);
 
 describe('PropertiesTable component', () => {
   it('should render with data', () => {
