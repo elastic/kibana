@@ -22,6 +22,10 @@ const unmountComponentAtNode = jest.fn();
 
 jest.doMock('react-dom', () => ({ render, unmountComponentAtNode }));
 
+jest.mock('ui/index_patterns', () => ({
+  INDEX_PATTERN_ILLEGAL_CHARACTERS: ['\\', '/', '?', '"', '<', '>', '|', ' '],
+}));
+
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',

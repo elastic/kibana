@@ -26,6 +26,10 @@ jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
 
+jest.mock('ui/index_patterns', () => ({
+  INDEX_PATTERN_ILLEGAL_CHARACTERS: ['\\', '/', '?', '"', '<', '>', '|', ' '],
+}));
+
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
