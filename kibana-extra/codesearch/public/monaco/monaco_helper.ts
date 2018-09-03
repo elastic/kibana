@@ -40,7 +40,11 @@ export class MonacoHelper {
         //  @ts-ignore another hack to replace function
         this.monaco!.typescript.DefinitionAdapter.prototype.provideDefinition = (model, position) =>
           provideDefinition(monaco, model, position);
-
+        this.monaco.languages.registerDefinitionProvider('java', {
+          provideDefinition(model, position) {
+            return provideDefinition(monaco, model, position);
+          },
+        });
         this.editor = monaco.editor.create(
           this.container!,
           {
