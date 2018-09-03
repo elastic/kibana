@@ -124,7 +124,7 @@ export class ExplorerChart extends React.Component {
           }
         })
         .each(function () {
-          maxYAxisLabelWidth = Math.max(((this.getBBox && this.getBBox().width) || 0) + yAxis.tickPadding(), maxYAxisLabelWidth);
+          maxYAxisLabelWidth = Math.max(this.getBBox().width + yAxis.tickPadding(), maxYAxisLabelWidth);
         })
         .remove();
       d3.select('.temp-axis-label').remove();

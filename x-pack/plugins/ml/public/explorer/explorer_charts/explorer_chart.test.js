@@ -24,54 +24,59 @@ import React from 'react';
 import { ExplorerChart } from './explorer_chart';
 import { chartLimits } from '../../util/chart_utils';
 
-const seriesConfig = {
-  jobId: 'population-03',
-  detectorIndex: 0,
-  metricFunction: 'sum',
-  timeField: '@timestamp',
-  interval: '1h',
-  datafeedConfig: {
-    datafeed_id: 'datafeed-population-03',
-    job_id: 'population-03',
-    query_delay: '60s',
-    frequency: '600s',
-    indices: ['filebeat-7.0.0*'],
-    types: ['doc'],
-    query: { match_all: { boost: 1 } },
-    scroll_size: 1000,
-    chunking_config: { mode: 'auto' },
-    state: 'stopped'
-  },
-  metricFieldName: 'nginx.access.body_sent.bytes',
-  functionDescription: 'sum',
-  bucketSpanSeconds: 3600,
-  detectorLabel: 'high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)',
-  fieldName: 'nginx.access.body_sent.bytes',
-  entityFields: [{
-    fieldName: 'nginx.access.remote_ip',
-    fieldValue: '72.57.0.53',
-    $$hashKey: 'object:813'
-  }],
-  infoTooltip: `<div class=\"explorer-chart-info-tooltip\">job ID: population-03<br/>
+describe('ExplorerChart', () => {
+  const seriesConfig = {
+    jobId: 'population-03',
+    detectorIndex: 0,
+    metricFunction: 'sum',
+    timeField: '@timestamp',
+    interval: '1h',
+    datafeedConfig: {
+      datafeed_id: 'datafeed-population-03',
+      job_id: 'population-03',
+      query_delay: '60s',
+      frequency: '600s',
+      indices: ['filebeat-7.0.0*'],
+      types: ['doc'],
+      query: { match_all: { boost: 1 } },
+      scroll_size: 1000,
+      chunking_config: { mode: 'auto' },
+      state: 'stopped'
+    },
+    metricFieldName: 'nginx.access.body_sent.bytes',
+    functionDescription: 'sum',
+    bucketSpanSeconds: 3600,
+    detectorLabel: 'high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)',
+    fieldName: 'nginx.access.body_sent.bytes',
+    entityFields: [{
+      fieldName: 'nginx.access.remote_ip',
+      fieldValue: '72.57.0.53',
+      $$hashKey: 'object:813'
+    }],
+    infoTooltip: `<div class=\"explorer-chart-info-tooltip\">job ID: population-03<br/>
       aggregation interval: 1h<br/>chart function: sum nginx.access.body_sent.bytes<br/>
       nginx.access.remote_ip: 72.57.0.53</div>`,
-  loading: false,
-  plotEarliest: 1487534400000,
-  plotLatest: 1488168000000,
-  selectedEarliest: 1487808000000,
-  selectedLatest: 1487894399999
-};
+    loading: false,
+    plotEarliest: 1487534400000,
+    plotLatest: 1488168000000,
+    selectedEarliest: 1487808000000,
+    selectedLatest: 1487894399999
+  };
 
-const mlSelectSeverityServiceMock = {
-  state: {
-    get: () => ({
-      val: ''
-    })
-  }
-};
+  const mlSelectSeverityServiceMock = {
+    state: {
+      get: () => ({
+        val: ''
+      })
+    }
+  };
 
-
-describe('ExplorerChart', () => {
+  const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
+  const originalGetBBox = SVGElement.prototype.getBBox;
+  beforeEach(() => SVGElement.prototype.getBBox = () => {
+    return mockedGetBBox;
+  });
+  afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
     const wrapper = mount(<ExplorerChart mlSelectSeverityService={mlSelectSeverityServiceMock} />);

@@ -363,7 +363,7 @@ export function calculateTextWidth(txt, isNumber, elementSelection) {
     .enter()
     .append('text')
     .text(txt);
-  const width = (tempLabelText[0][0].getBBox && tempLabelText[0][0].getBBox().width) || 0;
+  const width = tempLabelText[0][0].getBBox().width;
 
   d3.select('.temp-axis-label').remove();
   if ($el !== undefined) {
