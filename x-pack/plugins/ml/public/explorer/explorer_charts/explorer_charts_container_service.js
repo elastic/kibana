@@ -17,10 +17,10 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 import { buildConfig } from './explorer_chart_config_builder';
-import { chartLimits } from 'plugins/ml/util/chart_utils';
+import { chartLimits } from '../../util/chart_utils';
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
-import { mlResultsService } from 'plugins/ml/services/results_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlResultsService } from '../../services/results_service';
+import { mlJobService } from '../../services/job_service';
 
 function getDefaultData() {
   return {

@@ -14,7 +14,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { numTicks } from 'plugins/ml/util/chart_utils';
+import { numTicks } from '../../util/chart_utils';
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 

@@ -14,9 +14,9 @@
 import _ from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { buildConfigFromDetector } from 'plugins/ml/util/chart_config_builder';
-import { mlEscape } from 'plugins/ml/util/string_utils';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { buildConfigFromDetector } from '../../util/chart_config_builder';
+import { mlEscape } from '../../util/string_utils';
+import { mlJobService } from '../../services/job_service';
 
 // Builds the chart configuration for the provided anomaly record, returning
 // an object with properties used for the display (series function and field, aggregation interval etc),
