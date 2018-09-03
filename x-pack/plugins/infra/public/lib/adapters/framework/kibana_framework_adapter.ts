@@ -7,9 +7,11 @@
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+
+import { UIRoutes as KibanaUIRoutes } from 'ui/routes';
+
 import {
   InfraBufferedKibanaServiceCall,
-  InfraChrome,
   InfraFrameworkAdapter,
   InfraKibanaAdapterServiceRefs,
   InfraKibanaUIConfig,
@@ -32,11 +34,15 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   private rootComponent: React.ReactElement<any> | null = null;
   private breadcrumbsComponent: React.ReactElement<any> | null = null;
 
-  constructor(uiModule: IModule, timezoneProvider: InfraTimezoneProvider) {
+  constructor(
+    uiModule: IModule,
+    uiRoutes: KibanaUIRoutes,
+    timezoneProvider: InfraTimezoneProvider
+  ) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.timezoneProvider = timezoneProvider;
     this.appState = {};
-    this.register(uiModule);
+    this.register(uiModule, uiRoutes);
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -53,7 +59,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     this.adapterService.callOrBuffer(() => (this.breadcrumbsComponent = component));
   };
 
-  private register = (adapterModule: IModule) => {
+  private register = (adapterModule: IModule, uiRoutes: KibanaUIRoutes) => {
     adapterModule.provider('kibanaAdapter', this.adapterService);
 
     adapterModule.directive('infraUiKibanaAdapter', () => ({
@@ -117,7 +123,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     }));
 
     adapterModule.run((
-      chrome: InfraChrome,
       config: InfraKibanaUIConfig,
       kbnVersion: string,
       Private: <Provider>(provider: Provider) => Provider,
@@ -128,10 +133,13 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       this.kbnVersion = kbnVersion;
       this.dateFormat = config.get('dateFormat');
       this.scaledDateFormat = config.get('dateFormat:scaled');
+    });
 
-      chrome.setRootTemplate(
-        '<infra-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></infra-ui-kibana-adapter>'
-      );
+    uiRoutes.enable();
+
+    uiRoutes.otherwise({
+      template:
+        '<infra-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></infra-ui-kibana-adapter>',
     });
   };
 }

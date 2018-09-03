@@ -31,7 +31,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
       items: [
         {
           name: `View logs for this ${nodeType}`,
-          href: `#/details?filter=${node.name}`,
+          href: `#/logs?filter=${node.name}`,
         },
         {
           name: `View APM Traces for this ${nodeType}`,
