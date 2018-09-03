@@ -10,16 +10,17 @@
  * AngularJS directive for rendering Explorer dashboard swimlanes.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 import _ from 'lodash';
 import $ from 'jquery';
-import moment from 'moment';
 import d3 from 'd3';
 
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
-import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { ExplorerSwimlane } from './explorer_swimlane';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -27,50 +28,6 @@ const module = uiModules.get('apps/ml');
 module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService) {
 
   function link(scope, element) {
-
-    // Consider the setting to support to select a range of cells
-    if (!mlExplorerDashboardService.allowCellRangeSelection) {
-      element.addClass('ml-hide-range-selection');
-    }
-
-    let cellMouseoverActive = true;
-
-    // Listen for dragSelect events
-    function dragSelectListener({ action, elements = [] }) {
-      if (action === 'newSelection' && elements.length > 0) {
-        const firstCellData = $(elements[0]).data('click');
-        if (typeof firstCellData !== 'undefined' && scope.swimlaneType === firstCellData.swimlaneType) {
-          const selectedData = elements.reduce((d, e) => {
-            const cellData = $(e).data('click');
-            d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
-            d.laneLabels.push(cellData.laneLabel);
-            d.times.push(cellData.time);
-            return d;
-          }, {
-            bucketScore: 0,
-            laneLabels: [],
-            times: []
-          });
-
-          selectedData.laneLabels = _.uniq(selectedData.laneLabels);
-          selectedData.times = _.uniq(selectedData.times);
-          cellClick(elements, selectedData);
-        }
-        cellMouseoverActive = true;
-      } else if (action === 'elementSelect') {
-        element.addClass('ml-dragselect-dragging');
-        return;
-      } else if (action === 'dragStart') {
-        cellMouseoverActive = false;
-        return;
-      }
-
-      element.removeClass('ml-dragselect-dragging');
-      elements.map(e => $(e).removeClass('ds-selected'));
-    }
-
-    mlExplorerDashboardService.dragSelect.watch(dragSelectListener);
-
     // Re-render the swimlane whenever the underlying data changes.
     function swimlaneDataChangeListener(swimlaneType) {
       if (swimlaneType === scope.swimlaneType) {
@@ -82,22 +39,14 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
     mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
 
     element.on('$destroy', () => {
-      mlExplorerDashboardService.dragSelect.unwatch(dragSelectListener);
       mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
       scope.$destroy();
     });
 
     const MlTimeBuckets = Private(IntervalHelperProvider);
 
-    function cellClick(cellsToSelect, { laneLabels, bucketScore, times }) {
-      if (cellsToSelect.length > 1 || bucketScore > 0) {
-        selectCell(cellsToSelect, laneLabels, times, bucketScore, true);
-      } else {
-        clearSelection();
-      }
-    }
-
     function render() {
+      console.warn('directive render', _.cloneDeep(scope.swimlaneData));
       if (scope.swimlaneData === undefined) {
         return;
       }
@@ -108,201 +57,27 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       const stepSecs = scope.swimlaneData.interval;
       const points = scope.swimlaneData.points;
 
-      function colorScore(value) {
-        return getSeverityColor(value);
-      }
+      const props = {
+        lanes,
+        startTime,
+        endTime,
+        stepSecs,
+        points,
+        chartWidth: scope.chartWidth,
+        MlTimeBuckets,
+        swimlaneData: scope.swimlaneData,
+        swimlaneType: scope.swimlaneType,
+        mlChartTooltipService,
+        mlExplorerDashboardService,
+        clearSelection,
+        appState: scope.appState,
+        selectCell
+      };
 
-      const numBuckets = parseInt((endTime - startTime) / stepSecs);
-      const cellHeight = 30;
-      const height = (lanes.length + 1) * cellHeight - 10;
-      const laneLabelWidth = 170;
-
-      element.css('height', (height + 20) + 'px');
-      const $swimlanes = element.find('.ml-swimlanes').first();
-      $swimlanes.empty();
-
-      const cellWidth = Math.floor(scope.chartWidth / numBuckets);
-
-      const xAxisWidth = cellWidth * numBuckets;
-      const xAxisScale = d3.time.scale()
-        .domain([new Date(startTime * 1000), new Date(endTime * 1000)])
-        .range([0, xAxisWidth]);
-
-      // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new MlTimeBuckets();
-      timeBuckets.setInterval(`${stepSecs}s`);
-      const xAxisTickFormat = timeBuckets.getScaledDateFormat();
-
-      function cellMouseover($event, laneLabel, bucketScore, index, time) {
-        if (bucketScore === undefined || cellMouseoverActive === false) {
-          return;
-        }
-
-        const displayScore = (bucketScore > 1 ? parseInt(bucketScore) : '< 1');
-
-        // Display date using same format as Kibana visualizations.
-        const formattedDate = moment(time * 1000).format('MMMM Do YYYY, HH:mm');
-        let contents = `${formattedDate}<br/><hr/>`;
-        if (scope.swimlaneData.fieldName !== undefined) {
-          contents += `${mlEscape(scope.swimlaneData.fieldName)}: ${mlEscape(laneLabel)}<br/><hr/>`;
-        }
-        contents += `Max anomaly score: ${displayScore}`;
-
-        const offsets = ($event.target.className === 'sl-cell-inner' ? { x: 0, y: 0 } : { x: 2, y: 1 });
-        mlChartTooltipService.show(contents, $event.target, {
-          x: $event.target.offsetWidth - offsets.x,
-          y: 10 + offsets.y
-        });
-      }
-
-      function cellMouseleave() {
-        mlChartTooltipService.hide();
-      }
-
-      _.each(lanes, (lane) => {
-        const rowScope = scope.$new();
-        rowScope.cellMouseover = cellMouseover;
-        rowScope.cellMouseleave = cellMouseleave;
-
-        const $lane = $('<div>', {
-          class: 'lane',
-        });
-
-        const label = mlEscape(lane);
-        const fieldName = mlEscape(scope.swimlaneData.fieldName);
-        const laneDivProps = {
-          class: 'lane-label',
-          css: {
-            width: laneLabelWidth + 'px'
-          },
-          html: label
-        };
-
-        if (scope.swimlaneData.fieldName !== undefined) {
-          laneDivProps['tooltip-html-unsafe'] = `${fieldName}: ${label}`;
-          laneDivProps['tooltip-placement'] = 'right';
-          laneDivProps['aria-label'] = `${fieldName}: ${label}`;
-        }
-
-        const $label = $('<div>', laneDivProps);
-        $label.on('click', () => {
-          if (typeof scope.appState.mlExplorerSwimlane.selectedLanes !== 'undefined') {
-            clearSelection();
-          }
-        });
-        $lane.append($label);
-
-        const $cellsContainer = $('<div>', {
-          class: 'cells-container'
-        });
-        $lane.append($cellsContainer);
-
-        // TODO - mark if zoomed in to bucket width?
-        let time = startTime;
-        for (let i = 0; i < numBuckets; i++) {
-          const $cell = $('<div>', {
-            class: 'sl-cell ',
-            css: {
-              width: cellWidth + 'px'
-            },
-            'data-lane-label': label,
-            'data-time': time,
-
-          });
-
-          let color = 'none';
-          let bucketScore = 0;
-          for (let j = 0; j < points.length; j++) {
-            // this may break if detectors have the duplicate descriptions
-            if (points[j].value > 0 && points[j].laneLabel === lane && points[j].time === time) {
-              bucketScore = points[j].value;
-              color = colorScore(bucketScore);
-              $cell.append($('<div>', {
-                class: 'sl-cell-inner',
-                css: {
-                  'background-color': color
-                }
-              }));
-              $cell.attr({ 'data-score': bucketScore });
-              $cell.find('.sl-cell-inner-dragselect').remove();
-            } else if ($cell.find('.sl-cell-inner-dragselect').length === 0 && $cell.find('.sl-cell-inner').length === 0) {
-              $cell.append($('<div>', {
-                class: 'sl-cell-inner-dragselect'
-              }));
-            }
-          }
-
-          // Escape single quotes and backslash characters in the HTML for the event handlers.
-          $cell.data({
-            'click': {
-              bucketScore,
-              laneLabel: lane,
-              swimlaneType: scope.swimlaneType,
-              time
-            }
-          });
-
-          if (bucketScore > 0) {
-            const safeLaneTxt = lane.replace(/(['\\])/g, '\\$1');
-            const cellMouseoverTxt = 'cellMouseover($event, \'' + safeLaneTxt + '\', ' +
-              bucketScore + ', ' + i + ', ' + time + ')';
-            const cellMouseleaveTxt = 'cellMouseleave()';
-            $cell.attr({
-              'ng-mouseover': cellMouseoverTxt,
-              'ng-mouseleave': cellMouseleaveTxt
-            });
-          }
-
-          $cellsContainer.append($cell);
-
-          time += stepSecs;
-        }
-
-        $swimlanes.append($lane);
-
-        $compile($lane)(rowScope);
-      });
-
-      const laneTimes = d3.select($swimlanes.get(0))
-        .append('div')
-        .classed('time-tick-labels', true);
-
-      // height of .time-tick-labels
-      const svgHeight = 25;
-      const svg = laneTimes.append('svg')
-        .attr('width', scope.chartWidth)
-        .attr('height', svgHeight);
-
-      const xAxis = d3.svg.axis()
-        .scale(xAxisScale)
-        .ticks(numTicksForDateFormat(scope.chartWidth, xAxisTickFormat))
-        .tickFormat(tick => moment(tick).format(xAxisTickFormat));
-
-      const gAxis = svg.append('g').attr('class', 'x axis').call(xAxis);
-
-      // remove overlapping labels
-      let overlapCheck = 0;
-      gAxis.selectAll('g.tick').each(function () {
-        const tick = d3.select(this);
-        const xTransform = d3.transform(tick.attr('transform')).translate[0];
-        const tickWidth = tick.select('text').node().getBBox().width;
-        const xMinOffset = xTransform - (tickWidth / 2);
-        const xMaxOffset = xTransform + (tickWidth / 2);
-        // if the tick label overlaps the previous label
-        // (or overflows the chart to the left), remove it;
-        // otherwise pick that label's offset as the new offset to check against
-        if (xMinOffset < overlapCheck) {
-          tick.remove();
-        } else {
-          overlapCheck = xTransform + (tickWidth / 2);
-        }
-        // if the last tick label overflows the chart to the right, remove it
-        if (xMaxOffset > scope.chartWidth) {
-          tick.remove();
-        }
-      });
-
-      mlExplorerDashboardService.swimlaneRenderDone.changed();
+      ReactDOM.render(
+        React.createElement(ExplorerSwimlane, props),
+        element[0]
+      );
     }
 
     function checkForSelection() {
@@ -434,7 +209,6 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
     }
   }
 
-  const template = `<div class="ml-swimlanes"></div>`;
   return {
     scope: {
       swimlaneType: '@',
@@ -443,7 +217,6 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       chartWidth: '=',
       appState: '='
     },
-    link: link,
-    template: template
+    link: link
   };
 });
