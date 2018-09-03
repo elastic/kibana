@@ -35,7 +35,7 @@ import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+import { VislibResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -55,6 +55,9 @@ import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { showShareContextMenu } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { Inspector } from 'ui/inspector';
+import { RequestAdapter } from 'ui/inspector/adapters';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -153,12 +156,15 @@ function discoverController(
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(BasicResponseHandlerProvider).handler;
+  const responseHandler = Private(VislibResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier({
     location: 'Discover'
   });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const inspectorAdapters = {
+    requests: new RequestAdapter()
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
@@ -199,6 +205,15 @@ function discoverController(
         getUnhashableStates,
         objectId: savedSearch.id,
         objectType: 'search',
+      });
+    }
+  }, {
+    key: 'inspect',
+    description: 'Open Inspector for search',
+    testId: 'openInspectorButton',
+    run() {
+      Inspector.open(inspectorAdapters, {
+        title: savedSearch.title
       });
     }
   }];
@@ -554,9 +569,38 @@ function discoverController(
     segmented.setSortFn(sortFn);
     segmented.setSize($scope.opts.sampleSize);
 
+    let inspectorRequests = [];
+    function logResponseInInspector(resp) {
+      if (inspectorRequests.length > 0) {
+        const inspectorRequest = inspectorRequests.shift();
+        inspectorRequest
+          .stats(getResponseInspectorStats($scope.searchSource, resp))
+          .ok({ json: resp });
+      }
+    }
+
     // triggered when the status updated
     segmented.on('status', function (status) {
       $scope.fetchStatus = status;
+      if (status.complete === 0) {
+        // starting new segmented search request
+        inspectorAdapters.requests.reset();
+        inspectorRequests = [];
+      }
+
+      if (status.remaining > 0) {
+        const inspectorRequest = inspectorAdapters.requests.start(
+          `Segment ${$scope.fetchStatus.complete}`,
+          {
+            description: `This request queries Elasticsearch to fetch the data for the search.`,
+          });
+        inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
+        $scope.searchSource.getSearchRequestBody().then(body => {
+          inspectorRequest.json(body);
+        });
+        inspectorRequests.push(inspectorRequest);
+      }
+
     });
 
     segmented.on('first', function () {
@@ -564,12 +608,17 @@ function discoverController(
     });
 
     segmented.on('segment', (resp) => {
+      logResponseInInspector(resp);
       if (resp._shards.failed > 0) {
         $scope.failures = _.union($scope.failures, resp._shards.failures);
         $scope.failures = _.uniq($scope.failures, false, function (failure) {
           return failure.index + failure.shard + failure.reason;
         });
       }
+    });
+
+    segmented.on('emptySegment', function (resp) {
+      logResponseInInspector(resp);
     });
 
     segmented.on('mergedSegment', function (merged) {
