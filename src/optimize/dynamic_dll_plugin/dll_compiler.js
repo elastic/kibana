@@ -177,7 +177,7 @@ export class DllCompiler {
         // Otherwise let it proceed
         this.log(
           ['info', 'optimize:dynamic_dll_plugin'],
-          `Client vendors dll compilation finished with success and the following stats:\n\n${stats}`
+          `Client vendors dll compilation finished with success`
         );
         return resolve(stats);
       });
