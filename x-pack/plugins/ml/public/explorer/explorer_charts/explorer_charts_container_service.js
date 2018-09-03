@@ -22,27 +22,31 @@ import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 
-function getDefaultData() {
-  return {
-    seriesToPlot: [],
-    // default values, will update on every re-render
-    layoutCellsPerChart: 12,
-    tooManyBuckets: false,
-    timeFieldName: 'timestamp'
-  };
-}
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
   callback
 ) {
   const $chartContainer = $('.explorer-charts');
+
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
+  const DEFAULT_LAYOUT_CELLS_PER_CHART = 12;
+  const MAX_CHARTS_PER_ROW = 4;
+
+  function getDefaultData() {
+    return {
+      seriesToPlot: [],
+      // default values, will update on every re-render
+      layoutCellsPerChart: DEFAULT_LAYOUT_CELLS_PER_CHART,
+      tooManyBuckets: false,
+      timeFieldName: 'timestamp'
+    };
+  }
 
   callback(getDefaultData());
 
@@ -56,9 +60,9 @@ export function explorerChartsContainerServiceFactory(
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     const chartsContainerWidth = Math.floor($chartContainer.width());
-    const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), 4);
+    const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
 
-    data.layoutCellsPerChart = 12 / chartsPerRow;
+    data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
 
     // Build the data configs of the anomalies to be displayed.
     // TODO - implement paging?
