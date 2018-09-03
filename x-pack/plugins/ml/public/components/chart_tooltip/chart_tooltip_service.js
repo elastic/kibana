@@ -43,19 +43,19 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
     // the tooltip is hanging off the side of the page,
     // so move it to the other side of the target
     this.element.css({
-      'left': x - (tooltipWidth + offset.x + 22),
-      'top': (y - 28)
+      left: x - (tooltipWidth + offset.x + 22),
+      top: (y - 28)
     });
   } else {
     this.element.css({
-      'left': x,
-      'top': (y - 28)
+      left: x,
+      top: (y - 28)
     });
   }
 
   this.element.css({
-    'opacity': '0.9',
-    'display': 'block'
+    opacity: '0.9',
+    display: 'block'
   });
 };
 
@@ -65,7 +65,7 @@ mlChartTooltipService.hide = function () {
   }
 
   this.element.css({
-    'opacity': '0',
+    opacity: '0',
   });
 
   // after the fade out transition has finished, set the display to

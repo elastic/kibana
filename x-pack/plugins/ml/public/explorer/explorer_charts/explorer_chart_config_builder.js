@@ -49,21 +49,30 @@ export function buildConfig(record) {
   // define the metric series to be plotted.
   config.entityFields = [];
   if (_.has(record, 'partition_field_name')) {
-    config.entityFields.push({ fieldName: record.partition_field_name, fieldValue: record.partition_field_value });
+    config.entityFields.push({
+      fieldName: record.partition_field_name,
+      fieldValue: record.partition_field_value
+    });
   }
 
   if (_.has(record, 'over_field_name')) {
-    config.entityFields.push({ fieldName: record.over_field_name, fieldValue: record.over_field_value });
+    config.entityFields.push({
+      fieldName: record.over_field_name,
+      fieldValue: record.over_field_value
+    });
   }
 
   // For jobs with by and over fields, don't add the 'by' field as this
   // field will only be added to the top-level fields for record type results
   // if it also an influencer over the bucket.
   if (_.has(record, 'by_field_name') && !(_.has(record, 'over_field_name'))) {
-    config.entityFields.push({ fieldName: record.by_field_name, fieldValue: record.by_field_value });
+    config.entityFields.push({
+      fieldName: record.by_field_name,
+      fieldValue: record.by_field_value
+    });
   }
 
-  // Build the tooltip for the chart info icon, showing further details on what is being plotted.
+  // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
   let functionLabel = config.metricFunction;
   if (config.metricFieldName !== undefined) {
     functionLabel += ` ${mlEscape(config.metricFieldName)}`;

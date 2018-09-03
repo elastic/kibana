@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Mock the mlJobService that is imported for saving rules.
+// Mock TimeBuckets and mlFieldFormatService, they don't play well
+// with the jest based test setup yet.
 jest.mock('ui/time_buckets', () => ({
   TimeBuckets: function () {
     this.setBounds = jest.fn();

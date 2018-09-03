@@ -18,7 +18,7 @@ import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import { exploreSeriesFactory } from './explore_series';
+import { exploreSeries } from './explore_series';
 import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
@@ -27,13 +27,10 @@ const module = uiModules.get('apps/ml');
 
 module.directive('mlExplorerChartsContainer', function (
   mlExplorerDashboardService,
-  mlSelectSeverityService,
-  $window
+  mlSelectSeverityService
 ) {
 
   function link(scope, element) {
-    const exploreSeries = exploreSeriesFactory($window);
-
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mlSelectSeverityService,
       updateComponent

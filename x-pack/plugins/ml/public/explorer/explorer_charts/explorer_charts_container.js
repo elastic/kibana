@@ -10,35 +10,7 @@ import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 
 import { ExplorerChart } from './explorer_chart';
-
-function CompiledTooltip({
-  jobId,
-  aggregationInterval,
-  chartFunction,
-  entityFields = [],
-}) {
-  return (
-    <div className="explorer-chart-info-tooltip">
-      job ID: {jobId}<br />
-      aggregation interval: {aggregationInterval}<br />
-      chart function: {chartFunction}
-      {entityFields.map((entityField, i) => {
-        return (
-          <span key={`${entityField.fieldName}_${entityField.fieldValue}_${i}`}>
-            <br />{entityField.fieldName}: {entityField.fieldValue}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-CompiledTooltip.propTypes = {
-  jobId: PropTypes.string.isRequired,
-  aggregationInterval: PropTypes.string,
-  chartFunction: PropTypes.string,
-  entityFields: PropTypes.array
-};
-
+import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
 export function ExplorerChartsContainer({
   exploreSeries,
@@ -52,15 +24,13 @@ export function ExplorerChartsContainer({
       {(seriesToPlot.length > 0) &&
         seriesToPlot.map((series) => {
 
-          // create a somewhat unique ID from charts metadata
+          // create a somewhat unique ID from charts metadata for React's key attribute
           const {
             jobId,
             detectorLabel,
             entityFields,
           } = series;
-          const entities = entityFields.map((ef) => {
-            return `${ef.fieldName}/${ef.fieldValue}`;
-          }).join(',');
+          const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
           const id = `${jobId}_${detectorLabel}_${entities}`;
 
           return (
@@ -79,7 +49,7 @@ export function ExplorerChartsContainer({
                     );
                   })}
                 </div>
-                <EuiIconTip content={<CompiledTooltip {...series.infoTooltip} />} position="left" size="s" />
+                <EuiIconTip content={<ExplorerChartTooltip {...series.infoTooltip} />} position="left" size="s" />
                 {tooManyBuckets && (
                   <EuiIconTip
                     content={'This selection contains too many buckets to be displayed.' +

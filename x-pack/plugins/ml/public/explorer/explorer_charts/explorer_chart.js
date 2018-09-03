@@ -51,7 +51,7 @@ export class ExplorerChart extends React.Component {
       mlSelectSeverityService
     } = this.props;
 
-    const element = this._rootNode;
+    const element = this.rootNode;
     const config = this.props.seriesConfig;
 
     if (
@@ -332,8 +332,8 @@ export class ExplorerChart extends React.Component {
     return true;
   }
 
-  _setRef(componentNode) {
-    this._rootNode = componentNode;
+  setRef(componentNode) {
+    this.rootNode = componentNode;
   }
 
   render() {
@@ -350,12 +350,12 @@ export class ExplorerChart extends React.Component {
     const isLoading = seriesConfig.loading;
 
     return (
-      <div className="ml-explorer-chart" ref={this._setRef.bind(this)}>
+      <div className="ml-explorer-chart" ref={this.setRef.bind(this)} >
         {isLoading && (
           <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />
         )}
         {!isLoading && (
-          <div className="content-wrapper" ref={this._setRef.bind(this)} />
+          <div className="content-wrapper" />
         )}
       </div>
     );

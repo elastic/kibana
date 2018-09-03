@@ -22,17 +22,14 @@ import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
-function getData() {
-  const data = {};
-
-  data.seriesToPlot = [];
-
-  // default values, will update on every re-render
-  data.layoutCellsPerChart = 12;
-  data.tooManyBuckets = false;
-  data.timeFieldName = 'timestamp';
-
-  return data;
+function getDefaultData() {
+  return {
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    layoutCellsPerChart: 12,
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp'
+  };
 }
 
 export function explorerChartsContainerServiceFactory(
@@ -47,14 +44,13 @@ export function explorerChartsContainerServiceFactory(
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
 
-  callback(_.cloneDeep(getData()));
+  callback(getDefaultData());
 
-  const anomalyDataChangeListener = function (anomalyRecordsOrig, earliestMs, latestMs) {
-    const anomalyRecords = _.cloneDeep(anomalyRecordsOrig);
-    const data = getData();
+  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+    const data = getDefaultData();
 
     const threshold = mlSelectSeverityService.state.get('threshold');
-    const filteredRecords = _.filter(anomalyRecords, (record) => {
+    const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= threshold.val;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
@@ -84,7 +80,7 @@ export function explorerChartsContainerServiceFactory(
       chartData: null
     }));
 
-    callback(_.cloneDeep(data));
+    callback(data);
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
@@ -275,7 +271,7 @@ export function explorerChartsContainerServiceFactory(
           selectedLatest: latestMs,
           chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i])
         }));
-        callback(_.cloneDeep(data));
+        callback(data);
       })
       .catch(error => {
         console.error(error);
