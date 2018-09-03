@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockCluster }from './__mocks__/cluster';
+import { mockCluster } from './__mocks__/cluster';
 jest.mock('cluster', () => mockCluster());
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({
