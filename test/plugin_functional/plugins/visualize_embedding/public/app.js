@@ -45,6 +45,34 @@ import 'uiExports/search';
 // import 'uiExports/inspectorViews';
 // import 'uiExports/autocompleteProviders';
 
+// ----------- TODO Remove once https://github.com/elastic/kibana/pull/22623 is merged
+
+import moment from 'moment-timezone';
+
+function setDefaultTimezone(tz) {
+  moment.tz.setDefault(tz);
+}
+
+function setStartDayOfWeek(day) {
+  const dow = moment.weekdays().indexOf(day);
+  moment.updateLocale(moment.locale(), { week: { dow } });
+}
+
+const uiSettings = chrome.getUiSettingsClient();
+
+setDefaultTimezone(uiSettings.get('dateFormat:tz'));
+setStartDayOfWeek(uiSettings.get('dateFormat:dow'));
+
+uiSettings.subscribe(({ key, newValue }) => {
+  if (key === 'dateFormat:tz') {
+    setDefaultTimezone(newValue);
+  } else if (key === 'dateFormat:dow') {
+    setStartDayOfWeek(newValue);
+  }
+});
+
+// ----------------- END OF REMOVAL ----------
+
 import { Main } from './components/main';
 
 const app = uiModules.get('apps/firewallDemoPlugin', ['kibana']);
