@@ -75,6 +75,14 @@ export const metricSet = {
     {
       keys: ['index_segment_count_total', 'index_segment_count_primaries'],
       name: 'index_segment_count'
+    },
+    {
+      keys: ['index_latency'],
+      name: 'index_latency'
+    },
+    {
+      keys: ['query_latency'],
+      name: 'query_latency'
     }
   ],
   overview: [
