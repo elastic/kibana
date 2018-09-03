@@ -207,7 +207,7 @@ export default function (program) {
         configs: [].concat(opts.config || []),
         cliArgs: {
           dev: !!opts.dev,
-          envName: opts.env ? opts.env.name : undefined,
+          envName: unknownOptions.env ? unknownOptions.env.name : undefined,
           quiet: !!opts.quiet,
           silent: !!opts.silent,
           watch: !!opts.watch,
