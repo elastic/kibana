@@ -53,20 +53,12 @@ export default function ({ getService, getPageObjects }) {
       await selectSample('timebased_no-datehistogram_timerange');
       const data = await getTableData();
       expect(data).to.be.eql([
-        'jpg', '3,009',
-        'css', '704',
-        'png', '456',
-        'gif', '320',
-        'php', '140',
+        'jpg', '3,005',
+        'css', '720',
+        'png', '455',
+        'gif', '300',
+        'php', '142',
       ]);
-      // These should be the correct values (I assume some timezone mismatch)
-      // expect(data).to.be.eql([
-      //   'jpg', '3,014',
-      //   'css', '697',
-      //   'png', '458',
-      //   'gif', '318',
-      //   'php', '139',
-      // ]);
     });
   });
 
