@@ -19,12 +19,13 @@
 
 import chalk from 'chalk';
 import Listr from 'listr';
-import execa from 'execa';
-import readline from 'readline';
 import { resolve } from 'path';
 
 import { run, createFailError } from './run';
-import { extractDefaultTranslations, filterPaths } from './i18n/extract_default_translations';
+import {
+  filterPaths,
+  extractMessagesFromPathToMap,
+} from './i18n/extract_default_translations';
 import { writeFileAsync } from './i18n/utils';
 import { serializeToJson, serializeToJson5 } from './i18n/serializers';
 
@@ -39,37 +40,22 @@ None of input paths is available for extraction or validation. See .i18nrc.json.
     );
   }
 
-  if (filteredPaths.length === 1) {
-    await extractDefaultTranslations(filteredPaths[0]);
-  } else {
-    const list = new Listr(
-      filteredPaths.map(filteredPath => ({
-        task: messages => {
-          const child = execa('node', ['scripts/i18n_check', '--path', filteredPath], {
-            env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
-          });
+  const list = new Listr(
+    filteredPaths.map(filteredPath => ({
+      task: messages => extractMessagesFromPathToMap(filteredPath, messages),
+      title: filteredPath,
+    }))
+  );
 
-          readline.createInterface({ input: child.stdout }).on('line', buffer => {
-            messages.push(JSON.parse(buffer.toString()));
-          });
-
-          return child;
-        },
-        title: filteredPath,
-      })),
-      { concurrent: 5 }
-    );
-
-    const messages = await list.run([]);
-    if (!output || !messages.size) {
-      return;
-    }
-
-    const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
-
-    await writeFileAsync(
-      resolve(output, 'en.json'),
-      outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
-    );
+  // messages shouldn't be extracted to a file if output is not supplied
+  const messages = await list.run(new Map());
+  if (!output || !messages.size) {
+    return;
   }
+
+  const sortedMessages = [...messages].sort(([key1], [key2]) => key1.localeCompare(key2));
+  await writeFileAsync(
+    resolve(output, 'en.json'),
+    outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
+  );
 });

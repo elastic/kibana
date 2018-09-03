@@ -83,8 +83,7 @@ See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath) {
-  const targetMap = new Map();
+export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
@@ -139,17 +138,4 @@ export async function extractMessagesFromPathToMap(inputPath) {
       }
     })
   );
-
-  return targetMap;
-}
-
-export async function extractDefaultTranslations(inputPath) {
-  for (const mapEntry of await extractMessagesFromPathToMap(inputPath)) {
-    await new Promise((resolve, reject) => {
-      process.stdout.write(
-        Buffer.from(`${JSON.stringify(mapEntry)}\n`),
-        err => (err ? reject(err) : resolve())
-      );
-    });
-  }
 }
