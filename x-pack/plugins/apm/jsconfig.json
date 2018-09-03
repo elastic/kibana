@@ -1,11 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "baseUrl": "../../../.",
-    "paths": {
-      "ui/*": ["src/ui/public/*"]
-    }
-  },
+  "extends": "../../tsconfig.json",
   "exclude": ["node_modules", "**/node_modules/*", "build"]
 }
