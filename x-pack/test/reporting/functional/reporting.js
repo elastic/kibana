@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickBucket('X-Axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('my viz');
           await expectEnabledGenerateReportButton();
         });
 
