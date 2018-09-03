@@ -36,15 +36,6 @@ import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
-// import 'uiExports/fieldFormatEditors';
-// import 'uiExports/navbarExtensions';
-// import 'uiExports/dashboardPanelActions';
-// import 'uiExports/managementSections';
-// import 'uiExports/devTools';
-// import 'uiExports/docViews';
-// import 'uiExports/embeddableFactories';
-// import 'uiExports/inspectorViews';
-// import 'uiExports/autocompleteProviders';
 
 // ----------- TODO Remove once https://github.com/elastic/kibana/pull/22623 is merged
 
