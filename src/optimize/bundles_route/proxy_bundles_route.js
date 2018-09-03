@@ -20,16 +20,13 @@
 export function createProxyBundlesRoute({ host, port }) {
   return [
     buildProxyRouteForBundles('/bundles/', host, port),
-    buildProxyRouteForBundles('dlls', host, port)
+    buildProxyRouteForBundles('/dlls/', host, port)
   ];
 }
 
 function buildProxyRouteForBundles(routePath, host, port) {
   return {
-    path: [
-      `${routePath}{path*}`,
-      `${routePath}{path*}`
-    ],
+    path: `${routePath}{path*}`,
     method: 'GET',
     handler: {
       proxy: {
