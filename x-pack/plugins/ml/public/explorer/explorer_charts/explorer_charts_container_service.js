@@ -22,9 +22,6 @@ import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
-let currentRequests = 0;
-let latestCall = 0;
-
 function getData() {
   const data = {};
 
@@ -55,8 +52,6 @@ export function explorerChartsContainerServiceFactory(
   const anomalyDataChangeListener = function (anomalyRecordsOrig, earliestMs, latestMs) {
     const anomalyRecords = _.cloneDeep(anomalyRecordsOrig);
     const data = getData();
-    const t = new Date().getTime();
-    latestCall = t + 0;
 
     const threshold = mlSelectSeverityService.state.get('threshold');
     const filteredRecords = _.filter(anomalyRecords, (record) => {
@@ -90,7 +85,6 @@ export function explorerChartsContainerServiceFactory(
     }));
 
     callback(_.cloneDeep(data));
-    currentRequests = currentRequests + 1;
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
@@ -263,15 +257,6 @@ export function explorerChartsContainerServiceFactory(
 
     Promise.all(seriesPromises)
       .then(response => {
-        currentRequests = currentRequests - 1;
-        const delta = latestCall - t;
-        if (currentRequests > 0) {
-          console.error('RACE CONDITION');
-        }
-        if (delta > 0) {
-          return;
-        }
-
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {
