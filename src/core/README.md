@@ -5,7 +5,7 @@ Core is a set of systems (frontend, backend etc.) that Kibana and its plugins ar
 ## Integration with the "legacy" Kibana
 
 Most of the existing core functionality is still spread over "legacy" Kibana and it will take some time to upgrade it.
-Kibana is started using existing "legacy" CLI that bootstraps `core` which in its turn creates "legacy" Kibana server.
+Kibana is started using existing "legacy" CLI that bootstraps `core` which in turn creates the "legacy" Kibana server.
 At the moment `core` manages HTTP connections, handles TLS configuration and base path proxy. All requests to Kibana server
 will hit HTTP server exposed by the `core` first and it will decide whether request can be solely handled by the new 
 platform or request should be proxied to the "legacy" Kibana. This setup allows `core` to gradually introduce any "pre-route"
