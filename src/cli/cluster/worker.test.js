@@ -51,11 +51,11 @@ function setup(opts = {}) {
 
 describe('CLI cluster manager', () => {
   afterEach(async () => {
-    cluster.fork.mockClear();
-
     while(workersToShutdown.length > 0) {
       await workersToShutdown.pop().shutdown();
     }
+
+    cluster.fork.mockClear();
   });
 
   describe('#onChange', () => {
