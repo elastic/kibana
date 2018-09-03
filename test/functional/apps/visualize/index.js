@@ -54,7 +54,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_linked_saved_searches.js'));
       loadTestFile(require.resolve('./_markdown_vis'));
-      loadTestFile(require.resolve('./_metric_chart'));
+      // loadTestFile(require.resolve('./_metric_chart'));
     });
 
     describe('visualize @ciGroup11', function () {
