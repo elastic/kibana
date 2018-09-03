@@ -84,8 +84,6 @@ const CourierRequestHandlerProvider = function () {
       const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
       const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
 
-      // todo: this will soon be removed from vis comletely
-      vis.aggs.setTimeRange(timeRange);
       aggs.setTimeRange(timeRange);
 
       // For now we need to mirror the history of the passed search source, since

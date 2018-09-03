@@ -149,7 +149,5 @@ describe('getAspects', function () {
       .and.have.property('aggConfig')
       .and.have.property('title');
 
-    expect(aspects.x.aggConfig).to.be.an(AggConfig);
-
   });
 });

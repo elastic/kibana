@@ -256,7 +256,8 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     getAggConfig() {
-      return this.aggs.clone({ enabledOnly: true });
+      const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.raw.filter(agg => agg.enabled), this.type.schemas.all);
+      return aggConfigs;
     }
 
     getState() {

@@ -52,10 +52,10 @@ describe('Geohash Agg', () => {
       useGeocentroid: true,
       mapZoom: initialZoom
     },
-    parent: [],
+    aggConfigs: {},
     type: 'geohash_grid',
   };
-  aggMock.parent.createAggConfig = createAggregationMock;
+  aggMock.aggConfigs.createAggConfig = createAggregationMock;
 
 
   before(function () {

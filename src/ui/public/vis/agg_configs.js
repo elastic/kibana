@@ -91,18 +91,14 @@ class AggConfigs extends IndexedArray {
     this.timeRange = timeRange;
   }
 
-  clone({ onlyEnabled = false } = {}) {
-    let states = this.map(agg => agg.toJSON());
-    if (onlyEnabled) {
-      states = states.filter(state => state.enabled);
-    }
-    const aggConfigs = new AggConfigs(this.indexPattern, states, this.schemas);
-    aggConfigs.setTimeRange(this.timeRange);
-    return aggConfigs;
-  }
-
   createAggConfig(params, { addToAggConfigs = true } = {}) {
-    const aggConfig = new AggConfig(this, params);
+    let aggConfig;
+    if (params instanceof AggConfig) {
+      aggConfig = params;
+      params.parent = this;
+    } else {
+      aggConfig = new AggConfig(this, params);
+    }
     if (addToAggConfigs) {
       this.push(aggConfig);
     }

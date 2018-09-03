@@ -23,20 +23,25 @@ import { initXAxis } from '../_init_x_axis';
 
 describe('initXAxis', function () {
 
+  const field = {};
+  const indexPattern = {};
+
   const baseChart = {
     aspects: {
       x: {
         aggConfig: {
           fieldFormatter: _.constant({}),
           write: _.constant({ params: {} }),
+          aggConfigs: {},
+          getIndexPattern: () => {
+            return indexPattern;
+          },
           type: {}
         },
         title: 'label'
       }
     }
   };
-  const field = {};
-  const indexPattern = {};
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
     const chart = _.cloneDeep(baseChart);
