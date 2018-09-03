@@ -23,7 +23,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
-// This is required so some default styles and required scripts/Angular modules are loaded:
+// This is required so some default styles and required scripts/Angular modules are loaded,
+// or the timezone setting is correctly applied.
 import 'ui/autoload/all';
 
 // These are all the required uiExports you need to import in case you want to embed visualizations.

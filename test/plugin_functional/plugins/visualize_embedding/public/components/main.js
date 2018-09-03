@@ -35,6 +35,8 @@ import { embeddingSamples } from '../embedding';
 
 const VISUALIZATION_OPTIONS = [
   { value: '', text: '' },
+  { value: 'timebased', text: 'Time based' },
+  { value: 'timebased_with-filters', text: 'Time based (with filters)' },
   { value: 'timebased_no-datehistogram', text: 'Time based data without date histogram' }
 ];
 
@@ -49,6 +51,9 @@ class Main extends React.Component {
 
   embedVisualization = async () => {
     if (this.handler) {
+      // Whenever a visualization is about to be removed from DOM that you embedded,
+      // you need to call `destroy` on the handler to make sure the visualization is
+      // teared down correctly.
       this.handler.destroy();
       this.chartDiv.current.innerHTML = '';
     }
@@ -58,6 +63,8 @@ class Main extends React.Component {
       this.setState({ loading: true });
       const sample = embeddingSamples.find(el => el.id === selectedParams);
       this.handler = await sample.run(this.chartDiv.current, selectedVis);
+      // handler.whenFirstRenderComplete() will return a promise that resolves once the first
+      // rendering after embedding has finished.
       await this.handler.whenFirstRenderComplete();
       this.setState({ loading: false });
     }
@@ -116,7 +123,11 @@ class Main extends React.Component {
               </EuiFlexGroup>
             </EuiPageContentHeader>
             <EuiPageContentBody>
-              <div ref={this.chartDiv} style={{ height: '500px', display: 'flex' }} />
+              {/*
+                The div you want to render into should have its dimension set, since the visualization will
+                take exactly the space of that element.
+               */}
+              <div ref={this.chartDiv} style={{ height: '500px' }} />
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>

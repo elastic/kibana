@@ -106,6 +106,8 @@ class VisualizeLoader {
     element.className = 'visualize';
     element.setAttribute('data-test-subj', 'visualizationLoader');
     container.appendChild(element);
+    // We need the container to have display: flex so visualization will render correctly
+    container.style.display = 'flex';
 
     // If params specified cssClass, we will set this to the element.
     if (params.cssClass) {

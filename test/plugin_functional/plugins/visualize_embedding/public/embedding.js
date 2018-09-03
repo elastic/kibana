@@ -36,12 +36,14 @@ export const embeddingSamples = [
       // saved object in the .kibana index (you can find the id via Management -> Saved Objects).
       //
       // Pass in a DOM node that you want to embed that visualization into. Note: the loader will
-      // use the size of that DOM node. The DOM node should have `display: flex` set for the best compatibility
-      // with all visualizations.
+      // use the size of that DOM node.
       //
       // The call will return a handler for the visualization with methods to interact with it.
       // Check the components/main.js file to see how this handler is used. Most important: you need to call
       // `destroy` on the handler once you are about to remove the visualization from the DOM.
+      //
+      // Note: If the visualization you want to embed contains date histograms with an auto interval, you need
+      // to specify the timeRange parameter (see below).
       return loader.embedVisualizationWithId(domNode, id, {});
     }
   }, {
@@ -119,7 +121,7 @@ export const embeddingSamples = [
         },
         query: {
           language: 'lucene',
-          query: 'extension.raw:css'
+          query: 'bytes:>2000'
         },
         filters: [
           {
@@ -139,18 +141,4 @@ export const embeddingSamples = [
       });
     }
   }
-
-  /**
-   * TODO:
-   * timebased_with-datehistogram_filters
-   * timebased_with-datehistogram_query
-   * timebased_with-datehistogram_timerange
-   * timebased_with-datehistogram_timerange-filters-query
-   * timebased_with-datehistogram_searchcontext
-   * timebased_with-datehistogram_searchcontext_timerange-filters-query
-   *
-   * same with no-timebased
-   */
-
-
 ];
