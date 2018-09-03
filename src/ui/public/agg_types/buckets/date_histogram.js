@@ -46,8 +46,7 @@ function getInterval(agg) {
 function setBounds(agg, force) {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
-  const timeRange = agg.getTimeRange();
-  const bounds = timeRange ? timefilter.calculateBounds(timeRange) : null;
+  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
 }
 
@@ -98,6 +97,11 @@ export const dateHistogramBucketAgg = new BucketAggType({
 
         setBounds(agg, true);
       }
+    },
+    {
+      name: 'timeRange',
+      default: null,
+      write: _.noop,
     },
     {
       name: 'interval',

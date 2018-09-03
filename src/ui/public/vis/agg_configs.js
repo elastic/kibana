@@ -89,6 +89,21 @@ class AggConfigs extends IndexedArray {
 
   setTimeRange(timeRange) {
     this.timeRange = timeRange;
+    this.forEach(agg => {
+      if (agg.type.name === 'date_histogram') {
+        agg.params.timeRange = timeRange;
+      }
+    });
+  }
+
+  // clone method will reuse existing AggConfig in the list (will not create new instances)
+  clone({ enabledOnly = true } = {}) {
+    const filterAggs = (agg) => {
+      if (!enabledOnly) return true;
+      return agg.enabled;
+    };
+    const aggConfigs = new AggConfigs(this.indexPattern, this.raw.filter(filterAggs), this.schemas);
+    return aggConfigs;
   }
 
   createAggConfig(params, { addToAggConfigs = true } = {}) {
