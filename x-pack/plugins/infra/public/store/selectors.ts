@@ -16,6 +16,7 @@ import {
   logPositionSelectors as localLogPositionSelectors,
   logTextviewSelectors as localLogTextviewSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
+  waffleTimeSelectors as localWaffleTimeSelectors,
 } from './local';
 import { State } from './reducer';
 import {
@@ -35,6 +36,7 @@ export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinim
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
+export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 
 /**
  * remote selectors
