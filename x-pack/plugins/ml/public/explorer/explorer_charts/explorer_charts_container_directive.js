@@ -19,7 +19,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import { exploreSeriesFactory } from './explore_series';
-import { explorerChartsContainerDataFactory } from './explorer_charts_container_data';
+import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
@@ -34,7 +34,7 @@ module.directive('mlExplorerChartsContainer', function (
   function link(scope, element) {
     const exploreSeries = exploreSeriesFactory($window);
 
-    const anomalyDataChangeListener = explorerChartsContainerDataFactory(
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mlSelectSeverityService,
       updateComponent
     );

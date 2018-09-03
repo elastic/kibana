@@ -18,7 +18,7 @@ import $ from 'jquery';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits } from 'plugins/ml/util/chart_utils';
-import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
+import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -38,7 +38,7 @@ function getData() {
   return data;
 }
 
-export function explorerChartsContainerDataFactory(
+export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
   callback
 ) {
@@ -88,7 +88,7 @@ export function explorerChartsContainerDataFactory(
       loading: true,
       chartData: null
     }));
-    
+
     callback(_.cloneDeep(data));
     currentRequests = currentRequests + 1;
 
