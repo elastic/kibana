@@ -18,8 +18,8 @@
  */
 
 import { Server as HapiServer } from 'hapi-latest';
-import { combineLatest, ConnectableObservable, EMPTY, from, Subscription } from 'rxjs';
-import { first, map, mapTo, mergeMap, publishReplay, tap } from 'rxjs/operators';
+import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
+import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
 import { Config, ConfigService, Env } from '../config';
 import { DevConfig } from '../dev';
@@ -66,12 +66,13 @@ export class LegacyService implements CoreService {
     this.kbnServer = await update$
       .pipe(
         first(),
-        mergeMap(config => {
+        mergeMap(async config => {
           if (this.env.isDevClusterMaster) {
-            return from(this.createClusterManager(config)).pipe(mapTo(undefined));
+            await this.createClusterManager(config);
+            return;
           }
 
-          return from(this.createKbnServer(config, httpServerInfo));
+          return await this.createKbnServer(config, httpServerInfo);
         })
       )
       .toPromise();
