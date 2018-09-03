@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { TabifyTableGroup } from '../_table_group';
+export class KFetchError extends Error {
+  constructor(public readonly res: Response, public readonly body?: any) {
+    super(res.statusText);
 
-describe('Table Group class', function () {
-
-  it('exposes tables array and empty aggConfig, key and title', function () {
-    const tableGroup = new TabifyTableGroup();
-    expect(tableGroup.tables).to.be.an('array');
-    expect(tableGroup.aggConfig).to.be(null);
-    expect(tableGroup.key).to.be(null);
-    expect(tableGroup.title).to.be(null);
-  });
-});
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, KFetchError);
+    }
+  }
+}

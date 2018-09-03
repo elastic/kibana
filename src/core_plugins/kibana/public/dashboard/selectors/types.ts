@@ -37,7 +37,7 @@ export interface GridData {
   readonly h: number;
   readonly x: number;
   readonly y: number;
-  readonly id: string;
+  readonly i: string;
 }
 
 export type PanelId = string;

@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 // @ts-ignore: implicit any for JS file
-import { esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
+import { createEsTestCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -88,7 +89,7 @@ export function createRoot(settings = {}) {
  *  Creates an instance of Root, including all of the core plugins,
  *  with default configuration tailored for unit tests.
  *
- *  @param {Object} [settings={}]
+ *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
 export function createRootWithCorePlugins(settings = {}) {
@@ -113,3 +114,58 @@ export const request: Record<
   post: (root, path) => getSupertest(root, 'post', path),
   put: (root, path) => getSupertest(root, 'put', path),
 };
+
+/**
+ * Creates an instance of the Root, including all of the core "legacy" plugins,
+ * with default configuration tailored for unit tests, and starts es.
+ *
+ * @param options
+ * @prop settings Any config overrides for this instance.
+ * @prop adjustTimeout A function(t) => this.timeout(t) that adjust the timeout of a
+ * test, ensuring the test properly waits for the server to boot without timing out.
+ */
+export async function startTestServers({
+  adjustTimeout,
+  settings = {},
+}: {
+  adjustTimeout: (timeout: number) => void;
+  settings: Record<string, any>;
+}) {
+  if (!adjustTimeout) {
+    throw new Error('adjustTimeout is required in order to avoid flaky tests');
+  }
+
+  const log = new ToolingLog({
+    level: 'debug',
+    writeTo: process.stdout,
+  });
+
+  log.indent(6);
+  log.info('starting elasticsearch');
+  log.indent(4);
+
+  const es = createEsTestCluster({ log });
+
+  log.indent(-4);
+
+  adjustTimeout(es.getStartTimeout());
+
+  await es.start();
+
+  const root = createRootWithCorePlugins(settings);
+  await root.start();
+
+  const kbnServer = getKbnServer(root);
+  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+
+  return {
+    kbnServer,
+    root,
+    es,
+
+    async stop() {
+      await root.shutdown();
+      await es.cleanup();
+    },
+  };
+}

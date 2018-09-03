@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
           const mapBounds = await PageObjects.visualize.getMapBounds();
           await PageObjects.visualize.closeInspector();
 
-          await PageObjects.visualize.saveVisualization(vizName1);
+          await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 

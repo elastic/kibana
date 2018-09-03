@@ -35,7 +35,7 @@ import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+import { VislibResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -156,7 +156,7 @@ function discoverController(
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(BasicResponseHandlerProvider).handler;
+  const responseHandler = Private(VislibResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier({
     location: 'Discover'

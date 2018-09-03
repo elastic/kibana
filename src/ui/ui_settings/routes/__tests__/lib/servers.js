@@ -17,42 +17,24 @@
  * under the License.
  */
 
-import { createEsTestCluster } from '@kbn/test';
-import { ToolingLog } from '@kbn/dev-utils';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../test_utils/kbn_server';
 
-let root;
 let kbnServer;
 let services;
-let es;
+let servers;
 
 export async function startServers() {
-  const log = new ToolingLog({
-    level: 'debug',
-    writeTo: process.stdout
-  });
-  log.indent(6);
-
-  log.info('starting elasticsearch');
-  log.indent(4);
-
-  es = createEsTestCluster({ log });
-  this.timeout(es.getStartTimeout());
-
-  log.indent(-4);
-  await es.start();
-
-  root = kbnTestServer.createRootWithCorePlugins({
-    uiSettings: {
-      overrides: {
-        foo: 'bar',
-      }
+  servers = await startTestServers({
+    adjustTimeout: (t) => this.timeout(t),
+    settings: {
+      uiSettings: {
+        overrides: {
+          foo: 'bar',
+        }
+      },
     }
   });
-  await root.start();
-
-  kbnServer = kbnTestServer.getKbnServer(root);
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  kbnServer = servers.kbnServer;
 }
 
 export function getServices() {
@@ -60,7 +42,7 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = es.getCallCluster();
+  const callCluster = servers.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
@@ -81,15 +63,8 @@ export function getServices() {
 
 export async function stopServers() {
   services = null;
-
-  if (root) {
-    await root.shutdown();
-    root = null;
-    kbnServer = null;
-  }
-
-  if (es) {
-    await es.cleanup();
-    es = null;
+  kbnServer = null;
+  if (servers) {
+    await servers.stop();
   }
 }
