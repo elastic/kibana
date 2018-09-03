@@ -135,7 +135,7 @@ export class DllCompiler {
   }
 
   async readFile(filePath, content) {
-    await this.upsertFile(filePath, content);
+    await this.ensureFileExists(filePath, content);
     return await readFileAsync(filePath, 'utf8');
   }
 
