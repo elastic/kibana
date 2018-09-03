@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+export class KFetchError extends Error {
+  constructor(public readonly res: Response, public readonly body?: any) {
+    super(res.statusText);
+
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, KFetchError);
+    }
+  }
+}
