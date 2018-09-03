@@ -303,7 +303,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
     const devClusterLegacyService = new LegacyService(
       Env.createDefault(
         getEnvOptions({
-          cliArgs: { arg1: 1, arg2: '2', basePath: false },
+          cliArgs: { silent: true, basePath: false },
           isDevClusterMaster: true,
         })
       ),
@@ -322,7 +322,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
     const devClusterLegacyService = new LegacyService(
       Env.createDefault(
         getEnvOptions({
-          cliArgs: { arg1: 1, arg2: '2', basePath: true },
+          cliArgs: { quiet: true, basePath: true },
           isDevClusterMaster: true,
         })
       ),

@@ -19,7 +19,7 @@
 
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
-import { Env, RawConfigService } from './config';
+import { CliArgs, Env, RawConfigService } from './config';
 import { LegacyObjectToConfigAdapter } from './legacy_compat';
 import { Root } from './root';
 
@@ -40,17 +40,25 @@ interface KibanaFeatures {
   isXPackInstalled: boolean;
 }
 
-export async function bootstrap(
-  cliArgs: Record<string, any>,
-  applyConfigOverrides: (config: Record<string, any>) => Record<string, any>,
-  features: KibanaFeatures
-) {
+interface BootstrapArgs {
+  configs: string[];
+  cliArgs: CliArgs;
+  applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
+  features: KibanaFeatures;
+}
+
+export async function bootstrap({
+  configs,
+  cliArgs,
+  applyConfigOverrides,
+  features,
+}: BootstrapArgs) {
   if (cliArgs.repl && !features.isReplModeSupported) {
     onRootShutdown('Kibana REPL mode can only be run in development mode.');
   }
 
   const env = Env.createDefault({
-    configs: [].concat(cliArgs.config || []),
+    configs,
     cliArgs,
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });

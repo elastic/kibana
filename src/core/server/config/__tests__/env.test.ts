@@ -33,6 +33,7 @@ const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[
 jest.mock('../../../../utils/package_json', () => ({ pkg: mockPackage }));
 
 import { Env } from '../env';
+import { getEnvOptions } from './__mocks__/env';
 
 test('correctly creates default environment in dev mode.', () => {
   mockPackage.raw = {
@@ -40,11 +41,12 @@ test('correctly creates default environment in dev mode.', () => {
     version: 'some-version',
   };
 
-  const defaultEnv = Env.createDefault({
-    cliArgs: { dev: true, someArg: 1, someOtherArg: '2' },
-    configs: ['/test/cwd/config/kibana.yml'],
-    isDevClusterMaster: true,
-  });
+  const defaultEnv = Env.createDefault(
+    getEnvOptions({
+      configs: ['/test/cwd/config/kibana.yml'],
+      isDevClusterMaster: true,
+    })
+  );
 
   expect(defaultEnv).toMatchSnapshot('env properties');
 });
@@ -60,11 +62,12 @@ test('correctly creates default environment in prod distributable mode.', () => 
     },
   };
 
-  const defaultEnv = Env.createDefault({
-    cliArgs: { dev: false, someArg: 1, someOtherArg: '2' },
-    configs: ['/some/other/path/some-kibana.yml'],
-    isDevClusterMaster: false,
-  });
+  const defaultEnv = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { dev: false },
+      configs: ['/some/other/path/some-kibana.yml'],
+    })
+  );
 
   expect(defaultEnv).toMatchSnapshot('env properties');
 });
@@ -80,11 +83,12 @@ test('correctly creates default environment in prod non-distributable mode.', ()
     },
   };
 
-  const defaultEnv = Env.createDefault({
-    cliArgs: { dev: false, someArg: 1, someOtherArg: '2' },
-    configs: ['/some/other/path/some-kibana.yml'],
-    isDevClusterMaster: false,
-  });
+  const defaultEnv = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { dev: false },
+      configs: ['/some/other/path/some-kibana.yml'],
+    })
+  );
 
   expect(defaultEnv).toMatchSnapshot('env properties');
 });
@@ -100,17 +104,19 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
     },
   };
 
-  const defaultDevEnv = Env.createDefault({
-    cliArgs: { someArg: 1, someOtherArg: '2', env: { name: 'development' } },
-    configs: ['/some/other/path/some-kibana.yml'],
-    isDevClusterMaster: false,
-  });
+  const defaultDevEnv = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { envName: 'development' },
+      configs: ['/some/other/path/some-kibana.yml'],
+    })
+  );
 
-  const defaultProdEnv = Env.createDefault({
-    cliArgs: { someArg: 1, someOtherArg: '2', env: { name: 'production' } },
-    configs: ['/some/other/path/some-kibana.yml'],
-    isDevClusterMaster: false,
-  });
+  const defaultProdEnv = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { dev: false, envName: 'production' },
+      configs: ['/some/other/path/some-kibana.yml'],
+    })
+  );
 
   expect(defaultDevEnv).toMatchSnapshot('dev env properties');
   expect(defaultProdEnv).toMatchSnapshot('prod env properties');
@@ -127,11 +133,13 @@ test('correctly creates environment with constructor.', () => {
     },
   };
 
-  const env = new Env('/some/home/dir', {
-    cliArgs: { dev: false, someArg: 1, someOtherArg: '2' },
-    configs: ['/some/other/path/some-kibana.yml'],
-    isDevClusterMaster: false,
-  });
+  const env = new Env(
+    '/some/home/dir',
+    getEnvOptions({
+      cliArgs: { dev: false },
+      configs: ['/some/other/path/some-kibana.yml'],
+    })
+  );
 
   expect(env).toMatchSnapshot('env properties');
 });

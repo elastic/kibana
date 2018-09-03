@@ -4,10 +4,12 @@ exports[`once LegacyService is started in \`devClusterMaster\` mode creates Clus
 Array [
   Array [
     Object {
-      "arg1": 1,
-      "arg2": "2",
       "basePath": true,
       "dev": true,
+      "quiet": true,
+      "repl": false,
+      "silent": false,
+      "watch": false,
     },
     Object {
       "server": Object {
@@ -48,10 +50,12 @@ exports[`once LegacyService is started in \`devClusterMaster\` mode creates Clus
 Array [
   Array [
     Object {
-      "arg1": 1,
-      "arg2": "2",
       "basePath": false,
       "dev": true,
+      "quiet": false,
+      "repl": false,
+      "silent": true,
+      "watch": false,
     },
     Object {
       "server": Object {

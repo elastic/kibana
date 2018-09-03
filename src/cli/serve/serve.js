@@ -203,15 +203,24 @@ export default function (program) {
       }
 
       const unknownOptions = this.getUnknownOptions();
-      await bootstrap(
-        { ...opts, ...unknownOptions },
-        rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
-        {
+      await bootstrap({
+        configs: [].concat(opts.config || []),
+        cliArgs: {
+          dev: !!opts.dev,
+          envName: opts.env ? opts.env.name : undefined,
+          quiet: !!opts.quiet,
+          silent: !!opts.silent,
+          watch: !!opts.watch,
+          repl: !!opts.repl,
+          basePath: !!opts.basePath,
+        },
+        features: {
           isClusterModeSupported: CAN_CLUSTER,
           isOssModeSupported: XPACK_OPTIONAL,
           isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
-        }
-      );
+        },
+        applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      });
     });
 }

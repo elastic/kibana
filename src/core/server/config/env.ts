@@ -37,8 +37,18 @@ interface EnvironmentMode {
 
 export interface EnvOptions {
   configs: string[];
-  cliArgs: Record<string, any>;
+  cliArgs: CliArgs;
   isDevClusterMaster: boolean;
+}
+
+export interface CliArgs {
+  dev: boolean;
+  envName?: string;
+  quiet: boolean;
+  silent: boolean;
+  watch: boolean;
+  repl: boolean;
+  basePath: boolean;
 }
 
 export class Env {
@@ -68,7 +78,7 @@ export class Env {
   /**
    * Arguments provided through command line.
    */
-  public readonly cliArgs: Readonly<Record<string, any>>;
+  public readonly cliArgs: Readonly<CliArgs>;
 
   /**
    * Paths to the configuration files.
@@ -94,7 +104,7 @@ export class Env {
     this.configs = Object.freeze(options.configs);
     this.isDevClusterMaster = options.isDevClusterMaster;
 
-    const isDevMode = this.cliArgs.dev || (this.cliArgs.env || {}).name === 'development';
+    const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({
       dev: isDevMode,
       name: isDevMode ? 'development' : 'production',

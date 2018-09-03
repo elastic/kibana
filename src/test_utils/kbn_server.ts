@@ -53,11 +53,24 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
 };
 
 export function createRootWithSettings(...settings: Array<Record<string, any>>) {
+  const env = Env.createDefault({
+    configs: [],
+    cliArgs: {
+      dev: false,
+      quiet: false,
+      silent: false,
+      watch: false,
+      repl: false,
+      basePath: false,
+    },
+    isDevClusterMaster: false,
+  });
+
   return new Root(
     new BehaviorSubject(
       new LegacyObjectToConfigAdapter(defaultsDeep({}, ...settings, DEFAULTS_SETTINGS))
     ),
-    Env.createDefault({ configs: [], cliArgs: {}, isDevClusterMaster: false })
+    env
   );
 }
 
