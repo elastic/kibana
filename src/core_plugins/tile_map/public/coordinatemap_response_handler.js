@@ -34,9 +34,7 @@ export function makeGeoJsonResponseHandler() {
 
     //double conversion, first to table, then to geojson
     //This is to future-proof this code for Canvas-refactoring
-    const tabifiedResponse = tabifyAggResponse(vis.getAggConfig(), esResponse, {
-      asAggConfigResults: false
-    });
+    const tabifiedResponse = tabifyAggResponse(vis.getAggConfig(), esResponse);
     lastGeoJsonResponse = convertToGeoJson(tabifiedResponse);
 
     return lastGeoJsonResponse;

@@ -18,18 +18,18 @@
  */
 
 import { AggResponseIndexProvider } from '../../agg_response';
-import { TabifyTable } from '../../agg_response/tabify/_table';
-import { getTime } from 'ui/timefilter/get_time';
-
+import { LegacyResponseHandlerProvider } from './legacy';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
-const BasicResponseHandlerProvider = function (Private) {
+const VislibResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
+  const tableResponseProvider = Private(LegacyResponseHandlerProvider).handler;
 
   function convertTableGroup(vis, tableGroup) {
     const tables = tableGroup.tables;
     const firstChild = tables[0];
-    if (firstChild instanceof TabifyTable) {
+
+    if (firstChild.columns) {
 
       const chart = convertTable(vis, firstChild);
       // if chart is within a split, assign group title to its label
@@ -40,6 +40,7 @@ const BasicResponseHandlerProvider = function (Private) {
     }
 
     if (!tables.length) return;
+
     const out = {};
     let outList;
 
@@ -64,38 +65,34 @@ const BasicResponseHandlerProvider = function (Private) {
   }
 
   return {
-    name: 'basic',
+    name: 'vislib',
     handler: function (vis, response) {
       return new Promise((resolve) => {
         if (vis.isHierarchical()) {
           // the hierarchical converter is very self-contained (woot!)
+          // todo: it should be updated to be based on tabified data just as other responseConverters
           resolve(aggResponse.hierarchical(vis, response));
         }
 
-        const time = getTime(vis.indexPattern, vis.filters.timeRange);
+        return tableResponseProvider(vis, response).then(tableGroup => {
+          let converted = convertTableGroup(vis, tableGroup);
+          if (!converted) {
+            // mimic a row of tables that doesn't have any tables
+            // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
+            converted = { rows: [] };
+          }
 
-        const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
-          canSplit: true,
-          asAggConfigResults: true,
-          isHierarchical: vis.isHierarchical(),
-          timeRange: time ? time.range : undefined
+          converted.hits = response.hits.total;
+
+          resolve(converted);
         });
 
-        let converted = convertTableGroup(vis, tableGroup);
-        if (!converted) {
-          // mimic a row of tables that doesn't have any tables
-          // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
-          converted = { rows: [] };
-        }
 
-        converted.hits = response.hits.total;
-
-        resolve(converted);
       });
     }
   };
 };
 
-VisResponseHandlersRegistryProvider.register(BasicResponseHandlerProvider);
+VisResponseHandlersRegistryProvider.register(VislibResponseHandlerProvider);
 
-export { BasicResponseHandlerProvider };
+export { VislibResponseHandlerProvider };

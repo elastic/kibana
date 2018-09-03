@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { DASHBOARD_GRID_COLUMN_COUNT, DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from '../dashboard_constants';
+import { PanelState } from '../selectors';
 
 /**
  * Represents a panel on a grid. Keeps track of position in the grid and what visualization it
@@ -40,13 +45,12 @@ import chrome from 'ui/chrome';
  */
 
 // Look for the smallest y and x value where the default panel will fit.
-function findTopLeftMostOpenSpace(width, height, currentPanels) {
+function findTopLeftMostOpenSpace(width: number, height: number, currentPanels: PanelState[]) {
   let maxY = -1;
 
-  for (let i = 0; i < currentPanels.length; i++) {
-    const panel = currentPanels[i];
+  currentPanels.forEach(panel => {
     maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
-  }
+  });
 
   // Handle case of empty grid.
   if (maxY < 0) {
@@ -58,14 +62,13 @@ function findTopLeftMostOpenSpace(width, height, currentPanels) {
     grid[y] = new Array(DASHBOARD_GRID_COLUMN_COUNT).fill(0);
   }
 
-  for (let i = 0; i < currentPanels.length; i++) {
-    const panel = currentPanels[i];
+  currentPanels.forEach(panel => {
     for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
       for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
         grid[y][x] = 1;
       }
     }
-  }
+  });
 
   for (let y = 0; y < maxY; y++) {
     for (let x = 0; x < DASHBOARD_GRID_COLUMN_COUNT; x++) {
@@ -104,21 +107,29 @@ function findTopLeftMostOpenSpace(width, height, currentPanels) {
  * @param {Array} currentPanels
  * @return {PanelState}
  */
-export function createPanelState(id, type, panelIndex, currentPanels) {
-  const { x, y } = findTopLeftMostOpenSpace(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT, currentPanels);
+export function createPanelState(
+  id: string,
+  type: string,
+  panelIndex: string,
+  currentPanels: PanelState[]
+) {
+  const { x, y } = findTopLeftMostOpenSpace(
+    DEFAULT_PANEL_WIDTH,
+    DEFAULT_PANEL_HEIGHT,
+    currentPanels
+  );
   return {
     gridData: {
       w: DEFAULT_PANEL_WIDTH,
       h: DEFAULT_PANEL_HEIGHT,
       x,
       y,
-      i: panelIndex.toString()
+      i: panelIndex.toString(),
     },
     version: chrome.getKibanaVersion(),
     panelIndex: panelIndex.toString(),
-    type: type,
-    id: id,
+    type,
+    id,
     embeddableConfig: {},
   };
 }
-
