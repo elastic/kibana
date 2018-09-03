@@ -33,32 +33,54 @@ import {
 
 import { embeddingSamples } from '../embedding';
 
+const VISUALIZATION_OPTIONS = [
+  { value: '', text: '' },
+  { value: 'timebased_no-datehistogram', text: 'Time based data without date histogram' }
+];
+
 class Main extends React.Component {
 
   chartDiv = React.createRef();
   state = {
     loading: false,
+    selectedParams: null,
+    selectedVis: null,
   };
 
-  onSelectSample = async (ev) => {
-    if (ev.target.selectedIndex > 0) {
-      if (this.handler) {
-        this.handler.destroy();
-      }
+  embedVisualization = async () => {
+    if (this.handler) {
+      this.handler.destroy();
+      this.chartDiv.current.innerHTML = '';
+    }
+
+    const { selectedParams, selectedVis } = this.state;
+    if (selectedParams && selectedVis) {
       this.setState({ loading: true });
-      const sample = embeddingSamples[ev.target.selectedIndex - 1];
-      this.handler = await sample.run(this.chartDiv.current);
+      const sample = embeddingSamples.find(el => el.id === selectedParams);
+      this.handler = await sample.run(this.chartDiv.current, selectedVis);
       await this.handler.whenFirstRenderComplete();
       this.setState({ loading: false });
     }
+  }
+
+  onChangeVisualization = async (ev) => {
+    this.setState({
+      selectedVis: ev.target.value,
+    }, this.embedVisualization);
+  };
+
+  onSelectSample = async (ev) => {
+    this.setState({
+      selectedParams: ev.target.value,
+    }, this.embedVisualization);
   };
 
   render() {
     const samples = [
       { value: '', text: '' },
-      ...embeddingSamples.map(sample => ({
-        value: `sample-${sample.id}`,
-        text: sample.title,
+      ...embeddingSamples.map(({ id, title }) => ({
+        value: id,
+        text: title,
       }))
     ];
 
@@ -68,10 +90,19 @@ class Main extends React.Component {
           <EuiPageContent>
             <EuiPageContentHeader>
               <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
-                  <EuiFormRow label="Select example">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label="Select visualizations">
                     <EuiSelect
-                      data-test-subj="sampleSelect"
+                      data-test-subj="visSelect"
+                      options={VISUALIZATION_OPTIONS}
+                      onChange={this.onChangeVisualization}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label="Select embedding parameters">
+                    <EuiSelect
+                      data-test-subj="embeddingParamsSelect"
                       options={samples}
                       onChange={this.onSelectSample}
                     />

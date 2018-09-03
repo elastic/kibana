@@ -17,36 +17,131 @@
  * under the License.
  */
 
+/**
+ * This files shows a couple of examples how to use the visualize loader API
+ * to embed visualizations.
+ */
+
 import { getVisualizeLoader } from 'ui/visualize';
 
 export const embeddingSamples = [
 
   {
-    id: 'timebased_no-datehistogram',
-    title: 'Time based data',
-    async run(domNode) {
+    id: 'none',
+    title: 'No parameters',
+    async run(domNode, id) {
+      // You always need to retrieve the visualize loader for embedding visualizations.
       const loader = await getVisualizeLoader();
-      return loader.embedVisualizationWithId(domNode, 'timebased_no-datehistogram', {});
+      // Use the embedVisualizationWithId method to embed a visualization by its id. The id is the id of the
+      // saved object in the .kibana index (you can find the id via Management -> Saved Objects).
+      //
+      // Pass in a DOM node that you want to embed that visualization into. Note: the loader will
+      // use the size of that DOM node. The DOM node should have `display: flex` set for the best compatibility
+      // with all visualizations.
+      //
+      // The call will return a handler for the visualization with methods to interact with it.
+      // Check the components/main.js file to see how this handler is used. Most important: you need to call
+      // `destroy` on the handler once you are about to remove the visualization from the DOM.
+      return loader.embedVisualizationWithId(domNode, id, {});
     }
   }, {
-    id: 'timebased_no-datehistogram_timerange',
-    title: 'Time based data specifying timeRange',
-    async run(domNode) {
+    id: 'timerange',
+    title: 'timeRange',
+    async run(domNode, id) {
       const loader = await getVisualizeLoader();
-      return loader.embedVisualizationWithId(domNode, 'timebased_no-datehistogram', {
+      // If you want to filter down the data to a specific time range, you can specify a
+      // timeRange in the parameters to the embedding call.
+      // You can either use an absolute time range as seen below. You can also specify
+      // a datemath string, like "now-7d", "now-1w/w" for the from or to key.
+      // You can also directly assign a moment JS or regular JavaScript Date object.
+      return loader.embedVisualizationWithId(domNode, id, {
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
         }
       });
     }
+  }, {
+    id: 'query',
+    title: 'query',
+    async run(domNode, id) {
+      const loader = await getVisualizeLoader();
+      // You can specify a query that should filter down the data via the query parameter.
+      // It must have a language key which must be one of the supported query languages of Kibana,
+      // which are at the moment: 'lucene' or 'kquery'.
+      // The query key must then hold the actual query in the specified language for filtering.
+      return loader.embedVisualizationWithId(domNode, id, {
+        query: {
+          language: 'lucene',
+          query: 'extension.raw:jpg',
+        }
+      });
+    }
+  }, {
+    id: 'filters',
+    title: 'filters',
+    async run(domNode, id) {
+      const loader = await getVisualizeLoader();
+      // You can specify an array of filters that should apply to the query.
+      // The format of a filter must match the format the filter bar is using internally.
+      // This has a query key, which holds the query part of an Elasticsearch query
+      // and a meta key allowing to set some meta values, most important for this API
+      // the `negate` option to negate the filter.
+      return loader.embedVisualizationWithId(domNode, id, {
+        filters: [
+          {
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { 'extension.raw': 'jpg' } },
+                  { match_phrase: { 'extension.raw': 'png' } },
+                ]
+              }
+            },
+            meta: {
+              negate: true
+            }
+          }
+        ]
+      });
+    }
+  }, {
+    id: 'filters_query_timerange',
+    title: 'filters & query & timeRange',
+    async run(domNode, id) {
+      const loader = await getVisualizeLoader();
+      // You an of course combine timeRange, query and filters options all together
+      // to filter the data in the embedded visualization.
+      return loader.embedVisualizationWithId(domNode, id, {
+        timeRange: {
+          from: '2015-09-20 20:00:00.000',
+          to: '2015-09-21 20:00:00.000',
+        },
+        query: {
+          language: 'lucene',
+          query: 'extension.raw:css'
+        },
+        filters: [
+          {
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { 'extension.raw': 'jpg' } },
+                  { match_phrase: { 'extension.raw': 'png' } },
+                ]
+              }
+            },
+            meta: {
+              negate: true
+            }
+          }
+        ]
+      });
+    }
   }
 
   /**
    * TODO:
-   * timebased_no-datehistogram_query
-   * timebased_no-datehistogram_filters
-   * timebased_no-datehistogram_filters_query_timerange
    * timebased_with-datehistogram_filters
    * timebased_with-datehistogram_query
    * timebased_with-datehistogram_timerange
