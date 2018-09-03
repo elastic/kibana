@@ -76,7 +76,7 @@ export default class WatchOptimizer extends BaseOptimizer {
   }
 
   registerCompilerDoneHook() {
-    super.registerCompilerHooks();
+    super.registerCompilerDoneHook();
 
     this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
       if (stats.compilation.needAdditionalPass) {
