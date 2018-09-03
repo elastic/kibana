@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { WaffleMap } from './map';
+export * from './with_waffle_filters';
+export * from './with_waffle_nodes';

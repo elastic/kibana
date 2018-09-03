@@ -5,4 +5,3 @@
  */
 
 export { Toolbar } from './toolbar';
-export { WaffleMap } from './waffle_map';

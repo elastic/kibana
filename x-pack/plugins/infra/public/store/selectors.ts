@@ -15,6 +15,7 @@ import {
   logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
   logTextviewSelectors as localLogTextviewSelectors,
+  waffleFilterSelectors as localWaffleFilterSelectors,
 } from './local';
 import { State } from './reducer';
 import {
@@ -33,6 +34,7 @@ export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilter
 export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
+export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 
 /**
  * remote selectors
@@ -69,6 +71,21 @@ export const sharedSelectors = {
   ),
   selectLogFilterQueryAsJson: createSelector(
     logFilterSelectors.selectLogFilterQuery,
+    sourceSelectors.selectDerivedIndexPattern,
+    (filterQuery, indexPattern) => {
+      try {
+        return filterQuery
+          ? JSON.stringify(
+              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
+            )
+          : null;
+      } catch (err) {
+        return null;
+      }
+    }
+  ),
+  selectWaffleFilterQueryAsJson: createSelector(
+    waffleFilterSelectors.selectWaffleFilterQuery,
     sourceSelectors.selectDerivedIndexPattern,
     (filterQuery, indexPattern) => {
       try {

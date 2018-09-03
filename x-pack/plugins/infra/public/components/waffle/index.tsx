@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
-} from '../../containers/map/type_guards';
+} from '../../containers/waffle/type_guards';
 import {
   InfraWaffleData,
   InfraWaffleMapBounds,

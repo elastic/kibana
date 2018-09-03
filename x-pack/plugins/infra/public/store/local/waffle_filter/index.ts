@@ -3,4 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './with_map';
+
+import * as waffleFilterActions from './actions';
+import * as waffleFilterSelectors from './selectors';
+
+export { waffleFilterActions, waffleFilterSelectors };
+export * from './reducer';

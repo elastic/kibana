@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
-
 import {
   InfraLogMessageConstantSegment,
   InfraLogMessageFieldSegment,
@@ -15,6 +13,7 @@ import {
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 export type InfraSourceLogEntriesAroundResolver = InfraResolverOf<
@@ -140,14 +139,3 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
-
-const parseFilterQuery = (filterQuery: string | null | undefined) => {
-  try {
-    return filterQuery ? JSON.parse(filterQuery) : undefined;
-  } catch (err) {
-    throw new UserInputError(`Failed to parse query: ${err}`, {
-      query: filterQuery,
-      originalError: err,
-    });
-  }
-};

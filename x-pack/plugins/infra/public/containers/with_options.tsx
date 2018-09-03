@@ -6,18 +6,15 @@
 
 import moment from 'moment';
 import React from 'react';
+
 import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
 import {
   InfraOptions,
   InfraWaffleMapFormatterType,
   InfraWaffleMapLegendMode,
   // InfraWaffleMapRuleOperator,
-  Omit,
 } from '../lib/lib';
-
-interface WithOptionsInjectedProps {
-  options: InfraOptions;
-}
+import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
   options: {
@@ -33,7 +30,6 @@ const initialState = {
       },
       formatter: InfraWaffleMapFormatterType.bytes,
       formatTemplate: '{{value}}',
-      filters: [],
       metrics: [{ type: InfraMetricType.count }],
       path: [{ type: InfraPathType.hosts }],
       /*
@@ -80,17 +76,20 @@ const initialState = {
   } as InfraOptions,
 };
 
+interface WithOptionsProps {
+  children: RendererFunction<InfraOptions>;
+}
+
 type State = Readonly<typeof initialState>;
 
-export const withOptions = <P extends WithOptionsInjectedProps>(
-  WrappedComponent: React.ComponentType<P>
-) => {
-  class WithOptions extends React.Component<Omit<P, WithOptionsInjectedProps>, State> {
-    public readonly state = initialState;
+export const withOptions = <P extends InfraOptions>(WrappedComponent: React.ComponentType<P>) => (
+  <WithOptions>{args => <WrappedComponent {...args} />}</WithOptions>
+);
 
-    public render() {
-      return <WrappedComponent {...this.props} options={this.state.options} />;
-    }
+export class WithOptions extends React.Component<WithOptionsProps, State> {
+  public readonly state: State = initialState;
+
+  public render() {
+    return this.props.children(this.state.options);
   }
-  return WithOptions;
-};
+}

@@ -11,7 +11,6 @@ import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
 import {
-  InfraFilterInput,
   InfraMetricInput,
   InfraNodeMetric,
   InfraNodePath,
@@ -171,7 +170,6 @@ export enum InfraWaffleMapRuleOperator {
 export interface InfraWaffleMapOptions {
   sourceId: string;
   timerange: InfraTimerangeInput;
-  filters: InfraFilterInput[];
   formatter: InfraWaffleMapFormatterType;
   formatTemplate: string;
   metrics: InfraMetricInput[];

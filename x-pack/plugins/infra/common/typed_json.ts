@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  logFilterActions,
-  logMinimapActions,
-  logPositionActions,
-  logTextviewActions,
-  waffleFilterActions,
-} from './local';
-export { logEntriesActions, logSummaryActions } from './remote';
+export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
+
+export interface JsonArray extends Array<JsonValue> {}
+
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
