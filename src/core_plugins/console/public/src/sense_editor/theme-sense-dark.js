@@ -18,7 +18,6 @@
  */
 
 /* eslint import/no-unresolved: 0 */
-/* eslint  no-multi-str: 0 */
 /* eslint  max-len: 0 */
 const ace = require('brace');
 

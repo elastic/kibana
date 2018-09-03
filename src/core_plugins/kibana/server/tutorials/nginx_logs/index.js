@@ -36,7 +36,6 @@ export function nginxLogsSpecProvider() {
       defaultMessage: 'Collect and parse access and error logs created by the Nginx HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.nginxLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `nginx` Filebeat module parses access and error logs created by the Nginx HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
