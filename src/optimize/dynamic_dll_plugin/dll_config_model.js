@@ -25,6 +25,7 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 function generateDLL(config) {
   const {
+    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -47,7 +48,8 @@ function generateDLL(config) {
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
       extensions: ['.js', '.json'],
-      mainFields: ['browser', 'browserify', 'main']
+      mainFields: ['browser', 'browserify', 'main'],
+      alias: dllAlias
     },
     module: {
       rules: [
@@ -89,6 +91,7 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
+  const dllAlias = rawConfig.alias;
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -112,6 +115,7 @@ function extendRawConfig(rawConfig) {
 
   // Export dll config map
   return {
+    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
