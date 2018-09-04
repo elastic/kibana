@@ -134,13 +134,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       if (!this._baseLayerConfigured()) {
         try {
           const tmsServices = await serviceSettings.getTMSServices();
-          const firstRoadMapLayer = tmsServices.find((s) => {
-            return s.id === 'road_map';//first road map layer
-          });
-          const fallback = firstRoadMapLayer ? firstRoadMapLayer : tmsServices[0];
-          if (fallback) {
-            this._setTmsLayer(firstRoadMapLayer);
-          }
+          const baseLayer =  tmsServices[0]; // Gets layer from config (if provided), otherwise defaults to EMS
+          this._setTmsLayer(baseLayer);
         } catch (e) {
           toastNotifications.addWarning(e.message);
           return;
