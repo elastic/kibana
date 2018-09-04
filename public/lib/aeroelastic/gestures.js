@@ -32,8 +32,10 @@ const keyInfoFromMouseEvents = select(
       : null
 )(primaryUpdate);
 
-const altTest = key => key.slice(0, 3) === 'Alt' || key === 'KeyALT';
-const metaTest = key => key.slice(0, 4) === 'Meta';
+const altTest = key => key.slice(0, 3).toLowerCase() === 'alt' || key === 'KeyALT';
+const metaTest = key => key.slice(0, 4).toLowerCase() === 'meta';
+const deadKey1 = 'KeyDEAD';
+const deadKey2 = 'Key†';
 
 // Key states (up vs down) from keyboard events are trivially only captured if there's a keyboard event, and that only
 // happens if the user is interacting with the browser, and specifically, with the DOM subset that captures the keyboard
@@ -71,6 +73,9 @@ const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
   const lookup = keyInfoFromMouseEvent
     ? updateKeyLookupFromMouseEvent(prevLookup, keyInfoFromMouseEvent)
     : prevLookup;
+  // these weird things get in when we alt-tab (or similar) etc. away and get back later:
+  delete lookup[deadKey1];
+  delete lookup[deadKey2];
   if (!next) {
     return { ...lookup };
   }
@@ -90,16 +95,7 @@ const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
   }
 }, {})(keyboardEvent, keyInfoFromMouseEvents);
 
-const keyUp = selectReduce((prev, next) => {
-  switch (next && next.event) {
-    case 'keyDown':
-      return false;
-    case 'keyUp':
-      return true;
-    default:
-      return prev;
-  }
-}, true)(keyboardEvent);
+const keyUp = select(keys => Object.keys(keys).length === 0)(pressedKeys);
 
 const metaHeld = select(lookup => Boolean(lookup.meta))(pressedKeys);
 const optionHeld = select(lookup => Boolean(lookup.alt))(pressedKeys);
