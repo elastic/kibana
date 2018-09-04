@@ -114,13 +114,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify gauge label and count display', async function () {
-        const labelString = PageObjects.visualBuilder.getGaugeLabel();
         await retry.try(async () => {
-          expect(await labelString).to.be('Count');
-        });
-        const gaugeCount = PageObjects.visualBuilder.getGaugeCount();
-        await retry.try(async () => {
-          expect(await gaugeCount).to.be('156');
+          const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+          expect(labelString).to.be('Count');
+          const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+          expect(gaugeCount).to.be('156');
         });
       });
     });

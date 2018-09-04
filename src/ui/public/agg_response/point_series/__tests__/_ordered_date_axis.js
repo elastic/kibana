@@ -35,7 +35,7 @@ describe('orderedDateAxis', function () {
     chart: {
       aspects: {
         x: {
-          agg: {
+          aggConfig: {
             fieldIsTimeField: _.constant(true),
             buckets: {
               getScaledDateFormat: _.constant('hh:mm:ss'),
@@ -88,7 +88,7 @@ describe('orderedDateAxis', function () {
 
     it('relies on agg.buckets for the interval', function () {
       const args = _.cloneDeep(baseArgs);
-      const spy = sinon.spy(args.chart.aspects.x.agg.buckets, 'getInterval');
+      const spy = sinon.spy(args.chart.aspects.x.aggConfig.buckets, 'getInterval');
       orderedDateAxis(args.vis, args.chart);
       expect(spy).to.have.property('callCount', 1);
     });
@@ -102,7 +102,7 @@ describe('orderedDateAxis', function () {
 
     it('does not set the min/max when the buckets are unbounded', function () {
       const args = _.cloneDeep(baseArgs);
-      args.chart.aspects.x.agg.buckets.getBounds = _.constant();
+      args.chart.aspects.x.aggConfig.buckets.getBounds = _.constant();
       orderedDateAxis(args.vis, args.chart);
       expect(args.chart.ordered).to.not.have.property('min');
       expect(args.chart.ordered).to.not.have.property('max');

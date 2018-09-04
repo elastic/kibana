@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,15 +25,26 @@ export function muninMetricsSpecProvider() {
   const moduleName = 'munin';
   return {
     id: 'muninMetrics',
-    name: 'Munin metrics',
+    name: i18n.translate('kbn.server.tutorials.muninMetrics.nameTitle', {
+      defaultMessage: 'Munin metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Munin server.',
-    longDescription: 'The `munin` Metricbeat module fetches internal metrics from Munin.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-munin.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.muninMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Munin server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.muninMetrics.longDescription', {
+      defaultMessage: 'The `munin` Metricbeat module fetches internal metrics from Munin. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-munin.html',
+      },
+    }),
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.muninMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],

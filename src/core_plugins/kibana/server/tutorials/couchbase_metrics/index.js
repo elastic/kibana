@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,15 +25,26 @@ export function couchbaseMetricsSpecProvider() {
   const moduleName = 'couchbase';
   return {
     id: 'couchbaseMetrics',
-    name: 'Couchbase metrics',
+    name: i18n.translate('kbn.server.tutorials.couchbaseMetrics.nameTitle', {
+      defaultMessage: 'Couchbase metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from Couchbase.',
-    longDescription: 'The `couchbase` Metricbeat module fetches internal metrics from Couchbase.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-couchbase.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from Couchbase.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.longDescription', {
+      defaultMessage: 'The `couchbase` Metricbeat module fetches internal metrics from Couchbase. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchbase.html',
+      },
+    }),
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.couchbaseMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],

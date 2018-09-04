@@ -32,6 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
+  SharePageProvider
 } from './page_objects';
 
 import {
@@ -52,6 +53,7 @@ import {
   ComboBoxProvider,
   EmbeddingProvider,
   RenderableProvider,
+  TableProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -85,7 +87,8 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
-      timelion: TimelionPageProvider
+      timelion: TimelionPageProvider,
+      share: SharePageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),
@@ -109,6 +112,7 @@ export default async function ({ readConfigFile }) {
       comboBox: ComboBoxProvider,
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
+      table: TableProvider,
     },
     servers: commonConfig.get('servers'),
 

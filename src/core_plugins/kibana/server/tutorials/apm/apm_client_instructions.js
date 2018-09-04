@@ -19,11 +19,10 @@
 
 /* eslint-disable max-len */
 
-export const NODE_CLIENT_INSTRUCTIONS = [
+export const createNodeClientInstructions = () => [
   {
     title: 'Install the APM agent',
-    textPre:
-      'Install the APM agent for Node.js as a dependency to your application.',
+    textPre: 'Install the APM agent for Node.js as a dependency to your application.',
     commands: ['npm install elastic-apm-node --save'],
   },
   {
@@ -47,7 +46,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   },
 ];
 
-export const DJANGO_CLIENT_INSTRUCTIONS = [
+export const createDjangoClientInstructions = () => [
   {
     title: 'Install the APM agent',
     textPre: 'Install the APM agent for Python as a dependency.',
@@ -87,7 +86,7 @@ MIDDLEWARE = (
   },
 ];
 
-export const FLASK_CLIENT_INSTRUCTIONS = [
+export const createFlaskClientInstructions = () => [
   {
     title: 'Install the APM agent',
     textPre: 'Install the APM agent for Python as a dependency.',
@@ -124,7 +123,7 @@ apm = ElasticAPM(app)`.split('\n'),
   },
 ];
 
-export const RAILS_CLIENT_INSTRUCTIONS = [
+export const createRailsClientInstructions = () => [
   {
     title: 'Install the APM agent',
     textPre: 'Add the agent to your Gemfile.',
@@ -151,7 +150,7 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
   },
 ];
 
-export const RACK_CLIENT_INSTRUCTIONS = [
+export const createRackClientInstructions = () => [
   {
     title: 'Install the APM agent',
     textPre: 'Add the agent to your Gemfile.',
@@ -199,7 +198,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   },
 ];
 
-export const JS_CLIENT_INSTRUCTIONS = [
+export const createJsClientInstructions = () => [
   {
     title: 'Enable Real User Monitoring support in the APM server',
     textPre:
@@ -207,8 +206,7 @@ export const JS_CLIENT_INSTRUCTIONS = [
   },
   {
     title: 'Install the APM agent',
-    textPre:
-      'Install the APM agent for JavaScript as a dependency to your application:',
+    textPre: 'Install the APM agent for JavaScript as a dependency to your application:',
     commands: [`npm install elastic-apm-js-base --save`],
   },
   {
@@ -232,7 +230,7 @@ var apm = initApm({curlyOpen}
   },
 ];
 
-export const GO_CLIENT_INSTRUCTIONS = [
+export const createGoClientInstructions = () => [
   {
     title: 'Install the APM agent',
     textPre: 'Install the APM agent packages for Go.',
@@ -286,27 +284,29 @@ func main() {curlyOpen}
   },
 ];
 
-export const JAVA_CLIENT_INSTRUCTIONS = [
+export const createJavaClientInstructions = () => [
   {
     title: 'Download the APM agent',
-    textPre: 'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
-    'Do **not** add the agent as a dependency to your application.'
+    textPre:
+      'Download the agent jar from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent). ' +
+      'Do **not** add the agent as a dependency to your application.',
   },
   {
     title: 'Start your application with the javaagent flag',
-    textPre: 'Add the `-javaagent` flag and configure the agent with system properties.\n' +
-    '\n' +
-    ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
-    ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
-    ' * Set the base package of your application',
+    textPre:
+      'Add the `-javaagent` flag and configure the agent with system properties.\n' +
+      '\n' +
+      ' * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n' +
+      ' * Set custom APM Server URL (default: http://localhost:8200)\n' +
+      ' * Set the base package of your application',
     commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
      -Delastic.apm.service_name=my-application \\
-     -Delastic.apm.server_url=http://localhost:8200 \\ 
-     -Delastic.apm.application_packages=org.example \\ 
+     -Delastic.apm.server_url=http://localhost:8200 \\
+     -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost:
-    'See the [documentation]' +
-    '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
-    '**Warning: The Java agent is currently in Beta and not meant for production use.**',
+      'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/java/current/index.html) for configuration options and advanced usage.\n\n' +
+      '**Warning: The Java agent is currently in Beta and not meant for production use.**',
   },
 ];

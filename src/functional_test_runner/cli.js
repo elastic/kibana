@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 import { Command } from 'commander';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');
@@ -46,8 +46,10 @@ if (cmd.quiet) logLevel = 'error';
 if (cmd.debug) logLevel = 'debug';
 if (cmd.verbose) logLevel = 'verbose';
 
-const log = createToolingLog(logLevel);
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: logLevel,
+  writeTo: process.stdout
+});
 
 const functionalTestRunner = createFunctionalTestRunner({
   log,
