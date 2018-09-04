@@ -36,7 +36,7 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 
 esFrom=source
-if [[ "$GIT_BRANCH" = "origin/master" ]]; then
+if [[ "$PR_TARGET_BRANCH" = "origin/master" ]]; then
   esFrom=snapshot
 fi
 
