@@ -8934,19 +8934,9 @@ moment-timezone@^0.5.14:
   dependencies:
     moment ">= 2.9.0"
 
-moment-timezone@^0.5.21:
-  version "0.5.21"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.21.tgz#3cba247d84492174dbf71de2a9848fa13207b845"
-  dependencies:
-    moment ">= 2.9.0"
-
 moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.13.0, moment@^2.20.1:
   version "2.21.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
-
-moment@^2.22.2:
-  version "2.22.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
