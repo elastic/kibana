@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
 
   class ReportingPage {
     async initTests() {
@@ -33,14 +33,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clickTopNavReportingLink() {
       await retry.try(() => testSubjects.click('topNavReportingLink'));
-    }
-
-    async isReportingPanelOpen() {
-      const generateReportButtonExists = await this.getGenerateReportButtonExists();
-      const unsavedChangesWarningExists = await this.getUnsavedChangesWarningExists();
-      const isOpen = generateReportButtonExists || unsavedChangesWarningExists;
-      log.debug('isReportingPanelOpen: ' + isOpen);
-      return isOpen;
     }
 
     async getUrlOfTab(tabIndex) {
@@ -118,20 +110,14 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async openReportingPanel() {
-      log.debug('openReportingPanel');
-      await retry.try(async () => {
-        const isOpen = await this.isReportingPanelOpen();
+    async openCsvReportingPanel() {
+      log.debug('openCsvReportingPanel');
+      await PageObjects.share.openShareMenuItem('CSV Reports');
+    }
 
-        if (!isOpen) {
-          await this.clickTopNavReportingLink();
-        }
-
-        const wasOpened = await this.isReportingPanelOpen();
-        if (!wasOpened) {
-          throw new Error('Reporting panel was not opened successfully');
-        }
-      });
+    async openPdfReportingPanel() {
+      log.debug('openCsvReportingPanel');
+      await PageObjects.share.openShareMenuItem('PDF Reports');
     }
 
     async clickDownloadReportButton(timeout) {
@@ -143,14 +129,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await Promise.all(toasts.map(t => t.click()));
     }
 
-    async getUnsavedChangesWarningExists() {
-      return await testSubjects.exists('unsavedChangesReportingWarning');
-    }
-
-    async getGenerateReportButtonExists() {
-      return await testSubjects.exists('generateReportButton');
-    }
-
     async getQueueReportError() {
       return await testSubjects.exists('queueReportError');
     }
@@ -159,8 +137,8 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       return await retry.try(() => testSubjects.find('generateReportButton'));
     }
 
-    async clickPreserveLayoutOption() {
-      await retry.try(() => testSubjects.click('preserveLayoutOption'));
+    async checkUsePrintLayout() {
+      await retry.try(() => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {

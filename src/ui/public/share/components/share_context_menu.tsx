@@ -38,7 +38,13 @@ interface Props {
 export class ShareContextMenu extends Component<Props> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
-    return <EuiContextMenu initialPanelId={initialPanelId} panels={panels} />;
+    return (
+      <EuiContextMenu
+        initialPanelId={initialPanelId}
+        panels={panels}
+        data-test-subj="shareContextMenu"
+      />
+    );
   }
 
   private getPanels = () => {
@@ -115,9 +121,14 @@ export class ShareContextMenu extends Component<Props> {
       const topLevelMenuPanel = {
         id: panels.length + 1,
         title: `Share this ${this.props.objectType}`,
-        items: menuItems.sort((a, b) => {
-          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        }),
+        items: menuItems
+          .map(menuItem => {
+            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            return menuItem;
+          })
+          .sort((a, b) => {
+            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          }),
       };
       panels.push(topLevelMenuPanel);
     }

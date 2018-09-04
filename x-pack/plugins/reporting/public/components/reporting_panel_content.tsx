@@ -61,9 +61,7 @@ export class ReportingPanelContent extends Component<Props, State> {
     if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
         <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
-          <EuiFormRow helpText="Please save your work before generating a report.">
-            <EuiButton disabled>Generate {this.props.reportType}</EuiButton>
-          </EuiFormRow>
+          {this.renderGenerateReportButton(true)}
         </EuiForm>
       );
     }
@@ -82,11 +80,7 @@ export class ReportingPanelContent extends Component<Props, State> {
 
         {this.props.options}
 
-        <EuiFormRow>
-          <EuiButton fill onClick={this.createReportingJob}>
-            Generate {this.prettyPrintReportingType()}
-          </EuiButton>
-        </EuiFormRow>
+        {this.renderGenerateReportButton(false)}
 
         <EuiFormRow>
           <EuiText>
@@ -107,6 +101,22 @@ export class ReportingPanelContent extends Component<Props, State> {
       </EuiForm>
     );
   }
+
+  private renderGenerateReportButton = (isDisabled: boolean) => {
+    const helpText = isDisabled ? 'Please save your work before generating a report.' : undefined;
+    return (
+      <EuiFormRow helpText={helpText}>
+        <EuiButton
+          disabled={isDisabled}
+          fill
+          onClick={this.createReportingJob}
+          data-test-subj="generateReportButton"
+        >
+          Generate {this.prettyPrintReportingType()}
+        </EuiButton>
+      </EuiFormRow>
+    );
+  };
 
   private prettyPrintReportingType = () => {
     switch (this.props.reportType) {

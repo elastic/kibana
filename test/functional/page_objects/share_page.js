@@ -22,8 +22,31 @@ export function SharePageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize']);
 
   class SharePage {
+    async isShareMenuOpen() {
+      return await testSubjects.exists('shareContextMenu');
+    }
+
+    async ensureAtTopMenuLevel() {
+      while(true) {
+        const panelTitleButtonExists = await testSubjects.exists('contextMenuPanelTitleButton');
+        if (!panelTitleButtonExists) {
+          break;
+        }
+        await testSubjects.click('contextMenuPanelTitleButton');
+      }
+    }
+
     async clickShareTopNavButton() {
       return testSubjects.click('shareTopNavButton');
+    }
+
+    async openShareMenuItem(itemTitle) {
+      const isShareMenuOpen = await this.isShareMenuOpen();
+      if (!isShareMenuOpen) {
+        await this.clickShareTopNavButton();
+      }
+      await this.ensureAtTopMenuLevel();
+      return testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
     }
 
     async getSharedUrl() {
