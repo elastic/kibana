@@ -39,6 +39,8 @@ import {
 import { getIndexTemplates } from '.';
 
 export const getPolicies = state => state.policies.policies;
+export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
+
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
 export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
 export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;

@@ -34,6 +34,7 @@ import {
 export const defaultPolicy = {
   name: '',
   saveAsNew: true,
+  isNew: true,
   phases: {
     [PHASE_HOT]: defaultHotPhase,
     [PHASE_WARM]: defaultWarmPhase,

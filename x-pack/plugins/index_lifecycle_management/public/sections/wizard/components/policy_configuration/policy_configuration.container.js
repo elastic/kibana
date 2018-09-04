@@ -13,7 +13,6 @@ import {
   getBootstrapEnabled,
   getIndexName,
   getAliasName,
-  getSaveAsNewPolicy,
   getSelectedOriginalPolicyName,
   getIsSelectedPolicySet,
   getPolicies
@@ -23,7 +22,6 @@ import {
   setIndexName,
   setAliasName,
   setSelectedPolicyName,
-  setSaveAsNewPolicy,
   unsetSelectedPolicy
 } from '../../../../store/actions';
 
@@ -36,7 +34,6 @@ export const PolicyConfiguration = connect(
     bootstrapEnabled: getBootstrapEnabled(state),
     indexName: getIndexName(state),
     aliasName: getAliasName(state),
-    saveAsNewPolicy: getSaveAsNewPolicy(state),
     originalPolicyName: getSelectedOriginalPolicyName(state),
     hasExistingPolicies: getPolicies(state).length > 0
   }),
@@ -45,7 +42,6 @@ export const PolicyConfiguration = connect(
     setIndexName,
     setAliasName,
     setSelectedPolicyName,
-    setSaveAsNewPolicy,
     unsetSelectedPolicy
   }
 )(PresentationComponent);

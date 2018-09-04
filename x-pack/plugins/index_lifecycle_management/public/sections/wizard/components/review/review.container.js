@@ -21,6 +21,7 @@ import {
   getBootstrapEnabled,
   getIndexName,
   getPolicies,
+  getIsNewPolicy
 } from '../../../../store/selectors';
 import {
   setSelectedPolicyName,
@@ -42,6 +43,7 @@ export const Review = connect(
     selectedPolicyName: getSelectedPolicyName(state),
     saveAsNewPolicy: getSaveAsNewPolicy(state),
     originalPolicyName: getSelectedOriginalPolicyName(state),
+    isNewPolicy: getIsNewPolicy(state),
 
     /* start might go away */
     indexName: getIndexName(state),

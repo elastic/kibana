@@ -138,7 +138,7 @@ export class WarmPhase extends PureComponent {
                       validate();
                     }}
                   >
-                    Remove warm phase
+                    Deactivate warm phase
                   </EuiButton>
                 </div>
               </EuiFormRow>
