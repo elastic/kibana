@@ -38,7 +38,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
           ]
           : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            getShareConfig(),
+            getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
           ]
@@ -49,7 +49,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(actions[TopNavIds.ADD]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
-        getShareConfig()];
+        getShareConfig(actions[TopNavIds.SHARE])];
     default:
       return [];
   }
@@ -127,12 +127,12 @@ function getAddConfig(action) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getShareConfig() {
+function getShareConfig(action) {
   return {
     key: TopNavIds.SHARE,
     description: 'Share Dashboard',
-    testId: 'dashboardShareButton',
-    template: require('plugins/kibana/dashboard/top_nav/share.html')
+    testId: 'shareTopNavButton',
+    run: action,
   };
 }
 

@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
-      await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizNamewithSpecialChars);
@@ -67,14 +67,14 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
-      await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizNamewithSpecialChars);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Saved viz page title with umlaut is ${pageTitle}`);
       expect(pageTitle).to.contain(vizNamewithSpecialChars);
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Saved viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);

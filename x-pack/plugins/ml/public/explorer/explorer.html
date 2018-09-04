@@ -145,18 +145,8 @@
           </div>
         </div>
 
-        <div ng-controller="MlExplorerChartsContainerController" class="euiText">
-          <ml-explorer-charts-container
-            series-to-plot="seriesToPlot"
-            time-field-name="timeFieldName"
-            plot-earliest="plotEarliest"
-            plot-latest="plotLatest"
-            selected-earliest="selectedEarliest"
-            selected-latest="selectedLatest"
-            charts-per-row="chartsPerRow"
-            layout-cells-per-chart="layoutCellsPerChart"
-            too-many-buckets="tooManyBuckets">
-          </ml-explorer-charts-container>
+        <div class="euiText explorer-charts">
+          <ml-explorer-charts-container />
         </div>
 
         <ml-anomalies-table

@@ -186,7 +186,7 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    useUTC: Joi.boolean().default(true),
+    timezone: Joi.string().allow(false).default('UTC')
   }).default(),
 
   ops: Joi.object({
@@ -254,9 +254,5 @@ export default () => Joi.object({
   i18n: Joi.object({
     locale: Joi.string().default('en'),
   }).default(),
-
-  // This is a configuration node that is specifically handled by the config system
-  // in the new platform, and that the current platform doesn't need to handle at all.
-  __newPlatform: Joi.any(),
 
 }).default();

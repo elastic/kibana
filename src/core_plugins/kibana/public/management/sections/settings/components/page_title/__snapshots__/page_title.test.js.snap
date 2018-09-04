@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageTitle should render normally 1`] = `
+<EuiText
+  grow={true}
+>
+  <h1
+    data-test-subj="managementSettingsTitle"
+  >
+    Settings
+  </h1>
+</EuiText>
+`;
