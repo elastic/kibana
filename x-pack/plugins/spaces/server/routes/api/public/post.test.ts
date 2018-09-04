@@ -22,8 +22,9 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
   };
 });
 
+import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
-import { initPostSpacesApi } from './';
+import { initPostSpacesApi } from './post';
 
 describe('Spaces Public API', () => {
   let request: RequestRunner;
@@ -60,6 +61,27 @@ describe('Spaces Public API', () => {
       { name: 'my new space', description: 'with a description' },
       { id: 'my-space-id', overwrite: false }
     );
+  });
+
+  test(`returns result of routePreCheckLicense`, async () => {
+    const payload = {
+      id: 'my-space-id',
+      name: 'my new space',
+      description: 'with a description',
+    };
+
+    const { response } = await request('POST', '/api/spaces/space', {
+      preCheckLicenseImpl: (req: any, reply: any) =>
+        reply(Boom.forbidden('test forbidden message')),
+      payload,
+    });
+
+    const { statusCode, payload: responsePayload } = response;
+
+    expect(statusCode).toEqual(403);
+    expect(JSON.parse(responsePayload)).toMatchObject({
+      message: 'test forbidden message',
+    });
   });
 
   test('POST /space should not allow a space to be updated', async () => {

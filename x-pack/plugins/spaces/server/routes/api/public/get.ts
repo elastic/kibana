@@ -6,12 +6,9 @@
 
 import Boom from 'boom';
 import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { convertSavedObjectToSpace } from '../../lib';
 
-export function initGetSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
-
+export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'GET',
     path: '/api/spaces/space',

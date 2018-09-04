@@ -20,9 +20,9 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
     },
   };
 });
-
+import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
-import { initPutSpacesApi } from './';
+import { initPutSpacesApi } from './put';
 
 describe('Spaces Public API', () => {
   let request: RequestRunner;
@@ -57,6 +57,27 @@ describe('Spaces Public API', () => {
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith('space', 'a-space', {
       name: 'my updated space',
       description: 'with a description',
+    });
+  });
+
+  test(`returns result of routePreCheckLicense`, async () => {
+    const payload = {
+      id: 'a-space',
+      name: 'my updated space',
+      description: 'with a description',
+    };
+
+    const { response } = await request('PUT', '/api/spaces/space/a-space', {
+      preCheckLicenseImpl: (req: any, reply: any) =>
+        reply(Boom.forbidden('test forbidden message')),
+      payload,
+    });
+
+    const { statusCode, payload: responsePayload } = response;
+
+    expect(statusCode).toEqual(403);
+    expect(JSON.parse(responsePayload)).toMatchObject({
+      message: 'test forbidden message',
     });
   });
 

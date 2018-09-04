@@ -22,8 +22,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
   };
 });
 
-// @ts-ignore
-import { Server } from 'hapi';
+import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
 import { initPrivateSpacesApi } from './spaces';
 
@@ -51,6 +50,20 @@ describe('Spaces API', () => {
 
     const result = JSON.parse(payload);
     expect(result.location).toEqual('/s/a-space');
+  });
+
+  test(`returns result of routePreCheckLicense`, async () => {
+    const { response } = await request('POST', '/api/spaces/v1/space/a-space/select', {
+      preCheckLicenseImpl: (req: any, reply: any) =>
+        reply(Boom.forbidden('test forbidden message')),
+    });
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(403);
+    expect(JSON.parse(payload)).toMatchObject({
+      message: 'test forbidden message',
+    });
   });
 
   test('POST space/{id}/select should respond with 404 when the space is not found', async () => {

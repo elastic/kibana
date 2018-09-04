@@ -21,9 +21,9 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
     },
   };
 });
-
+import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
-import { initDeleteSpacesApi } from './';
+import { initDeleteSpacesApi } from './delete';
 
 describe('Spaces Public API', () => {
   let request: RequestRunner;
@@ -46,6 +46,20 @@ describe('Spaces Public API', () => {
     const { statusCode } = response;
 
     expect(statusCode).toEqual(204);
+  });
+
+  test(`returns result of routePreCheckLicense`, async () => {
+    const { response } = await request('DELETE', '/api/spaces/space/a-space', {
+      preCheckLicenseImpl: (req: any, reply: any) =>
+        reply(Boom.forbidden('test forbidden message')),
+    });
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(403);
+    expect(JSON.parse(payload)).toMatchObject({
+      message: 'test forbidden message',
+    });
   });
 
   test('DELETE spaces/{id} pretends to delete a non-existent space', async () => {

@@ -21,7 +21,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
     },
   };
 });
-
+import Boom from 'boom';
 import { Space } from '../../../../common/model/space';
 import { createSpaces, createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
 import { initGetSpacesApi } from './get';
@@ -50,6 +50,20 @@ describe('GET spaces', () => {
     expect(statusCode).toEqual(200);
     const resultSpaces: Space[] = JSON.parse(payload);
     expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
+  });
+
+  test(`returns result of routePreCheckLicense`, async () => {
+    const { response } = await request('GET', '/api/spaces/space', {
+      preCheckLicenseImpl: (req: any, reply: any) =>
+        reply(Boom.forbidden('test forbidden message')),
+    });
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(403);
+    expect(JSON.parse(payload)).toMatchObject({
+      message: 'test forbidden message',
+    });
   });
 
   test(`'GET spaces/{id}' returns the space with that id`, async () => {

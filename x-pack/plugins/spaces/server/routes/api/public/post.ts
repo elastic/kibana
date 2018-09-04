@@ -7,13 +7,10 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { getSpaceById } from '../../lib';
 
-export function initPostSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
-
+export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/space',

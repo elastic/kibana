@@ -7,12 +7,9 @@
 import Boom from 'boom';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { getSpaceById } from '../../lib';
 
-export function initDeleteSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
-
+export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',

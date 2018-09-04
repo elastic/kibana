@@ -8,13 +8,10 @@ import Boom from 'boom';
 import { omit } from 'lodash';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { convertSavedObjectToSpace, getSpaceById } from '../../lib';
 
-export function initPutSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
-
+export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',

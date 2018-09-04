@@ -16,6 +16,7 @@ export interface TestOptions {
   setupFn?: (server: any) => void;
   testConfig?: TestConfig;
   payload?: any;
+  preCheckLicenseImpl?: (req: any, reply: any) => any;
 }
 
 export type TeardownFn = () => void;
@@ -32,11 +33,13 @@ export type RequestRunner = (
   options?: TestOptions
 ) => Promise<RequestRunnerResult>;
 
+export const defaultPreCheckLicenseImpl = (request: any, reply: any) => reply();
+
 const baseConfig: TestConfig = {
   'server.basePath': '',
 };
 
-export function createTestHandler(initApiFn: (server: any) => void) {
+export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
   const teardowns: TeardownFn[] = [];
 
   const spaces = createSpaces();
@@ -52,7 +55,13 @@ export function createTestHandler(initApiFn: (server: any) => void) {
       },
       testConfig = {},
       payload,
+      preCheckLicenseImpl = defaultPreCheckLicenseImpl,
     } = options;
+
+    let pre = jest.fn();
+    if (preCheckLicenseImpl) {
+      pre = pre.mockImplementation(preCheckLicenseImpl);
+    }
 
     const server = new Server();
 
@@ -75,7 +84,7 @@ export function createTestHandler(initApiFn: (server: any) => void) {
       })
     );
 
-    initApiFn(server);
+    initApiFn(server, pre);
 
     server.decorate('request', 'getBasePath', jest.fn());
     server.decorate('request', 'setBasePath', jest.fn());
@@ -103,14 +112,26 @@ export function createTestHandler(initApiFn: (server: any) => void) {
 
     teardowns.push(() => server.stop());
 
-    return {
-      server,
-      mockSavedObjectsClient,
-      response: await server.inject({
+    const testRun = async () => {
+      const response = await server.inject({
         method,
         url: path,
         payload,
-      }),
+      });
+
+      if (preCheckLicenseImpl) {
+        expect(pre).toHaveBeenCalled();
+      } else {
+        expect(pre).not.toHaveBeenCalled();
+      }
+
+      return response;
+    };
+
+    return {
+      server,
+      mockSavedObjectsClient,
+      response: await testRun(),
     };
   };
 

@@ -10,7 +10,7 @@ import { wrapError } from '../../../lib/errors';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
 
-export function initPrivateSpacesApi(server: any) {
+export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
@@ -37,6 +37,9 @@ export function initPrivateSpacesApi(server: any) {
       } catch (error) {
         return reply(wrapError(error));
       }
+    },
+    config: {
+      pre: [routePreCheckLicenseFn],
     },
   });
 }

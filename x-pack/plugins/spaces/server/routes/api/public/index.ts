@@ -4,7 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initDeleteSpacesApi } from './delete';
-export { initGetSpacesApi } from './get';
-export { initPostSpacesApi } from './post';
-export { initPutSpacesApi } from './put';
+import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
+import { initDeleteSpacesApi } from './delete';
+import { initGetSpacesApi } from './get';
+import { initPostSpacesApi } from './post';
+import { initPutSpacesApi } from './put';
+
+export function initPublicSpacesApi(server: any) {
+  const routePreCheckLicenseFn = routePreCheckLicense(server);
+
+  initDeleteSpacesApi(server, routePreCheckLicenseFn);
+  initGetSpacesApi(server, routePreCheckLicenseFn);
+  initPostSpacesApi(server, routePreCheckLicenseFn);
+  initPutSpacesApi(server, routePreCheckLicenseFn);
+}
