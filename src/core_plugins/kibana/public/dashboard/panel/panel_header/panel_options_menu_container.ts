@@ -18,7 +18,7 @@
  */
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import * as Redux from 'react-redux';
+import { connect } from 'react-redux';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 import { panelActionsStore } from '../../store/panel_actions_store';
 import {
@@ -41,6 +41,7 @@ import {
   setVisibleContextMenuPanelId,
 } from '../../actions';
 
+import { Dispatch } from 'redux';
 import { DashboardContextMenuPanel } from 'ui/dashboard_panel_actions';
 import { CoreKibanaState } from '../../../selectors';
 import { DashboardViewMode } from '../../dashboard_view_mode';
@@ -106,7 +107,7 @@ const mapStateToProps = (
  * @param panelId {string}
  */
 const mapDispatchToProps = (
-  dispatch: Redux.Dispatch<CoreKibanaState>,
+  dispatch: Dispatch,
   { panelId }: PanelOptionsMenuContainerOwnProps
 ) => ({
   onDeletePanel: () => {
@@ -200,7 +201,7 @@ const mergeProps = (
   };
 };
 
-export const PanelOptionsMenuContainer = Redux.connect<
+export const PanelOptionsMenuContainer = connect<
   PanelOptionsMenuContainerStateProps,
   PanelOptionsMenuContainerDispatchProps,
   PanelOptionsMenuContainerOwnProps,

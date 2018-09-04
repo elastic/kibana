@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       log.debug('Bucket = Split Rows');
-      await PageObjects.common.sleep(500);
       await PageObjects.visualize.clickBucket('Split Rows');
       log.debug('Aggregation = Histogram');
       await PageObjects.visualize.selectAggregation('Histogram');
@@ -63,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
@@ -105,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
       await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
@@ -119,7 +118,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
-      await PageObjects.common.sleep(500);
       await PageObjects.visualize.clickBucket('Split Rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
@@ -139,7 +137,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch(PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED);
-      await PageObjects.common.sleep(500);
       await PageObjects.visualize.clickBucket('Split Rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
