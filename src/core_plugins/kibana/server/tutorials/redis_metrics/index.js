@@ -33,7 +33,6 @@ export function redisMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Redis.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.redisMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `redis` Metricbeat module fetches internal metrics from the Redis server. \
 [Learn more]({learnMoreLink}).',
       values: {

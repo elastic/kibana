@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AgentFeatureTipMessage component should render null empty string when no docs are returned 1`] = `""`;
+
+exports[`AgentFeatureTipMessage component should render when docs are returned 1`] = `
+<styled.div>
+  <EuiIcon
+    size="m"
+    type="iInCircle"
+  />
+  Mock Docs Text
+   
+  <ExternalLink
+    href="mock-url"
+  >
+    Learn more in the documentation.
+  </ExternalLink>
+</styled.div>
+`;
+
+exports[`AgentFeatureTipMessage component should render when docs are returned, but missing a url 1`] = `
+<styled.div>
+  <EuiIcon
+    size="m"
+    type="iInCircle"
+  />
+  Mock Docs Text
+   
+</styled.div>
+`;
+
+exports[`PropertiesTable component should render empty when data has no keys 1`] = `
+<styled.div>
+  <styled.div>
+    <EuiIcon
+      size="m"
+      type="iInCircle"
+    />
+     No data available
+  </styled.div>
+</styled.div>
+`;
+
+exports[`PropertiesTable component should render empty when data isn't present 1`] = `
+<styled.div>
+  <styled.div>
+    <EuiIcon
+      size="m"
+      type="iInCircle"
+    />
+     No data available
+  </styled.div>
+</styled.div>
+`;
+
+exports[`PropertiesTable component should render with data 1`] = `
+<styled.div>
+  <NestedKeyValueTable
+    data={
+      Object {
+        "a": "hello",
+        "b": "bananas",
+      }
+    }
+    depth={1}
+    keySorter={[Function]}
+    parentKey="testPropKey"
+  />
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="context-testPropKey"
+  />
+</styled.div>
+`;

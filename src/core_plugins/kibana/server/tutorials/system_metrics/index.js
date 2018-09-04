@@ -33,7 +33,6 @@ export function systemMetricsSpecProvider() {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.systemMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host. \
 It collects system wide statistics and statistics per process and filesystem. \
 [Learn more]({learnMoreLink}).',

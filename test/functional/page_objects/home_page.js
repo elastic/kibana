@@ -53,10 +53,22 @@ export function HomePageProvider({ getService }) {
 
     async addSampleDataSet(id) {
       await testSubjects.click(`addSampleDataSet${id}`);
+      await this._waitForSampleDataLoadingAction(id);
     }
 
     async removeSampleDataSet(id) {
       await testSubjects.click(`removeSampleDataSet${id}`);
+      await this._waitForSampleDataLoadingAction(id);
+    }
+
+    // loading action is either uninstall and install
+    async _waitForSampleDataLoadingAction(id) {
+      const sampleDataCard = await testSubjects.find(`sampleDataSetCard${id}`);
+      await retry.try(async () => {
+        // waitForDeletedByClassName needs to be inside retry because it will timeout at least once
+        // before action is complete
+        await sampleDataCard.waitForDeletedByClassName('euiLoadingSpinner');
+      });
     }
 
     async launchSampleDataSet(id) {

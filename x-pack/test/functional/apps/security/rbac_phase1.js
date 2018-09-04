@@ -100,8 +100,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(true);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();
 
     });
@@ -122,8 +121,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(false);
+      await PageObjects.visualize.saveVisualizationExpectFail(vizName1);
       await PageObjects.security.logout();
 
     });

@@ -9,8 +9,6 @@ import {
   // FIXME: need updated typedefs
   // @ts-ignore
   EuiCard,
-  // @ts-ignore
-  EuiTextColor,
 } from '@elastic/eui';
 import React from 'react';
 import { Space } from '../../../common/model/space';
@@ -43,16 +41,12 @@ function renderSpaceDescription(space: Space) {
   let description: JSX.Element | string = space.description || '';
   const needsTruncation = description.length > 120;
   if (needsTruncation) {
-    description = <span title={description}>{description.substr(0, 120) + '…'}</span>;
+    description = description.substr(0, 120) + '…';
   }
 
-  // FIXME: workaround for missing typedefs
-  // @ts-ignore
-  const TextColorCmp: ComponentClass = EuiTextColor;
-
   return (
-    <TextColorCmp className="eui-textBreakWord" color={'subdued'}>
+    <span title={description} className="eui-textBreakWord euiTextColor--subdued">
       {description}
-    </TextColorCmp>
+    </span>
   );
 }

@@ -18,95 +18,97 @@
  */
 
 import { INSTRUCTION_VARIANT } from './instruction_variant';
-import { TRYCLOUD_OPTION1, TRYCLOUD_OPTION2 } from './onprem_cloud_instructions';
+import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 
-export const METRICBEAT_INSTRUCTIONS = {
+export const createMetricbeatInstructions = () => ({
   INSTALL: {
     OSX: {
       title: 'Download and install Metricbeat',
-      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
-               '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
+      textPre:
+        'First time using Metricbeat? See the [Getting Started Guide]' +
+        '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
-      ]
+      ],
     },
     DEB: {
       title: 'Download and install Metricbeat',
-      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
-               '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
+      textPre:
+        'First time using Metricbeat? See the [Getting Started Guide]' +
+        '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb'
+        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb',
       ],
-      textPost: 'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
+      textPost:
+        'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).',
     },
     RPM: {
       title: 'Download and install Metricbeat',
-      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
-               '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
+      textPre:
+        'First time using Metricbeat? See the [Getting Started Guide]' +
+        '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm'
+        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
       ],
-      textPost: 'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
+      textPost:
+        'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).',
     },
     WINDOWS: {
       title: 'Download and install Metricbeat',
-      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
-               '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).\n' +
-               '1. Download the Metricbeat Windows zip file from the [Download](https://www.elastic.co/downloads/beats/metricbeat) page.\n' +
-               '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
-               '3. Rename the `metricbeat-{config.kibana.version}-windows` directory to `Metricbeat`.\n' +
-               '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
-               ' **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n' +
-               '5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
+      textPre:
+        'First time using Metricbeat? See the [Getting Started Guide]' +
+        '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).\n' +
+        '1. Download the Metricbeat Windows zip file from the [Download](https://www.elastic.co/downloads/beats/metricbeat) page.\n' +
+        '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
+        '3. Rename the `metricbeat-{config.kibana.version}-windows` directory to `Metricbeat`.\n' +
+        '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
+        ' **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n' +
+        '5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
       commands: [
         'PS > cd C:\\Program Files\\Metricbeat',
-        'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1'
+        'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1',
       ],
-      textPost: 'Modify the settings under `output.elasticsearch` in the ' +
-                '`C:\\Program Files\\Metricbeat\\metricbeat.yml` file to point to your Elasticsearch installation.'
-    }
+      textPost:
+        'Modify the settings under `output.elasticsearch` in the ' +
+        '`C:\\Program Files\\Metricbeat\\metricbeat.yml` file to point to your Elasticsearch installation.',
+    },
   },
   START: {
     OSX: {
       title: 'Start Metricbeat',
-      textPre: 'The `setup` command loads the Kibana dashboards.' +
-                ' If the dashboards are already set up, omit this command.',
-      commands: [
-        './metricbeat setup',
-        './metricbeat -e',
-      ]
+      textPre:
+        'The `setup` command loads the Kibana dashboards.' +
+        ' If the dashboards are already set up, omit this command.',
+      commands: ['./metricbeat setup', './metricbeat -e'],
     },
     DEB: {
       title: 'Start Metricbeat',
-      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
-                'omit this command.',
-      commands: [
-        'sudo metricbeat setup',
-        'sudo service metricbeat start',
-      ]
+      textPre:
+        'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+        'omit this command.',
+      commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
     },
     RPM: {
       title: 'Start Metricbeat',
-      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
-                'omit this command.',
-      commands: [
-        'sudo metricbeat setup',
-        'sudo service metricbeat start',
-      ],
+      textPre:
+        'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+        'omit this command.',
+      commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
     },
     WINDOWS: {
       title: 'Start Metricbeat',
-      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
-                'omit this command.',
+      textPre:
+        'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+        'omit this command.',
       commands: [
         'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup',
         'PS C:\\Program Files\\Metricbeat> Start-Service metricbeat',
-      ]
-    }
+      ],
+    },
   },
   CONFIG: {
     OSX: {
@@ -118,10 +120,11 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
-      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
-                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+      textPost:
+        'Where `<password>` is the password of the `elastic` user, ' +
+        '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.',
     },
     DEB: {
       title: 'Edit the configuration',
@@ -132,10 +135,11 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
-      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
-                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+      textPost:
+        'Where `<password>` is the password of the `elastic` user, ' +
+        '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.',
     },
     RPM: {
       title: 'Edit the configuration',
@@ -146,101 +150,89 @@ export const METRICBEAT_INSTRUCTIONS = {
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
-      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
-                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+      textPost:
+        'Where `<password>` is the password of the `elastic` user, ' +
+        '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.',
     },
     WINDOWS: {
       title: 'Edit the configuration',
-      textPre: 'Modify `C:\\Program Files\\Metricbeat\\metricbeat.yml` to set the connection information:',
+      textPre:
+        'Modify `C:\\Program Files\\Metricbeat\\metricbeat.yml` to set the connection information:',
       commands: [
         'output.elasticsearch:',
         '  hosts: ["<es_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
         'setup.kibana:',
-        '  host: "<kibana_url>"'
+        '  host: "<kibana_url>"',
       ],
-      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
-                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
-    }
-  }
-};
+      textPost:
+        'Where `<password>` is the password of the `elastic` user, ' +
+        '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.',
+    },
+  },
+});
 
-export const METRICBEAT_CLOUD_INSTRUCTIONS = {
+export const createMetricbeatCloudInstructions = () => ({
   CONFIG: {
     OSX: {
       title: 'Edit the configuration',
       textPre: 'Modify `metricbeat.yml` to set the connection information for Elastic Cloud:',
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: 'Where `<password>` is the password of the `elastic` user.'
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: 'Where `<password>` is the password of the `elastic` user.',
     },
     DEB: {
       title: 'Edit the configuration',
-      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: 'Where `<password>` is the password of the `elastic` user.'
+      textPre:
+        'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: 'Where `<password>` is the password of the `elastic` user.',
     },
     RPM: {
       title: 'Edit the configuration',
-      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: 'Where `<password>` is the password of the `elastic` user.'
+      textPre:
+        'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: 'Where `<password>` is the password of the `elastic` user.',
     },
     WINDOWS: {
       title: 'Edit the configuration',
-      textPre: 'Modify `C:\\Program Files\\Filebeat\\metricbeat.yml` to set the connection information for Elastic Cloud:',
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: 'Where `<password>` is the password of the `elastic` user.'
-    }
-  }
-};
+      textPre:
+        'Modify `C:\\Program Files\\Filebeat\\metricbeat.yml` to set the connection information for Elastic Cloud:',
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: 'Where `<password>` is the password of the `elastic` user.',
+    },
+  },
+});
 
 export function metricbeatEnableInstructions(moduleName) {
   return {
     OSX: {
       title: 'Enable and configure the ' + moduleName + ' module',
       textPre: 'From the installation directory, run:',
-      commands: [
-        './metricbeat modules enable ' + moduleName,
-      ],
-      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
+      commands: ['./metricbeat modules enable ' + moduleName],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.',
     },
     DEB: {
       title: 'Enable and configure the ' + moduleName + ' module',
-      commands: [
-        'sudo metricbeat modules enable ' + moduleName,
-      ],
-      textPost: 'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.'
+      commands: ['sudo metricbeat modules enable ' + moduleName],
+      textPost:
+        'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.',
     },
     RPM: {
       title: 'Enable and configure the ' + moduleName + ' module',
-      commands: [
-        'sudo metricbeat modules enable ' + moduleName,
-      ],
-      textPost: 'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.'
+      commands: ['sudo metricbeat modules enable ' + moduleName],
+      textPost:
+        'Modify the settings in the `/etc/metricbeat/modules.d/' + moduleName + '.yml` file.',
     },
     WINDOWS: {
       title: 'Enable and configure the ' + moduleName + ' module',
       textPre: 'From the `C:\\Program Files\\Metricbeat` folder, run:',
-      commands: [
-        'PS C:\\Program Files\\Metricbeat> metricbeat.exe modules enable ' + moduleName,
-      ],
-      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.'
-    }
+      commands: ['PS C:\\Program Files\\Metricbeat> metricbeat.exe modules enable ' + moduleName],
+      textPost: 'Modify the settings in the `modules.d/' + moduleName + '.yml` file.',
+    },
   };
 }
 
@@ -257,16 +249,18 @@ export function metricbeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'metricset.module': moduleName
-            }
-          }
-        }
-      }
-    }
+              'metricset.module': moduleName,
+            },
+          },
+        },
+      },
+    },
   };
 }
 
 export function onPremInstructions(moduleName) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+
   return {
     instructionSets: [
       {
@@ -278,8 +272,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -287,8 +281,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -296,8 +290,8 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -305,17 +299,21 @@ export function onPremInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }
 
 export function onPremCloudInstructions(moduleName) {
+  const TRYCLOUD_OPTION1 = createTrycloudOption1();
+  const TRYCLOUD_OPTION2 = createTrycloudOption2();
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+
   return {
     instructionSets: [
       {
@@ -329,8 +327,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -340,8 +338,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -351,8 +349,8 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -362,17 +360,20 @@ export function onPremCloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }
 
 export function cloudInstructions(moduleName) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+  const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
+
   return {
     instructionSets: [
       {
@@ -384,8 +385,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.OSX,
               metricbeatEnableInstructions(moduleName).OSX,
-              METRICBEAT_INSTRUCTIONS.START.OSX
-            ]
+              METRICBEAT_INSTRUCTIONS.START.OSX,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
@@ -393,8 +394,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.DEB,
               metricbeatEnableInstructions(moduleName).DEB,
-              METRICBEAT_INSTRUCTIONS.START.DEB
-            ]
+              METRICBEAT_INSTRUCTIONS.START.DEB,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
@@ -402,8 +403,8 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.RPM,
               metricbeatEnableInstructions(moduleName).RPM,
-              METRICBEAT_INSTRUCTIONS.START.RPM
-            ]
+              METRICBEAT_INSTRUCTIONS.START.RPM,
+            ],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -411,12 +412,12 @@ export function cloudInstructions(moduleName) {
               METRICBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               METRICBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
               metricbeatEnableInstructions(moduleName).WINDOWS,
-              METRICBEAT_INSTRUCTIONS.START.WINDOWS
-            ]
-          }
+              METRICBEAT_INSTRUCTIONS.START.WINDOWS,
+            ],
+          },
         ],
-        statusCheck: metricbeatStatusCheck(moduleName)
-      }
-    ]
+        statusCheck: metricbeatStatusCheck(moduleName),
+      },
+    ],
   };
 }

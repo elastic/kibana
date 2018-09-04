@@ -107,7 +107,6 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Terms aggregation on play_name', async function () {
       await PageObjects.visualize.clickBucket('X-Axis');
-      await PageObjects.common.sleep(1000);
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       aggIndex = aggIndex + 1;
@@ -139,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Max aggregation metric on speech_number', async function () {
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();
