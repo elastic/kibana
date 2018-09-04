@@ -15,15 +15,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormHelpText,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS } from '../../../constants';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl } from '../../../services';
 
 export class StepLogisticsUi extends Component {
@@ -51,7 +50,8 @@ export class StepLogisticsUi extends Component {
       rollupPageSize: errorRollupPageSize,
     } = fieldErrors;
 
-    const illegalCharacters = INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS.join(', ');
+    const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+    const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
     return (
       <Fragment>
@@ -112,26 +112,26 @@ export class StepLogisticsUi extends Component {
             />
           </EuiFormRow>
 
-          <EuiTitle size="s">
-            <h4>
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.title"
-                defaultMessage="Data flow"
-              />
-            </h4>
-          </EuiTitle>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.title"
+                    defaultMessage="Data flow"
+                  />
+                </h4>
+              </EuiTitle>
 
-          <EuiText>
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.description"
-              defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
-            />
-          </EuiText>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.description"
+                  defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
+                />
+              </EuiText>
 
-          <EuiSpacer size="l" />
+              <EuiSpacer size="l" />
 
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={(
                   <FormattedMessage
@@ -141,116 +141,114 @@ export class StepLogisticsUi extends Component {
                 )}
                 error={errorIndexPattern}
                 isInvalid={Boolean(showStepErrors && errorIndexPattern)}
+                helpText={(
+                  <Fragment>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.helpAllow.label"
+                        defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                        values={{ asterisk: <strong>*</strong> }}
+                      />
+                    </p>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.helpDisallow.label"
+                        defaultMessage="You can't use spaces or the characters {characterList}"
+                        values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+                      />
+                    </p>
+                  </Fragment>
+                )}
               >
                 <EuiFieldText
-                  aria-labelledby="indexPatternHelp"
                   value={indexPattern}
                   onChange={e => onFieldsChange({ indexPattern: e.target.value })}
                   isInvalid={Boolean(showStepErrors && errorIndexPattern)}
                 />
               </EuiFormRow>
-            </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiIcon type="arrowRight" />
-              </EuiFormRow>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={(
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.label"
-                    defaultMessage="Rollup index"
+                    defaultMessage="Rollup index name"
                   />
                 )}
                 error={errorRollupIndex}
                 isInvalid={Boolean(showStepErrors && errorRollupIndex)}
+                helpText={(
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.helpDisallow.label"
+                    defaultMessage="You can't use spaces, commas, or the characters {characterList}"
+                    values={{ characterList: <strong>{indexIllegalCharacters}</strong> }}
+                  />
+                )}
               >
                 <EuiFieldText
-                  aria-labelledby="indexPatternHelp"
                   value={rollupIndex}
                   onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
                   isInvalid={Boolean(showStepErrors && errorRollupIndex)}
                 />
               </EuiFormRow>
             </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.title"
+                    defaultMessage="Schedule"
+                  />
+                </h4>
+              </EuiTitle>
+
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.description"
+                  defaultMessage={`
+                    How often should data be rolled up and how many results should be indexed at a time?
+                    A larger value will tend to execute faster, but will require more memory during processing.
+                  `}
+                />
+              </EuiText>
+
+              <EuiSpacer size="l" />
+
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.stepCron.label"
+                    defaultMessage="Cron pattern"
+                  />
+                )}
+                error={errorRollupCron}
+                isInvalid={Boolean(showStepErrors && errorRollupCron)}
+              >
+                <EuiFieldText
+                  value={rollupCron}
+                  onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+                  isInvalid={Boolean(showStepErrors && errorRollupCron)}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistical.stepPageSize.label"
+                    defaultMessage="Page size"
+                  />
+                )}
+                error={errorRollupPageSize}
+                isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
+              >
+                <EuiFieldNumber
+                  value={rollupPageSize}
+                  onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
+                  isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
-
-          <EuiFormHelpText id="indexPatternHelp">
-            <p>
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.allowLabel"
-                defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                values={{ asterisk: <strong>*</strong> }}
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.disallowLabel"
-                defaultMessage="You can't use spaces or the characters {characterList}"
-                values={{ characterList: <strong>{illegalCharacters}</strong> }}
-              />
-            </p>
-          </EuiFormHelpText>
-
-          <EuiSpacer size="l" />
-
-          <EuiTitle size="s">
-            <h4>
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.title"
-                defaultMessage="Schedule"
-              />
-            </h4>
-          </EuiTitle>
-
-          <EuiText>
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.description"
-              defaultMessage={`
-                How often should data be rolled up and how many results should be indexed at a time?
-                A larger value will tend to execute faster, but will require more memory during processing.
-              `}
-            />
-          </EuiText>
-
-          <EuiSpacer size="l" />
-
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.stepCron.label"
-                defaultMessage="Cron"
-              />
-            )}
-            error={errorRollupCron}
-            isInvalid={Boolean(showStepErrors && errorRollupCron)}
-          >
-            <EuiFieldText
-              value={rollupCron}
-              onChange={e => onFieldsChange({ rollupCron: e.target.value })}
-              isInvalid={Boolean(showStepErrors && errorRollupCron)}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.stepPageSize.label"
-                defaultMessage="Page size"
-              />
-            )}
-            error={errorRollupPageSize}
-            isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
-          >
-            <EuiFieldNumber
-              value={rollupPageSize}
-              onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
-              isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
-            />
-          </EuiFormRow>
         </EuiForm>
 
         {this.renderErrors()}

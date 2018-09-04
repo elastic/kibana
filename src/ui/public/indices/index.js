@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export const INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|'];
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS.concat(' ');
+export {
+  INDEX_ILLEGAL_CHARACTERS_VISIBLE,
+} from './constants';

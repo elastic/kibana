@@ -95,8 +95,3 @@ FeatureCatalogueRegistryProvider.register(() => {
     category: FeatureCatalogueCategory.ADMIN
   };
 });
-
-export {
-  INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-} from './common';

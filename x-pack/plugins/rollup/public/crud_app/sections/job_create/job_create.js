@@ -23,7 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS, CRUD_APP_BASE_PATH } from '../../constants';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
@@ -80,7 +82,7 @@ const stepIdToStepMap = {
           />
         );
       } else {
-        const illegalCharacters = INDEX_PATTERN_ILLEGAL_VISIBLE_CHARACTERS.reduce((chars, char) => {
+        const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
           if (indexPattern.includes(char)) {
             chars.push(char);
           }
@@ -93,7 +95,7 @@ const stepIdToStepMap = {
             <FormattedMessage
               id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
               defaultMessage="You must remove these characters from your index pattern: {characterList}"
-              values={{ characterList: <strong>{illegalCharacters.join(', ')}</strong> }}
+              values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
             />
           );
         } else {
@@ -115,6 +117,40 @@ const stepIdToStepMap = {
             defaultMessage="You must provide a rollup index"
           />
         );
+      } else {
+        const illegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
+          if (rollupIndex.includes(char)) {
+            chars.push(char);
+          }
+
+          return chars;
+        }, []);
+
+        if (illegalCharacters.length) {
+          errors.rollupIndex = (
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.rollupIndexIllegalCharacters"
+              defaultMessage="You must remove these characters from your rollup index name: {characterList}"
+              values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
+            />
+          );
+        } else {
+          if (rollupIndex.includes(',')) {
+            errors.rollupIndex = (
+              <FormattedMessage
+                id="xpack.rollupJobs.create.errors.rollupIndexCommas"
+                defaultMessage="You must remove commas from your rollup index name"
+              />
+            );
+          } else if (rollupIndex.includes(' ')) {
+            errors.rollupIndex = (
+              <FormattedMessage
+                id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
+                defaultMessage="You must remove spaces from your rollup index name"
+              />
+            );
+          }
+        }
       }
 
       if (!rollupCron || !rollupCron.trim()) {
