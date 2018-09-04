@@ -29,7 +29,7 @@ describe('getSearchDsl', () => {
   describe('validation', () => {
     it('throws when sortField is passed without type', () => {
       expect(() => {
-        getSearchDsl({}, {
+        getSearchDsl({}, {}, {
           type: undefined,
           sortField: 'title'
         });
@@ -37,7 +37,7 @@ describe('getSearchDsl', () => {
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
-        getSearchDsl({}, {
+        getSearchDsl({}, {}, {
           type: 'foo',
           sortOrder: 'desc'
         });
@@ -46,38 +46,41 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, type, search, searchFields, filters) to getQueryParams', () => {
+    it('passes (mappings, schema, namespace, type, search, searchFields) to getQueryParams', () => {
       const spy = sandbox.spy(queryParamsNS, 'getQueryParams');
       const mappings = { type: { properties: {} } };
+      const schema = { isNamespaceAgnostic: () => {} };
       const opts = {
+        namespace: 'foo-namespace',
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
-        filters: [{ bool: {} }],
       };
 
-      getSearchDsl(mappings, opts);
+      getSearchDsl(mappings, schema, opts);
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWithExactly(
         spy,
         mappings,
+        schema,
+        opts.namespace,
         opts.type,
         opts.search,
         opts.searchFields,
-        opts.filters,
       );
     });
 
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
       const spy = sandbox.stub(sortParamsNS, 'getSortingParams').returns({});
       const mappings = { type: { properties: {} } };
+      const schema = { isNamespaceAgnostic: () => {} };
       const opts = {
         type: 'foo',
         sortField: 'bar',
         sortOrder: 'baz'
       };
 
-      getSearchDsl(mappings, opts);
+      getSearchDsl(mappings, schema, opts);
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWithExactly(
         spy,

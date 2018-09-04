@@ -353,8 +353,9 @@ describe('#delete', () => {
       actions: mockActions,
     });
     const id = Symbol();
+    const options = Symbol();
 
-    await expect(client.delete(type, id)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -366,6 +367,7 @@ describe('#delete', () => {
       {
         type,
         id,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -390,15 +392,17 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
       type,
       id,
+      options,
     });
   });
 
@@ -422,11 +426,12 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -488,7 +493,7 @@ describe('#find', () => {
         [type],
         [mockActions.getSavedObjectAction(type, 'find')],
         {
-          options
+          options,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -532,7 +537,7 @@ describe('#find', () => {
         [type1, type2],
         [mockActions.getSavedObjectAction(type1, 'find')],
         {
-          options
+          options,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -663,7 +668,7 @@ describe('#find', () => {
         [type],
         [mockActions.getSavedObjectAction(type, 'find')],
         {
-          options
+          options,
         }
       );
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -727,14 +732,14 @@ describe('#find', () => {
         actions: mockActions,
       });
 
-      await client.find();
+      await client.find({});
 
       expect(mockCheckPrivileges).toHaveBeenCalledWith([
         mockActions.getSavedObjectAction(type1, 'find'),
         mockActions.getSavedObjectAction(type2, 'find'),
       ]);
       expect(mockRepository.find).toHaveBeenCalledWith(expect.objectContaining({
-        type: [type2]
+        type: [type2],
       }));
     });
 
@@ -1005,7 +1010,7 @@ describe('#get', () => {
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
       type,
       id,
-      options
+      options,
     });
   });
 

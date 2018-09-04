@@ -42,6 +42,11 @@ export const spaces = (kibana) => new kibana.Plugin({
     }],
     hacks: [],
     mappings,
+    savedObjectsSchema: {
+      space: {
+        isNamespaceAgnostic: true,
+      },
+    },
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
       return {
@@ -83,9 +88,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.decorate('server', 'spaces', spacesService);
 
-    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
-      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+      spacesSavedObjectsClientWrapperFactory(spacesService)
     );
 
     initSpacesApi(server);

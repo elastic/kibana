@@ -31,17 +31,17 @@ export default function ({ getService }) {
         }
       });
 
-      const expectedDocumentId = spaceId === DEFAULT_SPACE_ID ? resp.body.id : `${spaceId}:${resp.body.id}`;
+      const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
 
       // query ES directory to assert on space id
       const { _source } = await es.get({
-        id: `visualization:${expectedDocumentId}`,
+        id: `${expectedSpacePrefix}visualization:${resp.body.id}`,
         type: 'doc',
         index: '.kibana'
       });
 
       const {
-        spaceId: actualSpaceId = '**not defined**'
+        namespace: actualSpaceId = '**not defined**'
       } = _source;
 
       if (spaceId === DEFAULT_SPACE_ID) {
@@ -75,7 +75,7 @@ export default function ({ getService }) {
       });
 
       const {
-        spaceId: actualSpaceId = '**not defined**'
+        namespace: actualSpaceId = '**not defined**'
       } = _source;
 
       expect(actualSpaceId).to.eql('**not defined**');

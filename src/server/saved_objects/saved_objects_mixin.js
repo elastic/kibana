@@ -54,7 +54,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, kbnServer.uiExports.savedObjectsSchema));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
