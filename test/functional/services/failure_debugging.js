@@ -34,6 +34,7 @@ export async function FailureDebuggingProvider({ getService }) {
   const remote = getService('remote');
 
   await del(config.get('failureDebugging.htmlDirectory'));
+  await del(config.get('failureDebugging.logDirectory'));
 
   async function logCurrentUrl() {
     const currentUrl = await remote.getCurrentUrl();
@@ -48,6 +49,15 @@ export async function FailureDebuggingProvider({ getService }) {
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
+  async function saveBrowserLogs(name) {
+    await mkdirAsync(config.get('failureDebugging.logDirectory'));
+    const browserOutputFileName = resolve(config.get('failureDebugging.logDirectory'), `${name}-browser.log`);
+    const browserLogs = await remote.getLogsFor('browser');
+    const browserOutput = browserLogs.reduce((acc, log) => acc += `${log.message.replace(/\\n/g, '\n')}\n`, '');
+    log.info(`Saving browser output to: ${browserOutputFileName}`);
+    await writeFileAsync(browserOutputFileName, browserOutput);
+  }
+
   async function onFailure(error, test) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
@@ -55,7 +65,8 @@ export async function FailureDebuggingProvider({ getService }) {
     await Promise.all([
       screenshots.takeForFailure(name),
       logCurrentUrl(),
-      savePageHtml(name)
+      savePageHtml(name),
+      saveBrowserLogs(name),
     ]);
   }
 

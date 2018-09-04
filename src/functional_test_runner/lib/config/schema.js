@@ -157,6 +157,7 @@ export const schema = Joi.object().keys({
 
   // settings for the failureDebugging module
   failureDebugging: Joi.object().keys({
-    htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
+    htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html')),
+    logDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/log'))
   }).default(),
 }).default();
