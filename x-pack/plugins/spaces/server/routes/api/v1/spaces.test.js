@@ -25,20 +25,14 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
 
 const spaces = [{
   id: 'a-space',
-  attributes: {
-    name: 'a space',
-  }
+  name: 'a space',
 }, {
   id: 'b-space',
-  attributes: {
-    name: 'b space',
-  }
+  name: 'b space',
 }, {
   id: 'default',
-  attributes: {
-    name: 'Default Space',
-    _reserved: true
-  }
+  name: 'Default Space',
+  _reserved: true,
 }];
 
 describe('Spaces API', () => {
@@ -80,10 +74,12 @@ describe('Spaces API', () => {
       server.decorate('request', 'getBasePath', jest.fn());
       server.decorate('request', 'setBasePath', jest.fn());
 
-      // Mock server.getSavedObjectsClient()
-      const mockSavedObjectsClient = {
-        get: jest.fn((type, id) => {
-          return spaces.filter(s => s.id === id)[0];
+      const mockSpacesClient = {
+        getAll: jest.fn(() => {
+          return spaces;
+        }),
+        get: jest.fn((id) => {
+          return spaces.find(s => s.id === id);
         }),
         find: jest.fn(() => {
           return {
@@ -99,19 +95,39 @@ describe('Spaces API', () => {
         }
       };
 
-      server.decorate('request', 'getSavedObjectsClient', () => mockSavedObjectsClient);
+      server.plugins = {
+        spaces: {
+          spacesClient: {
+            getScopedClient: jest.fn().mockReturnValue(mockSpacesClient)
+          }
+        }
+      };
 
       teardowns.push(() => server.stop());
 
-      return {
+      const headers = {
+        authorization: 'foo',
+      };
+
+      const result = {
         server,
-        mockSavedObjectsClient,
+        mockSpacesClient,
+        headers,
         response: await server.inject({
           method,
           url: path,
           payload,
+          headers,
         })
       };
+
+      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      }));
+
+      return result;
     };
   });
 
@@ -120,7 +136,7 @@ describe('Spaces API', () => {
   });
 
   test(`'GET spaces' returns all available spaces`, async () => {
-    const { response } = await request('GET', '/api/spaces/v1/spaces');
+    const { server, headers, response } = await request('GET', '/api/spaces/v1/spaces');
 
     const {
       statusCode,
@@ -130,6 +146,11 @@ describe('Spaces API', () => {
     expect(statusCode).toEqual(200);
     const resultSpaces = JSON.parse(payload);
     expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
+    expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(expect.objectContaining({
+      headers: expect.objectContaining({
+        authorization: headers.authorization,
+      }),
+    }));
   });
 
   test(`'GET spaces/{id}' returns the space with that id`, async () => {
@@ -155,22 +176,6 @@ describe('Spaces API', () => {
     expect(statusCode).toEqual(204);
   });
 
-  test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {
-    const { response } = await request('DELETE', '/api/spaces/v1/space/default');
-
-    const {
-      statusCode,
-      payload
-    } = response;
-
-    expect(statusCode).toEqual(400);
-    expect(JSON.parse(payload)).toEqual({
-      statusCode: 400,
-      error: "Bad Request",
-      message: "This Space cannot be deleted because it is reserved."
-    });
-  });
-
   test('POST /space should create a new space with the provided ID', async () => {
     const payload = {
       id: 'my-space-id',
@@ -178,73 +183,34 @@ describe('Spaces API', () => {
       description: 'with a description',
     };
 
-    const { mockSavedObjectsClient, response } = await request('POST', '/api/spaces/v1/space', { payload });
+    const { mockSpacesClient, response } = await request('POST', '/api/spaces/v1/space', { payload });
 
     const {
       statusCode,
     } = response;
 
     expect(statusCode).toEqual(200);
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.create)
-      .toHaveBeenCalledWith('space', { name: 'my new space', description: 'with a description' }, { id: 'my-space-id', overwrite: false });
-  });
-
-  test('POST /space should not allow a space to be updated', async () => {
-    const payload = {
-      id: 'a-space',
-      name: 'my updated space',
-      description: 'with a description',
-    };
-
-    const { response } = await request('POST', '/api/spaces/v1/space', { payload });
-
-    const {
-      statusCode,
-      payload: responsePayload,
-    } = response;
-
-    expect(statusCode).toEqual(409);
-    expect(JSON.parse(responsePayload)).toEqual({
-      error: 'Conflict',
-      message: "A space with the identifier a-space already exists. Please choose a different identifier",
-      statusCode: 409
-    });
+    expect(mockSpacesClient.create).toHaveBeenCalledTimes(1);
+    expect(mockSpacesClient.create)
+      .toHaveBeenCalledWith({  id: 'my-space-id', name: 'my new space', description: 'with a description' });
   });
 
   test('PUT /space should update an existing space with the provided ID', async () => {
     const payload = {
-      id: 'a-space',
       name: 'my updated space',
       description: 'with a description',
     };
 
-    const { mockSavedObjectsClient, response } = await request('PUT', '/api/spaces/v1/space/a-space', { payload });
+    const { mockSpacesClient, response } = await request('PUT', '/api/spaces/v1/space/a-space', { payload });
 
     const {
       statusCode,
     } = response;
 
     expect(statusCode).toEqual(200);
-    expect(mockSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.update)
-      .toHaveBeenCalledWith('space', 'a-space', { name: 'my updated space', description: 'with a description' });
-  });
-
-  test('PUT /space should not allow a new space to be created', async () => {
-    const payload = {
-      id: 'a-new-space',
-      name: 'my new space',
-      description: 'with a description',
-    };
-
-    const { response } = await request('PUT', '/api/spaces/v1/space/a-new-space', { payload });
-
-    const {
-      statusCode,
-    } = response;
-
-    expect(statusCode).toEqual(404);
+    expect(mockSpacesClient.update).toHaveBeenCalledTimes(1);
+    expect(mockSpacesClient.update)
+      .toHaveBeenCalledWith('a-space', { name: 'my updated space', description: 'with a description' });
   });
 
   test('POST space/{id}/select should respond with the new space location', async () => {

@@ -6,18 +6,21 @@
 import sinon from 'sinon';
 import { Server } from 'hapi';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
-import { createSpacesService } from './create_spaces_service';
 
 describe('interceptors', () => {
   const sandbox = sinon.sandbox.create();
   const teardowns = [];
+  const headers = {
+    authorization: 'foo',
+  };
+  let server;
   let request;
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
     request = async (path, setupFn = () => { }, testConfig = {}) => {
 
-      const server = new Server();
+      server = new Server();
 
       server.connection({ port: 0 });
 
@@ -34,8 +37,13 @@ describe('interceptors', () => {
         };
       }));
 
-      const spacesService = createSpacesService(server);
-      server.decorate('server', 'spaces', spacesService);
+      server.plugins = {
+        spaces: {
+          spacesClient: {
+            getScopedClient: jest.fn(),
+          }
+        }
+      };
 
       initSpacesRequestInterceptors(server);
 
@@ -57,6 +65,7 @@ describe('interceptors', () => {
       return await server.inject({
         method: 'GET',
         url: path,
+        headers,
       });
     };
   });
@@ -132,16 +141,10 @@ describe('interceptors', () => {
     };
 
     const setupTest = (server, spaces, testHandler) => {
-      // Mock server.getSavedObjectsClient()
-      server.decorate('request', 'getSavedObjectsClient', () => {
-        return {
-          find: jest.fn(() => {
-            return {
-              total: spaces.length,
-              saved_objects: spaces
-            };
-          })
-        };
+      server.plugins.spaces.spacesClient.getScopedClient.mockReturnValue({
+        getAll() {
+          return spaces;
+        }
       });
 
       // Register test inspector
@@ -175,6 +178,11 @@ describe('interceptors', () => {
         }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: headers.authorization
+          })
+        }));
       });
 
       test('it redirects to the defaultRoute within the context of the Default Space when navigating to Kibana root', async () => {
@@ -207,6 +215,11 @@ describe('interceptors', () => {
         }, config);
 
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: headers.authorization
+          })
+        }));
       });
     });
 
@@ -252,6 +265,11 @@ describe('interceptors', () => {
         expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
         expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(expect.objectContaining({
+          headers: expect.objectContaining({
+            authorization: headers.authorization
+          })
+        }));
       });
     });
   });

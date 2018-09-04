@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"kibanaIndex is not defined"`;
+exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [child \\"action3\\" fails because [\\"action3\\" must be a boolean]]]]"`;
 
 exports[`validateEsPrivilegeResponse fails validation when an action is missing in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [child \\"action2\\" fails because [\\"action2\\" is required]]]]"`;
 

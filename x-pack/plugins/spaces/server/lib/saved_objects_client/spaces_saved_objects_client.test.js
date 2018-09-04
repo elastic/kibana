@@ -460,14 +460,6 @@ describe('default space', () => {
                   }
                 }]
               }
-            }, {
-              bool: {
-                must: [{
-                  term: {
-                    type: 'space'
-                  },
-                }],
-              }
             }]
           }
         }]
@@ -1302,14 +1294,6 @@ describe('current space (space_1)', () => {
                   term: {
                     spaceId: 'space_1'
                   }
-                }],
-              }
-            }, {
-              bool: {
-                must: [{
-                  term: {
-                    type: 'space'
-                  },
                 }],
               }
             }]
