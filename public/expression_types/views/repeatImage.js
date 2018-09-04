@@ -1,6 +1,3 @@
-import { elasticOutline } from '../../../common/functions/repeatImage/elastic_outline';
-import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
-
 export const repeatImage = () => ({
   name: 'repeatImage',
   displayName: 'Repeating Image',
@@ -12,22 +9,12 @@ export const repeatImage = () => ({
       displayName: 'Image',
       help: 'An image to repeat',
       argType: 'imageUpload',
-
-      // TODO: This code is repeated in both image.js and this file. Shouldn't this be handled in the imageUpload argType?
-      resolve({ args }) {
-        return { dataurl: resolveFromArgs(args, elasticOutline) };
-      },
     },
     {
       name: 'emptyImage',
       displayName: 'Empty Image',
       help: 'An image to fill up the difference between the value and the max count',
       argType: 'imageUpload',
-
-      // TODO: This code is repeated in both image.js and this file. Shouldn't this be handled in the imageUpload argType?
-      resolve({ args }) {
-        return { dataurl: resolveFromArgs(args, elasticOutline) };
-      },
     },
     {
       name: 'size',

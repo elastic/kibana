@@ -9,6 +9,8 @@ import {
   EuiButton,
   EuiFieldText,
 } from '@elastic/eui';
+import { elasticOutline } from '../../../../common/functions/repeatImage/elastic_outline';
+import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
 import { Loading } from '../../../components/loading';
 import { FileUpload } from '../../../components/file_upload';
 import { isValid as isValidHttpUrl } from '../../../../common/lib/httpurl';
@@ -161,4 +163,7 @@ export const imageUpload = () => ({
   help: 'Select or upload an image',
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),
+  resolve({ args }) {
+    return { dataurl: resolveFromArgs(args, elasticOutline) };
+  },
 });

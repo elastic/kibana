@@ -9,8 +9,6 @@ export const image = () => ({
   args: [
     {
       name: 'dataurl',
-      displayName: 'Image',
-      help: 'The HTTP(S) URL or base64 data of an image.',
       argType: 'imageUpload',
       resolve({ args }) {
         return { dataurl: resolveFromArgs(args, elasticLogo) };
