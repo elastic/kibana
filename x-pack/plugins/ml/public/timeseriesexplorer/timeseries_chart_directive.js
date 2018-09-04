@@ -33,15 +33,12 @@ import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findChartPointForAnomalyTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlTimeseriesChart', function (
-  $compile,
-  $timeout,
-  Private,
-  mlChartTooltipService) {
+module.directive('mlTimeseriesChart', function () {
 
   function link(scope, element) {
 

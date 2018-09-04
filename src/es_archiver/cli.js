@@ -31,7 +31,7 @@ import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { readConfigFile } from '../functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');
@@ -76,8 +76,10 @@ if (missingCommand) {
 
 async function execute(fn) {
   try {
-    const log = createToolingLog(cmd.verbose ? 'debug' : 'info');
-    log.pipe(process.stdout);
+    const log = new ToolingLog({
+      level: cmd.verbose ? 'debug' : 'info',
+      writeTo: process.stdout
+    });
 
     if (cmd.config) {
       // load default values from the specified config file
