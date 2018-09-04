@@ -1,5 +1,5 @@
-import io from 'socket.io-client';
 import chrome from 'ui/chrome';
+import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
 import { loadBrowserPlugins } from './lib/load_browser_plugins';
 
