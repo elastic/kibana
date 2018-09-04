@@ -94,8 +94,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await find.clickByLinkText('Logout');
 
       await retry.try(async () => {
-        const logoutLinkExists = await find.existsByDisplayedByCssSelector('.login-form');
-        if (!logoutLinkExists) {
+        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
+
+        const logoutLinkExists = find.existsByLinkText('Logout');
+        if (logoutLinkExists) {
+          await find.clickByLinkText('Logout');
+        }
+
+        if (!loginFormExists) {
           throw new Error('Logout is not completed yet');
         }
       });
