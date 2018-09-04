@@ -28,6 +28,7 @@ import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
 import { StepLogistics } from './step_logistics';
+import { StepDateHistogram } from './step_date_histogram';
 import {
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
@@ -315,6 +316,16 @@ export class JobCreateUi extends Component {
       case STEP_LOGISTICS:
         return (
           <StepLogistics
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
+            fieldErrors={currentStepFieldErrors}
+            showStepErrors={showStepErrors}
+          />
+        );
+
+      case STEP_DATE_HISTOGRAM:
+        return (
+          <StepDateHistogram
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}

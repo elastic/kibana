@@ -1,0 +1,284 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Component, Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiDescribedFormGroup,
+  EuiCode,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+
+import {
+  dateHistogramDetailsUrl,
+  dateHistogramAggregationUrl,
+} from '../../../services';
+
+export class StepDateHistogramUi extends Component {
+  render() {
+    const {
+      fields,
+      onFieldsChange,
+      showStepErrors,
+      fieldErrors,
+    } = this.props;
+
+    const {
+      dateHistogramInterval,
+      dateHistogramDelay,
+      dateHistogramTimeZone,
+      dateHistogramField,
+    } = fields;
+
+    const {
+      dateHistogramInterval: errorDateHistogramInterval,
+      dateHistogramDelay: errorDateHistogramDelay,
+      dateHistogramTimeZone: errorDateHistogramTimeZone,
+      dateHistogramField: errorDateHistogramField,
+    } = fieldErrors;
+
+    return (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h3>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.title"
+                  defaultMessage="Date histogram"
+                />
+              </h3>
+            </EuiTitle>
+
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.description"
+                  defaultMessage="Define how {link} will operate on your rollup data."
+                  values={{
+                    link: (
+                      <EuiLink href={dateHistogramAggregationUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.rollupJobs.create.stepDateHistogram.descriptio"
+                          defaultMessage="date histogram aggregations"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={dateHistogramDetailsUrl}
+              target="_blank"
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepDateHistogram.readDocsButton.label"
+                defaultMessage="Read the docs"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="l" />
+
+        <EuiForm>
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="s">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.title"
+                    defaultMessage="Data source"
+                  />
+                </h4>
+              </EuiTitle>
+            )}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.description"
+                defaultMessage={`
+                  Which field contains the date histogram data and how large should its time buckets be?
+                  Note that smaller, more granular intervals take up proportionally more space.
+                `}
+              />
+            )}
+            fullWidth
+          >
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDateField.label"
+                  defaultMessage="Date field"
+                />
+              )}
+              error={errorDateHistogramField}
+              isInvalid={Boolean(showStepErrors && errorDateHistogramField)}
+            >
+              <EuiFieldText
+                isInvalid={Boolean(showStepErrors && errorDateHistogramField)}
+                value={dateHistogramField}
+                onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.label"
+                  defaultMessage="Interval"
+                />
+              )}
+              error={errorDateHistogramInterval}
+              isInvalid={Boolean(showStepErrors && errorDateHistogramInterval)}
+              helpText={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
+                      defaultMessage="Example intervals: 30s, 20m, 1h, 2d, 5M."
+                    />
+                  </p>
+                </Fragment>
+              )}
+            >
+              <EuiFieldText
+                value={dateHistogramInterval}
+                onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
+                isInvalid={Boolean(showStepErrors && errorDateHistogramInterval)}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="s">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.title"
+                    defaultMessage="Data storage"
+                  />
+                </h4>
+              </EuiTitle>
+            )}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.description"
+                defaultMessage="How should this date histogram data be rolled up?"
+              />
+            )}
+            fullWidth
+          >
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
+                  defaultMessage="Delay (optional)"
+                />
+              )}
+              error={errorDateHistogramDelay}
+              isInvalid={Boolean(showStepErrors && errorDateHistogramDelay)}
+              helpText={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
+                      defaultMessage="Example delay values: 30s, 20m, 1h, 2d, 5M."
+                    />
+                  </p>
+                </Fragment>
+              )}
+            >
+              <EuiFieldText
+                value={dateHistogramDelay}
+                onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
+                isInvalid={Boolean(showStepErrors && errorDateHistogramDelay)}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
+                  defaultMessage="Time zone (optional)"
+                />
+              )}
+              error={errorDateHistogramTimeZone}
+              isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
+              helpText={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.helpDefault.label"
+                  defaultMessage="Defaults to {timeZone}."
+                  values={{
+                    timeZone: (
+                      <EuiCode>
+                        <FormattedMessage
+                          id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.helpDefault.timeZone.label"
+                          defaultMessage="UTC"
+                        />
+                      </EuiCode>
+                    ),
+                  }}
+                />
+              )}
+            >
+              <EuiFieldText
+                value={dateHistogramTimeZone}
+                onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
+                isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        </EuiForm>
+
+        {this.renderErrors()}
+      </Fragment>
+    );
+  }
+
+  renderErrors = () => {
+    const { showStepErrors } = this.props;
+
+    if (!showStepErrors) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={(
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepDateHistogram.stepError.title"
+              defaultMessage="Fix errors before going to next step"
+            />
+          )}
+          color="danger"
+          iconType="cross"
+        />
+      </Fragment>
+    );
+  }
+}
+
+export const StepDateHistogram = injectI18n(StepDateHistogramUi);

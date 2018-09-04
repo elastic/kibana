@@ -57,7 +57,7 @@ export const stepIdToStepConfigMap = {
     defaultFields: {
       dateHistogramInterval: '1h',
       dateHistogramDelay: null,
-      dateHistogramTimeZone: 'UTC',
+      dateHistogramTimeZone: null,
       dateHistogramField: 'utc_time',
     },
   },

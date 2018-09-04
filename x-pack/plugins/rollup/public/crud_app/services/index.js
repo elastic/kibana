@@ -31,6 +31,8 @@ export {
 
 export {
   logisticalDetailsUrl,
+  dateHistogramDetailsUrl,
+  dateHistogramAggregationUrl,
 } from './documentation_links';
 
 export {

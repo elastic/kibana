@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiDescribedFormGroup,
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
