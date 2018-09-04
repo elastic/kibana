@@ -10,21 +10,21 @@
 import { connect } from 'react-redux';
 import { PolicyTable as PresentationComponent } from './policy_table';
 import { fetchPolicies, policyFilterChanged, policyPageChanged, policyPageSizeChanged, policySortChanged } from '../../../../store/actions';
-import { getPageOfPolicies, getPolicyPager, getPolicyFilter } from '../../../../store/selectors';
+import { getPageOfPolicies, getPolicyPager, getPolicyFilter, getPolicySort } from '../../../../store/selectors';
 
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    filterChanged: (filter) => {
+    policyFilterChanged: (filter) => {
       dispatch(policyFilterChanged({ filter }));
     },
-    pageChanged: (pageNumber) => {
+    policyPageChanged: (pageNumber) => {
       dispatch(policyPageChanged({ pageNumber }));
     },
-    pageSizeChanged: (pageSize) => {
+    policyPageSizeChanged: (pageSize) => {
       dispatch(policyPageSizeChanged({ pageSize }));
     },
-    sortChanged: (sortField, isSortAscending) => {
+    policySortChanged: (sortField, isSortAscending) => {
       dispatch(policySortChanged({ sortField, isSortAscending }));
     },
     fetchPolicies: (withIndices) => {
@@ -38,6 +38,8 @@ export const PolicyTable = connect(
     policies: getPageOfPolicies(state),
     pager: getPolicyPager(state),
     filter: getPolicyFilter(state),
+    sortField: getPolicySort(state).sortField,
+    isSortAscending: getPolicySort(state).isSortAscending,
   }),
   mapDispatchToProps
 )(PresentationComponent);

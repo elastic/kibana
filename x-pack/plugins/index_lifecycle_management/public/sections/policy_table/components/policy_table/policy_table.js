@@ -87,10 +87,9 @@ export class PolicyTableUi extends Component {
     this.props.fetchPolicies(true);
   }
   onSort = column => {
-    const { sortField, isSortAscending, sortChanged } = this.props;
-
+    const { sortField, isSortAscending, policySortChanged } = this.props;
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
-    sortChanged(column, newIsSortAscending);
+    policySortChanged(column, newIsSortAscending);
   };
 
   toggleAll = () => {
@@ -170,6 +169,15 @@ export class PolicyTableUi extends Component {
           {value}
         </EuiLink>
       );
+    } else if (fieldName === 'coveredIndices') {
+      if (!value) {
+        return null;
+      }
+      return (
+        <EuiText>
+          <b>{value.length}</b> ({value.join(', ')})
+        </EuiText>
+      );
     }
     return value;
   }
@@ -219,15 +227,15 @@ export class PolicyTableUi extends Component {
   }
 
   renderPager() {
-    const { pager, pageChanged, pageSizeChanged } = this.props;
+    const { pager, policyPageChanged, policyPageSizeChanged } = this.props;
     return (
       <EuiTablePagination
         activePage={pager.getCurrentPageIndex()}
         itemsPerPage={pager.itemsPerPage}
         itemsPerPageOptions={[10, 50, 100]}
         pageCount={pager.getTotalPages()}
-        onChangeItemsPerPage={pageSizeChanged}
-        onChangePage={pageChanged}
+        onChangeItemsPerPage={policyPageSizeChanged}
+        onChangePage={policyPageChanged}
       />
     );
   }
@@ -238,7 +246,7 @@ export class PolicyTableUi extends Component {
 
   render() {
     const {
-      filterChanged,
+      policyFilterChanged,
       filter,
       policies,
       intl,
@@ -290,7 +298,7 @@ export class PolicyTableUi extends Component {
                   fullWidth
                   value={filter}
                   onChange={event => {
-                    filterChanged(event.target.value);
+                    policyFilterChanged(event.target.value);
                   }}
                   data-test-subj="policyTableFilterInput"
                   placeholder={

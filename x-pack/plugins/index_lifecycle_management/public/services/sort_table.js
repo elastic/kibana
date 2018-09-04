@@ -7,37 +7,11 @@
 import { sortBy } from 'lodash';
 
 const stringSort = (fieldName) => (item) => item[fieldName];
-const numericSort = (fieldName) => (item) => +item[fieldName];
-const unitMagnitude = {
-  kb: 1,
-  mb: 2,
-  gb: 3,
-  tb: 4,
-  pb: 5
-};
-const byteSort = (fieldName) => (item) => {
-  const rawValue = item[fieldName];
-  // raw value can be missing if index is closed
-  if (!rawValue) {
-    return 0;
-  }
-  const matchResult = rawValue.match(/(.*)([kmgtp]b)/);
-  if (!matchResult) {
-    return 0;
-  }
-  const [ , number, unit] = matchResult;
-  return +number * Math.pow(1024, unitMagnitude[unit]);
-};
+const arraySort = (fieldName) => (item) => (item[fieldName] || []).length;
 
 const sorters = {
   name: stringSort('name'),
-  status: stringSort('status'),
-  health: stringSort('health'),
-  primary: numericSort('primary'),
-  replica: numericSort('replica'),
-  documents: numericSort('documents'),
-  size: byteSort('size'),
-  primary_size: byteSort('primary_size'),
+  coveredIndices: arraySort('coveredIndices'),
 };
 export const sortTable = (array = [], sortField, isSortAscending) => {
   const sorted = sortBy(array, sorters[sortField]);
