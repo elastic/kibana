@@ -55,7 +55,7 @@ export class OptInBanner extends Component {
     if (this.state.showDetails) {
       details = (
         <EuiText>
-          <p>
+          <p tabIndex="0">
             No information about the data you process or store will be sent. This feature
             will periodically send basic feature usage statistics. See an {(
               <EuiLink onClick={() => this.setState({ showExample: !this.state.showExample })}>
@@ -93,8 +93,12 @@ export class OptInBanner extends Component {
       );
     }
 
+    const titleNode = (
+      <span tabIndex="0">{title}</span>
+    );
+
     return (
-      <EuiCallOut iconType="questionInCircle" title={title}>
+      <EuiCallOut iconType="questionInCircle" title={titleNode}>
         { details }
         { flyoutDetails }
         <EuiSpacer size="s" />
