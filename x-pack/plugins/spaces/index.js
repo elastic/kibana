@@ -42,7 +42,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     hacks: [],
     mappings,
     savedObjectsSchema: {
-      namespaceAgnosticTypes: ['space']
+      space: {
+        isNamespaceAgnostic: true,
+      },
     },
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {

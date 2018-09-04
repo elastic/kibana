@@ -23,6 +23,10 @@ export class SavedObjectsSchema {
   }
 
   isNamespaceAgnostic(type) {
-    return this._schema.namespaceAgnosticTypes.includes(type);
+    const typeSchema = this._schema[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return Boolean(typeSchema.isNamespaceAgnostic);
   }
 }

@@ -19,51 +19,31 @@
 
 import { SavedObjectsSchema } from './schema';
 
-describe('#addNamespaceAgnosticType', () => {
-  it(`can add a string type`, () => {
-    const schema = new SavedObjectsSchema();
-    schema.addNamespaceAgnosticType('foo');
-  });
-
-  it(`can't add a bool type`, () => {
-    const schema = new SavedObjectsSchema();
-    expect(() => schema.addNamespaceAgnosticType(true)).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`can't add null type`, () => {
-    const schema = new SavedObjectsSchema();
-    expect(() => schema.addNamespaceAgnosticType(null)).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`can't add number type`, () => {
-    const schema = new SavedObjectsSchema();
-    expect(() => schema.addNamespaceAgnosticType(1)).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`can't add function type`, () => {
-    const schema = new SavedObjectsSchema();
-    expect(() => schema.addNamespaceAgnosticType(() => {})).toThrowErrorMatchingSnapshot();
-  });
-
-  it(`can't add Symbol type`, () => {
-    const schema = new SavedObjectsSchema();
-    expect(() => schema.addNamespaceAgnosticType(Symbol())).toThrowErrorMatchingSnapshot();
-  });
-});
-
 describe('#isNamespaceAgnostic', () => {
   it(`returns false for unknown types`, () => {
-    const schema = new SavedObjectsSchema();
-    schema.addNamespaceAgnosticType('foo');
+    const schema = new SavedObjectsSchema({});
     const result = schema.isNamespaceAgnostic('bar');
     expect(result).toBe(false);
   });
 
-  it(`returns true for namespace agnostic registered types`, () => {
-    const schema = new SavedObjectsSchema();
-    schema.addNamespaceAgnosticType('foo');
+  it(`returns true for explicitly namespace agnostic type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: true,
+      }
+    });
     const result = schema.isNamespaceAgnostic('foo');
     expect(result).toBe(true);
+  });
+
+  it(`returns false for explicitly namespaced type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: false,
+      }
+    });
+    const result = schema.isNamespaceAgnostic('foo');
+    expect(result).toBe(false);
   });
 });
 
