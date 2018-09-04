@@ -56,15 +56,6 @@ const rewriteBasePath = (settings, log) => {
   }
 };
 
-const loggingTimezone = (settings, log) => {
-  if (_.has(settings, 'logging.useUTC')) {
-    const timezone = settings.logging.useUTC ? 'UTC' : false;
-    set('logging.timezone', timezone);
-    unset(settings, 'logging.UTC');
-    log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
-  }
-};
-
 const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
@@ -78,7 +69,6 @@ const deprecations = [
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
-  loggingTimezone,
 ];
 
 export const transformDeprecations = createTransform(deprecations);

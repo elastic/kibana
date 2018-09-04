@@ -62,3 +62,9 @@ considered unique based on its persistent UUID, which is written to the path.dat
 *Details:* Any timezone can now be specified by canonical id.
 
 *Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
+
+[float]
+=== Default logging timezone is now the system's timezone
+*Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
+
+*Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
