@@ -12,7 +12,7 @@ exports[`SpacesDescription renders without crashing 1`] = `
     grow={true}
   >
     <p>
-      Organize your dashboards and other saved objects into topic-specific spaces.
+      Organize your dashboards and other saved objects into meaningful categories.
     </p>
   </EuiText>
   <div
