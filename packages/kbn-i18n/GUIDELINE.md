@@ -83,7 +83,7 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
 
-- Message id should start with namespace (`kbn`, `common.ui` and etc.) that identifies a plugin. 
+- Message id should start with namespace that identifies a functional area of the app (`common.ui` or `common.server`) or a plugin (`kbn`, `vega`, etc.).
 
     For example:
 
@@ -283,11 +283,11 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
 ### Unit tests
 
-Testing React component that use the injectI18n higher-order component is more complicated because `injectI18n()` creates a wrapper component around the component defined in the app.
+Testing React component that uses the `injectI18n` higher-order component is more complicated because `injectI18n()` creates a wrapper component around the original component.
 
-Shallow rendering only tests one level deep and we want to test the rendering of the component defined for the app, so we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
+With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
 
-When testing such component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the intl mock defined in test_utils/mocks/intl.
+When testing such component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
 
 Use the `mountWithIntl` helper function to mount render the component.
 
