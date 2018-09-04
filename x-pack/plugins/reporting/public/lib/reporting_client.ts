@@ -6,6 +6,7 @@
 
 import { kfetch } from 'ui/kfetch';
 
+// @ts-ignore
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
