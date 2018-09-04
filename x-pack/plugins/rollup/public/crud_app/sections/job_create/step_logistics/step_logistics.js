@@ -217,7 +217,7 @@ export class StepLogisticsUi extends Component {
               <EuiFormRow
                 label={(
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistical.stepCron.label"
+                    id="xpack.rollupJobs.create.stepLogistical.fieldCron.label"
                     defaultMessage="Cron pattern"
                   />
                 )}
@@ -234,7 +234,7 @@ export class StepLogisticsUi extends Component {
               <EuiFormRow
                 label={(
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistical.stepPageSize.label"
+                    id="xpack.rollupJobs.create.stepLogistical.fieldPageSize.label"
                     defaultMessage="Page size"
                   />
                 )}
