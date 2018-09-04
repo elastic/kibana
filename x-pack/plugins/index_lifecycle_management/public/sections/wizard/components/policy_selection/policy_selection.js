@@ -68,7 +68,7 @@ export class PolicySelection extends Component {
         fullWidth
       >
         <EuiFormRow hasEmptyLabelSpace>
-          <EuiFlexGroup  direction="column" alignItems="center" fullWidth>
+          <EuiFlexGroup  direction="column" alignItems="center">
             {existingPoliciesSelect}
             <EuiFlexItem>
               <h1>- OR -</h1>
