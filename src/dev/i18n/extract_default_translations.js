@@ -29,7 +29,7 @@ import {
 } from './extractors';
 import { globAsync, readFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
-import { createFailError } from '../run';
+import { createFailError, isFailError } from '../run';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
@@ -131,9 +131,13 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
-          );
+          if (isFailError(error)) {
+            throw createFailError(
+              `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
+            );
+          }
+
+          throw error;
         }
       }
     })

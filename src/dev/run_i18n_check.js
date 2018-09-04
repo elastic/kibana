@@ -25,9 +25,10 @@ import { run, createFailError } from './run';
 import {
   filterPaths,
   extractMessagesFromPathToMap,
-} from './i18n/extract_default_translations';
-import { writeFileAsync } from './i18n/utils';
-import { serializeToJson, serializeToJson5 } from './i18n/serializers';
+  writeFileAsync,
+  serializeToJson,
+  serializeToJson5,
+} from './i18n/';
 
 run(async ({ flags: { path, output, 'output-format': outputFormat } }) => {
   const paths = Array.isArray(path) ? path : [path || './'];
