@@ -85,6 +85,7 @@ export function showShareContextMenu({
         shareContextMenuExtensions={shareContextMenuExtensions}
         sharingData={sharingData}
         isDirty={isDirty}
+        onClose={onClose}
       />
     </EuiWrappingPopover>
   );

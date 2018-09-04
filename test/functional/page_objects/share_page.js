@@ -19,21 +19,12 @@
 
 export function SharePageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['visualize']);
+  const PageObjects = getPageObjects(['visualize', 'common']);
+  const log = getService('log');
 
   class SharePage {
     async isShareMenuOpen() {
       return await testSubjects.exists('shareContextMenu');
-    }
-
-    async ensureAtTopMenuLevel() {
-      while(true) {
-        const panelTitleButtonExists = await testSubjects.exists('contextMenuPanelTitleButton');
-        if (!panelTitleButtonExists) {
-          break;
-        }
-        await testSubjects.click('contextMenuPanelTitleButton');
-      }
     }
 
     async clickShareTopNavButton() {
@@ -41,11 +32,18 @@ export function SharePageProvider({ getService, getPageObjects }) {
     }
 
     async openShareMenuItem(itemTitle) {
+      log.debug(`openShareMenuItem title:${itemTitle}`);
       const isShareMenuOpen = await this.isShareMenuOpen();
       if (!isShareMenuOpen) {
         await this.clickShareTopNavButton();
+      } else {
+        // there is no easy way to ensure the menu is at the top level
+        // so just close the existing menu
+        await this.clickShareTopNavButton();
+        // and then re-open the menu
+        await this.clickShareTopNavButton();
       }
-      await this.ensureAtTopMenuLevel();
+
       return testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
     }
 

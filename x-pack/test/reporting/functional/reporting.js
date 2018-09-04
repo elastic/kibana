@@ -204,13 +204,13 @@ export default function ({ getService, getPageObjects }) {
 
         it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
       });
@@ -242,7 +242,6 @@ export default function ({ getService, getPageObjects }) {
           this.timeout(180000);
 
           await PageObjects.reporting.openPdfReportingPanel();
-          await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
 

@@ -24,6 +24,7 @@ interface Props {
   getJobParams: () => any;
   options?: any;
   isDirty: boolean;
+  onClose: () => void;
 }
 
 interface State {
@@ -163,6 +164,7 @@ export class ReportingPanelContent extends Component<Props, State> {
           text: 'Track its progress in Management',
           'data-test-subj': 'queueReportSuccess',
         });
+        this.props.onClose();
       })
       .catch((kfetchError: KFetchError) => {
         if (kfetchError.message === 'not exportable') {

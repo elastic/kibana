@@ -31,10 +31,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await remote.setWindowSize(1600, 850);
     }
 
-    async clickTopNavReportingLink() {
-      await retry.try(() => testSubjects.click('topNavReportingLink'));
-    }
-
     async getUrlOfTab(tabIndex) {
       return await retry.try(async () => {
         log.debug(`reportingPage.getUrlOfTab(${tabIndex}`);
@@ -116,7 +112,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async openPdfReportingPanel() {
-      log.debug('openCsvReportingPanel');
+      log.debug('openPdfReportingPanel');
       await PageObjects.share.openShareMenuItem('PDF Reports');
     }
 

@@ -33,6 +33,7 @@ interface Props {
   shareContextMenuExtensions?: any[];
   sharingData: any;
   isDirty: boolean;
+  onClose: () => void;
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -91,10 +92,24 @@ export class ShareContextMenu extends Component<Props> {
     }
 
     if (this.props.shareContextMenuExtensions) {
-      const { objectType, objectId, getUnhashableStates, sharingData, isDirty } = this.props;
+      const {
+        objectType,
+        objectId,
+        getUnhashableStates,
+        sharingData,
+        isDirty,
+        onClose,
+      } = this.props;
       this.props.shareContextMenuExtensions.forEach((provider: any) => {
         provider
-          .getMenuItems({ objectType, objectId, getUnhashableStates, sharingData, isDirty })
+          .getMenuItems({
+            objectType,
+            objectId,
+            getUnhashableStates,
+            sharingData,
+            isDirty,
+            onClose,
+          })
           .forEach(
             ({
               shareMenuItem,
