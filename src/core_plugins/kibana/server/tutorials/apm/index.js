@@ -69,7 +69,6 @@ export function apmSpecProvider(server) {
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: apmIntro,
     longDescription: i18n.translate('kbn.server.tutorials.apm.specProvider.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
@@ -83,7 +82,6 @@ It allows you to monitor the performance of thousands of applications in real ti
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPattern),
     savedObjectsInstallMsg: i18n.translate('kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'Load index pattern, visualizations, and pre-defined dashboards. \
 An index pattern is required for some features in the APM UI.',
     }),
