@@ -25,10 +25,10 @@ const module = uiModules.get('spaces_nav', ['kibana']);
 
 let spacesManager;
 
-module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, rootBasePath) => {
+module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, spaceSelectorURL) => {
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
-  spacesManager = new SpacesManager($http, chrome, rootBasePath);
+  spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
   render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
 

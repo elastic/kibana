@@ -46,7 +46,7 @@ export const spaces = (kibana) => new kibana.Plugin({
       return {
         spaces: [],
         activeSpace: null,
-        rootBasePath: server.config().get('server.basePath'),
+        spaceSelectorURL: server.config().get('server.basePath') || '/',
       };
     },
     replaceInjectedVars: async function (vars, request, server) {

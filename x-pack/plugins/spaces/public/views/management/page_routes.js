@@ -20,11 +20,11 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
-  controller: function ($scope, $http, chrome, spacesNavState, rootBasePath) {
+  controller: function ($scope, $http, chrome, spacesNavState, spaceSelectorURL) {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager($http, chrome, rootBasePath);
+      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(<SpacesGridPage
         spacesManager={spacesManager}
@@ -41,11 +41,11 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
-  controller: function ($scope, $http, chrome, spacesNavState, rootBasePath) {
+  controller: function ($scope, $http, chrome, spacesNavState, spaceSelectorURL) {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager($http, chrome, rootBasePath);
+      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(<ManageSpacePage
         spacesManager={spacesManager}
@@ -66,14 +66,14 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:space', {
   template,
-  controller: function ($scope, $http, $route, chrome, spacesNavState, rootBasePath) {
+  controller: function ($scope, $http, $route, chrome, spacesNavState, spaceSelectorURL) {
     $scope.$$postDigest(() => {
 
       const domNode = document.getElementById(reactRootNodeId);
 
       const { space } = $route.current.params;
 
-      const spacesManager = new SpacesManager($http, chrome, rootBasePath);
+      const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(<ManageSpacePage
         httpAgent={$http}

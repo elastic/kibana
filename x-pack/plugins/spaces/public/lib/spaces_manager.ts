@@ -12,13 +12,13 @@ import { Space } from '../../common/model/space';
 export class SpacesManager extends EventEmitter {
   private httpAgent: any;
   private baseUrl: any;
-  private rootBasePath: string;
+  private spaceSelectorURL: string;
 
-  constructor(httpAgent: any, chrome: any, rootBasePath: string) {
+  constructor(httpAgent: any, chrome: any, spaceSelectorURL: string) {
     super();
     this.httpAgent = httpAgent;
     this.baseUrl = chrome.addBasePath(`/api/spaces/v1`);
-    this.rootBasePath = rootBasePath;
+    this.spaceSelectorURL = spaceSelectorURL;
   }
 
   public async getSpaces(): Promise<Space[]> {
@@ -57,7 +57,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public redirectToSpaceSelector() {
-    window.location.href = this.rootBasePath;
+    window.location.href = this.spaceSelectorURL;
   }
 
   public async requestRefresh() {
