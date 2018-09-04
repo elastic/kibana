@@ -3,8 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Size } from '../../../../../types';
 
-export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
+export interface CaptureConfig {
+  zoom: number;
+  viewport: Size;
+}
+
+export interface ViewZoomWidthHeight {
+  zoom: number;
+  width: number;
+  height: number;
+}

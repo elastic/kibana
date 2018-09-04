@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export function containsInvalidCharacters(pattern, illegalCharacters) {
-  return !illegalCharacters.some(char => pattern.includes(char));
+export function containsIllegalCharacters(pattern, illegalCharacters) {
+  return illegalCharacters.some(char => pattern.includes(char));
 }
