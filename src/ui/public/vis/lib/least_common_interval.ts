@@ -31,11 +31,9 @@ import { parseEsInterval } from '../../utils/parse_es_interval';
  *  - `w, M, q, y` units are calendar intervals and do not support multiple, aka
  *    value must === 1
  *
- * @param {string} a
- * @param {string} b
  * @returns {string}
  */
-export function leastCommonInterval(a = '', b = '') {
+export function leastCommonInterval(a: string, b: string): string {
   const { unitsMap, unitsDesc } = dateMath;
   const aInt = parseEsInterval(a);
   const bInt = parseEsInterval(b);
@@ -72,6 +70,12 @@ export function leastCommonInterval(a = '', b = '') {
 
   // Otherwise find the biggest unit that divides evenly
   const lcmUnit = unitsDesc.find(unit => unitsMap[unit].base && lcmMs % unitsMap[unit].base === 0);
+
+  // Throw error in case we couldn't divide evenly, theoretically we never get here as everything is
+  // divisible by 1 millisecond
+  if (!lcmUnit) {
+    throw Error(`Unable to find common interval for: ${a}, ${b}`);
+  }
 
   // Return the interval string
   return `${lcmMs / unitsMap[lcmUnit].base}${lcmUnit}`;

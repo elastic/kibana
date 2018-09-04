@@ -64,9 +64,6 @@ describe('leastCommonInterval', () => {
 
   it('should throw an error for invalid intervals', () => {
     expect(() => {
-      leastCommonInterval();
-    }).toThrowError();
-    expect(() => {
       leastCommonInterval('foo', 'bar');
     }).toThrowError();
     expect(() => {

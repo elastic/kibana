@@ -47,8 +47,8 @@ uiModules
         // multiple of the base interval.
         function parseWithBase(value) {
           try {
-            const lci = leastCommonInterval(baseInterval, value);
-            return lci === value.replace(/\s/g, '');
+            const interval = leastCommonInterval(baseInterval, value);
+            return interval === value.replace(/\s/g, '');
           } catch(e) {
             return false;
           }

@@ -18,18 +18,33 @@
  */
 import dateMath from '@kbn/datemath';
 
-const ES_INTERVAL_STRING_RE = new RegExp('^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$');
+const ES_INTERVAL_STRING_REGEX = new RegExp(
+  '^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$'
+);
 
 /**
- * Strict version of parseInterval(), enforces ES interval format, and disallows fractional values
+ * Extracts interval properties from an ES interval string. Disallows unrecognized interval formats
+ * and fractional values. Converts some intervals from "calendar" to "fixed" when the number of
+ * units is larger than 1, and throws an error for others.
  *
- * @param interval
- * @returns {{amount: (RegExpMatchArray | null) | number, unit: (RegExpMatchArray | null) | string, type: string}}
+ * Conversion rules:
+ *
+ * | Interval | Single unit type | Multiple units type |
+ * | -------- | ---------------- | ------------------- |
+ * | ms       | fixed            | fixed               |
+ * | s        | fixed            | fixed               |
+ * | m        | fixed            | fixed               |
+ * | h        | calendar         | fixed               |
+ * | d        | calendar         | fixed               |
+ * | w        | calendar         | N/A - disallowed    |
+ * | M        | calendar         | N/A - disallowed    |
+ * | y        | calendar         | N/A - disallowed    |
+ *
  */
-export function parseEsInterval(interval = '') {
+export function parseEsInterval(interval: string): { value: number; unit: string; type: string } {
   const matches = String(interval)
     .trim()
-    .match(ES_INTERVAL_STRING_RE);
+    .match(ES_INTERVAL_STRING_REGEX);
 
   if (!matches) {
     throw Error(`Invalid interval format: ${interval}`);

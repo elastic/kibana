@@ -102,7 +102,7 @@ class EditorConfigProviderRegistry {
     }
 
     if (this.isBaseParam(current) && this.isBaseParam(merged)) {
-      // In case both had where interval values, just use the least common multiple between both interval
+      // In case where both had interval values, just use the least common multiple between both interval
       return {
         base: leastCommonMultiple(current.base, merged.base),
       };
@@ -134,7 +134,7 @@ class EditorConfigProviderRegistry {
     }
 
     if (this.isTimeBaseParam(current) && this.isTimeBaseParam(merged)) {
-      // In case both had where interval values, just use the least common multiple between both interval
+      // In case both had where interval values, just use the least common multiple between both intervals
       try {
         const timeBase = leastCommonInterval(current.timeBase, merged.timeBase);
         return {
