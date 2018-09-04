@@ -17,19 +17,23 @@
  * under the License.
  */
 
-export { QueryBarProvider } from './query_bar';
-export { FilterBarProvider } from './filter_bar';
-export { FindProvider } from './find';
-export { TestSubjectsProvider } from './test_subjects';
-export { RemoteProvider } from './remote';
-export { DocTableProvider } from './doc_table';
-export { ScreenshotsProvider } from './screenshots';
-export { FailureDebuggingProvider } from './failure_debugging';
-export { VisualizeListingTableProvider } from './visualize_listing_table';
-export { FlyoutProvider } from './flyout';
-export { EmbeddingProvider } from './embedding';
-export { ComboBoxProvider } from './combo_box';
-export { RenderableProvider } from './renderable';
-export { TableProvider } from './table';
+export function TableProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
+  // const retry = getService('retry');
 
-export * from './dashboard';
+  class Table {
+
+    async getDataFromTestSubj(testSubj) {
+      const table = await testSubjects.find(testSubj);
+      // Convert the data into a nested array format:
+      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+      const rows = await table.findAllByTagName('tr');
+      return await Promise.all(rows.map(async row => {
+        const cells = await row.findAllByTagName('td');
+        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+      }));
+    }
+  }
+
+  return new Table();
+}
