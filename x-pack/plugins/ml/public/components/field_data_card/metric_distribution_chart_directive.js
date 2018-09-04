@@ -14,13 +14,14 @@
 import _ from 'lodash';
 import d3 from 'd3';
 
-import { numTicks } from 'plugins/ml/util/chart_utils';
+import { numTicks } from '../../util/chart_utils';
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
+import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMetricDistributionChart', function (mlChartTooltipService) {
+module.directive('mlMetricDistributionChart', function () {
 
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;

@@ -19,11 +19,11 @@ export const units = {
   quadruple: unit * 4
 };
 
-export function px(value) {
+export function px(value: number): string {
   return `${value}px`;
 }
 
-export function pct(value) {
+export function pct(value: number): string {
   return `${value}%`;
 }
 
@@ -82,7 +82,7 @@ export const fontSizes = {
   xxlarge: '30px'
 };
 
-export function truncate(width) {
+export function truncate(width: string) {
   return `
       max-width: ${width};
       white-space: nowrap;
