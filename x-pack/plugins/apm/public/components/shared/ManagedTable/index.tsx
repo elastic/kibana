@@ -10,7 +10,7 @@ import get from 'lodash.get';
 import orderBy from 'lodash.orderby';
 import React, { Component } from 'react';
 
-// this should really be imported from EUI
+// TODO: this should really be imported from EUI
 interface TableColumn {
   field: string;
   name: string;
@@ -48,7 +48,7 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
     this.setState({ page, sort });
   };
 
-  public prepareItems() {
+  public getCurrentItems() {
     const { items } = this.props;
     const { sort = {}, page = {} } = this.state;
     const sorted = orderBy(items, sort.field, sort.direction);
@@ -61,7 +61,7 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
     return (
       <EuiBasicTable
         noItemsMessage={noItemsMessage}
-        items={this.prepareItems()}
+        items={this.getCurrentItems()}
         columns={columns}
         pagination={{
           hidePerPageOptions: true,

@@ -23,6 +23,7 @@ export function Home() {
       <KueryBar />
       <EuiSpacer />
       <EuiTabbedContent
+        size="l"
         tabs={[
           {
             id: 'services_overview',
