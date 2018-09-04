@@ -21,3 +21,12 @@ node scripts/functional_tests_server.js --config test/plugin_functional/config.j
 # Start a test run
 node scripts/functional_test_runner.js --config test/plugin_functional/config.js
 ```
+
+## Run Kibana with a test plugin
+
+In case you want to start Kibana with one of the test plugins (e.g. for developing the
+test plugin), you can just run:
+
+```
+yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
+```
