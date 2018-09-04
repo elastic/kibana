@@ -176,13 +176,15 @@ describe('#getLoadingCount$()', () => {
     const promise = uiSettingsApi
       .getLoadingCount$()
       .pipe(
-        toArray(),
-        takeUntil(done$)
+        takeUntil(done$),
+        toArray()
       )
       .toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
-    expect(promise).resolves.toEqual([0, 1, 0]);
+    done$.next();
+
+    await expect(promise).resolves.toEqual([0, 1, 0]);
   });
 
   it('decrements loading count when requests fail', async () => {
@@ -199,14 +201,16 @@ describe('#getLoadingCount$()', () => {
     const promise = uiSettingsApi
       .getLoadingCount$()
       .pipe(
-        toArray(),
-        takeUntil(done$)
+        takeUntil(done$),
+        toArray()
       )
       .toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
     await expect(uiSettingsApi.batchSet('foo', 'bar')).rejects.toThrowError();
-    expect(promise).resolves.toEqual([0, 1, 0, 1, 0]);
+
+    done$.next();
+    await expect(promise).resolves.toEqual([0, 1, 0, 1, 0]);
   });
 });
 
