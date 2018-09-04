@@ -67,9 +67,9 @@ export function createEsTestCluster(options = {}) {
       if (esInstallDir) {
         installPath = esInstallDir;
       } else if (esFrom === 'source') {
-        installPath = await cluster.installSource(config);
+        installPath = (await cluster.installSource(config)).installPath;
       } else {
-        installPath = await cluster.installSnapshot(config);
+        installPath = (await cluster.installSnapshot(config)).installPath;
       }
 
       await cluster.start(installPath, {
