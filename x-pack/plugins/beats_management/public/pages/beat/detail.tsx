@@ -16,9 +16,8 @@ import {
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../../components/connected_link';
-import { ClientSideBeatTag } from '../../lib/lib';
 
 interface BeatDetailPageProps {
   beat: CMPopulatedBeat | undefined;
@@ -30,11 +29,11 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
     return <div>Beat not found</div>;
   }
   const configurationBlocks = flatten(
-    beat.full_tags.map((tag: ClientSideBeatTag) => {
-      return tag.configurations.map(configuration => ({
+    beat.full_tags.map((tag: BeatTag) => {
+      return tag.configuration_blocks.map(configuration => ({
         ...configuration,
         // @ts-ignore one of the types on ClientSideConfigurationBlock doesn't define a "module" property
-        module: configuration.block_obj.module || null,
+        module: configuration.configs[0].module || null,
         tagId: tag.id,
         tagColor: tag.color,
         ...beat,
