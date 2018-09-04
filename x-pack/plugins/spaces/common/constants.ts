@@ -15,3 +15,9 @@ export const SPACE_SEARCH_COUNT_THRESHOLD = 8;
  * The maximum number of characters allowed in the Space Avatar's initials
  */
 export const MAX_SPACE_INITIALS = 2;
+
+/**
+ * The type name used within the Monitoring index to publish spaces stats.
+ * @type {string}
+ */
+export const KIBANA_SPACES_STATS_TYPE = 'spaces';
