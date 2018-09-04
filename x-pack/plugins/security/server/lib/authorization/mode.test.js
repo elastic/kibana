@@ -45,13 +45,14 @@ describe(`#initialize`, () => {
 });
 
 describe(`#useRbacForRequest`, () => {
-  test(`throw error if not initialized for request`, async () => {
+  test(`return false if not initialized for request`, async () => {
     const mockConfig = createMockConfig();
     const mockXpackInfoFeature = createMockXpackInfoFeature();
     const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
     const request = {};
 
-    expect(() => mode.useRbacForRequest(request)).toThrowErrorMatchingSnapshot();
+    const result = mode.useRbacForRequest(request);
+    expect(result).toBe(false);
   });
 
   test(`returns true if legacy fallback is disabled`, async () => {

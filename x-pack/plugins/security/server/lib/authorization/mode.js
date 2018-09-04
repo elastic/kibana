@@ -69,8 +69,10 @@ export function authorizationModeFactory(
     },
 
     useRbacForRequest(request) {
+      // the following can happen when the user isn't authenticated. Either true or false would work here,
+      // but we're going to go with false as this is closer to the "legacy" behavior
       if (!useRbacForRequestWeakMap.has(request)) {
-        throw new Error(`Authorization mode is not initialized`);
+        return false;
       }
 
       return useRbacForRequestWeakMap.get(request);
