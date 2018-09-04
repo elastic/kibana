@@ -334,7 +334,7 @@ export class Flyout extends Component {
 
           return (
             <EuiSelect
-              data-test-subj={`managementChangeIndexSelection`}
+              data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={e => this.onIndexChanged(id, e)}
               options={options}
             />
