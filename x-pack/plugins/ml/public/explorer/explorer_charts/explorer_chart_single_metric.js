@@ -38,7 +38,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
-export class ExplorerChart extends React.Component {
+export class ExplorerChartSingleMetric extends React.Component {
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,

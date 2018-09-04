@@ -17,7 +17,8 @@ import {
   getExploreSeriesLink,
   isLabelLengthAboveThreshold
 } from '../../util/chart_utils';
-import { ExplorerChart } from './explorer_chart';
+import { ExplorerChartRare } from './explorer_chart_rare';
+import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 const textTooManyBuckets = `This selection contains too many buckets to be displayed.
@@ -42,6 +43,7 @@ export function ExplorerChartsContainer({
             jobId,
             detectorLabel,
             entityFields,
+            functionDescription
           } = series;
           const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
           const id = `${jobId}_${detectorLabel}_${entities}`;
@@ -80,11 +82,27 @@ export function ExplorerChartsContainer({
                 infoTooltip={series.infoTooltip}
                 wrapLabel={wrapLabel}
               />
-              <ExplorerChart
-                tooManyBuckets={tooManyBuckets}
-                seriesConfig={series}
-                mlSelectSeverityService={mlSelectSeverityService}
-              />
+              {(() => {
+                console.warn('detectorLabel', detectorLabel);
+                switch (functionDescription) {
+                  case 'rare':
+                    return (
+                      <ExplorerChartRare
+                        tooManyBuckets={tooManyBuckets}
+                        seriesConfig={series}
+                        mlSelectSeverityService={mlSelectSeverityService}
+                      />
+                    );
+                  default:
+                    return (
+                      <ExplorerChartSingleMetric
+                        tooManyBuckets={tooManyBuckets}
+                        seriesConfig={series}
+                        mlSelectSeverityService={mlSelectSeverityService}
+                      />
+                    );
+                }
+              })()}
             </div>
           );
         })
