@@ -1,5 +1,5 @@
-import $script from 'scriptjs';
 import chrome from 'ui/chrome';
+import $script from 'scriptjs';
 import { typesRegistry } from '../../common/lib/types_registry';
 import {
   argTypeRegistry,

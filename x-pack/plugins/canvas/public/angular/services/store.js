@@ -1,5 +1,5 @@
-import uniqBy from 'lodash.uniqby';
 import { uiModules } from 'ui/modules';
+import uniqBy from 'lodash.uniqby';
 import { createStore } from '../../state/store';
 import { getInitialState } from '../../state/initial_state';
 import { functionsRegistry } from '../../../common/lib/functions_registry';
