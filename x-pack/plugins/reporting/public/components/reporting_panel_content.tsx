@@ -28,7 +28,7 @@ interface Props {
 
 interface State {
   isStale: boolean;
-  url?: string;
+  absoluteUrl?: string;
 }
 
 export class ReportingPanelContent extends Component<Props, State> {
@@ -44,14 +44,17 @@ export class ReportingPanelContent extends Component<Props, State> {
 
   public componentWillUnmount() {
     window.removeEventListener('hashchange', this.markAsStale);
+    window.removeEventListener('resize', this.setAbsoluteReportGenerationUrl);
 
     this.mounted = false;
   }
 
   public componentDidMount() {
     this.mounted = true;
+    this.setAbsoluteReportGenerationUrl();
 
     window.addEventListener('hashchange', this.markAsStale, false);
+    window.addEventListener('resize', this.setAbsoluteReportGenerationUrl);
   }
 
   public render() {
@@ -94,10 +97,7 @@ export class ReportingPanelContent extends Component<Props, State> {
           </EuiText>
         </EuiFormRow>
 
-        <EuiCopy
-          textToCopy={this.getAbsoluteReportGenerationUrl()}
-          anchorClassName="sharePanel__copyAnchor"
-        >
+        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="sharePanel__copyAnchor">
           {(copy: () => void) => (
             <EuiFormRow>
               <EuiButton onClick={copy}>Copy POST URL</EuiButton>
@@ -131,12 +131,17 @@ export class ReportingPanelContent extends Component<Props, State> {
     return this.props.objectId === undefined || this.props.objectId === '';
   };
 
-  private getAbsoluteReportGenerationUrl = () => {
+  private setAbsoluteReportGenerationUrl = () => {
+    if (!this.mounted) {
+      return;
+    }
+
     const relativePath = reportingClient.getReportingJobPath(
       this.props.reportType,
       this.props.getJobParams()
     );
-    return url.resolve(window.location.href, relativePath);
+    const absoluteUrl = url.resolve(window.location.href, relativePath);
+    this.setState({ absoluteUrl });
   };
 
   private createReportingJob = () => {
