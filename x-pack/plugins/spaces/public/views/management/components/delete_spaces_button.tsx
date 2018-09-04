@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
-import { ConfirmRedirectModal } from './confirm_redirect_modal';
 
 interface Props {
-  spaces: Space[];
+  style?: 'button' | 'icon';
+  space: Space;
   spacesManager: SpacesManager;
   spacesNavState: any;
   onDelete: () => void;
@@ -31,17 +31,28 @@ export class DeleteSpacesButton extends Component<Props, State> {
   };
 
   public render() {
-    const numSpaces = this.props.spaces.length;
+    const buttonText = `Delete space`;
 
-    const buttonText = numSpaces > 1 ? `Delete ${numSpaces} spaces` : `Delete space`;
+    let ButtonComponent: any = EuiButton;
+
+    const extraProps: EuiButtonIconProps = {};
+
+    if (this.props.style === 'icon') {
+      ButtonComponent = EuiButtonIcon;
+      extraProps.iconType = 'trash';
+    }
 
     return (
       <Fragment>
-        <EuiButton color={'danger'} onClick={this.onDeleteClick}>
+        <ButtonComponent
+          color={'danger'}
+          onClick={this.onDeleteClick}
+          aria-label={'Delete this space'}
+          {...extraProps}
+        >
           {buttonText}
-        </EuiButton>
+        </ButtonComponent>
         {this.getConfirmDeleteModal()}
-        {this.getConfirmRedirectModal()}
       </Fragment>
     );
   }
@@ -57,94 +68,46 @@ export class DeleteSpacesButton extends Component<Props, State> {
       return null;
     }
 
-    const { spaces, spacesNavState } = this.props;
-
-    const isDeletingCurrentSpace = !!this.locateCurrentSpace();
-
-    const performDelete = () => {
-      this.deleteSpaces(() => {
-        this.setState({
-          showConfirmDeleteModal: false,
-        });
-
-        const message =
-          spaces.length > 1
-            ? `Deleted ${spaces.length} spaces.`
-            : `Deleted "${spaces[0].name}" space.`;
-
-        toastNotifications.addSuccess(message);
-
-        if (this.props.onDelete) {
-          this.props.onDelete();
-        }
-
-        spacesNavState.refreshSpacesList();
-      });
-    };
-
-    const nextStep = isDeletingCurrentSpace ? this.showConfirmRedirectModal : performDelete;
+    const { spacesNavState, spacesManager } = this.props;
 
     return (
       <ConfirmDeleteModal
-        spaces={this.props.spaces}
+        space={this.props.space}
+        spacesNavState={spacesNavState}
+        spacesManager={spacesManager}
         onCancel={() => {
           this.setState({
             showConfirmDeleteModal: false,
           });
         }}
-        onConfirm={nextStep}
+        onConfirm={this.deleteSpaces}
       />
     );
   };
 
-  public showConfirmRedirectModal = () => {
-    this.setState({
-      showConfirmDeleteModal: false,
-      showConfirmRedirectModal: true,
-    });
-  };
+  public deleteSpaces = async () => {
+    const { spacesManager, space, spacesNavState } = this.props;
 
-  public getConfirmRedirectModal = () => {
-    if (!this.state.showConfirmRedirectModal) {
-      return null;
+    try {
+      await spacesManager.deleteSpace(space);
+    } catch (error) {
+      const { message: errorMessage = '' } = error.data || {};
+
+      toastNotifications.addDanger(`Error deleting space: ${errorMessage}`);
     }
 
-    const performDelete = () => {
-      this.deleteSpaces(() => {
-        this.props.spacesManager.redirectToSpaceSelector();
-      });
-    };
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
 
-    return (
-      <ConfirmRedirectModal
-        space={this.locateCurrentSpace()}
-        onCancel={() => {
-          this.setState({
-            showConfirmRedirectModal: false,
-          });
-        }}
-        onConfirm={performDelete}
-      />
-    );
-  };
+    const message = `Deleted "${space.name}" space.`;
 
-  public deleteSpaces = (onComplete: () => void) => {
-    const { spacesManager, spaces } = this.props;
+    toastNotifications.addSuccess(message);
 
-    const deleteOperations = spaces.map(space => spacesManager.deleteSpace(space));
+    if (this.props.onDelete) {
+      this.props.onDelete();
+    }
 
-    Promise.all(deleteOperations)
-      .then(onComplete)
-      .catch(error => {
-        const { message = '' } = error.data || {};
-
-        toastNotifications.addDanger(`Error deleting space: ${message}`);
-      });
-  };
-
-  private locateCurrentSpace = () => {
-    return this.props.spaces.find(
-      space => space.id === this.props.spacesNavState.getActiveSpace().id
-    );
+    spacesNavState.refreshSpacesList();
   };
 }

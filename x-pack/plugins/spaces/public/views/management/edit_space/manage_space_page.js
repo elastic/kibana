@@ -215,7 +215,7 @@ export class ManageSpacePage extends Component {
       return (
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
-            spaces={[this.state.space]}
+            space={this.state.space}
             spacesManager={this.props.spacesManager}
             spacesNavState={this.props.spacesNavState}
             onDelete={this.backToSpacesList}

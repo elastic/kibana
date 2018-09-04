@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -30,7 +29,6 @@ interface Props {
 }
 
 interface State {
-  selectedSpaces: Space[];
   spaces: Space[];
   loading: boolean;
   error: Error | null;
@@ -58,7 +56,6 @@ export class SpacesGridPage extends Component<Props, State> {
                 <h1>Spaces</h1>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xl'} />
 
@@ -66,10 +63,7 @@ export class SpacesGridPage extends Component<Props, State> {
             itemId={'id'}
             items={this.state.spaces}
             columns={this.getColumnConfig()}
-            selection={{
-              selectable: (space: Space) => !isReservedSpace(space),
-              onSelectionChange: this.onSelectionChange,
-            }}
+            hasActions
             pagination={true}
             search={true}
             loading={this.state.loading}
@@ -80,36 +74,11 @@ export class SpacesGridPage extends Component<Props, State> {
     );
   }
 
-  public getPrimaryActionButton() {
-    if (this.state.selectedSpaces.length > 0) {
-      return (
-        <DeleteSpacesButton
-          spaces={this.state.selectedSpaces}
-          spacesManager={this.props.spacesManager}
-          spacesNavState={this.props.spacesNavState}
-          onDelete={this.loadGrid}
-        />
-      );
-    }
-
-    return (
-      <EuiButton
-        fill
-        onClick={() => {
-          window.location.hash = `#/management/spaces/create`;
-        }}
-      >
-        Create new space
-      </EuiButton>
-    );
-  }
-
   public loadGrid = () => {
     const { spacesManager } = this.props;
 
     this.setState({
       loading: true,
-      selectedSpaces: [],
       spaces: [],
     });
 
@@ -161,10 +130,28 @@ export class SpacesGridPage extends Component<Props, State> {
         name: 'Description',
         sortable: true,
       },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            render: (record: any) => {
+              if (isReservedSpace(record)) {
+                return <span />;
+              }
+
+              return (
+                <DeleteSpacesButton
+                  style="icon"
+                  space={record}
+                  spacesManager={this.props.spacesManager}
+                  spacesNavState={this.props.spacesNavState}
+                  onDelete={this.loadGrid}
+                />
+              );
+            },
+          },
+        ],
+      },
     ];
   }
-
-  public onSelectionChange = (selectedSpaces: Space[]) => {
-    this.setState({ selectedSpaces });
-  };
 }

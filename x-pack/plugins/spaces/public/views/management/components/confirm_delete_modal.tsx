@@ -4,41 +4,117 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiCallOut,
+  // @ts-ignore
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFormRow,
+  EuiOverlayMask,
+  EuiText,
+} from '@elastic/eui';
+import React, { ChangeEvent, Component } from 'react';
 import { Space } from '../../../../common/model/space';
+import { SpacesManager } from '../../../lib';
 
 interface Props {
-  spaces: Space[];
+  space: Space;
+  spacesManager: SpacesManager;
+  spacesNavState: any;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export const ConfirmDeleteModal = (props: Props) => {
-  const { spaces } = props;
+interface State {
+  confirmSpaceName: string;
+  error: boolean | null;
+}
 
-  const buttonText = spaces.length > 1 ? `Delete ${spaces.length} spaces` : `Delete space`;
+export class ConfirmDeleteModal extends Component<Props, State> {
+  public state = {
+    confirmSpaceName: '',
+    error: null,
+  };
 
-  const bodyQuestion =
-    spaces.length > 1
-      ? `Are you sure you want to delete these ${spaces.length} spaces?`
-      : `Are you sure you want to delete this space?`;
+  public render() {
+    const { space, spacesNavState, onCancel } = this.props;
 
-  return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor={'danger'}
-        cancelButtonText={'Cancel'}
-        confirmButtonText={buttonText}
-        onCancel={props.onCancel}
-        onConfirm={props.onConfirm}
-        title={`Confirm Delete`}
-        defaultFocusedButton={'cancel'}
-      >
-        <p>{bodyQuestion}</p>
-        <p>This operation cannot be undone!</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
-  );
-};
+    let warning = null;
+    if (isDeletingCurrentSpace(space, spacesNavState)) {
+      const name = (
+        <span>
+          (<strong>{space.name}</strong>)
+        </span>
+      );
+      warning = (
+        <EuiCallOut color="warning">
+          <EuiText>
+            You are about to delete your current space {name}. You will be redirected to choose a
+            different space if you continue.
+          </EuiText>
+        </EuiCallOut>
+      );
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          buttonColor={'danger'}
+          cancelButtonText={'Cancel'}
+          confirmButtonText={'Delete space'}
+          onCancel={onCancel}
+          onConfirm={this.onConfirm}
+          title={`Confirm Delete`}
+          defaultFocusedButton={'cancel'}
+        >
+          <p>
+            Are you sure you want to delete the <strong>{space.name}</strong> space?
+          </p>
+
+          <EuiFormRow
+            label={'Enter space name to confirm'}
+            isInvalid={!!this.state.error}
+            error={'Enter the correct space name to continue'}
+          >
+            <EuiFieldText value={this.state.confirmSpaceName} onChange={this.onSpaceNameChange} />
+          </EuiFormRow>
+
+          {warning}
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  }
+
+  private onSpaceNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (typeof this.state.error === 'boolean') {
+      this.setState({
+        confirmSpaceName: e.target.value,
+        error: e.target.value !== this.props.space.name,
+      });
+    } else {
+      this.setState({
+        confirmSpaceName: e.target.value,
+      });
+    }
+  };
+
+  private onConfirm = async () => {
+    if (this.state.confirmSpaceName === this.props.space.name) {
+      const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
+      const spacesManager = this.props.spacesManager;
+
+      await this.props.onConfirm();
+      if (needsRedirect) {
+        spacesManager.redirectToSpaceSelector();
+      }
+    } else {
+      this.setState({
+        error: true,
+      });
+    }
+  };
+}
+
+function isDeletingCurrentSpace(space: Space, spacesNavState: any) {
+  return space.id === spacesNavState.getActiveSpace().id;
+}
