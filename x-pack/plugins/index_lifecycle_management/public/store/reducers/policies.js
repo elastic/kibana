@@ -11,6 +11,7 @@ import { handleActions } from 'redux-actions';
 import {
   fetchedPolicies,
   setSelectedPolicy,
+  unsetSelectedPolicy,
   setSelectedPolicyName,
   setSaveAsNewPolicy,
   setPhaseData
@@ -76,6 +77,9 @@ export const policies = handleActions(
           ...policyFromES(selectedPolicy)
         }
       };
+    },
+    [unsetSelectedPolicy]() {
+      return defaultState;
     },
     [setSelectedPolicyName](state, { payload: name }) {
       return {

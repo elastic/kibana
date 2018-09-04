@@ -10,7 +10,7 @@
 import { connect } from 'react-redux';
 import { PolicySelection as PresentationComponent } from './policy_selection';
 import {
-  getPolicies, getSelectedPolicyName,
+  getPolicies, getIsSelectedPolicySet, getSelectedPolicyName,
 } from '../../../../store/selectors';
 import {
   fetchPolicies,
@@ -19,6 +19,7 @@ import {
 
 export const PolicySelection = connect(
   state => ({
+    isSelectedPolicySet: getIsSelectedPolicySet(state),
     policies: getPolicies(state),
     selectedPolicyName: getSelectedPolicyName(state),
   }),

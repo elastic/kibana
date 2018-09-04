@@ -15,14 +15,16 @@ import {
   getAliasName,
   getSaveAsNewPolicy,
   getSelectedOriginalPolicyName,
-  getIsSelectedPolicySet
+  getIsSelectedPolicySet,
+  getPolicies
 } from '../../../../store/selectors';
 import {
   setBootstrapEnabled,
   setIndexName,
   setAliasName,
   setSelectedPolicyName,
-  setSaveAsNewPolicy
+  setSaveAsNewPolicy,
+  unsetSelectedPolicy
 } from '../../../../store/actions';
 
 export const PolicyConfiguration = connect(
@@ -35,13 +37,15 @@ export const PolicyConfiguration = connect(
     indexName: getIndexName(state),
     aliasName: getAliasName(state),
     saveAsNewPolicy: getSaveAsNewPolicy(state),
-    originalPolicyName: getSelectedOriginalPolicyName(state)
+    originalPolicyName: getSelectedOriginalPolicyName(state),
+    hasExistingPolicies: getPolicies(state).length > 0
   }),
   {
     setBootstrapEnabled,
     setIndexName,
     setAliasName,
     setSelectedPolicyName,
-    setSaveAsNewPolicy
+    setSaveAsNewPolicy,
+    unsetSelectedPolicy
   }
 )(PresentationComponent);

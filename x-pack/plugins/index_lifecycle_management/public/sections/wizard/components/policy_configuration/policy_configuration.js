@@ -15,6 +15,8 @@ import {
   EuiHorizontalRule,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
 import { WarmPhase } from './components/warm_phase';
@@ -63,7 +65,9 @@ export class PolicyConfiguration extends Component {
     const noErrors = !hasErrors(this.props.errors);
     return noErrors;
   };
-
+  componentDidMount() {
+    window.scrollTo(0, 0);
+  }
   submit = async () => {
     this.setState({ isShowingErrors: true });
     if (await this.validate()) {
@@ -84,6 +88,8 @@ export class PolicyConfiguration extends Component {
       selectedPolicyName,
       isSelectedPolicySet,
       errors,
+      unsetSelectedPolicy,
+      hasExistingPolicies
     } = this.props;
 
     const { isShowingErrors } = this.state;
@@ -98,11 +104,20 @@ export class PolicyConfiguration extends Component {
       <div className="euiAnimateContentLoad">
         <PolicySelection/>
         <EuiHorizontalRule className="ilmHrule" />
-        <EuiTitle>
-          <h4>
-            {!selectedPolicyName ? 'Create a policy' : `Edit policy ${selectedPolicyName}`}
-          </h4>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h4>
+                {!selectedPolicyName ? 'Create a lifecycle policy' : `Edit lifecycle policy ${selectedPolicyName}`}
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          {hasExistingPolicies ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={unsetSelectedPolicy}>Change lifecycle policy</EuiButton>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <EuiText color="subdued">
           <p>Configure the phases of your data and when to transition between them.</p>

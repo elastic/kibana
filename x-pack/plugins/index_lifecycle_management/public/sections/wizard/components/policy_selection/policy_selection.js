@@ -34,18 +34,15 @@ export class PolicySelection extends Component {
   }
 
   render() {
-    const { policies, selectedPolicyName } = this.props;
-    let existingPoliciesSelect;
+    const { isSelectedPolicySet, policies, selectedPolicyName } = this.props;
     const policiesExist = policies.length > 0;
-    if (!policiesExist) {
+    if (isSelectedPolicySet) {
       return null;
     }
+    let existingPoliciesSelect;
     if (policiesExist) {
       const options = policies.map(item => ({ value: item.name, text: item.name }));
-      options.unshift({
-        value: '',
-        text: '-- New Policy --',
-      });
+      options.unshift({ value: '', text: 'Select an existing policy' });
       existingPoliciesSelect = (
         <EuiFlexItem>
           <EuiFormRow label="Existing policies">
@@ -63,21 +60,24 @@ export class PolicySelection extends Component {
 
     return (
       <EuiDescribedFormGroup
-        title={<h4>Select or create a policy</h4>}
+        title={<h4>Select or create a lifecycle policy</h4>}
         titleSize="s"
         description={`An index lifecycle policy is a
           blueprint for transitioning your data over time.
           You can create a new policy${policiesExist ? ' or edit an existing policy and save it with a new name.' : '.'}`}
         fullWidth
       >
-        <EuiFlexGroup alignItems="center">
-          {existingPoliciesSelect}
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton onClick={() => this.selectPolicy()}>Create new policy</EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiFlexGroup  direction="column" alignItems="center" fullWidth>
+            {existingPoliciesSelect}
+            <EuiFlexItem>
+              <h1>- OR -</h1>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton onClick={() => this.selectPolicy()}>Create lifecycle policy</EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     );
   }

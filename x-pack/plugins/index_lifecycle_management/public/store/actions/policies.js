@@ -13,6 +13,7 @@ import { loadPolicies } from '../../api';
 import { SET_PHASE_DATA } from '../constants';
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
 export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');
+export const unsetSelectedPolicy = createAction('UNSET_SELECTED_POLICY');
 export const setSelectedPolicyName = createAction('SET_SELECTED_POLICY_NAME');
 export const setSaveAsNewPolicy = createAction('SET_SAVE_AS_NEW_POLICY');
 
