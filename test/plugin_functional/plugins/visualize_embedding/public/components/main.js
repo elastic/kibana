@@ -124,8 +124,9 @@ class Main extends React.Component {
             </EuiPageContentHeader>
             <EuiPageContentBody>
               {/*
-                The div you want to render into should have its dimension set, since the visualization will
-                take exactly the space of that element.
+                The element you want to render into should have its dimension set (via a fixed height, flexbox, absolute positioning, etc.),
+                since the visualization will render with exactly the size of that element, i.e. the container size determines the
+                visualization size.
                */}
               <div ref={this.chartDiv} style={{ height: '500px' }} />
             </EuiPageContentBody>
