@@ -33,7 +33,6 @@ export function vSphereMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from vSphere.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.vsphereMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `vsphere` Metricbeat module fetches internal metrics from a vSphere cluster. \
 [Learn more]({learnMoreLink}).',
       values: {

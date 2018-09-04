@@ -33,7 +33,6 @@ export function mysqlMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
 [Learn more]({learnMoreLink}).',
       values: {

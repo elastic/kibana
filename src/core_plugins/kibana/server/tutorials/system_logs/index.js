@@ -36,7 +36,6 @@ export function systemLogsSpecProvider() {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.systemLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `system` Filebeat module collects and parses logs created by the system logging service of common \
 Unix/Linux based distributions. This module is not available on Windows. \
 [Learn more]({learnMoreLink}).',

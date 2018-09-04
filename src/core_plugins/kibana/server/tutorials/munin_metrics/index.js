@@ -34,7 +34,6 @@ export function muninMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Munin server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.muninMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `munin` Metricbeat module fetches internal metrics from Munin. \
 [Learn more]({learnMoreLink}).',
       values: {

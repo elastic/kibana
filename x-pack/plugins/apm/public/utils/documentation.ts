@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore
 import { metadata } from 'ui/metadata';
 
 const STACK_VERSION = metadata.branch;
@@ -157,7 +158,7 @@ export const ELASTIC_DOCS = {
 //
 // Helper methods
 //
-function translateAgentName(agentName) {
+function translateAgentName(agentName: string): string {
   switch (agentName) {
     case 'js-react':
     case 'js-base':
@@ -168,7 +169,13 @@ function translateAgentName(agentName) {
   }
 }
 
-export function getFeatureDocs(featureName, agentName) {
+export function getFeatureDocs(
+  featureName: string,
+  agentName: string
+): {
+  url: string;
+  text?: string;
+} {
   const translatedAgentName = translateAgentName(agentName);
   return get(APM_AGENT_DOCS, `${featureName}.${translatedAgentName}`);
 }
