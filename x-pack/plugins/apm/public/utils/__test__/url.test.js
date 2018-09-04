@@ -15,9 +15,14 @@ import {
   KibanaLinkComponent,
   RelativeLinkComponent,
   encodeKibanaSearchParams,
-  decodeKibanaSearchParams
+  decodeKibanaSearchParams,
+  getMlJobUrl
 } from '../url';
 import { toJson } from '../testHelpers';
+
+jest.mock('ui/chrome', () => ({
+  addBasePath: path => `myBasePath${path}`
+}));
 
 describe('encodeKibanaSearchParams and decodeKibanaSearchParams should return the original string', () => {
   it('should convert string to object', () => {
@@ -207,11 +212,22 @@ describe('KibanaLinkComponent', () => {
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+      "myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
     );
   });
 
   it('should render correct markup', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
+  });
+});
+
+describe('getMlJobUrl', () => {
+  it('should have correct url', () => {
+    const serviceName = 'myServiceName';
+    const transactionType = 'myTransactionType';
+    const location = { search: '' };
+    expect(getMlJobUrl(serviceName, transactionType, location)).toBe(
+      'myBasePath/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
+    );
   });
 });

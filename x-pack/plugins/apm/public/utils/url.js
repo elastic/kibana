@@ -28,7 +28,7 @@ export function getMlJobUrl(serviceName, transactionType, location) {
     _a
   });
 
-  return `/app/ml#/timeseriesexplorer/?${nextSearch}`;
+  return chrome.addBasePath(`/app/ml#/timeseriesexplorer/?${nextSearch}`);
 }
 
 export function toQuery(search) {
