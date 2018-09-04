@@ -18,17 +18,11 @@
  */
 
 export class SavedObjectsSchema {
-  _namespaceAgnosticTypes = [];
-
-  addNamespaceAgnosticType(type) {
-    if (typeof type !== 'string') {
-      throw new Error('type must be a string');
-    }
-
-    this._namespaceAgnosticTypes.push(type);
+  constructor(uiExportsSchema) {
+    this._schema = uiExportsSchema;
   }
 
   isNamespaceAgnostic(type) {
-    return this._namespaceAgnosticTypes.includes(type);
+    return this._schema.namespaceAgnosticTypes.includes(type);
   }
 }

@@ -21,7 +21,7 @@ import { getRootPropertiesObjects } from '../../mappings';
 import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider, SavedObjectsSchema } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export function createSavedObjectsService(server) {
+export function createSavedObjectsService(server, uiExportsSchema) {
   const onBeforeWrite = async () => {
     const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
@@ -59,7 +59,7 @@ export function createSavedObjectsService(server) {
     }
   };
 
-  const schema = new SavedObjectsSchema();
+  const schema = new SavedObjectsSchema(uiExportsSchema);
 
   const mappings = server.getKibanaIndexMappingsDsl();
   const repositoryProvider = new SavedObjectsRepositoryProvider({

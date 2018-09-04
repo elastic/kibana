@@ -41,6 +41,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     }],
     hacks: [],
     mappings,
+    savedObjectsSchema: {
+      namespaceAgnosticTypes: ['space']
+    },
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
       return {
@@ -67,8 +70,6 @@ export const spaces = (kibana) => new kibana.Plugin({
   async init(server) {
     const thisPlugin = this;
     const xpackMainPlugin = server.plugins.xpack_main;
-
-    server.savedObjects.schema.addNamespaceAgnosticType('space');
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
       await createDefaultSpace(server);
