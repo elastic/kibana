@@ -61,6 +61,8 @@ export const LICENSE_WHITELIST = [
 ];
 
 export const LICENSE_OVERRIDES = {
+  'react-lib-adler32@1.0.1': ['BSD'], // adler32 extracted from react source
+
   // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
   'elasticsearch-browser@13.0.1': ['Apache-2.0'],
 
