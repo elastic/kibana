@@ -407,6 +407,7 @@ app.directive('dashboardApp', function ($injector) {
           sharingData: {
             title: dash.title,
           },
+          isDirty: dashboardStateManager.getIsDirty(),
         });
       };
 

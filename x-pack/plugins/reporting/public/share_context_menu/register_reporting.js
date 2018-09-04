@@ -14,7 +14,7 @@ import chrome from 'ui/chrome';
 
 function reportingProvider(Private, dashboardConfig) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = ({ objectType, objectId, getUnhashableStates, sharingData }) => {
+  const getMenuItems = ({ objectType, objectId, getUnhashableStates, sharingData, isDirty }) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -62,6 +62,7 @@ function reportingProvider(Private, dashboardConfig) {
               objectType={objectType}
               objectId={objectId}
               getJobParams={getReportingJobParams}
+              isDirty={isDirty}
             />
           )
         }

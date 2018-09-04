@@ -140,6 +140,10 @@ function VisEditor(
 
   $scope.vis = vis;
 
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
+
   $scope.topNavMenu = [{
     key: 'save',
     description: 'Save Visualization',
@@ -158,6 +162,8 @@ function VisEditor(
     description: 'Share Visualization',
     testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
+      const hasUnappliedChanges = vis.dirty;
+      const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
@@ -168,6 +174,7 @@ function VisEditor(
         sharingData: {
           title: savedVis.title,
         },
+        isDirty: hasUnappliedChanges || hasUnsavedChanges,
       });
     }
   }, {
@@ -195,10 +202,6 @@ function VisEditor(
   }];
 
   let stateMonitor;
-
-  const $appStatus = this.appStatus = {
-    dirty: !savedVis.id
-  };
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);

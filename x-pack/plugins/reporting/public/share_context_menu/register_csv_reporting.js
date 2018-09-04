@@ -11,7 +11,7 @@ import { ReportingPanelContent } from '../components/reporting_panel_content';
 
 function reportingProvider(Private) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = ({ objectType, objectId, sharingData }) => {
+  const getMenuItems = ({ objectType, objectId, sharingData, isDirty }) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -43,6 +43,7 @@ function reportingProvider(Private) {
               objectType={objectType}
               objectId={objectId}
               getJobParams={getJobParams}
+              isDirty={isDirty}
             />
           )
         }

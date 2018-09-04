@@ -14,6 +14,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
+  isDirty: boolean;
 }
 
 interface State {
@@ -37,6 +38,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         objectId={this.props.objectId}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
+        isDirty={this.props.isDirty}
       />
     );
   }

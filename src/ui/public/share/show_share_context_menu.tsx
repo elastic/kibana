@@ -46,6 +46,7 @@ interface ShowProps {
   objectType: string;
   shareContextMenuExtensions?: any[];
   sharingData: any;
+  isDirty: boolean;
 }
 
 export function showShareContextMenu({
@@ -56,6 +57,7 @@ export function showShareContextMenu({
   objectType,
   shareContextMenuExtensions,
   sharingData,
+  isDirty,
 }: ShowProps) {
   if (isOpen) {
     onClose();
@@ -82,6 +84,7 @@ export function showShareContextMenu({
         objectType={objectType}
         shareContextMenuExtensions={shareContextMenuExtensions}
         sharingData={sharingData}
+        isDirty={isDirty}
       />
     </EuiWrappingPopover>
   );

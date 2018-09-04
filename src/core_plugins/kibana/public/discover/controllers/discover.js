@@ -181,6 +181,10 @@ function discoverController(
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
 
+  const $appStatus = $scope.appStatus = this.appStatus = {
+    dirty: !savedSearch.id
+  };
+
   $scope.topNavMenu = [{
     key: 'new',
     description: 'New Search',
@@ -213,6 +217,7 @@ function discoverController(
           ...sharingData,
           title: savedSearch.title,
         },
+        isDirty: $appStatus.dirty,
       });
     }
   }, {
@@ -247,9 +252,6 @@ function discoverController(
   docTitle.change(`Discover${pageTitleSuffix}`);
 
   let stateMonitor;
-  const $appStatus = $scope.appStatus = this.appStatus = {
-    dirty: !savedSearch.id
-  };
 
   const $state = $scope.state = new AppState(getStateDefaults());
 

@@ -23,10 +23,11 @@ interface Props {
   objectType: string;
   getJobParams: () => any;
   options?: any;
+  isDirty: boolean;
 }
 
 interface State {
-  isDirty: boolean;
+  isStale: boolean;
   url?: string;
 }
 
@@ -37,12 +38,12 @@ export class ReportingPanelContent extends Component<Props, State> {
     super(props);
 
     this.state = {
-      isDirty: false,
+      isStale: false,
     };
   }
 
   public componentWillUnmount() {
-    window.removeEventListener('hashchange', this.markAsDirty);
+    window.removeEventListener('hashchange', this.markAsStale);
 
     this.mounted = false;
   }
@@ -50,11 +51,11 @@ export class ReportingPanelContent extends Component<Props, State> {
   public componentDidMount() {
     this.mounted = true;
 
-    window.addEventListener('hashchange', this.markAsDirty, false);
+    window.addEventListener('hashchange', this.markAsStale, false);
   }
 
   public render() {
-    if (this.isNotSaved() || this.state.isDirty) {
+    if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
         <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
           <EuiFormRow helpText="Please save your work before generating a report.">
@@ -118,12 +119,12 @@ export class ReportingPanelContent extends Component<Props, State> {
     }
   };
 
-  private markAsDirty = () => {
+  private markAsStale = () => {
     if (!this.mounted) {
       return;
     }
 
-    this.setState({ isDirty: true });
+    this.setState({ isStale: true });
   };
 
   private isNotSaved = () => {
