@@ -76,12 +76,11 @@ export const createMetricbeatInstructions = () => ({
         defaultMessage: 'Download and install Metricbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.windowsTextPre', {
-        // eslint-disable-next-line no-multi-str
         defaultMessage: 'First time using Metricbeat? See the [Getting Started Guide]({metricbeatLink}).\n\
  1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Metricbeat`.\n\
- 4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
+ 4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
         values: {
@@ -171,9 +170,8 @@ export const createMetricbeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -200,9 +198,8 @@ export const createMetricbeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -229,9 +226,8 @@ export const createMetricbeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -258,9 +254,8 @@ export const createMetricbeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',

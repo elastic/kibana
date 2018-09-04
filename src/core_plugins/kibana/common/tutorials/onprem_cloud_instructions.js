@@ -24,11 +24,10 @@ export const createTrycloudOption1 = () => ({
     defaultMessage: 'Option 1: Try module in Elastic Cloud',
   }),
   textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.textPre', {
-    // eslint-disable-next-line no-multi-str
     defaultMessage: 'Go to [Elastic Cloud]({link}). Register if you \
-      do not already have an account. Free 14-day trial available.\n\n\
-      Log into the Elastic Cloud console\n\n\
-      To create a cluster, in Elastic Cloud console:\n\
+do not already have an account. Free 14-day trial available.\n\n\
+Log into the Elastic Cloud console\n\n\
+To create a cluster, in Elastic Cloud console:\n\
  1. Select **Create Deployment** and specify the **Deployment Name**\n\
  2. Modify the other deployment options as needed (or not, the defaults are great to get started)\n\
  3. Click **Create Deployment**\n\
@@ -45,10 +44,9 @@ export const createTrycloudOption2 = () => ({
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
   textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.textPre', {
-    // eslint-disable-next-line no-multi-str
     defaultMessage: 'If you are running this Kibana instance against a hosted Elasticsearch instance, \
-      proceed with manual setup.\n\n\
-      Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password** as {passwordTemplate} for your records',
+proceed with manual setup.\n\n\
+Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password** as {passwordTemplate} for your records',
     values: {
       urlTemplate: '`<es_url>`',
       passwordTemplate: '`<password>`',

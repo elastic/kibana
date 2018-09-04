@@ -86,12 +86,11 @@ export const createFilebeatInstructions = () => ({
         defaultMessage: 'Download and install Filebeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.install.windowsTextPre', {
-        // eslint-disable-next-line no-multi-str
         defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
  1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Filebeat`.\n\
- 4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select\
+ 4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Filebeat as a Windows service.',
         values: {
@@ -184,9 +183,8 @@ export const createFilebeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.osxTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -213,9 +211,8 @@ export const createFilebeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.debTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -242,9 +239,8 @@ export const createFilebeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.rpmTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -271,9 +267,8 @@ export const createFilebeatInstructions = () => ({
         '  host: "<kibana_url>"',
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.windowsTextPost', {
-        // eslint-disable-next-line no-multi-str
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch,\
-          and {kibanaUrlTemplate} is the URL of Kibana.',
+        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+and {kibanaUrlTemplate} is the URL of Kibana.',
         values: {
           passwordTemplate: '`<password>`',
           esUrlTemplate: '`<es_url>`',
@@ -288,9 +283,8 @@ export const createFilebeatInstructions = () => ({
         defaultMessage: 'Install Elasticsearch GeoIP and user agent plugins',
       }),
       textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUaTextPre', {
-        // eslint-disable-next-line no-multi-str
         defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
-          From the Elasticsearch installation folder, run:',
+From the Elasticsearch installation folder, run:',
       }),
       commands: [
         'bin/elasticsearch-plugin install ingest-geoip',
@@ -302,9 +296,8 @@ export const createFilebeatInstructions = () => ({
         defaultMessage: 'Install Elasticsearch GeoIP plugin',
       }),
       textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipTextPre', {
-        // eslint-disable-next-line no-multi-str
         defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
-          From the Elasticsearch installation folder, run:',
+From the Elasticsearch installation folder, run:',
       }),
       commands: [
         'bin/elasticsearch-plugin install ingest-geoip'

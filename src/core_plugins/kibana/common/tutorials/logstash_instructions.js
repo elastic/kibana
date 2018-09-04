@@ -60,7 +60,6 @@ export const createLogstashInstructions = () => ({
           defaultMessage: 'Download and install Logstash',
         }),
         textPre: i18n.translate('kbn.common.tutorials.logstashInstructions.install.logstash.windowsTextPre', {
-          // eslint-disable-next-line no-multi-str
           defaultMessage: 'First time using Logstash?  See the [Getting Started Guide]({logstashLink}).\n\
  1. [Download]({elasticLink}) the Logstash Windows zip file.\n\
  2. Extract the contents of the zip file.',
