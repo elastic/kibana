@@ -42,7 +42,7 @@ export function diffMapping(actual: IndexMapping, expected: IndexMapping): Migra
   const actualProps = actual.doc.properties;
   const expectedProps = expected.doc.properties;
 
-  // There's a special case for root-levle properties: if a root property is in actual,
+  // There's a special case for root-level properties: if a root property is in actual,
   // but not in expected, it is treated like a disabled plugin and requires no action.
   return Object.keys(expectedProps).reduce((acc: number, key: string) => {
     return Math.max(acc, diffSubProperty(actualProps[key], expectedProps[key]));
@@ -57,10 +57,6 @@ function diffSubProperty(actual: any, expected: any): MigrationAction {
 
   // We've removed a sub property
   if (actual !== undefined && expected === undefined) {
-    return MigrationAction.Migrate;
-  }
-
-  if (typeof actual !== typeof expected) {
     return MigrationAction.Migrate;
   }
 

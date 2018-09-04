@@ -94,7 +94,7 @@ describe('diffMapping', () => {
     expect(diffMapping(actual, expected)).toEqual(MigrationAction.None);
   });
 
-  test('requires migration if a leaf differs', () => {
+  test('requires migration if a sub-property differs', () => {
     const actual = {
       doc: {
         dynamic: 'strict',
@@ -108,6 +108,27 @@ describe('diffMapping', () => {
         dynamic: 'strict',
         properties: {
           world: { type: 'keword' },
+        },
+      },
+    };
+
+    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Migrate);
+  });
+
+  test('requires migration if a type changes', () => {
+    const actual = {
+      doc: {
+        dynamic: 'strict',
+        properties: {
+          meaning: { type: 'text' },
+        },
+      },
+    };
+    const expected = {
+      doc: {
+        dynamic: 'strict',
+        properties: {
+          meaning: 42,
         },
       },
     };
