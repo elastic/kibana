@@ -129,7 +129,11 @@ export class EditJobFlyout extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
+        jobGroupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
+      } else {
+        jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      }
     }
 
     const valid = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
@@ -308,4 +312,5 @@ EditJobFlyout.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  allJobIds: PropTypes.array.isRequired,
 };
