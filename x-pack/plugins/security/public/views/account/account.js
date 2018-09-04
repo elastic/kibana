@@ -22,7 +22,7 @@ routes.when('/account', {
     },
 
     user(ShieldUser) {
-      return ShieldUser.getCurrent();
+      return ShieldUser.getCurrent().$promise;
     }
   },
   controllerAs: 'accountController',
