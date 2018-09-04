@@ -37,9 +37,9 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, log }) {
+  constructor({ log }) {
     this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, log);
+    this.dllCompiler = new DllCompiler(log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
   }
@@ -218,6 +218,12 @@ export class DynamicDllPlugin {
 
     // ignore modules from plugins
     if (inPluginNodeModules(module.resource)) {
+      return;
+    }
+
+    // also ignore files that are symlinked into plugins node_modules, but only
+    // do the `realpath` call after checking the plain resource path
+    if (inPluginNodeModules(await realPathAsync(module.resource))) {
       return;
     }
 

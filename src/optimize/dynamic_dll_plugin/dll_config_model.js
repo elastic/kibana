@@ -25,7 +25,6 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 function generateDLL(config) {
   const {
-    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -49,7 +48,10 @@ function generateDLL(config) {
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: dllAlias
+      alias: {
+        moment$: require.resolve('moment'),
+        'moment-timezone$': require.resolve('moment-timezone')
+      }
     },
     module: {
       rules: [
@@ -91,7 +93,6 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
-  const dllAlias = rawConfig.alias;
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -115,7 +116,6 @@ function extendRawConfig(rawConfig) {
 
   // Export dll config map
   return {
-    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
