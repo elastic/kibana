@@ -9,11 +9,11 @@ import React from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
+import { exploreSeries } from './explore_series';
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
 export function ExplorerChartsContainer({
-  exploreSeries,
   seriesToPlot,
   layoutCellsPerChart,
   tooManyBuckets,
@@ -60,7 +60,7 @@ export function ExplorerChartsContainer({
                     color="warning"
                   />
                 )}
-                <a className="kuiLink" onClick={() => exploreSeries(series)}>
+                <a className="euiLink" onClick={() => window.open(exploreSeries(series), '_blank')}>
                   View <i className="fa fa-external-link" aria-hidden="true" />
                 </a>
               </div>
@@ -76,7 +76,6 @@ export function ExplorerChartsContainer({
   );
 }
 ExplorerChartsContainer.propTypes = {
-  exploreSeries: PropTypes.func.isRequired,
   seriesToPlot: PropTypes.array.isRequired,
   layoutCellsPerChart: PropTypes.number.isRequired,
   tooManyBuckets: PropTypes.bool.isRequired,

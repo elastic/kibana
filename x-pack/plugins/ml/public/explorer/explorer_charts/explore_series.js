@@ -69,6 +69,6 @@ export function exploreSeries(series) {
   path += '/app/ml#/timeseriesexplorer';
   path += '?_g=' + _g;
   path += '&_a=' + encodeURIComponent(_a);
-  window.open(path, '_blank');
 
+  return path;
 }

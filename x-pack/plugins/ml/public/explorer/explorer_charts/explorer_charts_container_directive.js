@@ -18,7 +18,6 @@ import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import { exploreSeries } from './explore_series';
 import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
@@ -52,7 +51,6 @@ module.directive('mlExplorerChartsContainer', function (
 
     function updateComponent(data) {
       const props = {
-        exploreSeries,
         seriesToPlot: data.seriesToPlot,
         layoutCellsPerChart: data.layoutCellsPerChart,
         // convert truthy/falsy value to Boolean
