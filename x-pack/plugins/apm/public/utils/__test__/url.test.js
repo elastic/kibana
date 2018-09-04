@@ -227,7 +227,16 @@ describe('getMlJobUrl', () => {
     const transactionType = 'myTransactionType';
     const location = { search: '' };
     expect(getMlJobUrl(serviceName, transactionType, location)).toBe(
-      'myBasePath/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
+      '/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
+    );
+  });
+
+  it('should not contain basePath', () => {
+    const serviceName = 'myServiceName';
+    const transactionType = 'myTransactionType';
+    const location = { search: '' };
+    expect(getMlJobUrl(serviceName, transactionType, location)).toBe(
+      '/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
     );
   });
 });
