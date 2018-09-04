@@ -75,7 +75,7 @@ function reportingProvider(Private, dashboardConfig) {
   };
 
   return {
-    id: 'reporting',
+    id: 'screenCaptureReports',
     getMenuItems,
   };
 }

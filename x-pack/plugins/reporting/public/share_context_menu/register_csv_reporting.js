@@ -24,7 +24,7 @@ function reportingProvider(Private) {
     };
 
     const menuItems = [];
-    if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
+    if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
       const panelTitle = 'CSV Reports';
 
       menuItems.push({
@@ -50,13 +50,11 @@ function reportingProvider(Private) {
       });
     }
 
-    // TODO register PNG menu item once PNG is supported on server side
-
     return menuItems;
   };
 
   return {
-    id: 'reporting',
+    id: 'csvReports',
     getMenuItems,
   };
 }
