@@ -17,21 +17,22 @@
   }
 
   // SASSTODO: Is this even an element anymore, or should it be .visualize?
-  /* Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
+  /* 1. Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
 a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   > visualize {
     height: 100%;
     flex: 1 1 auto;
     display: flex;
-    z-index: 0; /* 1. */
+    z-index: 0; /* 1 */
   }
+
+  // .visualize {
+  //   display: flex;
+  //   flex: 1 1 100%;
+  //   overflow-x: hidden;
+  // }
 }
 
-.visualize {
-  display: flex;
-  flex: 1 1 100%;
-  overflow-x: hidden;
-}
 
 .visEditor__content {
   @include flex-parent();
