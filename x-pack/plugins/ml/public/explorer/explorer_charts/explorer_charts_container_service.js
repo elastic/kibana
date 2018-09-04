@@ -140,6 +140,23 @@ export function explorerChartsContainerServiceFactory(
       );
     }
 
+    // Query 4 - load the rare chart's event distribution
+    function getEventDistribution(config, range) {
+      const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
+      return mlResultsService.getEventDistributionData(
+        config.datafeedConfig.indices,
+        config.datafeedConfig.types,
+        config.entityFields,
+        datafeedQuery,
+        config.metricFunction,
+        config.metricFieldName,
+        config.timeField,
+        range.min,
+        range.max,
+        config.interval
+      );
+    }
+
     // first load and wait for required data,
     // only after that trigger data processing and page render.
     // TODO - if query returns no results e.g. source data has been deleted,
@@ -147,7 +164,8 @@ export function explorerChartsContainerServiceFactory(
     const seriesPromises = seriesConfigs.map(seriesConfig => Promise.all([
       getMetricData(seriesConfig, chartRange),
       getRecordsForCriteria(seriesConfig, chartRange),
-      getScheduledEvents(seriesConfig, chartRange)
+      getScheduledEvents(seriesConfig, chartRange),
+      getEventDistribution(seriesConfig, chartRange)
     ]));
 
     function processChartData(response, seriesIndex) {
@@ -155,6 +173,7 @@ export function explorerChartsContainerServiceFactory(
       const records = response[1].records;
       const jobId = seriesConfigs[seriesIndex].jobId;
       const scheduledEvents = response[2].events[jobId];
+      const eventDistribution = response[3];
 
       // Return dataset in format used by the chart.
       // i.e. array of Objects with keys date (timestamp), value,
@@ -163,18 +182,23 @@ export function explorerChartsContainerServiceFactory(
         return [];
       }
 
-      const chartData = _.map(metricData, (value, time) => ({
+      let chartData = _.map(metricData, (value, time) => ({
         date: +time,
         value: value
       }));
+
+      if (eventDistribution.length > 0) {
+        chartData = eventDistribution;
+      }
+
+
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       _.each(records, (record) => {
 
         // Look for a chart point with the same time as the record.
         // If none found, find closest time in chartData set.
-        const recordTime = record[ML_TIME_FIELD_NAME];
-        let chartPoint = findNearestChartPointToTime(chartData, recordTime);
+        let chartPoint = findNearestChartPointToTime(chartData, record);
 
         if (chartPoint === undefined) {
           // In case there is a record with a time after that of the last chart point, set the score
@@ -224,7 +248,15 @@ export function explorerChartsContainerServiceFactory(
       return chartData;
     }
 
-    function findNearestChartPointToTime(chartData, time) {
+    function findNearestChartPointToTime(chartData, record) {
+      const time = record[ML_TIME_FIELD_NAME];
+
+      if (record.function === 'rare') {
+        chartData = chartData.filter((d) => {
+          return d.entity === record.by_field_value;
+        });
+      }
+
       let chartPoint;
       for (let i = 0; i < chartData.length; i++) {
         if (chartData[i].date === time) {
