@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`i18n utils should escape linebreaks 1`] = `"Text with\\\\n\\\\n\\\\nline-breaks and \\\\n\\\\n\\\\n      \\\\n\\\\n\\\\n      "`;

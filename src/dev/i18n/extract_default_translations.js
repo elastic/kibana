@@ -31,8 +31,6 @@ import { globAsync, readFileAsync, writeFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError } from '../run';
 
-const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
-
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
   if (targetMap.has(key) && existingValue.message !== value.message) {
@@ -143,15 +141,23 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
 }
 
 function serializeToJson5(defaultMessages) {
+  const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
+  const LINE_BREAK_REGEX = /\n/g;
+
   // .slice(0, -1): remove closing curly brace from json to append messages
   let jsonBuffer = Buffer.from(
     JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
   );
 
   for (const [mapKey, mapValue] of defaultMessages) {
-    const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
+    const formattedMessage = mapValue.message
+      .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+      .replace(LINE_BREAK_REGEX, '\\n');
+
     const formattedContext = mapValue.context
-      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+      ? mapValue.context
+        .replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+        .replace(LINE_BREAK_REGEX, '\\n')
       : '';
 
     jsonBuffer = Buffer.concat([
@@ -172,7 +178,10 @@ function serializeToJson(defaultMessages) {
 
   for (const [mapKey, mapValue] of defaultMessages) {
     if (mapValue.context) {
-      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+      resultJsonObject[mapKey] = {
+        text: mapValue.message,
+        comment: mapValue.context,
+      };
     } else {
       resultJsonObject[mapKey] = mapValue.message;
     }
