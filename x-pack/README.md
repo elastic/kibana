@@ -100,6 +100,16 @@ We also have SAML API integration tests which set up Elasticsearch and Kibana wi
 node scripts/functional_tests --config test/saml_api_integration/config
 ```
 
+#### Running Reporting functional tests
+
+To run the reporting functional tests:
+
+Start the test server
+```sh
+// Run from the directory KIBANA_HOME/x-pack
+node scripts/functional_tests_server
+```
+
 #### Developing functional tests
 
 If you are **developing functional tests** then you probably don't want to rebuild Elasticsearch and wait for all that setup on every test run, so instead use this command to build and start just the Elasticsearch and Kibana servers:
