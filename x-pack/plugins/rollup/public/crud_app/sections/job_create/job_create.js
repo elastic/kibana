@@ -23,186 +23,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps } from '../../services';
 
 import { Navigation } from './navigation';
 import { StepLogistics } from './step_logistics';
-
-const STEP_LOGISTICS = 'STEP_LOGISTICS';
-const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
-const STEP_GROUPS = 'STEP_GROUPS';
-const STEP_METRICS = 'STEP_METRICS';
-const STEP_REVIEW = 'STEP_REVIEW';
-
-const stepIds = [
+import {
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
   STEP_GROUPS,
   STEP_METRICS,
   STEP_REVIEW,
-];
-
-const stepIdToStepMap = {
-  [STEP_LOGISTICS]: {
-    defaultFields: {
-      id: '',
-      indexPattern: '',
-      rollupIndex: '',
-      rollupCron: '/30 * * * * ?',
-      rollupPageSize: 1000,
-    },
-    fieldsValidator: fields => {
-      const {
-        id,
-        indexPattern,
-        rollupIndex,
-        rollupCron,
-        rollupPageSize,
-      } = fields;
-
-      const errors = {};
-
-      if (!id || !id.trim()) {
-        errors.id = (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.idMissing"
-            defaultMessage="You must provide an ID"
-          />
-        );
-      }
-
-      if (!indexPattern || !indexPattern.trim()) {
-        errors.indexPattern = (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternMissing"
-            defaultMessage="You must provide an index pattern"
-          />
-        );
-      } else {
-        const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
-          if (indexPattern.includes(char)) {
-            chars.push(char);
-          }
-
-          return chars;
-        }, []);
-
-        if (illegalCharacters.length) {
-          errors.indexPattern = (
-            <FormattedMessage
-              id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
-              defaultMessage="You must remove these characters from your index pattern: {characterList}"
-              values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
-            />
-          );
-        } else {
-          if (indexPattern.includes(' ')) {
-            errors.indexPattern = (
-              <FormattedMessage
-                id="xpack.rollupJobs.create.errors.indexPatternSpaces"
-                defaultMessage="You must remove spaces from your index pattern"
-              />
-            );
-          }
-        }
-      }
-
-      if (!rollupIndex || !rollupIndex.trim()) {
-        errors.rollupIndex = (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupIndexMissing"
-            defaultMessage="You must provide a rollup index"
-          />
-        );
-      } else {
-        const illegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
-          if (rollupIndex.includes(char)) {
-            chars.push(char);
-          }
-
-          return chars;
-        }, []);
-
-        if (illegalCharacters.length) {
-          errors.rollupIndex = (
-            <FormattedMessage
-              id="xpack.rollupJobs.create.errors.rollupIndexIllegalCharacters"
-              defaultMessage="You must remove these characters from your rollup index name: {characterList}"
-              values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
-            />
-          );
-        } else {
-          if (rollupIndex.includes(',')) {
-            errors.rollupIndex = (
-              <FormattedMessage
-                id="xpack.rollupJobs.create.errors.rollupIndexCommas"
-                defaultMessage="You must remove commas from your rollup index name"
-              />
-            );
-          } else if (rollupIndex.includes(' ')) {
-            errors.rollupIndex = (
-              <FormattedMessage
-                id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
-                defaultMessage="You must remove spaces from your rollup index name"
-              />
-            );
-          }
-        }
-      }
-
-      if (!rollupCron || !rollupCron.trim()) {
-        errors.rollupCron = (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupCronMissing"
-            defaultMessage="You must provide an interval"
-          />
-        );
-      }
-
-      if (!rollupPageSize) {
-        errors.rollupPageSize = (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.rollupPageSizeMissing"
-            defaultMessage="You must provide a page size"
-          />
-        );
-      }
-
-      return errors;
-    },
-  },
-  [STEP_DATE_HISTOGRAM]: {
-    defaultFields: {
-      dateHistogramInterval: '1h',
-      dateHistogramDelay: null,
-      dateHistogramTimeZone: 'UTC',
-      dateHistogramField: 'utc_time',
-    },
-  },
-  [STEP_GROUPS]: {
-    defaultFields: {
-      terms: ['index.keyword'],
-      histogram: ['memory'],
-      histogramInterval: 5,
-    },
-  },
-  [STEP_METRICS]: {
-    defaultFields: {
-      metrics: [{
-        'field': 'bytes',
-        'metrics': ['min', 'max', 'avg']
-      }, {
-        'field': 'memory',
-        'metrics': ['min', 'max', 'avg']
-      }],
-    },
-  },
-  [STEP_REVIEW]: {
-  },
-};
+  stepIds,
+  stepIdToStepConfigMap,
+} from './steps_config';
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: 'Logistics',
@@ -222,7 +56,7 @@ export class JobCreateUi extends Component {
   constructor(props) {
     super(props);
 
-    const stepsFields = mapValues(stepIdToStepMap, step => cloneDeep(step.defaultFields || {}));
+    const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
 
     this.state = {
       checkpointStepId: stepIds[0],
@@ -306,7 +140,7 @@ export class JobCreateUi extends Component {
   getStepsFieldsErrors(newStepsFields) {
     return Object.keys(newStepsFields).reduce((stepsFieldErrors, stepId) => {
       const stepFields = newStepsFields[stepId];
-      const fieldsValidator = stepIdToStepMap[stepId].fieldsValidator;
+      const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
       stepsFieldErrors[stepId] = typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
       return stepsFieldErrors;
     }, {});
