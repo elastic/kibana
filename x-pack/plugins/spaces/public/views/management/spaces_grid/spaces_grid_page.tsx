@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -56,6 +57,7 @@ export class SpacesGridPage extends Component<Props, State> {
                 <h1>Spaces</h1>
               </EuiText>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size={'xl'} />
 
@@ -71,6 +73,19 @@ export class SpacesGridPage extends Component<Props, State> {
           />
         </EuiPageContent>
       </EuiPage>
+    );
+  }
+
+  public getPrimaryActionButton() {
+    return (
+      <EuiButton
+        fill
+        onClick={() => {
+          window.location.hash = `#/management/spaces/create`;
+        }}
+      >
+        Create new space
+      </EuiButton>
     );
   }
 
