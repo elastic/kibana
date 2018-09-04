@@ -7,7 +7,6 @@ import {
   EuiFlexItem,
   EuiOverlayMask,
   EuiModal,
-  EuiModalBody,
   EuiModalFooter,
   EuiButton,
 } from '@elastic/eui';
@@ -41,10 +40,8 @@ export const Toolbar = props => {
 
   const workpadLoader = (
     <EuiOverlayMask>
-      <EuiModal onClose={done} style={{ maxWidth: '80vw' }}>
-        <EuiModalBody>
-          <WorkpadLoader onClose={done} />
-        </EuiModalBody>
+      <EuiModal onClose={done} className="canvasModal--fixedSize">
+        <WorkpadLoader onClose={done} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={done}>
             Dismiss

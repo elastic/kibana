@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiOverlayMask,
   EuiModal,
-  EuiModalBody,
   EuiModalFooter,
   EuiToolTip,
 } from '@elastic/eui';
@@ -32,15 +31,13 @@ export const WorkpadHeader = ({
 
   const elementAdd = (
     <EuiOverlayMask>
-      <EuiModal onClose={() => setShowElementModal(false)} style={{ width: '1080px' }}>
-        <EuiModalBody>
-          <ElementTypes
-            onClick={element => {
-              addElement(element);
-              setShowElementModal(false);
-            }}
-          />
-        </EuiModalBody>
+      <EuiModal onClose={() => setShowElementModal(false)} className="canvasModal--fixedSize">
+        <ElementTypes
+          onClick={element => {
+            addElement(element);
+            setShowElementModal(false);
+          }}
+        />
         <EuiModalFooter>
           <EuiButton size="s" onClick={() => setShowElementModal(false)}>
             Dismiss

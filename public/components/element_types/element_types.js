@@ -1,6 +1,14 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFieldSearch, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiModalHeader,
+  EuiModalBody,
+} from '@elastic/eui';
 import lowerCase from 'lodash.lowercase';
 import { map, includes, sortBy } from 'lodash';
 
@@ -13,7 +21,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
 
     // Add back in icon={image} to this when Design has a full icon set
     const card = (
-      <EuiFlexItem key={name} style={{ minWidth: 200, maxWidth: 200, maxHeight: 200 }}>
+      <EuiFlexItem key={name}>
         <EuiCard
           textAlign="left"
           image={image}
@@ -33,17 +41,22 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
 
   return (
     <Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            placeholder="Filter Elements"
-            onChange={e => setSearch(e.target.value)}
-            value={search}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup wrap>{elementList}</EuiFlexGroup>
+      <EuiModalHeader>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              placeholder="Filter elements"
+              onChange={e => setSearch(e.target.value)}
+              value={search}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiFlexGrid gutterSize="l" columns={4}>
+          {elementList}
+        </EuiFlexGrid>
+      </EuiModalBody>
     </Fragment>
   );
 };

@@ -14,7 +14,7 @@ export const HomeApp = () => (
       </p>
     </EuiText>
     <EuiSpacer size="m" />
-    <EuiPanel className="canvasHomeApp__workpadLoader">
+    <EuiPanel paddingSize="none" className="canvasHomeApp__workpadLoader">
       <WorkpadLoader onClose={() => {}} />
     </EuiPanel>
   </div>
