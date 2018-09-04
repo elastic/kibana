@@ -226,29 +226,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .getVisibleText();
     }
 
-    clickShare() {
-      return testSubjects.click('discoverShareButton');
-    }
-
-    clickShortenUrl() {
-      return testSubjects.click('sharedSnapshotShortUrlButton');
-    }
-
-    async clickCopyToClipboard() {
-      await testSubjects.click('sharedSnapshotCopyButton');
-
-      // Confirm that the content was copied to the clipboard.
-      return await testSubjects.exists('shareCopyToClipboardSuccess');
-    }
-
-    async getShareCaption() {
-      return await testSubjects.getVisibleText('shareUiTitle');
-    }
-
-    async getSharedUrl() {
-      return await testSubjects.getProperty('sharedSnapshotUrl', 'value');
-    }
-
     async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }

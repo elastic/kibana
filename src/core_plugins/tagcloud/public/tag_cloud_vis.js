@@ -76,6 +76,7 @@ VisTypesRegistryProvider.register(function (Private) {
           aggFilter: ['terms', 'significant_terms']
         }
       ])
-    }
+    },
+    useCustomNoDataScreen: true
   });
 });

@@ -36,7 +36,6 @@ export function traefikLogsSpecProvider() {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `traefik` Filebeat module parses access logs created by Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {

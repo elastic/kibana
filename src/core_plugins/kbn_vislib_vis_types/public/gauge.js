@@ -109,6 +109,7 @@ export default function GaugeVisType(Private) {
           aggFilter: ['!geohash_grid', '!filter']
         }
       ])
-    }
+    },
+    useCustomNoDataScreen: true
   });
 }
