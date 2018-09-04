@@ -35,8 +35,13 @@ mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 
+$esFrom=source
+if [[ "$GIT_BRANCH" = "origin/master" ]]; then
+  $esFrom=snapshot
+fi
+
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom=snapshot
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom="$esFrom"
 echo ""
 echo ""
