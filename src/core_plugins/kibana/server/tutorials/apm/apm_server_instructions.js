@@ -118,7 +118,10 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
       textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
         defaultMessage: 'Note: If script execution is disabled on your system, \
 you need to set the execution policy for the current session \
-to allow the script to run. For example: `PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`.',
+to allow the script to run. For example: {command}.',
+        values: {
+          command: '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`'
+        }
       }),
     },
     createEditConfig(),
