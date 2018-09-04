@@ -6,16 +6,15 @@
 
 import { set } from 'lodash';
 
-import { InfraPathType } from '../../../../../../common/graphql/types';
-import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
+import { InfraESSearchBody, InfraNodeType, InfraProcesorRequestOptions } from '../../adapter_types';
 import { NODE_REQUEST_PARTITION_FACTOR, NODE_REQUEST_PARTITION_SIZE } from '../../constants';
 
 const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
   const { fields } = options.nodeOptions.sourceConfiguration;
   switch (options.nodeType) {
-    case InfraPathType.pods:
+    case InfraNodeType.pod:
       return fields.pods;
-    case InfraPathType.containers:
+    case InfraNodeType.container:
       return fields.containers;
     default:
       return fields.hosts;
