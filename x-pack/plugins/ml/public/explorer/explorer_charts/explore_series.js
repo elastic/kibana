@@ -65,10 +65,5 @@ export function exploreSeries(series) {
     }
   });
 
-  let path = chrome.getBasePath();
-  path += '/app/ml#/timeseriesexplorer';
-  path += '?_g=' + _g;
-  path += '&_a=' + encodeURIComponent(_a);
-
-  return path;
+  return `${chrome.getBasePath()}/app/ml#/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
 }
