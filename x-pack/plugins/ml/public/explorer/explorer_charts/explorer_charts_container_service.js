@@ -251,7 +251,7 @@ export function explorerChartsContainerServiceFactory(
     function findNearestChartPointToTime(chartData, record) {
       const time = record[ML_TIME_FIELD_NAME];
 
-      if (record.function === 'rare') {
+      if (record.function === 'rare' || record.function === 'count') {
         chartData = chartData.filter((d) => {
           return d.entity === record.by_field_value;
         });

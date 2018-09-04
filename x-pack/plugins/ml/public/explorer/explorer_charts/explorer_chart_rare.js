@@ -31,8 +31,6 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
-const CHART_TYPE = 'rare'; // one of ['rare', 'population']
-const CHART_Y_ATTRIBUTE = 'entity'; // on of ['entity', 'value']
 
 export class ExplorerChartRare extends React.Component {
   static propTypes = {
@@ -78,6 +76,9 @@ export class ExplorerChartRare extends React.Component {
     let lineChartYScale = null;
     let lineChartGroup;
     let lineChartValuesLine = null;
+
+    const CHART_TYPE = (config.functionDescription === 'rare') ? 'rare' : 'population';
+    const CHART_Y_ATTRIBUTE = (config.functionDescription === 'rare') ? 'entity' : 'value';
 
     init(config);
     drawRareChart(config.chartData);
@@ -330,7 +331,7 @@ export class ExplorerChartRare extends React.Component {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
-        if (_.has(marker, 'actual') && config.function !== 'rare') {
+        if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);

@@ -83,24 +83,31 @@ export function ExplorerChartsContainer({
                 wrapLabel={wrapLabel}
               />
               {(() => {
-                switch (functionDescription) {
-                  case 'rare':
-                    return (
-                      <ExplorerChartRare
-                        tooManyBuckets={tooManyBuckets}
-                        seriesConfig={series}
-                        mlSelectSeverityService={mlSelectSeverityService}
-                      />
-                    );
-                  default:
-                    return (
-                      <ExplorerChartSingleMetric
-                        tooManyBuckets={tooManyBuckets}
-                        seriesConfig={series}
-                        mlSelectSeverityService={mlSelectSeverityService}
-                      />
-                    );
+                if (functionDescription === 'rare') {
+                  return (
+                    <ExplorerChartRare
+                      tooManyBuckets={tooManyBuckets}
+                      seriesConfig={series}
+                      mlSelectSeverityService={mlSelectSeverityService}
+                    />
+                  );
                 }
+                if (functionDescription === 'count') {
+                  return (
+                    <ExplorerChartRare
+                      tooManyBuckets={tooManyBuckets}
+                      seriesConfig={series}
+                      mlSelectSeverityService={mlSelectSeverityService}
+                    />
+                  );
+                }
+                return (
+                  <ExplorerChartSingleMetric
+                    tooManyBuckets={tooManyBuckets}
+                    seriesConfig={series}
+                    mlSelectSeverityService={mlSelectSeverityService}
+                  />
+                );
               })()}
             </div>
           );
