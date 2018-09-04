@@ -10,7 +10,6 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
-//import PropTypes from 'prop-types';
 import React from 'react';
 
 import _ from 'lodash';
@@ -315,8 +314,6 @@ export class ExplorerSwimlane extends React.Component {
         class: 'lane',
       });
 
-      //$lane.on('mouseover', cellMouseover);
-      //$lane.on('mouseleave', cellMouseleave);
       const label = mlEscape(lane);
       const fieldName = mlEscape(swimlaneData.fieldName);
       const laneDivProps = {

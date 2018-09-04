@@ -72,6 +72,6 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
       chartWidth: '=',
       appState: '='
     },
-    link: link
+    link
   };
 });
