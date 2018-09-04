@@ -36,7 +36,6 @@ export function iisLogsSpecProvider() {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.iisLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {

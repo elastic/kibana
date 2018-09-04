@@ -36,7 +36,6 @@ export function postgresqlLogsSpecProvider() {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL. \
 [Learn more]({learnMoreLink}).',
       values: {
