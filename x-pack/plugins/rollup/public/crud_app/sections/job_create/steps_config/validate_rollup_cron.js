@@ -17,5 +17,5 @@ export function validateRollupCron(rollupCron) {
     )];
   }
 
-  return [];
+  return undefined;
 }

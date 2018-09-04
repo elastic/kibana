@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, mapValues, cloneDeep } from 'lodash';
+import { mapValues, cloneDeep } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -134,7 +134,8 @@ export class JobCreateUi extends Component {
   }
 
   hasStepErrors(stepId) {
-    return !isEmpty(this.state.stepsFieldErrors[stepId]);
+    const stepFieldErrors = this.state.stepsFieldErrors[stepId];
+    return Object.values(stepFieldErrors).some(error => error != null);
   }
 
   getStepsFieldsErrors(newStepsFields) {

@@ -17,5 +17,5 @@ export function validateRollupPageSize(rollupPageSize) {
     )];
   }
 
-  return [];
+  return undefined;
 }

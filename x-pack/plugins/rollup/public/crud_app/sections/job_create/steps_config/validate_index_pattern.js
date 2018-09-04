@@ -46,5 +46,5 @@ export function validateIndexPattern(indexPattern) {
     )];
   }
 
-  return [];
+  return undefined;
 }

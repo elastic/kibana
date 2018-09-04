@@ -17,5 +17,5 @@ export function validateId(id) {
     )];
   }
 
-  return [];
+  return undefined;
 }

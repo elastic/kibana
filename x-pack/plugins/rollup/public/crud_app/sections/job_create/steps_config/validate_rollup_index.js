@@ -55,5 +55,5 @@ export function validateRollupIndex(rollupIndex) {
     )];
   }
 
-  return [];
+  return undefined;
 }
