@@ -43,7 +43,7 @@ export class Table extends React.Component<TableProps, TableState> {
   }
 
   public resetSelection = () => {
-    this.setState({ selection: [] });
+    this.setSelection([]);
   };
 
   public setSelection = (selection: any[]) => {
