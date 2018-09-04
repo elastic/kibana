@@ -31,6 +31,8 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+const CHART_TYPE = 'rare'; // one of ['rare', 'population']
+const CHART_Y_ATTRIBUTE = 'entity'; // on of ['entity', 'value']
 
 export class ExplorerChartRare extends React.Component {
   static propTypes = {
@@ -77,10 +79,10 @@ export class ExplorerChartRare extends React.Component {
     let lineChartGroup;
     let lineChartValuesLine = null;
 
-    init(config.chartLimits);
+    init(config);
     drawRareChart(config.chartData);
 
-    function init(chartLimits) {
+    function init({ chartLimits, chartData }) {
       const $el = $('.ml-explorer-chart');
 
       // Clear any existing elements from the visualization,
@@ -95,13 +97,23 @@ export class ExplorerChartRare extends React.Component {
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
-      lineChartYScale = d3.scale.linear()
-        .range([chartHeight, 0])
-        .domain([
-          chartLimits.min,
-          chartLimits.max
-        ])
-        .nice();
+      const scaleCategories = _.uniq(chartData.map(d => d.entity));
+
+      if (CHART_TYPE === 'population') {
+        lineChartYScale = d3.scale.linear()
+          .range([chartHeight, 0])
+          .domain([
+            chartLimits.min,
+            chartLimits.max
+          ])
+          .nice();
+      } else if (CHART_TYPE === 'rare') {
+        lineChartYScale = d3.scale.ordinal()
+          .rangePoints([0, chartHeight])
+          .domain(scaleCategories);
+      } else {
+        throw `CHART_TYPE '${CHART_TYPE}' not supported`;
+      }
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
         .orient('left')
@@ -112,14 +124,18 @@ export class ExplorerChartRare extends React.Component {
       let maxYAxisLabelWidth = 0;
       const tempLabelText = svg.append('g')
         .attr('class', 'temp-axis-label tick');
-      tempLabelText.selectAll('text.temp.axis').data(lineChartYScale.ticks())
+      const tempLabelTextData = (CHART_TYPE === 'population') ? lineChartYScale.ticks() : scaleCategories;
+      tempLabelText.selectAll('text.temp.axis').data(tempLabelTextData)
         .enter()
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
             return fieldFormat.convert(d, 'text');
           } else {
-            return lineChartYScale.tickFormat()(d);
+            if (CHART_TYPE === 'population') {
+              return lineChartYScale.tickFormat()(d);
+            }
+            return d;
           }
         })
         .each(function () {
@@ -141,7 +157,7 @@ export class ExplorerChartRare extends React.Component {
 
       lineChartValuesLine = d3.svg.line()
         .x(d => lineChartXScale(d.date))
-        .y(d => lineChartYScale(d.value))
+        .y(d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
         .defined(d => d.value !== null);
 
       lineChartGroup = svg.append('g')
@@ -271,7 +287,7 @@ export class ExplorerChartRare extends React.Component {
       // Update all dots to new positions.
       const threshold = mlSelectSeverityService.state.get('threshold');
       dots.attr('cx', function (d) { return lineChartXScale(d.date); })
-        .attr('cy', function (d) { return lineChartYScale(d.value); })
+        .attr('cy', function (d) { return lineChartYScale(d[CHART_Y_ATTRIBUTE]); })
         .attr('class', function (d) {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
@@ -297,7 +313,7 @@ export class ExplorerChartRare extends React.Component {
 
       // Update all markers to new positions.
       scheduledEventMarkers.attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', (d) => lineChartYScale(d.value) - (SCHEDULED_EVENT_MARKER_HEIGHT / 2));
+        .attr('y', (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]) - (SCHEDULED_EVENT_MARKER_HEIGHT / 2));
 
     }
 
@@ -314,7 +330,7 @@ export class ExplorerChartRare extends React.Component {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
-        if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
+        if (_.has(marker, 'actual') && config.function !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);

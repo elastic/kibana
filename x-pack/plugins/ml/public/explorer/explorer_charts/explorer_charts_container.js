@@ -83,7 +83,6 @@ export function ExplorerChartsContainer({
                 wrapLabel={wrapLabel}
               />
               {(() => {
-                console.warn('detectorLabel', detectorLabel);
                 switch (functionDescription) {
                   case 'rare':
                     return (
