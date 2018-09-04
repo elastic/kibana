@@ -9,6 +9,7 @@ import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
+import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
@@ -59,7 +60,7 @@ export function compose(): InfraFrontendLibs {
 
   const infraModule = uiModules.get('app/infa');
 
-  const framework = new InfraKibanaFrameworkAdapter(infraModule, timezoneProvider);
+  const framework = new InfraKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
 
   const api = new InfraAxiosApiAdapter({ framework });
 

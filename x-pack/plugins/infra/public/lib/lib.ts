@@ -92,10 +92,6 @@ export interface InfraKibanaAdapterServiceRefs {
 
 export type InfraBufferedKibanaServiceCall<ServiceRefs> = (serviceRefs: ServiceRefs) => void;
 
-export interface InfraChrome {
-  setRootTemplate(template: string): void;
-}
-
 export interface InfraField {
   name: string;
   type: string;

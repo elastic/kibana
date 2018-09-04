@@ -10,9 +10,11 @@ import { resolve } from 'path';
 
 import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 
+const APP_ID = 'infra';
+
 export function infra(kibana: any) {
   return new kibana.Plugin({
-    id: 'infra',
+    id: APP_ID,
     configPrefix: 'xpack.infra',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
@@ -22,7 +24,27 @@ export function infra(kibana: any) {
         icon: 'plugins/infra/images/infra.svg',
         main: 'plugins/infra/app',
         title: 'Infra',
+        listed: false,
+        url: `/app/${APP_ID}#/home`,
       },
+      links: [
+        {
+          description: 'Explore your infrastructure',
+          icon: 'plugins/infra/images/infra.svg',
+          id: 'infra:home',
+          order: 8000,
+          title: 'Infra',
+          url: `/app/${APP_ID}#/home`,
+        },
+        {
+          description: 'Explore your logs',
+          icon: 'plugins/infra/images/infra.svg',
+          id: 'infra:logs',
+          order: 8001,
+          title: 'Logs',
+          url: `/app/${APP_ID}#/logs`,
+        },
+      ],
     },
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);

@@ -6,7 +6,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
@@ -20,8 +20,9 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/details" component={LogsPage} />
-        <Route path="/" exact={true} component={HomePage} />
+        <Redirect from="/" exact={true} to="/home" />
+        <Route path="/logs" component={LogsPage} />
+        <Route path="/home" component={HomePage} />
         <Route component={NotFoundPage} />
       </Switch>
     </Router>
