@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 
+import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository } from '../../model';
 import { RepositoryIndexInitializer } from '../indexer';
@@ -35,6 +36,13 @@ export function repositoryRoute(
     async handler(req, reply) {
       const repoUrl: string = req.payload.url;
       const log = new Log(req.server);
+
+      // Reject the request if the url is an invalid git url.
+      if (!isValidGitUrl(repoUrl)) {
+        reply(Boom.badRequest('Invalid git url.'));
+        return;
+      }
+
       const repo = RepositoryUtils.buildRepository(repoUrl);
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
 
