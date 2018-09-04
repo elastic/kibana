@@ -6,10 +6,8 @@
 
 require('@kbn/plugin-helpers').babelRegister();
 require('@kbn/test').runTestsCli([
-  // https://github.com/elastic/kibana/issues/19563 needs to be fixed and then these can get
-  // turned back on. A 3x retry loop did not prevent it from becoming flaky.
-  // require.resolve('../test/reporting/configs/chromium_api.js'),
-  // require.resolve('../test/reporting/configs/chromium_functional.js'),
+  require.resolve('../test/reporting/configs/chromium_api.js'),
+  require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/phantom_api.js'),
   require.resolve('../test/reporting/configs/phantom_functional.js'),
   require.resolve('../test/functional/config.js'),

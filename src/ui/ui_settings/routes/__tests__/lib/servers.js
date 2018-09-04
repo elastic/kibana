@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
 let services;
 let servers;
 
 export async function startServers() {
-  servers = await kbnTestServer.startTestServers({
+  servers = await startTestServers({
     adjustTimeout: (t) => this.timeout(t),
     settings: {
       uiSettings: {

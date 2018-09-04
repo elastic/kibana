@@ -31,6 +31,8 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function Introduction({ description, previewUrl, title, exportedFieldsUrl, iconType, isBeta }) {
   let img;
   if (previewUrl) {
@@ -55,7 +57,7 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
           target="_blank"
           rel="noopener noreferrer"
         >
-          View exported fields
+          <FormattedMessage id="kbn.home.tutorial.introduction.viewButtonLabel" defaultMessage="View exported fields"/>
         </EuiButton>
       </div>
     );

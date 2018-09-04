@@ -71,7 +71,10 @@ export function createServer(settings = {}) {
  * Creates an instance of KbnServer, including all of the core plugins,
  * with default configuration tailored for unit tests, and starts es.
  *
- * @param  {Object} [settings={}]
+ * @param  {Object} options
+ * @prop {Object} settings Any config overrides for this instance
+ * @prop {function} adjustTimeout A function(t) => this.timeout(t) that adjust the timeout of a test,
+ *    ensuring the test properly waits for the server to boot without timing out.
  * @return {KbnServer}
  */
 export async function startTestServers({ adjustTimeout, settings = {} }) {
@@ -116,7 +119,7 @@ export async function startTestServers({ adjustTimeout, settings = {} }) {
  *  Creates an instance of KbnServer, including all of the core plugins,
  *  with default configuration tailored for unit tests
  *
- *  @param  {Object} [settings={}]
+ *  @param  {Object} [settings={}] Any config overrides for this instance
  *  @return {KbnServer}
  */
 export function createServerWithCorePlugins(settings = {}) {

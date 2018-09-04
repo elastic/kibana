@@ -64,7 +64,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
+      if (process.platform === 'darwin') {
+        await input.session.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+      } else {
+        await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+      }
       await input.session.pressKeys(Keys.NULL); // Release modifier keys
       await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
@@ -120,8 +124,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await gaugeCount.getVisibleText();
     }
 
-    async clickTopN()
-    {
+    async clickTopN() {
       await testSubjects.click('top_nTsvbTypeBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

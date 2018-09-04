@@ -39,8 +39,8 @@ export function PointSeriesGetAspectsProvider(Private) {
 
     const aspect = {
       i: i,
-      col: col,
-      agg: col.aggConfig
+      title: col.title,
+      aggConfig: col.aggConfig
     };
 
     if (!aspects[name]) aspects[name] = [];

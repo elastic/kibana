@@ -36,7 +36,6 @@ export function redisLogsSpecProvider() {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.redisLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `redis` Filebeat module parses error and slow logs created by Redis. \
 For Redis to write error logs, make sure the `logfile` option, from the \
 Redis configuration file, is set to `redis-server.log`. \

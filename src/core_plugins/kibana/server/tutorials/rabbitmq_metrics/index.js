@@ -33,7 +33,6 @@ export function rabbitmqMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
       values: {
