@@ -7,9 +7,7 @@ const ancestorElement = (element, className) => {
   } while ((element = element.parentElement));
 };
 
-const localMousePosition = (target, clientX, clientY) => {
-  const ancestor = ancestorElement(target, 'canvasPage') || target;
-  const box = ancestor.getBoundingClientRect(); // causes reflow, fixme check performance impact
+const localMousePosition = (box, clientX, clientY) => {
   return {
     x: clientX - box.left,
     y: clientY - box.top,
@@ -22,14 +20,19 @@ const resetHandler = () => {
 };
 
 const setupHandler = (commit, target) => {
+  // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
+  // DOM elements that had been removed: kibana-canvas github issue #1093
+  const canvasPage = ancestorElement(target, 'canvasPage');
+  if (!canvasPage) return;
+  const canvasOrigin = canvasPage.getBoundingClientRect();
   window.onmousemove = ({ clientX, clientY, altKey, metaKey }) => {
-    const { x, y } = localMousePosition(target, clientX, clientY);
+    const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
     commit('cursorPosition', { x, y, altKey, metaKey });
   };
   window.onmouseup = e => {
     e.stopPropagation();
     const { clientX, clientY, altKey, metaKey } = e;
-    const { x, y } = localMousePosition(target, clientX, clientY);
+    const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey });
     resetHandler();
   };
