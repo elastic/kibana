@@ -19,7 +19,6 @@
 
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
-import './styles/index.less';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';

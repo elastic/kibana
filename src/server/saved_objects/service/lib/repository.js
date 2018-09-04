@@ -19,7 +19,7 @@
 
 import uuid from 'uuid';
 
-import { getRootType } from '../../../../core/server/saved_objects/mappings';
+import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';

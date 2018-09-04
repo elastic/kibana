@@ -223,6 +223,9 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
         if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);

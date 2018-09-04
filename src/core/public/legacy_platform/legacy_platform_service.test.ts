@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import * as Rx from 'rxjs';
 
 const mockLoadOrder: string[] = [];
 
@@ -61,6 +62,14 @@ jest.mock('ui/notify/toasts', () => {
   };
 });
 
+const mockLoadingCountInit = jest.fn();
+jest.mock('ui/chrome/api/loading_count', () => {
+  mockLoadOrder.push('ui/chrome/api/loading_count');
+  return {
+    __newPlatformInit__: mockLoadingCountInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -72,11 +81,23 @@ const injectedMetadataStartContract = {
   getLegacyMetadata: jest.fn(),
 };
 
+const loadingCountStartContract = {
+  add: jest.fn(),
+  getCount$: jest.fn().mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
+};
+
 const defaultParams = {
   targetDomElement: document.createElement('div'),
   requireLegacyFiles: jest.fn(() => {
     mockLoadOrder.push('legacy files');
   }),
+};
+
+const defaultStartDeps = {
+  fatalErrors: fatalErrorsStartContract,
+  injectedMetadata: injectedMetadataStartContract,
+  notifications: notificationsStartContract,
+  loadingCount: loadingCountStartContract,
 };
 
 afterEach(() => {
@@ -96,11 +117,7 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start({
-        fatalErrors: fatalErrorsStartContract,
-        injectedMetadata: injectedMetadataStartContract,
-        notifications: notificationsStartContract,
-      });
+      legacyPlatform.start(defaultStartDeps);
 
       expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
@@ -111,11 +128,7 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start({
-        fatalErrors: fatalErrorsStartContract,
-        injectedMetadata: injectedMetadataStartContract,
-        notifications: notificationsStartContract,
-      });
+      legacyPlatform.start(defaultStartDeps);
 
       expect(mockFatalErrorInit).toHaveBeenCalledTimes(1);
       expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStartContract);
@@ -126,14 +139,21 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start({
-        fatalErrors: fatalErrorsStartContract,
-        injectedMetadata: injectedMetadataStartContract,
-        notifications: notificationsStartContract,
-      });
+      legacyPlatform.start(defaultStartDeps);
 
       expect(mockNotifyToastsInit).toHaveBeenCalledTimes(1);
       expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStartContract.toasts);
+    });
+
+    it('passes loadingCount service to ui/chrome/api/loading_count', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockLoadingCountInit).toHaveBeenCalledTimes(1);
+      expect(mockLoadingCountInit).toHaveBeenCalledWith(loadingCountStartContract);
     });
 
     describe('useLegacyTestHarness = false', () => {
@@ -142,11 +162,7 @@ describe('#start()', () => {
           ...defaultParams,
         });
 
-        legacyPlatform.start({
-          fatalErrors: fatalErrorsStartContract,
-          injectedMetadata: injectedMetadataStartContract,
-          notifications: notificationsStartContract,
-        });
+        legacyPlatform.start(defaultStartDeps);
 
         expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
         expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
@@ -160,11 +176,7 @@ describe('#start()', () => {
           useLegacyTestHarness: true,
         });
 
-        legacyPlatform.start({
-          fatalErrors: fatalErrorsStartContract,
-          injectedMetadata: injectedMetadataStartContract,
-          notifications: notificationsStartContract,
-        });
+        legacyPlatform.start(defaultStartDeps);
 
         expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
         expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
@@ -182,16 +194,13 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
-        legacyPlatform.start({
-          fatalErrors: fatalErrorsStartContract,
-          injectedMetadata: injectedMetadataStartContract,
-          notifications: notificationsStartContract,
-        });
+        legacyPlatform.start(defaultStartDeps);
 
         expect(mockLoadOrder).toEqual([
           'ui/metadata',
           'ui/notify/fatal_error',
           'ui/notify/toasts',
+          'ui/chrome/api/loading_count',
           'ui/chrome',
           'legacy files',
         ]);
@@ -207,16 +216,13 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
-        legacyPlatform.start({
-          fatalErrors: fatalErrorsStartContract,
-          injectedMetadata: injectedMetadataStartContract,
-          notifications: notificationsStartContract,
-        });
+        legacyPlatform.start(defaultStartDeps);
 
         expect(mockLoadOrder).toEqual([
           'ui/metadata',
           'ui/notify/fatal_error',
           'ui/notify/toasts',
+          'ui/chrome/api/loading_count',
           'ui/test_harness',
           'legacy files',
         ]);

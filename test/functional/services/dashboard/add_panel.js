@@ -24,6 +24,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
+  const find = getService('find');
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -94,8 +95,10 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForEuiTableLoading() {
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      await addPanel.waitForDeletedByClassName('euiBasicTable-loading');
+      await retry.waitFor('dashboard add panel loading to complete', async () => {
+        const table = await find.byClassName('euiBasicTable');
+        return !((await table.getAttribute('class')).includes('loading'));
+      });
     }
 
     async closeAddPanel() {
@@ -169,8 +172,6 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
-      // workaround for timing issue with slideout animation
-      await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();

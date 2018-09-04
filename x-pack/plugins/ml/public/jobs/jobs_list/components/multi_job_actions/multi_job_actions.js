@@ -34,6 +34,7 @@ export class MultiJobActions extends Component {
 
             <GroupSelector
               jobs={this.props.selectedJobs}
+              allJobIds={this.props.allJobIds}
               refreshJobs={this.props.refreshJobs}
             />
 
@@ -51,6 +52,7 @@ export class MultiJobActions extends Component {
 }
 MultiJobActions.propTypes = {
   selectedJobs: PropTypes.array.isRequired,
+  allJobIds: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,

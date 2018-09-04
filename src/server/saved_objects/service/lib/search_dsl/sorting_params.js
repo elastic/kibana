@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 
-import { getProperty } from '../../../../../core/server/saved_objects/mappings';
+import { getProperty } from '../../../../mappings';
 
 export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (!sortField) {

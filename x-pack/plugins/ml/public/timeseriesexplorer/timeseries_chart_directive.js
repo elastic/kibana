@@ -30,18 +30,15 @@ import {
 import { TimeBuckets } from 'ui/time_buckets';
 import { mlAnomaliesTableService } from 'plugins/ml/components/anomalies_table/anomalies_table_service';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
-import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
+import { findChartPointForAnomalyTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlTimeseriesChart', function (
-  $compile,
-  $timeout,
-  Private,
-  mlChartTooltipService) {
+module.directive('mlTimeseriesChart', function () {
 
   function link(scope, element) {
 
@@ -1017,11 +1014,11 @@ module.directive('mlTimeseriesChart', function (
     function highlightFocusChartAnomaly(record) {
       // Highlights the anomaly marker in the focus chart corresponding to the specified record.
 
-      // Find the anomaly marker which is closest in time to the source record.
+      // Find the anomaly marker which corresponds to the time of the anomaly record.
       // Depending on the way the chart is aggregated, there may not be
       // a point at exactly the same time as the record being highlighted.
       const anomalyTime = record.source.timestamp;
-      const markerToSelect = findNearestChartPointToTime(scope.focusChartData, anomalyTime);
+      const markerToSelect = findChartPointForAnomalyTime(scope.focusChartData, anomalyTime);
 
       // Render an additional highlighted anomaly marker on the focus chart.
       // TODO - plot anomaly markers for cases where there is an anomaly due

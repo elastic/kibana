@@ -1,5 +1,11 @@
-// Import the EUI global scope so we can use EUI constants
-@import '../../../../src/ui/public/styles/_styling_constants';
+@import 'ui/public/styles/styling_constants';
 
 // Discover styles
-@import 'discover/index';
+@import './discover/index';
+
+// Home styles
+@import './home/index';
+
+// Dashboard styles
+// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
+@import './dashboard/index';

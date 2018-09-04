@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe.skip('adding a filter that excludes all data', async () => {
+    describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -102,11 +102,15 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('using a pinned filter that excludes all data', async () => {
+    describe('using a pinned filter that excludes all data', async () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      after(async () => {
+        await filterBar.toggleFilterPinned('bytes');
       });
 
       it('filters on pie charts', async () => {
@@ -159,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('disabling a filter unfilters the data on', async () => {
+    describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -241,7 +245,7 @@ export default function ({ getService, getPageObjects }) {
         await renderable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -256,7 +260,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await dashboardExpect.pieSliceCount(1);

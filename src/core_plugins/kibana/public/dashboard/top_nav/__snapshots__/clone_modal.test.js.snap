@@ -3,7 +3,7 @@
 exports[`renders DashboardCloneModal 1`] = `
 <EuiOverlayMask>
   <EuiModal
-    className="dashboardModal"
+    className="dshCloneModal"
     data-test-subj="dashboardCloneModal"
     onClose={[Function]}
   >

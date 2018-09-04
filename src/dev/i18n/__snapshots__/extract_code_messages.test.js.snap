@@ -26,6 +26,6 @@ Array [
 ]
 `;
 
-exports[`extractCodeMessages throws on empty id 1`] = `"Empty \\"id\\" value in i18n() or i18n.translate() is not allowed."`;
+exports[`extractCodeMessages throws on empty id 1`] = `"[37m[41m I18N ERROR [49m[39m Empty \\"id\\" value in i18n() or i18n.translate() is not allowed."`;
 
-exports[`extractCodeMessages throws on missing defaultMessage 1`] = `"Empty defaultMessage in intl.formatMessage() is not allowed (\\"message-id\\")."`;
+exports[`extractCodeMessages throws on missing defaultMessage 1`] = `"[37m[41m I18N ERROR [49m[39m Empty defaultMessage in intl.formatMessage() is not allowed (\\"message-id\\")."`;

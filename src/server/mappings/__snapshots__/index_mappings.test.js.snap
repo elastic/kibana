@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`server/mapping/index_mapping constructor includes the pluginId from the extension in the _ error message if defined 1`] = `"Property names _foo registered by plugin abc123 are not allowed to start with an underscore (_)"`;
+
+exports[`server/mapping/index_mapping constructor throws if any of the new properties start with _ 1`] = `"Property names _foo are not allowed to start with an underscore (_)"`;

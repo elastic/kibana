@@ -26,6 +26,10 @@ const getBaseStats = () => ({
     count: 0,
     names: []
   },
+  architecture: {
+    count: 0,
+    architectures: []
+  }
 });
 
 
@@ -37,7 +41,7 @@ const getBaseStats = () => ({
  * @param {Object} clusterHostSets - the object keyed by cluster UUIDs to count the unique hosts
  * @param {Object} clusterModuleSets - the object keyed by cluster UUIDs to count the unique modules
  */
-export function processResults(results = [], { clusters, clusterHostSets, clusterInputSets, clusterModuleSets }) {
+export function processResults(results = [], { clusters, clusterHostSets, clusterInputSets, clusterModuleSets, clusterArchitectureMaps }) {
   const currHits = get(results, 'hits.hits', []);
   currHits.forEach(hit => {
     const clusterUuid = get(hit, '_source.cluster_uuid');
@@ -46,6 +50,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
       clusterHostSets[clusterUuid] = new Set();
       clusterInputSets[clusterUuid] = new Set();
       clusterModuleSets[clusterUuid] = new Set();
+      clusterArchitectureMaps[clusterUuid] = new Map();
     }
 
     const processBeatsStatsResults = () => {
@@ -97,6 +102,25 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
         clusters[clusterUuid].module.names = Array.from(moduleSet);
         clusters[clusterUuid].module.count += stateModule.count;
       }
+
+      const stateHost = get(hit, '_source.beats_state.state.host');
+      if (stateHost !== undefined) {
+        const hostMap = clusterArchitectureMaps[clusterUuid];
+        const hostKey = `${stateHost.architecture}/${stateHost.os.platform}`;
+        let os = hostMap.get(hostKey);
+
+        if (!os) { // undefined if new
+          os = { name: stateHost.os.platform, architecture: stateHost.architecture, count: 0 };
+          hostMap.set(hostKey, os);
+        }
+
+        // total per os/arch
+        os.count += 1;
+
+        // overall total (which should be the same number as the sum of all os.count values)
+        clusters[clusterUuid].architecture.count += 1;
+        clusters[clusterUuid].architecture.architectures = Array.from(hostMap.values());
+      }
     };
 
     if (get(hit, '_source.type') === 'beats_stats') {
@@ -136,6 +160,7 @@ async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, {
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
       'hits.hits._source.beats_state.state.input',
       'hits.hits._source.beats_state.state.module',
+      'hits.hits._source.beats_state.state.host',
     ],
     body: {
       query: createQuery({
@@ -194,7 +219,8 @@ export async function getBeatsStats(server, callCluster, clusterUuids, start, en
     clusters: {}, // the result object to be built up
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation
     clusterInputSets: {}, // passed to processResults for tracking state in the results generation
-    clusterModuleSets: {} // passed to processResults for tracking state in the results generation
+    clusterModuleSets: {}, // passed to processResults for tracking state in the results generation
+    clusterArchitectureMaps: {} // passed to processResults for tracking state in the results generation
   };
 
   await Promise.all([
