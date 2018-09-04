@@ -19,7 +19,7 @@ import {
   EuiSwitch,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
-  EuiIcon,
+  EuiBadge,
   EuiButton,
 } from '@elastic/eui';
 import {
@@ -102,7 +102,7 @@ export class WarmPhase extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">Warm phase</span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiIcon label="Enabled" type="checkInCircleFilled" color="currentColor" className="eui-alignMiddle" />
+              <EuiBadge className="eui-alignMiddle">Active</EuiBadge>
             ) : null}
           </div>
         }
