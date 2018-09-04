@@ -37,9 +37,9 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, log }) {
+  constructor({ log }) {
     this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, log);
+    this.dllCompiler = new DllCompiler(log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
   }
@@ -145,8 +145,7 @@ export class DynamicDllPlugin {
         }
 
         this.afterCompilationEntryPaths = requires.sort().join('\n');
-        compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths)
-          || !this.dllCompiler.dllExistsSync();
+        compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths);
         this.entryPaths = this.afterCompilationEntryPaths;
 
         this.log(
