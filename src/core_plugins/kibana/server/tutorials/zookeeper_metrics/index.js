@@ -34,7 +34,6 @@ export function zookeeperMetricsSpecProvider() {
       defaultMessage: 'Fetch interal metrics from a Zookeeper server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
 [Learn more]({learnMoreLink}).',
       values: {

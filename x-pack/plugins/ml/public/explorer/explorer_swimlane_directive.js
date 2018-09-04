@@ -19,11 +19,12 @@ import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { mlEscape } from 'plugins/ml/util/string_utils';
+import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService, mlChartTooltipService) {
+module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService) {
 
   function link(scope, element) {
 
