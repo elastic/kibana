@@ -23,6 +23,7 @@ export default function ({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const table = getService('table');
+  const retry = getService('retry');
 
   async function selectVis(id) {
     await testSubjects.click('visSelect');
@@ -32,7 +33,9 @@ export default function ({ getService }) {
   async function selectParams(id) {
     await testSubjects.click('embeddingParamsSelect');
     await find.clickByCssSelector(`option[value="${id}"]`);
-    await testSubjects.waitForDeleted('visLoadingIndicator');
+    await retry.try(async () => {
+      await testSubjects.waitForDeleted('visLoadingIndicator');
+    });
   }
 
   async function getTableData() {
@@ -152,6 +155,24 @@ export default function ({ getService }) {
 
       it('should correctly embed specifying filters and query and timeRange', async () => {
         await selectParams('filters_query_timerange');
+        const data = await getTableData();
+        expect(data).to.be.eql([
+          ['2015-09-20 20:00', '24.567KB', '3.498KB'],
+          ['2015-09-21 00:00', '25.984KB', '3.589KB'],
+          ['2015-09-21 04:00', '2.543KB', '2.543KB'],
+          ['2015-09-21 12:00', '5.783KB', '2.927KB'],
+          ['2015-09-21 16:00', '21.107KB', '3.44KB'],
+        ]);
+      });
+    });
+
+    describe('vis visa saved object on timebased data with date histogram with interval auto and saved filters', () => {
+      before(async () => {
+        await selectVis('timebased_with-filters');
+      });
+
+      it('should correctly embed specifying filters and query and timeRange', async () => {
+        await selectParams('savedobject_filter_query_timerange');
         const data = await getTableData();
         expect(data).to.be.eql([
           ['2015-09-20 20:00', '24.567KB', '3.498KB'],

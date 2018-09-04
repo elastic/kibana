@@ -23,6 +23,7 @@
  */
 
 import { getVisualizeLoader } from 'ui/visualize';
+import chrome from 'ui/chrome';
 
 export const embeddingSamples = [
 
@@ -115,6 +116,48 @@ export const embeddingSamples = [
       // You an of course combine timeRange, query and filters options all together
       // to filter the data in the embedded visualization.
       return loader.embedVisualizationWithId(domNode, id, {
+        timeRange: {
+          from: '2015-09-20 20:00:00.000',
+          to: '2015-09-21 20:00:00.000',
+        },
+        query: {
+          language: 'lucene',
+          query: 'bytes:>2000'
+        },
+        filters: [
+          {
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { 'extension.raw': 'jpg' } },
+                  { match_phrase: { 'extension.raw': 'png' } },
+                ]
+              }
+            },
+            meta: {
+              negate: true
+            }
+          }
+        ]
+      });
+    }
+  }, {
+    id: 'savedobject_filter_query_timerange',
+    title: 'filters & query & time (use saved object)',
+    async run(domNode, id) {
+      const loader = await getVisualizeLoader();
+      // Besides embedding via the id of the visualizataion, the API offers the possibility to
+      // embed via the saved visualization object.
+      //
+      // WE ADVISE YOU NOT TO USE THIS INSIDE ANY PLUGIN!
+      //
+      // Since the format of the saved visualization object will change in the future and because
+      // this still requires you to talk to old Angular code, we do not encourage you to use this
+      // way of embedding in any plugin. It's likely it will be removed or changed in a future version.
+      const $injector = await chrome.dangerouslyGetActiveInjector();
+      const savedVisualizations = $injector.get('savedVisualizations');
+      const savedVis = await savedVisualizations.get(id);
+      return loader.embedVisualizationWithSavedObject(domNode, savedVis, {
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
