@@ -24,7 +24,7 @@ import { SavedObjectDoc } from './document_migrator';
 import { IndexMigrator } from './index_migrator';
 
 describe('IndexMigrator', () => {
-  test.only('patches the index mappings if the index is already migrated', async () => {
+  test('patches the index mappings if the index is already migrated', async () => {
     const opts = defaultOpts();
     const callCluster = clusterStub(opts);
 
