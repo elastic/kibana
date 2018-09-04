@@ -208,6 +208,7 @@ export default class BaseOptimizer {
 
       plugins: [
         new DynamicDllPlugin({
+          uiBundles: this.uiBundles,
           log: this.log
         }),
 
