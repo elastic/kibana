@@ -238,9 +238,26 @@ export default () => Joi.object({
     }),
     profile: Joi.boolean().default(false)
   }).default(),
+
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
+
+  taskManager: Joi.object({
+    max_attempts: Joi.number()
+      .description('The maximum number of times a task will be attempted before being abandoned as failed')
+      .default(3),
+    poll_interval: Joi.number()
+      .description('How often, in milliseconds, the task manager will look for more work.')
+      .default(3000),
+    index: Joi.string()
+      .description('The name of the index used to store task information.')
+      .default('.kibana_task_manager'),
+    num_workers: Joi.number()
+      .description('The maximum number of tasks that this Kibana instance will run simultaneously.')
+      .default(10),
+  }).default(),
+
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     tilemap: tilemapSchema,
