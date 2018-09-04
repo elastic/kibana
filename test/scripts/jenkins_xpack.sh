@@ -35,9 +35,9 @@ mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
 
-$esFrom=source
+esFrom=source
 if [[ "$GIT_BRANCH" = "origin/master" ]]; then
-  $esFrom=snapshot
+  esFrom=snapshot
 fi
 
 echo " -> Running functional and api tests"
