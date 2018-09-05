@@ -13,6 +13,7 @@ import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
 import { indexLifecycleManagementStore } from './store';
 import { I18nProvider } from '@kbn/i18n/react';
+import { setUrlService } from './services/navigation';
 
 import routes from 'ui/routes';
 
@@ -34,9 +35,16 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
   template: template,
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
-    constructor($scope, $route, $http) {
+    constructor($scope, $route, $http, kbnUrl, $rootScope) {
       setHttpClient($http);
-
+      setUrlService({
+        change(url) {
+          console.log("CHANGE");
+          kbnUrl.change(url);
+          $rootScope.$digest();
+          console.log("PICHANGE");
+        }
+      });
       $scope.$$postDigest(() => {
         const elem = document.getElementById('indexLifecycleManagementReactRoot');
         renderReact(elem);

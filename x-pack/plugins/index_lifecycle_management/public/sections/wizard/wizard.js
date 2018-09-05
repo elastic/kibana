@@ -10,6 +10,7 @@ import { toastNotifications } from 'ui/notify';
 import { IndexTemplate } from './components/index_template';
 import { PolicyConfiguration } from './components/policy_configuration';
 import { Review } from './components/review';
+import { goToPolicyList } from '../../services/navigation';
 import {
   EuiPage,
   EuiPageBody,
@@ -68,15 +69,20 @@ export class Wizard extends Component {
   };
 
   addLifecycle = async lifecycle => {
-    await this.props.saveLifecycle(lifecycle, this.props.indexTemplatePatch);
-    await this.bootstrap();
-    // this.onSelectedStepChanged(5);
+    const lifecycleSuccess = await this.props.saveLifecycle(lifecycle, this.props.indexTemplatePatch);
+    if (!lifecycleSuccess) {
+      return;
+    }
+    const bootstrapSuccess = await this.bootstrap();
+    if (bootstrapSuccess) {
+      goToPolicyList();
+    }
   };
 
   bootstrap = async () => {
     const { indexName, aliasName, bootstrapEnabled } = this.props;
     if (!bootstrapEnabled) {
-      return;
+      return true;
     }
 
     const bootstrapSuccess = await bootstrap(indexName, aliasName);
@@ -90,6 +96,7 @@ export class Wizard extends Component {
     } else {
       toastNotifications.addDanger('Unable to bootstrap an index and alias');
     }
+    return bootstrapSuccess;
   };
 
   renderContent() {
