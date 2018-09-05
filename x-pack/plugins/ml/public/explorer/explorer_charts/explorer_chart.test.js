@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { seriesConfig } from './mock_series_config';
+import seriesConfig from './mock_series_config.json';
 
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
