@@ -23,15 +23,13 @@ function getLink(location, jobs) {
   let from = 0;
   let to = 0;
   if (jobs.length === 1) {
-    from = jobs[0].earliestTimeStampSeconds;
-    to = jobs[0].latestTimeStampSeconds;
+    from = jobs[0].earliestTimeStampMs;
+    to = jobs[0].latestTimeStampMs;
   } else {
-    from = Math.min(...jobs.map(j => j.earliestTimeStampSeconds));
-    to = Math.max(...jobs.map(j => j.latestTimeStampSeconds));
+    from = Math.min(...jobs.map(j => j.earliestTimeStampMs));
+    to = Math.max(...jobs.map(j => j.latestTimeStampMs));
   }
 
-  // if either of the dates are zero, set them to undefined
-  // moment will convert undefined to now.
   const fromString = moment(from).format(TIME_FORMAT);
   const toString = moment(to).format(TIME_FORMAT);
 

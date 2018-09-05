@@ -97,8 +97,8 @@ export function jobsProvider(callWithRequest) {
     const jobs = fullJobsList.map((job) => {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
-        earliest: earliestTimeStampSeconds,
-        latest: latestTimeStampSeconds } = earliestAndLatestTimeStamps(job.data_counts);
+        earliest: earliestTimeStampMs,
+        latest: latestTimeStampMs } = earliestAndLatestTimeStamps(job.data_counts);
 
       const tempJob = {
         id: job.job_id,
@@ -110,8 +110,8 @@ export function jobsProvider(callWithRequest) {
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
-        latestTimeStampSeconds,
-        earliestTimeStampSeconds,
+        latestTimeStampMs,
+        earliestTimeStampMs,
         nodeName: (job.node) ? job.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {

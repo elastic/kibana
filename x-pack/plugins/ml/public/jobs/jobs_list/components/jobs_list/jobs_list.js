@@ -164,7 +164,7 @@ export class JobsList extends Component {
         render: (time, item) => (
           <span className="euiTableCellContent__text">
             {
-              (item.latestTimeStampSeconds === undefined) ? '' : moment(item.latestTimeStampSeconds).format(TIME_FORMAT)
+              (item.latestTimeStampMs === undefined) ? '' : moment(item.latestTimeStampMs).format(TIME_FORMAT)
             }
           </span>
         )
