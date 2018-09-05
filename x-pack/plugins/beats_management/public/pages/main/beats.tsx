@@ -5,6 +5,7 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
@@ -68,9 +69,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private sortBeats = (a: CMPopulatedBeat, b: CMPopulatedBeat) => (a.id < b.id ? 0 : 1);
 
-  private renderTagAssignment = (tag: BeatTag) => (
+  private renderTagAssignment = (tag: BeatTag, key: string) => (
     <TagAssignment
       assignTagsToBeats={this.assignTagsToBeats}
+      key={key}
       removeTagsFromBeats={this.removeTagsFromBeats}
       selectedBeats={this.getSelectedBeats()}
       tag={tag}
@@ -160,9 +162,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         : `${assignments.length} beats`;
     this.setState({
       notifications: this.state.notifications.concat({
-        title: `Tag ${actionName}`,
         color: 'success',
+        id: `tag-${moment.now()}`,
         text: <p>{`${actionName} tag "${tag}" ${preposition} ${beatMessage}.`}</p>,
+        title: `Tag ${actionName}`,
       }),
     });
   };

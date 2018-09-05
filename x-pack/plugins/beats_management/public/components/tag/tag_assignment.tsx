@@ -6,12 +6,11 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
-import { ClientSideBeatTag } from '../../lib/lib';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 
 interface TagAssignmentProps {
   selectedBeats: CMPopulatedBeat[];
-  tag: ClientSideBeatTag;
+  tag: BeatTag;
   assignTagsToBeats(selectedBeats: any, tag: any): void;
   removeTagsFromBeats(selectedBeats: any, tag: any): void;
 }
@@ -43,13 +42,13 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
     );
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" key={`${id}-${hasMatches ? 'matched' : 'unmatched'}`}>
         {this.state.isFetchingTags && (
           <EuiFlexItem>
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
         )}
-        <EuiFlexItem key={`${id}-${hasMatches ? 'matched' : 'unmatched'}`}>
+        <EuiFlexItem>
           <EuiBadge
             color={color}
             iconType={hasMatches ? 'cross' : undefined}

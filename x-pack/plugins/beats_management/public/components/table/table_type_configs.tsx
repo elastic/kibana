@@ -71,10 +71,8 @@ export const BeatsTableType: TableType = {
       render: (value: string, beat: CMPopulatedBeat) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
           {(beat.full_tags.sort((a, b) => (a.id <= b.id ? 0 : 1)) || []).map(tag => (
-            <EuiFlexItem grow={false}>
-              <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
-                {tag.id}
-              </EuiBadge>
+            <EuiFlexItem key={tag.id} grow={false}>
+              <EuiBadge color={tag.color ? tag.color : 'primary'}>{tag.id}</EuiBadge>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
