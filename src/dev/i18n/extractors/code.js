@@ -26,9 +26,9 @@ import {
   isMemberExpression,
 } from '@babel/types';
 
-import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { isI18nTranslateFunction, traverseNodes } from './utils';
-import { extractIntlMessages, extractFormattedMessages } from './extract_react_messages';
+import { extractI18nCallMessages } from './i18n_call';
+import { isI18nTranslateFunction, traverseNodes } from '../utils';
+import { extractIntlMessages, extractFormattedMessages } from './react';
 
 /**
  * Detect Intl.formatMessage() function call (React).

@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export { run } from './run';
-export { createFailError, combineErrors, isFailError } from './fail';
+import { serializeToJson } from './json';
+
+describe('dev/i18n/serializers/json', () => {
+  test('should serialize default messages to JSON', () => {
+    const messages = new Map([
+      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          context: 'Message context',
+        },
+      ],
+    ]);
+
+    expect(serializeToJson(messages)).toMatchSnapshot();
+  });
+});

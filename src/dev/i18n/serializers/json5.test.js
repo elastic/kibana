@@ -17,5 +17,26 @@
  * under the License.
  */
 
-export { run } from './run';
-export { createFailError, combineErrors, isFailError } from './fail';
+import { serializeToJson5 } from './json5';
+
+describe('dev/i18n/serializers/json5', () => {
+  test('should serialize default messages to JSON5', () => {
+    const messages = new Map([
+      [
+        'plugin1.message.id-1',
+        {
+          message: 'Message text 1',
+        },
+      ],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          context: 'Message context',
+        },
+      ],
+    ]);
+
+    expect(serializeToJson5(messages).toString()).toMatchSnapshot();
+  });
+});
