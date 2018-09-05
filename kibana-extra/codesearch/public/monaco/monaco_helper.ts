@@ -99,17 +99,23 @@ export class MonacoHelper {
     if (!this.initialized) {
       await this.init();
     }
-
-    this.editor!.setModel(null);
+    const ed = this.editor!;
+    const oldModel = ed.getModel();
+    if (oldModel) {
+      oldModel.dispose();
+    }
+    ed.setModel(null);
     const uri = this.monaco!.Uri.parse(
       toCanonicalUrl({ schema: 'git:', repoUri, file, revision, pathType: 'blob' })
     );
     let newModel = this.monaco!.editor.getModel(uri);
     if (!newModel) {
       newModel = this.monaco!.editor.createModel(text, lang, uri);
+    } else {
+      newModel.setValue(text);
     }
-    this.editor!.setModel(newModel);
-    return this.editor!;
+    ed.setModel(newModel);
+    return ed;
   }
 
   public revealLine(line: number) {

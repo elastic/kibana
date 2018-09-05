@@ -23,6 +23,7 @@ export interface FetchRepoTreePayload extends FetchFilePayload {
 }
 
 export interface FetchFileResponse {
+  payload: FetchFilePayload;
   isNotFound?: boolean;
   content?: string;
   lang?: string;

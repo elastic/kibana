@@ -34,9 +34,7 @@ export interface FileState {
   branches: ReferenceInfo[];
   tags: ReferenceInfo[];
   commits: CommitInfo[];
-  file?: FetchFilePayload;
-  fileContent?: string;
-  fileLanguage?: string;
+  file?: FetchFileResponse;
   opendir?: FileTree;
   isNotFound: boolean;
   isImage?: boolean;
@@ -128,14 +126,12 @@ export const file = handleActions(
       }),
     [String(fetchFile)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
-        const payload = action.payload as FetchFilePayload;
-        draft.file = payload;
+        draft.file = { payload: action.payload as FetchFilePayload };
       }),
     [String(fetchFileSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
+        draft.file = action.payload as FetchFileResponse;
         const response = action.payload as FetchFileResponse;
-        draft.fileContent = response.content;
-        draft.fileLanguage = response.lang;
         draft.isImage = !!response.isImage;
         if (response.url) {
           draft.url = response.url;
@@ -144,8 +140,7 @@ export const file = handleActions(
       }),
     [String(fetchFileFailed)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
-        draft.fileContent = undefined;
-        draft.fileLanguage = undefined;
+        draft.file = undefined;
       }),
     [String(fetchDirectorySuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {

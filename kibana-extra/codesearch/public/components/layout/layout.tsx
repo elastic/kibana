@@ -26,6 +26,7 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import {
   closeTreePath,
+  FetchFileResponse,
   fetchRepoTree,
   FetchRepoTreePayload,
   symbolSearchQueryChanged,
@@ -65,8 +66,7 @@ interface Props {
   symbolSearchQueryChanged: (query: string) => void;
   isSymbolsLoading: boolean;
   isNotFound: boolean;
-  fileLanguage?: string;
-  fileContent?: string;
+  file: FetchFileResponse;
   isImage?: boolean;
   url?: string;
 }
@@ -232,14 +232,7 @@ export class LayoutPage extends React.Component<Props, State> {
           </div>
         );
       }
-      return (
-        <Editor
-          file={path}
-          goto={goto}
-          repoUri={`${resource}/${org}/${repo}`}
-          revision={revision || 'HEAD'}
-        />
-      );
+      return <Editor />;
     } else if (pathType === PathTypes.tree) {
       return (
         <EuiFlexGroup direction="column" style={noMarginStyle}>
@@ -352,6 +345,7 @@ const mapStateToProps = (state: RootState) => ({
   symbols: state.symbolSearch.symbols,
   isSymbolsLoading: state.symbolSearch.isLoading,
   commits: state.file.commits,
+  file: state.file.file,
 });
 
 const mapDispatchToProps = {

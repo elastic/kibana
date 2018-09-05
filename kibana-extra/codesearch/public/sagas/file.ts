@@ -123,9 +123,10 @@ function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision) {
 }
 
 export async function requestFile(
-  { uri, revision, path }: FetchFilePayload,
+  payload: FetchFilePayload,
   line?: string
 ): Promise<FetchFileResponse> {
+  const { uri, revision, path } = payload;
   let url = `../api/cs/repo/${uri}/blob/${revision}/${path}`;
   if (line) {
     url += '?line=' + line;
@@ -137,11 +138,13 @@ export async function requestFile(
     if (contentType && contentType.startsWith('text/')) {
       const lang = contentType.split(';')[0].substring('text/'.length);
       return {
+        payload,
         lang,
         content: await response.text(),
       };
     } else if (contentType && contentType.startsWith('image/')) {
       return {
+        payload,
         isImage: true,
         content: await response.text(),
         url,
@@ -149,6 +152,7 @@ export async function requestFile(
     }
   } else if (response.status === 404) {
     return {
+      payload,
       isNotFound: true,
     };
   }

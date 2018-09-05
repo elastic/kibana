@@ -64,9 +64,9 @@ export class EditorComponent extends React.Component<Props> {
     if (nextProps.revealPosition && nextProps.revealPosition !== this.props.revealPosition) {
       this.revealPosition(nextProps.revealPosition);
     }
-    if (nextProps.fileContent !== this.props.fileContent) {
+    if (nextProps.fileContent && nextProps.fileContent !== this.props.fileContent) {
       this.loadText(
-        nextProps.fileContent!,
+        nextProps.fileContent,
         nextProps.repoUri,
         nextProps.file,
         nextProps.fileLanguage!
@@ -136,8 +136,11 @@ export class EditorComponent extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  fileContent: state.file.fileContent,
-  fileLanguage: state.file.fileLanguage,
+  file: state.file.file!.payload.path,
+  repoUri: state.file.file!.payload.uri,
+  revision: state.file.file!.payload.uri,
+  fileContent: state.file.file!.content,
+  fileLanguage: state.file.file!.lang,
   isReferencesOpen: state.editor.showing,
   isReferencesLoading: state.editor.loading,
   references: state.editor.references,
