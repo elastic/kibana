@@ -8,8 +8,11 @@ import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
+  isDetailPanelOpen,
   getDetailPanelType,
   getDetailPanelJob,
+  getDetailPanelJobId,
+  isLoading,
 } from '../../../store/selectors';
 
 import {
@@ -18,10 +21,12 @@ import {
 } from '../../../store/actions';
 
 const mapStateToProps = (state) => {
-  const job = getDetailPanelJob(state);
   return {
+    isOpen: isDetailPanelOpen(state),
+    isLoading: isLoading(state),
+    job: getDetailPanelJob(state),
+    jobId: getDetailPanelJobId(state),
     panelType: getDetailPanelType(state),
-    job,
   };
 };
 

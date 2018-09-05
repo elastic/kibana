@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobList } from './job_list';
-export { JobCreate } from './job_create';
+export const CRUD_APP_BASE_PATH = '/management/elasticsearch/rollup_jobs';

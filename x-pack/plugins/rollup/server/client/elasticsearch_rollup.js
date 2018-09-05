@@ -65,6 +65,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  rollup.job = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/<%=id%>',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
   rollup.startJob = ca({
     urls: [
       {
@@ -105,6 +119,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       },
     ],
     method: 'DELETE'
+  });
+
+  rollup.createJob = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/job/<%=id%>',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      },
+    ],
+    needBody: true,
+    method: 'PUT'
   });
 };
 

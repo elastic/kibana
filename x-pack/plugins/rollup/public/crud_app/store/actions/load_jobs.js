@@ -4,18 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { loadJobs as request, deserializeJobs } from '../../services';
+import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
+import {
+  LOAD_JOBS_START,
+  LOAD_JOBS_SUCCESS,
+  LOAD_JOBS_FAILURE,
+} from '../action_types';
 
-export const loadJobsSuccess = createAction('LOAD_JOBS_SUCCESS');
 export const loadJobs = () => async (dispatch) => {
+  dispatch({
+    type: LOAD_JOBS_START,
+  });
+
   let jobs;
   try {
-    jobs = await request();
+    jobs = await sendLoadJobsRequest();
   } catch (error) {
+    dispatch({
+      type: LOAD_JOBS_FAILURE,
+    });
+
     return toastNotifications.addDanger(error.data.message);
   }
 
-  dispatch(loadJobsSuccess({ jobs: deserializeJobs(jobs) }));
+  dispatch({
+    type: LOAD_JOBS_SUCCESS,
+    payload: { jobs: deserializeJobs(jobs) }
+  });
 };

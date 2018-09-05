@@ -6,7 +6,7 @@
 
 import { once } from 'lodash';
 import { wrapCustomError } from '../error_wrappers';
-import { PLUGIN } from '../../../common/constants';
+import { PLUGIN } from '../../../common';
 
 export const licensePreRoutingFactory = once((server) => {
   const xpackMainPlugin = server.plugins.xpack_main;

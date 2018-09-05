@@ -22,8 +22,8 @@ export const TabSummary = ({
   indexPattern,
   rollupIndex,
   rollupCron,
-  rollupInterval,
-  rollupDelay,
+  dateHistogramInterval,
+  dateHistogramDelay,
   dateHistogramTimeZone,
   dateHistogramField,
   documentsProcessed,
@@ -107,7 +107,7 @@ export const TabSummary = ({
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>
-          {rollupDelay || 'None'}
+          {dateHistogramDelay || 'None'}
         </EuiDescriptionListDescription>
 
         <EuiDescriptionListTitle>
@@ -118,7 +118,7 @@ export const TabSummary = ({
         </EuiDescriptionListTitle>
 
         <EuiDescriptionListDescription>
-          {rollupInterval}
+          {dateHistogramInterval}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
 

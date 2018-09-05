@@ -12,11 +12,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 
-import { CRUD_APP_BASE_PATH } from '../../common/constants';
+import { CRUD_APP_BASE_PATH } from './constants';
 import { setHttpClient } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
+import './index.less';
 
 const esSection = management.getSection('elasticsearch');
 
@@ -24,7 +25,7 @@ esSection.register('rollup_jobs', {
   visible: true,
   display: 'Rollup Jobs',
   order: 2,
-  url: `#${CRUD_APP_BASE_PATH}`
+  url: `#${CRUD_APP_BASE_PATH}`,
 });
 
 export const manageAngularLifecycle = ($scope, $route, elem) => {
@@ -46,7 +47,7 @@ export const manageAngularLifecycle = ($scope, $route, elem) => {
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
-      <Provider store={rollupJobsStore()}>
+      <Provider store={rollupJobsStore}>
         <HashRouter>
           <App />
         </HashRouter>
@@ -56,7 +57,7 @@ const renderReact = async (elem) => {
   );
 };
 
-routes.when(`${CRUD_APP_BASE_PATH}:view?`, {
+routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
   template: template,
   controllerAs: 'rollupJobs',
   controller: class IndexRollupJobsController {

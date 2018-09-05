@@ -6,23 +6,26 @@
 
 export {
   loadJobs,
-  loadJobsSuccess,
 } from './load_jobs';
 
 export {
-  startJobs,
-  startJobsSuccess,
-} from './start_jobs';
+  createJob,
+  clearCreateJobErrors,
+} from './create_job';
 
 export {
+  startJobs,
   stopJobs,
-  stopJobsSuccess,
-} from './stop_jobs';
+} from './change_job_status';
 
 export {
   deleteJobs,
-  deleteJobsSuccess,
 } from './delete_jobs';
+
+export {
+  openDetailPanel,
+  closeDetailPanel,
+} from './detail_panel';
 
 export {
   applyFilters,
@@ -32,8 +35,3 @@ export {
   pageSizeChanged,
   sortChanged,
 } from './table_state';
-
-export {
-  openDetailPanel,
-  closeDetailPanel,
-} from './detail_panel';
