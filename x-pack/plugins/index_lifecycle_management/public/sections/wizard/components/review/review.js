@@ -65,7 +65,9 @@ export class Review extends Component {
 
     this.currentFetchTimeout = null;
   }
-
+  componentDidMount() {
+    window.scrollTo(0, 0);
+  }
   fetchAffectedIndices = () => {
     if (this.currentFetchTimeout) {
       clearTimeout(this.currentFetchTimeout);
