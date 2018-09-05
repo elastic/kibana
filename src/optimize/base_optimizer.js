@@ -26,6 +26,7 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
+import { EsmExportsPlugin } from './esm_exports_plugin';
 
 import { defaults } from 'lodash';
 
@@ -207,6 +208,12 @@ export default class BaseOptimizer {
       },
 
       plugins: [
+        // used to mark esm exports as configurable
+        // which was a thing changed since webpack 4
+        // more info can be found inside the implementation
+        // file for that plugin
+        new EsmExportsPlugin(),
+
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           log: this.log

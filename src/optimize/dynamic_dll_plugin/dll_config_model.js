@@ -25,8 +25,8 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 function generateDLL(config) {
   const {
-    dllNoParseRules,
     dllAlias,
+    dllNoParseRules,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -36,6 +36,11 @@ function generateDLL(config) {
     dllStyleFilename,
     dllManifestPath
   } = config;
+
+  const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+  const BABEL_EXCLUDE_RE = [
+    /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
+  ];
 
   return {
     entry: dllEntry,
@@ -61,6 +66,28 @@ function generateDLL(config) {
     },
     module: {
       rules: [
+        {
+          resource: [
+            {
+              test: /\.js$/,
+              exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
+            },
+            {
+              test: /\.js$/,
+              include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+            }
+          ],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [
+                BABEL_PRESET_PATH,
+              ],
+            },
+          }
+        },
         {
           test: /\.(html)$/,
           loader: 'raw-loader'
@@ -104,8 +131,8 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
-  const dllNoParseRules = rawConfig.noParseRules;
   const dllAlias = rawConfig.alias;
+  const dllNoParseRules = rawConfig.noParseRules;
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -129,8 +156,8 @@ function extendRawConfig(rawConfig) {
 
   // Export dll config map
   return {
-    dllNoParseRules,
     dllAlias,
+    dllNoParseRules,
     dllContext,
     dllEntry,
     dllOutputPath,

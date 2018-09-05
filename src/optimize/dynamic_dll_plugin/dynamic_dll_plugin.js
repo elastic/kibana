@@ -29,8 +29,7 @@ const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
 function inNodeModulesOrWebpackShims(checkPath) {
-  return checkPath.includes(`${path.sep}node_modules${path.sep}`)
-    || checkPath.includes(`${path.sep}webpackShims${path.sep}`);
+  return checkPath.includes(`${path.sep}node_modules${path.sep}`);
 }
 
 function inPluginNodeModules(checkPath) {
@@ -135,8 +134,12 @@ export class DynamicDllPlugin {
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
-            const absoluteResource = path.resolve(dllContext, module.userRequest);
-            requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
+            if (module.userRequest.includes('node_modules')) {
+              const absoluteResource = path.resolve(dllContext, module.userRequest);
+              requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
+            }
+            // const absoluteResource = path.resolve(dllContext, module.userRequest);
+            // requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }
 
           // include requires for modules that need to be added to the dll

@@ -51,7 +51,10 @@ export class DllCompiler {
   }
 
   constructor(uiBundles, log) {
-    this.rawDllConfig = DllCompiler.getRawDllConfig(uiBundles.getAliases(), uiBundles.getWebpackNoParseRules());
+    this.rawDllConfig = DllCompiler.getRawDllConfig(
+      uiBundles.getAliases(),
+      uiBundles.getWebpackNoParseRules()
+    );
     this.log = log || (() => null);
   }
 

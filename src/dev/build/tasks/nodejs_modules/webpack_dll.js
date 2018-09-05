@@ -40,13 +40,13 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
     throw new Error(`The following dll manifest is reporting an empty dll: ${manifestPath}`);
   }
 
-  // Only includes modules who are not in the black list of modules
-  // and there are not dll entry files
+  // Only includes modules who are not in the white list of modules
+  // and that are node_modules
   return modules.filter(entry => {
     const isWhiteListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
-    const isDllEntryFile = entry.includes('.entry.dll.js');
+    const isNodeModule = entry.includes('node_modules');
 
-    return !isWhiteListed && !isDllEntryFile;
+    return !isWhiteListed && isNodeModule;
   });
 }
 

@@ -295,8 +295,13 @@ describe('State Management', () => {
 
         it('triggers fatal error linking to github when setting item fails', () => {
           const { state, hashedItemStore } = setup({ storeInHash: true });
-          const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
-          sinon.stub(hashedItemStore, 'setItem').returns(false);
+          const fatalErrorStub = sandbox.stub();
+          Object.defineProperty(FatalErrorNS, 'fatalError', {
+            writable: true,
+            value: fatalErrorStub
+          });
+          // const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
+          sandbox.stub(hashedItemStore, 'setItem').returns(false);
           state.toQueryParam();
           sinon.assert.calledOnce(fatalErrorStub);
           sinon.assert.calledWith(fatalErrorStub, sinon.match(error => (
