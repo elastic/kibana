@@ -32,3 +32,10 @@ Hide default dashed gridlines in EUI chart component for all APM graphs
   stroke-opacity: 1;
   stroke-dasharray: 1;
 }
+
+/*
+Override tab size since K6 theme makes "s" and "m" tabs both 14px
+*/
+.k6Tab--large .euiTab {
+  font-size: 16px;
+}

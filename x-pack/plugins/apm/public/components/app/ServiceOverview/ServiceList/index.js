@@ -14,6 +14,7 @@ import TooltipOverlay from '../../../shared/TooltipOverlay';
 import { asMillisWithDefault } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
+// TODO: Consolidate these formatting helpers centrally
 function formatNumber(value) {
   if (value === 0) {
     return '0';

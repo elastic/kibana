@@ -23,18 +23,14 @@ export function Home() {
       <KueryBar />
       <EuiSpacer />
       <EuiTabbedContent
-        size="l"
+        className="k6Tab--large"
         tabs={[
           {
             id: 'services_overview',
             name: 'Services',
             content: <ServiceOverview />
           },
-          {
-            id: 'traces_overview',
-            name: 'Traces',
-            content: <TraceOverview />
-          }
+          { id: 'traces_overview', name: 'Traces', content: <TraceOverview /> }
         ]}
       />
     </div>
