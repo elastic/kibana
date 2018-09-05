@@ -29,6 +29,7 @@
     "@kbn/test": "link:../packages/kbn-test",
     "@types/jest": "^22.2.3",
     "@types/pngjs": "^3.3.1",
+    "@types/react-virtualized": "^9.18.7",
     "abab": "^1.0.4",
     "ansicolors": "0.3.2",
     "aws-sdk": "2.2.33",
