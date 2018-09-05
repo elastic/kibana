@@ -109,6 +109,9 @@ pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to functio
 ```sh
 //OSX
 brew install imagemagick ghostscript poppler
+
+//Ubutnu
+sudo apt-get install imagemagick ghostscript poppler-utils
 ```
 
 To run the reporting functional tests:
