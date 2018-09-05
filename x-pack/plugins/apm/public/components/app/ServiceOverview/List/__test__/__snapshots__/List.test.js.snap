@@ -54,7 +54,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Sorting
                 </span>
               </span>
@@ -286,7 +288,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Rows per page: 10
                 </span>
               </span>
@@ -366,7 +370,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Sorting
                 </span>
               </span>
@@ -708,7 +714,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Rows per page: 10
                 </span>
               </span>
