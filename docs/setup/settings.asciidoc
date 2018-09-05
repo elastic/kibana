@@ -101,7 +101,7 @@ error messages.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage information and all requests. Supported on Elastic Cloud Enterprise.
 
-`logging.useUTC`:: *Default: true* Set the value of this setting to `false` to log events using the timezone of the server, rather than UTC.
+`logging.timezone`:: *Default: UTC* Set to the canonical timezone id (e.g. `US/Pacific`) to log events using that timezone.  A list of timezones can be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 `map.includeElasticMapsService:`:: *Default: true* Turns on or off whether layers from the Elastic Maps Service should be included in the vector and tile layer option list.
 By turning this off, only the layers that are configured here will be included.
