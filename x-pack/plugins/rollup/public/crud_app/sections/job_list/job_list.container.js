@@ -9,12 +9,20 @@ import { JobList as JobListView } from './job_list';
 
 import {
   loadJobs,
+  openDetailPanel,
+  closeDetailPanel,
 } from '../../store/actions';
 
 const mapDispatchToProps = (dispatch) => {
   return {
     loadJobs: () => {
       dispatch(loadJobs());
+    },
+    openDetailPanel: (jobId) => {
+      dispatch(openDetailPanel({ jobId: jobId }));
+    },
+    closeDetailPanel: () => {
+      dispatch(closeDetailPanel());
     },
   };
 };
