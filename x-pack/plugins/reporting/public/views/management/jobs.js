@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import 'angular-paging';
 import 'plugins/reporting/services/job_queue';
 import 'plugins/reporting/less/main.less';
@@ -15,6 +17,8 @@ import template from 'plugins/reporting/views/management/jobs.html';
 import { Poller } from '../../../../../common/poller';
 
 const pageSize = 10;
+
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'reactReportingTableAnchor';
 
 function mapJobs(jobs) {
   return jobs.map((job) => {
@@ -45,6 +49,25 @@ routes.when('/management/kibana/reporting', {
     this.pageSize = pageSize;
     this.currentPage = 1;
     this.reportingJobs = [];
+
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <div>All wired up and ready to go</div>,
+        node,
+      );
+    });
+
+    $scope.$on('$destroy', () => {
+      const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
+      if (node) {
+        unmountComponentAtNode(node);
+      }
+    });
 
     const licenseAllowsToShowThisPage = () => {
       return xpackInfo.get('features.reporting.management.showLinks')
