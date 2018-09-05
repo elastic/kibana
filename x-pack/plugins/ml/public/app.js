@@ -34,14 +34,6 @@ import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
 
 import uiRoutes from 'ui/routes';
-import moment from 'moment-timezone';
-import { uiModules } from 'ui/modules';
-
-const uiModule = uiModules.get('kibana');
-uiModule.run((config) => {
-  // Set the timezone for moment formatting to that configured in Kibana.
-  moment.tz.setDefault(config.get('dateFormat:tz'));
-});
 
 if (typeof uiRoutes.enable === 'function') {
   uiRoutes.enable();

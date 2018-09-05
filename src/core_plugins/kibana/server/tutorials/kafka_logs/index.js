@@ -36,7 +36,6 @@ export function kafkaLogsSpecProvider() {
       defaultMessage: 'Collect and parse logs created by Kafka.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.kafkaLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `kafka` Filebeat module parses logs created by Kafka. \
 [Learn more]({learnMoreLink}).',
       values: {

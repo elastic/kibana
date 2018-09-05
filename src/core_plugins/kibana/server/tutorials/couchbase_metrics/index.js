@@ -34,7 +34,6 @@ export function couchbaseMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Couchbase.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `couchbase` Metricbeat module fetches internal metrics from Couchbase. \
 [Learn more]({learnMoreLink}).',
       values: {

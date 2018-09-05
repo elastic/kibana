@@ -30,6 +30,11 @@ function getLink(location, jobs) {
     to = tos[0].string;
   }
 
+  // if either of the dates are empty, set them to undefined
+  // moment will convert undefined to now.
+  from = (from === '') ? undefined : from;
+  to = (to === '') ? undefined : to;
+
   const jobIds = jobs.map(j => j.id);
   const url = mlJobService.createResultsUrl(jobIds, from, to, location);
   return `${chrome.getBasePath()}/app/${url}`;
