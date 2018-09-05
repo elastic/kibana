@@ -8,9 +8,9 @@ export const asFn = () => ({
   },
   help: 'Creates a datatable with a single value',
   args: {
-    _: {
+    name: {
       types: ['string'],
-      aliases: ['name'],
+      aliases: ['_'],
       help: 'A name to give the column',
       default: 'value',
     },
@@ -20,13 +20,13 @@ export const asFn = () => ({
       type: 'datatable',
       columns: [
         {
-          name: args._,
+          name: args.name,
           type: getType(context),
         },
       ],
       rows: [
         {
-          [args._]: context,
+          [args.name]: context,
         },
       ],
     };

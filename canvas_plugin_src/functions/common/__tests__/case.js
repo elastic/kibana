@@ -53,7 +53,7 @@ describe('case', () => {
     describe('with value', () => {
       it('should return whether it matches the context as the matches prop', async () => {
         const args = {
-          _: () => 'foo',
+          when: () => 'foo',
           then: () => 'bar',
         };
         expect(await fn('foo', args)).to.eql({
@@ -73,7 +73,7 @@ describe('case', () => {
       it('should return the if as the matches prop', async () => {
         const context = null;
         const args = {
-          _: () => 'foo',
+          when: () => 'foo',
           if: true,
         };
         expect(await fn(context, args)).to.eql({

@@ -10,14 +10,15 @@ export const asset = () => ({
   type: 'string',
   help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
   args: {
-    _: {
+    id: {
+      aliases: ['_'],
       types: ['string'],
       help: 'The ID of the asset value to return',
       multi: false,
     },
   },
   fn: (context, args) => {
-    const assetId = args._;
+    const assetId = args.id;
     const asset = getAssetById(getState(), assetId);
     if (asset !== undefined) {
       return asset.value;

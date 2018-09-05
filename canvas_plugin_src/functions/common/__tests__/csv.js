@@ -17,7 +17,7 @@ describe('csv', () => {
   it('should return a datatable', () => {
     expect(
       fn(null, {
-        _: `name,number
+        data: `name,number
 one,1
 two,2
 fourty two,42`,
@@ -28,7 +28,7 @@ fourty two,42`,
   it('should allow custom delimiter', () => {
     expect(
       fn(null, {
-        _: `name\tnumber
+        data: `name\tnumber
 one\t1
 two\t2
 fourty two\t42`,
@@ -38,7 +38,7 @@ fourty two\t42`,
 
     expect(
       fn(null, {
-        _: `name%SPLIT%number
+        data: `name%SPLIT%number
 one%SPLIT%1
 two%SPLIT%2
 fourty two%SPLIT%42`,
@@ -50,7 +50,7 @@ fourty two%SPLIT%42`,
   it('should allow custom newline', () => {
     expect(
       fn(null, {
-        _: `name,number\rone,1\rtwo,2\rfourty two,42`,
+        data: `name,number\rone,1\rtwo,2\rfourty two,42`,
         newline: '\r',
       })
     ).to.eql(expected);
@@ -59,7 +59,7 @@ fourty two%SPLIT%42`,
   it('should trim column names', () => {
     expect(
       fn(null, {
-        _: `foo," bar  ", baz, " buz "
+        data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
       })
     ).to.eql({
@@ -77,7 +77,7 @@ fourty two%SPLIT%42`,
   it('should handle odd spaces correctly', () => {
     expect(
       fn(null, {
-        _: `foo," bar  ", baz, " buz "
+        data: `foo," bar  ", baz, " buz "
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
       })

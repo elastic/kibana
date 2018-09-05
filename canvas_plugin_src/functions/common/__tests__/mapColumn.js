@@ -9,7 +9,7 @@ describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
 
   it('returns a datatable with a new column with the values from mapping a function over each row in a datatable', () => {
-    return fn(testTable, { _: 'pricePlusTwo', expression: pricePlusTwo }).then(result => {
+    return fn(testTable, { name: 'pricePlusTwo', expression: pricePlusTwo }).then(result => {
       const arbitraryRowIndex = 2;
 
       expect(result.type).to.be('datatable');
@@ -23,7 +23,7 @@ describe('mapColumn', () => {
   });
 
   it('overwrites existing column with the new column if an existing column name is provided', () => {
-    return fn(testTable, { _: 'name', expression: pricePlusTwo }).then(result => {
+    return fn(testTable, { name: 'name', expression: pricePlusTwo }).then(result => {
       const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
       const arbitraryRowIndex = 4;
 
@@ -38,7 +38,7 @@ describe('mapColumn', () => {
 
   describe('expression', () => {
     it('maps null values to the new column', () => {
-      return fn(testTable, { _: 'empty' }).then(result => {
+      return fn(testTable, { name: 'empty' }).then(result => {
         const emptyColumnIndex = result.columns.findIndex(({ name }) => name === 'empty');
         const arbitraryRowIndex = 8;
 

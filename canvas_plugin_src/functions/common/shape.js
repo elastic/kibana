@@ -7,10 +7,10 @@ export const shape = () => ({
     types: ['null'],
   },
   args: {
-    _: {
+    shape: {
       types: ['string', 'null'],
       help: 'Pick a shape',
-      aliases: ['shape'],
+      aliases: ['_'],
       default: 'square',
     },
     fill: {
@@ -35,9 +35,9 @@ export const shape = () => ({
       default: false,
     },
   },
-  fn: (context, { _, fill, border, borderWidth, maintainAspect }) => ({
+  fn: (context, { shape, fill, border, borderWidth, maintainAspect }) => ({
     type: 'shape',
-    shape: _,
+    shape,
     fill,
     border,
     borderWidth,

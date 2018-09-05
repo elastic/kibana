@@ -10,7 +10,7 @@ describe('filterrows', () => {
   const fn = functionWrapper(filterrows);
 
   it('returns a datable', () => {
-    return fn(testTable, { _: inStock }).then(result => {
+    return fn(testTable, { fn: inStock }).then(result => {
       expect(result).to.have.property('type', 'datatable');
     });
   });
@@ -18,14 +18,14 @@ describe('filterrows', () => {
   it('keeps rows that evaluate to true and removes rows that evaluate to false', () => {
     const inStockRows = testTable.rows.filter(row => row.in_stock);
 
-    return fn(testTable, { _: inStock }).then(result => {
+    return fn(testTable, { fn: inStock }).then(result => {
       expect(result.columns).to.eql(testTable.columns);
       expect(result.rows).to.eql(inStockRows);
     });
   });
 
   it('returns datatable with no rows when no rows meet function condition', () => {
-    return fn(testTable, { _: returnFalse }).then(result => {
+    return fn(testTable, { fn: returnFalse }).then(result => {
       expect(result.rows).to.be.empty();
     });
   });

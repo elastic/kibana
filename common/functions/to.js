@@ -6,16 +6,16 @@ export const to = () => ({
   help: 'Explicitly cast from one type to another.',
   context: {},
   args: {
-    _: {
+    type: {
       types: ['string'],
       help: 'A known type',
-      aliases: ['type'],
+      aliases: ['_'],
       multi: true,
     },
   },
   fn: (context, args, { types }) => {
-    if (!args._) throw new Error('Must specify a casting type');
+    if (!args.type) throw new Error('Must specify a casting type');
 
-    return castProvider(types)(context, args._);
+    return castProvider(types)(context, args.type);
   },
 });

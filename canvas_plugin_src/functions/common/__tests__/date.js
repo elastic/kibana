@@ -17,13 +17,13 @@ describe('date', () => {
   });
 
   it('returns a date in ms from a date string with the provided format', () => {
-    expect(fn(null, { _: '20111031', format: 'YYYYMMDD' })).to.be(1320019200000);
+    expect(fn(null, { value: '20111031', format: 'YYYYMMDD' })).to.be(1320019200000);
   });
 
   describe('args', () => {
-    describe('_', () => {
+    describe('value', () => {
       it('sets the date string to convert into ms', () => {
-        expect(fn(null, { _: '2011-10-05T14:48:00.000Z' })).to.be(1317826080000);
+        expect(fn(null, { value: '2011-10-05T14:48:00.000Z' })).to.be(1317826080000);
       });
 
       it('defaults to current date (ms)', () => {
@@ -33,15 +33,15 @@ describe('date', () => {
 
     describe('format', () => {
       it('sets the format to parse the date string', () => {
-        expect(fn(null, { _: '20111031', format: 'YYYYMMDD' })).to.be(1320019200000);
+        expect(fn(null, { value: '20111031', format: 'YYYYMMDD' })).to.be(1320019200000);
       });
 
       it('defaults to ISO 8601 format', () => {
-        expect(fn(null, { _: '2011-10-05T14:48:00.000Z' })).to.be(1317826080000);
+        expect(fn(null, { value: '2011-10-05T14:48:00.000Z' })).to.be(1317826080000);
       });
 
       it('throws when passing an invalid date string and format is not specified', () => {
-        expect(() => fn(null, { _: '23/25/2014' })).to.throwException(e => {
+        expect(() => fn(null, { value: '23/25/2014' })).to.throwException(e => {
           expect(e.message).to.be('Invalid date input: 23/25/2014');
         });
       });

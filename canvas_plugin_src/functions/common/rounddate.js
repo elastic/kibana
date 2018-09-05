@@ -8,14 +8,15 @@ export const rounddate = () => ({
     types: ['number'],
   },
   args: {
-    _: {
+    format: {
+      aliases: ['_'],
       types: ['string'],
       help:
-        'MomentJS  Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
+        'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
     },
   },
   fn: (context, args) => {
-    if (!args._) return context;
-    return moment.utc(moment.utc(context).format(args._), args._).valueOf();
+    if (!args.format) return context;
+    return moment.utc(moment.utc(context).format(args.format), args.format).valueOf();
   },
 });

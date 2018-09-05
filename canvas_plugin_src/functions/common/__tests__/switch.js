@@ -57,14 +57,14 @@ describe('switch', () => {
     describe('with no matching cases', () => {
       it('should return the context if no default is provided', async () => {
         const context = 'foo';
-        const args = { _: nonMatchingCases.map(getter) };
+        const args = { case: nonMatchingCases.map(getter) };
         expect(await fn(context, args)).to.be(context);
       });
 
       it('should return the default if provided', async () => {
         const context = 'foo';
         const args = {
-          _: nonMatchingCases.map(getter),
+          case: nonMatchingCases.map(getter),
           default: () => 'bar',
         };
         expect(await fn(context, args)).to.be(args.default());
@@ -74,7 +74,7 @@ describe('switch', () => {
     describe('with matching cases', () => {
       it('should return the first match', async () => {
         const context = 'foo';
-        const args = { _: mockCases.map(getter) };
+        const args = { case: mockCases.map(getter) };
         const firstMatch = mockCases.find(c => c.matches);
         expect(await fn(context, args)).to.be(firstMatch.result);
       });

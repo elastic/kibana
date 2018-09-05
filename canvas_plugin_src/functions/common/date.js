@@ -16,7 +16,8 @@ export const date = () => ({
   },
   help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch.',
   args: {
-    _: {
+    value: {
+      aliases: ['_'],
       types: ['string', 'null'],
       help:
         'An optional date string to parse into milliseconds since epoch. ' +
@@ -29,11 +30,11 @@ export const date = () => ({
     },
   },
   fn: (context, args) => {
-    const { _: date, format } = args;
+    const { value: date, format } = args;
     const useMoment = date && format;
     const outputDate = useMoment ? moment.utc(date, format).toDate() : new Date(getInputDate(date));
 
-    if (isNaN(outputDate.getTime())) throw new Error(`Invalid date input: ${args._}`);
+    if (isNaN(outputDate.getTime())) throw new Error(`Invalid date input: ${date}`);
 
     return outputDate.valueOf();
   },

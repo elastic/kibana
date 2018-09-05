@@ -10,9 +10,9 @@ export const urlparam = () => ({
     types: ['null'],
   },
   args: {
-    _: {
+    param: {
       types: ['string'],
-      aliases: ['var', 'variable'],
+      aliases: ['_', 'var', 'variable'],
       help: 'The URL hash parameter to access',
       multi: false,
     },
@@ -24,6 +24,6 @@ export const urlparam = () => ({
   },
   fn: (context, args) => {
     const query = parse(window.location.href, true).query;
-    return query[args._] || args.default;
+    return query[args.param] || args.default;
   },
 });

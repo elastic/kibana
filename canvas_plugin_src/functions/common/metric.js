@@ -8,9 +8,9 @@ export const metric = () => ({
     types: ['string', 'null'],
   },
   args: {
-    _: {
+    label: {
       types: ['string'],
-      alias: ['label', 'text', 'description'],
+      alias: ['_', 'text', 'description'],
       help: 'Text describing the metric',
       default: '""',
     },
@@ -25,13 +25,13 @@ export const metric = () => ({
       default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
     },
   },
-  fn: (context, { _, metricFont, labelFont }) => {
+  fn: (context, { label, metricFont, labelFont }) => {
     return {
       type: 'render',
       as: 'metric',
       value: {
         metric: context === null ? '?' : context,
-        label: _,
+        label,
         metricFont,
         labelFont,
       },

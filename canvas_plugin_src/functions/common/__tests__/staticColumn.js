@@ -7,7 +7,7 @@ describe('staticColumn', () => {
   const fn = functionWrapper(staticColumn);
 
   it('adds a column to a datatable with a static value in every row', () => {
-    const result = fn(testTable, { _: 'foo', value: 'bar' });
+    const result = fn(testTable, { name: 'foo', value: 'bar' });
 
     expect(result.type).to.be('datatable');
     expect(result.columns).to.eql([...testTable.columns, { name: 'foo', type: 'string' }]);
@@ -16,7 +16,7 @@ describe('staticColumn', () => {
   });
 
   it('overwrites an existing column if provided an existing column name', () => {
-    const result = fn(testTable, { _: 'name', value: 'John' });
+    const result = fn(testTable, { name: 'name', value: 'John' });
 
     expect(result.type).to.be('datatable');
     expect(result.columns).to.eql(testTable.columns);
@@ -25,7 +25,7 @@ describe('staticColumn', () => {
   });
 
   it('adds a column with null values', () => {
-    const result = fn(testTable, { _: 'empty' });
+    const result = fn(testTable, { name: 'empty' });
 
     expect(result.type).to.be('datatable');
     expect(result.columns).to.eql([...testTable.columns, { name: 'empty', type: 'null' }]);

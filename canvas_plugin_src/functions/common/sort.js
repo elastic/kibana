@@ -8,9 +8,9 @@ export const sort = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    by: {
       types: ['string'],
-      aliases: ['column'],
+      aliases: ['_', 'column'],
       multi: false, // TODO: No reason you couldn't.
       help:
         'The column to sort on. If column is not specified, the datatable will be sorted on the first column.',
@@ -22,7 +22,7 @@ export const sort = () => ({
     },
   },
   fn: (context, args) => {
-    const column = args._ || context.columns[0].name;
+    const column = args.by || context.columns[0].name;
 
     return {
       ...context,

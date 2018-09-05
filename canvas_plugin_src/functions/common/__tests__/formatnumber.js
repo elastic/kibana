@@ -6,13 +6,13 @@ describe('formatnumber', () => {
   const fn = functionWrapper(formatnumber);
 
   it('returns number as formatted string with given format', () => {
-    expect(fn(140000, { _: '$0,0.00' })).to.be('$140,000.00');
+    expect(fn(140000, { format: '$0,0.00' })).to.be('$140,000.00');
   });
 
   describe('args', () => {
-    describe('_', () => {
+    describe('format', () => {
       it('sets the format of the resulting number string', () => {
-        expect(fn(0.68, { _: '0.000%' })).to.be('68.000%');
+        expect(fn(0.68, { format: '0.000%' })).to.be('68.000%');
       });
 
       it('casts number to a string if format is not specified', () => {

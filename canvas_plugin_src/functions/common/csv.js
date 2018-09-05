@@ -7,7 +7,8 @@ export const csv = () => ({
     types: ['null'],
   },
   args: {
-    _: {
+    data: {
+      aliases: ['_'],
       types: ['string'],
       help: 'CSV data to use',
     },
@@ -22,7 +23,7 @@ export const csv = () => ({
   },
   help: 'Create datatable from csv input',
   fn(context, args) {
-    const { _: csvString, delimiter, newline } = args;
+    const { data: csvString, delimiter, newline } = args;
 
     const config = {
       transform: val => {

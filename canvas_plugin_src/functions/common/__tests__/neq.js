@@ -6,21 +6,21 @@ describe('neq', () => {
   const fn = functionWrapper(neq);
 
   it('should return true when the types are different', () => {
-    expect(fn(1, { _: '1' })).to.be(true);
-    expect(fn(true, { _: 'true' })).to.be(true);
-    expect(fn(null, { _: 'null' })).to.be(true);
+    expect(fn(1, { value: '1' })).to.be(true);
+    expect(fn(true, { value: 'true' })).to.be(true);
+    expect(fn(null, { value: 'null' })).to.be(true);
   });
 
   it('should return true when the values are different', () => {
-    expect(fn(1, { _: 2 })).to.be(true);
-    expect(fn('foo', { _: 'bar' })).to.be(true);
-    expect(fn(true, { _: false })).to.be(true);
+    expect(fn(1, { value: 2 })).to.be(true);
+    expect(fn('foo', { value: 'bar' })).to.be(true);
+    expect(fn(true, { value: false })).to.be(true);
   });
 
   it('should return false when the values are the same', () => {
-    expect(fn(1, { _: 1 })).to.be(false);
-    expect(fn('foo', { _: 'foo' })).to.be(false);
-    expect(fn(true, { _: true })).to.be(false);
-    expect(fn(null, { _: null })).to.be(false);
+    expect(fn(1, { value: 1 })).to.be(false);
+    expect(fn('foo', { value: 'foo' })).to.be(false);
+    expect(fn(true, { value: true })).to.be(false);
+    expect(fn(null, { value: null })).to.be(false);
   });
 });

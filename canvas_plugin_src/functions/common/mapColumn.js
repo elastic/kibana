@@ -9,9 +9,9 @@ export const mapColumn = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    name: {
       types: ['string'],
-      aliases: ['column'],
+      aliases: ['_', 'column'],
       help: 'The name of the resulting column',
       required: true,
     },
@@ -35,14 +35,14 @@ export const mapColumn = () => ({
         })
         .then(val => ({
           ...row,
-          [args._]: val,
+          [args.name]: val,
         }));
     });
 
     return Promise.all(rowPromises).then(rows => {
-      const existingColumnIndex = columns.findIndex(({ name }) => name === args._);
-      const type = getType(rows[0][args._]);
-      const newColumn = { name: args._, type };
+      const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
+      const type = getType(rows[0][args.name]);
+      const newColumn = { name: args.name, type };
       if (existingColumnIndex === -1) {
         columns.push(newColumn);
       } else {

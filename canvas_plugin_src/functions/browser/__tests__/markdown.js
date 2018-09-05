@@ -8,17 +8,17 @@ describe('markdown', () => {
   const fn = functionWrapper(markdown);
 
   it('returns a render as markdown', () => {
-    const result = fn(null, { _: [''], font: fontStyle });
+    const result = fn(null, { expression: [''], font: fontStyle });
     expect(result)
       .to.have.property('type', 'render')
       .and.to.have.property('as', 'markdown');
   });
 
   describe('args', () => {
-    describe('_', () => {
-      it('sets the content to all strings in _ concatenated', () => {
+    describe('expression', () => {
+      it('sets the content to all strings in expression concatenated', () => {
         const result = fn(null, {
-          _: ['# this ', 'is ', 'some ', 'markdown'],
+          expression: ['# this ', 'is ', 'some ', 'markdown'],
           font: fontStyle,
         });
 
@@ -30,7 +30,7 @@ describe('markdown', () => {
         testTable.columns.map(col => (expectedContent += ` ${col.name}`));
 
         const result = fn(testTable, {
-          _: ['Columns:', '{{#each columns}} {{name}}{{/each}}'],
+          expression: ['Columns:', '{{#each columns}} {{name}}{{/each}}'],
         });
 
         expect(result.value).to.have.property('content', expectedContent);
@@ -46,7 +46,7 @@ describe('markdown', () => {
     describe('font', () => {
       it('sets the font style for the markdown', () => {
         const result = fn(null, {
-          _: ['some ', 'markdown'],
+          expression: ['some ', 'markdown'],
           font: fontStyle,
         });
 

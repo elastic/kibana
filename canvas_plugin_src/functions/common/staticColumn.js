@@ -8,9 +8,9 @@ export const staticColumn = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    name: {
       types: ['string'],
-      aliases: ['column'],
+      aliases: ['_', 'column'],
       help: 'The name of the new column column',
       required: true,
     },
@@ -22,11 +22,11 @@ export const staticColumn = () => ({
     },
   },
   fn: (context, args) => {
-    const rows = context.rows.map(row => ({ ...row, [args._]: args.value }));
-    const type = getType(rows[0][args._]);
+    const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
+    const type = getType(rows[0][args.name]);
     const columns = [...context.columns];
-    const existingColumnIndex = columns.findIndex(({ name }) => name === args._);
-    const newColumn = { name: args._, type };
+    const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
+    const newColumn = { name: args.name, type };
 
     if (existingColumnIndex > -1) {
       columns[existingColumnIndex] = newColumn;

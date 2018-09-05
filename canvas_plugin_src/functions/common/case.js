@@ -3,7 +3,8 @@ export const caseFn = () => ({
   type: 'case',
   help: 'Build a case (including a condition/result) to pass to the switch function.',
   args: {
-    _: {
+    when: {
+      aliases: ['_'],
       resolve: false,
       help:
         'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
@@ -27,7 +28,7 @@ export const caseFn = () => ({
 
 async function doesMatch(context, args) {
   if (typeof args.if !== 'undefined') return args.if;
-  if (typeof args._ !== 'undefined') return (await args._()) === context;
+  if (typeof args.when !== 'undefined') return (await args.when()) === context;
   return true;
 }
 

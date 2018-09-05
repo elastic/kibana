@@ -10,10 +10,10 @@ export const markdown = () => ({
     types: ['datatable', 'null'],
   },
   args: {
-    _: {
+    expression: {
+      aliases: ['_'],
       types: ['string'],
-      help:
-        'A string containing markdown. You can pass this multiple times to achieve concatenation',
+      help: 'A markdown expression. You can pass this multiple times to achieve concatenation',
       default: '""',
       multi: true,
     },
@@ -24,7 +24,7 @@ export const markdown = () => ({
     },
   },
   fn: (context, args) => {
-    const compileFunctions = args._.map(str => Handlebars.compile(String(str)));
+    const compileFunctions = args.expression.map(str => Handlebars.compile(String(str)));
     const ctx = {
       columns: [],
       rows: [],

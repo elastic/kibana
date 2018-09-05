@@ -2,9 +2,9 @@ export const switchFn = () => ({
   name: 'switch',
   help: 'Perform conditional logic with multiple conditions',
   args: {
-    _: {
+    case: {
       types: ['case'],
-      aliases: ['case'],
+      aliases: ['_'],
       resolve: false,
       multi: true,
       help: 'The list of conditions to check',
@@ -16,7 +16,7 @@ export const switchFn = () => ({
     },
   },
   fn: async (context, args) => {
-    const cases = args._ || [];
+    const cases = args.case || [];
     for (let i = 0; i < cases.length; i++) {
       const { matches, result } = await cases[i]();
       if (matches) return result;

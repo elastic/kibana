@@ -24,10 +24,10 @@ describe('metric', () => {
   });
 
   describe('args', () => {
-    describe('_', () => {
+    describe('label', () => {
       it('sets the label of the metric', () => {
         const result = fn(null, {
-          _: 'My Label',
+          label: 'My Label',
         });
 
         expect(result.value).to.have.property('label', 'My Label');

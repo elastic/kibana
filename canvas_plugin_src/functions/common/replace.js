@@ -6,8 +6,8 @@ export const replace = () => ({
     types: ['string'],
   },
   args: {
-    _: {
-      aliases: ['pattern', 'regex'],
+    pattern: {
+      aliases: ['_', 'regex'],
       types: ['string'],
       help:
         'The text or pattern of a JavaScript regular expression, eg "[aeiou]". You can use capture groups here.',
@@ -26,5 +26,5 @@ export const replace = () => ({
       default: '""',
     },
   },
-  fn: (context, args) => context.replace(new RegExp(args._, args.flags), args.replacement),
+  fn: (context, args) => context.replace(new RegExp(args.pattern, args.flags), args.replacement),
 });

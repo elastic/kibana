@@ -8,13 +8,14 @@ export const formatnumber = () => ({
     types: ['number'],
   },
   args: {
-    _: {
+    format: {
+      aliases: ['_'],
       types: ['string'],
       help: 'NumeralJS format string http://numeraljs.com/#format',
     },
   },
   fn: (context, args) => {
-    if (!args._) return String(context);
-    return numeral(context).format(args._);
+    if (!args.format) return String(context);
+    return numeral(context).format(args.format);
   },
 });

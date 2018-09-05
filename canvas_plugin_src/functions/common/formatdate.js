@@ -7,13 +7,14 @@ export const formatdate = () => ({
     types: ['number'],
   },
   args: {
-    _: {
+    format: {
+      aliases: ['_'],
       types: ['string'],
       help: 'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
     },
   },
   fn: (context, args) => {
-    if (!args._) return moment.utc(new Date(context)).toISOString();
-    return moment.utc(new Date(context)).format(args._);
+    if (!args.format) return moment.utc(new Date(context)).toISOString();
+    return moment.utc(new Date(context)).format(args.format);
   },
 });

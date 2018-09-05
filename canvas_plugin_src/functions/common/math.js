@@ -11,14 +11,15 @@ export const math = () => ({
     types: ['number', 'datatable'],
   },
   args: {
-    _: {
+    expression: {
+      aliases: ['_'],
       types: ['string'],
       help:
         'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
     },
   },
   fn: (context, args) => {
-    if (!args._ || args._.trim() === '') {
+    if (!args.expression || args.expression.trim() === '') {
       throw new Error('Empty expression');
     }
     const isDatatable = context && context.type === 'datatable';
@@ -26,7 +27,7 @@ export const math = () => ({
       ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
       : { value: context };
     try {
-      const result = evaluate(args._, mathContext);
+      const result = evaluate(args.expression, mathContext);
       if (Array.isArray(result)) {
         if (result.length === 1) return result[0];
         throw new Error(

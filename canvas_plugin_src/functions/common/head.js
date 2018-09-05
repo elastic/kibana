@@ -9,7 +9,8 @@ export const head = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    count: {
+      aliases: ['_'],
       types: ['number'],
       help: 'Return this many rows from the beginning of the datatable',
       default: 1,
@@ -17,6 +18,6 @@ export const head = () => ({
   },
   fn: (context, args) => ({
     ...context,
-    rows: take(context.rows, args._),
+    rows: take(context.rows, args.count),
   }),
 });

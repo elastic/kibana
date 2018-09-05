@@ -5,9 +5,9 @@ export const getCell = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    column: {
       types: ['string'],
-      aliases: ['column', 'c'],
+      aliases: ['_', 'c'],
       help: 'The name of the column value to fetch',
     },
     row: {
@@ -19,12 +19,12 @@ export const getCell = () => ({
   },
   fn: (context, args) => {
     const row = context.rows[args.row];
-
     if (!row) throw new Error(`Row not found: ${args.row}`);
-    if (!args._) args._ = context.columns[0].name;
-    const value = row[args._];
 
-    if (typeof value === 'undefined') throw new Error(`Column not found: ${args._}`);
+    const { column = context.columns[0].name } = args;
+    const value = row[column];
+
+    if (typeof value === 'undefined') throw new Error(`Column not found: ${column}`);
 
     return value;
   },

@@ -2,9 +2,9 @@ export const ifFn = () => ({
   name: 'if',
   help: 'Perform conditional logic',
   args: {
-    _: {
+    condition: {
       types: ['boolean', 'null'],
-      aliases: ['condition'],
+      aliases: ['_'],
       help:
         'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
     },
@@ -20,7 +20,7 @@ export const ifFn = () => ({
     },
   },
   fn: async (context, args) => {
-    if (args._) {
+    if (args.condition) {
       if (typeof args.then === 'undefined') return context;
       return await args.then();
     } else {

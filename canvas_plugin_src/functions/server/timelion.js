@@ -8,9 +8,9 @@ export const timelion = () => ({
     types: ['filter'],
   },
   args: {
-    _: {
+    query: {
       types: ['string'],
-      aliases: ['query', 'q'],
+      aliases: ['_', 'q'],
       help: 'A timelion query',
       default: '".es(*)"',
     },
@@ -55,7 +55,7 @@ export const timelion = () => ({
           },
         },
       },
-      sheet: [args._],
+      sheet: [args.query],
       time: {
         from: range.from,
         to: range.to,

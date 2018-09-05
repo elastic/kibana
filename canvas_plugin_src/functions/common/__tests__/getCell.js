@@ -9,7 +9,7 @@ describe('getCell', () => {
   it('returns the value from the specified row and column', () => {
     const arbitraryRowIndex = 3;
 
-    expect(fn(testTable, { _: 'quantity', row: arbitraryRowIndex })).to.eql(
+    expect(fn(testTable, { column: 'quantity', row: arbitraryRowIndex })).to.eql(
       testTable.rows[arbitraryRowIndex].quantity
     );
   });
@@ -21,11 +21,11 @@ describe('getCell', () => {
       expect(fn(testTable)).to.be(testTable.rows[0][firstColumn]);
     });
 
-    describe('_', () => {
+    describe('column', () => {
       const arbitraryRowIndex = 1;
 
       it('sets which column to get the value from', () => {
-        expect(fn(testTable, { _: 'price', row: arbitraryRowIndex })).to.be(
+        expect(fn(testTable, { column: 'price', row: arbitraryRowIndex })).to.be(
           testTable.rows[arbitraryRowIndex].price
         );
       });
@@ -37,7 +37,7 @@ describe('getCell', () => {
       });
 
       it('throws when invalid column is provided', () => {
-        expect(() => fn(testTable, { _: 'foo' })).to.throwException(e => {
+        expect(() => fn(testTable, { column: 'foo' })).to.throwException(e => {
           expect(e.message).to.be('Column not found: foo');
         });
       });
@@ -47,23 +47,23 @@ describe('getCell', () => {
       it('sets which row to get the value from', () => {
         const arbitraryRowIndex = 8;
 
-        expect(fn(testTable, { _: 'in_stock', row: arbitraryRowIndex })).to.eql(
+        expect(fn(testTable, { column: 'in_stock', row: arbitraryRowIndex })).to.eql(
           testTable.rows[arbitraryRowIndex].in_stock
         );
       });
 
       it('defaults to first row if not specified', () => {
-        expect(fn(testTable, { _: 'name' })).to.eql(testTable.rows[0].name);
+        expect(fn(testTable, { column: 'name' })).to.eql(testTable.rows[0].name);
       });
 
       it('throws when row does not exist', () => {
         const invalidRow = testTable.rows.length;
 
-        expect(() => fn(testTable, { _: 'name', row: invalidRow })).to.throwException(e => {
+        expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(e => {
           expect(e.message).to.be(`Row not found: ${invalidRow}`);
         });
 
-        expect(() => fn(emptyTable, { _: 'foo' })).to.throwException(e => {
+        expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(e => {
           expect(e.message).to.be('Row not found: 0');
         });
 

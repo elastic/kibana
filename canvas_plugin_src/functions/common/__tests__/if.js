@@ -14,47 +14,51 @@ describe('if', () => {
   describe('function', () => {
     describe('condition passed', () => {
       it('with then', async () => {
-        expect(await fn(null, { _: true, then: () => 'foo' })).to.be('foo');
-        expect(await fn(null, { _: true, then: () => 'foo', else: () => 'bar' })).to.be('foo');
+        expect(await fn(null, { condition: true, then: () => 'foo' })).to.be('foo');
+        expect(await fn(null, { condition: true, then: () => 'foo', else: () => 'bar' })).to.be(
+          'foo'
+        );
       });
 
       it('without then', async () => {
-        expect(await fn(null, { _: true })).to.be(null);
-        expect(await fn('some context', { _: true })).to.be('some context');
+        expect(await fn(null, { condition: true })).to.be(null);
+        expect(await fn('some context', { condition: true })).to.be('some context');
       });
     });
 
     describe('condition failed', () => {
       it('with else', async () =>
-        expect(await fn('some context', { _: false, then: () => 'foo', else: () => 'bar' })).to.be(
-          'bar'
-        ));
+        expect(
+          await fn('some context', { condition: false, then: () => 'foo', else: () => 'bar' })
+        ).to.be('bar'));
 
       it('without else', async () =>
-        expect(await fn('some context', { _: false, then: () => 'foo' })).to.be('some context'));
+        expect(await fn('some context', { condition: false, then: () => 'foo' })).to.be(
+          'some context'
+        ));
     });
 
     describe('falsy values', () => {
       describe('for then', () => {
         it('with null', async () =>
-          expect(await fn('some context', { _: true, then: () => null })).to.be(null));
+          expect(await fn('some context', { condition: true, then: () => null })).to.be(null));
 
         it('with false', async () =>
-          expect(await fn('some context', { _: true, then: () => false })).to.be(false));
+          expect(await fn('some context', { condition: true, then: () => false })).to.be(false));
 
         it('with 0', async () =>
-          expect(await fn('some context', { _: true, then: () => 0 })).to.be(0));
+          expect(await fn('some context', { condition: true, then: () => 0 })).to.be(0));
       });
 
       describe('for else', () => {
         it('with null', async () =>
-          expect(await fn('some context', { _: false, else: () => null })).to.be(null));
+          expect(await fn('some context', { condition: false, else: () => null })).to.be(null));
 
         it('with false', async () =>
-          expect(await fn('some context', { _: false, else: () => false })).to.be(false));
+          expect(await fn('some context', { condition: false, else: () => false })).to.be(false));
 
         it('with 0', async () =>
-          expect(await fn('some context', { _: false, else: () => 0 })).to.be(0));
+          expect(await fn('some context', { condition: false, else: () => 0 })).to.be(0));
       });
     });
   });

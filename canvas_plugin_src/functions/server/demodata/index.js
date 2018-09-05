@@ -11,17 +11,17 @@ export const demodata = () => ({
     types: ['filter'],
   },
   args: {
-    _: {
+    type: {
       types: ['string', 'null'],
-      aliases: ['type'],
+      aliases: ['_'],
       help: 'The name of the demo data set to use',
       default: 'ci',
     },
   },
   fn: (context, args) => {
-    const demoRows = getDemoRows(args._);
+    const demoRows = getDemoRows(args.type);
     let set = {};
-    if (args._ === 'ci') {
+    if (args.type === 'ci') {
       set = {
         columns: [
           { name: 'time', type: 'date' },
@@ -35,7 +35,7 @@ export const demodata = () => ({
         ],
         rows: sortBy(demoRows, 'time'),
       };
-    } else if (args._ === 'shirts') {
+    } else if (args.type === 'shirts') {
       set = {
         columns: [
           { name: 'size', type: 'string' },

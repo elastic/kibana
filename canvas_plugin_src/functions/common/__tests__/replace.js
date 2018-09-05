@@ -8,7 +8,7 @@ describe('replace', () => {
   it('replaces text that matches the pattern', () => {
     expect(
       fn('A string with vowels', {
-        _: '[aeiou]',
+        pattern: '[aeiou]',
         flags: 'gi',
         replacement: '*',
       })
@@ -16,13 +16,13 @@ describe('replace', () => {
   });
 
   it('supports capture groups in the pattern', () => {
-    expect(fn('abcABCabcABC', { _: '(a)(b)(c)', flags: 'ig', replacement: '$1-$2 ' })).to.be(
+    expect(fn('abcABCabcABC', { pattern: '(a)(b)(c)', flags: 'ig', replacement: '$1-$2 ' })).to.be(
       'a-b A-B a-b A-B '
     );
 
     expect(
       fn('500.948.0888, 589-786-3621, (887) 486 5577, 123 456 7890', {
-        _: '\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})',
+        pattern: '\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})',
         flags: 'g',
         replacement: '($1)$2-$3',
       })
@@ -30,10 +30,14 @@ describe('replace', () => {
   });
 
   describe('args', () => {
-    describe('_', () => {
+    describe('pattern', () => {
       it('sets the pattern for RegEx', () => {
         expect(
-          fn('\t\t\t\tfoo\rbar\n\rfizz\n\r\nbuzz\r\n\n', { _: '\\s+', flag: 'g', replacement: ',' })
+          fn('\t\t\t\tfoo\rbar\n\rfizz\n\r\nbuzz\r\n\n', {
+            pattern: '\\s+',
+            flag: 'g',
+            replacement: ',',
+          })
         ).to.be(',foo,bar,fizz,buzz,');
       });
 
@@ -47,23 +51,23 @@ describe('replace', () => {
 
     describe('flags', () => {
       it('sets the flags for RegEx', () => {
-        expect(fn('AaBbAaBb', { _: 'a', flags: 'ig', replacement: '_' })).to.be('__Bb__Bb');
-        expect(fn('AaBbAaBb', { _: 'a', flags: 'i', replacement: '_' })).to.be('_aBbAaBb');
-        expect(fn('AaBbAaBb', { _: 'a', flags: '', replacement: '_' })).to.be('A_BbAaBb');
+        expect(fn('AaBbAaBb', { pattern: 'a', flags: 'ig', replacement: '_' })).to.be('__Bb__Bb');
+        expect(fn('AaBbAaBb', { pattern: 'a', flags: 'i', replacement: '_' })).to.be('_aBbAaBb');
+        expect(fn('AaBbAaBb', { pattern: 'a', flags: '', replacement: '_' })).to.be('A_BbAaBb');
       });
 
       it("defaults to 'g' if flag is not provided", () => {
-        expect(fn('This,is,a,test!', { _: ',', replacement: ' ' })).to.be('This is a test!');
+        expect(fn('This,is,a,test!', { pattern: ',', replacement: ' ' })).to.be('This is a test!');
       });
     });
 
     describe('replacement', () => {
       it('sets the replacement string for all RegEx matches', () => {
-        expect(fn('140000', { _: '0', replacement: '1' })).to.be('141111');
+        expect(fn('140000', { pattern: '0', replacement: '1' })).to.be('141111');
       });
       // TODO: put test back when using interpreter
       // it('removes matches to regex if replacement is not provided', () => {
-      //   expect(fn('140000', { _: '0' })).to.be('14');
+      //   expect(fn('140000', { pattern: '0' })).to.be('14');
       // });
     });
   });

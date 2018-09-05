@@ -8,7 +8,8 @@ export const palette = () => ({
     types: ['null'],
   },
   args: {
-    _: {
+    color: {
+      aliases: ['_'],
       multi: true,
       types: ['string'],
       help: 'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
@@ -25,7 +26,7 @@ export const palette = () => ({
     },
   },
   fn: (context, args) => {
-    const colors = [].concat(args._ || palettes.paul_tor_14.colors);
+    const colors = [].concat(args.color || palettes.paul_tor_14.colors);
     return {
       type: 'palette',
       colors: args.reverse ? colors.reverse() : colors,

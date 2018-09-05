@@ -13,9 +13,9 @@ export const escount = () => ({
       default: '_all',
       help: 'Specify an index pattern. Eg "logstash-*"',
     },
-    _: {
+    query: {
       types: ['string'],
-      aliases: ['query', 'q'],
+      aliases: ['_', 'q'],
       help: 'A Lucene query string',
       default: '"-_index:.kibana"',
     },
@@ -24,7 +24,7 @@ export const escount = () => ({
     context.and = context.and.concat([
       {
         type: 'luceneQueryString',
-        query: args._,
+        query: args.query,
       },
     ]);
 

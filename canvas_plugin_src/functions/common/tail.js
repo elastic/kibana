@@ -9,13 +9,14 @@ export const tail = () => ({
     types: ['datatable'],
   },
   args: {
-    _: {
+    count: {
+      aliases: ['_'],
       types: ['number'],
       help: 'Return this many rows from the end of the datatable',
     },
   },
   fn: (context, args) => ({
     ...context,
-    rows: takeRight(context.rows, args._),
+    rows: takeRight(context.rows, args.count),
   }),
 });

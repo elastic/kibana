@@ -1,6 +1,7 @@
 import { includes } from 'lodash';
 
 export function Arg(config) {
+  if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');
   this.name = config.name;
   this.required = config.required || false;
   this.help = config.help;

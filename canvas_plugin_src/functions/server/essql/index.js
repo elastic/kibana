@@ -11,8 +11,8 @@ export const essql = () => ({
   },
   help: 'Elasticsearch SQL',
   args: {
-    _: {
-      aliases: ['query', 'q'],
+    query: {
+      aliases: ['_', 'q'],
       types: ['string'],
       help: 'SQL query',
     },
@@ -28,7 +28,7 @@ export const essql = () => ({
         method: 'POST',
         body: {
           fetch_size: args.count,
-          query: args._,
+          query: args.query,
           filter: {
             bool: {
               must: [{ match_all: {} }, ...buildBoolArray(context.and)],

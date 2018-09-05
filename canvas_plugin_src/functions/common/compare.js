@@ -9,8 +9,8 @@ export const compare = () => ({
     types: ['null', 'string', 'number', 'boolean'],
   },
   args: {
-    _: {
-      aliases: ['op'],
+    op: {
+      aliases: ['_'],
       types: ['string'],
       default: 'eq',
       help:
@@ -25,7 +25,7 @@ export const compare = () => ({
   fn: (context, args) => {
     const a = context;
     const b = args.to;
-    const op = args._;
+    const op = args.op;
     const typesMatch = typeof a === typeof b;
 
     switch (op) {

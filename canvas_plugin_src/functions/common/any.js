@@ -3,15 +3,16 @@ export const any = () => ({
   type: 'boolean',
   help: 'Return true if any of the conditions are true',
   args: {
-    _: {
+    condition: {
+      aliases: ['_'],
       types: ['boolean', 'null'],
       required: true,
       multi: true,
-      help: 'The conditions to check',
+      help: 'One or more conditions to check',
     },
   },
   fn: (context, args) => {
-    const conditions = args._ || [];
+    const conditions = args.condition || [];
     return conditions.some(Boolean);
   },
 });

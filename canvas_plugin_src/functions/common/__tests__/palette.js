@@ -12,9 +12,9 @@ describe('palette', () => {
   });
 
   describe('args', () => {
-    describe('_', () => {
+    describe('color', () => {
       it('sets colors', () => {
-        const result = fn(null, { _: ['red', 'green', 'blue'] });
+        const result = fn(null, { color: ['red', 'green', 'blue'] });
         expect(result.colors).to.eql(['red', 'green', 'blue']);
       });
 

@@ -7,7 +7,7 @@ describe('asset', () => {
 
   it('throws if asset could not be retrieved by ID', () => {
     const throwsErr = () => {
-      return fn(null, { _: 'boo' });
+      return fn(null, { id: 'boo' });
     };
     expect(throwsErr).to.throwException(err => {
       expect(err.message).to.be('Could not get the asset by ID: boo');
@@ -15,6 +15,6 @@ describe('asset', () => {
   });
 
   it('returns the asset for found asset ID', () => {
-    expect(fn(null, { _: 'yay' })).to.be('here is your image');
+    expect(fn(null, { id: 'yay' })).to.be('here is your image');
   });
 });
