@@ -1,6 +1,7 @@
 # Kibana 7.0.0-alpha1
 
 # PR test please ignore
+# Yay
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
