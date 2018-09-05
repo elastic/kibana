@@ -37,9 +37,9 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ log }) {
+  constructor({ uiBundles, log }) {
     this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(log);
+    this.dllCompiler = new DllCompiler(uiBundles, log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
   }
@@ -134,6 +134,12 @@ export class DynamicDllPlugin {
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
+
+            if(module.userRequest.includes('webpackShims')) {
+              // eslint-disable-next-line
+              debugger;
+            }
+
             const absoluteResource = path.resolve(dllContext, module.userRequest);
             requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }

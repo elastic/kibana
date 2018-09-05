@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -25,6 +25,8 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 function generateDLL(config) {
   const {
+    dllNoParseRules,
+    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -48,10 +50,14 @@ function generateDLL(config) {
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: {
-        moment$: require.resolve('moment'),
-        'moment-timezone$': require.resolve('moment-timezone')
-      }
+      alias: dllAlias,
+      modules: [
+        'webpackShims',
+        fromRoot('webpackShims'),
+
+        'node_modules',
+        fromRoot('node_modules'),
+      ],
     },
     module: {
       rules: [
@@ -70,7 +76,8 @@ function generateDLL(config) {
           test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
           loader: 'file-loader'
         },
-      ]
+      ],
+      noParse: dllNoParseRules,
     },
     plugins: [
       new webpack.DllPlugin({
@@ -93,6 +100,8 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
+  const dllNoParseRules = rawConfig.noParseRules;
+  const dllAlias = rawConfig.alias;
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -116,6 +125,8 @@ function extendRawConfig(rawConfig) {
 
   // Export dll config map
   return {
+    dllNoParseRules,
+    dllAlias,
     dllContext,
     dllEntry,
     dllOutputPath,
