@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { FieldTypeIcon } from './field_type_icon';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
 describe('FieldTypeIcon', () => {
 
@@ -22,12 +23,12 @@ describe('FieldTypeIcon', () => {
   });
 
   test(`render component when type matches a field type`, () => {
-    const wrapper = shallow(<FieldTypeIcon type="keyword" />);
+    const wrapper = shallow(<FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test(`render with tooltip and test hovering`, () => {
-    const wrapper = mount(<FieldTypeIcon type="keyword" tooltipEnabled={true} />);
+    const wrapper = mount(<FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />);
     const container = wrapper.find({ className: 'field-type-icon-container' });
 
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
@@ -42,7 +43,7 @@ describe('FieldTypeIcon', () => {
   test(`update component`, () => {
     const wrapper = shallow(<FieldTypeIcon />);
     expect(wrapper.isEmptyRender()).toBeTruthy();
-    wrapper.setProps({ type: 'keyword' });
+    wrapper.setProps({ type: ML_JOB_FIELD_TYPES.IP });
     expect(wrapper).toMatchSnapshot();
   });
 
