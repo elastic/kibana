@@ -33,7 +33,7 @@ export const createNodeClientInstructions = () => [
       ' This agent supports a vararity of frameworks but can also be used with your custom stack.',
     commands: `// Add this to the VERY top of the first file loaded in your app
 var apm = require('elastic-apm-node').start({curlyOpen}
-  // Overwrite service name from package.json
+  // Override service name from package.json
   // Allowed characters: a-z, A-Z, 0-9, -, _, and space
   serviceName: '',
 
