@@ -239,6 +239,7 @@ export class WarmPhase extends PureComponent {
                         await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         validate();
                       }}
+                      min={0}
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>
