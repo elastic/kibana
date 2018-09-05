@@ -30,9 +30,9 @@ const unitsMap = {
   // q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter
   y: { weight: 9, type: 'calendar' },
 };
-const units = Object.keys(unitsMap).sort((a, b) => unitsMap[a].weight - unitsMap[b].weight);
-const unitsDesc = [...units].reverse();
-const unitsAsc = [...units];
+const units = Object.keys(unitsMap).sort((a, b) => unitsMap[b].weight - unitsMap[a].weight);
+const unitsDesc = [...units];
+const unitsAsc = [...units].reverse();
 
 const isDate = d => Object.prototype.toString.call(d) === '[object Date]';
 
