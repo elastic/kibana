@@ -17,30 +17,44 @@
  * under the License.
  */
 
+function mockClass<T>(
+  module: string,
+  Class: { new (...args: any[]): T },
+  setup: (instance: any, args: any[]) => void
+) {
+  const MockClass = jest.fn<T>(function(this: any, ...args: any[]) {
+    setup(this, args);
+  });
+
+  // define the mock name which is used in some snapshots
+  MockClass.mockName(`Mock${Class.name}`);
+
+  // define the class name for the MockClass which is used in other snapshots
+  Object.defineProperty(MockClass, 'name', {
+    value: `Mock${Class.name}`,
+  });
+
+  jest.mock(module, () => ({
+    [Class.name]: MockClass,
+  }));
+
+  return MockClass;
+}
+
 // Mock the UiSettingsApi class
 import { UiSettingsApi } from './ui_settings_api';
-const MockUiSettingsApi = jest
-  .fn<UiSettingsApi>(function(this: any) {
-    this.stop = jest.fn();
-    this.getLoadingCount$ = jest.fn().mockReturnValue({
-      loadingCountObservable: true,
-    });
-  })
-  .mockName('MockUiSettingsApi');
-jest.mock('./ui_settings_api', () => ({
-  UiSettingsApi: MockUiSettingsApi,
-}));
+const MockUiSettingsApi = mockClass('./ui_settings_api', UiSettingsApi, inst => {
+  inst.stop = jest.fn();
+  inst.getLoadingCount$ = jest.fn().mockReturnValue({
+    loadingCountObservable: true,
+  });
+});
 
 // Mock the UiSettingsClient class
 import { UiSettingsClient } from './ui_settings_client';
-const MockUiSettingsClient = jest
-  .fn<UiSettingsClient>(function(this: any) {
-    this.stop = jest.fn();
-  })
-  .mockName('MockUiSettingsClient');
-jest.mock('./ui_settings_client', () => ({
-  UiSettingsClient: MockUiSettingsClient,
-}));
+const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient, inst => {
+  inst.stop = jest.fn();
+});
 
 // Load the service
 import { UiSettingsService } from './ui_settings_service';
