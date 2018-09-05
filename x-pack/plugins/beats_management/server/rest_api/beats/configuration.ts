@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import Joi from 'joi';
+import { omit } from 'lodash';
 import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
+import { ReturnedConfigurationBlock } from './../../../common/domain_types';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -42,10 +43,24 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       return reply(wrapEsError(err));
     }
 
-    const configurationBlocks = tags.reduce((blocks: ConfigurationBlock[], tag: BeatTag) => {
-      blocks = blocks.concat(tag.configuration_blocks);
-      return blocks;
-    }, []);
+    const configurationBlocks = tags.reduce(
+      (blocks: ReturnedConfigurationBlock[], tag: BeatTag) => {
+        blocks = blocks.concat(
+          tag.configuration_blocks.reduce(
+            (acc: ReturnedConfigurationBlock[], block: ConfigurationBlock) => {
+              acc.push({
+                ...omit(block, ['configs']),
+                config: block.configs[0],
+              });
+              return acc;
+            },
+            []
+          )
+        );
+        return blocks;
+      },
+      []
+    );
 
     reply({
       configuration_blocks: configurationBlocks,

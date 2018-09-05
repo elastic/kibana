@@ -50,6 +50,11 @@ export interface ConfigurationBlock {
   configs: ConfigContent[];
 }
 
+export interface ReturnedConfigurationBlock
+  extends Pick<ConfigurationBlock, Exclude<keyof ConfigurationBlock, 'configs'>> {
+  config: ConfigContent;
+}
+
 export interface CMBeat {
   id: string;
   enrollment_token: string;
