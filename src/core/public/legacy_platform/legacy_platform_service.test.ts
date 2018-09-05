@@ -78,6 +78,14 @@ jest.mock('ui/chrome/api/base_path', () => {
   };
 });
 
+const mockUiSettingsInit = jest.fn();
+jest.mock('ui/chrome/api/ui_settings', () => {
+  mockLoadOrder.push('ui/chrome/api/ui_settings');
+  return {
+    __newPlatformInit__: mockUiSettingsInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -85,7 +93,7 @@ const notificationsStartContract = {
   toasts: {},
 } as any;
 
-const injectedMetadataStartContract = {
+const injectedMetadataStartContract: any = {
   getBasePath: jest.fn(),
   getLegacyMetadata: jest.fn(),
 };
@@ -101,6 +109,8 @@ const basePathStartContract = {
   removeFromPath: jest.fn(),
 };
 
+const uiSettingsStartContract: any = {};
+
 const defaultParams = {
   targetDomElement: document.createElement('div'),
   requireLegacyFiles: jest.fn(() => {
@@ -114,6 +124,7 @@ const defaultStartDeps = {
   notifications: notificationsStartContract,
   loadingCount: loadingCountStartContract,
   basePath: basePathStartContract,
+  uiSettings: uiSettingsStartContract,
 };
 
 afterEach(() => {
@@ -224,15 +235,7 @@ describe('#start()', () => {
 
         legacyPlatform.start(defaultStartDeps);
 
-        expect(mockLoadOrder).toEqual([
-          'ui/metadata',
-          'ui/notify/fatal_error',
-          'ui/notify/toasts',
-          'ui/chrome/api/loading_count',
-          'ui/chrome/api/base_path',
-          'ui/chrome',
-          'legacy files',
-        ]);
+        expect(mockLoadOrder).toMatchSnapshot();
       });
     });
 
@@ -247,15 +250,7 @@ describe('#start()', () => {
 
         legacyPlatform.start(defaultStartDeps);
 
-        expect(mockLoadOrder).toEqual([
-          'ui/metadata',
-          'ui/notify/fatal_error',
-          'ui/notify/toasts',
-          'ui/chrome/api/loading_count',
-          'ui/chrome/api/base_path',
-          'ui/test_harness',
-          'legacy files',
-        ]);
+        expect(mockLoadOrder).toMatchSnapshot();
       });
     });
   });
