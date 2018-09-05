@@ -29,7 +29,7 @@ export interface YamlConfigSchema {
     helpText?: string;
   };
   options?: Array<{ value: string; text: string }>;
-  validations?: 'isHost' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
+  validations?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
   error: string;
   defaultValue?: string;
   required?: boolean;

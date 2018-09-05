@@ -48,10 +48,10 @@ class MultiFieldText extends Component<
   }
 
   public handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.currentTarget;
+    const value = e.currentTarget.value.split('\n');
     this.props.setValue(value);
     if (this.props.onChange) {
-      this.props.onChange(e, e.currentTarget.value);
+      this.props.onChange(e, value);
     }
     if (this.props.instantValidation) {
       this.showError();
@@ -96,7 +96,7 @@ class MultiFieldText extends Component<
         <EuiTextArea
           id={id}
           name={name}
-          value={getValue() || ''}
+          value={getValue() ? getValue().join('\n') : ''}
           isInvalid={!disabled && error}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

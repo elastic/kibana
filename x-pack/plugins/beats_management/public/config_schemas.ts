@@ -16,7 +16,6 @@ const filebeatInputConfig: YamlConfigSchema[] = [
     validations: 'isPaths',
     error: 'One file path per line',
     required: true,
-    parseValidResult: v => v.split('\n'),
   },
   {
     id: 'other',
@@ -106,10 +105,9 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
       label: 'Hosts',
       type: 'multi-input',
     },
-    validations: 'isHost',
+    validations: 'isHosts',
     error: 'One file host per line',
     required: false,
-    parseValidResult: v => v.split('\n'),
   },
   {
     id: 'period',

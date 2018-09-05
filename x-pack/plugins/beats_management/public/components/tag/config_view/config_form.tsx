@@ -15,8 +15,23 @@ import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
 import { FormsyEuiSelect } from '../../inputs/select';
 
-addValidationRule('isHost', (values: FormData, value: FieldValue) => {
-  return value && value.length > 0;
+addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
+  if (values && values.length > 0 && values instanceof Array) {
+    return values.reduce((pass: boolean, value: string) => {
+      if (
+        value.match(
+          new RegExp(
+            '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'
+          )
+        ) !== null
+      ) {
+        return true;
+      }
+      return false;
+    }, false);
+  } else {
+    return true;
+  }
 });
 
 addValidationRule('isString', (values: FormData, value: FieldValue) => {
@@ -88,17 +103,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     }
   };
   public onValidSubmit = <ModelType extends any>(model: ModelType) => {
-    const newModel: any = {};
-
-    Object.keys(model).forEach(field => {
-      const fieldSchema = this.props.schema.find(s => s.id === field);
-      if (fieldSchema && fieldSchema.parseValidResult) {
-        newModel[field] = fieldSchema.parseValidResult(model[field]);
-      } else {
-        newModel[field] = model[field];
-      }
-    });
-    this.props.onSubmit(newModel);
+    this.props.onSubmit(model);
   };
   public render() {
     return (
