@@ -68,7 +68,7 @@ export class HistogramInner extends PureComponent {
       const padding = (item.x - item.x0) / 20;
       return {
         ...item,
-        color: item === selectedItem ? colors.blue2 : colors.apmLightBlue,
+        color: item === selectedItem ? colors.teal : colors.blue2,
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -176,7 +176,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: colors.blue2,
+                stroke: colors.teal,
                 rx: '0px',
                 ry: '0px'
               }}
