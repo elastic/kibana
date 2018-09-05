@@ -10,6 +10,7 @@ import fs from 'fs';
 import getPort from 'get-port';
 import { promisify } from 'bluebird';
 import { LevelLogger } from '../../../../server/lib/level_logger';
+import { i18n } from '@kbn/i18n';
 
 const fsp = {
   readFile: promisify(fs.readFile, fs)
@@ -61,7 +62,9 @@ export function screenshotsObservableFactory(server) {
 
   const waitForNotFoundError = async (browser) => {
     await browser.waitForSelector(`.toast.alert.alert-danger`);
-    throw new Error('Reporting subject could not be loaded to take a screenshot.');
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.screenshots.subjectCouldNotBeLoadedErrorMessage', {
+      defaultMessage: 'Reporting subject could not be loaded to take a screenshot.'
+    }));
   };
 
   const getNumberOfItems = async (browser, layout) => {

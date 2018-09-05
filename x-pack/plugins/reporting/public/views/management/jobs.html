@@ -1,20 +1,20 @@
 <kbn-management-app section="kibana">
   <div class="euiPage">
     <div class="euiPageBody">
-      <h1 class="euiTitle">Generated reports</h1>
+      <h1 class="euiTitle" i18n-id="xpack.reporting.views.management.jobs.generatedReportsTitle" i18n-default-message="Generated reports"></h1>
 
       <table class="table table-striped job-list" ng-class="{ loading: jobsCtrl.loading }">
         <thead>
           <tr>
-            <th scope="col">Document</th>
-            <th scope="col">Added</th>
-            <th scope="col">Status</th>
-            <th scope="col">Actions</th>
+            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.documentTitle" i18n-default-message="Document"></th>
+            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.addedTitle" i18n-default-message="Added"></th>
+            <th scope="col" i18n-id="xpack.reporting.views.management.statusTitle" i18n-default-message="Status">Status</th>
+            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.actionsTitle" i18n-default-message="Actions"></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-if="!jobsCtrl.reportingJobs.jobs.length">
-            <td colspan="5">No reports have been created</td>
+            <td colspan="5"  i18n-id="xpack.reporting.views.management.jobs.noReportsDescription" i18n-default-message="No reports have been created"></td>
           </tr>
           <tr ng-if="jobsCtrl.reportingJobs.jobs.length" ng-repeat="job in jobsCtrl.reportingJobs.jobs">
             <td>
