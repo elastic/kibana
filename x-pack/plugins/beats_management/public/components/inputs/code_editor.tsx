@@ -38,9 +38,7 @@ class CodeEditor extends Component<
 
   public componentDidMount() {
     const { defaultValue, setValue } = this.props;
-    if (defaultValue) {
-      setValue(defaultValue);
-    }
+    setValue(defaultValue || '');
   }
 
   public componentWillReceiveProps(nextProps: ComponentProps) {
