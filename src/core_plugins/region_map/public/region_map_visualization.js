@@ -46,14 +46,17 @@ export function RegionMapsVisualizationProvider(Private, config) {
       }
     }
 
-    async _updateData(tableGroup) {
-      this._chartData = tableGroup;
+    async _updateData(table) {
+      this._chartData = table;
       let results;
-      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
+      if (!table || !table.rows.length || table.columns.length !== 2) {
         results = [];
       } else {
-        const buckets = tableGroup.tables[0].rows;
-        results = buckets.map(([term, value]) => {
+        const termColumn = table.columns[0].id;
+        const valueColumn = table.columns[1].id;
+        results = table.rows.map(row => {
+          const term = row[termColumn];
+          const value = row[valueColumn];
           return { term: term, value: value };
         });
       }
@@ -150,8 +153,8 @@ export function RegionMapsVisualizationProvider(Private, config) {
           return;
         }
 
-        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
-        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex, event);
+        const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData, 0, rowIndex, event);
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {

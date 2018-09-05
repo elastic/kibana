@@ -37,7 +37,6 @@ export function elasticsearchLogsSpecProvider() {
       defaultMessage: 'Collect and parse logs created by Elasticsearch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
 [Learn more]({learnMoreLink}).',
       values: {

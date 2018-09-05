@@ -33,7 +33,6 @@ export function dockerMetricsSpecProvider() {
       defaultMessage: 'Fetch metrics about your Docker containers.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `docker` Metricbeat module fetches metrics from the Docker server. \
 [Learn more]({learnMoreLink}).',
       values: {

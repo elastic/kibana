@@ -66,6 +66,8 @@ export default function ({ getService, getPageObjects }) {
     };
 
     describe('Dashboard', () => {
+      beforeEach(() => PageObjects.reporting.clearToastNotifications());
+
       describe('Print PDF button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
@@ -224,7 +226,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickBucket('X-Axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
-          await PageObjects.visualize.saveVisualization('my viz');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('my viz');
           await expectEnabledGenerateReportButton();
         });
 

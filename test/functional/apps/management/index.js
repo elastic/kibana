@@ -47,6 +47,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
     loadTestFile(require.resolve('./_test_huge_fields'));
     loadTestFile(require.resolve('./_handle_alias'));
+    loadTestFile(require.resolve('./_handle_version_conflict'));
   });
 
 }
