@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
+import moment from 'moment';
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -21,22 +23,22 @@ function getLink(location, jobs) {
   let from = 0;
   let to = 0;
   if (jobs.length === 1) {
-    from = jobs[0].earliestTimeStamp.string;
-    to = jobs[0].latestTimeStamp.string;
+    from = jobs[0].earliestTimeStampSeconds;
+    to = jobs[0].latestTimeStampSeconds;
   } else {
-    const froms = jobs.map(j => j.earliestTimeStamp).sort((a, b) => a.unix > b.unix);
-    const tos = jobs.map(j => j.latestTimeStamp).sort((a, b) => a.unix < b.unix);
-    from = froms[0].string;
-    to = tos[0].string;
+    const froms = jobs.map(j => j.earliestTimeStampSeconds).sort();
+    const tos = jobs.map(j => j.latestTimeStampSeconds).sort().reverse();
+    from = froms[0];
+    to = tos[0];
   }
 
-  // if either of the dates are empty, set them to undefined
+  // if either of the dates are zero, set them to undefined
   // moment will convert undefined to now.
-  from = (from === '') ? undefined : from;
-  to = (to === '') ? undefined : to;
+  const fromString = moment(from).format(TIME_FORMAT);
+  const toString = moment(to).format(TIME_FORMAT);
 
   const jobIds = jobs.map(j => j.id);
-  const url = mlJobService.createResultsUrl(jobIds, from, to, location);
+  const url = mlJobService.createResultsUrl(jobIds, fromString, toString, location);
   return `${chrome.getBasePath()}/app/${url}`;
 }
 
