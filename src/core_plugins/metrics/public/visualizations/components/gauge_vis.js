@@ -86,7 +86,7 @@ class GaugeVis extends Component {
           display: 'flex',
           rowDirection: 'column',
           flex: '1 0 auto',
-          // overflow: 'hidden', // Fixes IE scrollbars issue
+          overflow: 'hidden', // Fixes IE scrollbars issue
         },
         svg: {
           position: 'absolute',
