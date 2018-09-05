@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractHtmlMessages } from './extract_html_messages';
+import { extractHtmlMessages } from './html';
 
 const htmlSourceBuffer = Buffer.from(`
 <div name="dashboard">
@@ -37,7 +37,7 @@ const htmlSourceBuffer = Buffer.from(`
 </div>
 `);
 
-describe('dev/i18n/extract_html_messages', () => {
+describe('dev/i18n/extractors/html', () => {
   test('extracts default messages from HTML', () => {
     const actual = Array.from(extractHtmlMessages(htmlSourceBuffer));
     expect(actual.sort()).toMatchSnapshot();

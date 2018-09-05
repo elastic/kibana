@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { run } from './run';
-export { createFailError, combineErrors, isFailError } from './fail';
+import { parse } from '@babel/parser';
+
+import { extractI18nCallMessages } from './i18n_call';
+import { isI18nTranslateFunction, traverseNodes } from '../utils';
+
+/**
+ * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
+ */
+const PUG_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
+
+/**
+ * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
+ */
+export function* extractPugMessages(buffer) {
+  const expressions = buffer.toString().match(PUG_I18N_REGEX) || [];
+
+  for (const expression of expressions) {
+    for (const node of traverseNodes(parse(expression).program.body)) {
+      if (isI18nTranslateFunction(node)) {
+        yield extractI18nCallMessages(node);
+        break;
+      }
+    }
+  }
+}
