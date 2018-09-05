@@ -19,8 +19,8 @@ import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
 
 import { parse as parseQuery } from 'query-string';
-import { QueryString } from 'ui/utils/query_string';
 import { Link, match, withRouter } from 'react-router-dom';
+import { QueryString } from 'ui/utils/query_string';
 import { Location } from 'vscode-languageserver';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
@@ -67,8 +67,6 @@ interface Props {
   isSymbolsLoading: boolean;
   isNotFound: boolean;
   file: FetchFileResponse;
-  isImage?: boolean;
-  url?: string;
 }
 
 const DirectoryView = withRouter(props => {
@@ -216,24 +214,8 @@ export class LayoutPage extends React.Component<Props, State> {
     );
 
   public renderContent = () => {
-    const { resource, org, repo, revision, path, goto, pathType } = this.props.match.params;
-    const { fileLanguage, fileContent, url } = this.props;
-    if (this.props.match.params.pathType === PathTypes.blob) {
-      if (fileLanguage === 'markdown') {
-        return (
-          <div className="markdown-body markdownContainer">
-            <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
-          </div>
-        );
-      } else if (this.props.isImage) {
-        return (
-          <div className="autoMargin">
-            <img src={url} alt={path} />
-          </div>
-        );
-      }
-      return <Editor />;
-    } else if (pathType === PathTypes.tree) {
+    const { path, pathType } = this.props.match.params;
+    if (pathType === PathTypes.tree) {
       return (
         <EuiFlexGroup direction="column" style={noMarginStyle}>
           <EuiFlexItem className="contentItem">
@@ -244,6 +226,26 @@ export class LayoutPage extends React.Component<Props, State> {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
+    } else if (this.props.match.params.pathType === PathTypes.blob) {
+      const { file } = this.props;
+      if (!file) {
+        return null;
+      }
+      const { lang: fileLanguage, content: fileContent, url } = file;
+      if (fileLanguage === 'markdown') {
+        return (
+          <div className="markdown-body markdownContainer">
+            <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
+          </div>
+        );
+      } else if (this.props.file.isImage) {
+        return (
+          <div className="autoMargin">
+            <img src={url} alt={path} />
+          </div>
+        );
+      }
+      return <Editor />;
     } else {
       return null;
     }
@@ -328,7 +330,7 @@ export class LayoutPage extends React.Component<Props, State> {
     this.props.fetchRepoTree({
       uri: `${resource}/${org}/${repo}`,
       revision,
-      path,
+      path: path || '',
     });
   }
 }
@@ -338,10 +340,6 @@ const mapStateToProps = (state: RootState) => ({
   openedPaths: state.file.openedPaths,
   loading: state.file.loading,
   isNotFound: state.file.isNotFound,
-  fileLanguage: state.file.fileLanguage,
-  fileContent: state.file.fileContent,
-  isImage: state.file.isImage,
-  url: state.file.url,
   symbols: state.symbolSearch.symbols,
   isSymbolsLoading: state.symbolSearch.isLoading,
   commits: state.file.commits,

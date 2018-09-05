@@ -14,10 +14,12 @@ import {
   FetchFilePayload,
   fetchRepoConfigs,
   fetchRepos,
+  fetchRepoTree,
   findReferences,
   loadStructure,
   revealPosition,
 } from '../actions';
+
 import * as ROUTES from '../components/routes';
 import { fileSelector, lastRequestPathSelector, refUrlSelector } from '../selectors';
 
@@ -68,7 +70,7 @@ function* handleLocationChange(action: any) {
     yield put(fetchRepos());
     yield put(fetchRepoConfigs());
   } else if (ROUTES.mainRegex.test(pathname)) {
-    const { file, pathType, repoUri, revision, schema, position } = parseLspUrl(pathname);
+    const { file, pathType, repoUri, revision, position } = parseLspUrl(pathname);
     if (file && pathType === ROUTES.PathTypes.blob) {
       yield call(handleFile, repoUri, file, revision);
       if (position) {
@@ -78,8 +80,21 @@ function* handleLocationChange(action: any) {
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl));
       }
-      const uri = toCanonicalUrl({ revision, schema, repoUri, file });
-      const lastRequestPath = yield select(lastRequestPathSelector);
+    }
+    const lastRequestPath = yield select(lastRequestPathSelector);
+    yield put(
+      fetchRepoTree({
+        uri: repoUri,
+        revision,
+        path: file || '',
+      })
+    );
+    if (file && pathType === ROUTES.PathTypes.blob) {
+      const uri = toCanonicalUrl({
+        repoUri,
+        file,
+        revision,
+      });
       if (lastRequestPath !== uri) {
         yield put(loadStructure(uri!));
       }

@@ -37,8 +37,6 @@ export interface FileState {
   file?: FetchFileResponse;
   opendir?: FileTree;
   isNotFound: boolean;
-  isImage?: boolean;
-  url?: string;
 }
 
 const initialState: FileState = {
@@ -54,7 +52,6 @@ const initialState: FileState = {
   tags: [],
   commits: [],
   isNotFound: false,
-  isImage: false,
 };
 
 function mergeTree(draft: FileState, update: FileTree) {
@@ -131,11 +128,6 @@ export const file = handleActions(
     [String(fetchFileSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.file = action.payload as FetchFileResponse;
-        const response = action.payload as FetchFileResponse;
-        draft.isImage = !!response.isImage;
-        if (response.url) {
-          draft.url = response.url;
-        }
         draft.isNotFound = false;
       }),
     [String(fetchFileFailed)]: (state: FileState, action: any) =>
