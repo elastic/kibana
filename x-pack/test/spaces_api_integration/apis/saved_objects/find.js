@@ -68,7 +68,9 @@ export default function ({ getService }) {
         .sort(sortById);
 
       expectedSavedObjects.forEach((object, index) => {
-        object.attributes = resp.body.saved_objects[index].attributes;
+        if (resp.body.saved_objects[index]) {
+          object.attributes = resp.body.saved_objects[index].attributes;
+        }
       });
 
       expect(resp.body).to.eql({

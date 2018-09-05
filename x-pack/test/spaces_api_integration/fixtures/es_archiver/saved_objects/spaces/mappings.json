@@ -30,9 +30,6 @@
               }
             }
           },
-          "spaceId": {
-            "type": "keyword"
-          },
           "space": {
             "properties": {
               "name": {

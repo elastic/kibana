@@ -7,7 +7,6 @@
 import expect from 'expect.js';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix, getIdPrefix } from '../lib/space_test_utils';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -47,16 +46,10 @@ export default function ({ getService }) {
         ));
 
         it(`should return ${tests.inOtherSpace.statusCode} when deleting a doc belonging to another space`, async () => {
-          const documentId = `${getIdPrefix('space_2')}be3733a0-9efe-11e7-acb3-3dab96693fab`;
-
-          let expectedObjectId = documentId;
-
-          if (spaceId !== DEFAULT_SPACE_ID) {
-            expectedObjectId = `${spaceId}:${expectedObjectId}`;
-          }
+          const expectedObjectId = `${getIdPrefix('space_2')}be3733a0-9efe-11e7-acb3-3dab96693fab`;
 
           await supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${documentId}`)
+            .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${expectedObjectId}`)
             .expect(tests.inOtherSpace.statusCode)
             .then(tests.inOtherSpace.response('dashboard', expectedObjectId));
         });

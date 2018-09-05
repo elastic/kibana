@@ -17,29 +17,16 @@
  * under the License.
  */
 
-function assertNonEmptyString(value, name) {
-  if (!value || typeof value !== 'string') {
-    throw new TypeError(`Expected "${value}" to be a ${name}`);
-  }
-}
-
-/**
- *  Trim the prefix from the id of a saved object doc
- *
- *  @param  {string} id
- *  @param  {string} type
- *  @return {string}
- */
-export function trimIdPrefix(schema, id, namespace, type) {
-  assertNonEmptyString(id, 'document id');
-  assertNonEmptyString(type, 'saved object type');
-
-  const namespacePrefix = namespace && !schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
-  const prefix = `${namespacePrefix}${type}:`;
-
-  if (!id.startsWith(prefix)) {
-    throw new Error(`Unable to trim id ${id}`);
+export class SavedObjectsSchema {
+  constructor(uiExportsSchema) {
+    this._schema = uiExportsSchema;
   }
 
-  return id.slice(prefix.length);
+  isNamespaceAgnostic(type) {
+    const typeSchema = this._schema[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return Boolean(typeSchema.isNamespaceAgnostic);
+  }
 }

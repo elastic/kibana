@@ -431,17 +431,19 @@ describe(`spaces disabled`, () => {
         spaces: null,
       });
       const id = Symbol();
+      const options = Symbol();
 
-      const result = await client.delete(type, id);
+      const result = await client.delete(type, id, options);
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
-      expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id);
+      expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
         type,
         id,
+        options,
       });
     });
   });
@@ -1640,18 +1642,20 @@ describe(`spaces enabled`, () => {
         spaces: mockSpaces,
       });
       const id = Symbol();
+      const options = Symbol();
 
-      const result = await client.delete(type, id);
+      const result = await client.delete(type, id, options);
 
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'delete')]);
-      expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id);
+      expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
         type,
         id,
+        options,
       });
     });
   });

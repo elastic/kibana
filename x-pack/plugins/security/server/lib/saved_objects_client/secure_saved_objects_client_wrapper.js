@@ -50,14 +50,14 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.bulkCreate(objects, options);
   }
 
-  async delete(type, id) {
+  async delete(type, id, options) {
     await this._ensureAuthorized(
       type,
       'delete',
-      { type, id },
+      { type, id, options },
     );
 
-    return await this._baseClient.delete(type, id);
+    return await this._baseClient.delete(type, id, options);
   }
 
   async find(options = {}) {

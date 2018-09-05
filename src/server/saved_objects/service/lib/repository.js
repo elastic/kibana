@@ -35,12 +35,14 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
+      schema,
       callCluster,
       onBeforeWrite = () => { },
     } = options;
 
     this._index = index;
     this._mappings = mappings;
+    this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
@@ -54,14 +56,14 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.extraDocumentProperties={}] - extra properties to append to the document body, outside of the object's type property
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      extraDocumentProperties = {},
-      overwrite = false
+      overwrite = false,
+      namespace,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -69,12 +71,12 @@ export class SavedObjectsRepository {
 
     try {
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: this._generateEsId(namespace, type, id),
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
         body: {
-          ...extraDocumentProperties,
+          ...namespace && !this._schema.isNamespaceAgnostic(type) && { namespace },
           type,
           updated_at: time,
           [type]: attributes,
@@ -82,7 +84,7 @@ export class SavedObjectsRepository {
       });
 
       return {
-        id: trimIdPrefix(response._id, type),
+        id: trimIdPrefix(this._schema, response._id, namespace, type),
         type,
         updated_at: time,
         version: response._version,
@@ -101,14 +103,16 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
+   * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      overwrite = false,
+      namespace
     } = options;
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
@@ -117,12 +121,12 @@ export class SavedObjectsRepository {
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
+            _id: this._generateEsId(namespace, object.type, object.id),
             _type: this._type,
           }
         },
         {
-          ...object.extraDocumentProperties,
+          ... namespace && !this._schema.isNamespaceAgnostic(object.type) && { namespace },
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes,
@@ -186,11 +190,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id) {
+  async delete(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
+      id: this._generateEsId(namespace, type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -220,12 +230,12 @@ export class SavedObjectsRepository {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -238,7 +248,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
-      filters,
+      namespace,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -249,10 +259,6 @@ export class SavedObjectsRepository {
       throw new TypeError('options.searchFields must be an array');
     }
 
-    if (filters && !Array.isArray(filters)) {
-      throw new TypeError('options.filters must be an array');
-    }
-
     const esOptions = {
       index: this._index,
       size: perPage,
@@ -261,13 +267,13 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         version: true,
-        ...getSearchDsl(this._mappings, {
+        ...getSearchDsl(this._mappings, this._schema, {
+          namespace,
           search,
           searchFields,
           type,
           sortField,
           sortOrder,
-          filters
         })
       }
     };
@@ -292,7 +298,7 @@ export class SavedObjectsRepository {
       saved_objects: response.hits.hits.map(hit => {
         const { type, updated_at: updatedAt } = hit._source;
         return {
-          id: trimIdPrefix(hit._id, type),
+          id: trimIdPrefix(this._schema, hit._id, namespace, type),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
@@ -306,8 +312,8 @@ export class SavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options = {}]
-   * @param {array} [options.extraDocumentProperties = []] - an array of extra properties to return from the underlying document
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -317,6 +323,10 @@ export class SavedObjectsRepository {
    * ])
    */
   async bulkGet(objects = [], options = {}) {
+    const {
+      namespace
+    } = options;
+
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -325,15 +335,13 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: this._generateEsId(namespace, object.type, object.id),
           _type: this._type,
         }))
       }
     });
 
     const { docs } = response;
-
-    const { extraDocumentProperties = [] } = options;
 
     return {
       saved_objects: docs.map((doc, i) => {
@@ -353,9 +361,6 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          ...extraDocumentProperties
-            .map(s => ({ [s]: doc._source[s] }))
-            .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
           attributes: {
             ...doc._source[type],
           }
@@ -371,13 +376,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
-   * @param {object} [options = {}]
-   * @param {array} [options.extraDocumentProperties = []] - an array of extra properties to return from the underlying document
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+      id: this._generateEsId(namespace, type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -390,8 +399,6 @@ export class SavedObjectsRepository {
       throw errors.createGenericNotFoundError(type, id);
     }
 
-    const { extraDocumentProperties = [] } = options;
-
     const { updated_at: updatedAt } = response._source;
 
     return {
@@ -399,9 +406,6 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      ...extraDocumentProperties
-        .map(s => ({ [s]: response._source[s] }))
-        .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
       attributes: {
         ...response._source[type],
       }
@@ -415,21 +419,26 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const {
+      version,
+      namespace
+    } = options;
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+      id: this._generateEsId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version: options.version,
+      version,
       refresh: 'wait_for',
       ignore: [404],
       body: {
         doc: {
-          ...options.extraDocumentProperties,
+          ...namespace && !this._schema.isNamespaceAgnostic(type) && { namespace },
           updated_at: time,
           [type]: attributes,
         }
@@ -467,8 +476,9 @@ export class SavedObjectsRepository {
     }
   }
 
-  _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
+  _generateEsId(namespace, type, id) {
+    const namespacePrefix = namespace && !this._schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+    return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
   _getCurrentTime() {

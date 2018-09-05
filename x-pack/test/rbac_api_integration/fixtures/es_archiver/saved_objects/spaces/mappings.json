@@ -30,7 +30,7 @@
               }
             }
           },
-          "spaceId": {
+          "namespace": {
             "type": "keyword"
           },
           "space": {

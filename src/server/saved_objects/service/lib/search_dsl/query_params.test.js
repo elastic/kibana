@@ -50,61 +50,189 @@ const MAPPINGS = {
             }
           }
         }
+      },
+      global: {
+        properties: {
+          name: {
+            type: 'keyword',
+          }
+        }
       }
     }
   }
 };
 
+const SCHEMA = {
+  isNamespaceAgnostic: type => type === 'global',
+};
+
+
+// create a type clause to be used within the "should", if a namespace is specified
+// the clause will ensure the namespace matches; otherwise, the clause will ensure
+// that there isn't a namespace field.
+const createTypeClause = (type, namespace) => {
+  if (namespace) {
+    return {
+      bool: {
+        must: [
+          { term: { type } },
+          { term: { namespace } },
+        ]
+      }
+    };
+  }
+
+  return {
+    bool: {
+      must: [{ term: { type } }],
+      must_not: [{ exists: { field: 'namespace' } }]
+    }
+  };
+};
+
 describe('searchDsl/queryParams', () => {
-  describe('{}', () => {
-    it('searches for everything', () => {
-      expect(getQueryParams(MAPPINGS))
-        .toEqual({});
-    });
-  });
-
-  describe('{type}', () => {
-    it('includes just a terms filter', () => {
-      expect(getQueryParams(MAPPINGS, 'saved'))
+  describe('no parameters', () => {
+    it('searches for all known types without a namespace specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                {
-                  term: { type: 'saved' }
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending'),
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
                 }
-              ]
+              }]
             }
           }
         });
     });
   });
 
-  describe('{type,filters}', () => {
-    it('includes filters and a term filter for type', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', null, null, [{ terms: { foo: ['bar', 'baz'] } }]))
+  describe('namespace', () => {
+    it('filters namespaced types for namespace, and ensures namespace agnostic types have no namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace'))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-                {
-                  term: { type: 'saved' }
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
                 }
-              ]
+              }]
             }
           }
         });
     });
   });
 
-  describe('{search}', () => {
-    it('includes just a sqs query', () => {
-      expect(getQueryParams(MAPPINGS, null, 'us*'))
+  describe('type (singular, namespaced)', () => {
+    it('includes a terms filter for type and namespace not being specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, 'saved'))
         .toEqual({
           query: {
             bool: {
-              filter: [],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }]
+            }
+          }
+        });
+    });
+  });
+
+  describe('type (singular, global)', () => {
+    it('includes a terms filter for type and namespace not being specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, 'global'))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }]
+            }
+          }
+        });
+    });
+  });
+
+  describe('type (plural, namespaced and global)', () => {
+    it('includes term filters for types and namespace not being specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, ['saved', 'global']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }]
+            }
+          }
+        });
+    });
+  });
+
+  describe('namespace, type (plural, namespaced and global)', () => {
+    it('includes a terms filter for type and namespace not being specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }]
+            }
+          }
+        });
+    });
+  });
+
+  describe('search', () => {
+    it('includes a sqs query and all known types without a namespace specified', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, null, 'us*'))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending'),
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
@@ -119,15 +247,22 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{search,filters}', () => {
-    it('includes filters and a sqs query', () => {
-      expect(getQueryParams(MAPPINGS, null, 'us*', null, [{ terms: { foo: ['bar', 'baz'] } }]))
+  describe('namespace, search', () => {
+    it('includes a sqs query and namespaced types with the namespace and global types without a namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', null, 'us*'))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } }
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
@@ -142,19 +277,25 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{type,search}', () => {
-    it('includes bool with sqs query and term filter for type', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*'))
+  describe('type (plural, namespaced and global), search', () => {
+    it('includes a sqs query and types without a namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, ['saved', 'global'], 'us*'))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { term: { type: 'saved' } }
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
-                    query: 'y*',
+                    query: 'us*',
                     all_fields: true
                   }
                 }
@@ -165,20 +306,25 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{type,search,filters}', () => {
-    it('includes bool with sqs query, filters and term filter for type', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', null, [{ terms: { foo: ['bar', 'baz'] } }]))
+  describe('namespace, type (plural, namespaced and global), search', () => {
+    it('includes a sqs query and namespace type with a namespace and global type without a namespace', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'us*'))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-                { term: { type: 'saved' } }
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
-                    query: 'y*',
+                    query: 'us*',
                     all_fields: true
                   }
                 }
@@ -189,20 +335,30 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{search,searchFields}', () => {
+  describe('search, searchFields', () => {
     it('includes all types for field', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title']))
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, null, 'y*', ['title']))
         .toEqual({
           query: {
             bool: {
-              filter: [],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending'),
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'pending.title',
-                      'saved.title'
+                      'saved.title',
+                      'global.title',
                     ]
                   }
                 }
@@ -212,18 +368,28 @@ describe('searchDsl/queryParams', () => {
         });
     });
     it('supports field boosting', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title^3']))
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, null, 'y*', ['title^3']))
         .toEqual({
           query: {
             bool: {
-              filter: [],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending'),
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'pending.title^3',
-                      'saved.title^3'
+                      'saved.title^3',
+                      'global.title^3',
                     ]
                   }
                 }
@@ -233,11 +399,20 @@ describe('searchDsl/queryParams', () => {
         });
     });
     it('supports field and multi-field', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title', 'title.raw']))
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, null, 'y*', ['title', 'title.raw']))
         .toEqual({
           query: {
             bool: {
-              filter: [],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending'),
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
@@ -245,8 +420,10 @@ describe('searchDsl/queryParams', () => {
                     fields: [
                       'pending.title',
                       'saved.title',
+                      'global.title',
                       'pending.title.raw',
                       'saved.title.raw',
+                      'global.title.raw',
                     ]
                   }
                 }
@@ -257,22 +434,30 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{search,searchFields,filters}', () => {
-    it('specifies filters and includes all types for field', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title'], [{ terms: { foo: ['bar', 'baz'] } }]))
+  describe('namespace, search, searchFields', () => {
+    it('includes all types for field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', null, 'y*', ['title']))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'pending.title',
-                      'saved.title'
+                      'saved.title',
+                      'global.title',
                     ]
                   }
                 }
@@ -281,21 +466,29 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
-    it('specifies filters and supports field boosting', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title^3'], [{ terms: { foo: ['bar', 'baz'] } }]))
+    it('supports field boosting', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', null, 'y*', ['title^3']))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'pending.title^3',
-                      'saved.title^3'
+                      'saved.title^3',
+                      'global.title^3',
                     ]
                   }
                 }
@@ -304,14 +497,21 @@ describe('searchDsl/queryParams', () => {
           }
         });
     });
-    it('specifies filters and supports field and multi-field', () => {
-      expect(getQueryParams(MAPPINGS, null, 'y*', ['title', 'title.raw'], [{ terms: { foo: ['bar', 'baz'] } }]))
+    it('supports field and multi-field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', null, 'y*', ['title', 'title.raw']))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-              ],
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('pending', 'foo-namespace'),
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
               must: [
                 {
                   simple_query_string: {
@@ -319,8 +519,10 @@ describe('searchDsl/queryParams', () => {
                     fields: [
                       'pending.title',
                       'saved.title',
+                      'global.title',
                       'pending.title.raw',
                       'saved.title.raw',
+                      'global.title.raw',
                     ]
                   }
                 }
@@ -331,66 +533,88 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{type,search,searchFields}', () => {
-    it('includes bool, and sqs with field list', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title']))
+  describe('type (plural, namespaced and global), search, searchFields', () => {
+    it('includes all types for field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, ['saved', 'global'], 'y*', ['title']))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { term: { type: 'saved' } }
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: [
-                      'saved.title'
-                    ]
-                  }
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
                 }
-              ]
-            }
-          }
-        });
-    });
-    it('supports fields pointing to multi-fields', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title.raw']))
-        .toEqual({
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'saved' } }
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: [
-                      'saved.title.raw'
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        });
-    });
-    it('supports multiple search fields', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title', 'title.raw']))
-        .toEqual({
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'saved' } }
-              ],
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'saved.title',
-                      'saved.title.raw'
+                      'global.title',
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('supports field boosting', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, ['saved', 'global'], 'y*', ['title^3']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title^3',
+                      'global.title^3',
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('supports field and multi-field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, null, ['saved', 'global'], 'y*', ['title', 'title.raw']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title',
+                      'global.title',
+                      'saved.title.raw',
+                      'global.title.raw',
                     ]
                   }
                 }
@@ -401,69 +625,88 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{type,search,searchFields,filters}', () => {
-    it('includes specified filters, type filter and sqs with field list', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title'], [{ terms: { foo: ['bar', 'baz'] } }]))
+  describe('namespace, type (plural, namespaced and global), search, searchFields', () => {
+    it('includes all types for field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', ['title']))
         .toEqual({
           query: {
             bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-                { term: { type: 'saved' } }
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: [
-                      'saved.title'
-                    ]
-                  }
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
                 }
-              ]
-            }
-          }
-        });
-    });
-    it('supports fields pointing to multi-fields', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title.raw'], [{ terms: { foo: ['bar', 'baz'] } }]))
-        .toEqual({
-          query: {
-            bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-                { term: { type: 'saved' } }
-              ],
-              must: [
-                {
-                  simple_query_string: {
-                    query: 'y*',
-                    fields: [
-                      'saved.title.raw'
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        });
-    });
-    it('supports multiple search fields', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title', 'title.raw'], [{ terms: { foo: ['bar', 'baz'] } }]))
-        .toEqual({
-          query: {
-            bool: {
-              filter: [
-                { terms: { foo: ['bar', 'baz'] } },
-                { term: { type: 'saved' } }
-              ],
+              }],
               must: [
                 {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
                       'saved.title',
-                      'saved.title.raw'
+                      'global.title',
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('supports field boosting', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', ['title^3']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title^3',
+                      'global.title^3',
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+    it('supports field and multi-field', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'y*', ['title', 'title.raw']))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1
+                }
+              }],
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'y*',
+                    fields: [
+                      'saved.title',
+                      'global.title',
+                      'saved.title.raw',
+                      'global.title.raw',
                     ]
                   }
                 }
