@@ -29,7 +29,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     try {
       beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
-        return reply({ message: `Beat ${beatId} not found` }).code(404);
+        return reply({ message: `Beat "${beatId}" not found` }).code(404);
       }
 
       const isAccessTokenValid = beat.access_token === accessToken;

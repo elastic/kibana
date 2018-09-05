@@ -40,7 +40,7 @@ export class TagsLib {
       // will now be in the UI forms...
       transformedTag.configuration_blocks = tag.configuration_blocks.map(block => {
         const { type, description, configs } = block;
-        const activeConfig = configs[0]; // ?
+        const activeConfig = configs[0];
         const thisConfig = this.tagConfigs.find((conf: any) => conf.value === type).config;
         const knownConfigIds = thisConfig.map((config: any) => config.id);
 

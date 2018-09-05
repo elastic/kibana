@@ -32,7 +32,7 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
     beat.full_tags.map((tag: BeatTag) => {
       return tag.configuration_blocks.map(configuration => ({
         ...configuration,
-        // @ts-ignore one of the types on ClientSideConfigurationBlock doesn't define a "module" property
+        // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
         module: configuration.configs[0].module || null,
         tagId: tag.id,
         tagColor: tag.color,
