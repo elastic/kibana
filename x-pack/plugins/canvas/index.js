@@ -1,11 +1,14 @@
+import { resolve } from 'path';
 import init from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib/constants';
 
-export default function(kibana) {
+export function canvas(kibana) {
   return new kibana.Plugin({
-    name: CANVAS_APP,
+    id: CANVAS_APP,
+    configPrefix: 'xpack.canvas',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
         title: 'Canvas',
