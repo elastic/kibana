@@ -14,11 +14,17 @@ export class LspService {
   public readonly controller: LanguageServerController;
   public readonly workspaceHandler: WorkspaceHandler;
   private log: Log;
-  constructor(targetHost: string, server: Hapi.Server, serverOptions: ServerOptions) {
+  constructor(
+    targetHost: string,
+    server: Hapi.Server,
+    serverOptions: ServerOptions,
+    objectsClient: any
+  ) {
     this.log = new Log(server, ['LSP']);
     this.workspaceHandler = new WorkspaceHandler(
       serverOptions.repoPath,
       serverOptions.workspacePath,
+      objectsClient,
       new Log(server, ['LSP', 'workspace'])
     );
     this.controller = new LanguageServerController(targetHost, server);

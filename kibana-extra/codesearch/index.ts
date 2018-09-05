@@ -70,18 +70,19 @@ export default (kibana: any) =>
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
       const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
+      const repository = server.savedObjects.getSavedObjectsRepository(
+        adminCluster.callWithInternalUser
+      );
+      const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
+
       // Initialize indexers
-      const lspService = new LspService('127.0.0.1', server, serverOptions);
+      const lspService = new LspService('127.0.0.1', server, serverOptions, objectsClient);
       const lspIndexer = new LspIndexer(lspService, serverOptions, adminCluster.getClient(), log);
 
       // Initialize repository index.
       const repositoryIndexInit = new RepositoryIndexInitializer(adminCluster.getClient(), log);
 
       // Initialize queue.
-      const repository = server.savedObjects.getSavedObjectsRepository(
-        adminCluster.callWithInternalUser
-      );
-      const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
       const queue = new Esqueue(queueIndex, {
         client: adminCluster.getClient(),
         timeout: queueTimeout,
@@ -118,7 +119,7 @@ export default (kibana: any) =>
       documentSearchRoute(server, documentSearchClient);
       symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
-      workspaceRoute(server, serverOptions);
+      workspaceRoute(server, serverOptions, objectsClient);
       monacoRoute(server);
 
       lspService.launchServers().then(() => {

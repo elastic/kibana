@@ -11,7 +11,7 @@ import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 
-export function workspaceRoute(server: Server, serverOptions: ServerOptions) {
+export function workspaceRoute(server: Server, serverOptions: ServerOptions, objectsClient: any) {
   server.route({
     path: '/api/cs/workspace',
     method: 'GET',
@@ -34,6 +34,7 @@ export function workspaceRoute(server: Server, serverOptions: ServerOptions) {
         const workspaceHandler = new WorkspaceHandler(
           serverOptions.repoPath,
           serverOptions.workspacePath,
+          objectsClient,
           log
         );
         try {

@@ -13,19 +13,24 @@ import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserv
 
 import { Full } from '@codesearch/lsp-extension';
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
+
 import { parseLspUrl } from '../../common/uri_util';
-import { LspRequest } from '../../model';
+import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { CloneWorkerProgress, LspRequest } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 
 export class WorkspaceHandler {
   private git: GitOperations;
-  private log: Log;
   private revisionMap: { [uri: string]: string } = {};
 
-  constructor(readonly repoPath: string, private readonly workspacePath: string, log: Log) {
+  constructor(
+    readonly repoPath: string,
+    private readonly workspacePath: string,
+    private readonly objectsClient: any,
+    private readonly log: Log
+  ) {
     this.git = new GitOperations(repoPath);
-    this.log = log;
   }
 
   /**
@@ -34,6 +39,16 @@ export class WorkspaceHandler {
    * @param revision
    */
   public async openWorkspace(repositoryUri: string, revision: string) {
+    try {
+      const res = await this.objectsClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repositoryUri);
+      const cloneProgress: CloneWorkerProgress = res.attributes;
+      if (cloneProgress.progress !== 100) {
+        throw Boom.internal(`repository has not been fully cloned yet.`);
+      }
+    } catch (error) {
+      throw Boom.internal(`checkout workspace on an unknown status repository`);
+    }
+
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
     if (revision !== 'master') {
