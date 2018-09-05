@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -100,9 +99,6 @@ app.controller('timelion', function (
   // switches to say, the timepicker.
   $scope.page = config.get('timelion:showTutorial', true) ? 1 : 0;
   $scope.setPage = (page) => $scope.page = page;
-
-  // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
-  moment.tz.setDefault(config.get('dateFormat:tz'));
 
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();

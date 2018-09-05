@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('vertical bar chart with index without time filter', function () {
+  describe.skip('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
