@@ -27,7 +27,7 @@ const basePath = '/someBasePath';
 
 function init(customInternals = { basePath }) {
   const chrome = {
-    getBasePath: () => basePath,
+    getBasePath: () => customInternals.basePath || '',
   };
   const internals = {
     nav: [],
