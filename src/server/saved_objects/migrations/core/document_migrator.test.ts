@@ -465,7 +465,7 @@ describe('DocumentMigrator', () => {
         },
       },
       validateDoc: d => {
-        if (d.attributes.counter === 42) {
+        if ((d.attributes as any).counter === 42) {
           throw new Error('Meaningful!');
         }
       },
