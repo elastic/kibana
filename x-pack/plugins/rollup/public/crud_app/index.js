@@ -28,22 +28,6 @@ esSection.register('rollup_jobs', {
   url: `#${CRUD_APP_BASE_PATH}`,
 });
 
-export const manageAngularLifecycle = ($scope, $route, elem) => {
-  const lastRoute = $route.current;
-
-  const deregister = $scope.$on('$locationChangeSuccess', () => {
-    const currentRoute = $route.current;
-    if (lastRoute.$$route.template === currentRoute.$$route.template) {
-      $route.current = lastRoute;
-    }
-  });
-
-  $scope.$on('$destroy', () => {
-    deregister && deregister();
-    elem && unmountComponentAtNode(elem);
-  });
-};
-
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
@@ -67,9 +51,21 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
       setHttpClient($http);
 
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('rollupJobsReactRoot');
-        renderReact(elem);
-        manageAngularLifecycle($scope, $route, elem);
+        const appElement = document.getElementById('rollupJobsReactRoot');
+        renderReact(appElement);
+
+        const lastRoute = $route.current;
+        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+          const currentRoute = $route.current;
+          if (lastRoute.$$route.template === currentRoute.$$route.template) {
+            $route.current = lastRoute;
+          }
+        });
+
+        $scope.$on('$destroy', () => {
+          stopListeningForLocationChange();
+          unmountComponentAtNode(appElement);
+        });
       });
     }
   }
