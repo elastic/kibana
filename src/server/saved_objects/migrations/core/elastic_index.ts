@@ -147,7 +147,7 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
  * @param {string} index
  * @param {MigrationVersion} migrationVersion - The latest versions of the migrations
  */
-export async function hasMigrations(
+export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
   migrationVersion: MigrationVersion

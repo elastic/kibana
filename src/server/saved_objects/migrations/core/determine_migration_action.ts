@@ -34,7 +34,10 @@ export enum MigrationAction {
  * differ in a way that requires migration, the result is 'migrate', and if
  * the mappings are equivalent, the result is 'none'.
  */
-export function diffMapping(actual: IndexMapping, expected: IndexMapping): MigrationAction {
+export function determineMigrationAction(
+  actual: IndexMapping,
+  expected: IndexMapping
+): MigrationAction {
   if (actual.doc.dynamic !== expected.doc.dynamic) {
     return MigrationAction.Migrate;
   }

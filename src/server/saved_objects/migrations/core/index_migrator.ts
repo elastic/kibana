@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { diffMapping, MigrationAction } from './diff_mapping';
+import { determineMigrationAction, MigrationAction } from './determine_migration_action';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
 import { Context, migrationContext, MigrationOpts } from './migration_context';
@@ -80,7 +80,7 @@ export class IndexMigrator {
 async function requiredAction(context: Context): Promise<MigrationAction> {
   const { callCluster, alias, documentMigrator, dest } = context;
 
-  const hasMigrations = await Index.hasMigrations(
+  const hasMigrations = await Index.migrationsUpToDate(
     callCluster,
     alias,
     documentMigrator.migrationVersion
@@ -96,7 +96,7 @@ async function requiredAction(context: Context): Promise<MigrationAction> {
     return MigrationAction.Migrate;
   }
 
-  return diffMapping(refreshedSource.mappings, dest.mappings);
+  return determineMigrationAction(refreshedSource.mappings, dest.mappings);
 }
 
 /**

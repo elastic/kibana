@@ -169,9 +169,14 @@ describe('ElasticIndex', () => {
     });
   });
 
-  describe('hasMigrations', () => {
+  describe('migrationsUpToDate', () => {
     // A helper to reduce boilerplate in the hasMigration tests that follow.
-    async function testHasMigrations({ index = '.myindex', mappings, count, migrations }: any) {
+    async function testMigrationsUpToDate({
+      index = '.myindex',
+      mappings,
+      count,
+      migrations,
+    }: any) {
       const callCluster = sinon.spy(async (path: string) => {
         if (path === 'indices.get') {
           return {
@@ -183,12 +188,12 @@ describe('ElasticIndex', () => {
         }
         throw new Error(`Unknown command ${path}.`);
       });
-      const hasMigrations = await Index.hasMigrations(callCluster, index, migrations);
+      const hasMigrations = await Index.migrationsUpToDate(callCluster, index, migrations);
       return { hasMigrations, callCluster };
     }
 
     test('is false if the index mappings do not contain migrationVersion', async () => {
-      const { hasMigrations, callCluster } = await testHasMigrations({
+      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           doc: {
@@ -206,7 +211,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is true if there are no migrations defined', async () => {
-      const { hasMigrations, callCluster } = await testHasMigrations({
+      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           doc: {
@@ -229,7 +234,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is true if there are no documents out of date', async () => {
-      const { hasMigrations, callCluster } = await testHasMigrations({
+      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           doc: {
@@ -253,7 +258,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is false if there are documents out of date', async () => {
-      const { hasMigrations, callCluster } = await testHasMigrations({
+      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           doc: {
@@ -277,7 +282,7 @@ describe('ElasticIndex', () => {
     });
 
     test('counts docs that are out of date', async () => {
-      const { callCluster } = await testHasMigrations({
+      const { callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           doc: {

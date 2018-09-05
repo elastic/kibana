@@ -74,7 +74,7 @@ export interface MigrationVersion {
  * scenario out of the box.
  */
 export interface SavedObjectDoc {
-  attributes: any;
+  attributes: object;
   id: string;
   type: string;
   migrationVersion?: MigrationVersion;
@@ -281,7 +281,8 @@ function props(doc: SavedObjectDoc) {
  */
 function propVersion(doc: SavedObjectDoc | ActiveMigrations, prop: string) {
   return (
-    (doc[prop] && doc[prop].latestVersion) || (doc.migrationVersion && doc.migrationVersion[prop])
+    (doc[prop] && doc[prop].latestVersion) ||
+    (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
 

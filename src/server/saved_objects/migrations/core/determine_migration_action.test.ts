@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { diffMapping, MigrationAction } from './diff_mapping';
+import { determineMigrationAction, MigrationAction } from './determine_migration_action';
 
-describe('diffMapping', () => {
+describe('determineMigrationAction', () => {
   test('requires no action if mappings are identical', () => {
     const actual = {
       doc: {
@@ -46,7 +46,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
   });
 
   test('requires no action if mappings differ only by dynamic properties', () => {
@@ -69,7 +69,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
   });
 
   test('requires no action if a root property has been disabled', () => {
@@ -91,7 +91,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.None);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
   });
 
   test('requires migration if a sub-property differs', () => {
@@ -112,7 +112,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
   });
 
   test('requires migration if a type changes', () => {
@@ -133,7 +133,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
   });
 
   test('requires migration if doc dynamic value differs', () => {
@@ -154,7 +154,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
   });
 
   test('requires patching if we added a root property', () => {
@@ -173,7 +173,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Patch);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Patch);
   });
 
   test('requires patching if we added a sub-property', () => {
@@ -203,7 +203,7 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Patch);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Patch);
   });
 
   test('requires migration if a sub property has been removed', () => {
@@ -233,6 +233,6 @@ describe('diffMapping', () => {
       },
     };
 
-    expect(diffMapping(actual, expected)).toEqual(MigrationAction.Migrate);
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
   });
 });

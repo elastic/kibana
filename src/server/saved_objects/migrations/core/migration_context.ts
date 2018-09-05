@@ -54,7 +54,7 @@ export interface Context {
 }
 
 /**
- * Builds up an uuber object which has all of the config options, settings,
+ * Builds up an uber object which has all of the config options, settings,
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
