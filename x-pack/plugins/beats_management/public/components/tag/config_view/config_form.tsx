@@ -19,6 +19,7 @@ addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => 
   if (values && values.length > 0 && values instanceof Array) {
     return values.reduce((pass: boolean, value: string) => {
       if (
+        pass &&
         value.match(
           new RegExp(
             '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'
@@ -28,7 +29,7 @@ addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => 
         return true;
       }
       return false;
-    }, false);
+    }, true);
   } else {
     return true;
   }
