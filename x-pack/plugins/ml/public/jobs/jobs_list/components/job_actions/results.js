@@ -26,10 +26,8 @@ function getLink(location, jobs) {
     from = jobs[0].earliestTimeStampSeconds;
     to = jobs[0].latestTimeStampSeconds;
   } else {
-    const froms = jobs.map(j => j.earliestTimeStampSeconds).sort();
-    const tos = jobs.map(j => j.latestTimeStampSeconds).sort().reverse();
-    from = froms[0];
-    to = tos[0];
+    from = Math.min(...jobs.map(j => j.earliestTimeStampSeconds));
+    to = Math.max(...jobs.map(j => j.latestTimeStampSeconds));
   }
 
   // if either of the dates are zero, set them to undefined
