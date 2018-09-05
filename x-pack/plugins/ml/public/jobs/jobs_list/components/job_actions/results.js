@@ -23,11 +23,11 @@ function getLink(location, jobs) {
   let from = 0;
   let to = 0;
   if (jobs.length === 1) {
-    from = jobs[0].earliestTimeStampMs;
-    to = jobs[0].latestTimeStampMs;
+    from = jobs[0].earliestTimestampMs;
+    to = jobs[0].latestTimestampMs;
   } else {
-    from = Math.min(...jobs.map(j => j.earliestTimeStampMs));
-    to = Math.max(...jobs.map(j => j.latestTimeStampMs));
+    from = Math.min(...jobs.map(j => j.earliestTimestampMs));
+    to = Math.max(...jobs.map(j => j.latestTimestampMs));
   }
 
   const fromString = moment(from).format(TIME_FORMAT);
