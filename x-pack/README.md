@@ -104,7 +104,7 @@ node scripts/functional_tests --config test/saml_api_integration/config
 
 prerequisites:
 The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisions between generated reports and baseline reports.
-pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up be running the following.
+pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up by running the following.
 
 ```sh
 //OSX
