@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import { TaskManagerClientWrapper } from './client_wrapper';
 import {
   Logger,
   TaskDefinition,
@@ -29,16 +30,15 @@ import {
 } from './task_pool';
 import { SanitizedTaskDefinition } from './task_pool/task';
 
-function taskManagerFactory(kbnServer: any, server: any, config: any) {
-  let taskManager: TaskManager;
-  return async function getTaskManager() {
-    if (taskManager) {
-      return taskManager;
-    }
+export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
+  const logger = new Logger((...args) => server.log(...args));
+  const numWorkers = config.get('taskManager.num_workers');
+  const definitions = extractTaskDefinitions(numWorkers, kbnServer.uiExports.taskDefinitions);
 
-    const logger = new Logger((...args) => server.log(...args));
+  server.decorate('server', 'taskManager', new TaskManagerClientWrapper());
+
+  kbnServer.afterPluginsInit(async () => {
     const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-    const numWorkers = config.get('taskManager.num_workers');
     const store = new TaskStore({
       index: config.get('taskManager.index'),
       callCluster,
@@ -47,8 +47,6 @@ function taskManagerFactory(kbnServer: any, server: any, config: any) {
 
     logger.debug('Initializing the task manager index');
     await store.init();
-
-    const definitions = extractTaskDefinitions(numWorkers, kbnServer.uiExports.taskDefinitions);
 
     const pool = new TaskPool({
       logger,
@@ -62,18 +60,8 @@ function taskManagerFactory(kbnServer: any, server: any, config: any) {
 
     pool.start();
 
-    taskManager = new TaskManager({
-      store,
-      pool,
-    });
-
-    return taskManager;
-  };
-}
-
-export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  server.decorate('server', 'taskManager', {
-    getTaskManager: taskManagerFactory(kbnServer, server, config),
+    const client = new TaskManager({ store, pool });
+    server.taskManager.setClient(client);
   });
 }
 
