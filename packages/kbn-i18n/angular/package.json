@@ -1,4 +1,4 @@
 {
-  "browser": "../target/web/angular",
-  "main": "../target/node/angular"
+  "browser": "../src/angular",
+  "main": "../src/angular"
 }
