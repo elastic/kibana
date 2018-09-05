@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 
 import {
   EuiCheckbox,
@@ -15,9 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
@@ -28,7 +25,6 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -69,13 +65,13 @@ const COLUMNS = [{
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.delayHeader', {
     defaultMessage: 'Delay',
   }),
-  fieldName: 'rollupDelay',
-  render: ({ rollupDelay }) => rollupDelay || 'None',
+  fieldName: 'dateHistogramDelay',
+  render: ({ dateHistogramDelay }) => dateHistogramDelay || 'None',
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.intervalHeader', {
     defaultMessage: 'Interval',
   }),
-  fieldName: 'rollupInterval',
+  fieldName: 'dateHistogramInterval',
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.groupsHeader', {
     defaultMessage: 'Groups',
@@ -338,77 +334,67 @@ export class JobTableUi extends Component {
     const atLeastOneItemSelected = Object.keys(idToSelectedJobMap).length > 0;
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiTitle size="l">
-              <h1>Rollup jobs</h1>
-            </EuiTitle>
+      <Fragment>
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          {atLeastOneItemSelected ? (
+            <EuiFlexItem grow={false}>
+              <JobActionMenu
+                jobs={this.getSelectedJobs()}
+                closeDetailPanel={closeDetailPanel}
+                resetSelection={this.resetSelection}
+                deselectJobs={this.deselectItems}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              value={filter}
+              onChange={event => {
+                filterChanged(event.target.value);
+              }}
+              data-test-subj="jobTableFilterInput"
+              placeholder={
+                intl.formatMessage({
+                  id: 'xpack.rollupJobs.jobTable.searchInputPlaceholder',
+                  defaultMessage: 'Search',
+                })
+              }
+              aria-label="Search jobs"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiSpacer />
+        <EuiSpacer size="m" />
 
-            <EuiFlexGroup gutterSize="l" alignItems="center">
-              {atLeastOneItemSelected ? (
-                <EuiFlexItem grow={false}>
-                  <JobActionMenu
-                    jobs={this.getSelectedJobs()}
-                    closeDetailPanel={closeDetailPanel}
-                    resetSelection={this.resetSelection}
-                    deselectJobs={this.deselectItems}
-                  />
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  value={filter}
-                  onChange={event => {
-                    filterChanged(event.target.value);
-                  }}
-                  data-test-subj="jobTableFilterInput"
-                  placeholder={
-                    intl.formatMessage({
-                      id: 'xpack.rollupJobs.jobTable.searchInputPlaceholder',
-                      defaultMessage: 'Search',
-                    })
-                  }
-                  aria-label="Search jobs"
+        {jobs.length > 0 ? (
+          <EuiTable>
+            <EuiTableHeader>
+              <EuiTableHeaderCellCheckbox>
+                <EuiCheckbox
+                  id="selectAllJobsCheckbox"
+                  checked={this.areAllItemsSelected()}
+                  onChange={this.toggleAll}
+                  type="inList"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </EuiTableHeaderCellCheckbox>
+              {this.buildHeader()}
+            </EuiTableHeader>
 
-            <EuiSpacer size="m" />
+            <EuiTableBody>
+              {this.buildRows()}
+            </EuiTableBody>
+          </EuiTable>
+        ) : (
+          <div>
+            No rollup jobs to show
+          </div>
+        )}
 
-            {jobs.length > 0 ? (
-              <EuiTable>
-                <EuiTableHeader>
-                  <EuiTableHeaderCellCheckbox>
-                    <EuiCheckbox
-                      id="selectAllJobsCheckbox"
-                      checked={this.areAllItemsSelected()}
-                      onChange={this.toggleAll}
-                      type="inList"
-                    />
-                  </EuiTableHeaderCellCheckbox>
-                  {this.buildHeader()}
-                </EuiTableHeader>
+        <EuiSpacer size="m" />
 
-                <EuiTableBody>
-                  {this.buildRows()}
-                </EuiTableBody>
-              </EuiTable>
-            ) : (
-              <div>
-                No rollup jobs to show
-              </div>
-            )}
-
-            <EuiSpacer size="m" />
-
-            {jobs.length > 0 ? this.renderPager() : null}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+        {jobs.length > 0 ? this.renderPager() : null}
+      </Fragment>
     );
   }
 }
