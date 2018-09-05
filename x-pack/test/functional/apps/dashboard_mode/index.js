@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('dashboard mode', function () {
+  describe('dashboard mode @ciGroup02', function () {
     loadTestFile(require.resolve('./dashboard_view_mode'));
   });
 }

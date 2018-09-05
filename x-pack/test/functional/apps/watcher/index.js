@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('watcher app', function () {
+  describe('watcher app @ciGroup01', function () {
     //loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./watcher_test'));
   });

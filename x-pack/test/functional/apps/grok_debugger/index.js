@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('logstash', () => {
+  describe('logstash @ciGroup01', () => {
     loadTestFile(require.resolve('./grok_debugger'));
   });
 }

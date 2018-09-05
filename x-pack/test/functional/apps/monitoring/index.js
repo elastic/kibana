@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Monitoring app', () => {
+  describe('Monitoring app @ciGroup01', () => {
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
     loadTestFile(require.resolve('./cluster/alerts'));
