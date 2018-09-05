@@ -118,11 +118,13 @@ export class StepLogisticsUi extends Component {
               )}
               error={errorId}
               isInvalid={Boolean(showStepErrors && errorId)}
+              fullWidth
             >
               <EuiFieldText
                 isInvalid={Boolean(showStepErrors && errorId)}
                 value={id}
                 onChange={e => onFieldsChange({ id: e.target.value })}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

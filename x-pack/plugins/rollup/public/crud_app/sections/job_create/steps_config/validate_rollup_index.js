@@ -55,5 +55,14 @@ export function validateRollupIndex(rollupIndex) {
     )];
   }
 
+  if (rollupIndex[0] === '.') {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
+        defaultMessage="Index names can't begin with periods"
+      />
+    )];
+  }
+
   return undefined;
 }
