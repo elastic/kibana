@@ -13,6 +13,7 @@ Options:
   --config <file>                Pass in a config 
   --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
   --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
+  --es-install-dir <dir>         Run Elasticsearch from existing install directory instead of from source or snapshot.
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
