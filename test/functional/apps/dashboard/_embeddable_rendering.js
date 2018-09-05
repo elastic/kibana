@@ -31,10 +31,13 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const remote = getService('remote');
   const dashboardExpect = getService('dashboardExpect');
+  const failureDebugging = getService('failureDebugging');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
+    failureDebugging.logBrowserConsole();
+    await PageObjects.dashboard.waitForRenderComplete();
     await dashboardExpect.pieSliceCount(16);
     await dashboardExpect.seriesElementCount(19);
     await dashboardExpect.dataTableRowCount(5);
@@ -57,6 +60,8 @@ export default function ({ getService, getPageObjects }) {
   };
 
   const expectNoDataRenders = async () => {
+    failureDebugging.logBrowserConsole();
+    await PageObjects.dashboard.waitForRenderComplete();
     await dashboardExpect.pieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableRowCount(0);
@@ -82,6 +87,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
+      failureDebugging.logBrowserConsole();
       await PageObjects.dashboard.clickNewDashboard();
 
       const fromTime = '2018-01-01 00:00:00.000';

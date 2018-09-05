@@ -20,16 +20,22 @@
 const attributeName = 'data-render-complete';
 
 export class RenderCompleteHelper {
+  private title: string | null;
+
   constructor(private readonly element: HTMLElement) {
     this.setup();
+
+    this.title = this.element.getAttribute('data-title');
   }
 
   public destroy = () => {
+    console.error(`${this.title}: RenderCompleteHelper.destroy`);
     this.element.removeEventListener('renderStart', this.start);
     this.element.removeEventListener('renderComplete', this.complete);
   };
 
   public setup = () => {
+    console.error(`${this.title}: RenderCompleteHelper.setup`);
     this.element.setAttribute(attributeName, 'false');
     this.element.addEventListener('renderStart', this.start);
     this.element.addEventListener('renderComplete', this.complete);
@@ -41,11 +47,13 @@ export class RenderCompleteHelper {
   };
 
   private start = () => {
+    console.error(`${this.title}: RenderCompleteHelper.start`);
     this.element.setAttribute(attributeName, 'false');
     return true;
   };
 
   private complete = () => {
+    console.error(`${this.title}: RenderCompleteHelper.complete`);
     this.element.setAttribute(attributeName, 'true');
     return true;
   };

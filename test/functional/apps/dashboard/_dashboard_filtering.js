@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
+  const failureDebugging = getService('failureDebugging');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('adding a filter that excludes all data', async () => {
       before(async () => {
+        failureDebugging.logBrowserConsole();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
@@ -49,6 +51,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
+
+        failureDebugging.logBrowserConsole();
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
