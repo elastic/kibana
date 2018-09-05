@@ -137,7 +137,7 @@ export class StepDateHistogramUi extends Component {
             >
               <EuiFieldText
                 isInvalid={Boolean(showStepErrors && errorDateHistogramField)}
-                value={dateHistogramField}
+                value={dateHistogramField || ''}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
               />
             </EuiFormRow>
@@ -163,7 +163,7 @@ export class StepDateHistogramUi extends Component {
               )}
             >
               <EuiFieldText
-                value={dateHistogramInterval}
+                value={dateHistogramInterval || ''}
                 onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
                 isInvalid={Boolean(showStepErrors && errorDateHistogramInterval)}
               />
@@ -210,7 +210,7 @@ export class StepDateHistogramUi extends Component {
               )}
             >
               <EuiFieldText
-                value={dateHistogramDelay}
+                value={dateHistogramDelay || ''}
                 onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
                 isInvalid={Boolean(showStepErrors && errorDateHistogramDelay)}
               />
@@ -223,7 +223,7 @@ export class StepDateHistogramUi extends Component {
                   defaultMessage="Time zone (optional)"
                 />
               )}
-              error={errorDateHistogramTimeZone}
+              error={errorDateHistogramTimeZone || ''}
               isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
               helpText={(
                 <FormattedMessage
@@ -243,7 +243,7 @@ export class StepDateHistogramUi extends Component {
               )}
             >
               <EuiFieldText
-                value={dateHistogramTimeZone}
+                value={dateHistogramTimeZone || ''}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
                 isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
               />
