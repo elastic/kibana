@@ -14,12 +14,16 @@ import { HoverComputer } from './hover_computer';
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
+  private static readonly DECORATION_OPTIONS = {
+    className: 'hoverHighlight',
+  };
   private hoverOperation: Operation<Hover>;
   private computer: HoverComputer;
   private lastRange: IRange | null = null;
   private shouldFocus: boolean = false;
   private eventsBound: boolean = false;
   private hoverResultAction?: (hover: Hover) => void = undefined;
+  private highlightDecorations: string[] = [];
 
   constructor(editor: Editor.ICodeEditor) {
     super(ContentHoverWidget.ID, editor);
@@ -58,6 +62,11 @@ export class ContentHoverWidget extends ContentWidget {
 
   public setHoverResultAction(hoverResultAction: (hover: Hover) => void) {
     this.hoverResultAction = hoverResultAction;
+  }
+
+  public hide(): void {
+    super.hide();
+    this.highlightDecorations = this.editor.deltaDecorations(this.highlightDecorations, []);
   }
 
   private result(result: Hover, complete: boolean) {
@@ -121,6 +130,12 @@ export class ContentHoverWidget extends ContentWidget {
     );
     if (result.range) {
       this.lastRange = this.toMonacoRange(result.range);
+      this.highlightDecorations = this.editor.deltaDecorations(this.highlightDecorations, [
+        {
+          range: this.lastRange,
+          options: ContentHoverWidget.DECORATION_OPTIONS,
+        },
+      ]);
     }
     this.updateContents(fragment);
   }
