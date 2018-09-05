@@ -12,6 +12,7 @@ import {
   documentSearch,
   fetchFile,
   FetchFilePayload,
+  fetchRepoConfigs,
   fetchRepos,
   findReferences,
   loadStructure,
@@ -65,6 +66,7 @@ function* handleLocationChange(action: any) {
 
   if (ROUTES.adminRegex.test(pathname)) {
     yield put(fetchRepos());
+    yield put(fetchRepoConfigs());
   } else if (ROUTES.mainRegex.test(pathname)) {
     const { file, pathType, repoUri, revision, schema, position } = parseLspUrl(pathname);
     if (file && pathType === ROUTES.PathTypes.blob) {

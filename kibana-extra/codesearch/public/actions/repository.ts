@@ -7,6 +7,7 @@
 import { createAction } from 'redux-actions';
 
 import { Repository } from '../../model';
+import { RepoConfigs } from '../../model/workspace';
 
 export const fetchRepos = createAction('FETCH REPOS');
 export const fetchReposSuccess = createAction<Repository[]>('FETCH REPOS SUCCESS');
@@ -23,3 +24,9 @@ export const indexRepoFailed = createAction<Error>('INDEX REPOS FAILED');
 export const importRepo = createAction<string>('IMPORT REPOS');
 export const importRepoSuccess = createAction<string>('IMPORT REPOS SUCCESS');
 export const importRepoFailed = createAction<Error>('IMPORT REPOS FAILED');
+
+export const fetchRepoConfigs = createAction('FETCH REPO CONFIGS');
+export const fetchRepoConfigSuccess = createAction<RepoConfigs>('FETCH REPO CONFIGS SUCCESS');
+export const fetchRepoConfigFailed = createAction<Error>('FETCH REPO CONFIGS FAILED');
+
+export const initRepoCommand = createAction<string>('INIT REPO CMD');

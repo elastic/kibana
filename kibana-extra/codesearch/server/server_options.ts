@@ -5,6 +5,7 @@
  */
 
 import { resolve } from 'path';
+import { RepoConfig, RepoConfigs } from '../model/workspace';
 
 export class ServerOptions {
   public readonly workspacePath = resolve(this.config.get('path.data'), 'codesearch/workspace');
@@ -14,6 +15,14 @@ export class ServerOptions {
   public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
 
   public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
+
+  public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
+    (previous, current) => {
+      previous[current.repo] = current;
+      return previous;
+    },
+    {} as RepoConfigs
+  );
 
   constructor(private options: any, private config: any) {}
 }

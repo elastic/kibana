@@ -22,6 +22,7 @@ import {
   repositorySearchRoute,
   symbolSearchRoute,
 } from './server/routes/search';
+import { workspaceRoute } from './server/routes/workspace';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { UpdateScheduler } from './server/update_scheduler';
@@ -52,6 +53,7 @@ export default (kibana: any) =>
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
+        repos: Joi.array().default([]),
       }).default();
     },
 
@@ -116,6 +118,7 @@ export default (kibana: any) =>
       documentSearchRoute(server, documentSearchClient);
       symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
+      workspaceRoute(server, serverOptions);
       monacoRoute(server);
 
       lspService.launchServers().then(() => {

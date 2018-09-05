@@ -2,3 +2,11 @@ optimize:
   unsafeCache: true
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
+
+#codesearch:
+#  repos:
+#  - repo: 'github.com/Microsoft/TypeScript-Node-Starter'
+#    init:
+#      - 'yarn'
+#      - 'install'
+

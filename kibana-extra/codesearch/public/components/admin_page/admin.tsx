@@ -30,7 +30,8 @@ import {
 import { Link } from 'react-router-dom';
 
 import { Repository } from '../../../model';
-import { deleteRepo, importRepo, indexRepo } from '../../actions';
+import { RepoConfigs } from '../../../model/workspace';
+import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
 
 enum Tabs {
@@ -44,6 +45,8 @@ interface Props {
   deleteRepo: (uri: string) => void;
   indexRepo: (uri: string) => void;
   importRepo: (uri: string) => void;
+  initRepoCommand: (uri: string) => void;
+  repoConfigs?: RepoConfigs;
 }
 
 interface State {
@@ -58,31 +61,40 @@ interface RepositoryItemProps {
   repoURI: string;
   deleteRepo: () => void;
   indexRepo: () => void;
+  initRepoCommand: () => void;
+  hasInitCmd?: boolean;
 }
 
-const RepositoryItem = (props: RepositoryItemProps) => (
-  <EuiFlexGroup className="repoItem" wrap={true} justifyContent="spaceBetween">
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+const RepositoryItem = (props: RepositoryItemProps) => {
+  const initRepoButton = (
+    <EuiButtonIcon iconType="play" aria-label="run init command" onClick={props.initRepoCommand} />
+  );
+
+  return (
+    <EuiFlexGroup className="repoItem" wrap={true} justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <div>
+            <Link to={`/${props.repoURI}/tree/master`}>{props.repoName}</Link>
+          </div>
+          <div>
+            <a href={`//${props.repoURI}`} target="__blank">
+              {props.repoURI}
+            </a>
+          </div>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <div>
-          <Link to={`/${props.repoURI}/tree/master`}>{props.repoName}</Link>
+          {props.hasInitCmd && initRepoButton}
+          <EuiButtonIcon iconType="indexSettings" aria-label="settings" />
+          <EuiButtonIcon iconType="indexOpen" aria-label="index" onClick={props.indexRepo} />
+          <EuiButtonIcon iconType="trash" aria-label="delete" onClick={props.deleteRepo} />
         </div>
-        <div>
-          <a href={`//${props.repoURI}`} target="__blank">
-            {props.repoURI}
-          </a>
-        </div>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <div>
-        <EuiButtonIcon iconType="indexSettings" aria-label="settings" />
-        <EuiButtonIcon iconType="indexOpen" aria-label="index" onClick={props.indexRepo} />
-        <EuiButtonIcon iconType="trash" aria-label="delete" onClick={props.deleteRepo} />
-      </div>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
@@ -230,6 +242,8 @@ class AdminPage extends React.PureComponent<Props, State> {
         repoURI={repo.uri}
         deleteRepo={this.getDeleteRepoHandler(repo.uri)}
         indexRepo={this.getIndexRepoHandler(repo.uri)}
+        initRepoCommand={this.props.initRepoCommand.bind(this, repo.uri)}
+        hasInitCmd={this.hasInitCmd(repo)}
       />
     ));
 
@@ -268,17 +282,27 @@ class AdminPage extends React.PureComponent<Props, State> {
       </EuiPage>
     );
   }
+
+  private hasInitCmd(repo: Repository) {
+    if (this.props.repoConfigs) {
+      const config = this.props.repoConfigs[repo.uri];
+      return config && !!config.init;
+    }
+    return false;
+  }
 }
 
 const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   importLoading: state.repository.importLoading,
+  repoConfigs: state.repository.repoConfigs,
 });
 
 const mapDispatchToProps = {
   deleteRepo,
   importRepo,
   indexRepo,
+  initRepoCommand,
 };
 
 export const Admin = connect(

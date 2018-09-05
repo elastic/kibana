@@ -11,6 +11,9 @@ import {
   deleteRepo,
   deleteRepoFailed,
   deleteRepoSuccess,
+  fetchRepoConfigFailed,
+  fetchRepoConfigs,
+  fetchRepoConfigSuccess,
   fetchRepos,
   fetchReposFailed,
   fetchReposSuccess,
@@ -20,6 +23,7 @@ import {
   indexRepo,
   indexRepoFailed,
   indexRepoSuccess,
+  initRepoCommand,
 } from '../actions';
 
 function requestRepos(): any {
@@ -73,6 +77,31 @@ function* handleImportRepo(action: Action<string>) {
     yield put(importRepoFailed(err));
   }
 }
+function* handleFetchRepoConfigs() {
+  try {
+    const configs = yield call(requestRepoConfigs);
+    yield put(fetchRepoConfigSuccess(configs));
+  } catch (e) {
+    yield put(fetchRepoConfigFailed(e));
+  }
+}
+
+function requestRepoConfigs() {
+  return kfetch({ pathname: '../api/cs/workspace', method: 'get' });
+}
+
+function* handleInitCmd(action: Action<string>) {
+  const repoUri = action.payload as string;
+  yield call(requestRepoInitCmd, repoUri);
+}
+
+function requestRepoInitCmd(repoUri: string) {
+  return kfetch({
+    pathname: `../api/cs/workspace/${repoUri}/master`,
+    query: { force: true },
+    method: 'post',
+  });
+}
 
 export function* watchImportRepo() {
   yield takeEvery(String(importRepo), handleImportRepo);
@@ -88,4 +117,12 @@ export function* watchIndexRepo() {
 
 export function* watchFetchRepos() {
   yield takeEvery(String(fetchRepos), handleFetchRepos);
+}
+
+export function* watchFetchRepoConfigs() {
+  yield takeEvery(String(fetchRepoConfigs), handleFetchRepoConfigs);
+}
+
+export function* watchInitRepoCmd() {
+  yield takeEvery(String(initRepoCommand), handleInitCmd);
 }

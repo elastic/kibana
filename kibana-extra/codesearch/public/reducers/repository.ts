@@ -8,8 +8,10 @@ import { Action, handleActions } from 'redux-actions';
 
 import { Repository } from '../../model';
 
+import { RepoConfigs } from '../../model/workspace';
 import {
   deleteRepoSuccess,
+  fetchRepoConfigSuccess,
   fetchRepos,
   fetchReposFailed,
   fetchReposSuccess,
@@ -23,6 +25,7 @@ export interface RepositoryState {
   error?: Error;
   loading: boolean;
   importLoading: boolean;
+  repoConfigs?: RepoConfigs;
 }
 
 const initialState: RepositoryState = {
@@ -68,6 +71,10 @@ export const repository = handleActions(
     [String(importRepoFailed)]: (state: RepositoryState) =>
       produce<RepositoryState>(state, draft => {
         draft.importLoading = false;
+      }),
+    [String(fetchRepoConfigSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.repoConfigs = action.payload;
       }),
   },
   initialState
