@@ -134,10 +134,12 @@ export function screenshotsObservableFactory(server) {
         }
 
         // The renderComplete fires before the visualizations are in the DOM, so
-        // we wait for the event loop to flush before resolving the promise. This
-        // seems to correct the timing issue and prevents us from capturing
-        // visualization screenshots before they're rendered.
-        return Promise.all(renderedTasks).then(() => new Promise(r => setTimeout(r)));
+        // we wait for the event loop to flush before telling reporting to continue. This
+        // seems to correct a timing issue that was causing reporting to occasionally
+        // capture the first visualization before it was actually in the DOM.
+        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 100));
+
+        return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
       awaitPromise: true,
