@@ -8,7 +8,8 @@ import Boom from 'boom';
 
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { Repository } from '../../model';
+import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { CloneWorkerProgress, Repository } from '../../model';
 import { RepositoryIndexInitializer } from '../indexer';
 import {
   RepositoryIndexName,
@@ -138,6 +139,26 @@ export function repositoryRoute(
         reply(repo);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
+        log.error(msg);
+        reply(Boom.notFound(msg));
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/cs/repoCloneStatus/{uri*3}',
+    method: 'GET',
+    async handler(req, reply) {
+      const repoUri = req.params.uri as string;
+      const log = new Log(req.server);
+      const objectClient = req.getSavedObjectsClient();
+
+      try {
+        const response = await objectClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri);
+        const status: CloneWorkerProgress = response.attributes;
+        reply(status);
+      } catch (error) {
+        const msg = `Get repository clone status ${repoUri} error: ${error}`;
         log.error(msg);
         reply(Boom.notFound(msg));
       }

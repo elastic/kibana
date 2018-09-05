@@ -38,6 +38,31 @@ export const mappings = {
       timestamp: {
         type: 'date',
       },
+      cloneProgress: {
+        properties: {
+          receivedObjects: {
+            type: 'integer',
+          },
+          indexedObjects: {
+            type: 'integer',
+          },
+          totalObjects: {
+            type: 'integer',
+          },
+          localObjects: {
+            type: 'integer',
+          },
+          totalDeltas: {
+            type: 'integer',
+          },
+          indexedDeltas: {
+            type: 'integer',
+          },
+          receivedBytes: {
+            type: 'integer',
+          },
+        },
+      },
     },
   },
   [REPOSITORY_DELETE_STATUS_INDEX_TYPE]: {

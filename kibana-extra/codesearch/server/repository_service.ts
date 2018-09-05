@@ -9,14 +9,22 @@ import Git from 'nodegit';
 import rimraf from 'rimraf';
 
 import { RepositoryUtils } from '../common/repository_utils';
-import { CloneWorkerResult, DeleteWorkerResult, Repository, UpdateWorkerResult } from '../model';
+import {
+  CloneProgress,
+  CloneWorkerResult,
+  DeleteWorkerResult,
+  Repository,
+  UpdateWorkerResult,
+} from '../model';
 import { Log } from './log';
+
+export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => void;
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
   constructor(private readonly repoVolPath: string, private log: Log) {}
 
-  public async clone(repo: Repository): Promise<CloneWorkerResult> {
+  public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
       throw new Error(`Invalid repository.`);
     } else {
@@ -31,20 +39,32 @@ export class RepositoryService {
         };
       } else {
         try {
-          const gitRepo = await Git.Clone.clone(
-            repo.url,
-            localPath
-            // {
-            //   fetchOpts: {
-            //     callbacks: {
-            //       transferProgress: (stats) => {
-            //         const progress = (100 * (stats.receivedObjects() + stats.indexedObjects())) / (stats.totalObjects() * 2);
-            //         return progress;
-            //       }
-            //     }
-            //   }
-            // }
-          );
+          const gitRepo = await Git.Clone.clone(repo.url, localPath, {
+            fetchOpts: {
+              callbacks: {
+                transferProgress: {
+                  throttle: 50, // Make the progress update less frequent.
+                  callback: (stats: any) => {
+                    const progress =
+                      (100 * (stats.receivedObjects() + stats.indexedObjects())) /
+                      (stats.totalObjects() * 2);
+                    const cloneProgress = {
+                      receivedObjects: stats.receivedObjects(),
+                      indexedObjects: stats.indexedObjects(),
+                      totalObjects: stats.totalObjects(),
+                      localObjects: stats.localObjects(),
+                      totalDeltas: stats.totalDeltas(),
+                      indexedDeltas: stats.indexedDeltas(),
+                      receivedBytes: stats.receivedBytes(),
+                    };
+                    if (handler) {
+                      handler(progress, cloneProgress);
+                    }
+                  },
+                },
+              },
+            },
+          });
           const headCommit = await gitRepo.getHeadCommit();
           const headRevision = headCommit.sha();
           this.log.info(

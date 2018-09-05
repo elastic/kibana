@@ -65,3 +65,17 @@ export interface WorkerProgress {
   progress: number;
   timestamp: Date;
 }
+
+export interface CloneProgress {
+  receivedObjects: number;
+  indexedObjects: number;
+  totalObjects: number;
+  localObjects: number;
+  totalDeltas: number;
+  indexedDeltas: number;
+  receivedBytes: number;
+}
+
+export interface CloneWorkerProgress extends WorkerProgress {
+  cloneProgress?: CloneProgress;
+}
