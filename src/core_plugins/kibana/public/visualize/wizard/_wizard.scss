@@ -35,15 +35,14 @@
  * This preserves backwards-compatibility with any plugins that are still specifying an `icon`
  * class.
  *
- * 1. Size icon correctly.
- * 2. Font icons will display as pseudo elements, leaving the normal EuiIcon still there
- *    but empty of any SVG causing extra space issues, just remove it in this case
+ * 1. Size icon correctly to match xxLarge EuiIcon
  */
  .visWizard__visTypeIcon {
   color: $euiColorFullShade;
-  font-size: 50px; /* 1 */
+  font-size: $euiSizeXXL; /* 1 */
+}
 
-  .euiIcon:empty {
-    display: none; /* 2 */
-  }
+// SASSTODO: Remove img element selector when `.kuiGalleryItem__image img` selector is removed
+img.visWizard__visTypeImage { // Use element selector to override base .kuiGalleryItem__image styles
+  @include size($euiSizeXXL); /* 1 */
 }
