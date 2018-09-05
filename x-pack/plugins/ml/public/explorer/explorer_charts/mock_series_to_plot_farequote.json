@@ -1,0 +1,52 @@
+[
+  {
+    "jobId": "fq-1351",
+    "detectorIndex": 0,
+    "metricFunction": "avg",
+    "timeField": "@timestamp",
+    "interval": "15m",
+    "datafeedConfig": {
+      "datafeed_id": "datafeed-fq-1351",
+      "job_id": "fq-1351",
+      "query_delay": "86658ms",
+      "indices": [
+        "farequote-2017"
+      ],
+      "types": [],
+      "query": {
+        "match_all": {
+          "boost": 1
+        }
+      },
+      "scroll_size": 1000,
+      "chunking_config": {
+        "mode": "auto"
+      },
+      "state": "stopped"
+    },
+    "metricFieldName": "responsetime",
+    "functionDescription": "mean",
+    "bucketSpanSeconds": 900,
+    "detectorLabel": "mean(responsetime)",
+    "fieldName": "responsetime",
+    "entityFields": [
+      {
+        "fieldName": "airline",
+        "fieldValue": "AAL"
+      }
+    ],
+    "infoTooltip": {
+      "jobId": "fq-1351",
+      "aggregationInterval": "15m",
+      "chartFunction": "avg responsetime",
+      "entityFields": [
+        {
+          "fieldName": "airline",
+          "fieldValue": "AAL"
+        }
+      ]
+    },
+    "loading": true,
+    "chartData": null
+  }
+]

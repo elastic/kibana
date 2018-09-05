@@ -14,7 +14,6 @@
  */
 
 import _ from 'lodash';
-import $ from 'jquery';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits } from '../../util/chart_utils';
@@ -25,10 +24,9 @@ import { mlJobService } from '../../services/job_service';
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
-  callback
+  callback,
+  $chartContainer
 ) {
-  const $chartContainer = $('.explorer-charts');
-
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;

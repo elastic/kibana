@@ -32,7 +32,8 @@ module.directive('mlExplorerChartsContainer', function (
   function link(scope, element) {
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mlSelectSeverityService,
-      updateComponent
+      updateComponent,
+      $('.explorer-charts')
     );
 
     mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);

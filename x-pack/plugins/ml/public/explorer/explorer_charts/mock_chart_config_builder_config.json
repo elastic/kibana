@@ -26,7 +26,7 @@
   "metricFieldName": "responsetime",
   "functionDescription": "mean",
   "bucketSpanSeconds": 900,
-  "detectorLabel": "mean undefined",
+  "detectorLabel": "mean(responsetime)",
   "fieldName": "responsetime",
   "entityFields": [
     {

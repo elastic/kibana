@@ -1,0 +1,11 @@
+{
+  "fq-1351": [
+    {
+      "detector_description": "mean(responsetime)",
+      "function": "mean",
+      "field_name": "responsetime",
+      "partition_field_name": "airline",
+      "detector_index": 0
+    }
+  ]
+}

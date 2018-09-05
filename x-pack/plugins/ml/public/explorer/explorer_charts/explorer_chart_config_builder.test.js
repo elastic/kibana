@@ -6,6 +6,7 @@
 
 import mockAnomalyRecord from './mock_anomaly_record.json';
 import mockChartConfigBuildConfig from './mock_chart_config_builder_config.json';
+import mockDetectorsByJob from './mock_detectors_by_job.json';
 import mockJobConfig from './mock_job_config.json';
 
 jest.mock('../../util/ml_error',
@@ -15,7 +16,8 @@ jest.mock('../../util/ml_error',
 jest.mock('../../services/job_service',
   () => ({
     mlJobService: {
-      getJob() { return mockJobConfig; }
+      getJob() { return mockJobConfig; },
+      detectorsByJob: mockDetectorsByJob
     }
   })
 );
