@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { taskManagerMixin } from './task_manager';
+export { taskManagerMixin } from './task_manager_mixin';
