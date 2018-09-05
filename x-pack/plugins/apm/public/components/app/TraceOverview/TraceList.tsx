@@ -85,7 +85,7 @@ export function TraceList({ items = [], noItemsMessage }: Props) {
       columns={TRACE_COLUMNS}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSort={{ field: 'name', direction: 'asc' }}
+      initialSort={{ field: 'impact', direction: 'desc' }}
     />
   );
 }

@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { TraceList } from './TraceList';
 import { EuiSpacer } from '@elastic/eui';
-import EmptyMessage from '../../shared/EmptyMessage';
-
+import React from 'react';
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
+import EmptyMessage from '../../shared/EmptyMessage';
+import { TraceList } from './TraceList';
 
-export function TraceOverview(props) {
+interface Props {
+  urlParams?: object;
+}
+
+export function TraceOverview(props: Props) {
   const { urlParams } = props;
 
   return (
@@ -19,7 +22,7 @@ export function TraceOverview(props) {
       <EuiSpacer />
       <TraceListRequest
         urlParams={urlParams}
-        render={({ data }) => (
+        render={({ data }: { data: object[] }) => (
           <TraceList
             items={data}
             noItemsMessage={

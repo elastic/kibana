@@ -16,7 +16,6 @@ Object {
   "items": Array [],
   "noItemsMessage": <EmptyMessage
     heading="No services were found"
-    hideSubheading={false}
     subheading={null}
   />,
 }
@@ -38,7 +37,6 @@ Object {
   "items": Array [],
   "noItemsMessage": <EmptyMessage
     heading="Looks like you don't have any services with APM installed. Let's add some!"
-    hideSubheading={false}
     subheading={
       <SetupInstructionsLink
         buttonFill={true}
