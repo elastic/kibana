@@ -240,7 +240,7 @@ export class JobsListView extends Component {
               fullJobsList[job.id] = job.fullJob;
               delete job.fullJob;
             }
-            job.latestTimeStampUnix = job.latestTimeStamp.unix;
+            job.latestTimeStampSortValue = (job.latestTimeStampMs || 0);
             return job;
           });
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
