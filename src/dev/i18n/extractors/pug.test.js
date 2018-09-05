@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { extractPugMessages } from './extract_pug_messages';
+import { extractPugMessages } from './pug';
 
-describe('extractPugMessages', () => {
+describe('dev/i18n/extractors/pug', () => {
   test('extracts messages from pug template', () => {
     const source = Buffer.from(`\
 #{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
