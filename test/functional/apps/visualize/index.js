@@ -32,7 +32,7 @@ export default function ({ getService, loadTestFile }) {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
     });
 
-    describe('visualize @ciGroup08', function () {
+    describe('visualize @ciGroup09', function () {
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_chart_types'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
@@ -40,7 +40,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_embedding_chart'));
     });
 
-    describe('visualize @ciGroup09', function () {
+    describe('visualize @ciGroup10', function () {
       loadTestFile(require.resolve('./_experimental_vis'));
       loadTestFile(require.resolve('./_gauge_chart'));
       loadTestFile(require.resolve('./_heatmap_chart'));
@@ -49,23 +49,20 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_inspector'));
     });
 
-    describe('visualize @ciGroup10', function () {
+    describe('visualize @ciGroup11', function () {
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_linked_saved_searches.js'));
       loadTestFile(require.resolve('./_markdown_vis'));
       // loadTestFile(require.resolve('./_metric_chart'));
-    });
-
-    describe('visualize @ciGroup11', function () {
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_region_map'));
       loadTestFile(require.resolve('./_shared_item'));
-      loadTestFile(require.resolve('./_tag_cloud'));
     });
 
     describe('visualize @ciGroup12', function () {
+      loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tile_map'));
       loadTestFile(require.resolve('./_tsvb_chart'));
       loadTestFile(require.resolve('./_vega_chart'));

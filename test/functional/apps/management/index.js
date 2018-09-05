@@ -34,19 +34,24 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('empty_kibana');
     });
 
-    loadTestFile(require.resolve('./_create_index_pattern_wizard'));
-    loadTestFile(require.resolve('./_index_pattern_create_delete'));
-    loadTestFile(require.resolve('./_index_pattern_results_sort'));
-    loadTestFile(require.resolve('./_index_pattern_popularity'));
-    loadTestFile(require.resolve('./_kibana_settings'));
-    loadTestFile(require.resolve('./_scripted_fields'));
-    loadTestFile(require.resolve('./_scripted_fields_preview'));
-    loadTestFile(require.resolve('./_index_pattern_filter'));
-    loadTestFile(require.resolve('./_scripted_fields_filter'));
-    loadTestFile(require.resolve('./_import_objects'));
-    loadTestFile(require.resolve('./_test_huge_fields'));
-    loadTestFile(require.resolve('./_handle_alias'));
-    loadTestFile(require.resolve('./_handle_version_conflict'));
+    describe('mgmt1 @ciGroup07', function () {
+      loadTestFile(require.resolve('./_create_index_pattern_wizard'));
+      loadTestFile(require.resolve('./_index_pattern_create_delete'));
+      loadTestFile(require.resolve('./_index_pattern_results_sort'));
+      loadTestFile(require.resolve('./_index_pattern_popularity'));
+      loadTestFile(require.resolve('./_kibana_settings'));
+      loadTestFile(require.resolve('./_scripted_fields'));
+      loadTestFile(require.resolve('./_scripted_fields_preview'));
+    });
+
+    describe('mgmt2 @ciGroup08', function () {
+      loadTestFile(require.resolve('./_index_pattern_filter'));
+      loadTestFile(require.resolve('./_scripted_fields_filter'));
+      loadTestFile(require.resolve('./_import_objects'));
+      loadTestFile(require.resolve('./_test_huge_fields'));
+      loadTestFile(require.resolve('./_handle_alias'));
+      loadTestFile(require.resolve('./_handle_version_conflict'));
+    });
   });
 
 }
