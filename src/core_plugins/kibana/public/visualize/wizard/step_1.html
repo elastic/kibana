@@ -58,12 +58,19 @@
               ng-src="{{ type.image }}"
             />
 
-            <!-- If there's no image, default to an icon, for BWC. -->
-            <icon
-              ng-if="!type.image"
+            <!-- Allowing legacyIcon to hold a CSS name, will be removed in 7.0 -->
+            <span
+              ng-if="!type.image && !type.icon"
               aria-hidden="true"
               class="kuiIcon visWizard__visTypeIcon"
-              ng-class="type.icon"
+              ng-class="type.legacyIcon"
+            ></span>
+
+            <!-- If there's no image, default to an icon, for BWC. -->
+            <icon
+              ng-if="!type.image && type.icon"
+              aria-hidden="true"
+              class="kuiIcon visWizard__visTypeIcon"
               type="type.icon"
               size="'xxl'"
             ></icon>
