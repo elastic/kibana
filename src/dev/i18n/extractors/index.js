@@ -17,16 +17,9 @@
  * under the License.
  */
 
-import { containsIllegalCharacters } from '../contains_illegal_characters';
-
-describe('containsIllegalCharacters', () => {
-  it('returns true with illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['a']);
-    expect(isInvalid).toBe(true);
-  });
-
-  it('returns false with no illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['%']);
-    expect(isInvalid).toBe(false);
-  });
-});
+export { extractCodeMessages } from './code';
+export { extractHandlebarsMessages } from './handlebars';
+export { extractHtmlMessages } from './html';
+export { extractI18nCallMessages } from './i18n_call';
+export { extractPugMessages } from './pug';
+export { extractFormattedMessages, extractIntlMessages } from './react';

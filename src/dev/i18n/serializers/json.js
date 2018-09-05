@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { containsIllegalCharacters } from '../contains_illegal_characters';
+import { i18n } from '@kbn/i18n';
 
-describe('containsIllegalCharacters', () => {
-  it('returns true with illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['a']);
-    expect(isInvalid).toBe(true);
-  });
+export function serializeToJson(defaultMessages) {
+  const resultJsonObject = { formats: i18n.formats };
 
-  it('returns false with no illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['%']);
-    expect(isInvalid).toBe(false);
-  });
-});
+  for (const [mapKey, mapValue] of defaultMessages) {
+    if (mapValue.context) {
+      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+    } else {
+      resultJsonObject[mapKey] = mapValue.message;
+    }
+  }
+
+  return JSON.stringify(resultJsonObject, undefined, 2);
+}

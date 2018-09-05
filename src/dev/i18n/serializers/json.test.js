@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { containsIllegalCharacters } from '../contains_illegal_characters';
+import { serializeToJson } from './json';
 
-describe('containsIllegalCharacters', () => {
-  it('returns true with illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['a']);
-    expect(isInvalid).toBe(true);
-  });
+describe('dev/i18n/serializers/json', () => {
+  test('should serialize default messages to JSON', () => {
+    const messages = new Map([
+      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          context: 'Message context',
+        },
+      ],
+    ]);
 
-  it('returns false with no illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['%']);
-    expect(isInvalid).toBe(false);
+    expect(serializeToJson(messages)).toMatchSnapshot();
   });
 });

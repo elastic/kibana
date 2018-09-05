@@ -19,8 +19,8 @@
 
 import { parse } from '@babel/parser';
 
-import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { isI18nTranslateFunction, traverseNodes } from './utils';
+import { extractI18nCallMessages } from './i18n_call';
+import { isI18nTranslateFunction, traverseNodes } from '../utils';
 
 /**
  * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
