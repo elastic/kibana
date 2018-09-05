@@ -39,10 +39,8 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
       setHttpClient($http);
       setUrlService({
         change(url) {
-          console.log("CHANGE");
           kbnUrl.change(url);
           $rootScope.$digest();
-          console.log("PICHANGE");
         }
       });
       $scope.$$postDigest(() => {

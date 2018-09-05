@@ -33,6 +33,7 @@ export function registerDeleteRoute(server) {
       const { policyNames } = request.params;
       try {
         await deletePolicies(policyNames, callWithRequest);
+        reply();
       } catch (err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));

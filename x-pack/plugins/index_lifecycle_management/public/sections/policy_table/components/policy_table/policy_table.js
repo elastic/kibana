@@ -85,6 +85,7 @@ export class PolicyTableUi extends Component {
   }
   handleDelete = () => {
     this.props.fetchPolicies(true);
+    this.setState({ showDeleteConfirmation: false });
   }
   onSort = column => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
