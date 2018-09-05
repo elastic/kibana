@@ -71,7 +71,38 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
       loadTestFile(require.resolve('./_panel_controls'));
+
       loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./_dashboard_state'));
+
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));
       loadTestFile(require.resolve('./_dashboard_listing'));
