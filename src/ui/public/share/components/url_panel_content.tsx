@@ -112,6 +112,7 @@ export class UrlPanelContent extends Component<Props, State> {
                 disabled={this.state.isCreatingShortUrl || this.state.url === ''}
                 data-share-url={this.state.url}
                 data-test-subj="copyShareUrlButton"
+                size="s"
               >
                 Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
               </EuiButton>

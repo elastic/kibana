@@ -10,7 +10,7 @@ declare module '@elastic/eui' {
   export const EuiForm: React.SFC<any>;
 }
 
-import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Component } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
@@ -29,7 +29,7 @@ interface Props {
 
 interface State {
   isStale: boolean;
-  absoluteUrl?: string;
+  absoluteUrl: string;
 }
 
 export class ReportingPanelContent extends Component<Props, State> {
@@ -40,6 +40,7 @@ export class ReportingPanelContent extends Component<Props, State> {
 
     this.state = {
       isStale: false,
+      absoluteUrl: '',
     };
   }
 
@@ -62,7 +63,9 @@ export class ReportingPanelContent extends Component<Props, State> {
     if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
         <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
-          {this.renderGenerateReportButton(true)}
+          <EuiFormRow helpText={'Please save your work before generating a report.'}>
+            {this.renderGenerateReportButton(true)}
+          </EuiFormRow>
         </EuiForm>
       );
     }
@@ -73,30 +76,29 @@ export class ReportingPanelContent extends Component<Props, State> {
 
     return (
       <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
-        <EuiFormRow>
-          <EuiText>
-            <p>{reportMsg}</p>
-          </EuiText>
-        </EuiFormRow>
+        <EuiText size="s">
+          <p>{reportMsg}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
 
         {this.props.options}
 
         {this.renderGenerateReportButton(false)}
+        <EuiSpacer size="s" />
 
-        <EuiFormRow>
-          <EuiText>
-            <p>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from
-              Watcher.
-            </p>
-          </EuiText>
-        </EuiFormRow>
+        <EuiText size="s">
+          <p>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from
+            Watcher.
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
 
         <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="sharePanel__copyAnchor">
           {(copy: () => void) => (
-            <EuiFormRow>
-              <EuiButton onClick={copy}>Copy POST URL</EuiButton>
-            </EuiFormRow>
+            <EuiButton className="sharePanel__button" onClick={copy} size="s">
+              Copy POST URL
+            </EuiButton>
           )}
         </EuiCopy>
       </EuiForm>
@@ -104,18 +106,17 @@ export class ReportingPanelContent extends Component<Props, State> {
   }
 
   private renderGenerateReportButton = (isDisabled: boolean) => {
-    const helpText = isDisabled ? 'Please save your work before generating a report.' : undefined;
     return (
-      <EuiFormRow helpText={helpText}>
-        <EuiButton
-          disabled={isDisabled}
-          fill
-          onClick={this.createReportingJob}
-          data-test-subj="generateReportButton"
-        >
-          Generate {this.prettyPrintReportingType()}
-        </EuiButton>
-      </EuiFormRow>
+      <EuiButton
+        className="sharePanel__button"
+        disabled={isDisabled}
+        fill
+        onClick={this.createReportingJob}
+        data-test-subj="generateReportButton"
+        size="s"
+      >
+        Generate {this.prettyPrintReportingType()}
+      </EuiButton>
     );
   };
 

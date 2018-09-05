@@ -5,8 +5,8 @@
  */
 
 // TODO: Remove once typescript definitions are in EUI
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import React, { Component } from 'react';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
 import { ReportingPanelContent } from './reporting_panel_content';
 
 interface Props {
@@ -47,14 +47,15 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
 
   private renderOptions = () => {
     return (
-      <EuiFormRow>
+      <Fragment>
         <EuiSwitch
           label="Optimize for printing"
           checked={this.state.usePrintLayout}
           onChange={this.handlePrintLayoutChange}
           data-test-subj="usePrintLayout"
         />
-      </EuiFormRow>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   };
 
