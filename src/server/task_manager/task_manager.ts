@@ -29,16 +29,12 @@ import {
 } from './task_pool';
 import { SanitizedTaskDefinition } from './task_pool/task';
 
-function taskManagerFactory(kbnServer: any, server: any, config: any) {
-  let taskManager: TaskManager;
-  return async function getTaskManager() {
-    if (taskManager) {
-      return taskManager;
-    }
+export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
+  const logger = new Logger((...args) => server.log(...args));
+  const numWorkers = config.get('taskManager.num_workers');
 
-    const logger = new Logger((...args) => server.log(...args));
+  kbnServer.afterPluginsInit(async () => {
     const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-    const numWorkers = config.get('taskManager.num_workers');
     const store = new TaskStore({
       index: config.get('taskManager.index'),
       callCluster,
@@ -62,18 +58,14 @@ function taskManagerFactory(kbnServer: any, server: any, config: any) {
 
     pool.start();
 
-    taskManager = new TaskManager({
-      store,
-      pool,
-    });
-
-    return taskManager;
-  };
-}
-
-export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  server.decorate('server', 'taskManager', {
-    getTaskManager: taskManagerFactory(kbnServer, server, config),
+    server.decorate(
+      'server',
+      'taskManager',
+      new TaskManager({
+        store,
+        pool,
+      })
+    );
   });
 }
 
