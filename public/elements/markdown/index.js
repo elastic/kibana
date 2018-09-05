@@ -1,1 +1,0 @@
-export { markdown } from './markdown';

@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
-import { getAutocompleteProposals } from '../../lib/autocomplete_proposals';
 import { ContextMenu } from '../context_menu';
 import { matchPairsProvider } from './match_pairs';
 import { Suggestion } from './suggestion';
@@ -53,7 +52,7 @@ export class ExpressionInput extends React.Component {
   };
 
   updateState = ({ value, selection }) => {
-    const suggestions = getAutocompleteProposals({ value, selection });
+    const suggestions = [];
     this.props.onChange(value);
     this.setState({ selection, suggestions });
   };

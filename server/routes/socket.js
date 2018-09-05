@@ -4,6 +4,7 @@ import { socketInterpreterProvider } from '../../common/interpreter/socket_inter
 import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
+import { loadServerPlugins } from '../lib/load_server_plugins';
 import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
@@ -22,7 +23,7 @@ export function socketApi(server) {
     const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
-      socket.emit('functionList', functionsRegistry.toJS());
+      loadServerPlugins().then(() => socket.emit('functionList', functionsRegistry.toJS()));
     });
 
     const handler = ({ ast, context, id }) => {

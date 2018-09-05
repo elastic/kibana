@@ -54,18 +54,3 @@
 @import '../components/toolbar/tray/tray';
 @import '../components/workpad/workpad';
 @import '../components/workpad_page/workpad_page';
-
-// Canvas expressions
-@import '../expression_types/arg_types/image_upload/image_upload';
-
-// Canvas render functions
-@import '../render_functions/advanced_filter/component/advanced_filter';
-@import '../render_functions/dropdown_filter/component/dropdown_filter';
-@import '../render_functions/error/error';
-@import '../render_functions/markdown/markdown';
-@import '../render_functions/plot/plot';
-@import '../render_functions/reveal_image/reveal_image';
-@import '../render_functions/time_filter/components/datetime_calendar/datetime_calendar';
-@import '../render_functions/time_filter/components/datetime_range_absolute/datetime_range_absolute';
-@import '../render_functions/time_filter/components/time_picker/time_picker';
-@import '../render_functions/time_filter/components/time_picker_mini/time_picker_mini';

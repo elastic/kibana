@@ -1,35 +1,7 @@
-import { axisConfig } from './axis_config';
 import { color } from './color';
-import { containerStyle } from './container_style';
-import { datacolumn } from './datacolumn';
-import { font } from './font';
-import { imageUpload } from './image_upload';
-import { number } from './number';
-import { palette } from './palette';
-import { percentage } from './percentage';
-import { range } from './range';
-import { select } from './select';
 import { seriesStyle } from './series_style';
-import { shape } from './shape';
-import { string } from './string';
-import { textarea } from './textarea';
-import { toggle } from './toggle';
+import { containerStyle } from './container_style';
+import { font } from './font';
 
-export const argTypeSpecs = [
-  axisConfig,
-  color,
-  containerStyle,
-  datacolumn,
-  font,
-  imageUpload,
-  number,
-  palette,
-  percentage,
-  range,
-  select,
-  seriesStyle,
-  shape,
-  string,
-  textarea,
-  toggle,
-];
+// Anything that uses the color picker has to be loaded privately because the color picker uses Redux
+export const argTypeSpecs = [color, containerStyle, font, seriesStyle];

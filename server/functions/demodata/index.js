@@ -1,1 +1,0 @@
-export { demodata } from './demodata';

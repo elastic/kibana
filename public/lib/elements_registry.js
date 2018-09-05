@@ -1,5 +1,5 @@
 import { Registry } from '../../common/lib/registry';
-import { Element } from '../elements/element';
+import { Element } from './element';
 
 class ElementsRegistry extends Registry {
   wrapper(obj) {

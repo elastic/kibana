@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { shapes } from '../../render_functions/shape/shapes';
+import { shapes } from '../../../canvas_plugin_src/renderers/shape/shapes';
 
 export const ShapePreview = ({ value }) => {
   // eslint-disable-next-line react/no-danger

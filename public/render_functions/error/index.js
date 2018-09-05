@@ -1,1 +1,0 @@
-export { error } from './error';

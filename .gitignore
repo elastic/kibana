@@ -49,3 +49,6 @@ build
 
 # TEMPORARY: sass build output
 public/style/index.css
+
+# Don't commit built plugin files
+canvas_plugin/*

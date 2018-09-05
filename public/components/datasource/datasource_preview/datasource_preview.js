@@ -37,8 +37,8 @@ export const DatasourcePreview = ({ done, datatable }) => (
                 titleSize="s"
                 body={
                   <p>
-                    We couldn't find any documents matching your search criteria.<br /> Check your
-                    datasource settings and try again.
+                    We couldn't find any documents matching your search criteria.
+                    <br /> Check your datasource settings and try again.
                   </p>
                 }
               />

@@ -4,6 +4,7 @@ import { socket } from '../socket';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { createHandlers } from './create_handlers';
 import { functionsRegistry } from './functions_registry';
+import { loadBrowserPlugins } from './load_browser_plugins';
 
 // Create the function list
 socket.emit('getFunctionList');
@@ -11,8 +12,9 @@ export const getServerFunctions = new Promise(resolve => socket.once('functionLi
 
 // Use the above promise to seed the interpreter with the functions it can defer to
 export function interpretAst(ast, context) {
-  return getServerFunctions
-    .then(serverFunctionList => {
+  // Load plugins before attempting to get functions, otherwise this gets racey
+  return Promise.all([getServerFunctions, loadBrowserPlugins()])
+    .then(([serverFunctionList]) => {
       return socketInterpreterProvider({
         types: typesRegistry.toJS(),
         handlers: createHandlers(socket),

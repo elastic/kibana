@@ -1,1 +1,0 @@
-export { datacolumn } from './datacolumn';

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { shapes } from '../../render_functions/shape/shapes';
+import { shapes } from '../../../canvas_plugin_src/renderers/shape/shapes';
 import { ShapePreview } from '../shape_preview';
 
 export const ShapePicker = ({ onChange }) => {

@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import { routes } from 'plugins/canvas/apps';
+import { routes } from '../../apps';
 import { historyProvider } from '../../lib/history_provider';
 import { routerProvider } from '../../lib/router_provider';
 import { restoreHistory, undoHistory, redoHistory } from '../actions/history';

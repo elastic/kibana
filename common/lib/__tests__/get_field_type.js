@@ -1,6 +1,9 @@
 import expect from 'expect.js';
 import { getFieldType } from '../get_field_type';
-import { emptyTable, testTable } from '../../functions/__tests__/fixtures/test_tables';
+import {
+  emptyTable,
+  testTable,
+} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
 
 describe('getFieldType', () => {
   it('returns type of a field in a datatable', () => {

@@ -7,7 +7,7 @@
     "index.js",
     "init.js",
     ".node-version",
-    "{public,server,common,webpackShims,translations}/**/*",
+    "{public,server,common,webpackShims,translations,canvas_plugin}/**/*",
     "!__tests__",
     "!__tests__/**/*",
     "!**/__tests__",

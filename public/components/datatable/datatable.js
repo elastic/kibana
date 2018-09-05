@@ -48,7 +48,9 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
                 <tr className="canvasDataTable__tr">
                   {datatable.columns.map(col => (
                     <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
-                      {getColumnName(col)}&nbsp;{getIcon(getColumnType(col))}
+                      {getColumnName(col)}
+                      &nbsp;
+                      {getIcon(getColumnType(col))}
                     </th>
                   ))}
                 </tr>

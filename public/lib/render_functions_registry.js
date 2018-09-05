@@ -1,5 +1,5 @@
 import { Registry } from '../../common/lib/registry';
-import { RenderFunction } from '../render_functions/render_function';
+import { RenderFunction } from './render_function';
 
 class RenderFunctionsRegistry extends Registry {
   wrapper(obj) {
