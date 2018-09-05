@@ -82,7 +82,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     };
 
     this.server.route({
-      handler: wrappedHandler(route.licenseRequired),
+      handler: wrappedHandler(route.licenseRequired || false),
       method: route.method,
       path: route.path,
       config: route.config,

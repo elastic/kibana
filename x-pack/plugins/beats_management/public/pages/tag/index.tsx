@@ -9,10 +9,10 @@ import 'brace/mode/yaml';
 
 import 'brace/theme/github';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
-import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/lib';
 
 interface TagPageProps {
   libs: FrontendLibs;
@@ -23,7 +23,7 @@ interface TagPageProps {
 interface TagPageState {
   showFlyout: boolean;
   attachedBeats: CMPopulatedBeat[] | null;
-  tag: ClientSideBeatTag;
+  tag: BeatTag;
 }
 
 export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
@@ -36,7 +36,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
       tag: {
         id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
         color: '#DD0A73',
-        configurations: [],
+        configuration_blocks: [],
         last_updated: new Date(),
       },
     };
@@ -105,7 +105,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
     });
   };
   private saveTag = async () => {
-    await this.props.libs.tags.upsertTag(this.state.tag as ClientSideBeatTag);
+    await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
     this.props.history.push('/overview/tags');
   };
 }

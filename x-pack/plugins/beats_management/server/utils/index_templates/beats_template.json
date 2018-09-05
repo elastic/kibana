@@ -45,8 +45,9 @@
                 "description": {
                   "type": "text"
                 },
-                "block_yml": {
-                  "type": "text"
+                "configs": {
+                  "type": "nested",
+                  "dynamic": true
                 }
               }
             }
@@ -84,14 +85,8 @@
             "ephemeral_id": {
               "type": "keyword"
             },
-            "local_configuration_yml": {
-              "type": "text"
-            },
             "tags": {
               "type": "keyword"
-            },
-            "orig_configuration_yml": {
-              "type": "text"
             },
             "metadata": {
               "dynamic": "true",

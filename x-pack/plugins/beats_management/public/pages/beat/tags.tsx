@@ -7,9 +7,9 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { get } from 'lodash';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatDetailTagsTable, Table } from '../../components/table';
-import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/lib';
 
 interface BeatTagsPageProps {
   beat: CMPopulatedBeat;
@@ -19,7 +19,7 @@ interface BeatTagsPageProps {
 
 interface BeatTagsPageState {
   notifications: any[];
-  tags: ClientSideBeatTag[];
+  tags: BeatTag[];
 }
 
 export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTagsPageState> {

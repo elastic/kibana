@@ -6,11 +6,11 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
 import { TagAssignment } from '../../components/tag';
-import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
@@ -68,7 +68,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private sortBeats = (a: CMPopulatedBeat, b: CMPopulatedBeat) => (a.id < b.id ? 0 : 1);
 
-  private renderTagAssignment = (tag: ClientSideBeatTag) => (
+  private renderTagAssignment = (tag: BeatTag) => (
     <TagAssignment
       assignTagsToBeats={this.assignTagsToBeats}
       removeTagsFromBeats={this.removeTagsFromBeats}
@@ -130,17 +130,17 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private createBeatTagAssignments = (
     beats: CMPopulatedBeat[],
-    tag: ClientSideBeatTag
+    tag: BeatTag
   ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
 
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
+  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     const assignments = this.createBeatTagAssignments(beats, tag);
     await this.props.libs.beats.removeTagsFromBeats(assignments);
     await this.refreshData();
     this.notifyUpdatedTagAssociation('remove', assignments, tag.id);
   };
 
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
+  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     const assignments = this.createBeatTagAssignments(beats, tag);
     await this.props.libs.beats.assignTagsToBeats(assignments);
     await this.refreshData();

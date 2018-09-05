@@ -28,14 +28,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { ConfigurationBlock } from '../../../../common/domain_types';
 import { supportedConfigs } from '../../../config_schemas';
-import { ClientSideConfigurationBlock } from '../../../lib/lib';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
-  configBlock?: ClientSideConfigurationBlock;
+  configBlock?: ConfigurationBlock;
   onClose(): any;
-  onSave(config: ClientSideConfigurationBlock): any;
+  onSave(config: ConfigurationBlock): any;
 }
 
 export class ConfigView extends React.Component<ComponentProps, any> {
@@ -99,7 +99,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             onSubmit={data => {
               this.props.onSave({
                 ...this.state.configBlock,
-                block_obj: data,
+                configs: [data],
               });
               this.props.onClose();
             }}

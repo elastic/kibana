@@ -25,8 +25,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { isEqual } from 'lodash';
 import React from 'react';
-import { CMBeat } from '../../../common/domain_types';
-import { ClientSideBeatTag, ClientSideConfigurationBlock } from '../../lib/lib';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
@@ -34,8 +33,8 @@ import { ConfigView } from './config_view';
 
 interface TagEditProps {
   mode: 'edit' | 'create';
-  tag: Pick<ClientSideBeatTag, Exclude<keyof ClientSideBeatTag, 'last_updated'>>;
-  onTagChange: (field: keyof ClientSideBeatTag, value: string) => any;
+  tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
+  onTagChange: (field: keyof BeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
 }
 
@@ -105,7 +104,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         <EuiHorizontalRule />
 
         <EuiFlexGroup
-          alignItems={tag.configurations && tag.configurations.length ? 'stretch' : 'center'}
+          alignItems={
+            tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
+          }
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -122,15 +123,15 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <EuiFlexItem>
             <div>
               <ConfigList
-                configs={tag.configurations}
-                onConfigClick={(action: string, config: ClientSideConfigurationBlock) => {
-                  const selectedIndex = tag.configurations.findIndex(c => {
+                configs={tag.configuration_blocks}
+                onConfigClick={(action: string, config: ConfigurationBlock) => {
+                  const selectedIndex = tag.configuration_blocks.findIndex(c => {
                     return isEqual(config, c);
                   });
                   if (action === 'delete') {
-                    const configs = [...tag.configurations];
+                    const configs = [...tag.configuration_blocks];
                     configs.splice(selectedIndex, 1);
-                    this.updateTag('configurations', configs);
+                    this.updateTag('configuration_blocks', configs);
                   } else {
                     this.setState({
                       showFlyout: true,
@@ -176,18 +177,18 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <ConfigView
             configBlock={
               this.state.selectedConfigIndex !== undefined
-                ? tag.configurations[this.state.selectedConfigIndex]
+                ? tag.configuration_blocks[this.state.selectedConfigIndex]
                 : undefined
             }
             onClose={() => this.setState({ showFlyout: false, selectedConfigIndex: undefined })}
             onSave={(config: any) => {
               this.setState({ showFlyout: false, selectedConfigIndex: undefined });
               if (this.state.selectedConfigIndex !== undefined) {
-                const configs = [...tag.configurations];
+                const configs = [...tag.configuration_blocks];
                 configs[this.state.selectedConfigIndex] = config;
-                this.updateTag('configurations', configs);
+                this.updateTag('configuration_blocks', configs);
               } else {
-                this.updateTag('configurations', [...tag.configurations, config]);
+                this.updateTag('configuration_blocks', [...tag.configuration_blocks, config]);
               }
             }}
           />
@@ -205,7 +206,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   };
 
   // TODO this should disable save button on bad validations
-  private updateTag = (key: keyof ClientSideBeatTag, value?: any) =>
+  private updateTag = (key: keyof BeatTag, value?: any) =>
     value !== undefined
       ? this.props.onTagChange(key, value)
       : (e: any) => this.props.onTagChange(key, e.target ? e.target.value : e);

@@ -12,7 +12,6 @@ import React from 'react';
 
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { ClientSideConfigurationBlock } from '../../lib/lib';
 import { ConnectedLink } from '../connected_link';
 
 export interface ColumnDefinition {
@@ -192,9 +191,7 @@ export const BeatDetailTagsTable: TableType = {
       align: 'right',
       field: 'configurations',
       name: 'Configurations',
-      render: (configurations: ClientSideConfigurationBlock[]) => (
-        <span>{configurations.length}</span>
-      ),
+      render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
       sortable: true,
     },
     {

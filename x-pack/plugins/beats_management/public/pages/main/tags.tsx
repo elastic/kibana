@@ -17,7 +17,7 @@ import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { Table, TagsTableType } from '../../components/table';
-import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/lib';
 
 interface TagsPageProps {
   libs: FrontendLibs;
@@ -25,7 +25,7 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
-  tags: ClientSideBeatTag[];
+  tags: BeatTag[];
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {

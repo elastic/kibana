@@ -108,20 +108,19 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
     },
     validations: 'isHost',
     error: 'One file host per line',
-    required: true,
+    required: false,
     parseValidResult: v => v.split('\n'),
   },
   {
     id: 'period',
     ui: {
       label: 'Period',
-      type: 'multi-input',
+      type: 'input',
     },
     defaultValue: '10s',
     validations: 'isPeriod',
     error: 'Invalid Period, must be formatted as `10s` for 10 seconds',
     required: true,
-    parseValidResult: v => v.split('\n'),
   },
   {
     id: 'other',
