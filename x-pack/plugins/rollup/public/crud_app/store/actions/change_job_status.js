@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { stopJobs as sendStopJobsRequest } from '../../services';
+import {
+  startJobs as sendStartJobsRequest,
+  stopJobs as sendStopJobsRequest,
+} from '../../services';
 import { loadJobs } from './load_jobs';
 
-export const stopJobsSuccess = createAction('STOP_JOBS_SUCCESS');
+export const startJobs = (jobIds) => async (dispatch) => {
+  try {
+    await sendStartJobsRequest(jobIds);
+  } catch (error) {
+    return toastNotifications.addDanger(error.data.message);
+  }
+
+  dispatch(loadJobs());
+};
+
 export const stopJobs = (jobIds) => async (dispatch) => {
   try {
     await sendStopJobsRequest(jobIds);
@@ -17,6 +28,5 @@ export const stopJobs = (jobIds) => async (dispatch) => {
     return toastNotifications.addDanger(error.data.message);
   }
 
-  dispatch(stopJobsSuccess());
   dispatch(loadJobs());
 };

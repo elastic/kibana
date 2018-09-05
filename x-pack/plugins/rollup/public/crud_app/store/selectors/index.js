@@ -10,13 +10,19 @@ import { createSelector } from 'reselect';
 import { filterItems, sortTable } from '../../services';
 
 export const getJobs = (state) => state.jobs.byId;
+export const getJobsList = (state) => state.jobs.allIds;
 export const getJobByJobId = (state, id) => getJobs(state)[id];
 export const getFilteredIds = (state) => state.jobs.filteredIds;
 export const getTableState = (state) => state.tableState;
 
 export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
+export const isDetailPanelOpen = (state) => state.detailPanel.isOpen;
 export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPanel.jobId);
+export const getDetailPanelJobId = (state) => state.detailPanel.jobId;
+
+export const isLoading = (state) => state.jobs.isLoading;
+export const isSaving = (state) => state.createJob.isSaving;
+export const getCreateJobError = (state) => state.createJob.error;
 
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);

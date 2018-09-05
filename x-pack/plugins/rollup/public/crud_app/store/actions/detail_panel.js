@@ -4,11 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
+import { extractQueryParams, getRouter } from '../../services';
+import {
+  OPEN_DETAIL_PANEL,
+  CLOSE_DETAIL_PANEL,
+} from '../action_types';
 
-export const openDetailPanel = createAction(
-  'INDEX_ROLLUP_JOB_OPEN_DETAIL_PANEL'
-);
-export const closeDetailPanel = createAction(
-  'INDEX_ROLLUP_JOB_CLOSE_DETAIL_PANEL'
-);
+export const openDetailPanel = ({ panelType, jobId }) => (dispatch) => {
+  const { history } = getRouter();
+  const search = history.location.search;
+  const { job: deepLinkedJobId } = extractQueryParams(search);
+
+  if (deepLinkedJobId !== jobId) {
+    // Allow the user to share a deep link to this job.
+    history.replace({
+      search: `?job=${jobId}`,
+    });
+  }
+
+  dispatch({
+    type: OPEN_DETAIL_PANEL,
+    payload: { panelType, jobId },
+  });
+};
+
+export const closeDetailPanel = () => (dispatch) => {
+  dispatch({
+    type: CLOSE_DETAIL_PANEL,
+  });
+};
