@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export { run } from './run';
-export { createFailError, combineErrors, isFailError } from './fail';
+import { i18n } from '@kbn/i18n';
+
+export function serializeToJson(defaultMessages) {
+  const resultJsonObject = { formats: i18n.formats };
+
+  for (const [mapKey, mapValue] of defaultMessages) {
+    if (mapValue.context) {
+      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+    } else {
+      resultJsonObject[mapKey] = mapValue.message;
+    }
+  }
+
+  return JSON.stringify(resultJsonObject, undefined, 2);
+}

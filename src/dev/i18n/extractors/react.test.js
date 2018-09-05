@@ -20,8 +20,8 @@
 import { parse } from '@babel/parser';
 import { isCallExpression, isJSXOpeningElement, isJSXIdentifier } from '@babel/types';
 
-import { extractIntlMessages, extractFormattedMessages } from './extract_react_messages';
-import { traverseNodes } from './utils';
+import { extractIntlMessages, extractFormattedMessages } from './react';
+import { traverseNodes } from '../utils';
 
 const intlFormatMessageCallSource = `
 const MyComponentContent = ({ intl }) => (
@@ -79,7 +79,7 @@ intl.formatMessage({
 `,
 ];
 
-describe('dev/i18n/extract_react_messages', () => {
+describe('dev/i18n/extractors/react', () => {
   describe('extractIntlMessages', () => {
     test('extracts messages from "intl.formatMessage" function call', () => {
       const ast = parse(intlFormatMessageCallSource, { plugins: ['jsx'] });
