@@ -179,7 +179,7 @@ VisTypesRegistryProvider.register(MyNewVisType);
 [[development-react-visualization-type]]
 ==== React Visualization Type
 React visualization type assumes you are using React as your rendering technology.
-Just pass in a React component to `visConfig.template`.
+Just pass in a React component to `visConfig.component`.
 
 The visualization will receive `vis`, `appState`, `updateStatus` and `visData` as props.
 It also has a `renderComplete` property, which needs to be called once the rendering has completed.
@@ -197,7 +197,7 @@ const MyNewVisType = (Private) => {
     icon: 'my_icon',
     description: 'Cool new chart',
     visConfig: {
-       template: ReactComponent
+       component: ReactComponent
     }
   });
 }
