@@ -37,7 +37,6 @@ import 'leaflet';
 
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
-import { KibanaRootController } from 'plugins/kibana/kibana_root_controller';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
@@ -46,9 +45,8 @@ routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
 chrome
-  .setRootController('kibana', function ($controller, $scope, courier, config) {
+  .setRootController('kibana', function () {
     chrome.showOnlyById('kibana:dashboard');
-    $controller(KibanaRootController, { $scope, courier, config });
   });
 
 uiModules.get('kibana').run(showAppRedirectNotification);
