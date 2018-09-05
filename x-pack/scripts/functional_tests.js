@@ -7,7 +7,8 @@
 require('@kbn/plugin-helpers').babelRegister();
 require('@kbn/test').runTestsCli([
   require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
+  // TODO: Enable once the flakiness has been solved...
+  // require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/phantom_api.js'),
   require.resolve('../test/reporting/configs/phantom_functional.js'),
   require.resolve('../test/functional/config.js'),
