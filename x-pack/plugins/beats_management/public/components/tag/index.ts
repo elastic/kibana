@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { TagAssignment } from './tag_assignment';
 export { TagEdit } from './tag_edit';

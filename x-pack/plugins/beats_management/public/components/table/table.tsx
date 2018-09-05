@@ -46,6 +46,12 @@ export class Table extends React.Component<TableProps, TableState> {
     this.setSelection([]);
   };
 
+  public setSelection = (selection: any[]) => {
+    this.setState({
+      selection,
+    });
+  };
+
   public render() {
     const {
       actionHandler,
@@ -72,7 +78,7 @@ export class Table extends React.Component<TableProps, TableState> {
     return (
       <TableContainer>
         <ControlBar
-          actionHandler={(action: string, payload: any) => actionHandler(action, payload)}
+          actionHandler={actionHandler}
           assignmentOptions={assignmentOptions}
           renderAssignmentOptions={renderAssignmentOptions}
           assignmentTitle={assignmentTitle}
@@ -93,10 +99,4 @@ export class Table extends React.Component<TableProps, TableState> {
       </TableContainer>
     );
   }
-
-  private setSelection = (selection: any[]) => {
-    this.setState({
-      selection,
-    });
-  };
 }
