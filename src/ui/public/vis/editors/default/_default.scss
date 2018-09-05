@@ -116,8 +116,7 @@
     flex-basis: 100%;
   }
 
-  // SASSTODO: Is this even an element anymore?
-  visualize {
+  .visualize {
     @include flex-parent();
     flex: 1 1 100%;
   }
