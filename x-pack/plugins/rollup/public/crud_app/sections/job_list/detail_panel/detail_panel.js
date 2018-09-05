@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiFlyoutFooter,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiTitle,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 
 import {
@@ -35,6 +39,8 @@ const tabs = ['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON'];
 
 export class DetailPanelUi extends Component {
   static propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool.isRequired,
     job: PropTypes.object,
     panelType: PropTypes.oneOf(tabs),
     closeDetailPanel: PropTypes.func.isRequired,
@@ -52,7 +58,11 @@ export class DetailPanelUi extends Component {
   renderTabs() {
     const { panelType, job, openDetailPanel } = this.props;
 
-    return tabs.map((tab, index) => {
+    if (!job) {
+      return;
+    }
+
+    const renderedTabs = tabs.map((tab, index) => {
       if (tab === 'Terms' && !job.terms.fields.length) {
         return;
       }
@@ -77,27 +87,27 @@ export class DetailPanelUi extends Component {
         </EuiTab>
       );
     }).filter(tab => tab);
+
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiTabs>
+          {renderedTabs}
+        </EuiTabs>
+      </Fragment>
+    );
   }
 
-  render() {
-    const {
-      panelType,
-      closeDetailPanel,
-      job,
-      intl,
-    } = this.props;
-
-    if (!job) {
-      return null;
-    }
+  renderJob() {
+    const { panelType, job, intl } = this.props;
 
     const {
       id,
       indexPattern,
       rollupIndex,
       rollupCron,
-      rollupInterval,
-      rollupDelay,
+      dateHistogramInterval,
+      dateHistogramDelay,
       dateHistogramTimeZone,
       dateHistogramField,
       metrics,
@@ -118,8 +128,8 @@ export class DetailPanelUi extends Component {
           indexPattern={indexPattern}
           rollupIndex={rollupIndex}
           rollupCron={rollupCron}
-          rollupInterval={rollupInterval}
-          rollupDelay={rollupDelay}
+          dateHistogramInterval={dateHistogramInterval}
+          dateHistogramDelay={dateHistogramDelay}
           dateHistogramTimeZone={dateHistogramTimeZone}
           dateHistogramField={dateHistogramField}
           documentsProcessed={documentsProcessed}
@@ -143,29 +153,12 @@ export class DetailPanelUi extends Component {
       ),
     };
 
-    const content = tabToContentMap[panelType];
+    const tabContent = tabToContentMap[panelType];
 
     return (
-      <EuiFlyout
-        data-test-subj="indexDetailFlyout"
-        onClose={closeDetailPanel}
-        aria-labelledby="rollupJobDetailsFlyoutTitle"
-        size="m"
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
-            <h2>{id}</h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiTabs>
-            {this.renderTabs()}
-          </EuiTabs>
-        </EuiFlyoutHeader>
-
+      <Fragment>
         <EuiFlyoutBody>
-          {content}
+          {tabContent}
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
@@ -185,6 +178,97 @@ export class DetailPanelUi extends Component {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+      </Fragment>
+    );
+  }
+
+  render() {
+    const {
+      isOpen,
+      isLoading,
+      closeDetailPanel,
+      job,
+      jobId,
+    } = this.props;
+
+    if (!isOpen) {
+      return null;
+    }
+
+    let content;
+
+    if (isLoading) {
+      content = (
+        <EuiFlyoutBody>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.rollupJobs.detailPanel.loading.label"
+                    defaultMessage="Loading job..."
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+      );
+    }
+
+    if (job) {
+      content = this.renderJob();
+    } else {
+      content = (
+        <EuiFlyoutBody>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="m" type="alert" color="danger" />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.rollupJobs.detailPanel.notFound.label"
+                    defaultMessage="Job not found"
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+      );
+    }
+
+    return (
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={closeDetailPanel}
+        aria-labelledby="rollupJobDetailsFlyoutTitle"
+        size="m"
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="m" id="rollupJobDetailsFlyoutTitle">
+            <h2>{jobId}</h2>
+          </EuiTitle>
+
+          {this.renderTabs()}
+        </EuiFlyoutHeader>
+
+        {content}
       </EuiFlyout>
     );
   }
