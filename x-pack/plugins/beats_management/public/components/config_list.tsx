@@ -7,12 +7,12 @@
 // @ts-ignore
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { ConfigurationBlock } from '../../common/domain_types';
 import { supportedConfigs } from '../config_schemas';
-import { ClientSideConfigurationBlock } from '../lib/lib';
 
 interface ComponentProps {
-  configs: ClientSideConfigurationBlock[];
-  onConfigClick: (action: 'edit' | 'delete', config: ClientSideConfigurationBlock) => any;
+  configs: ConfigurationBlock[];
+  onConfigClick: (action: 'edit' | 'delete', config: ConfigurationBlock) => any;
 }
 
 export const ConfigList: React.SFC<ComponentProps> = props => (
@@ -23,7 +23,7 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
         field: 'type',
         name: 'Type',
         truncateText: false,
-        render: (value: string, config: ClientSideConfigurationBlock) => {
+        render: (value: string, config: ConfigurationBlock) => {
           const type = supportedConfigs.find((sc: any) => sc.value === config.type);
 
           return (
@@ -34,7 +34,7 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
         },
       },
       {
-        field: 'block_obj.module',
+        field: 'module',
         name: 'Module',
         truncateText: false,
         render: (value: string) => {
@@ -53,7 +53,7 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
             description: 'Remove this config from tag',
             type: 'icon',
             icon: 'trash',
-            onClick: (item: ClientSideConfigurationBlock) => props.onConfigClick('delete', item),
+            onClick: (item: ConfigurationBlock) => props.onConfigClick('delete', item),
           },
         ],
       },

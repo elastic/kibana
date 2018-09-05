@@ -11,10 +11,10 @@ import {
 } from '@elastic/eui';
 
 import React from 'react';
-import { CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
+import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
-import { ClientSideBeatTag, FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps {
@@ -55,7 +55,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         items={this.state.beats || []}
         ref={this.state.tableRef}
         showAssignmentOptions={true}
-        renderAssignmentOptions={(tag: ClientSideBeatTag) => {
+        renderAssignmentOptions={(tag: BeatTag) => {
           const selectedBeats = this.getSelectedBeats();
           const hasMatches = selectedBeats.some((beat: any) =>
             (beat.tags || []).some((t: string) => t === tag.id)
@@ -136,16 +136,16 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private createBeatTagAssignments = (
     beats: CMPopulatedBeat[],
-    tag: ClientSideBeatTag
+    tag: BeatTag
   ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
 
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
+  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     await this.props.libs.beats.removeTagsFromBeats(this.createBeatTagAssignments(beats, tag));
     await this.loadBeats();
     await this.loadTags();
   };
 
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: ClientSideBeatTag) => {
+  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
     await this.props.libs.beats.assignTagsToBeats(this.createBeatTagAssignments(beats, tag));
     await this.loadBeats();
     await this.loadTags();

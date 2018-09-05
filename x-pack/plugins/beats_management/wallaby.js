@@ -34,12 +34,7 @@ module.exports = function (wallaby) {
     setup: wallaby => {
       const path = require('path');
 
-      const kibanaDirectory = path.resolve(
-        wallaby.localProjectDir,
-        '..',
-        '..',
-        '..'
-      );
+      const kibanaDirectory = path.resolve(wallaby.localProjectDir, '..', '..', '..');
       wallaby.testFramework.configure({
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {
@@ -48,13 +43,9 @@ module.exports = function (wallaby) {
           '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
           '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
         },
-
-        setupFiles: [
-          `${kibanaDirectory}/x-pack/dev-tools/jest/setup/enzyme.js`,
-        ],
-        snapshotSerializers: [
-          `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`,
-        ],
+        testURL: 'http://localhost',
+        setupFiles: [`${kibanaDirectory}/x-pack/dev-tools/jest/setup/enzyme.js`],
+        snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
         transform: {
           '^.+\\.js$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
           //"^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,

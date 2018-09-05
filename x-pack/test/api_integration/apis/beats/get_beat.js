@@ -32,20 +32,20 @@ export default function ({ getService }) {
       expect(configurationBlocks).to.be.an(Array);
       expect(configurationBlocks.length).to.be(3);
 
-      expect(configurationBlocks[0].type).to.be('output');
-      expect(configurationBlocks[0].block_yml).to.be(
-        'elasticsearch:\n    hosts: ["localhost:9200"]\n    username: "..."'
-      );
-
       expect(configurationBlocks[1].type).to.be('metricbeat.modules');
-      expect(configurationBlocks[1].block_yml).to.be(
-        'module: memcached\nhosts: ["localhost:11211"]'
-      );
+      expect(configurationBlocks[1].configs).to.be.an('array');
+      expect(configurationBlocks[1].configs[0]).to.eql({
+        module: 'memcached',
+        hosts: ['localhost:11211'],
+      });
 
       expect(configurationBlocks[2].type).to.be('metricbeat.modules');
-      expect(configurationBlocks[2].block_yml).to.be(
-        'module: munin\nhosts: ["localhost:4949"]\nnode.namespace: node'
-      );
+      expect(configurationBlocks[2].configs).to.be.an('array');
+      expect(configurationBlocks[2].configs[0]).to.eql({
+        module: 'memcached',
+        hosts: ['localhost:4949'],
+        'node.namespace': 'node',
+      });
     });
   });
 }

@@ -8,6 +8,7 @@
       "type": "beat",
       "beat": {
         "type": "filebeat",
+        "active": true,
         "host_ip": "1.2.3.4",
         "host_name": "foo.bar.com",
         "id": "qux",
@@ -27,6 +28,7 @@
       "type": "beat",
       "beat": {
         "type": "metricbeat",
+        "active": true,
         "host_ip": "22.33.11.44",
         "host_name": "baz.bar.com",
         "id": "baz",
@@ -46,6 +48,7 @@
       "type": "beat",
       "beat": {
         "type": "metricbeat",
+        "active": true,
         "host_ip": "1.2.3.4",
         "host_name": "foo.bar.com",
         "id": "foo",
@@ -70,6 +73,7 @@
       "type": "beat",
       "beat": {
         "type": "filebeat",
+        "active": true,
         "host_ip": "11.22.33.44",
         "host_name": "foo.com",
         "id": "bar",
@@ -91,11 +95,18 @@
         "configuration_blocks": [
           {
             "type": "output",
-            "block_yml": "elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: \"...\""
+            "description": "some description",
+            "configs": [{ 
+              "hosts": ["localhost:9200"],
+              "username": "some-username"
+            }]
           },
           {
             "type": "metricbeat.modules",
-            "block_yml": "module: memcached\nhosts: [\"localhost:11211\"]"
+            "configs": [{ 
+              "module": "memcached",
+              "hosts": ["localhost:11211"]
+            }]
           }
         ]
       }
@@ -130,7 +141,11 @@
         "configuration_blocks": [
           {
             "type": "metricbeat.modules",
-            "block_yml": "module: munin\nhosts: [\"localhost:4949\"]\nnode.namespace: node"
+            "configs": [{ 
+              "module": "memcached",
+              "node.namespace": "node",
+              "hosts": ["localhost:4949"]
+            }]
           }
         ]
       }

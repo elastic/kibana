@@ -14,7 +14,9 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/agents/{listByAndValue*}',
   licenseRequired: true,
   handler: async (request: FrameworkRequest, reply: any) => {
-    const listByAndValueParts = request.params.listByAndValue.split('/');
+    const listByAndValueParts = request.params.listByAndValue
+      ? request.params.listByAndValue.split('/')
+      : [];
     let listBy: 'tag' | null = null;
     let listByValue: string | null = null;
 

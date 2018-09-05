@@ -3,13 +3,51 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ClientSideBeatTag } from '../public/lib/lib';
 import { ConfigurationBlockTypes } from './constants';
 
+export enum FilebeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum MetricbeatModuleName {
+  system = 'system',
+  apache2 = 'apache2',
+  nginx = 'nginx',
+  mongodb = 'mongodb',
+  elasticsearch = 'elasticsearch',
+}
+
+export enum OutputType {
+  elasticsearch = 'elasticsearch',
+  logstash = 'logstash',
+  kafka = 'kafka',
+  console = 'console',
+}
+
+export interface FilebeatInputsConfig {
+  paths: string[];
+  other: string;
+}
+export interface FilebeatModuleConfig {
+  module: FilebeatModuleName;
+  other: string;
+}
+export interface MetricbeatModuleConfig {
+  module: MetricbeatModuleName;
+  hosts?: string[];
+  period: string;
+  other: string;
+}
+
+export type ConfigContent = FilebeatInputsConfig | FilebeatModuleConfig | MetricbeatModuleConfig;
 export interface ConfigurationBlock {
   type: ConfigurationBlockTypes;
   description: string;
-  block_yml: string;
+  configs: ConfigContent[];
 }
 
 export interface CMBeat {
@@ -32,7 +70,7 @@ export interface CMBeat {
 }
 
 export interface CMPopulatedBeat extends CMBeat {
-  full_tags: ClientSideBeatTag[];
+  full_tags: BeatTag[];
 }
 
 export interface BeatTag {
