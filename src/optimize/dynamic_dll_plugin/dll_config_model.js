@@ -62,6 +62,10 @@ function generateDLL(config) {
     module: {
       rules: [
         {
+          test: /\.(html)$/,
+          loader: 'raw-loader'
+        },
+        {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,

@@ -28,8 +28,9 @@ import { promisify } from 'util';
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
-function inNodeModules(checkPath) {
-  return checkPath.includes(`${path.sep}node_modules${path.sep}`);
+function inNodeModulesOrWebpackShims(checkPath) {
+  return checkPath.includes(`${path.sep}node_modules${path.sep}`)
+    || checkPath.includes(`${path.sep}webpackShims${path.sep}`);
 }
 
 function inPluginNodeModules(checkPath) {
@@ -134,12 +135,6 @@ export class DynamicDllPlugin {
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
-
-            if(module.userRequest.includes('webpackShims')) {
-              // eslint-disable-next-line
-              debugger;
-            }
-
             const absoluteResource = path.resolve(dllContext, module.userRequest);
             requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }
@@ -204,13 +199,13 @@ export class DynamicDllPlugin {
     }
 
     // ignore files that are not in node_modules
-    if (!inNodeModules(module.resource)) {
+    if (!inNodeModulesOrWebpackShims(module.resource)) {
       return;
     }
 
     // also ignore files that are symlinked into node_modules, but only
     // do the `realpath` call after checking the plain resource path
-    if (!inNodeModules(await realPathAsync(module.resource))) {
+    if (!inNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
       return;
     }
 
