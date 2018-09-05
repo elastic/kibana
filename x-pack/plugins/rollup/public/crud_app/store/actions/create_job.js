@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { toastNotifications } from 'ui/notify';
-import { EuiCode } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
@@ -44,15 +42,17 @@ export const createJob = (jobConfig) => async (dispatch) => {
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
-            error: `A job named '${jobConfig.id}' already exists.`
+            error: `A job with ID '${jobConfig.id}' already exists.`
           }
         });
         break;
 
       default:
-        toastNotifications.addDanger({
-          title: <EuiCode>{status}</EuiCode>,
-          text: data.message,
+        dispatch({
+          type: CREATE_JOB_FAILURE,
+          payload: {
+            error: `Request failed with a ${status} error. ${data.message}`,
+          }
         });
     }
 
