@@ -16,8 +16,8 @@ import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
 interface TableProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
+  assignmentOptions?: any[] | null;
+  assignmentTitle?: string | null;
   items: any[];
   renderAssignmentOptions?: (item: any) => any;
   showAssignmentOptions: boolean;
@@ -79,9 +79,9 @@ export class Table extends React.Component<TableProps, TableState> {
       <TableContainer>
         <ControlBar
           actionHandler={actionHandler}
-          assignmentOptions={assignmentOptions}
+          assignmentOptions={assignmentOptions || null}
           renderAssignmentOptions={renderAssignmentOptions}
-          assignmentTitle={assignmentTitle}
+          assignmentTitle={assignmentTitle || null}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
           showAssignmentOptions={showAssignmentOptions}
