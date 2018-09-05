@@ -110,7 +110,16 @@ const COLUMNS = [{
 export class JobTableUi extends Component {
   static propTypes = {
     jobs: PropTypes.array,
+    pager: PropTypes.object.isRequired,
+    filter: PropTypes.string.isRequired,
+    sortField: PropTypes.string.isRequired,
+    isSortAscending: PropTypes.bool.isRequired,
     closeDetailPanel: PropTypes.func.isRequired,
+    filterChanged: PropTypes.func.isRequired,
+    pageChanged: PropTypes.func.isRequired,
+    pageSizeChanged: PropTypes.func.isRequired,
+    sortChanged: PropTypes.func.isRequired,
+    dispatch: PropTypes.func.isRequired,
   }
 
   static defaultProps = {

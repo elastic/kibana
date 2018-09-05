@@ -28,8 +28,6 @@ export {
 } from './detail_panel';
 
 export {
-  applyFilters,
-  filtersApplied,
   filterChanged,
   pageChanged,
   pageSizeChanged,

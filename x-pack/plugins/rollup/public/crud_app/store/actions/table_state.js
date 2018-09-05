@@ -5,46 +5,36 @@
  */
 
 import {
-  APPLY_FILTERS,
-  FILTERS_APPLIED,
   FILTER_CHANGED,
   PAGE_CHANGED,
   PAGE_SIZE_CHANGED,
   SORT_CHANGED,
 } from '../action_types';
 
-export const applyFilters = () => (dispatch) => {
-  dispatch({
-    type: APPLY_FILTERS,
-  });
-};
-
-export const filtersApplied = () => (dispatch) => {
-  dispatch({
-    type: FILTERS_APPLIED,
-  });
-};
-
-export const filterChanged = () => (dispatch) => {
+export const filterChanged = ({ filter }) => (dispatch) => {
   dispatch({
     type: FILTER_CHANGED,
+    payload: { filter },
   });
 };
 
-export const pageChanged = () => (dispatch) => {
+export const pageChanged = ({ pageNumber }) => (dispatch) => {
   dispatch({
     type: PAGE_CHANGED,
+    payload: { pageNumber },
   });
 };
 
-export const pageSizeChanged = () => (dispatch) => {
+export const pageSizeChanged = ({ pageSize }) => (dispatch) => {
   dispatch({
     type: PAGE_SIZE_CHANGED,
+    payload: { pageSize },
   });
 };
 
-export const sortChanged = () => (dispatch) => {
+export const sortChanged = ({ sortField, isSortAscending }) => (dispatch) => {
   dispatch({
     type: SORT_CHANGED,
+    payload: { sortField, isSortAscending },
   });
 };
