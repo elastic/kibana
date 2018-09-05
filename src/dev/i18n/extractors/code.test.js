@@ -24,8 +24,8 @@ import {
   extractCodeMessages,
   isFormattedMessageElement,
   isIntlFormatMessageFunction,
-} from './extract_code_messages';
-import { traverseNodes } from './utils';
+} from './code';
+import { traverseNodes } from '../utils';
 
 const extractCodeMessagesSource = Buffer.from(`
 i18n('kbn.mgmt.id-1', { defaultMessage: 'Message text 1' });
@@ -65,7 +65,7 @@ function f() {
 }
 `;
 
-describe('extractCodeMessages', () => {
+describe('dev/i18n/extractors/code', () => {
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
     expect(actual.sort()).toMatchSnapshot();
@@ -84,12 +84,16 @@ describe('extractCodeMessages', () => {
 
 describe('isIntlFormatMessageFunction', () => {
   test('detects intl.formatMessage call expression', () => {
-    const callExpressionNodes = [...traverseNodes(parse(intlFormatMessageSource).program.body)].filter(
-      node => isCallExpression(node)
-    );
+    const callExpressionNodes = [
+      ...traverseNodes(parse(intlFormatMessageSource).program.body),
+    ].filter(node => isCallExpression(node));
 
     expect(callExpressionNodes).toHaveLength(4);
-    expect(callExpressionNodes.every(callExpressionNode => isIntlFormatMessageFunction(callExpressionNode))).toBe(true);
+    expect(
+      callExpressionNodes.every(callExpressionNode =>
+        isIntlFormatMessageFunction(callExpressionNode)
+      )
+    ).toBe(true);
   });
 });
 
