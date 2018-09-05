@@ -188,7 +188,10 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 configs[this.state.selectedConfigIndex] = config;
                 this.updateTag('configuration_blocks', configs);
               } else {
-                this.updateTag('configuration_blocks', [...tag.configuration_blocks, config]);
+                this.updateTag('configuration_blocks', [
+                  ...(tag.configuration_blocks || []),
+                  config,
+                ]);
               }
             }}
           />

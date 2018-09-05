@@ -28,7 +28,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
             configs: Joi.array()
               .items(Joi.object())
               .required(),
-            description: Joi.string(),
+            description: Joi.string().allow(''),
             type: Joi.string()
               .only(values(ConfigurationBlockTypes))
               .required(),

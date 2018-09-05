@@ -40,6 +40,28 @@ describe('Tags Client Domain Lib', () => {
     expect((convertedTag[0].configuration_blocks[0].configs[0] as any).something).toBe('here');
   });
 
+  it('should use helper function to convert user config to json with undefined `other`', async () => {
+    const convertedTag = tagsLib.userConfigsToJson([
+      {
+        id: 'fsdfsdfs',
+        color: '#DD0A73',
+        configuration_blocks: [
+          {
+            type: 'filebeat.inputs',
+            description: 'sdfsdf',
+            configs: [{ paths: ['sdfsfsdf'], other: undefined }],
+          },
+        ],
+        last_updated: '2018-09-04T15:52:08.983Z',
+      } as any,
+    ]);
+
+    expect(convertedTag.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs[0]).not.toHaveProperty('other');
+  });
+
   it('should use helper function to convert users yaml in tag to config object, where empty other leads to no other fields saved', async () => {
     const convertedTag = tagsLib.userConfigsToJson([
       {
@@ -95,7 +117,7 @@ describe('Tags Client Domain Lib', () => {
         configuration_blocks: [
           {
             type: 'filebeat.inputs',
-            description: 'sdfsdf',
+            description: undefined,
             configs: [{ paths: ['sdfsfsdf'] }],
           },
         ],

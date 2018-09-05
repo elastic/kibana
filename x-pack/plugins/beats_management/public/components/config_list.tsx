@@ -17,7 +17,7 @@ interface ComponentProps {
 
 export const ConfigList: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
-    items={props.configs}
+    items={props.configs || []}
     columns={[
       {
         field: 'type',
