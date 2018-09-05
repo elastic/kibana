@@ -21,12 +21,15 @@ interface TableColumn {
 
 interface ManagedTableProps {
   items: Array<StringMap<any>>;
+  columns: TableColumn[];
+  initialPageIndex?: number;
+  initialPageSize?: number;
+  hidePerPageOptions?: boolean;
   initialSort?: {
     field: string;
     direction: string;
   };
   noItemsMessage?: any;
-  columns: TableColumn[];
 }
 
 export class ManagedTable extends Component<ManagedTableProps, any> {
@@ -38,9 +41,15 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
       direction: 'asc'
     };
 
+    const {
+      initialPageIndex = 0,
+      initialPageSize = 10,
+      initialSort = defaultSort
+    } = props;
+
     this.state = {
-      page: { index: 0, size: 10 },
-      sort: props.initialSort || defaultSort
+      page: { index: initialPageIndex, size: initialPageSize },
+      sort: initialSort
     };
   }
 
@@ -56,7 +65,12 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
   }
 
   public render() {
-    const { columns, noItemsMessage, items } = this.props;
+    const {
+      columns,
+      noItemsMessage,
+      items,
+      hidePerPageOptions = true
+    } = this.props;
     const { page, sort } = this.state;
     return (
       <EuiBasicTable
@@ -64,10 +78,10 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
         items={this.getCurrentItems()}
         columns={columns}
         pagination={{
-          hidePerPageOptions: true,
+          hidePerPageOptions,
+          totalItemCount: items.length,
           pageIndex: page.index,
-          pageSize: page.size,
-          totalItemCount: items.length
+          pageSize: page.size
         }}
         sorting={{ sort }}
         onChange={this.onTableChange}

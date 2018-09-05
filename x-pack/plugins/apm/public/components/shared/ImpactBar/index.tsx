@@ -7,8 +7,9 @@
 import { EuiProgress } from '@elastic/eui';
 import React from 'react';
 
+// TODO: extend from EUI's EuiProgress prop interface
 interface Props extends StringMap<any> {
-  value: any;
+  value: number;
 }
 
 export function ImpactBar({ value, ...rest }: Props) {
