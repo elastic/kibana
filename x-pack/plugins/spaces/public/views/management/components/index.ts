@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DeleteSpacesButton } from './delete_spaces_button';
+export { ConfirmDeleteModal } from './confirm_delete_modal';

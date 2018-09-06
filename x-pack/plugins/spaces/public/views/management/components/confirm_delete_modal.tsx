@@ -64,17 +64,18 @@ export class ConfirmDeleteModal extends Component<Props, State> {
           confirmButtonText={'Delete space'}
           onCancel={onCancel}
           onConfirm={this.onConfirm}
-          title={`Confirm Delete`}
+          title={`Delete space '${space.name}'`}
           defaultFocusedButton={'cancel'}
         >
           <p>
-            Are you sure you want to delete the <strong>{space.name}</strong> space?
+            Deleting a space permanently removes the space and all of its contents. You can't undo
+            this action.
           </p>
 
           <EuiFormRow
-            label={'Enter space name to confirm'}
+            label={'Confirm space name'}
             isInvalid={!!this.state.error}
-            error={'Enter the correct space name to continue'}
+            error={'Space names do not match.'}
           >
             <EuiFieldText value={this.state.confirmSpaceName} onChange={this.onSpaceNameChange} />
           </EuiFormRow>

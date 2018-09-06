@@ -24,7 +24,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { DeleteSpacesButton } from '../components';
+import { DeleteSpacesButton } from './delete_spaces_button';
 import { SpaceAvatar } from '../../../components';
 
 import { Notifier, toastNotifications } from 'ui/notify';

@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib/spaces_manager';
-import { ConfirmDeleteModal } from './confirm_delete_modal';
+import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 
 interface Props {
   style?: 'button' | 'icon';
