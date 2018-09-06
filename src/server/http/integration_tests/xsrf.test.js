@@ -18,10 +18,10 @@
  */
 
 import { resolve } from 'path';
-import * as kbnTestServer from '../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_utils/kbn_server';
 
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
-const src = resolve.bind(null, __dirname, '../../../src');
+const src = resolve.bind(null, __dirname, '../../../../src');
 
 const xsrfHeader = 'kbn-xsrf';
 const versionHeader = 'kbn-version';
@@ -29,23 +29,18 @@ const testPath = '/xsrf/test/route';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const actualVersion = require(src('../package.json')).version;
 
-describe('xsrf request filter', function () {
-  async function inject(kbnServer, opts) {
-    return await kbnTestServer.makeRequest(kbnServer, opts);
-  }
-
-  const makeServer = async function () {
-    const kbnServer = kbnTestServer.createServer({
+describe('xsrf request filter', () => {
+  let root;
+  beforeAll(async () => {
+    root = kbnTestServer.createRoot({
       server: {
-        xsrf: {
-          disableProtection: false,
-          whitelist: [whitelistedTestPath]
-        }
+        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] }
       }
     });
 
-    await kbnServer.ready();
+    await root.start();
 
+    const kbnServer = kbnTestServer.getKbnServer(root);
     kbnServer.server.route({
       path: testPath,
       method: 'GET',
@@ -81,117 +76,68 @@ describe('xsrf request filter', function () {
         reply(null, 'ok');
       }
     });
+  }, 30000);
 
-    return kbnServer;
-  };
-
-  let kbnServer;
-  beforeEach(async () => {
-    kbnServer = await makeServer();
-  });
-
-  afterEach(async () => {
-    await kbnServer.close();
-  });
+  afterAll(async () => await root.shutdown());
 
   describe(`nonDestructiveMethod: GET`, function () {
     it('accepts requests without a token', async function () {
-      const resp = await inject(kbnServer, {
-        url: testPath,
-        method: 'GET'
-      });
-
-      expect(resp.statusCode).toBe(200);
-      expect(resp.payload).toBe('ok');
+      await kbnTestServer.request
+        .get(root, testPath)
+        .expect(200, 'ok');
     });
 
     it('accepts requests with the xsrf header', async function () {
-      const resp = await inject(kbnServer, {
-        url: testPath,
-        method: 'GET',
-        headers: {
-          [xsrfHeader]: 'anything',
-        },
-      });
-
-      expect(resp.statusCode).toBe(200);
-      expect(resp.payload).toBe('ok');
+      await kbnTestServer.request
+        .get(root, testPath)
+        .set(xsrfHeader, 'anything')
+        .expect(200, 'ok');
     });
   });
 
   describe(`nonDestructiveMethod: HEAD`, function () {
     it('accepts requests without a token', async function () {
-      const resp = await inject(kbnServer, {
-        url: testPath,
-        method: 'HEAD'
-      });
-
-      expect(resp.statusCode).toBe(200);
-      expect(resp.payload).toHaveLength(0);
+      await kbnTestServer.request
+        .head(root, testPath)
+        .expect(200, undefined);
     });
 
     it('accepts requests with the xsrf header', async function () {
-      const resp = await inject(kbnServer, {
-        url: testPath,
-        method: 'HEAD',
-        headers: {
-          [xsrfHeader]: 'anything',
-        },
-      });
-
-      expect(resp.statusCode).toBe(200);
-      expect(resp.payload).toHaveLength(0);
+      await kbnTestServer.request
+        .head(root, testPath)
+        .set(xsrfHeader, 'anything')
+        .expect(200, undefined);
     });
   });
 
   for (const method of destructiveMethods) {
     describe(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
       it('accepts requests with the xsrf header', async function () {
-        const resp = await inject(kbnServer, {
-          url: testPath,
-          method: method,
-          headers: {
-            [xsrfHeader]: 'anything',
-          },
-        });
-
-        expect(resp.statusCode).toBe(200);
-        expect(resp.payload).toBe('ok');
+        await kbnTestServer.request[method.toLowerCase()](root, testPath)
+          .set(xsrfHeader, 'anything')
+          .expect(200, 'ok');
       });
 
       // this is still valid for existing csrf protection support
       // it does not actually do any validation on the version value itself
       it('accepts requests with the version header', async function () {
-        const resp = await inject(kbnServer, {
-          url: testPath,
-          method: method,
-          headers: {
-            [versionHeader]: actualVersion,
-          },
-        });
-
-        expect(resp.statusCode).toBe(200);
-        expect(resp.payload).toBe('ok');
+        await kbnTestServer.request[method.toLowerCase()](root, testPath)
+          .set(versionHeader, actualVersion)
+          .expect(200, 'ok');
       });
 
       it('rejects requests without either an xsrf or version header', async function () {
-        const resp = await inject(kbnServer, {
-          url: testPath,
-          method: method
-        });
-
-        expect(resp.statusCode).toBe(400);
-        expect(resp.result).toMatchSnapshot(`${method} reject response`);
+        await kbnTestServer.request[method.toLowerCase()](root, testPath)
+          .expect(400, {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Request must contain a kbn-xsrf header.'
+          });
       });
 
       it('accepts whitelisted requests without either an xsrf or version header', async function () {
-        const resp = await inject(kbnServer, {
-          url: whitelistedTestPath,
-          method: method
-        });
-
-        expect(resp.statusCode).toBe(200);
-        expect(resp.payload).toBe('ok');
+        await kbnTestServer.request[method.toLowerCase()](root, whitelistedTestPath)
+          .expect(200, 'ok');
       });
     });
   }
