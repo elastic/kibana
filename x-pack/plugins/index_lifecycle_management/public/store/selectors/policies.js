@@ -98,7 +98,7 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   policy[PHASE_ROLLOVER_ENABLED] = false;
 
   if (phase.after) {
-    if (phaseName === PHASE_WARM && phase.after === '0s') {
+    if (phaseName === PHASE_WARM && phase.after === '0ms') {
       policy[WARM_PHASE_ON_ROLLOVER] = true;
     } else {
       const { size: after, units: afterUnits } = splitSizeAndUnits(
