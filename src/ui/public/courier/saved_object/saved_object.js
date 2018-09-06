@@ -31,7 +31,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { SavedObjectNotFound } from '../../errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
 import MappingSetupProvider from '../../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../search_source';
@@ -117,7 +117,15 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       try {
         searchSourceValues = JSON.parse(searchSourceJson);
       } catch (e) {
-        searchSourceValues = {};
+        throw new InvalidJSONProperty(
+          `Invalid JSON in ${esType} "${this.id}". ${e.message} JSON: ${searchSourceJson}`
+        );
+      }
+
+      // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
+      // (This happened in issue #20308)
+      if (!searchSourceValues || typeof searchSourceValues !== 'object') {
+        throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${this.id}".`);
       }
 
       const searchSourceFields = this.searchSource.getFields();
@@ -211,7 +219,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     this.applyESResp = (resp) => {
       this._source = _.cloneDeep(resp._source);
 
-      if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
+      if (resp.found != null && !resp.found) {
+        throw new SavedObjectNotFound(esType, this.id);
+      }
 
       const meta = resp._source.kibanaSavedObjectMeta || {};
       delete resp._source.kibanaSavedObjectMeta;

@@ -1,0 +1,20 @@
+.homAddData__card {
+  width: 250px;
+  min-width: 200px;
+  border: none;
+  box-shadow: none;
+}
+
+.homAddData__icon {
+  width: $euiSizeXL * 2;
+  height: $euiSizeXL * 2;
+}
+
+.homAddData__footerItem--highlight {
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  padding: $euiSize;
+}
+
+.homAddData__footerItem {
+  text-align: center;
+}

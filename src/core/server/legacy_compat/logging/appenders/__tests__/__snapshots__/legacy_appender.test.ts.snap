@@ -3,94 +3,125 @@
 exports[`\`append()\` correctly pushes records to legacy platform. 1`] = `
 Array [
   Array [
-    Array [
-      "trace",
-      "context-1",
-    ],
-    "message-1",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-1",
+      "level": LogLevel {
+        "id": "trace",
+        "value": 7,
+      },
+      "message": "message-1",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "debug",
-      "context-2",
-    ],
-    "message-2",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-2",
+      "level": LogLevel {
+        "id": "debug",
+        "value": 6,
+      },
+      "message": "message-2",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "info",
-      "context-3",
-      "sub-context-3",
-    ],
-    "message-3",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-3.sub-context-3",
+      "level": LogLevel {
+        "id": "info",
+        "value": 5,
+      },
+      "message": "message-3",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "warn",
-      "context-4",
-      "sub-context-4",
-    ],
-    "message-4",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-4.sub-context-4",
+      "level": LogLevel {
+        "id": "warn",
+        "value": 4,
+      },
+      "message": "message-4",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "error",
-      "context-5",
-    ],
-    [Error: Some Error],
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-5",
+      "error": [Error: Some Error],
+      "level": LogLevel {
+        "id": "error",
+        "value": 3,
+      },
+      "message": "message-5-with-error",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "error",
-      "context-6",
-    ],
-    "message-6-with-message",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-6",
+      "level": LogLevel {
+        "id": "error",
+        "value": 3,
+      },
+      "message": "message-6-with-message",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "fatal",
-      "context-7",
-      "sub-context-7",
-      "sub-sub-context-7",
-    ],
-    [Error: Some Fatal Error],
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-7.sub-context-7.sub-sub-context-7",
+      "error": [Error: Some Fatal Error],
+      "level": LogLevel {
+        "id": "fatal",
+        "value": 2,
+      },
+      "message": "message-7-with-error",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "fatal",
-      "context-8",
-      "sub-context-8",
-      "sub-sub-context-8",
-    ],
-    "message-8-with-message",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-8.sub-context-8.sub-sub-context-8",
+      "level": LogLevel {
+        "id": "fatal",
+        "value": 2,
+      },
+      "message": "message-8-with-message",
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "info",
-      "context-9",
-      "sub-context-9",
-    ],
-    "message-9-with-message",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-9.sub-context-9",
+      "level": LogLevel {
+        "id": "info",
+        "value": 5,
+      },
+      "message": "message-9-with-message",
+      "meta": Object {
+        "someValue": 3,
+      },
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
   Array [
-    Array [
-      "info",
-      "context-10",
-      "sub-context-10",
-      "tag1",
-      "tag2",
-    ],
-    "message-10-with-message",
-    2012-02-01T11:22:33.044Z,
+    Object {
+      "context": "context-10.sub-context-10",
+      "level": LogLevel {
+        "id": "info",
+        "value": 5,
+      },
+      "message": "message-10-with-message",
+      "meta": Object {
+        "tags": Array [
+          "tag1",
+          "tag2",
+        ],
+      },
+      "timestamp": 2012-02-01T11:22:33.044Z,
+    },
   ],
 ]
 `;

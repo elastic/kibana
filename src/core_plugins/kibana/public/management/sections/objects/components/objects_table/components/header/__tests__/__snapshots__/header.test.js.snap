@@ -15,42 +15,13 @@ exports[`Header should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiFlexGroup
-        alignItems="baseline"
-        component="div"
-        direction="row"
-        gutterSize="m"
-        justifyContent="flexStart"
-        responsive={false}
-        wrap={false}
+      <EuiTitle
+        size="m"
       >
-        <EuiFlexItem
-          component="div"
-          grow={false}
-        >
-          <EuiTitle
-            size="m"
-          >
-            <h1>
-              Saved Objects
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            <p>
-              4
-               in total
-            </p>
-          </EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <h1>
+          Saved Objects
+        </h1>
+      </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
@@ -78,7 +49,10 @@ exports[`Header should render normally 1`] = `
             size="s"
             type="button"
           >
-            Export Everything
+            Export 
+            2
+             
+            objects
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem

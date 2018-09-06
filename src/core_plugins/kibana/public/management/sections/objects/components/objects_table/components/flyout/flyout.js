@@ -136,6 +136,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       importedObjectCount,
+      failedImports,
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
@@ -166,6 +167,7 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports,
       conflicts,
       importCount: importedObjectCount,
       isLoading: false,
@@ -198,6 +200,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports
     } = this.state;
 
     const { services, indexPatterns } = this.props;
@@ -235,6 +238,13 @@ export class Flyout extends Component {
           conflictedSearchDocs,
           services,
           indexPatterns,
+          isOverwriteAllChecked
+        );
+        this.setState({
+          loadingMessage: 'Retrying failed objects...',
+        });
+        importCount += await saveObjects(
+          failedImports.map(({ obj }) => obj),
           isOverwriteAllChecked
         );
       } catch (e) {
@@ -314,6 +324,7 @@ export class Flyout extends Component {
           const options = this.state.indexPatterns.map(indexPattern => ({
             text: indexPattern.get('title'),
             value: indexPattern.id,
+            ['data-test-subj']: `indexPatternOption-${indexPattern.get('title')}`,
           }));
 
           options.unshift({
@@ -323,7 +334,7 @@ export class Flyout extends Component {
 
           return (
             <EuiSelect
-              data-test-subj="managementChangeIndexSelection"
+              data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={e => this.onIndexChanged(id, e)}
               options={options}
             />
@@ -373,6 +384,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       wasImportSuccessful,
       importCount,
+      failedImports = [],
     } = this.state;
 
     if (isLoading) {
@@ -389,9 +401,41 @@ export class Flyout extends Component {
       );
     }
 
-    if (wasImportSuccessful) {
+    if (failedImports.length && !this.hasConflicts) {
       return (
-        <EuiCallOut title="Import successful" color="success" iconType="check">
+        <EuiCallOut
+          title="Import failed"
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
+          </p>
+          <p>
+            {failedImports.map(({ error }) => error.message || '').join(' ')}
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    if (wasImportSuccessful) {
+      if (importCount === 0) {
+        return (
+          <EuiCallOut
+            data-test-subj="importSavedObjectsSuccessNoneImported"
+            title="No objects imported"
+            color="primary"
+          />
+        );
+      }
+
+      return (
+        <EuiCallOut
+          data-test-subj="importSavedObjectsSuccess"
+          title="Import successful"
+          color="success"
+          iconType="check"
+        >
           <p>Successfully imported {importCount} objects.</p>
         </EuiCallOut>
       );
@@ -514,7 +558,7 @@ export class Flyout extends Component {
     const { close } = this.props;
 
     return (
-      <EuiFlyout onClose={close}>
+      <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Import saved objects</h2>

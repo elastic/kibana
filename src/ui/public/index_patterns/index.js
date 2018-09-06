@@ -19,3 +19,8 @@
 
 export { IndexPatternsProvider } from './index_patterns';
 export { FieldsFetcher } from './fields_fetcher';
+
+export {
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+} from './constants';

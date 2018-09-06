@@ -21,10 +21,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=chromium`,
-        // Jenkins agents take about 30 seconds to spin up chromium on a first run because of some fontconfig cache
-        // generation.
-        `--xpack.reporting.queue.timeout=60000`,
-        `--logging.verbose=true`,
       ],
     },
   };

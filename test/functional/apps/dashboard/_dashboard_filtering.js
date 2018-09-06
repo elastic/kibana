@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -37,10 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    // Disabling flaky test
-    // Failing in PageObjects.dashboard.waitForRenderComplete() with the error
-    // "tryForTime timeout: Error: Still waiting on more visualizations to finish rendering, expecting: 17, received: 16"
-    describe.skip('adding a filter that excludes all data', async () => {
+    describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
@@ -104,8 +102,68 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // Skipped because it depends on filter applied by disabled test
-    describe.skip('disabling a filter unfilters the data on', async () => {
+    describe('using a pinned filter that excludes all data', async () => {
+      before(async () => {
+        await filterBar.toggleFilterPinned('bytes');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      after(async () => {
+        await filterBar.toggleFilterPinned('bytes');
+      });
+
+      it('filters on pie charts', async () => {
+        await dashboardExpect.pieSliceCount(0);
+      });
+
+      it('area, bar and heatmap charts filtered', async () => {
+        await dashboardExpect.seriesElementCount(0);
+      });
+
+      it('data tables are filtered', async () => {
+        await dashboardExpect.dataTableRowCount(0);
+      });
+
+      it('goal and guages are filtered', async () => {
+        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      });
+
+      it('tsvb time series shows no data message', async () => {
+        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
+      });
+
+      it('metric value shows no data', async () => {
+        await dashboardExpect.metricValuesExist(['-']);
+      });
+
+      it('tag cloud values are filtered', async () => {
+        await dashboardExpect.emptyTagCloudFound();
+      });
+
+      it('tsvb metric is filtered', async () => {
+        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
+      });
+
+      it('tsvb top n is filtered', async () => {
+        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+      });
+
+      it('saved search is filtered', async () => {
+        await dashboardExpect.savedSearchRowCount(0);
+      });
+
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
+
+      it('vega is filtered', async () => {
+        await dashboardExpect.vegaTextsDoNotExist(['5,000']);
+      });
+    });
+
+    describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -181,10 +239,13 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+
+        // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
+        // as that expects an item with the `data-shared-items-count` tag.
+        await renderable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering-Test:-animal-sounds-pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -194,12 +255,12 @@ export default function ({ getService, getPageObjects }) {
       it('Nested visualization filter pills filters data as expected', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await renderable.waitForRender();
         await PageObjects.dashboard.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await dashboardExpect.pieSliceCount(1);

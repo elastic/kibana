@@ -35,7 +35,7 @@ For a more complex use-case you usually want to use that method.
 `params` is a parameter object specifying several parameters, that influence rendering.
 
 You will find a detailed description of all the parameters in the inline docs
-in the {repo}blob/{branch}/src/ui/public/visualize/loader/loader.js[loader source code].
+in the {repo}blob/{branch}/src/ui/public/visualize/loader/types.ts[loader source code].
 
 Both methods return an `EmbeddedVisualizeHandler`, that gives you some access
 to the visualization. The `embedVisualizationWithSavedObject` method will return
@@ -45,7 +45,8 @@ found. It will reject, if the `id` is invalid.
 
 The returned `EmbeddedVisualizeHandler` itself has the following methods and properties:
 
-- `destroy()`: destroys the underlying Angular scope of the visualization
+- `destroy()`: destroys the embedded visualization. You MUST call that method when navigating away
+  or destroying the DOM node you have embedded into.
 - `getElement()`: a reference to the jQuery wrapped DOM element, that renders the visualization
 - `whenFirstRenderComplete()`: will return a promise, that resolves as soon as the visualization has
   finished rendering for the first time

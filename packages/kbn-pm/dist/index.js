@@ -12431,6 +12431,7 @@ class Project {
         this.path = projectPath;
         this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
         this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
+        this.optimizeLocation = (0, _path.resolve)(this.path, 'optimize');
         this.targetLocation = (0, _path.resolve)(this.path, 'target');
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
@@ -35201,7 +35202,7 @@ exports.runScriptInPackage = exports.installInDir = undefined;
  */
 let installInDir = exports.installInDir = (() => {
     var _ref = _asyncToGenerator(function* (directory, extraArgs = []) {
-        const options = ['install', '--check-files', '--non-interactive', '--mutex file', ...extraArgs];
+        const options = ['install', '--check-files', '--non-interactive', '--mutex=file', ...extraArgs];
         // We pass the mutex flag to ensure only one instance of yarn runs at any
         // given time (e.g. to avoid conflicts).
         yield (0, _child_process.spawn)('yarn', options, {
@@ -38923,6 +38924,9 @@ const CleanCommand = exports.CleanCommand = {
                 }
                 if (yield (0, _fs.isDirectory)(project.targetLocation)) {
                     directoriesToDelete.push(project.targetLocation);
+                }
+                if (yield (0, _fs.isDirectory)(project.optimizeLocation)) {
+                    directoriesToDelete.push(project.optimizeLocation);
                 }
             }
             if (directoriesToDelete.length === 0) {

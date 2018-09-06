@@ -21,33 +21,23 @@
 
 import { EnvOptions } from '../../env';
 
-interface MockEnvOptions {
-  config?: string;
-  kbnServer?: any;
-  mode?: EnvOptions['mode']['name'];
-  packageInfo?: Partial<EnvOptions['packageInfo']>;
-}
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>
+};
 
-export function getEnvOptions({
-  config,
-  kbnServer,
-  mode = 'development',
-  packageInfo = {},
-}: MockEnvOptions = {}): EnvOptions {
+export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
   return {
-    config,
-    kbnServer,
-    mode: {
-      dev: mode === 'development',
-      name: mode,
-      prod: mode === 'production',
+    configs: options.configs || [],
+    cliArgs: {
+      dev: true,
+      quiet: false,
+      silent: false,
+      watch: false,
+      repl: false,
+      basePath: false,
+      ...(options.cliArgs || {}),
     },
-    packageInfo: {
-      branch: 'some-branch',
-      buildNum: 1,
-      buildSha: 'some-sha-256',
-      version: 'some-version',
-      ...packageInfo,
-    },
+    isDevClusterMaster:
+      options.isDevClusterMaster !== undefined ? options.isDevClusterMaster : false,
   };
 }

@@ -6,10 +6,10 @@
     data-test-subj="field-{{::field.name}}"
     ng-click="onClickToggleDetails($event, field)"
     kbn-accessible-click
-    class="sidebar-item-title discover-sidebar-item"
+    class="sidebar-item-title dscSidebarItem"
   >
     <field-name
-      class="discover-sidebar-item-label"
+      class="dscField dscSidebarItem__label"
       field="field"
     ></field-name>
 
@@ -18,7 +18,7 @@
       ng-click="toggleDisplay(field)"
       ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
       ng-bind="::field.display ? 'remove' : 'add'"
-      class="discover-sidebar-item-action kuiButton kuiButton--small"
+      class="dscSidebarItem__action kuiButton kuiButton--small"
       data-test-subj="fieldToggle-{{::field.name}}"
     ></button>
   </div>

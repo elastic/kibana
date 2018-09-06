@@ -57,7 +57,12 @@ function MoreSeries({ hiddenSeriesCount }) {
     return null;
   }
 
-  return <MoreSeriesContainer>(+{hiddenSeriesCount})</MoreSeriesContainer>;
+  return (
+    <MoreSeriesContainer>
+      (+
+      {hiddenSeriesCount})
+    </MoreSeriesContainer>
+  );
 }
 
 export default function Legends({

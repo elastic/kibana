@@ -43,7 +43,7 @@ const instanceRowFactory = (scope, kbnUrl) => {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={goToInstance.bind(null, get(props, 'kibana.uuid'))}
               data-test-subj={`kibanaLink-${props.kibana.name}`}
@@ -51,34 +51,34 @@ const instanceRowFactory = (scope, kbnUrl) => {
               { props.kibana.name }
             </EuiLink>
           </div>
-          <div className="monitoringTableCell__transportAddress">{ get(props, 'kibana.transport_address') }</div>
+          <div className="monTableCell__transportAddress">{ get(props, 'kibana.transport_address') }</div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div title={`Instance status: ${props.kibana.status}`} className="monitoringTableCell__status">
+          <div title={`Instance status: ${props.kibana.status}`} className="monTableCell__status">
             <KibanaStatusIcon status={props.kibana.status} availability={props.availability} />&nbsp;
             { !props.availability ? 'Offline' : capitalize(props.kibana.status) }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatMetric(get(props, 'os.load["1m"]'), '0.00') }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatNumber(props.process.memory.resident_set_size_in_bytes, 'byte') }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__number">
+          <div className="monTableCell__number">
             { formatNumber(props.requests.total, 'int_commas') }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__splitNumber">
+          <div className="monTableCell__splitNumber">
             { props.response_times.average && (formatNumber(props.response_times.average, 'int_commas') + ' ms avg') }
           </div>
-          <div className="monitoringTableCell__splitNumber">
+          <div className="monTableCell__splitNumber">
             { formatNumber(props.response_times.max, 'int_commas') } ms max
           </div>
         </KuiTableRowCell>

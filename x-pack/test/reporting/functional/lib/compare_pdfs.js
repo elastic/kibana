@@ -12,9 +12,9 @@ import mkdirp from 'mkdirp';
 
 import { PNG } from 'pngjs';
 import { PDFImage } from 'pdf-image';
+import PDFJS from 'pdfjs-dist';
 
 const mkdirAsync = promisify(mkdirp);
-const writeFileAsync = promisify(fs.writeFile);
 
 function comparePngs(actualPath, expectedPath, diffPath, log) {
   log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
@@ -73,12 +73,14 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   // don't want to start causing failures for other devs working on OS's which are lacking snapshots.  We have
   // mac and linux covered which is better than nothing for now.
   try {
-    await writeFileAsync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
+    log.debug(`writeFileSync: ${baselineCopyPath}`);
+    fs.writeFileSync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
   } catch (error) {
     log.error(`No baseline pdf found at ${baselinePdfPath}`);
     return 0;
   }
-  await writeFileAsync(actualCopyPath, fs.readFileSync(actualPdfPath));
+  log.debug(`writeFileSync: ${actualCopyPath}`);
+  fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
     '-density': '300',
@@ -86,37 +88,30 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
-  let pageNum = 0;
+  log.debug(`Calculating numberOfPages`);
+
+  const actualDoc = await PDFJS.getDocument(actualCopyPath);
+  const expectedDoc = await PDFJS.getDocument(baselineCopyPath);
+  const actualPages = actualDoc.numPages;
+  const expectedPages = expectedDoc.numPages;
+
+  if (actualPages !== expectedPages) {
+    throw new Error(
+      `Expected ${expectedPages} pages but got ${actualPages} in PDFs expected: "${baselineCopyPath}" actual: "${actualCopyPath}".`
+    );
+  }
+
   let diffTotal = 0;
-  // Ran across an instance where the page conversion failed with `Failed to convert page to image` for no known
-  // reason. Seeing if a loop will resolve these flaky errors.
-  let failCount = 0;
-  while (true) {
-    let expectedPagePng;
-    try {
-      expectedPagePng = await expectedPdfImage.convertPage(pageNum);
-    } catch (e) {
-      if (JSON.stringify(e).indexOf('Requested FirstPage is greater than the number of pages in the file') >= 0) {
-        break;
-      } else {
-        log.error('Failed on: ' + e.message);
-        if (failCount < 3) {
-          log.error('Will try conversion again...');
-          failCount++;
-          continue;
-        } else {
-          throw e;
-        }
-      }
-    }
 
+  for (let pageNum = 0; pageNum <= expectedPages; ++pageNum) {
+    log.debug(`Converting expected pdf page ${pageNum} to png`);
+    const expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+    log.debug(`Converting actual pdf page ${pageNum} to png`);
     const actualPagePng = await actualPdfImage.convertPage(pageNum);
-
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
-
     diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
     pageNum++;
   }
+
   return diffTotal;
 }
-

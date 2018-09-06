@@ -21,7 +21,7 @@ and an Elasticsearch client node on the same machine. For more information, see
 [[configuring-kibana-shield]]
 === Using Kibana with {security}
 
-You can use {stack-ov}/xpack-security.html[{security}] to control what
+You can use {stack-ov}/elasticsearch-security.html[{security}] to control what
 Elasticsearch data users can access through Kibana.
 
 When {security} is enabled, Kibana users have to log in. They need to
@@ -40,7 +40,7 @@ For information about setting up Kibana users, see
 [[enabling-ssl]]
 === Enabling SSL
 
-See <<configuring-tls>>. 
+See <<configuring-tls>>.
 
 [float]
 [[load-balancing]]

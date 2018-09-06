@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
-
 const mockHttpServer = jest.fn();
 
 jest.mock('../http_server', () => ({
@@ -26,9 +24,7 @@ jest.mock('../http_server', () => ({
 }));
 
 import { noop } from 'lodash';
-import { BehaviorSubject } from '../../../lib/kbn_observable';
-
-import { Env } from '../../config';
+import { BehaviorSubject } from 'rxjs';
 import { logger } from '../../logging/__mocks__';
 import { HttpConfig } from '../http_config';
 import { HttpService } from '../http_service';
@@ -55,11 +51,7 @@ test('creates and starts http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(
-    config$.asObservable(),
-    logger,
-    new Env('/kibana', getEnvOptions())
-  );
+  const service = new HttpService(config$.asObservable(), logger);
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
   expect(httpServer.start).not.toHaveBeenCalled();
@@ -81,11 +73,7 @@ test('logs error if already started', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(
-    config$.asObservable(),
-    logger,
-    new Env('/kibana', getEnvOptions())
-  );
+  const service = new HttpService(config$.asObservable(), logger);
 
   await service.start();
 
@@ -104,11 +92,7 @@ test('stops http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(
-    config$.asObservable(),
-    logger,
-    new Env('/kibana', getEnvOptions())
-  );
+  const service = new HttpService(config$.asObservable(), logger);
 
   await service.start();
 
@@ -132,11 +116,7 @@ test('register route handler', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(
-    config$.asObservable(),
-    logger,
-    new Env('/kibana', getEnvOptions())
-  );
+  const service = new HttpService(config$.asObservable(), logger);
 
   const router = new Router('/foo');
   service.registerRouter(router);
@@ -159,15 +139,28 @@ test('throws if registering route handler after http server is started', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(
-    config$.asObservable(),
-    logger,
-    new Env('/kibana', getEnvOptions())
-  );
+  const service = new HttpService(config$.asObservable(), logger);
 
   const router = new Router('/foo');
   service.registerRouter(router);
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
   expect(logger.mockCollect()).toMatchSnapshot();
+});
+
+test('returns http server contract on start', async () => {
+  const httpServerContract = {
+    server: {},
+    options: { someOption: true },
+  };
+
+  mockHttpServer.mockImplementation(() => ({
+    isListening: () => false,
+    start: jest.fn().mockReturnValue(httpServerContract),
+    stop: noop,
+  }));
+
+  const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
+
+  expect(await service.start()).toBe(httpServerContract);
 });

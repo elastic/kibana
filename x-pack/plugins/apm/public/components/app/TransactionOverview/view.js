@@ -9,10 +9,11 @@ import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import Charts from '../../shared/charts/TransactionCharts';
-import { getMlJobUrl } from '../../../utils/url';
+import { getMlJobUrl, KibanaLink } from '../../../utils/url';
 import List from './List';
 import { units, px, fontSizes } from '../../../style/variables';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
@@ -69,20 +70,20 @@ class TransactionOverview extends Component {
     const mlEnabled = chrome.getInjected('mlEnabled');
 
     const ChartHeaderContent =
-      hasDynamicBaseline && license.data.features.ml.isAvailable ? (
+      hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
         <MLTipContainer>
           <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
-            <a
-              href={getMlJobUrl(
+            <KibanaLink
+              pathname={getMlJobUrl(
                 serviceName,
                 transactionType,
                 this.props.location
               )}
             >
               View Job
-            </a>
+            </KibanaLink>
           </MLText>
         </MLTipContainer>
       ) : null;
@@ -91,7 +92,7 @@ class TransactionOverview extends Component {
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          {license.data.features.ml.isAvailable &&
+          {get(license.data, 'features.ml.isAvailable') &&
             mlEnabled && (
               <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
             )}

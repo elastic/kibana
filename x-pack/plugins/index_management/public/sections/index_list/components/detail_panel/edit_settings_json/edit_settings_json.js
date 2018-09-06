@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { settingsDocumentationLink } from '../../../../../lib/documentation_links';
 
 import {
@@ -118,7 +119,10 @@ export class EditSettingsJson extends React.PureComponent {
           <EuiFlexItem>
             <EuiTitle>
               <p>
-                Edit, then save your JSON
+                <FormattedMessage
+                  id="xpack.idxMgmt.editSettingsJSON.saveJSONDescription"
+                  defaultMessage="Edit, then save your JSON"
+                />
               </p>
             </EuiTitle>
           </EuiFlexItem>
@@ -130,7 +134,10 @@ export class EditSettingsJson extends React.PureComponent {
               onClick={this.commitSettings}
               disabled={!this.state.valid}
             >
-              Save
+              <FormattedMessage
+                id="xpack.idxMgmt.editSettingsJSON.saveJSONButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -140,7 +147,10 @@ export class EditSettingsJson extends React.PureComponent {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Settings reference
+          <FormattedMessage
+            id="xpack.idxMgmt.editSettingsJSON.settingsReferenceLinkText"
+            defaultMessage="Settings reference"
+          />
         </EuiLink>
         <EuiSpacer />
         <div

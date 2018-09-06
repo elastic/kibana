@@ -19,31 +19,30 @@
 
 import { resolve } from 'path';
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
+import { fromEvent, race } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
 import { Config } from '../../server/config/config';
 import { transformDeprecations } from '../../server/config/transform_deprecations';
-import { configureBasePathProxy } from './configure_base_path_proxy';
 
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  static async create(opts = {}, settings = {}) {
-    const transformedSettings = transformDeprecations(settings);
-    const config = await Config.withDefaultSchema(transformedSettings);
-
-    const basePathProxy = opts.basePath
-      ? await configureBasePathProxy(config)
-      : undefined;
-
-    return new ClusterManager(opts, config, basePathProxy);
+  static create(opts, settings = {}, basePathProxy) {
+    return new ClusterManager(
+      opts,
+      Config.withDefaultSchema(transformDeprecations(settings)),
+      basePathProxy
+    );
   }
 
   constructor(opts, config, basePathProxy) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
     this.inReplMode = !!opts.repl;
+    this.basePathProxy = basePathProxy;
 
     const serverArgv = [];
     const optimizerArgv = [
@@ -51,17 +50,15 @@ export default class ClusterManager {
       '--server.autoListen=false',
     ];
 
-    if (basePathProxy) {
-      this.basePathProxy = basePathProxy;
-
+    if (this.basePathProxy) {
       optimizerArgv.push(
-        `--server.basePath=${this.basePathProxy.getBasePath()}`,
+        `--server.basePath=${this.basePathProxy.basePath}`,
         '--server.rewriteBasePath=true',
       );
 
       serverArgv.push(
-        `--server.port=${this.basePathProxy.getTargetPort()}`,
-        `--server.basePath=${this.basePathProxy.getBasePath()}`,
+        `--server.port=${this.basePathProxy.targetPort}`,
+        `--server.basePath=${this.basePathProxy.basePath}`,
         '--server.rewriteBasePath=true',
       );
     }
@@ -81,12 +78,6 @@ export default class ClusterManager {
         argv: serverArgv
       })
     ];
-
-    if (basePathProxy) {
-      // Pass server worker to the basepath proxy so that it can hold off the
-      // proxying until server worker is ready.
-      this.basePathProxy.serverWorker = this.server;
-    }
 
     // broker messages between workers
     this.workers.forEach((worker) => {
@@ -130,7 +121,10 @@ export default class ClusterManager {
     this.setupManualRestart();
     invoke(this.workers, 'start');
     if (this.basePathProxy) {
-      this.basePathProxy.start();
+      this.basePathProxy.start({
+        blockUntil: this.blockUntil.bind(this),
+        shouldRedirectFromOldBasePath: this.shouldRedirectFromOldBasePath.bind(this),
+      });
     }
   }
 
@@ -221,5 +215,24 @@ export default class ClusterManager {
   onWatcherError(err) {
     this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
+  }
+
+  shouldRedirectFromOldBasePath(path) {
+    const isApp = path.startsWith('app/');
+    const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
+
+    return isApp || isKnownShortPath;
+  }
+
+  blockUntil() {
+    // Wait until `server` worker either crashes or starts to listen.
+    if (this.server.listening || this.server.crashed) {
+      return Promise.resolve();
+    }
+
+    return race(
+      fromEvent(this.server, 'listening'),
+      fromEvent(this.server, 'crashed')
+    ).pipe(first()).toPromise();
   }
 }

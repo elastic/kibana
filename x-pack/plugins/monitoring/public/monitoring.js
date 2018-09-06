@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment-timezone';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
-import 'plugins/monitoring/less/main.less';
 import 'plugins/monitoring/filters';
 import 'plugins/monitoring/services/clusters';
 import 'plugins/monitoring/services/features';
@@ -20,9 +18,6 @@ import 'plugins/monitoring/directives/all';
 import 'plugins/monitoring/views/all';
 
 const uiSettings = chrome.getUiSettingsClient();
-
-// Allow UTC times to be entered for Absolute Time range in timepicker
-moment.tz.setDefault(uiSettings.get('dateFormat:tz'));
 
 // default timepicker default to the last hour
 uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify({

@@ -20,7 +20,7 @@ import { isEmpty, capitalize, get, sortBy, last } from 'lodash';
 import { ContextProperties } from '../../../shared/ContextProperties';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
 import Spans from './Spans';
 import DiscoverButton from '../../../shared/DiscoverButton';
@@ -67,7 +67,7 @@ const DEFAULT_TAB = 'timeline';
 
 export function getAgentMarks(transaction) {
   const duration = get(transaction, TRANSACTION_DURATION);
-  const threshold = duration / 100 * 2;
+  const threshold = (duration / 100) * 2;
 
   return sortBy(
     Object.entries(get(transaction, 'transaction.marks.agent', [])),
@@ -114,7 +114,7 @@ function getCurrentTab(tabs = [], detailTab) {
 
 function getTabs(transactionData) {
   const dynamicProps = Object.keys(transactionData.context || {});
-  return getLevelOneProps(dynamicProps);
+  return getPropertyTabNames(dynamicProps);
 }
 
 function Transaction({ transaction, location, urlParams }) {
@@ -123,8 +123,8 @@ function Transaction({ transaction, location, urlParams }) {
   if (isEmpty(transaction)) {
     return (
       <EmptyMessage
-        heading="No transaction sample available for this time range."
-        subheading="Please select another time range or another bucket from the distribution histogram."
+        heading="No transaction sample available."
+        subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
       />
     );
   }

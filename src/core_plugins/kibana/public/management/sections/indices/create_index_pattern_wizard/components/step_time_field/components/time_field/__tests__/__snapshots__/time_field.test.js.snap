@@ -9,10 +9,18 @@ exports[`TimeField should render a loading state 1`] = `
     helpText={
       <div>
         <p>
-          The Time Filter will use this field to filter your data by time.
+          <FormattedMessage
+            defaultMessage="The Time Filter will use this field to filter your data by time."
+            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            values={Object {}}
+          />
         </p>
         <p>
-          You can choose not to have a time field, but you will not be able to narrow down your data by a time range.
+          <FormattedMessage
+            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            values={Object {}}
+          />
         </p>
       </div>
     }
@@ -31,7 +39,11 @@ exports[`TimeField should render a loading state 1`] = `
           grow={false}
         >
           <span>
-            Time Filter field name
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
           </span>
         </EuiFlexItem>
         <EuiFlexItem
@@ -75,10 +87,18 @@ exports[`TimeField should render a selected time field 1`] = `
     helpText={
       <div>
         <p>
-          The Time Filter will use this field to filter your data by time.
+          <FormattedMessage
+            defaultMessage="The Time Filter will use this field to filter your data by time."
+            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            values={Object {}}
+          />
         </p>
         <p>
-          You can choose not to have a time field, but you will not be able to narrow down your data by a time range.
+          <FormattedMessage
+            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            values={Object {}}
+          />
         </p>
       </div>
     }
@@ -97,7 +117,11 @@ exports[`TimeField should render a selected time field 1`] = `
           grow={false}
         >
           <span>
-            Time Filter field name
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
           </span>
         </EuiFlexItem>
         <EuiFlexItem
@@ -110,7 +134,11 @@ exports[`TimeField should render a selected time field 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Refresh
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="kbn.management.createIndexPattern.stepTime.refreshButton"
+              values={Object {}}
+            />
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -148,10 +176,18 @@ exports[`TimeField should render normally 1`] = `
     helpText={
       <div>
         <p>
-          The Time Filter will use this field to filter your data by time.
+          <FormattedMessage
+            defaultMessage="The Time Filter will use this field to filter your data by time."
+            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            values={Object {}}
+          />
         </p>
         <p>
-          You can choose not to have a time field, but you will not be able to narrow down your data by a time range.
+          <FormattedMessage
+            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            values={Object {}}
+          />
         </p>
       </div>
     }
@@ -170,7 +206,11 @@ exports[`TimeField should render normally 1`] = `
           grow={false}
         >
           <span>
-            Time Filter field name
+            <FormattedMessage
+              defaultMessage="Time Filter field name"
+              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              values={Object {}}
+            />
           </span>
         </EuiFlexItem>
         <EuiFlexItem
@@ -183,7 +223,11 @@ exports[`TimeField should render normally 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Refresh
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="kbn.management.createIndexPattern.stepTime.refreshButton"
+              values={Object {}}
+            />
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -218,7 +262,11 @@ exports[`TimeField should render something if hiding time field 1`] = `
     grow={true}
   >
     <p>
-      The indices which match this index pattern don't contain any time fields.
+      <FormattedMessage
+        defaultMessage="The indices which match this index pattern don't contain any time fields."
+        id="kbn.management.createIndexPattern.stepTime.field.noTimeFieldsLabel"
+        values={Object {}}
+      />
     </p>
   </EuiText>
 </EuiForm>

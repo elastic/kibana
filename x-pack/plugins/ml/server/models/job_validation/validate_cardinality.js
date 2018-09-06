@@ -12,6 +12,18 @@ import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
 
+function isValidCategorizationConfig(job, fieldName) {
+  return (
+    typeof job.analysis_config.categorization_field_name !== 'undefined' &&
+    fieldName === 'mlcategory'
+  );
+}
+
+function isScriptField(job, fieldName) {
+  const scriptFields = Object.keys(_.get(job, 'datafeed_config.script_fields', {}));
+  return scriptFields.includes(fieldName);
+}
+
 // Thresholds to determine whether cardinality is
 // too high or low for certain fields analysis
 const OVER_FIELD_CARDINALITY_THRESHOLD_LOW = 10;
@@ -84,12 +96,12 @@ const validateFactory = (callWithRequest, job) => {
               });
             }
           } else {
-            // when the job is using categorization and the field name is set to 'mlcategory',
-            // then don't report the field as not being able to be aggregated.
-            if (!(
-              typeof job.analysis_config.categorization_field_name !== 'undefined' &&
-              uniqueFieldName === 'mlcategory'
-            )) {
+            // only report uniqueFieldName as not aggregatable if it's not part
+            // of a valid categorization configuration and if it's not a scripted field.
+            if (
+              !isValidCategorizationConfig(job, uniqueFieldName) &&
+              !isScriptField(job, uniqueFieldName)
+            ) {
               messages.push({
                 id: 'field_not_aggregatable',
                 fieldName: uniqueFieldName

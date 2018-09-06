@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import './add_data.less';
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -35,22 +36,54 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-export function AddData({ apmUiEnabled }) {
+const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
   const renderCards = () => {
+    const apmTitle = intl.formatMessage({
+      id: 'kbn.home.addData.apm.nameTitle', defaultMessage: 'APM'
+    });
+    const apmDescription = intl.formatMessage({
+      id: 'kbn.home.addData.apm.nameDescription',
+      defaultMessage: 'APM automatically collects in-depth performance metrics and errors from inside your applications.'
+    });
+    const loggingTitle = intl.formatMessage({
+      id: 'kbn.home.addData.logging.nameTitle', defaultMessage: 'Logging'
+    });
+    const loggingDescription = intl.formatMessage({
+      id: 'kbn.home.addData.logging.nameDescription',
+      defaultMessage: 'Ingest logs from popular data sources and easily visualize in preconfigured dashboards.'
+    });
+    const metricsTitle = intl.formatMessage({
+      id: 'kbn.home.addData.metrics.nameTitle', defaultMessage: 'Metrics'
+    });
+    const metricsDescription = intl.formatMessage({
+      id: 'kbn.home.addData.metrics.nameDescription',
+      defaultMessage: 'Collect metrics from the operating system and services running on your servers.'
+    });
+    const securityTitle = intl.formatMessage({
+      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security Analytics'
+    });
+    const securityDescription = intl.formatMessage({
+      id: 'kbn.home.addData.security.nameDescription',
+      defaultMessage: 'Centralize security events for interactive investigation in ready-to-go visualizations.'
+    });
+
     const getApmCard = () =>  (
       <EuiFlexItem>
         <EuiCard
-          className="addDataCard"
-          icon={<EuiIcon className="addDataIcon" type="apmApp" />}
-          title="APM"
-          description="APM automatically collects in-depth performance metrics and errors from inside your applications."
+          className="homAddData__card"
+          icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
+          title={apmTitle}
+          description={apmDescription}
           footer={
             <EuiButton
-              className="addDataButton"
+              className="homAddData__button"
               href="#/home/tutorial/apm"
             >
-              Add APM
+              <FormattedMessage
+                id="kbn.home.addData.apm.addApmButtonLabel"
+                defaultMessage="Add APM"
+              />
             </EuiButton>
           }
         />
@@ -64,16 +97,19 @@ export function AddData({ apmUiEnabled }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon  className="addDataIcon" type="loggingApp" />}
-            title="Logging"
-            description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
+            className="homAddData__card"
+            icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
+            title={loggingTitle}
+            description={loggingDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/logging"
               >
-                Add log data
+                <FormattedMessage
+                  id="kbn.home.addData.logging.addLogDataButtonLabel"
+                  defaultMessage="Add log data"
+                />
               </EuiButton>
             }
           />
@@ -81,16 +117,19 @@ export function AddData({ apmUiEnabled }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="monitoringApp" />}
-            title="Metrics"
-            description="Collect metrics from the operating system and services running on your servers."
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
+            title={metricsTitle}
+            description={metricsDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/metrics"
               >
-                Add metric data
+                <FormattedMessage
+                  id="kbn.home.addData.metrics.addMetricsDataButtonLabel"
+                  defaultMessage="Add metric data"
+                />
               </EuiButton>
             }
           />
@@ -98,16 +137,19 @@ export function AddData({ apmUiEnabled }) {
 
         <EuiFlexItem>
           <EuiCard
-            className="addDataCard"
-            icon={<EuiIcon className="addDataIcon" type="securityApp" />}
-            title="Security Analytics"
-            description="Centralize security events for interactive investigation in ready-to-go visualizations."
+            className="homAddData__card"
+            icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
+            title={securityTitle}
+            description={securityDescription}
             footer={
               <EuiButton
-                className="addDataButton"
+                className="homAddData__button"
                 href="#/home/tutorial_directory/security"
               >
-                Add security events
+                <FormattedMessage
+                  id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+                  defaultMessage="Add security events"
+                />
               </EuiButton>
             }
           />
@@ -116,16 +158,26 @@ export function AddData({ apmUiEnabled }) {
     );
   };
 
+  const footerItemClasses = classNames('homAddData__footerItem', { 'homAddData__footerItem--highlight': isNewKibanaInstance });
+
   return (
     <EuiPanel paddingSize="l">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle>
-            <h3>Add Data to Kibana</h3>
+            <h3>
+              <FormattedMessage
+                id="kbn.home.addData.addDataToKibanaTitle"
+                defaultMessage="Add Data to Kibana"
+              />
+            </h3>
           </EuiTitle>
           <EuiText>
             <p>
-              Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+              <FormattedMessage
+                id="kbn.home.addData.addDataToKibanaDescription"
+                defaultMessage="Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems."
+              />
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -138,29 +190,41 @@ export function AddData({ apmUiEnabled }) {
       <EuiHorizontalRule />
 
       <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Need data?
+              <FormattedMessage
+                id="kbn.home.addData.sampleDataTitle"
+                defaultMessage="Sample Data"
+              />
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/home/tutorial_directory/sampleData"
             >
-              Load sample data, visualizations, and dashboards
+              <FormattedMessage
+                id="kbn.home.addData.sampleDataLink"
+                defaultMessage="Load a data set and a Kibana dashboard"
+              />
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
-              Have data?
+              <FormattedMessage
+                id="kbn.home.addData.yourDataTitle"
+                defaultMessage="Your Data"
+              />
             </strong>
             <EuiLink
               style={{ marginLeft: 8 }}
               href="#/management/kibana/index"
             >
-              Connect to your Elasticsearch index
+              <FormattedMessage
+                id="kbn.home.addData.yourDataLink"
+                defaultMessage="Connect to your Elasticsearch index"
+              />
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
@@ -170,8 +234,11 @@ export function AddData({ apmUiEnabled }) {
 
     </EuiPanel>
   );
-}
-
-AddData.propTypes = {
-  apmUiEnabled: PropTypes.bool.isRequired,
 };
+
+AddDataUi.propTypes = {
+  apmUiEnabled: PropTypes.bool.isRequired,
+  isNewKibanaInstance: PropTypes.bool.isRequired,
+};
+
+export const AddData = injectI18n(AddDataUi);

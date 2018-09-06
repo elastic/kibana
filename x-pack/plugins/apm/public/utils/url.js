@@ -125,7 +125,10 @@ export function KibanaLinkComponent({
   return <EuiLink {...props} href={href} />;
 }
 
-const withLocation = connect(({ location }) => ({ location }), {});
+const withLocation = connect(
+  ({ location }) => ({ location }),
+  {}
+);
 export const RelativeLink = withLocation(RelativeLinkComponent);
 export const KibanaLink = withLocation(KibanaLinkComponent);
 

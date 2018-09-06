@@ -17,65 +17,17 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
-/** @internal */
-export { LegacyConfigToRawConfigAdapter, LegacyConfig } from './legacy_platform_config';
-/** @internal */
-export { LegacyKbnServer } from './legacy_kbn_server';
+import { ConfigService, Env } from '../config';
+import { LoggerFactory } from '../logging';
+import { LegacyService } from './legacy_service';
 
-import {
-  LegacyConfig,
-  LegacyConfigToRawConfigAdapter,
-  LegacyKbnServer,
-  LegacyPlatformProxifier,
-} from '.';
-import { BehaviorSubject, k$, map } from '../../lib/kbn_observable';
-import { Env } from '../config';
-import { Root } from '../root';
-import { BasePathProxyRoot } from '../root/base_path_proxy_root';
+export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
+export { LegacyService } from './legacy_service';
 
-function initEnvironment(rawKbnServer: any) {
-  const config: LegacyConfig = rawKbnServer.config;
+export class LegacyCompatModule {
+  public readonly service: LegacyService;
 
-  const legacyConfig$ = new BehaviorSubject(config);
-  const config$ = k$(legacyConfig$)(
-    map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
-  );
-
-  const env = Env.createDefault({
-    kbnServer: new LegacyKbnServer(rawKbnServer),
-    // The defaults for the following parameters are retrieved by the legacy
-    // platform from the command line or from `package.json` and stored in the
-    // config, so we can borrow these parameters and avoid double parsing.
-    mode: config.get('env'),
-    packageInfo: config.get('pkg'),
-  });
-
-  return {
-    config$,
-    env,
-    // Propagates legacy config updates to the new platform.
-    updateConfig(legacyConfig: LegacyConfig) {
-      legacyConfig$.next(legacyConfig);
-    },
-  };
+  constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
+    this.service = new LegacyService(env, logger, this.configService);
+  }
 }
-
-/**
- * @internal
- */
-export const injectIntoKbnServer = (rawKbnServer: any) => {
-  const { env, config$, updateConfig } = initEnvironment(rawKbnServer);
-
-  rawKbnServer.newPlatform = {
-    // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
-    proxyListener: new LegacyPlatformProxifier(new Root(config$, env)),
-    updateConfig,
-  };
-};
-
-export const createBasePathProxy = (rawKbnServer: any) => {
-  const { env, config$ } = initEnvironment(rawKbnServer);
-  return new BasePathProxyRoot(config$, env);
-};

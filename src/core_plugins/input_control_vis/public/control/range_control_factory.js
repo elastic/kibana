@@ -68,8 +68,8 @@ class RangeControl extends Control {
       return;
     }
 
-    const min = _.get(resp, 'aggregations.minAgg.value');
-    const max = _.get(resp, 'aggregations.maxAgg.value');
+    const min = _.get(resp, 'aggregations.minAgg.value', null);
+    const max = _.get(resp, 'aggregations.maxAgg.value', null);
 
     if (min === null || max === null) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));

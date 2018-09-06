@@ -5,6 +5,8 @@
  */
 
 import {
+  EsProvider,
+  EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
 } from './services';
@@ -22,7 +24,8 @@ export default async function ({ readConfigFile }) {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
-      es: kibanaCommonConfig.get('services.es'),
+      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
+      es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
@@ -31,7 +34,6 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },
-    env: xPackFunctionalTestsConfig.get('env'),
     kbnTestServer: {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [

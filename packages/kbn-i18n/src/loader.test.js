@@ -164,53 +164,6 @@ describe('I18n loader', () => {
     });
   });
 
-  describe('getTranslationsByLanguageHeader', () => {
-    test('should return empty object if there are no registered locales', async () => {
-      expect(
-        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
-      ).toEqual({});
-    });
-
-    test('should return empty object if registered locales do not match to accept-language header', async () => {
-      i18nLoader.registerTranslationFile(
-        join(__dirname, './__fixtures__/test_plugin_2/translations/ru.json')
-      );
-
-      expect(
-        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
-      ).toEqual({});
-    });
-
-    test('should return translation messages for the only matched locale', async () => {
-      i18nLoader.registerTranslationFile(
-        join(__dirname, './__fixtures__/test_plugin_1/translations/en.json')
-      );
-
-      expect(
-        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
-      ).toEqual({
-        locale: 'en',
-        ['a.b.c']: 'foo',
-        ['d.e.f']: 'bar',
-      });
-    });
-
-    test('should return translation messages for the best matched locale', async () => {
-      i18nLoader.registerTranslationFiles([
-        join(__dirname, './__fixtures__/test_plugin_1/translations/en.json'),
-        join(__dirname, './__fixtures__/test_plugin_1/translations/en-US.json'),
-      ]);
-
-      expect(
-        await i18nLoader.getTranslationsByLanguageHeader('en-GB,en-US;q=0.9,fr-CA;q=0.7,en;q=0.8')
-      ).toEqual({
-        locale: 'en-US',
-        ['a.b.c']: 'bar',
-        ['d.e.f']: 'foo',
-      });
-    });
-  });
-
   describe('getAllTranslations', () => {
     test('should return translation messages for all registered locales', async () => {
       i18nLoader.registerTranslationFiles([

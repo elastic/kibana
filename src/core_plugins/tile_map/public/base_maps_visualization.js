@@ -121,7 +121,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     _baseLayerConfigured() {
       const mapParams = this._getMapsParams();
-      return mapParams.wms.baseLayersAreLoaded || mapParams.wms.selectedTmsLayer;
+      return mapParams.wms.selectedTmsLayer;
     }
 
     async _updateBaseLayer() {
@@ -166,9 +166,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
               ...mapParams.wms.options
             }
           });
-        } else {
-
-          await mapParams.wms.baseLayersAreLoaded;
+        } else if (mapParams.wms.selectedTmsLayer) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
           this._setTmsLayer(selectedTmsLayer);
 

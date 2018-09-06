@@ -183,6 +183,11 @@ uiModules.get('kibana')
           }
         }
       }
+
+      getEMSHotLink(fileLayer) {
+        const id = `file/${fileLayer.name}`;
+        return `${mapConfig.emsLandingPageUrl}#${id}`;
+      }
     }
 
     return new ServiceSettings();

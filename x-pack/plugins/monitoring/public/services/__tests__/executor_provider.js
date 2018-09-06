@@ -29,7 +29,6 @@ describe('$executor service', () => {
     $timeout.cancel = (id) => clearTimeout(id);
 
     timefilter.setRefreshInterval({
-      pause: false,
       value: 0
     });
 
@@ -63,6 +62,7 @@ describe('$executor service', () => {
 
   it('should call $timeout if the timefilter is not paused and set to 1000ms', () => {
     timefilter.setRefreshInterval({
+      pause: false,
       value: 1000
     });
     executor.start(scope);
@@ -71,6 +71,7 @@ describe('$executor service', () => {
 
   it('should execute function if timefilter is not paused and interval set to 1000ms', (done) => {
     timefilter.setRefreshInterval({
+      pause: false,
       value: 1000
     });
     executor.register({ execute: () => Promise.resolve().then(() => done(), done) });
@@ -80,6 +81,7 @@ describe('$executor service', () => {
   it('should execute function multiple times', (done) => {
     let calls = 0;
     timefilter.setRefreshInterval({
+      pause: false,
       value: 10
     });
     executor.register({ execute: () => {
@@ -91,6 +93,7 @@ describe('$executor service', () => {
 
   it('should call handleResponse', (done) => {
     timefilter.setRefreshInterval({
+      pause: false,
       value: 10
     });
     executor.register({
@@ -102,6 +105,7 @@ describe('$executor service', () => {
 
   it('should call handleError', (done) => {
     timefilter.setRefreshInterval({
+      pause: false,
       value: 10
     });
     executor.register({

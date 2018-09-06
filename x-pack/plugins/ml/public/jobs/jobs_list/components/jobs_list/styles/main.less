@@ -17,7 +17,7 @@
       width: auto;
     }
     th:nth-child(6) {
-      width: 90px;
+      width: 100px;
     }
     th:nth-child(7) {
       width: 85px;
@@ -75,9 +75,9 @@
       }
     }
 
-
-    .euiTableCellContent .euiLink {
+    .results-button {
       margin-right: 10px;
+      width: 18px;
     }
 
     .euiContextMenuItem .euiIcon {
@@ -100,5 +100,12 @@
 
   .job-loading-spinner {
     text-align: center;
+  }
+}
+
+.jobs-list-table.jobs-selected {
+  .results-button {
+    color: silver;
+    pointer-events: none;
   }
 }

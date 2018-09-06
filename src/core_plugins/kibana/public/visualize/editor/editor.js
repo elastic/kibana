@@ -23,11 +23,10 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import { Notifier, toastNotifications } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -42,6 +41,9 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
+import { showShareContextMenu } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -100,6 +102,7 @@ uiModules
 
 function VisEditor(
   $scope,
+  $element,
   $route,
   AppState,
   $window,
@@ -113,16 +116,26 @@ function VisEditor(
 ) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-
-  const notify = new Notifier({
-    location: 'Visualization Editor'
-  });
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   // vis is instance of src/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
+
+  // adds top level search source to the stack to which global filters are applied
+  const getTopLevelSearchSource = (searchSource) => {
+    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
+    return searchSource;
+  };
+
+  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
+  const globalFiltersSearchSource = searchSource.create();
+  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
+  topLevelSearchSource.setParent(globalFiltersSearchSource);
+
+
   $scope.vis = vis;
 
   $scope.topNavMenu = [{
@@ -141,8 +154,16 @@ function VisEditor(
   }, {
     key: 'share',
     description: 'Share Visualization',
-    template: require('plugins/kibana/visualize/editor/panels/share.html'),
-    testId: 'visualizeShareButton',
+    testId: 'shareTopNavButton',
+    run: (menuItem, navController, anchorElement) => {
+      showShareContextMenu({
+        anchorElement,
+        allowEmbed: true,
+        getUnhashableStates,
+        objectId: savedVis.id,
+        objectType: 'visualization',
+      });
+    }
   }, {
     key: 'inspect',
     description: 'Open Inspector for visualization',
@@ -236,7 +257,7 @@ function VisEditor(
     $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.timeRange = timefilter.getTime();
-    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'isAddToDashMode');
+    $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
@@ -266,6 +287,13 @@ function VisEditor(
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.getTime();
+      // In case we are running in embedded mode (i.e. we used the visualize loader to embed)
+      // the visualization, we need to update the timeRange on the visualize handler.
+      if ($scope._handler) {
+        $scope._handler.update({
+          timeRange: $scope.timeRange,
+        });
+      }
     };
 
     timefilter.enableAutoRefreshSelector();
@@ -279,15 +307,31 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
+      const globalFilters = queryFilter.getGlobalFilters();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
+      globalFiltersSearchSource.setField('filter', globalFilters);
       $scope.vis.forceReload();
     };
 
     $scope.$on('$destroy', function () {
+      if ($scope._handler) {
+        $scope._handler.destroy();
+      }
       savedVis.destroy();
       stateMonitor.destroy();
     });
+
+    if (!$scope.chrome.getVisible()) {
+      getVisualizeLoader().then(loader => {
+        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
+          timeRange: $scope.timeRange,
+          uiState: $scope.uiState,
+          appState: $state,
+          listenOnChange: false
+        });
+      });
+    }
   }
 
   $scope.updateQueryAndFetch = function (query) {
@@ -339,32 +383,31 @@ function VisEditor(
             kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
           }
         }
-      }, notify.error);
+      }, (err) => {
+        toastNotifications.addDanger({
+          title: `Error on saving '${savedVis.title}'`,
+          text: err.message,
+          'data-test-subj': 'saveVisualizationError',
+        });
+      });
   };
 
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
-
     $state.linked = false;
-    const searchSourceParent = searchSource.getParent(true);
-    const searchSourceGrandparent = searchSourceParent.getParent(true);
+    const searchSourceParent = searchSource.getParent();
+    const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
     searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
-    // copy over all state except "aggs", "query" and "filter"
-    _(searchSourceParent.toJSON())
-      .omit(['aggs', 'filter', 'query'])
-      .forOwn(function (val, key) {
-        searchSource.setField(key, val);
-      })
-      .commit();
-
-    $state.query = searchSource.getField('query');
-    $state.filters = searchSource.getField('filter');
+    $state.query = searchSourceParent.getField('query');
+    $state.filters = searchSourceParent.getField('filter');
+    searchSource.setField('index', searchSourceParent.getField('index'));
     searchSource.setParent(searchSourceGrandparent);
+
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $scope.fetch();
   };

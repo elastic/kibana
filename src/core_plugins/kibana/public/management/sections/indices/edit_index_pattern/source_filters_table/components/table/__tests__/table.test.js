@@ -19,8 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Table } from '../table';
+import { TableComponent } from '../table';
 import { keyCodes } from '@elastic/eui';
 
 const indexPattern = {};
@@ -28,8 +29,8 @@ const items = [{ value: 'tim*' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -43,8 +44,8 @@ describe('Table', () => {
   });
 
   it('should render filter matches', async () => {
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={{
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
         }}
@@ -68,8 +69,8 @@ describe('Table', () => {
     let component;
 
     beforeEach(() => {
-      component = shallow(
-        <Table
+      component = shallowWithIntl(
+        <TableComponent
           indexPattern={indexPattern}
           items={items}
           deleteFilter={() => {}}
@@ -129,8 +130,8 @@ describe('Table', () => {
     });
 
     it('should update the matches dynamically as input value is changed', () => {
-      const localComponent = shallow(
-        <Table
+      const localComponent = shallowWithIntl(
+        <TableComponent
           indexPattern={{
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
           }}
@@ -143,6 +144,7 @@ describe('Table', () => {
           isSaving={false}
         />
       );
+
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -206,8 +208,8 @@ describe('Table', () => {
   it('should allow deletes', () => {
     const deleteFilter = jest.fn();
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         deleteFilter={deleteFilter}
@@ -235,8 +237,8 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -280,8 +282,8 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <TableComponent
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}

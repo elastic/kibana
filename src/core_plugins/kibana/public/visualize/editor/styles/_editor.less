@@ -124,7 +124,7 @@
 
   /* Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
 a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
-  > visualize {
+  > .visualize {
     height: 100%;
     flex: 1 1 auto;
     display: flex;
@@ -419,7 +419,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       flex-basis: 100%;
     }
 
-    visualize {
+    .visualize {
       .flex-parent();
       flex: 1 1 100%;
     }
@@ -442,6 +442,10 @@ vis-editor-agg-param,
 vis-editor-vis-options,
 vis-editor-vis-options > * {
   .flex-parent();
+}
+
+.vis-editor-config .ems-hotlink {
+  font-size: 12px;
 }
 
 /**
@@ -485,3 +489,5 @@ vis-editor-vis-options > * {
 .agg-select-help {
   float: right;
 }
+
+

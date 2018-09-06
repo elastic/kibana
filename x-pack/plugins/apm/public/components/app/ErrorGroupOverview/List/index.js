@@ -34,7 +34,7 @@ const GroupIdLink = styled(RelativeLink)`
 `;
 
 const MessageAndCulpritCell = styled.div`
-  ${truncate(px(unit * 32))};
+  ${truncate('100%')};
 `;
 
 const MessageLink = styled(RelativeLink)`

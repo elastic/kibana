@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { StepTimeField } from '../step_time_field';
+import { StepTimeFieldComponent } from '../step_time_field';
 
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
@@ -37,8 +37,8 @@ const fieldsFetcher = {
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -50,8 +50,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render timeFields', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -70,8 +70,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render a selected timeField', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -92,8 +92,8 @@ describe('StepTimeField', () => {
   });
 
   it('should ensure disabled time field options work properly', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -120,8 +120,8 @@ describe('StepTimeField', () => {
   });
 
   it('should disable the action button if an invalid time field is selected', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -143,8 +143,8 @@ describe('StepTimeField', () => {
   });
 
   it('should enable the action button if the user decides to not select a time field', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -166,8 +166,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -181,8 +181,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render advanced options with an index pattern id', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}
@@ -199,8 +199,8 @@ describe('StepTimeField', () => {
   });
 
   it('should render a loading state when creating the index pattern', () => {
-    const component = shallow(
-      <StepTimeField
+    const component = shallowWithIntl(
+      <StepTimeFieldComponent
         indexPattern="ki*"
         fieldsFetcher={fieldsFetcher}
         goToPreviousStep={noop}

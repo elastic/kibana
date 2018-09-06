@@ -181,7 +181,7 @@ function getCurrentMethodAndTokenPaths(editor, pos, forceEndOfUrl) {
   }
   ret.urlTokenPath = [];
   if (tokenIter.getCurrentTokenRow() === startPos.row) {
-    if (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value') {
+    if (t && (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value')) {
       // we are forcing the end of the url for the purposes of determining an endpoint
       if (forceEndOfUrl && t.type === 'url.part') {
         ret.urlTokenPath.push(t.value);

@@ -193,8 +193,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/styles/bootstrap/mixins/vendor-prefixes.less',
   'src/ui/public/styles/bootstrap/progress-bars.less',
   'src/ui/public/styles/bootstrap/responsive-utilities.less',
-  'src/ui/public/styles/dark-theme.less',
-  'src/ui/public/styles/dark-variables.less',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.eot',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.svg',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.ttf',

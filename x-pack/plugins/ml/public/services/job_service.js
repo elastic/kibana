@@ -11,12 +11,12 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from './ml_api_service';
 
-import { labelDuplicateDetectorDescriptions } from 'plugins/ml/../common/util/anomaly_utils';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { isWebUrl } from 'plugins/ml/util/string_utils';
-import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
+import { labelDuplicateDetectorDescriptions } from '../../common/util/anomaly_utils';
+import { mlMessageBarService } from '../components/messagebar/messagebar_service';
+import { isWebUrl } from '../util/string_utils';
+import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -520,6 +520,7 @@ class JobService {
     delete tempJob.model_snapshot_id;
     delete tempJob.open_time;
     delete tempJob.established_model_memory;
+    delete tempJob.calendars;
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 

@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+import { Server } from 'http';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
 
 import Chance from 'chance';
-import http from 'http';
 import supertest from 'supertest';
 
-import { Env } from '../../config';
 import { ByteSizeValue } from '../../config/schema';
 import { logger } from '../../logging/__mocks__';
 import { HttpConfig } from '../http_config';
@@ -39,10 +37,6 @@ const chance = new Chance();
 let server: HttpServer;
 let config: HttpConfig;
 
-function getServerListener(httpServer: HttpServer) {
-  return (httpServer as any).server.listener;
-}
-
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -51,7 +45,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  server = new HttpServer(logger.get(), new Env('/kibana', getEnvOptions()));
+  server = new HttpServer(logger.get());
 });
 
 afterEach(async () => {
@@ -76,9 +70,9 @@ test('200 OK with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(200)
     .then(res => {
@@ -95,9 +89,9 @@ test('202 Accepted with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(202)
     .then(res => {
@@ -114,9 +108,9 @@ test('204 No content', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(204)
     .then(res => {
@@ -135,9 +129,9 @@ test('400 Bad request with error', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(400)
     .then(res => {
@@ -164,9 +158,9 @@ test('valid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
@@ -193,9 +187,9 @@ test('invalid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
     .then(res => {
@@ -225,9 +219,9 @@ test('valid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
     .then(res => {
@@ -254,9 +248,9 @@ test('invalid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
     .then(res => {
@@ -286,9 +280,9 @@ test('valid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -319,9 +313,9 @@ test('invalid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
@@ -351,9 +345,9 @@ test('handles putting', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
@@ -381,9 +375,9 @@ test('handles deleting', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
     .then(res => {
@@ -406,9 +400,9 @@ test('filtered headers', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=quux')
     .set('x-kibana-foo', 'bar')
     .set('x-kibana-bar', 'quux');
@@ -421,6 +415,7 @@ test('filtered headers', async () => {
 
 describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   let configWithBasePath: HttpConfig;
+  let innerServerListener: Server;
 
   beforeEach(async () => {
     configWithBasePath = {
@@ -437,29 +432,30 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 
     server.registerRouter(router);
 
-    await server.start(configWithBasePath);
+    const { server: innerServer } = await server.start(configWithBasePath);
+    innerServerListener = innerServer.listener;
   });
 
   test('/bar => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar')
       .expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/')
       .expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(404);
   });
 
   test('/ => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/')
       .expect(200)
       .then(res => {
@@ -468,7 +464,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/foo => /foo', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
       .then(res => {
@@ -479,6 +475,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 
 describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   let configWithBasePath: HttpConfig;
+  let innerServerListener: Server;
 
   beforeEach(async () => {
     configWithBasePath = {
@@ -495,11 +492,12 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 
     server.registerRouter(router);
 
-    await server.start(configWithBasePath);
+    const { server: innerServer } = await server.start(configWithBasePath);
+    innerServerListener = innerServer.listener;
   });
 
   test('/bar => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
       .then(res => {
@@ -508,7 +506,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/bar/ => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
       .then(res => {
@@ -517,7 +515,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/bar/foo => /foo', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
       .then(res => {
@@ -526,13 +524,13 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/ => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/')
       .expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/foo')
       .expect(404);
   });
@@ -563,99 +561,13 @@ describe('with defined `redirectHttpFromPort`', () => {
   });
 });
 
-describe('when run within legacy platform', () => {
-  let newPlatformProxyListenerMock: any;
-  beforeEach(() => {
-    newPlatformProxyListenerMock = {
-      bind: jest.fn(),
-      proxy: jest.fn(),
-    };
-
-    const kbnServerMock = {
-      newPlatformProxyListener: newPlatformProxyListenerMock,
-    };
-
-    server = new HttpServer(
-      logger.get(),
-      new Env('/kibana', getEnvOptions({ kbnServer: kbnServerMock }))
-    );
-
-    const router = new Router('/new');
-    router.get({ path: '/', validate: false }, async (req, res) => {
-      return res.ok({ key: 'new-platform' });
-    });
-
-    server.registerRouter(router);
-
-    newPlatformProxyListenerMock.proxy.mockImplementation(
-      (req: http.IncomingMessage, res: http.ServerResponse) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ key: `legacy-platform:${req.url}` }));
-      }
-    );
+test('returns server and connection options on start', async () => {
+  const { server: innerServer, options } = await server.start({
+    ...config,
+    port: 12345,
   });
 
-  test('binds proxy listener to server.', async () => {
-    expect(newPlatformProxyListenerMock.bind).not.toHaveBeenCalled();
-
-    await server.start(config);
-
-    expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledTimes(1);
-    expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledWith(
-      expect.any((http as any).Server)
-    );
-    expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(getServerListener(server));
-  });
-
-  test('forwards request to legacy platform if new one cannot handle it', async () => {
-    await server.start(config);
-
-    await supertest(getServerListener(server))
-      .get('/legacy')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
-          expect.any((http as any).IncomingMessage),
-          expect.any((http as any).ServerResponse)
-        );
-      });
-  });
-
-  test('forwards request to legacy platform and rewrites base path if needed', async () => {
-    await server.start({
-      ...config,
-      basePath: '/bar',
-      rewriteBasePath: true,
-    });
-
-    await supertest(getServerListener(server))
-      .get('/legacy')
-      .expect(404);
-
-    await supertest(getServerListener(server))
-      .get('/bar/legacy')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
-        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
-          expect.any((http as any).IncomingMessage),
-          expect.any((http as any).ServerResponse)
-        );
-      });
-  });
-
-  test('do not forward request to legacy platform if new one can handle it', async () => {
-    await server.start(config);
-
-    await supertest(getServerListener(server))
-      .get('/new/')
-      .expect(200)
-      .then(res => {
-        expect(res.body).toEqual({ key: 'new-platform' });
-        expect(newPlatformProxyListenerMock.proxy).not.toHaveBeenCalled();
-      });
-  });
+  expect(innerServer).toBeDefined();
+  expect(innerServer).toBe((server as any).server);
+  expect(options).toMatchSnapshot();
 });

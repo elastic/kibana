@@ -43,6 +43,10 @@ jest.mock('ui/chrome', () => ({
 
 
 describe('UrlFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(UrlFormatEditor.formatId).toEqual('url');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <UrlFormatEditor

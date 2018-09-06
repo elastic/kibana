@@ -35,6 +35,8 @@ import {
   FormatEditorSamples
 } from '../../samples';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class NumberFormatEditor extends DefaultFormatEditor {
   static formatId = 'number';
 
@@ -52,14 +54,17 @@ export class NumberFormatEditor extends DefaultFormatEditor {
       <Fragment>
         <EuiFormRow
           label={
-            <span>
-              Numeral.js format pattern (Default: <EuiCode>{defaultPattern}</EuiCode>)
-            </span>
+            <FormattedMessage
+              id="common.ui.fieldEditor.number.numeralLabel"
+              defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+              values={{ defaultPattern: <EuiCode>{defaultPattern}</EuiCode> }}
+            />
           }
           helpText={
             <span>
               <EuiLink target="_window" href="https://adamwdraper.github.io/Numeral-js/">
-                Documentation <EuiIcon type="link" />
+                <FormattedMessage id="common.ui.fieldEditor.number.documentaionLabel" defaultMessage="Documentation" />&nbsp;
+                <EuiIcon type="link" />
               </EuiLink>
             </span>
           }

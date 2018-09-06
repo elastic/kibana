@@ -98,3 +98,24 @@ navbar {
     }
   }
 }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  navbar {
+    color: @white;
+    background-color: #454545;
+    border-color: darken(#454545, 10%);
+    button {
+      color: @white;
+      background-color: transparent;
+    }
+  }
+}
+
+.navbar__popover {
+  height: 100%;
+
+  .euiPopover__anchor {
+    height: 100%;
+  }
+}

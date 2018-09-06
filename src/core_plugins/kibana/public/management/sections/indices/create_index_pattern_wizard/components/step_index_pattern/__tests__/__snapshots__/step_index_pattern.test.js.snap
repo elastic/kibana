@@ -1,20 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StepIndexPattern renders errors when input is invalid 1`] = `
-<Header
-  characterList="\\\\, /, ?, \\", <, >, |"
-  data-test-subj="createIndexPatternStep1Header"
-  errors={
+Object {
+  "component": <InjectIntl(HeaderComponent)
+    characterList="\\\\, /, ?, \\", <, >, |"
+    data-test-subj="createIndexPatternStep1Header"
+    errors={
+      Array [
+        "An index pattern cannot contain spaces or the characters: {characterList}",
+      ]
+    }
+    goToNextStep={[Function]}
+    isInputInvalid={true}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="?"
+  />,
+  "i18n": Array [
     Array [
-      "An index pattern cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
-    ]
-  }
-  goToNextStep={[Function]}
-  isInputInvalid={true}
-  isNextStepDisabled={true}
-  onQueryChanged={[Function]}
-  query="?"
-/>
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+    Array [
+      Object {
+        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
+      },
+      Object {
+        "characterList": "\\\\, /, ?, \\", <, >, |",
+      },
+    ],
+  ],
+}
 `;
 
 exports[`StepIndexPattern renders indices which match the initial query 1`] = `

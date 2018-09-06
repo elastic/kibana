@@ -26,7 +26,6 @@ export function saveJob(job, newJobData, finish) {
     };
 
     if (jobData.custom_settings !== undefined) {
-      // remove the created_by setting if too much of the job has changed
       jobData.custom_settings =  processCustomSettings(jobData, datafeedData);
     }
 
@@ -194,8 +193,8 @@ function extractDetectorDescriptions(job, newJobData) {
 
 function extractCustomSettings(job, newJobData) {
   const settingsData = {};
-  if (job.custom_settings && newJobData && newJobData.customUrls) {
-    settingsData.custom_settings = job.custom_settings;
+  if (newJobData && newJobData.customUrls) {
+    settingsData.custom_settings = job.custom_settings || {};
     settingsData.custom_settings.custom_urls = newJobData.customUrls;
   }
   return settingsData;
@@ -230,12 +229,15 @@ function extractDatafeed(job, newDatafeedData) {
 }
 
 function processCustomSettings(jobData, datafeedData) {
+  // remove the created_by setting if parts of the job contain
+  // fields which won't be retained when cloned in a wizard
   let customSettings = {};
   if (jobData.custom_settings !== undefined) {
     customSettings = { ...jobData.custom_settings };
 
     if (jobData.custom_settings.created_by !== undefined) {
-      if (jobData.detectors !== undefined || Object.keys(datafeedData).length) {
+      if (jobData.detectors !== undefined || Object.keys(datafeedData).length ||
+        (jobData.custom_settings.custom_urls !== undefined && jobData.custom_settings.custom_urls.length)) {
         delete customSettings.created_by;
       }
     }

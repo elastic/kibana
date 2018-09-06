@@ -66,14 +66,14 @@ module.directive('mlBucketSpanEstimator', function () {
           // single metric config
           const fieldName = ($scope.formConfig.field === null) ? null : $scope.formConfig.field.name;
           data.fields.push(fieldName);
-          data.aggTypes.push($scope.formConfig.agg.type.name);
+          data.aggTypes.push($scope.formConfig.agg.type.dslName);
         } else {
           // multi metric config
           Object.keys($scope.formConfig.fields).map((id) => {
             const field = $scope.formConfig.fields[id];
             const fieldName = (field.id === EVENT_RATE_COUNT_FIELD) ? null : field.name;
             data.fields.push(fieldName);
-            data.aggTypes.push(field.agg.type.name);
+            data.aggTypes.push(field.agg.type.dslName);
           });
         }
 
