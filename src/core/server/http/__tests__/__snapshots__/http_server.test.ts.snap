@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`broadcasts server and connection options to the legacy "channel" 1`] = `
+exports[`returns server and connection options on start 1`] = `
 Object {
   "host": "127.0.0.1",
   "port": 12345,
