@@ -35,7 +35,7 @@ require('ui/modules')
         let panelScope = $scope.$new(true);
 
         function render(seriesList) {
-          console.error(`Timelion Chart.render`);
+         // console.error(`Timelion Chart.render`);
           panelScope.$destroy();
 
           if (!seriesList) return;
@@ -56,7 +56,7 @@ require('ui/modules')
           panelScope.interval = $scope.interval;
           panelScope.search = $scope.search;
 
-          console.error(`Timelion Chart) calling panelSchema.render`);
+        //  console.error(`Timelion Chart) calling panelSchema.render`);
           panelSchema.render(panelScope, $elem);
         }
 

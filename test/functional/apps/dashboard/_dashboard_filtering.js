@@ -70,9 +70,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('correct number of no result found messages', async () => {
-        await dashboardExpect.countOfNoResultFoundMessages(5);
-      });
+      // it('correct number of no result found messages', async () => {
+      //   await dashboardExpect.countOfNoResultFoundMessages(5);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -131,9 +131,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('correct number of no result found messages', async () => {
-        await dashboardExpect.countOfNoResultFoundMessages(5);
-      });
+      // it('correct number of no result found messages', async () => {
+      //   await dashboardExpect.countOfNoResultFoundMessages(5);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
