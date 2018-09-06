@@ -91,10 +91,10 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
         sinon.assert.calledOnce(callCluster);
       });
 
-      it('logs a deprecation warning', async () => {
+      it('does not log a deprecation warning', async () => {
         const { config, callCluster, log } = setup({ docExists: false });
         await getDefaultAdminEmail(config, callCluster, log);
-        sinon.assert.calledOnce(log.warn);
+        sinon.assert.notCalled(log.warn);
       });
     });
 
@@ -105,10 +105,10 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
         sinon.assert.calledOnce(callCluster);
       });
 
-      it('logs a deprecation warning', async () => {
+      it('does not log a deprecation warning', async () => {
         const { config, callCluster, log } = setup({ defaultAdminEmail: false });
         await getDefaultAdminEmail(config, callCluster, log);
-        sinon.assert.calledOnce(log.warn);
+        sinon.assert.notCalled(log.warn);
       });
     });
 
