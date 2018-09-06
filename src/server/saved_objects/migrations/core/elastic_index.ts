@@ -271,7 +271,7 @@ export async function claimAlias(
  *
  * @param {FullIndexInfo} indexInfo
  */
-export async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
+async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
   const currentTypes = getTypes(indexInfo.mappings);
   const isV5Index = currentTypes.length > 1 || currentTypes[0] !== 'doc';
   if (isV5Index) {

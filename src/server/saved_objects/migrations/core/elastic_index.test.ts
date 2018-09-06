@@ -22,6 +22,286 @@ import sinon from 'sinon';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
+  describe('fetchInfo', () => {
+    test('it handles 404', async () => {
+      const callCluster = sinon.spy(async (path: string, { ignore, index }: any) => {
+        expect(path).toEqual('indices.get');
+        expect(ignore).toEqual([404]);
+        expect(index).toEqual('.kibana-test');
+        return { status: 404 };
+      });
+
+      const info = await Index.fetchInfo(callCluster, '.kibana-test');
+      expect(info).toEqual({
+        aliases: {},
+        exists: false,
+        indexName: '.kibana-test',
+        mappings: { doc: { dynamic: 'strict', properties: {} } },
+      });
+    });
+
+    test('fails if the index doc type is unsupported', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        return {
+          [index]: {
+            aliases: { foo: index },
+            mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
+          },
+        };
+      });
+
+      await expect(Index.fetchInfo(callCluster, '.baz')).rejects.toThrow(
+        /cannot be automatically migrated/
+      );
+    });
+
+    test('fails if there are multiple root types', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        return {
+          [index]: {
+            aliases: { foo: index },
+            mappings: {
+              doc: { dynamic: 'strict', properties: { a: 'b' } },
+              doctor: { dynamic: 'strict', properties: { a: 'b' } },
+            },
+          },
+        };
+      });
+
+      await expect(Index.fetchInfo(callCluster, '.baz')).rejects.toThrow(
+        /cannot be automatically migrated/
+      );
+    });
+
+    test('decorates index info with exists and indexName', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        return {
+          [index]: {
+            aliases: { foo: index },
+            mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+          },
+        };
+      });
+
+      const info = await Index.fetchInfo(callCluster, '.baz');
+      expect(info).toEqual({
+        aliases: { foo: '.baz' },
+        mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+        exists: true,
+        indexName: '.baz',
+      });
+    });
+  });
+
+  describe('createIndex', () => {
+    test('calls indices.create', async () => {
+      const callCluster = sinon.spy(async (path: string, { body, index }: any) => {
+        expect(path).toEqual('indices.create');
+        expect(body).toEqual({ mappings: { foo: 'bar' } });
+        expect(index).toEqual('.abcd');
+      });
+
+      await Index.createIndex(callCluster, '.abcd', { foo: 'bar' } as any);
+      sinon.assert.called(callCluster);
+    });
+  });
+
+  describe('deleteIndex', () => {
+    test('calls indices.delete', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        expect(path).toEqual('indices.delete');
+        expect(index).toEqual('.lotr');
+      });
+
+      await Index.deleteIndex(callCluster, '.lotr');
+      sinon.assert.called(callCluster);
+    });
+  });
+
+  describe('putMappings', () => {
+    test('it calls indices.putMapping', async () => {
+      const callCluster = sinon.spy(async (path: string, { body, type, index }: any) => {
+        expect(path).toEqual('indices.putMapping');
+        expect(index).toEqual('.shazm');
+        expect(type).toEqual('doc');
+        expect(body).toEqual({
+          dynamic: 'strict',
+          properties: {
+            foo: 'bar',
+          },
+        });
+      });
+
+      await Index.putMappings(callCluster, '.shazm', {
+        doc: {
+          dynamic: 'strict',
+          properties: {
+            foo: 'bar',
+          },
+        },
+      });
+
+      sinon.assert.called(callCluster);
+    });
+  });
+
+  describe('claimAlias', () => {
+    function assertCalled(callCluster: sinon.SinonSpy) {
+      expect(callCluster.args.map(([path]) => path)).toEqual([
+        'indices.getAlias',
+        'indices.updateAliases',
+        'indices.refresh',
+      ]);
+    }
+
+    test('handles unaliased indices', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.getAlias':
+            expect(arg.ignore).toEqual([404]);
+            expect(arg.name).toEqual('.hola');
+            return { status: 404 };
+          case 'indices.updateAliases':
+            expect(arg.body).toEqual({
+              actions: [{ add: { index: '.hola-42', alias: '.hola' } }],
+            });
+            return true;
+          case 'indices.refresh':
+            expect(arg.index).toEqual('.hola-42');
+            return true;
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      await Index.claimAlias(callCluster, '.hola-42', '.hola');
+
+      assertCalled(callCluster);
+    });
+
+    test('removes existing alias', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.getAlias':
+            return { '.my-fanci-index': '.muchacha' };
+          case 'indices.updateAliases':
+            expect(arg.body).toEqual({
+              actions: [
+                { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
+                { add: { index: '.ze-index', alias: '.muchacha' } },
+              ],
+            });
+            return true;
+          case 'indices.refresh':
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      await Index.claimAlias(callCluster, '.ze-index', '.muchacha');
+
+      assertCalled(callCluster);
+    });
+
+    test('allows custom alias actions', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.getAlias':
+            return { '.my-fanci-index': '.muchacha' };
+          case 'indices.updateAliases':
+            expect(arg.body).toEqual({
+              actions: [
+                { remove_index: { index: 'awww-snap!' } },
+                { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
+                { add: { index: '.ze-index', alias: '.muchacha' } },
+              ],
+            });
+            return true;
+          case 'indices.refresh':
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      await Index.claimAlias(callCluster, '.ze-index', '.muchacha', [
+        { remove_index: { index: 'awww-snap!' } },
+      ]);
+
+      assertCalled(callCluster);
+    });
+  });
+
+  describe('convertToAlias', () => {
+    test('it creates the destination index, then reindexes to it', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.create':
+            expect(arg.body).toEqual({
+              mappings: {
+                doc: {
+                  dynamic: 'strict',
+                  properties: { foo: 'bar' },
+                },
+              },
+            });
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          case 'reindex':
+            expect(arg).toEqual({
+              body: {
+                dest: { index: '.ze-index' },
+                source: { index: '.muchacha' },
+              },
+              refresh: true,
+              waitForCompletion: true,
+            });
+            return true;
+          case 'indices.getAlias':
+            return { '.my-fanci-index': '.muchacha' };
+          case 'indices.updateAliases':
+            expect(arg.body).toEqual({
+              actions: [
+                { remove_index: { index: '.muchacha' } },
+                { remove: { alias: '.muchacha', index: '.my-fanci-index' } },
+                { add: { index: '.ze-index', alias: '.muchacha' } },
+              ],
+            });
+            return true;
+          case 'indices.refresh':
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      const info = {
+        aliases: {},
+        exists: true,
+        indexName: '.ze-index',
+        mappings: {
+          doc: {
+            dynamic: 'strict',
+            properties: { foo: 'bar' },
+          },
+        },
+      };
+      await Index.convertToAlias(callCluster, info, '.muchacha');
+
+      expect(callCluster.args.map(([path]) => path)).toEqual([
+        'indices.create',
+        'reindex',
+        'indices.getAlias',
+        'indices.updateAliases',
+        'indices.refresh',
+      ]);
+    });
+  });
+
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
       const index = '.myalias';
