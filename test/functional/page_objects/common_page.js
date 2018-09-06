@@ -88,6 +88,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
+    async waitForEuiTableLoading() {
+      await retry.waitFor('CommonPage.waitForEuiTableLoading', async () => {
+        const table = await find.byClassName('euiBasicTable');
+        return !((await table.getAttribute('class')).includes('loading'));
+      });
+    }
 
     navigateToApp(appName) {
       const self = this;
