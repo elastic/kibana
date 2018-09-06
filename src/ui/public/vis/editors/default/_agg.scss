@@ -1,4 +1,5 @@
-// Entire container actually found in agg_group.html
+// Entire container -- found in agg_group.html
+
 .visEditorAgg {
   @include flex-parent();
   width: 100%;
@@ -8,10 +9,8 @@
   flex-basis: 100%;
 }
 
-// Rest of the agg elements found in agg.html
-
 //
-// Header
+// Header -- found in agg.html
 //
 
 .visEditorAggHeader {
@@ -56,31 +55,21 @@
   flex: 0 0 auto;
 }
 
-////
+//
+// Misc elements -- found in agg_types/controls/*.html
+//
 
-.vis-editor-agg-error {
-  margin: $vis-editor-agg-editor-spacing 0;
-  padding: $vis-editor-agg-editor-spacing;
-  text-align: center;
-  background: $euiColorDanger;
-  color: $euiColorEmptyShade;
-  line-height: 1.5;
-}
-
-.vis-editor-agg-editor-ranges {
+.visEditorAgg__rangesTable {
   td {
     padding: 0 $vis-editor-agg-editor-spacing $vis-editor-agg-editor-spacing 0;
+
     &:last-child {
       padding-right: 0;
     }
   }
 }
 
-.vis-editor-agg-editor-advanced-toggle {
-  text-align: right;
-}
-
-.vis-editor-agg-form-row {
+.visEditorAgg__formRow--flex {
   display: flex;
 
   > * {
@@ -96,82 +85,21 @@
 /**
   * 1. Hack to split child elements evenly.
   */
-.vis-editor-agg-form-row__even-split {
+.visEditorAgg__formRow--split {
   flex: 1 1 0 !important; /* 1 */
 }
 
-.vis-editor-agg-form-value {
+.visEditorAgg__sliderValue {
   align-self: center;
   margin: 0 0 0 $vis-editor-agg-editor-spacing;
-  font-size: 1.2em;
+  @include euiFontSize;
 }
 
-.vis-editor-agg-wide-btn {
-  text-align: center;
-}
-
-.vis-editor-agg-wide-btn-add {
-  width: 140px;
-  margin: -2px auto 5px auto;
-  text-align: center;
-  border: 2px solid;
-  border-color: $euiColorLightShade;
-  border-top: 0px;
-  padding: 3px;
-  border-bottom-right-radius: $euiBorderRadius;
-  border-bottom-left-radius: $euiBorderRadius;
-  background-color: $euiColorEmptyShade;
-  font-weight: $euiFontWeightBold;
-
-  &:hover {
-    color: $euiColorDarkestShade;
-    background-color: $euiColorLightShade;
-  }
-}
-
-.vis-editor-agg-add-schemas {
-  margin-bottom: 10px;
-}
-
-.vis-editor-agg-order-agg {
+.visEditorAgg__subAgg {
   border: 2px solid;
   border-color: $euiColorLightShade;
   border-radius: $euiBorderRadius;
   background-color: transparent;
-  margin: $vis-editor-agg-editor-spacing;
+  margin: $vis-editor-agg-editor-spacing 0;
   padding: $vis-editor-agg-editor-spacing;
-}
-
-/**
-* 1. Show invalid state if the user has interacted with the input without selecting an option.
-*/
-.vis-editor-field-ui-select {
-
-  .ui-select-match-text,
-  .vis-editor-field-ui-select__field-entry {
-    @include euiTextTruncate;
-  }
-
-  &.ng-invalid.ng-dirty,
-  &.ng-invalid.ng-touched {
-    .ui-select-match {
-      .btn {
-        border-color: $euiColorDanger; /* 1 */
-      }
-    }
-  }
-}
-
-vis-editor-agg,
-vis-editor-agg-params,
-vis-editor-agg-param {
-  @include flex-parent();
-}
-
-.agg-select-label {
-  display: inline !important;
-}
-
-.agg-select-help {
-  float: right;
 }
