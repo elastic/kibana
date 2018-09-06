@@ -76,7 +76,7 @@ export class GeohashGridLayer extends ALayer {
     return placeHolderLayer;
   }
 
-  _syncWithCurrentDataAsVectors(olLayer) {
+  _syncOLWithCurrentDataAsVectors(olLayer) {
 
     if (!this._descriptor.data) {
       return;
@@ -107,7 +107,7 @@ export class GeohashGridLayer extends ALayer {
   }
 
   _syncOLData(olLayer) {
-    return this._syncWithCurrentDataAsVectors(olLayer);
+    return this._syncOLWithCurrentDataAsVectors(olLayer);
   }
 
   async _fetchNewData(mapState, requestToken, precision, dispatch) {

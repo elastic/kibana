@@ -58,24 +58,13 @@ const syncOLMap = createSelector(
   }
 );
 
-const syncLayers = createSelector(
+export const syncOLState = createSelector(
   syncOLMap,
   getLayerList,
   getDataSources,
   (olMap, layerList, dataSources) => {
-
-
-    // removeOrphanedOLLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
     removeOrphanedOLLayers(olMap, layerList);
-
     layerList.forEach((layer, position) => layer.syncLayerWithOL(olMap, dataSources, position));
-  }
-);
-
-export const syncOLState = createSelector(
-  syncOLMap,
-  syncLayers,
-  (olMap) => {
     return olMap;
   }
 );

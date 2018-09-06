@@ -58,11 +58,16 @@ export class ALayer {
     return this._source.renderDetails();
   }
 
-  /**
-   * this is a temp method, in progress of refactoring this.
-   */
-  _createCorrespondingOLLayer() {
-    throw new Error('Should implement Layer#createCorrespondingOLLayer');
+  isLayerLoading() {
+    return false;
+  }
+
+  toLayerDescriptor() {
+    return this._descriptor;
+  }
+
+  async syncDataToMapState() {
+    //no-op by default
   }
 
   syncLayerWithOL(olMap, dataSources, newPosition) {
@@ -74,14 +79,9 @@ export class ALayer {
       olLayer.set('id', this.getId());
       olMap.addLayer(olLayer);
     } else {
-      //check if position is OK
       const actualPosition = olLayerArray.indexOf(olLayer);
-      console.log('must check position..', newPosition, actualPosition);
       if (actualPosition !== newPosition) {
-        console.log('reposition!');
-        // layerToMove = olLayers.removeAt(idx);
         olMap.removeLayer(olLayer);
-        // newIdx = newLayerOrder.findIndex(id => id === oldLayerOrder[idx]);
         olLayers.insertAt(newPosition, olLayer);
       }
     }
@@ -95,7 +95,7 @@ export class ALayer {
     //no-op by default
   }
 
-  _syncWithCurrentDataAsVectors(olLayer) {
+  _syncOLWithCurrentDataAsVectors(olLayer) {
 
     if (!this._descriptor.data) {
       return;
@@ -115,19 +115,11 @@ export class ALayer {
     olSource.addFeatures(olFeatures);
   }
 
+  _createCorrespondingOLLayer() {
+    throw new Error('Should implement Layer#createCorrespondingOLLayer');
+  }
+
   _syncOLData() {
-    //no-op by default
-  }
-
-  isLayerLoading() {
-    return false;
-  }
-
-  toLayerDescriptor() {
-    return this._descriptor;
-  }
-
-  async syncDataToMapState() {
     //no-op by default
   }
 

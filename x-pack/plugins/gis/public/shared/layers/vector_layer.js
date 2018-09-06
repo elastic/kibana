@@ -68,7 +68,7 @@ export class VectorLayer extends ALayer {
   }
 
   _syncOLData(olLayer) {
-    return this._syncWithCurrentDataAsVectors(olLayer);
+    return this._syncOLWithCurrentDataAsVectors(olLayer);
   }
 
   isLayerLoading() {
