@@ -5,9 +5,11 @@
  */
 
 import mockAnomalyChartRecords from './mock_anomaly_chart_records.json';
+import mockChartData from './mock_chart_data.json';
 import mockDetectorsByJob from './mock_detectors_by_job.json';
 import mockJobConfig from './mock_job_config.json';
 import mockSeriesConfig from './mock_series_config_farequote.json';
+import mockSeriesPromisesResponse from './mock_series_promises_response.json';
 import mockSeriesToPlot from './mock_series_to_plot_farequote.json';
 
 jest.mock('../../services/job_service',
@@ -15,6 +17,22 @@ jest.mock('../../services/job_service',
     mlJobService: {
       getJob() { return mockJobConfig; },
       detectorsByJob: mockDetectorsByJob
+    }
+  })
+);
+
+jest.mock('../../services/results_service',
+  () => ({
+    mlResultsService: {
+      getMetricData() {
+        return Promise.resolve(mockSeriesPromisesResponse[0][0]);
+      },
+      getRecordsForCriteria() {
+        return Promise.resolve(mockSeriesPromisesResponse[0][1]);
+      },
+      getScheduledEventsByBucket() {
+        return Promise.resolve(mockSeriesPromisesResponse[0][2]);
+      }
     }
   })
 );
@@ -32,7 +50,7 @@ const mockMlSelectSeverityService = {
 };
 
 const mockChartContainer = {
-  width() { return 1600; }
+  width() { return 1140; }
 };
 
 function mockGetDefaultData() {
@@ -101,6 +119,7 @@ describe('explorerChartsContainerService', () => {
       seriesToPlot: mockSeriesToPlot,
       layoutCellsPerChart: 6
     });
+    callbackData.push(mockChartData);
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mockMlSelectSeverityService,
@@ -110,8 +129,8 @@ describe('explorerChartsContainerService', () => {
 
     anomalyDataChangeListener(
       mockAnomalyChartRecords,
-      mockSeriesConfig.selectedEarliest,
-      mockSeriesConfig.selectedLatest
+      1486656000000,
+      1486670399999
     );
 
     function callback(data) {
