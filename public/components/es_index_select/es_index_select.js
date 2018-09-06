@@ -12,12 +12,11 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
   return (
     <EuiComboBox
       selectedOptions={selectedOption}
-      onChange={([index]) => onChange(get(index, 'label', defaultIndex))}
+      onChange={([index]) => onChange(get(index, 'label', defaultIndex).toLowerCase())}
       onSearchChange={searchValue => {
         // resets input when user starts typing
         if (searchValue) onChange(defaultIndex);
       }}
-      placeholder={defaultIndex}
       onBlur={onBlur}
       onFocus={onFocus}
       disabled={loading}

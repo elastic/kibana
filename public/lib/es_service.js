@@ -9,7 +9,11 @@ const apiPath = basePath + API_ROUTE;
 export const getFields = (index = '_all') => {
   return fetch
     .get(`${apiPath}/es_fields?index=${index}`)
-    .then(({ data: mapping }) => Object.keys(mapping).sort())
+    .then(({ data: mapping }) =>
+      Object.keys(mapping)
+        .filter(field => !field.startsWith('_')) // filters out meta fields
+        .sort()
+    )
     .catch(err =>
       notify.error(err, { title: `Couldn't fetch Elasticsearch fields for '${index}'` })
     );

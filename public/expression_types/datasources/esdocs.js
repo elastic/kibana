@@ -35,13 +35,14 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   };
 
   const getSortBy = () => {
-    const commas = getSimpleArg('sort', args)[0] || '_score, desc';
+    const commas = getSimpleArg('sort', args)[0] || ', DESC';
     return commas.split(',').map(str => str.trim());
   };
 
   const fields = getFields();
   const [sortField, sortOrder] = getSortBy();
-  const index = getSimpleArg('index', args)[0];
+
+  const index = getSimpleArg('index', args)[0].toLowerCase();
 
   const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
 
@@ -74,7 +75,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       </EuiFormRow>
       <EuiFormRow label="Sort Order" helpText="Document sort order" compressed>
         <EuiSelect
-          value={sortOrder}
+          value={sortOrder.toLowerCase()}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
           options={sortOptions}
         />

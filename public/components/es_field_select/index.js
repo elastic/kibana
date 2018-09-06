@@ -9,8 +9,15 @@ export const ESFieldSelect = compose(
       getFields(this.props.index).then(this.props.setFields);
     },
     componentDidUpdate({ index }) {
+      const { value, onChange, setFields } = this.props;
       if (this.props.index !== index) {
-        getFields(this.props.index).then(this.props.setFields);
+        getFields(this.props.index).then(fields => {
+          setFields(fields);
+        });
+      }
+
+      if (value && !this.props.fields.includes(value)) {
+        onChange(null);
       }
     },
   })

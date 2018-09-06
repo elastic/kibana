@@ -1,7 +1,8 @@
-import { keys, map } from 'lodash';
-import { getESFieldTypes } from '../../../../server/routes/es_fields/get_es_field_types';
-import { flattenHit } from './lib/flatten_hit';
-import { buildESRequest } from './lib/build_es_request';
+import squel from 'squel';
+import { map, zipObject } from 'lodash';
+import { buildBoolArray } from '../../../../server/lib/build_bool_array';
+import { normalizeType } from '../../../../server/lib/normalize_type';
+import { sanitizeName } from '../../../../server/lib/sanitize_name';
 
 export const esdocs = () => ({
   name: 'esdocs',
@@ -50,49 +51,50 @@ export const esdocs = () => ({
       },
     ]);
 
-    function getSort() {
-      if (!args.sort) return;
+    let query = squel
+      .select({
+        autoQuoteTableNames: true,
+        autoQuoteFieldNames: true,
+        autoQuoteAliasNames: true,
+        nameQuoteCharacter: '"',
+      })
+      .from(args.index.toLowerCase());
 
-      const sort = args.sort.split(',').map(str => str.trim());
-      return [{ [sort[0]]: sort[1] }];
+    if (args.fields) {
+      const fields = args.fields.split(',').map(field => field.trim());
+      fields.forEach(field => (query = query.field(field)));
     }
 
-    const fields = args.fields && args.fields.split(',').map(str => str.trim());
-    const esRequest = buildESRequest(
-      {
-        index: args.index,
+    if (args.sort) {
+      const [sortField, sortOrder] = args.sort.split(',').map(str => str.trim());
+      if (sortField) query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+    }
+
+    return handlers
+      .elasticsearchClient('transport.request', {
+        path: '/_xpack/sql?format=json',
+        method: 'POST',
         body: {
-          _source: fields || [],
-          sort: getSort(),
-          query: {
+          fetch_size: args.count,
+          query: query.toString(),
+          filter: {
             bool: {
-              must: [{ match_all: {} }],
+              must: [{ match_all: {} }, ...buildBoolArray(context.and)],
             },
           },
-          size: args.count,
         },
-      },
-      context
-    );
-
-    return handlers.elasticsearchClient('search', esRequest).then(resp => {
-      const metaFields = args.metaFields
-        ? args.metaFields.split(',').map(field => field.trim())
-        : [];
-      // TODO: This doesn't work for complex fields such as geo objects. This is really important to fix.
-      // we need to pull the field caps for the index first, then use that knowledge to flatten the documents
-      const flatHits = map(resp.hits.hits, hit => flattenHit(hit, metaFields));
-      const columnNames = keys(flatHits[0]);
-
-      return getESFieldTypes(args.index, columnNames, handlers.elasticsearchClient).then(
-        typedFields => {
-          return {
-            type: 'datatable',
-            columns: map(typedFields, (type, name) => ({ name, type })),
-            rows: flatHits,
-          };
-        }
-      );
-    });
+      })
+      .then(res => {
+        const columns = res.columns.map(({ name, type }) => {
+          return { name: sanitizeName(name), type: normalizeType(type) };
+        });
+        const columnNames = map(columns, 'name');
+        const rows = res.rows.map(row => zipObject(columnNames, row));
+        return {
+          type: 'datatable',
+          columns,
+          rows,
+        };
+      });
   },
 });

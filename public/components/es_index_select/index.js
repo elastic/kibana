@@ -8,8 +8,10 @@ export const ESIndexSelect = compose(
   lifecycle({
     componentDidMount() {
       getIndices().then((indices = []) => {
-        this.props.setLoading(false);
-        this.props.setIndices(indices.sort());
+        const { setLoading, setIndices, value, onChange } = this.props;
+        setLoading(false);
+        setIndices(indices.sort());
+        if (!value && indices.length) onChange(indices[0]);
       });
     },
   })
