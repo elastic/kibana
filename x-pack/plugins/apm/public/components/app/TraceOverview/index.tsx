@@ -5,9 +5,11 @@
  */
 
 import { connect } from 'react-redux';
-import { TraceOverview } from './view';
+// @ts-ignore
 import { selectTraceList } from '../../../store/reactReduxRequest/traceList';
+// @ts-ignore
 import { getUrlParams } from '../../../store/urlParams';
+import { TraceOverview } from './view';
 
 function mapStateToProps(state = {}) {
   return {
@@ -16,4 +18,5 @@ function mapStateToProps(state = {}) {
   };
 }
 
+// tslint:disable-next-line:no-default-export
 export default connect(mapStateToProps)(TraceOverview);

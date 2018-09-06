@@ -6,12 +6,13 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+// @ts-ignore
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
 import EmptyMessage from '../../shared/EmptyMessage';
 import { TraceList } from './TraceList';
 
 interface Props {
-  urlParams?: object;
+  urlParams: object;
 }
 
 export function TraceOverview(props: Props) {

@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
-import { createInitialDataSelector } from './helpers';
+import { createSelector } from 'reselect';
 import mockTraceList from '../mockData/mockTraceList.json';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'traceList';
 const INITIAL_DATA = [];
@@ -27,12 +27,12 @@ function loadMockTraces() {
   return Promise.resolve(mockTraceList);
 }
 
-export function TraceListRequest({ urlParams, render }) {
-  const { serviceName, start, end, transactionType, kuery } = urlParams;
+export function TraceListRequest({ urlParams = {}, render }) {
+  const { start, end, kuery } = urlParams;
 
-  // if (!(serviceName && start && end && transactionType)) {
-  //   return null;
-  // }
+  if (!start || !end) {
+    return null;
+  }
 
   return (
     <Request
@@ -40,10 +40,8 @@ export function TraceListRequest({ urlParams, render }) {
       fn={loadMockTraces}
       args={[
         {
-          serviceName,
           start,
           end,
-          transactionType,
           kuery
         }
       ]}

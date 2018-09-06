@@ -69,6 +69,7 @@
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@types/react-router-dom": "^4.3.0",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
     "angular-aria": "1.6.6",

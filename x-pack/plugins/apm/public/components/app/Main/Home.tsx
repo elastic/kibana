@@ -5,11 +5,14 @@
  */
 
 // @ts-ignore
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 import React from 'react';
+// @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
+// @ts-ignore
 import { HeaderContainer } from '../../shared/UIComponents';
+// @ts-ignore
 import ServiceOverview from '../ServiceOverview';
 import TraceOverview from '../TraceOverview';
 
@@ -21,7 +24,6 @@ export function Home() {
         <SetupInstructionsLink />
       </HeaderContainer>
       <KueryBar />
-      <EuiSpacer />
       <EuiTabbedContent
         className="k6Tab--large"
         tabs={[

@@ -6,6 +6,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
+// @ts-ignore
 import { KibanaLink } from '../../utils/url';
 
 export function SetupInstructionsLink({

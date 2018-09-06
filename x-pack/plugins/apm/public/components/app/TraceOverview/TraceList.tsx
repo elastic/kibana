@@ -7,10 +7,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { fontSizes, truncate } from '../../../style/variables';
+// @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
+// @ts-ignore
 import { RelativeLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ManagedTable } from '../../shared/ManagedTable';
+// @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
 
 function formatString(value: string) {

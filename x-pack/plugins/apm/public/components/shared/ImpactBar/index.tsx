@@ -14,6 +14,6 @@ interface Props extends StringMap<any> {
 
 export function ImpactBar({ value, ...rest }: Props) {
   return (
-    <EuiProgress size="l" value={value} max={100} color="subdued" {...rest} />
+    <EuiProgress size="l" value={value} max={100} color="primary" {...rest} />
   );
 }

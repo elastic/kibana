@@ -20,12 +20,12 @@ exports[`ManagedTable component should render a page-full of items, with default
   items={
     Array [
       Object {
-        "age": 43,
-        "name": "Becky",
-      },
-      Object {
         "age": 29,
         "name": "Jess",
+      },
+      Object {
+        "age": 43,
+        "name": "Becky",
       },
       Object {
         "age": 31,
@@ -75,8 +75,8 @@ exports[`ManagedTable component should render when specifying initial values 1`]
   items={
     Array [
       Object {
-        "age": 29,
-        "name": "Jess",
+        "age": 31,
+        "name": "Thomas",
       },
     ]
   }

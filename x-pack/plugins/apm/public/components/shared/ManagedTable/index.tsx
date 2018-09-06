@@ -6,8 +6,7 @@
 
 // @ts-ignore
 import { EuiBasicTable } from '@elastic/eui';
-import get from 'lodash.get';
-import orderBy from 'lodash.orderby';
+import { get, sortByOrder } from 'lodash';
 import React, { Component } from 'react';
 
 // TODO: this should really be imported from EUI
@@ -60,7 +59,8 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
   public getCurrentItems() {
     const { items } = this.props;
     const { sort = {}, page = {} } = this.state;
-    const sorted = orderBy(items, sort.field, sort.direction);
+    // TODO: Use _.orderBy once we upgrade to lodash 4+
+    const sorted = sortByOrder(items, sort.field, sort.direction);
     return sorted.slice(page.index * page.size, (page.index + 1) * page.size);
   }
 
@@ -72,6 +72,7 @@ export class ManagedTable extends Component<ManagedTableProps, any> {
       hidePerPageOptions = true
     } = this.props;
     const { page, sort } = this.state;
+
     return (
       <EuiBasicTable
         noItemsMessage={noItemsMessage}
