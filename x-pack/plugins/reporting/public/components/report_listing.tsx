@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { jobQueueClient } from '../lib/job_queue_client';
 
-import { EuiBasicTable, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiBasicTable, EuiPage, EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 
 interface Props {
   xpackInfo: any;
@@ -22,7 +22,6 @@ interface Props {
 
 interface State {
   page: number;
-  perPage: number;
   total: number;
   jobs: [];
   isLoading: boolean;
@@ -36,7 +35,6 @@ export class ReportListing extends Component<Props, State> {
 
     this.state = {
       page: 0,
-      perPage: 10,
       total: 0,
       jobs: [],
       isLoading: false,
@@ -47,7 +45,12 @@ export class ReportListing extends Component<Props, State> {
     return (
       <EuiPage restrictWidth>
         <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">{this.renderTable()}</EuiPageContent>
+          <EuiPageContent horizontalPosition="center">
+            <EuiTitle>
+              <h1>Reports</h1>
+            </EuiTitle>
+            {this.renderTable()}
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     );
@@ -94,9 +97,9 @@ export class ReportListing extends Component<Props, State> {
 
     const pagination = {
       pageIndex: this.state.page,
-      pageSize: this.state.perPage,
+      pageSize: 10,
       totalItemCount: this.state.total,
-      pageSizeOptions: [2, 5, 10],
+      hidePerPageOptions: true,
     };
 
     return (
@@ -105,7 +108,7 @@ export class ReportListing extends Component<Props, State> {
         items={this.state.jobs}
         loading={this.state.isLoading}
         columns={tableColumns}
-        noItemsMessage="No reporting jobs"
+        noItemsMessage="No reports have been created"
         pagination={pagination}
         onChange={this.onTableChange}
       />
@@ -113,14 +116,14 @@ export class ReportListing extends Component<Props, State> {
   }
 
   private onTableChange = ({ page }: { page: any }) => {
-    const { index: pageIndex, size: pageSize } = page;
+    const { index: pageIndex } = page;
 
-    this.setState({
-      page: pageIndex,
-      perPage: pageSize,
-    });
-
-    this.fetchJobs();
+    this.setState(
+      {
+        page: pageIndex,
+      },
+      this.fetchJobs
+    );
   };
 
   private fetchJobs = async () => {
