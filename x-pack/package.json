@@ -9,8 +9,6 @@
     "kbn": "node ../scripts/kbn",
     "start": "gulp dev",
     "build": "gulp build",
-    "lint": "gulp lint",
-    "lintroller": "gulp lint --fixLint",
     "testonly": "gulp testonly",
     "test": "gulp test",
     "test:browser:dev": "gulp testbrowser-dev",
