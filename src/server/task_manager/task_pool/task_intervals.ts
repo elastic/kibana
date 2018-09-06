@@ -30,8 +30,15 @@ export function intervalFromNow(interval?: string): Date | undefined {
 
   assertValidInterval(interval);
 
-  const mins = parseInterval(interval);
+  return minutesFromNow(parseInterval(interval));
+}
 
+/**
+ * Returns a date that is mins minutes from now.
+ *
+ * @param mins The number of mintues from now
+ */
+export function minutesFromNow(mins: number): Date {
   const now = new Date();
 
   now.setMinutes(now.getMinutes() + mins);

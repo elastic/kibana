@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { ConcreteTaskInstance, ElasticJs, RunContext, RunResult, TaskDefinition } from './task';
-import { intervalFromNow } from './task_intervals';
-import { TaskStore } from './task_store';
+import Joi from 'joi';
+import {
+  ConcreteTaskInstance,
+  ElasticJs,
+  RunContext,
+  RunResult,
+  TaskDefinition,
+  validateRunResult,
+} from './task';
+import { intervalFromNow, minutesFromNow } from './task_intervals';
 
 interface Logger {
   info: (msg: string) => void;
@@ -27,21 +34,26 @@ interface Logger {
   warning: (msg: string) => void;
 }
 
+interface Updatable {
+  update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
+  remove(id: string): Promise<void>;
+}
+
 interface Opts {
   logger: Logger;
   callCluster: ElasticJs;
   definition: TaskDefinition;
   instance: ConcreteTaskInstance;
-  store: TaskStore;
+  store: Updatable;
   kbnServer: object;
 }
 
 export class TaskRunner {
-  private promise?: Promise<RunResult>;
+  private promise?: PromiseLike<RunResult | undefined>;
   private instance: ConcreteTaskInstance;
   private definition: TaskDefinition;
   private logger: Logger;
-  private store: TaskStore;
+  private store: Updatable;
   private context: RunContext;
 
   constructor(opts: Opts) {
@@ -108,12 +120,19 @@ export class TaskRunner {
 
   public async cancel() {
     const promise: any = this.promise;
-    return promise && promise.cancel && promise.cancel();
+
+    if (promise && promise.cancel) {
+      return promise.cancel();
+    }
+
+    this.logger.warning(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult): RunResult {
-    if (typeof result !== 'undefined' && typeof result !== 'object') {
-      this.logger.warning(`Task ${this} returned unexpected result type ${typeof result}`);
+    const { error } = Joi.validate(result, validateRunResult);
+
+    if (error) {
+      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || {};
@@ -123,10 +142,10 @@ export class TaskRunner {
     const runAt = result.runAt || intervalFromNow(this.instance.interval);
     const state = result.state || this.instance.state || {};
 
-    if (runAt) {
+    if (runAt || result.error) {
       await this.store.update({
         ...this.instance,
-        runAt,
+        runAt: runAt || minutesFromNow((this.instance.attempts + 1) * 5),
         state,
         attempts: result.error ? this.instance.attempts + 1 : 0,
       });

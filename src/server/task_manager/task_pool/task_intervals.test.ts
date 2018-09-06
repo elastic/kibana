@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { assertValidInterval, intervalFromNow } from './task_intervals';
+import { assertValidInterval, intervalFromNow, minutesFromNow } from './task_intervals';
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
@@ -40,7 +40,7 @@ describe('taskIntervals', () => {
     test('it returns the current date plus n minutes', () => {
       const mins = _.random(1, 100);
       const expected = Date.now() + mins * 60 * 1000;
-      const nextRun = intervalFromNow(`${mins}m`).getTime();
+      const nextRun = intervalFromNow(`${mins}m`)!.getTime();
       expect(Math.abs(nextRun - expected)).toBeLessThan(100);
     });
 
@@ -51,6 +51,15 @@ describe('taskIntervals', () => {
       expect(() => intervalFromNow(`hello`)).toThrow(
         /Invalid interval "hello"\. Intervals must be of the form {numbrer}m. Example: 5m/
       );
+    });
+  });
+
+  describe('minutesFromNow', () => {
+    test('it returns the current date plus a number of minutes', () => {
+      const mins = _.random(1, 100);
+      const expected = Date.now() + mins * 60 * 1000;
+      const nextRun = minutesFromNow(mins).getTime();
+      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
     });
   });
 });

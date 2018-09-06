@@ -88,10 +88,16 @@ export interface RunResult {
   state?: object;
 }
 
+export const validateRunResult = Joi.object({
+  runAt: Joi.date().optional(),
+  error: Joi.object().optional(),
+  state: Joi.object().optional(),
+}).optional();
+
 /**
  * The type signature of the function that performs a task.
  */
-export type RunFunction = (context: RunContext) => Promise<RunResult>;
+export type RunFunction = (context: RunContext) => PromiseLike<RunResult | undefined>;
 
 /**
  * Defines a task which can be scheduled and run by the Kibana
