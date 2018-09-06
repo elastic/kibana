@@ -21,6 +21,7 @@ import { constant, once, compact, flatten } from 'lodash';
 import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
+import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
@@ -30,94 +31,85 @@ import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
+import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
+import { KibanaMigrator } from './saved_objects/migrations';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
-import { KibanaMigrator } from './saved_objects/migrations';
-import { injectIntoKbnServer as newPlatformMixin } from '../core';
 import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings) {
+  constructor(settings, core) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.ready = constant(
-      this.mixin(
-        Plugins.waitForInitSetupMixin,
+    this.core = core;
 
-        // sets this.config, reads this.settings
-        configSetupMixin,
+    this.ready = constant(this.mixin(
+      Plugins.waitForInitSetupMixin,
 
-        newPlatformMixin,
+      // sets this.config, reads this.settings
+      configSetupMixin,
 
-        // sets this.server
-        httpMixin,
+      // sets this.server
+      httpMixin,
 
-        // adds methods for extending this.server
-        serverExtensionsMixin,
-        loggingMixin,
-        configDeprecationWarningsMixin,
-        warningsMixin,
-        usageMixin,
-        statusMixin,
+      // adds methods for extending this.server
+      serverExtensionsMixin,
+      loggingMixin,
+      configDeprecationWarningsMixin,
+      warningsMixin,
+      usageMixin,
+      statusMixin,
 
-        // writes pid file
-        pidMixin,
+      // writes pid file
+      pidMixin,
 
-        // find plugins and set this.plugins and this.pluginSpecs
-        Plugins.scanMixin,
+      // find plugins and set this.plugins and this.pluginSpecs
+      Plugins.scanMixin,
 
-        // tell the config we are done loading plugins
-        configCompleteMixin,
+      // tell the config we are done loading plugins
+      configCompleteMixin,
 
-        // setup this.uiExports and this.uiBundles
-        uiMixin,
-        i18nMixin,
-        indexPatternsMixin,
+      // setup this.uiExports and this.uiBundles
+      uiMixin,
+      i18nMixin,
+      indexPatternsMixin,
 
-        // setup saved object routes
-        savedObjectsMixin,
+      // setup saved object routes
+      savedObjectsMixin,
 
-        // setup routes for installing/uninstalling sample data sets
-        sampleDataMixin,
+      // setup routes for installing/uninstalling sample data sets
+      sampleDataMixin,
 
-        // setup routes for short urls
-        urlShorteningMixin,
+      // setup routes for short urls
+      urlShorteningMixin,
 
-        // ensure that all bundles are built, or that the
-        // watch bundle server is running
-        optimizeMixin,
+      // ensure that all bundles are built, or that the
+      // watch bundle server is running
+      optimizeMixin,
 
-        // transpiles SCSS into CSS
-        sassMixin,
+      // transpiles SCSS into CSS
+      sassMixin,
 
-        // initialize the plugins
-        Plugins.initializeMixin,
+      // initialize the plugins
+      Plugins.initializeMixin,
 
-        // notify any deferred setup logic that plugins have initialized
-        Plugins.waitForInitResolveMixin,
-
-        () => {
-          if (this.config.get('server.autoListen')) {
-            this.ready = constant(Promise.resolve());
-            return this.listen();
-          }
-        }
-      )
-    );
+      // notify any deferred setup logic that plugins have initialized
+      Plugins.waitForInitResolveMixin,
+    ));
 
     this.listen = once(this.listen);
   }
@@ -147,9 +139,9 @@ export default class KbnServer {
   async listen() {
     await this.ready();
 
-    await new KibanaMigrator({ kbnServer: this }).migrateIndex();
+    const { server, config } = this;
 
-    const { server } = this;
+    await new KibanaMigrator({ kbnServer: this }).migrateIndex();
 
     await fromNode(cb => server.start(cb));
 
@@ -157,6 +149,12 @@ export default class KbnServer {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }
+
+    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
+      config.get('server.rewriteBasePath')
+        ? config.get('server.basePath')
+        : ''
+    }`);
 
     return server;
   }
@@ -173,7 +171,12 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  async applyLoggingConfiguration(config) {
+  applyLoggingConfiguration(settings) {
+    const config = new Config(
+      this.config.getSchema(),
+      transformDeprecations(settings)
+    );
+
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
