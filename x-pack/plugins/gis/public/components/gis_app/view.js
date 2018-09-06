@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { OLMapContainer } from '../map';
+import { OLMapContainer } from '../map/ol';
 import { LayerControl } from '../layer_control/index';
 
 export function GISApp() {

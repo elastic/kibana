@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { AddLayerPanel } from '../layer_addpanel/index';
+import { AddLayerPanel } from '../../layer_addpanel/index';
 import * as ol from 'openlayers';
-import { WEBMERCATOR, WGS_84 } from '../../shared/ol_layer_defaults';
+import { WEBMERCATOR, WGS_84 } from '../../../shared/ol_layer_defaults';
 
 export class OLMapContainer extends React.Component {
 

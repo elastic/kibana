@@ -6,8 +6,8 @@
 
 import { connect } from 'react-redux';
 import { OLMapContainer } from './view';
-import { syncOLState } from "../../selectors/ol_map_selectors";
-import { mapExtentChanged } from '../../actions/store_actions';
+import { syncOLState } from "../../../selectors/ol_map_selectors";
+import { mapExtentChanged } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
