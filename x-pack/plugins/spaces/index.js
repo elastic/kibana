@@ -14,6 +14,7 @@ import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
+import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
@@ -92,6 +93,10 @@ export const spaces = (kibana) => new kibana.Plugin({
     const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
       spacesSavedObjectsClientWrapperFactory(spacesService)
+    );
+
+    server.addScopedTutorialContextFactory(
+      createSpacesTutorialContextFactory(spacesService)
     );
 
     initPrivateApis(server);
