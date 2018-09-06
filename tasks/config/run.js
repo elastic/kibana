@@ -166,7 +166,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--'source'', esFrom,
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
