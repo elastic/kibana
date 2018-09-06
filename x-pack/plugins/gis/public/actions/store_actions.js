@@ -107,19 +107,13 @@ export function endDataLoad(layerId, data, requestToken) {
 }
 
 
-export function addInitialData(layer) {
-  return async (dispatch, getState) => {
-    const mapState = getMapState(getState());
-    layer.syncDataToMapState(mapState, Symbol('data_request'), dispatch);
-  };
-}
-
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch, getState) => {
     const layer = source.createDefaultLayer(layerOptions, getState().config.meta.data_sources);
     const layerDescriptor = layer.toLayerDescriptor();
     await dispatch(addLayer(layerDescriptor, position));
-    dispatch(addInitialData(layer));
+    const mapState = getMapState(getState());
+    layer.syncDataToMapState(mapState, Symbol('data_request'), dispatch);
   };
 }
 

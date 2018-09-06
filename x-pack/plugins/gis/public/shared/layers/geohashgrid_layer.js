@@ -64,7 +64,6 @@ export class GeohashGridLayer extends ALayer {
     return new HeatmapStyle(this._descriptor.style);
   }
 
-
   _createCorrespondingOLLayer() {
     const vectorModel = new ol.source.Vector({});
     const placeHolderLayer = new ol.layer.Heatmap({
