@@ -135,10 +135,6 @@ export class DynamicDllPlugin {
         for (const module of compilation.modules) {
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
-            // if (module.userRequest.includes('node_modules')) {
-            //   const absoluteResource = path.resolve(dllContext, module.userRequest);
-            //   requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
-            // }
             const absoluteResource = path.resolve(dllContext, module.userRequest);
             requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }

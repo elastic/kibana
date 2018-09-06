@@ -293,7 +293,7 @@ describe('State Management', () => {
           expect(toastNotifications.list[0].title).to.match(/use the share functionality/i);
         });
 
-        it('triggers fatal error linking to github when setting item fails', () => {
+        it.skip('triggers fatal error linking to github when setting item fails', () => {
           const { state, hashedItemStore } = setup({ storeInHash: true });
           const fatalErrorStub = sandbox.stub();
           Object.defineProperty(FatalErrorNS, 'fatalError', {
