@@ -1,0 +1,49 @@
+@import (reference) "~ui/styles/variables";
+
+#indexLifecycleManagementReactRoot {
+  background: @globalColorLightestGray;
+  min-height: 100vh;
+}
+
+.euiPageContent.ilmContent {
+  max-width: 1000px;
+  width: 100%;
+}
+
+.ilmHrule {
+  // Less has a bug with calcs
+  width: calc(~"100% + 48px") !important;
+  margin-left: -24px;
+  margin-right: -24px;
+}
+
+.ilmAlias {
+  display: inline-block;
+  background-color: #333;
+  color: white;
+  padding: 4px 8px;
+}
+
+.ilmDiff__nav {
+  padding: 16px;
+  background: #f5f5f5;
+}
+
+.ilmDiff__code {
+
+}
+
+.euiAnimateContentLoad {
+  animation: euiAnimContentLoad $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+}
+
+@keyframes euiAnimContentLoad {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

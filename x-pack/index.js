@@ -20,6 +20,7 @@ import { apm } from './plugins/apm';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
+import { indexLifecycleManagement } from './plugins/index_lifecycle_management';
 import { consoleExtensions } from './plugins/console_extensions';
 import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
@@ -44,6 +45,7 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
+    indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana)
   ];
 };
