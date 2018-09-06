@@ -44,7 +44,13 @@ describe('i18n utils', () => {
   test('should remove escaped linebreak', () => {
     expect(formatJSString('Test\\\n str\\\ning')).toEqual('Test string');
   });
-
+  test('should not escape linebreaks', () => {
+    expect(
+      formatJSString(`Text \n with
+   line-breaks
+`)
+    ).toMatchSnapshot();
+  });
   test('should detect i18n translate function call', () => {
     let source = i18nTranslateSources[0];
     let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find(node =>

@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`i18n utils should not escape linebreaks 1`] = `
+"Text 
+ with
+   line-breaks
+"
+`;
