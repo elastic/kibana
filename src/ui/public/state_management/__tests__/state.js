@@ -300,7 +300,7 @@ describe('State Management', () => {
             writable: true,
             value: fatalErrorStub
           });
-          // const fatalErrorStub = sandbox.stub(FatalErrorNS, 'fatalError');
+
           sandbox.stub(hashedItemStore, 'setItem').returns(false);
           state.toQueryParam();
           sinon.assert.calledOnce(fatalErrorStub);
