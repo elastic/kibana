@@ -3116,16 +3116,6 @@ gulp-util@^3.0.0:
     through2 "^2.0.0"
     vinyl "^0.5.0"
 
-gulp-zip@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/gulp-zip/-/gulp-zip-3.1.0.tgz#4a72449da666e9a9c23c4da7e7d559f99dfc4c09"
-  dependencies:
-    chalk "^1.0.0"
-    concat-stream "^1.4.7"
-    gulp-util "^3.0.0"
-    through2 "^0.6.1"
-    yazl "^2.1.0"
-
 gulp-zip@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/gulp-zip/-/gulp-zip-4.1.0.tgz#dab178bd99afa190923f1eb78abaf0db47817704"
