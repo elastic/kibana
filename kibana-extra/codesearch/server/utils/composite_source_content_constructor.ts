@@ -13,8 +13,10 @@ type MergedHit = [number, number];
 // The processed search result with all data processed for monaco to render.
 export class CompositeSourceContentConstructor {
   private HIT_MERGE_LINE_INTERVAL = 2; // Inclusive
+  private MAX_HIT_NUMBER = 5;
   private mergedHits: MergedHit[];
   private lineMapper: LineMapper;
+  private readonly slicedHightlights: SourceHit[];
 
   /*
    * The line mapping from the line number of the current code snippet to
@@ -25,7 +27,8 @@ export class CompositeSourceContentConstructor {
   private invertedLineMapping: Map<number, number> = new Map<number, number>();
 
   constructor(private readonly highlights: SourceHit[], content: string) {
-    const sortedHits = Array.from(highlights).sort((h1: SourceHit, h2: SourceHit) => {
+    this.slicedHightlights = this.highlights.slice(0, this.MAX_HIT_NUMBER);
+    const sortedHits = Array.from(this.slicedHightlights).sort((h1: SourceHit, h2: SourceHit) => {
       return h1.range.startLoc.line - h2.range.startLoc.line;
     });
     this.lineMapper = new LineMapper(content);
@@ -96,7 +99,7 @@ export class CompositeSourceContentConstructor {
    * Convert highlights into Monaco decoration ranges (IRange).
    */
   private getHighlightRanges(): IRange[] {
-    return this.highlights.map(h => {
+    return this.slicedHightlights.map(h => {
       const range: IRange = {
         startLineNumber: this.invertedLineMapping.get(h.range.startLoc.line + 1)!,
         startColumn: h.range.startLoc.column + 1,
@@ -149,15 +152,38 @@ export class CompositeSourceContentConstructor {
     const firstLine = 1;
     const lastLine = this.lineMapper.getLines().length;
 
-    sortedHits.forEach((hit: SourceHit) => {
+    sortedHits.forEach((hit: SourceHit, index: number) => {
       const newBeginLine = Math.max(
         firstLine,
         hit.range.startLoc.line + 1 - this.HIT_MERGE_LINE_INTERVAL
       );
-      const newEndLine = Math.min(
+      let newEndLine = Math.min(
         lastLine,
         hit.range.startLoc.line + 1 + this.HIT_MERGE_LINE_INTERVAL
       );
+
+      // This is the last hit. We have to prevent hits shown in the next 2 lines if necessary
+      if (index === this.MAX_HIT_NUMBER - 1) {
+        let showAdditionalLines = true;
+        // Go through the next few highlights and try to find if there is any additional hits
+        // covered by the current snippet.
+        for (
+          let i = index + 1;
+          i < this.highlights.length && i < index + this.HIT_MERGE_LINE_INTERVAL;
+          i++
+        ) {
+          const h = this.highlights[i];
+          if (h.range.startLoc.line + 1 <= newEndLine) {
+            showAdditionalLines = false;
+            break;
+          }
+        }
+
+        // Shrink the end line without the additional lines.
+        if (!showAdditionalLines) {
+          newEndLine = Math.min(hit.range.startLoc.line + 1, newEndLine);
+        }
+      }
 
       if (
         res.length !== 0 &&
