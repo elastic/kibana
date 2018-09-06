@@ -1,0 +1,14 @@
+.visEditorAggGroup {
+  border-top: 0 !important; // override .sidebar-item
+  padding: $euiSizeM;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $vis-editor-agg-editor-spacing;
+  background: $euiColorEmptyShade;
+}
+
+.visEditorAggGroup__title {
+  @include euiFontSizeL;
+  margin-bottom: $vis-editor-agg-editor-spacing !important;
+  padding: 0px !important;
+  text-transform: capitalize;
+}
