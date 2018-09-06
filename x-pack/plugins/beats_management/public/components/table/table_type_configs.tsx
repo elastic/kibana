@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { flatten, uniq } from 'lodash';
+import { flatten, sortBy, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 
@@ -70,7 +70,7 @@ export const BeatsTableType: TableType = {
       name: 'Tags',
       render: (value: string, beat: CMPopulatedBeat) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-          {(beat.full_tags.sort((a, b) => (a.id <= b.id ? 0 : 1)) || []).map(tag => (
+          {(sortBy(beat.full_tags, 'id') || []).map(tag => (
             <EuiFlexItem grow={false}>
               <EuiBadge key={tag.id} color={tag.color ? tag.color : 'primary'}>
                 {tag.id}
