@@ -17,11 +17,23 @@
  * under the License.
  */
 
+// properties that come from legacyInjectedMetadata.uiSettings.defaults
+interface InjectedUiSettingsDefault {
+  name?: string;
+  value?: any;
+  description?: string;
+  category?: string[];
+  type?: string;
+  readOnly?: boolean;
+  options?: string[] | { [key: string]: any };
+}
+
+// properties that come from legacyInjectedMetadata.uiSettings.user
+interface InjectedUiSettingsUser {
+  userValue?: any;
+  isOverridden?: boolean;
+}
+
 export interface UiSettingsState {
-  [key: string]: {
-    type?: string;
-    userValue?: any;
-    value?: any;
-    isOverridden?: boolean;
-  };
+  [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }
