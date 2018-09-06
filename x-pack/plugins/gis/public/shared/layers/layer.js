@@ -65,14 +65,26 @@ export class ALayer {
     throw new Error('Should implement Layer#createCorrespondingOLLayer');
   }
 
-  syncLayerWithOL(olMap, dataSources) {
-    const olLayerArray = olMap.getLayers().getArray();
+  syncLayerWithOL(olMap, dataSources, newPosition) {
+    const olLayers = olMap.getLayers();
+    const olLayerArray = olLayers.getArray();
     let olLayer = olLayerArray.find(olLayer => olLayer.get('id') === this.getId());
     if (!olLayer) {
       olLayer = this._createCorrespondingOLLayer(dataSources, olMap);
+      olLayer.set('id', this.getId());
       olMap.addLayer(olLayer);
+    } else {
+      //check if position is OK
+      const actualPosition = olLayerArray.indexOf(olLayer);
+      console.log('must check position..', newPosition, actualPosition);
+      if (actualPosition !== newPosition) {
+        console.log('reposition!');
+        // layerToMove = olLayers.removeAt(idx);
+        olMap.removeLayer(olLayer);
+        // newIdx = newLayerOrder.findIndex(id => id === oldLayerOrder[idx]);
+        olLayers.insertAt(newPosition, olLayer);
+      }
     }
-    olLayer.set('id', this.getId());
     olLayer.setVisible(this.isVisible());
     this._syncOLStyle(olLayer, olMap);
     this._syncOLData(olLayer);

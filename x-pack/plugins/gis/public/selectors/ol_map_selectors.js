@@ -11,28 +11,10 @@ import * as ol from 'openlayers';
 import _ from 'lodash';
 
 
-// OpenLayers helper function
-const getLayersIds = mapLayers => mapLayers.getArray().map(layer => layer.get('id'));
-
-
-function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
-  let layerToMove;
-  let newIdx;
-  newLayerOrder.some((newOrderId, idx) => {
-    if (oldLayerOrder[idx] !== newOrderId) {
-      layerToMove = mapLayers.removeAt(idx);
-      newIdx = newLayerOrder.findIndex(id => id === oldLayerOrder[idx]);
-      mapLayers.insertAt(newIdx, layerToMove);
-      updateMapLayerOrder(mapLayers, getLayersIds(mapLayers), newLayerOrder);
-      return true;
-    } else {
-      return false;
-    }
-  });
-}
-
-function removeLayers(map, existingMapLayers, updatedLayersIds) {
+function removeOrphanedOLLayers(olMap, layerList) {
+  const updatedLayersIds = layerList.map((layer) => layer.getId());
   const layersToRemove = [];
+  const existingMapLayers = olMap.getLayers();
   existingMapLayers.forEach((mapLayer, idx) => {
     if (!updatedLayersIds.find(id => id === mapLayer.get('id'))) {
       layersToRemove.push(idx);
@@ -81,26 +63,19 @@ const syncLayers = createSelector(
   getLayerList,
   getDataSources,
   (olMap, layerList, dataSources) => {
-    return layerList.map(layer => {
-      return {
-        layer: layer,
-        olLayer: layer.syncLayerWithOL(olMap, dataSources)
-      };
-    });
+
+
+    // removeOrphanedOLLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
+    removeOrphanedOLLayers(olMap, layerList);
+
+    layerList.forEach((layer, position) => layer.syncLayerWithOL(olMap, dataSources, position));
   }
 );
 
 export const syncOLState = createSelector(
   syncOLMap,
   syncLayers,
-  (olMap, layersWithOl) => {
-    const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.getId());
-    // Deletes
-    removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);
-    // Update layers order
-    const oldLayerIdsOrder = getLayersIds(olMap.getLayers());
-    updateMapLayerOrder(olMap.getLayers(), oldLayerIdsOrder, newLayerIdsOrder);
-
+  (olMap) => {
     return olMap;
   }
 );
