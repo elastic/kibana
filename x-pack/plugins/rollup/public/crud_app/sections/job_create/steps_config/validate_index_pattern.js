@@ -28,7 +28,7 @@ export function validateIndexPattern(indexPattern) {
   }, []);
 
   if (illegalCharacters.length) {
-    return[(
+    return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
         defaultMessage="You must remove these characters from your index pattern: {characterList}"

@@ -13,7 +13,7 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttpClient } from './services';
+import { setHttp } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
@@ -45,10 +45,10 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
   template: template,
   controllerAs: 'rollupJobs',
   controller: class IndexRollupJobsController {
-    constructor($scope, $route, $http) {
+    constructor($scope, $route, $injector) {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
-      setHttpClient($http);
+      setHttp($injector.get('$http'));
 
       $scope.$$postDigest(() => {
         const appElement = document.getElementById('rollupJobsReactRoot');

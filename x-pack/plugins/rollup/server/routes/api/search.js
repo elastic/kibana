@@ -5,14 +5,19 @@
 */
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 
 export function registerSearchRoute(server) {
   const isEsError = isEsErrorFactory(server);
+  const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/rollup/search',
     method: 'POST',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
 

@@ -5,6 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -29,11 +30,28 @@ import {
 } from '../../../services';
 
 export class StepDateHistogramUi extends Component {
+  static propTypes = {
+    fields: PropTypes.object.isRequired,
+    onFieldsChange: PropTypes.func.isRequired,
+    fieldErrors: PropTypes.object.isRequired,
+    areStepErrorsVisible: PropTypes.bool.isRequired,
+    indexPatternTimeFields: PropTypes.array.isRequired,
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isLoadingTimeFields: true,
+      timeFields: [],
+    };
+  }
+
   render() {
     const {
       fields,
       onFieldsChange,
-      showStepErrors,
+      areStepErrorsVisible,
       fieldErrors,
     } = this.props;
 
@@ -133,10 +151,10 @@ export class StepDateHistogramUi extends Component {
                 />
               )}
               error={errorDateHistogramField}
-              isInvalid={Boolean(showStepErrors && errorDateHistogramField)}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
             >
               <EuiFieldText
-                isInvalid={Boolean(showStepErrors && errorDateHistogramField)}
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
                 value={dateHistogramField || ''}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
               />
@@ -150,7 +168,7 @@ export class StepDateHistogramUi extends Component {
                 />
               )}
               error={errorDateHistogramInterval}
-              isInvalid={Boolean(showStepErrors && errorDateHistogramInterval)}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
               helpText={(
                 <Fragment>
                   <p>
@@ -165,7 +183,7 @@ export class StepDateHistogramUi extends Component {
               <EuiFieldText
                 value={dateHistogramInterval || ''}
                 onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorDateHistogramInterval)}
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -197,7 +215,7 @@ export class StepDateHistogramUi extends Component {
                 />
               )}
               error={errorDateHistogramDelay}
-              isInvalid={Boolean(showStepErrors && errorDateHistogramDelay)}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
               helpText={(
                 <Fragment>
                   <p>
@@ -212,7 +230,7 @@ export class StepDateHistogramUi extends Component {
               <EuiFieldText
                 value={dateHistogramDelay || ''}
                 onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorDateHistogramDelay)}
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
               />
             </EuiFormRow>
 
@@ -224,7 +242,7 @@ export class StepDateHistogramUi extends Component {
                 />
               )}
               error={errorDateHistogramTimeZone || ''}
-              isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
               helpText={(
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.helpDefault.label"
@@ -245,7 +263,7 @@ export class StepDateHistogramUi extends Component {
               <EuiFieldText
                 value={dateHistogramTimeZone || ''}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorDateHistogramTimeZone)}
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -257,9 +275,9 @@ export class StepDateHistogramUi extends Component {
   }
 
   renderErrors = () => {
-    const { showStepErrors } = this.props;
+    const { areStepErrorsVisible } = this.props;
 
-    if (!showStepErrors) {
+    if (!areStepErrorsVisible) {
       return null;
     }
 

@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { mapValues, cloneDeep } from 'lodash';
+import { mapValues, cloneDeep, debounce } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -24,7 +24,10 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps } from '../../services';
+import {
+  getRouterLinkProps,
+  validateIndexPattern,
+} from '../../services';
 
 import { Navigation } from './navigation';
 import { StepLogistics } from './step_logistics';
@@ -65,14 +68,103 @@ export class JobCreateUi extends Component {
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
+      stepsFieldErrorsAsync: {},
+      areStepErrorsVisible: false,
       stepsFields,
+      isValidatingIndexPattern: false,
+      indexPatternAsyncErrors: undefined,
+      indexPatternTimeFields: [],
     };
+
+    this.lastIndexPatternValidationTime = 0;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const indexPattern = this.getIndexPattern();
+    if (indexPattern !== this.getIndexPattern(prevState)) {
+
+      // If the user hasn't entered anything, then skip validation.
+      if (!indexPattern || !indexPattern.trim()) {
+        this.setState({
+          indexPatternAsyncErrors: undefined,
+          indexPatternTimeFields: [],
+          isValidatingIndexPattern: false,
+        });
+
+        return;
+      }
+
+      this.setState({
+        isValidatingIndexPattern: true,
+      });
+
+      this.requestIndexPatternValidation();
+    }
   }
 
   componentWillUnmount() {
     // Clean up after ourselves.
     this.props.clearCreateJobErrors();
   }
+
+  requestIndexPatternValidation = debounce(() => {
+    const indexPattern = this.getIndexPattern();
+
+    const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
+    validateIndexPattern(indexPattern).then(response => {
+      // Ignore all responses except that to the most recent request.
+      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+        return;
+      }
+
+      const {
+        doesMatchIndices: doesIndexPatternMatchIndices,
+        doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
+        timeFields: indexPatternTimeFields,
+      } = response.data;
+
+      let indexPatternAsyncErrors;
+
+      if (doesIndexPatternMatchRollupIndices) {
+        indexPatternAsyncErrors = [(
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
+            defaultMessage="Index pattern must not match rollup indices"
+          />
+        )];
+      } else if (!doesIndexPatternMatchIndices) {
+        indexPatternAsyncErrors = [(
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
+            defaultMessage="Index pattern must match at least one non-rollup index"
+          />
+        )];
+      } else if (!indexPatternTimeFields.length) {
+        indexPatternAsyncErrors = [(
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
+            defaultMessage="Index pattern must match indices that contain time fields"
+          />
+        )];
+      }
+
+      this.setState({
+        indexPatternAsyncErrors,
+        indexPatternTimeFields,
+        isValidatingIndexPattern: false,
+      });
+    }).catch(() => {
+      // Ignore all responses except that to the most recent request.
+      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+        return;
+      }
+
+      // TODO: Show toast or inline error.
+      this.setState({
+        isValidatingIndexPattern: false,
+      });
+    });
+  }, 300);
 
   getSteps() {
     const { currentStepId, checkpointStepId } = this.state;
@@ -105,7 +197,7 @@ export class JobCreateUi extends Component {
     // error.
     if (!this.canGoToStep(stepId)) {
       this.setState({
-        showStepErrors: true,
+        areStepErrorsVisible: true,
       });
       return;
     }
@@ -116,7 +208,7 @@ export class JobCreateUi extends Component {
       currentStepId: stepId,
       nextStepId: stepIds[currentStepIndex + 1],
       previousStepId: stepIds[currentStepIndex - 1],
-      showStepErrors: false,
+      areStepErrorsVisible: false,
       isSaving: false,
     });
 
@@ -210,6 +302,10 @@ export class JobCreateUi extends Component {
       histogramInterval,
       metrics,
     };
+  }
+
+  getIndexPattern(state = this.state) {
+    return state.stepsFields[STEP_LOGISTICS].indexPattern;
   }
 
   save = () => {
@@ -308,7 +404,16 @@ export class JobCreateUi extends Component {
   }
 
   renderCurrentStep() {
-    const { currentStepId, stepsFields, stepsFieldErrors, showStepErrors } = this.state;
+    const {
+      currentStepId,
+      stepsFields,
+      stepsFieldErrors,
+      areStepErrorsVisible,
+      isValidatingIndexPattern,
+      indexPatternTimeFields,
+      indexPatternAsyncErrors,
+    } = this.state;
+
     const currentStepFields = stepsFields[currentStepId];
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
 
@@ -319,17 +424,21 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
-            showStepErrors={showStepErrors}
+            areStepErrorsVisible={areStepErrorsVisible}
+            isValidatingIndexPattern={isValidatingIndexPattern}
+            indexPatternAsyncErrors={indexPatternAsyncErrors}
           />
         );
 
       case STEP_DATE_HISTOGRAM:
         return (
           <StepDateHistogram
+            indexPattern={this.getIndexPattern()}
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
-            showStepErrors={showStepErrors}
+            areStepErrorsVisible={areStepErrorsVisible}
+            indexPatternTimeFields={indexPatternTimeFields}
           />
         );
 
