@@ -41,11 +41,7 @@ export class VectorLayer extends ALayer {
   }
 
   getCurrentStyle() {
-    if (this._descriptor.style.type === FillAndOutlineStyle.type) {
-      return new FillAndOutlineStyle(this._descriptor.style);
-    } else {
-      throw new Error('Style type not recognized by VectorLayer');
-    }
+    return this._style;
   }
 
   isLayerLoading() {

@@ -7,9 +7,10 @@ import { OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
 
 export class ALayer {
 
-  constructor({ layerDescriptor, source }) {
+  constructor({ layerDescriptor, source, style }) {
     this._descriptor = layerDescriptor;
     this._source = source;
+    this._style = style;
   }
 
   static createDescriptor(options) {

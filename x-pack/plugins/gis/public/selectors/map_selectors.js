@@ -14,16 +14,18 @@ import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
+import { FillAndOutlineStyle } from '../shared/layers/styles/fill_and_outline_style';
 
 function createLayerInstance(layerDescriptor) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor);
+  const style = createStyleInstance(layerDescriptor.style);
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source });
+      return new TileLayer({ layerDescriptor, source, style });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source });
+      return new VectorLayer({ layerDescriptor, source, style });
     case GeohashGridLayer.type:
-      return new GeohashGridLayer({ layerDescriptor, source });
+      return new GeohashGridLayer({ layerDescriptor, source, style });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
@@ -47,6 +49,22 @@ function createSourceInstance(sourceDescriptor) {
       throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
 }
+
+
+function createStyleInstance(styleDescriptor) {
+
+  if (!styleDescriptor || !styleDescriptor.type) {
+    return null;
+  }
+
+  switch (styleDescriptor.type) {
+    case FillAndOutlineStyle.type:
+      return new FillAndOutlineStyle(styleDescriptor);
+    default:
+      throw new Error(`Unrecognized styleType ${styleDescriptor.type}`);
+  }
+}
+
 
 export const getMapState = ({ map }) => map && map.mapState;
 
