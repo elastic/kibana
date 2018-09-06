@@ -30,10 +30,11 @@ export const createNodeClientInstructions = () => [
     textPre:
       'Agents are libraries that run inside of your application process.' +
       ' APM services are created programmatically based on the `serviceName`.' +
-      ' This agent supports Express, Koa, hapi, and custom Node.js.',
+      ' This agent supports a vararity of frameworks but can also be used with your custom stack.',
     commands: `// Add this to the VERY top of the first file loaded in your app
 var apm = require('elastic-apm-node').start({curlyOpen}
-  // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
+  // Override service name from package.json
+  // Allowed characters: a-z, A-Z, 0-9, -, _, and space
   serviceName: '',
 
   // Use if APM Server requires a token

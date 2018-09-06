@@ -57,6 +57,7 @@ considered unique based on its persistent UUID, which is written to the path.dat
 
 *Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
 
+[float]
 === Deprecated kibana.yml setting logging.useUTC has been replaced with logging.timezone
 *Details:* Any timezone can now be specified by canonical id.
 

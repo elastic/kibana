@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { extractHandlebarsMessages } from './extract_handlebars_messages';
+import { extractHandlebarsMessages } from './handlebars';
 
-describe('dev/i18n/extract_handlebars_messages', () => {
+describe('dev/i18n/extractors/handlebars', () => {
   test('extracts handlebars default messages', () => {
     const source = Buffer.from(`\
 window.onload = function () {

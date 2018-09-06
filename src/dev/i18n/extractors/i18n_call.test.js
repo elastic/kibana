@@ -20,8 +20,8 @@
 import { parse } from '@babel/parser';
 import { isCallExpression } from '@babel/types';
 
-import { extractI18nCallMessages } from './extract_i18n_call_messages';
-import { traverseNodes } from './utils';
+import { extractI18nCallMessages } from './i18n_call';
+import { traverseNodes } from '../utils';
 
 const i18nCallMessageSource = `
 i18n('message-id-1', { defaultMessage: 'Default message 1', context: 'Message context 1' });
@@ -31,7 +31,7 @@ const translateCallMessageSource = `
 i18n.translate('message-id-2', { defaultMessage: 'Default message 2', context: 'Message context 2' });
 `;
 
-describe('extractI18nCallMessages', () => {
+describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
     let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
       node => isCallExpression(node)
