@@ -43,7 +43,6 @@ export default class ClusterManager {
     this.addedCount = 0;
     this.inReplMode = !!opts.repl;
     this.basePathProxy = basePathProxy;
-    this.config = config;
 
     const serverArgv = [];
     const optimizerArgv = [
