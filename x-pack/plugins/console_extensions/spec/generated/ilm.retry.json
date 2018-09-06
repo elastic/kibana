@@ -1,0 +1,11 @@
+{
+  "ilm.retry": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_ilm/retry"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}

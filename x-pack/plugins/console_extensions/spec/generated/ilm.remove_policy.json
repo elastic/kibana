@@ -1,0 +1,12 @@
+{
+  "ilm.remove_policy": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "{indices}/_ilm",
+      "_ilm"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}

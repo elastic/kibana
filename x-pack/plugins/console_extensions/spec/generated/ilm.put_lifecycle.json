@@ -1,0 +1,11 @@
+{
+  "ilm.put_lifecycle": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ilm/{lifecycle}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}

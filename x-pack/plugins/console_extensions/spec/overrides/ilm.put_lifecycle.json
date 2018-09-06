@@ -1,0 +1,54 @@
+{
+  "ilm.put_lifecycle": {
+    "data_autocomplete_rules": {
+      "phases": {
+        "warm": {
+          "after": "",
+          "actions": {
+            "allocate": {
+              "number_of_replicas": "",
+              "include": {},
+              "exclude": {},
+              "require": {
+                "_name": ""
+              }
+            },
+            "shrink": {
+              "number_of_shards": ""
+            },
+            "forcemerge": {
+              "max_num_segments": ""
+            }
+          }
+        },
+        "cold": {
+          "after": "",
+          "actions": {
+            "allocate": {
+              "number_of_replicas": "",
+              "include": {},
+              "exclude": {},
+              "require": {
+                "_name": ""
+              }
+            }
+          }
+        },
+        "hot": {
+          "after": "",
+          "actions": {
+            "rollover": {
+              "max_age": ""
+            }
+          }
+        },
+        "delete": {
+          "after": "",
+          "actions": {
+            "delete": {}
+          }
+        }
+      }
+    }
+  }
+}

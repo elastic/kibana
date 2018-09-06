@@ -1,0 +1,12 @@
+{
+  "ilm.get_lifecycle": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ilm/{lifecycle}",
+      "_ilm"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}

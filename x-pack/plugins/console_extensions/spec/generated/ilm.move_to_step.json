@@ -1,0 +1,11 @@
+{
+  "ilm.move_to_step": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ilm/move/{indices}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}

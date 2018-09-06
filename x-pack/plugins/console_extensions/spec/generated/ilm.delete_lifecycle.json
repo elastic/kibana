@@ -1,0 +1,11 @@
+{
+  "ilm.delete_lifecycle": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ilm/{lifecycle}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+  }
+}
