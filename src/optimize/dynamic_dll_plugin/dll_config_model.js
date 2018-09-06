@@ -89,7 +89,7 @@ function generateDLL(config) {
           }
         },
         {
-          test: /\.(html)$/,
+          test: /\.(html|tmpl)$/,
           loader: 'raw-loader'
         },
         {

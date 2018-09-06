@@ -294,6 +294,9 @@ describe('State Management', () => {
         });
 
         it.skip('triggers fatal error linking to github when setting item fails', () => {
+          // NOTE: this test needs to be written in jest and removed from the browser ones
+          // More info could be read in the opened issue:
+          // https://github.com/elastic/kibana/issues/22751
           const { state, hashedItemStore } = setup({ storeInHash: true });
           const fatalErrorStub = sandbox.stub();
           Object.defineProperty(FatalErrorNS, 'fatalError', {
