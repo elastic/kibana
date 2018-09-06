@@ -311,9 +311,9 @@ export class ManageSpacePage extends Component {
     }
 
     action
-      .then(result => {
+      .then(() => {
         this.props.spacesNavState.refreshSpacesList();
-        toastNotifications.addSuccess(`Saved '${result.data.name}'`);
+        toastNotifications.addSuccess(`'${name}' was saved`);
         window.location.hash = `#/management/spaces/list`;
       })
       .catch(error => {

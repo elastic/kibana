@@ -78,7 +78,11 @@ export class SpacesGridPage extends Component<Props, State> {
               columns={this.getColumnConfig()}
               hasActions
               pagination={true}
-              search={true}
+              search={{
+                box: {
+                  placeholder: 'Search',
+                },
+              }}
               loading={this.state.loading}
               message={this.state.loading ? 'loading...' : undefined}
             />
@@ -97,7 +101,7 @@ export class SpacesGridPage extends Component<Props, State> {
           window.location.hash = `#/management/spaces/create`;
         }}
       >
-        Create new space
+        Create space
       </EuiButton>
     );
   }

@@ -8,13 +8,23 @@ exports[`renders without crashing 1`] = `
     hasEmptyLabelSpace={false}
     helpText={
       <p>
-        Links within Kibana will include this space identifier
+        If the identifier is 
+        <strong>
+          engineering
+        </strong>
+        , the Kibana URL is 
+        <br />
+         https://my-kibana.example
+        <strong>
+          /s/engineering/
+        </strong>
+        app/kibana.
       </p>
     }
     isInvalid={false}
     label={
       <p>
-        Space Identifier 
+        URL identifier 
         <EuiLink
           color="primary"
           onClick={[Function]}
@@ -31,7 +41,7 @@ exports[`renders without crashing 1`] = `
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}
-      placeholder="give your space a name to see its identifier"
+      placeholder="The URL identifier is generated from the space name."
       readOnly={true}
       value=""
     />
