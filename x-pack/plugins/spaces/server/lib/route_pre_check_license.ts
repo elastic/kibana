@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const Boom = require('boom');
+import Boom from 'boom';
 
-export function routePreCheckLicense(server) {
+export function routePreCheckLicense(server: any) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'spaces';
-  return function forbidApiAccess(request, reply) {
+  return function forbidApiAccess(request: any, reply: any) {
     const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
     if (!licenseCheckResults.showSpaces) {
       reply(Boom.forbidden(licenseCheckResults.linksMessage));

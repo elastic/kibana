@@ -7,7 +7,8 @@
 import { resolve } from 'path';
 import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
-import { initSpacesApi } from './server/routes/api/v1/spaces';
+import { initPublicSpacesApi } from './server/routes/api/public';
+import { initPrivateApis } from './server/routes/api/v1';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
@@ -93,7 +94,8 @@ export const spaces = (kibana) => new kibana.Plugin({
       spacesSavedObjectsClientWrapperFactory(spacesService)
     );
 
-    initSpacesApi(server);
+    initPrivateApis(server);
+    initPublicSpacesApi(server);
 
     initSpacesRequestInterceptors(server);
 

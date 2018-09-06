@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap as wrapBoom } from 'boom';
-
-export function wrapError(error) {
-  return wrapBoom(error, error.status);
-}
+export { createSpaces } from './create_spaces';
+export {
+  createTestHandler,
+  TestConfig,
+  TestOptions,
+  TeardownFn,
+  RequestRunner,
+  RequestRunnerResult,
+} from './create_test_handler';

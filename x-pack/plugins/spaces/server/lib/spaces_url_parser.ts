@@ -5,8 +5,11 @@
  */
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export function getSpaceIdFromPath(requestBasePath = '/', serverBasePath = '/') {
-  let pathToCheck = requestBasePath;
+export function getSpaceIdFromPath(
+  requestBasePath: string = '/',
+  serverBasePath: string = '/'
+): string {
+  let pathToCheck: string = requestBasePath;
 
   if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
     pathToCheck = requestBasePath.substr(serverBasePath.length);
@@ -28,7 +31,11 @@ export function getSpaceIdFromPath(requestBasePath = '/', serverBasePath = '/') 
   return spaceId;
 }
 
-export function addSpaceIdToPath(basePath = '/', spaceId = '', requestedPath = '') {
+export function addSpaceIdToPath(
+  basePath: string = '/',
+  spaceId: string = '',
+  requestedPath: string = ''
+): string {
   if (requestedPath && !requestedPath.startsWith('/')) {
     throw new Error(`path must start with a /`);
   }

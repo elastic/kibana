@@ -13,5 +13,5 @@ export const spaceSchema = Joi.object({
   description: Joi.string(),
   initials: Joi.string().max(MAX_SPACE_INITIALS),
   color: Joi.string().regex(/^#[a-z0-9]{6}$/, `6 digit hex color, starting with a #`),
-  _reserved: Joi.boolean()
+  _reserved: Joi.boolean(),
 }).default();
