@@ -6,13 +6,16 @@
 
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
-export function createSpacesService(server) {
+export interface SpacesService {
+  getSpaceId: (req: any) => string;
+}
 
+export function createSpacesService(server: any): SpacesService {
   const serverBasePath = server.config().get('server.basePath');
 
   const contextCache = new WeakMap();
 
-  function getSpaceId(request) {
+  function getSpaceId(request: any) {
     if (!contextCache.has(request)) {
       populateCache(request);
     }
@@ -21,11 +24,11 @@ export function createSpacesService(server) {
     return spaceId;
   }
 
-  function populateCache(request) {
+  function populateCache(request: any) {
     const spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
 
     contextCache.set(request, {
-      spaceId
+      spaceId,
     });
   }
 
