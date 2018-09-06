@@ -38,7 +38,17 @@
       "$$hashKey": "object:813"
     }
   ],
-  "infoTooltip": "<div class=\"explorer-chart-info-tooltip\">job ID: population-03<br/>\n      aggregation interval: 1h<br/>chart function: sum nginx.access.body_sent.bytes<br/>\n      nginx.access.remote_ip: 72.57.0.53</div>",
+  "infoTooltip": {
+    "jobId": "population-03",
+    "aggregationInterval": "1h",
+    "chartFunction": "sum nginx.access.body_sent.bytes",
+    "entityFields": [
+      {
+        "fieldName": "nginx.access.remote_ip",
+        "fieldValue": "72.57.0.53"
+      }
+    ]
+  },
   "loading": false,
   "plotEarliest": 1487534400000,
   "plotLatest": 1488168000000,

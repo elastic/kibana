@@ -5,8 +5,6 @@
  */
 
 
-import mockConfig from './__mocks__/mock_chart_config_builder_config.json';
-
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -14,7 +12,17 @@ import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
 describe('ExplorerChartTooltip', () => {
   test('Render tooltip based on infoTooltip data.', () => {
-    const wrapper = shallow(<ExplorerChartTooltip {...mockConfig.infoTooltip} />);
+    const infoTooltip = {
+      aggregationInterval: '15m',
+      chartFunction: 'avg responsetime',
+      entityFields: [{
+        fieldName: 'airline',
+        fieldValue: 'JAL',
+      }],
+      jobId: 'mock-job-id'
+    };
+
+    const wrapper = shallow(<ExplorerChartTooltip {...infoTooltip} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

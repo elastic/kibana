@@ -5,12 +5,9 @@
  */
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
-import mockChartData from './__mocks__/mock_chart_data.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';
-import mockSeriesConfig from './__mocks__/mock_series_config_farequote.json';
 import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_response.json';
-import mockSeriesToPlot from './__mocks__/mock_series_to_plot_farequote.json';
 
 jest.mock('../../services/job_service',
   () => ({
@@ -95,8 +92,8 @@ describe('explorerChartsContainerService', () => {
 
     anomalyDataChangeListener(
       [],
-      mockSeriesConfig.selectedEarliest,
-      mockSeriesConfig.selectedLatest
+      1486656000000,
+      1486670399999
     );
 
     function callback(data) {
@@ -110,16 +107,8 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('call anomalyChangeListener with actual series config', (done) => {
-    // callback will be called multiple times.
-    // the callbackData array contains the expected data values for each consecutive call.
-    const callbackData = [];
-    callbackData.push(mockGetDefaultData());
-    callbackData.push({
-      ...mockGetDefaultData(),
-      seriesToPlot: mockSeriesToPlot,
-      layoutCellsPerChart: 6
-    });
-    callbackData.push(mockChartData);
+    let testCount = 0;
+    const expectedTestCount = 3;
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mockMlSelectSeverityService,
@@ -134,10 +123,9 @@ describe('explorerChartsContainerService', () => {
     );
 
     function callback(data) {
-      if (callbackData.length > 0) {
-        expect(data).toEqual(callbackData.shift());
-      }
-      if (callbackData.length === 0) {
+      testCount++;
+      expect(data).toMatchSnapshot();
+      if (testCount === expectedTestCount) {
         done();
       }
     }

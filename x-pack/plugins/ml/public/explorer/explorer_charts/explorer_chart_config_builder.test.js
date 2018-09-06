@@ -5,7 +5,6 @@
  */
 
 import mockAnomalyRecord from './__mocks__/mock_anomaly_record.json';
-import mockChartConfigBuildConfig from './__mocks__/mock_chart_config_builder_config.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';
 
@@ -27,6 +26,6 @@ import { buildConfig } from './explorer_chart_config_builder';
 describe('buildConfig', () => {
   test('get dataConfig for anomaly record', () => {
     const dataConfig = buildConfig(mockAnomalyRecord);
-    expect(dataConfig).toEqual(mockChartConfigBuildConfig);
+    expect(dataConfig).toMatchSnapshot();
   });
 });
