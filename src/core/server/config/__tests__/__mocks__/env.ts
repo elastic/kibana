@@ -21,11 +21,20 @@
 
 import { EnvOptions } from '../../env';
 
-export function getEnvOptions(options: Partial<EnvOptions> = {}): EnvOptions {
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>
+};
+
+export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
   return {
     configs: options.configs || [],
     cliArgs: {
       dev: true,
+      quiet: false,
+      silent: false,
+      watch: false,
+      repl: false,
+      basePath: false,
       ...(options.cliArgs || {}),
     },
     isDevClusterMaster:

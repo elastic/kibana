@@ -22,7 +22,7 @@ import { Config, ObjectToConfigAdapter } from '..';
 /**
  * Overrides some config values with ones from argv.
  *
- * @param config `RawConfig` instance to update config values for.
+ * @param config `Config` instance to update config values for.
  * @param argv Argv object with key/value pairs.
  */
 export function overrideConfigWithArgv(config: Config, argv: { [key: string]: any }) {
