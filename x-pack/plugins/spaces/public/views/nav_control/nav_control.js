@@ -30,11 +30,19 @@ module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) =>
 
   spacesManager = new SpacesManager($http, chrome);
 
-  render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+  let mounted = false;
+
+  $scope.$parent.$watch('isVisible', function (isVisible) {
+    if (isVisible && !mounted) {
+      render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+      mounted = true;
+    }
+  });
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {
     unmountComponentAtNode(domNode);
+    mounted = false;
   });
 
 });
