@@ -45,13 +45,13 @@ describe('tutorial mixins', () => {
 
   let root;
   let kbnServer;
-  beforeEach(async () => {
+  beforeAll(async () => {
     root = createRoot();
     await root.start();
     kbnServer = getKbnServer(root);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await root.shutdown();
   });
 
