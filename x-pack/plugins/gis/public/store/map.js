@@ -88,8 +88,6 @@ export function map(state = INITIAL_STATE, action) {
         ...state, layerList: [...state.layerList.filter(
           ({ temporary }) => !temporary)]
       };
-    // case LAYER_LOADING:
-    //   return { ...state, layerLoading: action.loadingBool };
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
@@ -132,25 +130,24 @@ function updateWithDataRequest(state, action) {
 
 function updateWithDataResponse(state, action) {
   const layerReceivingData = findLayerById(state, action.layerId);
-  if (layerReceivingData) {
-    if (
-      layerReceivingData.dataRequestToken &&
-      layerReceivingData.dataRequestToken !== action.requestToken
-    ) {
-      //hackyest way to deal with race conditions
-      //just pick response of last request
-      return state;
-    }
-    layerReceivingData.data = action.data;
-    layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
-    layerReceivingData.dataMetaAtStart = null;
-    layerReceivingData.dataDirty = false;
-    layerReceivingData.dataRequestToken = null;
-    const layerList = [...state.layerList];
-    return { ...state, layerList };
-  } else {
+  if (!layerReceivingData) {
     return state;
   }
+  if (
+    layerReceivingData.dataRequestToken &&
+    layerReceivingData.dataRequestToken !== action.requestToken
+  ) {
+    //hackyest way to deal with race conditions
+    //just pick response of last request
+    return state;
+  }
+  layerReceivingData.data = action.data;
+  layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
+  layerReceivingData.dataMetaAtStart = null;
+  layerReceivingData.dataDirty = false;
+  layerReceivingData.dataRequestToken = null;
+  const layerList = [...state.layerList];
+  return { ...state, layerList };
 }
 
 function findLayerById(state, id) {

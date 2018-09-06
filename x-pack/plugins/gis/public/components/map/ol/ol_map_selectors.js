@@ -5,8 +5,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList, getMapState, getDataSources } from "./map_selectors";
-import { WEBMERCATOR, WGS_84 } from '../shared/ol_layer_defaults';
+import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
+import { WEBMERCATOR, WGS_84 } from '../../../shared/ol_layer_defaults';
 import * as ol from 'openlayers';
 import _ from 'lodash';
 
