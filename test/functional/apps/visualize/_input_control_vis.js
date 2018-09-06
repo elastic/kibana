@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('input control visualization', () => {
+  // unskip when https://github.com/elastic/kibana/issues/22233 is fixed
+  describe.skip('input control visualization', () => {
 
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();

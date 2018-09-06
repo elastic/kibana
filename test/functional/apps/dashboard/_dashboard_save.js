@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
   describe('dashboard save', function describeIndexTests() {
@@ -38,15 +37,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      let isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
+      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
       expect(isWarningDisplayed).to.equal(false);
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
-      isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
-      expect(isWarningDisplayed).to.equal(true);
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed();
     });
 
     it('does not save on reject confirmation', async function () {
@@ -87,10 +85,7 @@ export default function ({ getService, getPageObjects }) {
     it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { saveAsNew: true });
-
-      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
-      expect(isWarningDisplayed).to.equal(true);
-
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed();
       await PageObjects.dashboard.cancelSave();
     });
 
@@ -104,13 +99,7 @@ export default function ({ getService, getPageObjects }) {
     it('Warns when case is different', async function () {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
-
-      // We expect isWarningDisplayed to be open, hence the retry if not found.
-      await retry.try(async () => {
-        const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
-        expect(isWarningDisplayed).to.equal(true);
-      });
-
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed();
       await PageObjects.dashboard.cancelSave();
     });
   });
