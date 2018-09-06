@@ -195,9 +195,7 @@ vis-editor-agg-group {
 
 vis-editor-agg,
 vis-editor-agg-params,
-vis-editor-agg-param,
-vis-editor-vis-options,
-vis-editor-vis-options > * {
+vis-editor-agg-param {
   @include flex-parent();
 }
 
