@@ -3,35 +3,42 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export async function createDefaultSpace(server) {
+export async function createDefaultSpace(server: any) {
   const { callWithInternalUser: callCluster } = getClient(server);
 
   const { getSavedObjectsRepository, SavedObjectsClient } = server.savedObjects;
 
   const savedObjectsRepository = getSavedObjectsRepository(callCluster);
 
-  const defaultSpaceExists = await doesDefaultSpaceExist(SavedObjectsClient, savedObjectsRepository);
+  const defaultSpaceExists = await doesDefaultSpaceExist(
+    SavedObjectsClient,
+    savedObjectsRepository
+  );
 
   if (defaultSpaceExists) {
     return;
   }
 
   const options = {
-    id: DEFAULT_SPACE_ID
+    id: DEFAULT_SPACE_ID,
   };
 
-  await savedObjectsRepository.create('space', {
-    name: 'Default',
-    description: 'This is your default space!',
-    _reserved: true
-  }, options);
+  await savedObjectsRepository.create(
+    'space',
+    {
+      name: 'Default',
+      description: 'This is your default space!',
+      _reserved: true,
+    },
+    options
+  );
 }
 
-async function doesDefaultSpaceExist(SavedObjectsClient, savedObjectsRepository) {
+async function doesDefaultSpaceExist(SavedObjectsClient: any, savedObjectsRepository: any) {
   try {
     await savedObjectsRepository.get('space', DEFAULT_SPACE_ID);
     return true;

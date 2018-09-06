@@ -3,28 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+jest.mock('../../../../server/lib/get_client_shield', () => ({
+  getClient: jest.fn(),
+}));
+
 import Boom from 'boom';
+// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
-
-jest.mock('../../../../server/lib/get_client_shield', () => ({
-  getClient: jest.fn()
-}));
 
 let mockCallWithRequest;
 beforeEach(() => {
   mockCallWithRequest = jest.fn();
   getClient.mockReturnValue({
-    callWithRequest: mockCallWithRequest
+    callWithRequest: mockCallWithRequest,
   });
 });
-
-const createMockServer = (settings = {}) => {
-
-  const {
-    defaultExists = false,
-    simulateErrorCondition = false
-  } = settings;
+interface MockServerSettings {
+  defaultExists?: boolean;
+  simulateErrorCondition?: boolean;
+  [invalidKeys: string]: any;
+}
+const createMockServer = (settings: MockServerSettings = {}) => {
+  const { defaultExists = false, simulateErrorCondition = false } = settings;
 
   const mockGet = jest.fn().mockImplementation(() => {
     if (simulateErrorCondition) {
@@ -37,28 +38,28 @@ const createMockServer = (settings = {}) => {
     throw Boom.notFound('unit test: default space not found');
   });
 
-  const mockCreate = jest.fn().mockReturnValue();
+  const mockCreate = jest.fn().mockReturnValue(null);
 
   const mockServer = {
     config: jest.fn().mockReturnValue({
-      get: jest.fn()
+      get: jest.fn(),
     }),
     savedObjects: {
       SavedObjectsClient: {
         errors: {
-          isNotFoundError: (e) => e.message === 'unit test: default space not found'
-        }
+          isNotFoundError: (e: Error) => e.message === 'unit test: default space not found',
+        },
       },
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {
           get: mockGet,
           create: mockCreate,
         };
-      })
-    }
+      }),
+    },
   };
 
-  mockServer.config().get.mockImplementation(key => {
+  mockServer.config().get.mockImplementation((key: string) => {
     return settings[key];
   });
 
@@ -67,7 +68,7 @@ const createMockServer = (settings = {}) => {
 
 test(`it creates the default space when one does not exist`, async () => {
   const server = createMockServer({
-    defaultExists: false
+    defaultExists: false,
   });
 
   await createDefaultSpace(server);
@@ -78,14 +79,14 @@ test(`it creates the default space when one does not exist`, async () => {
   expect(repository.create).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledWith(
     'space',
-    { "_reserved": true, "description": "This is your default space!", "name": "Default" },
-    { "id": "default" }
+    { _reserved: true, description: 'This is your default space!', name: 'Default' },
+    { id: 'default' }
   );
 });
 
 test(`it does not attempt to recreate the default space if it already exists`, async () => {
   const server = createMockServer({
-    defaultExists: true
+    defaultExists: true,
   });
 
   await createDefaultSpace(server);

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { wrapError } from './errors';
 import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export function initSpacesRequestInterceptors(server) {
-
+export function initSpacesRequestInterceptors(server: any) {
   const serverBasePath = server.config().get('server.basePath');
 
-  server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
+  server.ext('onRequest', async function spacesOnRequestHandler(request: any, reply: any) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
@@ -38,7 +37,7 @@ export function initSpacesRequestInterceptors(server) {
     return reply.continue();
   });
 
-  server.ext('onPostAuth', async function spacesOnRequestHandler(request, reply) {
+  server.ext('onPostAuth', async function spacesOnRequestHandler(request: any, reply: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
@@ -50,7 +49,7 @@ export function initSpacesRequestInterceptors(server) {
       try {
         const client = request.getSavedObjectsClient();
         const { total, saved_objects: spaceObjects } = await client.find({
-          type: 'space'
+          type: 'space',
         });
 
         const config = server.config();
@@ -70,10 +69,9 @@ export function initSpacesRequestInterceptors(server) {
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
           return reply.renderApp(app, {
-            spaces: spaceObjects.map(so => ({ ...so.attributes, id: so.id }))
+            spaces: spaceObjects.map((so: any) => ({ ...so.attributes, id: so.id })),
           });
         }
-
       } catch (error) {
         return reply(wrapError(error));
       }
@@ -81,6 +79,4 @@ export function initSpacesRequestInterceptors(server) {
 
     return reply.continue();
   });
-
-
 }

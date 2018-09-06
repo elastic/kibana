@@ -3,36 +3,49 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
+// @ts-ignore
 import { Server } from 'hapi';
-import { initSpacesRequestInterceptors } from './space_request_interceptors';
+import sinon from 'sinon';
 import { createSpacesService } from './create_spaces_service';
+import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {
   const sandbox = sinon.sandbox.create();
-  const teardowns = [];
-  let request;
+  const teardowns: Array<() => void> = [];
+  let request: any;
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
-    request = async (path, setupFn = () => { }, testConfig = {}) => {
-
+    request = async (
+      path: string,
+      setupFn: (ser?: any) => void = () => {
+        return;
+      },
+      testConfig = {}
+    ) => {
       const server = new Server();
 
       server.connection({ port: 0 });
 
-      const config = {
+      interface Config {
+        [key: string]: any;
+      }
+      const config: Config = {
         'server.basePath': '/foo',
         ...testConfig,
       };
 
-      server.decorate('server', 'config', jest.fn(() => {
-        return {
-          get: jest.fn(key => {
-            return config[key];
-          })
-        };
-      }));
+      server.decorate(
+        'server',
+        'config',
+        jest.fn(() => {
+          return {
+            get: jest.fn(key => {
+              return config[key];
+            }),
+          };
+        })
+      );
 
       const spacesService = createSpacesService(server);
       server.decorate('server', 'spaces', spacesService);
@@ -42,9 +55,9 @@ describe('interceptors', () => {
       server.route({
         method: 'GET',
         path: '/',
-        handler: (req, reply) => {
+        handler: (req: any, reply: any) => {
           return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
-        }
+        },
       });
 
       await setupFn(server);
@@ -68,11 +81,11 @@ describe('interceptors', () => {
   describe('onRequest', () => {
     test('handles paths without a space identifier', async () => {
       const testHandler = jest.fn((req, reply) => {
-        expect(req.path).toBe("/");
+        expect(req.path).toBe('/');
         return reply.continue();
       });
 
-      await request('/', (server) => {
+      await request('/', (server: any) => {
         server.ext('onRequest', testHandler);
       });
 
@@ -81,11 +94,11 @@ describe('interceptors', () => {
 
     test('strips the Space URL Context from the request', async () => {
       const testHandler = jest.fn((req, reply) => {
-        expect(req.path).toBe("/");
+        expect(req.path).toBe('/');
         return reply.continue();
       });
 
-      await request('/s/foo', (server) => {
+      await request('/s/foo', (server: any) => {
         server.ext('onRequest', testHandler);
       });
 
@@ -94,11 +107,11 @@ describe('interceptors', () => {
 
     test('ignores space identifiers in the middle of the path', async () => {
       const testHandler = jest.fn((req, reply) => {
-        expect(req.path).toBe("/some/path/s/foo/bar");
+        expect(req.path).toBe('/some/path/s/foo/bar');
         return reply.continue();
       });
 
-      await request('/some/path/s/foo/bar', (server) => {
+      await request('/some/path/s/foo/bar', (server: any) => {
         server.ext('onRequest', testHandler);
       });
 
@@ -109,12 +122,12 @@ describe('interceptors', () => {
       const testHandler = jest.fn((req, reply) => {
         expect(req.path).toBe('/i/love/spaces.html');
         expect(req.query).toEqual({
-          queryParam: 'queryValue'
+          queryParam: 'queryValue',
         });
         return reply.continue();
       });
 
-      await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (server) => {
+      await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (server: any) => {
         server.ext('onRequest', testHandler);
       });
 
@@ -128,19 +141,19 @@ describe('interceptors', () => {
 
     const config = {
       'server.basePath': serverBasePath,
-      'server.defaultRoute': defaultRoute
+      'server.defaultRoute': defaultRoute,
     };
 
-    const setupTest = (server, spaces, testHandler) => {
+    const setupTest = (server: any, spaces: any[], testHandler: any) => {
       // Mock server.getSavedObjectsClient()
       server.decorate('request', 'getSavedObjectsClient', () => {
         return {
           find: jest.fn(() => {
             return {
               total: spaces.length,
-              saved_objects: spaces
+              saved_objects: spaces,
             };
-          })
+          }),
         };
       });
 
@@ -163,16 +176,22 @@ describe('interceptors', () => {
           return reply.continue();
         });
 
-        const spaces = [{
-          id: 'a-space',
-          attributes: {
-            name: 'a space',
-          }
-        }];
+        const spaces = [
+          {
+            id: 'a-space',
+            attributes: {
+              name: 'a space',
+            },
+          },
+        ];
 
-        await request('/', (server) => {
-          setupTest(server, spaces, testHandler);
-        }, config);
+        await request(
+          '/',
+          (server: any) => {
+            setupTest(server, spaces, testHandler);
+          },
+          config
+        );
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -195,16 +214,22 @@ describe('interceptors', () => {
           return reply.continue();
         });
 
-        const spaces = [{
-          id: 'default',
-          attributes: {
-            name: 'Default Space',
-          }
-        }];
+        const spaces = [
+          {
+            id: 'default',
+            attributes: {
+              name: 'Default Space',
+            },
+          },
+        ];
 
-        await request('/', (server) => {
-          setupTest(server, spaces, testHandler);
-        }, config);
+        await request(
+          '/',
+          (server: any) => {
+            setupTest(server, spaces, testHandler);
+          },
+          config
+        );
 
         expect(testHandler).toHaveBeenCalledTimes(1);
       });
@@ -212,20 +237,22 @@ describe('interceptors', () => {
 
     describe('with multiple available spaces', () => {
       test('it redirects to the Space Selector App when navigating to Kibana root', async () => {
+        const spaces = [
+          {
+            id: 'a-space',
+            attributes: {
+              name: 'a space',
+            },
+          },
+          {
+            id: 'b-space',
+            attributes: {
+              name: 'b space',
+            },
+          },
+        ];
 
-        const spaces = [{
-          id: 'a-space',
-          attributes: {
-            name: 'a space',
-          }
-        }, {
-          id: 'b-space',
-          attributes: {
-            name: 'b space',
-          }
-        }];
-
-        const getHiddenUiAppHandler = jest.fn(() => { return '<div>space selector</div>'; });
+        const getHiddenUiAppHandler = jest.fn(() => '<div>space selector</div>');
 
         const testHandler = jest.fn((req, reply) => {
           const { response } = req;
@@ -235,19 +262,24 @@ describe('interceptors', () => {
           }
 
           expect(response.statusCode).toEqual(200);
-          expect(response.source).toEqual({ "app": "<div>space selector</div>", "renderApp": true });
+          expect(response.source).toEqual({ app: '<div>space selector</div>', renderApp: true });
 
           return reply.continue();
         });
 
-        await request('/', (server) => {
-          server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
-          server.decorate('reply', 'renderApp', function (app) {
-            this({ renderApp: true, app });
-          });
+        await request(
+          '/',
+          (server: any) => {
+            server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
+            server.decorate('reply', 'renderApp', function renderAppHandler(app: any) {
+              // @ts-ignore
+              this({ renderApp: true, app });
+            });
 
-          setupTest(server, spaces, testHandler);
-        }, config);
+            setupTest(server, spaces, testHandler);
+          },
+          config
+        );
 
         expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
         expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');

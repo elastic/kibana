@@ -15,10 +15,10 @@
  * @param {XPackInfo} xPackInfo XPackInfo instance to extract license information from.
  * @returns {LicenseCheckResult}
  */
-export function checkLicense(xPackInfo) {
+export function checkLicense(xPackInfo: any) {
   if (!xPackInfo.isAvailable()) {
     return {
-      showSpaces: false
+      showSpaces: false,
     };
   }
 
@@ -26,11 +26,11 @@ export function checkLicense(xPackInfo) {
 
   if (!isAnyXpackLicense) {
     return {
-      showSpaces: false
+      showSpaces: false,
     };
   }
 
   return {
-    showSpaces: true
+    showSpaces: true,
   };
 }

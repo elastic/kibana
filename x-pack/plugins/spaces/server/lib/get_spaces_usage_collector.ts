@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
+// @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
+import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 
 /**
  *
@@ -15,8 +15,10 @@ import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constan
  * @param withinDayRange
  * @return {ReportingUsageStats}
  */
-async function getSpacesUsage(callCluster, server, spacesAvailable) {
-  if (!spacesAvailable) return {};
+async function getSpacesUsage(callCluster: any, server: any, spacesAvailable: boolean) {
+  if (!spacesAvailable) {
+    return {};
+  }
 
   const { getSavedObjectsRepository } = server.savedObjects;
 
@@ -29,15 +31,20 @@ async function getSpacesUsage(callCluster, server, spacesAvailable) {
   };
 }
 
+export interface UsageStats {
+  available: boolean;
+  enabled: boolean;
+  count?: number;
+}
 /*
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getSpacesUsageCollector(server) {
+export function getSpacesUsageCollector(server: any) {
   const { collectorSet } = server.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
-    fetch: async callCluster => {
+    fetch: async (callCluster: any) => {
       const xpackInfo = server.plugins.xpack_main.info;
       const config = server.config();
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
@@ -50,7 +57,7 @@ export function getSpacesUsageCollector(server) {
         available,
         enabled: spacesAvailableAndEnabled, // similar behavior as _xpack API in ES
         ...usageStats,
-      };
+      } as UsageStats;
     },
 
     /*
@@ -58,18 +65,17 @@ export function getSpacesUsageCollector(server) {
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage.xpack.spaces namespace of the data payload
      */
-    formatForBulkUpload: result => {
+    formatForBulkUpload: (result: UsageStats) => {
       return {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
           usage: {
             xpack: {
-              spaces: result
-            }
-          }
-        }
+              spaces: result,
+            },
+          },
+        },
       };
-
-    }
+    },
   });
 }

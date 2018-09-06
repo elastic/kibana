@@ -4,28 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSpacesService } from "./create_spaces_service";
 import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { createSpacesService } from './create_spaces_service';
 
-const createRequest = (spaceId, serverBasePath = '') => ({
-  getBasePath: () => spaceId && spaceId !== DEFAULT_SPACE_ID ? `${serverBasePath}/s/${spaceId}` : serverBasePath
+const createRequest = (spaceId?: string, serverBasePath = '') => ({
+  getBasePath: () =>
+    spaceId && spaceId !== DEFAULT_SPACE_ID ? `${serverBasePath}/s/${spaceId}` : serverBasePath,
 });
 
-const createMockServer = (config) => {
+const createMockServer = (config: any) => {
   return {
     config: jest.fn(() => {
       return {
-        get: jest.fn((key) => {
+        get: jest.fn((key: string) => {
           return config[key];
-        })
+        }),
       };
-    })
+    }),
   };
 };
 
 test('returns the default space ID', () => {
   const server = createMockServer({
-    'server.basePath': ''
+    'server.basePath': '',
   });
 
   const service = createSpacesService(server);
@@ -35,7 +36,7 @@ test('returns the default space ID', () => {
 test('returns the id for the current space', () => {
   const request = createRequest('my-space-context');
   const server = createMockServer({
-    'server.basePath': ''
+    'server.basePath': '',
   });
 
   const service = createSpacesService(server);
@@ -45,7 +46,7 @@ test('returns the id for the current space', () => {
 test(`returns the id for the current space when a server basepath is defined`, () => {
   const request = createRequest('my-space-context', '/foo');
   const server = createMockServer({
-    'server.basePath': '/foo'
+    'server.basePath': '/foo',
   });
 
   const service = createSpacesService(server);
