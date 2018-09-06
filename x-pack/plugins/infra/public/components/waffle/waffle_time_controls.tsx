@@ -50,7 +50,7 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
           selected={currentMoment}
           shouldCloseOnSelect
           showTimeSelect
-          timeFormat="LTS"
+          timeFormat="LT"
         />
       </EuiFormControlLayout>
     );
