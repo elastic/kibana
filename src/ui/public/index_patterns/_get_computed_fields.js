@@ -29,7 +29,7 @@ export function getComputedFields() {
     .map((dateField) => {
       return {
         field: dateField.name,
-        format: 'epoch_millis',
+        format: 'strict_date_optional_time',
       };
     });
 
