@@ -102,7 +102,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.extraDocumentProperties={}] - extra properties to append to the document body, outside of the object's type property
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -115,6 +115,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, extraDocumentProperties }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
@@ -126,10 +127,12 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id) {
-    return this._repository.delete(type, id);
+  async delete(type, id, options = {}) {
+    return this._repository.delete(type, id, options);
   }
 
   /**
@@ -138,12 +141,12 @@ export class SavedObjectsClient {
    * @property {string} [options.search]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
-   * @property {object} [options.filters] - ES Query filters to append
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -154,8 +157,8 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @param {object} [options = {}]
-   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -173,8 +176,8 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @param {object} [options = {}]
-   * @param {array} [options.extraSourceProperties = []] - an array of extra properties to return from the underlying document
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
@@ -188,7 +191,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
-   * @param {array} [options.extraDocumentProperties = {}] - an object of extra properties to write into the underlying document
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {

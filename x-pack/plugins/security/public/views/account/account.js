@@ -16,7 +16,7 @@ routes.when('/account', {
   template,
   resolve: {
     user(ShieldUser) {
-      return ShieldUser.getCurrent();
+      return ShieldUser.getCurrent().$promise;
     }
   },
   controllerAs: 'accountController',

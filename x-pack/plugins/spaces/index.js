@@ -7,11 +7,14 @@
 import { resolve } from 'path';
 import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
-import { initSpacesApi } from './server/routes/api/v1/spaces';
+import { initPublicSpacesApi } from './server/routes/api/public';
+import { initPrivateApis } from './server/routes/api/v1';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
 import { getActiveSpace } from './server/lib/get_active_space';
+import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
+import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
@@ -41,6 +44,11 @@ export const spaces = (kibana) => new kibana.Plugin({
     }],
     hacks: [],
     mappings,
+    savedObjectsSchema: {
+      space: {
+        isNamespaceAgnostic: true,
+      },
+    },
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function (server) {
       return {
@@ -83,13 +91,21 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.decorate('server', 'spaces', spacesService);
 
-    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
     addScopedSavedObjectsClientWrapperFactory(
-      spacesSavedObjectsClientWrapperFactory(spacesService, types)
+      spacesSavedObjectsClientWrapperFactory(spacesService)
     );
 
-    initSpacesApi(server);
+    server.addScopedTutorialContextFactory(
+      createSpacesTutorialContextFactory(spacesService)
+    );
+
+    initPrivateApis(server);
+    initPublicSpacesApi(server);
 
     initSpacesRequestInterceptors(server);
+
+    // Register a function with server to manage the collection of usage stats
+    server.usage.collectorSet.register(getSpacesUsageCollector(server));
   }
 });

@@ -94,8 +94,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await find.clickByLinkText('Logout');
 
       await retry.try(async () => {
-        const logoutLinkExists = await find.existsByDisplayedByCssSelector('.login-form');
-        if (!logoutLinkExists) {
+        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
+
+        const logoutLinkExists = await find.existsByLinkText('Logout');
+        if (logoutLinkExists) {
+          await find.clickByLinkText('Logout');
+        }
+
+        if (!loginFormExists) {
           throw new Error('Logout is not completed yet');
         }
       });
@@ -197,12 +203,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async user => {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
+        const emailElement = await user.findByCssSelector('[data-header="Email Address"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
         const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
+          email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
@@ -238,7 +246,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await testSubjects.setValue('userFormEmailInput', userObj.email);
       log.debug('Add roles: ', userObj.roles);
       const rolesToAdd = userObj.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {

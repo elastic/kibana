@@ -47,12 +47,12 @@ export class SecureSavedObjectsClient {
     );
   }
 
-  async delete(type, id) {
+  async delete(type, id, options = {}) {
     return await this._execute(
       type,
       'delete',
-      { type, id },
-      repository => repository.delete(type, id),
+      { type, id, options },
+      repository => repository.delete(type, id, options),
     );
   }
 
@@ -150,10 +150,11 @@ export class SecureSavedObjectsClient {
 
     this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
 
-    return await this._internalRepository.find({
-      ...options,
-      type: authorizedTypes
-    });
+    return await this._internalRepository.find(
+      {
+        ...options,
+        type: authorizedTypes,
+      });
   }
 
   async _findWithTypes(options) {

@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { SPACES } from './lib/spaces';
-import { getIdPrefix, getUrlPrefix, getExpectedSpaceIdProperty } from './lib/space_test_utils';
+import { getIdPrefix, getUrlPrefix } from './lib/space_test_utils';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -73,7 +73,6 @@ export default function ({ getService }) {
             type: 'visualization',
             updated_at: '2017-09-21T18:51:23.794Z',
             version: resp.body.saved_objects[0].version,
-            ...getExpectedSpaceIdProperty(spaceId),
             attributes: {
               title: 'Count of requests',
               description: '',

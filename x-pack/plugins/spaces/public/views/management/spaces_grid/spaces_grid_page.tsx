@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPage,
+  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -59,28 +60,30 @@ export class SpacesGridPage extends Component<Props, State> {
   public render() {
     return (
       <EuiPage restrictWidth className="spacesGridPage">
-        <EuiPageContent>
-          <EuiFlexGroup justifyContent={'spaceBetween'}>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h1>Spaces</h1>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size={'xl'} />
+        <EuiPageBody>
+          <EuiPageContent horizontalPosition="center">
+            <EuiFlexGroup justifyContent={'spaceBetween'}>
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <h1>Spaces</h1>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size={'xl'} />
 
-          <EuiInMemoryTable
-            itemId={'id'}
-            items={this.state.spaces}
-            columns={this.getColumnConfig()}
-            hasActions
-            pagination={true}
-            search={true}
-            loading={this.state.loading}
-            message={this.state.loading ? 'loading...' : undefined}
-          />
-        </EuiPageContent>
+            <EuiInMemoryTable
+              itemId={'id'}
+              items={this.state.spaces}
+              columns={this.getColumnConfig()}
+              hasActions
+              pagination={true}
+              search={true}
+              loading={this.state.loading}
+              message={this.state.loading ? 'loading...' : undefined}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
         {this.getConfirmDeleteModal()}
       </EuiPage>
     );

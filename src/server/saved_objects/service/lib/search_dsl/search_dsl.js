@@ -22,14 +22,14 @@ import Boom from 'boom';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, options = {}) {
+export function getSearchDsl(mappings, schema, options = {}) {
   const {
+    namespace,
     type,
     search,
     searchFields,
     sortField,
     sortOrder,
-    filters,
   } = options;
 
   if (!type && sortField) {
@@ -40,12 +40,8 @@ export function getSearchDsl(mappings, options = {}) {
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
-  if (filters && !Array.isArray(filters)) {
-    throw Boom.notAcceptable('filters must be an array');
-  }
-
   return {
-    ...getQueryParams(mappings, type, search, searchFields, filters),
+    ...getQueryParams(mappings, schema, namespace, type, search, searchFields),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }
