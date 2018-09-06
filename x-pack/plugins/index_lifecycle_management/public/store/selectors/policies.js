@@ -171,7 +171,9 @@ export const policyFromES = ({ name, type, phases }) => {
       [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
       [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultColdPhase),
       [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultDeletePhase)
-    }
+    },
+    isNew: false,
+    saveAsNew: false
   };
 };
 
