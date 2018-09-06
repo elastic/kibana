@@ -29,7 +29,6 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
-import chalk from 'chalk';
 
 import { createFailError } from '../run';
 
@@ -118,17 +117,14 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
 
   if (unusedKeys.length) {
     throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-"values" object contains unused properties ("${messageId}"):
+      `"values" object contains unused properties ("${messageId}"):
 [${unusedKeys}].`
     );
   }
 
   if (missingKeys.length) {
     throw createFailError(
-      `${chalk.white.bgRed(
-        ' I18N ERROR '
-      )} some properties are missing in "values" object ("${messageId}"):
+      `some properties are missing in "values" object ("${messageId}"):
 [${missingKeys}].`
     );
   }
@@ -136,9 +132,7 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
 
 export function extractMessageIdFromNode(node) {
   if (!isStringLiteral(node)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} Message id should be a string literal.`
-    );
+    throw createFailError(`Message id should be a string literal.`);
   }
 
   return node.value;
@@ -146,10 +140,7 @@ export function extractMessageIdFromNode(node) {
 
 export function extractMessageValueFromNode(node, id) {
   if (!isStringLiteral(node)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-defaultMessage value should be a string literal ("${id}").`
-    );
+    throw createFailError(`defaultMessage value should be a string literal ("${id}").`);
   }
 
   return node.value;
@@ -157,9 +148,7 @@ defaultMessage value should be a string literal ("${id}").`
 
 export function extractContextValueFromNode(node, id) {
   if (!isStringLiteral(node)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} context value should be a string literal ("${id}").`
-    );
+    throw createFailError(`context value should be a string literal ("${id}").`);
   }
 
   return node.value;
@@ -167,10 +156,7 @@ export function extractContextValueFromNode(node, id) {
 
 export function extractValuesKeysFromNode(node, id) {
   if (!isObjectExpression(node)) {
-    throw createFailError(
-      `${chalk.white.bgRed(' I18N ERROR ')} \
-"values" value should be an object expression ("${id}").`
-    );
+    throw createFailError(`"values" value should be an object expression ("${id}").`);
   }
 
   return node.properties.map(
