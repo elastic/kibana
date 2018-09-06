@@ -44,6 +44,6 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
-    kueryAutocomplete(kibana),
+    kueryAutocomplete(kibana)
   ];
 };

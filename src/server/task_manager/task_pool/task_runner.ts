@@ -22,6 +22,7 @@ import { intervalFromNow } from './task_intervals';
 import { TaskStore } from './task_store';
 
 interface Logger {
+  info: (msg: string) => void;
   debug: (msg: string) => void;
   warning: (msg: string) => void;
 }

@@ -36,6 +36,7 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
+import { taskManagerMixin } from './task_manager';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
@@ -95,6 +96,9 @@ export default class KbnServer {
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
+
+      // task manager service
+      taskManagerMixin,
 
       // setup routes for short urls
       urlShorteningMixin,
