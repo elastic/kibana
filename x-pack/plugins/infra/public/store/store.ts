@@ -17,6 +17,7 @@ import {
   reducer,
   sharedSelectors,
   State,
+  waffleTimeSelectors,
 } from '.';
 import { InfraApolloClient, InfraObservableApi } from '../lib/lib';
 
@@ -47,6 +48,7 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
     selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
     selectVisibleLogSummary: logPositionSelectors.selectVisibleSummary,
+    selectWaffleTimeUpdatePolicyInterval: waffleTimeSelectors.selectTimeUpdatePolicyInterval,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(

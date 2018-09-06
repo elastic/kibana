@@ -12,8 +12,11 @@ import { Toolbar } from '../components/eui/toolbar';
 import { Header } from '../components/header';
 import { ColumnarPage, PageContent } from '../components/page';
 import { Waffle } from '../components/waffle';
+import { WaffleTimeControls } from '../components/waffle/waffle_time_controls';
+
 import { WithWaffleFilter } from '../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../containers/waffle/with_waffle_nodes';
+import { WithWaffleTime } from '../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../containers/with_kuery_autocompletion';
 import { WithOptions } from '../containers/with_options';
 
@@ -23,7 +26,7 @@ export class HomePage extends React.PureComponent {
       <ColumnarPage>
         <Header />
         <Toolbar>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
               <WithKueryAutocompletion>
                 {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
@@ -49,6 +52,25 @@ export class HomePage extends React.PureComponent {
                 )}
               </WithKueryAutocompletion>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WithWaffleTime>
+                {({
+                  currentTime,
+                  isAutoReloading,
+                  jumpToTime,
+                  startAutoReload,
+                  stopAutoReload,
+                }) => (
+                  <WaffleTimeControls
+                    currentTime={currentTime}
+                    isLiveStreaming={isAutoReloading}
+                    onChangeTime={jumpToTime}
+                    startLiveStreaming={startAutoReload}
+                    stopLiveStreaming={stopAutoReload}
+                  />
+                )}
+              </WithWaffleTime>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </Toolbar>
         <PageContent>
@@ -56,15 +78,19 @@ export class HomePage extends React.PureComponent {
             {({ wafflemap }) => (
               <WithWaffleFilter>
                 {({ filterQueryAsJson }) => (
-                  <WithWaffleNodes
-                    filterQuery={filterQueryAsJson}
-                    metrics={wafflemap.metrics}
-                    path={wafflemap.path}
-                    sourceId={wafflemap.sourceId}
-                    timerange={wafflemap.timerange}
-                  >
-                    {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}
-                  </WithWaffleNodes>
+                  <WithWaffleTime>
+                    {({ currentTimeRange }) => (
+                      <WithWaffleNodes
+                        filterQuery={filterQueryAsJson}
+                        metrics={wafflemap.metrics}
+                        path={wafflemap.path}
+                        sourceId={wafflemap.sourceId}
+                        timerange={currentTimeRange}
+                      >
+                        {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}
+                      </WithWaffleNodes>
+                    )}
+                  </WithWaffleTime>
                 )}
               </WithWaffleFilter>
             )}

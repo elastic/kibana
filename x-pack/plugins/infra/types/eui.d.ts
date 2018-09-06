@@ -91,4 +91,25 @@ declare module '@elastic/eui' {
     onOutsideClick: React.MouseEventHandler<Element>;
   }
   export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
+
+  interface EuiFormControlLayoutIconProps {
+    type: IconType;
+    side?: 'left' | 'right';
+    onClick?: React.MouseEventHandler<Element>;
+  }
+
+  interface EuiFormControlLayoutClearIconProps {
+    onClick?: React.MouseEventHandler<Element>;
+  }
+
+  type EuiFormControlLayoutProps = CommonProps & {
+    icon?: string | EuiFormControlLayoutIconProps;
+    clear?: EuiFormControlLayoutClearIconProps;
+    fullWidth?: boolean;
+    isLoading?: boolean;
+    compressed?: boolean;
+    prepend?: React.ReactNode;
+    append?: React.ReactNode;
+  };
+  export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
 }
