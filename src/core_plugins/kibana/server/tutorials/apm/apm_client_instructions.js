@@ -36,14 +36,17 @@ export const createNodeClientInstructions = () => [
     textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPre', {
       defaultMessage: 'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `serviceName`. \
-This agent supports Express, Koa, hapi, and custom Node.js.',
+This agent supports a vararity of frameworks but can also be used with your custom stack.',
     }),
     commands: `// ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.addThisToTheFileTopComment', {
       defaultMessage: 'Add this to the VERY top of the first file loaded in your app',
     })}
 var apm = require('elastic-apm-node').start({curlyOpen}
   // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.setRequiredServiceNameComment', {
-    defaultMessage: 'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
+    defaultMessage: 'Override service name from package.json',
+  })}
+  // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.allowedCharactersComment', {
+    defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
   })}
   serviceName: '',
 
