@@ -59,7 +59,10 @@ routes.when('/management/kibana/reporting', {
       }
 
       render(
-        <ReportListing/>,
+        <ReportListing
+          xpackInfo={xpackInfo}
+          kbnUrl={kbnUrl}
+        />,
         node,
       );
     });

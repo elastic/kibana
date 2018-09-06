@@ -13,12 +13,20 @@ const API_BASE_URL = '/api/reporting/jobs';
 class JobQueueClient {
   public list = (page = 0) => {
     return kfetch({
-      method: 'POST',
+      method: 'GET',
       pathname: `${API_BASE_URL}/list`,
       query: { page },
       headers: addSystemApiHeader({}),
     });
   };
+
+  public total() {
+    return kfetch({
+      method: 'GET',
+      pathname: `${API_BASE_URL}/count`,
+      headers: addSystemApiHeader({}),
+    });
+  }
 }
 
 export const jobQueueClient = new JobQueueClient();
