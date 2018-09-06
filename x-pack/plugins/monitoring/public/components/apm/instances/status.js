@@ -16,7 +16,6 @@ export function Status({ stats }) {
     apms: {
       total
     },
-    bytesSent,
     totalEvents,
     timeOfLastEvent,
   } = stats;
@@ -26,11 +25,6 @@ export function Status({ stats }) {
       label: 'Servers',
       value: total,
       dataTestSubj: 'total'
-    },
-    {
-      label: 'Bytes Sent',
-      value: formatMetric(bytesSent, 'bytes'),
-      dataTestSubj: 'bytesSent'
     },
     {
       label: 'Total Events',

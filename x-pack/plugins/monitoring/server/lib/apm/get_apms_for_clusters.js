@@ -11,12 +11,13 @@ import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_sta
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(clusterUuid, response) {
-  const { apmTotal, totalEvents, bytesSent } = apmAggResponseHandler(response);
+  const { apmTotal, totalEvents, memRss, memTotal } = apmAggResponseHandler(response);
 
   // combine stats
   const stats = {
     totalEvents,
-    bytesSent,
+    memRss,
+    memTotal,
     apms: {
       total: apmTotal,
     }

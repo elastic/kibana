@@ -65,7 +65,8 @@ export function handleResponse(response, start, end) {
       bytes_sent_rate: bytesSentRate,
       errors,
       memory: get(stats, 'metrics.beat.memstats.memory_alloc'),
-      version: get(stats, 'beat.version')
+      version: get(stats, 'beat.version'),
+      time_of_last_event: get(hit, '_source.timestamp')
     });
 
     return accum;
@@ -86,6 +87,7 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
     size: config.get('xpack.monitoring.max_bucket_size'), // FIXME
     ignoreUnavailable: true,
     filterPath: [ // only filter path can filter for inner_hits
+      'hits.hits._source.timestamp',
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beats_stats.beat.name',
       'hits.hits._source.beats_stats.beat.host',

@@ -74,14 +74,6 @@ export const metricSet = [
   },
   {
     keys: [
-      'apm_decoder_deflate_contentlength',
-      'apm_decoder_gzip_contentlength',
-      'apm_decoder_uncompressed_contentlength'
-    ],
-    name: 'apm_incoming_requests_size'
-  },
-  {
-    keys: [
       'apm_processor_transaction_transformations',
       'apm_processor_span_transformations',
       'apm_processor_error_transformations',

@@ -217,7 +217,7 @@ export const metrics = {
 
   apm_processor_transaction_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.transaction.transformations',
-    title: 'Transformations',
+    title: 'Processed Events',
     label: 'Transaction',
     description: 'PLZ FILL ME IN'
   }),

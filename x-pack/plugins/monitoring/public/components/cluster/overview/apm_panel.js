@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
 
 import {
   EuiFlexGrid,
@@ -20,6 +21,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { formatTimestampToDuration } from '../../../../common';
 
 export function ApmPanel(props) {
   if (!get(props, 'apms.total', 0) > 0) {
@@ -47,13 +49,13 @@ export function ApmPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Total Events</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>Processed Events</EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Bytes Sent</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>Last Event</EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
-                {formatMetric(props.bytesSent, 'byte')}
+                {formatTimestampToDuration(+moment(props.timeOfLastEvent), 'since') + ' ago'}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -71,6 +73,13 @@ export function ApmPanel(props) {
                 </EuiLink>
               </h3>
             </EuiTitle>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle>Memory Usage</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
+                <BytesPercentageUsage usedBytes={props.memRss} maxBytes={props.memTotal} />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGrid>
