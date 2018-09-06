@@ -9,36 +9,30 @@ import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';
 import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_response.json';
 
-jest.mock('../../services/job_service',
-  () => ({
-    mlJobService: {
-      getJob() { return mockJobConfig; },
-      detectorsByJob: mockDetectorsByJob
-    }
-  })
-);
+jest.mock('../../services/job_service', () => ({
+  mlJobService: {
+    getJob() { return mockJobConfig; },
+    detectorsByJob: mockDetectorsByJob
+  }
+}));
 
-jest.mock('../../services/results_service',
-  () => ({
-    mlResultsService: {
-      getMetricData() {
-        return Promise.resolve(mockSeriesPromisesResponse[0][0]);
-      },
-      getRecordsForCriteria() {
-        return Promise.resolve(mockSeriesPromisesResponse[0][1]);
-      },
-      getScheduledEventsByBucket() {
-        return Promise.resolve(mockSeriesPromisesResponse[0][2]);
-      }
+jest.mock('../../services/results_service', () => ({
+  mlResultsService: {
+    getMetricData() {
+      return Promise.resolve(mockSeriesPromisesResponse[0][0]);
+    },
+    getRecordsForCriteria() {
+      return Promise.resolve(mockSeriesPromisesResponse[0][1]);
+    },
+    getScheduledEventsByBucket() {
+      return Promise.resolve(mockSeriesPromisesResponse[0][2]);
     }
-  })
-);
+  }
+}));
 
-jest.mock('../../util/string_utils',
-  () => ({
-    mlEscape(d) { return d; }
-  })
-);
+jest.mock('../../util/string_utils', () => ({
+  mlEscape(d) { return d; }
+}));
 
 const mockMlSelectSeverityService = {
   state: {
