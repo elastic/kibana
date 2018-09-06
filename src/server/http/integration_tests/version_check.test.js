@@ -18,9 +18,9 @@
  */
 
 import { resolve } from 'path';
-import * as kbnTestServer from '../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_utils/kbn_server';
 
-const src = resolve.bind(null, __dirname, '../../../src');
+const src = resolve.bind(null, __dirname, '../../../../src');
 
 const versionHeader = 'kbn-version';
 const version = require(src('../package.json')).version;

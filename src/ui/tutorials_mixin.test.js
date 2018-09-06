@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createServer } from '../test_utils/kbn_server';
+import { createRoot, getKbnServer } from '../test_utils/kbn_server';
 
 const validTutorial = {
   id: 'spec1',
@@ -43,14 +43,16 @@ const validTutorial = {
 
 describe('tutorial mixins', () => {
 
+  let root;
   let kbnServer;
   beforeEach(async () => {
-    kbnServer = createServer();
-    await kbnServer.ready();
+    root = createRoot();
+    await root.start();
+    kbnServer = getKbnServer(root);
   });
 
   afterEach(async () => {
-    await kbnServer.close();
+    await root.shutdown();
   });
 
   describe('scoped context', () => {

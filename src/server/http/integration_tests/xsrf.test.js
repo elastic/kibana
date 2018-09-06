@@ -18,10 +18,10 @@
  */
 
 import { resolve } from 'path';
-import * as kbnTestServer from '../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_utils/kbn_server';
 
 const destructiveMethods = ['POST', 'PUT', 'DELETE'];
-const src = resolve.bind(null, __dirname, '../../../src');
+const src = resolve.bind(null, __dirname, '../../../../src');
 
 const xsrfHeader = 'kbn-xsrf';
 const versionHeader = 'kbn-version';
