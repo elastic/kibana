@@ -16,9 +16,11 @@ import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
 import { Poller } from '../../../../../common/poller';
 
+import { ReportListing } from '../../components/report_listing';
+
 const pageSize = 10;
 
-const REACT_ANCHOR_DOM_ELEMENT_ID = 'reactReportingTableAnchor';
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'reportListingAnchor';
 
 function mapJobs(jobs) {
   return jobs.map((job) => {
@@ -57,7 +59,7 @@ routes.when('/management/kibana/reporting', {
       }
 
       render(
-        <div>All wired up and ready to go</div>,
+        <ReportListing/>,
         node,
       );
     });
