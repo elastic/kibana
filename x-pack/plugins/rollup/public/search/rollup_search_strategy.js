@@ -80,6 +80,24 @@ function serializeFetchParams(searchRequestsWithFetchParams) {
   }));
 }
 
+// Rollup search always returns 0 hits, but visualizations expect search responses
+// to return hits > 0, otherwise they do not render. We fake the number of hits here
+// by counting the number of aggregation buckets/values returned by rollup search.
+function shimHitsInFetchResponse(response) {
+  return response.map(result => {
+    const buckets = result.aggregations ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
+      return allBuckets.concat(result.aggregations[agg].buckets || [result.aggregations[agg].value] || []);
+    }, []) : [];
+    return buckets && buckets.length ? {
+      ...result,
+      hits: {
+        ...result.hits,
+        total: buckets.length
+      }
+    } : result;
+  });
+}
+
 export const rollupSearchStrategy = {
   id: 'rollup',
 
@@ -106,7 +124,7 @@ export const rollupSearchStrategy = {
     return {
       searching: new Promise((resolve, reject) => {
         fetching.then(result => {
-          resolve(result);
+          resolve(shimHitsInFetchResponse(result));
         }).catch(error => {
           const {
             body: { statusText, error: title, message },
