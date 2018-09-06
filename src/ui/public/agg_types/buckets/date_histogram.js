@@ -91,6 +91,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'date',
       default: function (agg) {
         return agg._indexPattern.timeFieldName;
