@@ -29,11 +29,11 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
         iconType="pause"
         onClick={this.stopLiveStreaming}
       >
-        Stop streaming
+        Stop refreshing
       </EuiButtonEmpty>
     ) : (
       <EuiButtonEmpty iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
-        Stream live
+        Auto-refresh
       </EuiButtonEmpty>
     );
 
