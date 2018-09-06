@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import seriesConfig from './mock_series_config_filebeat';
+import seriesConfig from './__mocks__/mock_series_config_filebeat';
 
 jest.mock('ui/chrome',
   () => ({

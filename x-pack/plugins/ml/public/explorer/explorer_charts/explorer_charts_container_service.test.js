@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockAnomalyChartRecords from './mock_anomaly_chart_records.json';
-import mockChartData from './mock_chart_data.json';
-import mockDetectorsByJob from './mock_detectors_by_job.json';
-import mockJobConfig from './mock_job_config.json';
-import mockSeriesConfig from './mock_series_config_farequote.json';
-import mockSeriesPromisesResponse from './mock_series_promises_response.json';
-import mockSeriesToPlot from './mock_series_to_plot_farequote.json';
+import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
+import mockChartData from './__mocks__/mock_chart_data.json';
+import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
+import mockJobConfig from './__mocks__/mock_job_config.json';
+import mockSeriesConfig from './__mocks__/mock_series_config_farequote.json';
+import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_response.json';
+import mockSeriesToPlot from './__mocks__/mock_series_to_plot_farequote.json';
 
 jest.mock('../../services/job_service',
   () => ({
@@ -39,7 +39,7 @@ jest.mock('../../services/results_service',
 
 jest.mock('../../util/string_utils',
   () => ({
-    mlEscape(d) { console.warn('escape', d); return d; }
+    mlEscape(d) { return d; }
   })
 );
 

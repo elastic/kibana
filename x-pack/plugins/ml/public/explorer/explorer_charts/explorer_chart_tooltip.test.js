@@ -5,7 +5,7 @@
  */
 
 
-import mockConfig from './mock_chart_config_builder_config.json';
+import mockConfig from './__mocks__/mock_chart_config_builder_config.json';
 
 import { shallow } from 'enzyme';
 import React from 'react';

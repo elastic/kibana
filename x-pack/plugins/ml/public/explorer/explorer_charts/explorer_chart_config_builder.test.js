@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockAnomalyRecord from './mock_anomaly_record.json';
-import mockChartConfigBuildConfig from './mock_chart_config_builder_config.json';
-import mockDetectorsByJob from './mock_detectors_by_job.json';
-import mockJobConfig from './mock_job_config.json';
+import mockAnomalyRecord from './__mocks__/mock_anomaly_record.json';
+import mockChartConfigBuildConfig from './__mocks__/mock_chart_config_builder_config.json';
+import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
+import mockJobConfig from './__mocks__/mock_job_config.json';
 
 jest.mock('../../util/ml_error',
   () => (class MLRequestFailure {})
