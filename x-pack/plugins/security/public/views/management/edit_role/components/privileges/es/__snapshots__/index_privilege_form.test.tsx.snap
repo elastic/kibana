@@ -162,7 +162,7 @@ exports[`it renders without crashing 1`] = `
             <EuiSwitch
               compressed={true}
               data-test-subj="restrictDocumentsQuery0"
-              label="Restrict documents query"
+              label="Grant read privileges to specific documents"
               onChange={[Function]}
               value={false}
             />

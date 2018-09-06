@@ -41,7 +41,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiFormRow
-            label={'Space(s)'}
+            label={'Spaces'}
             {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}
           >
             <SpaceSelector

@@ -45,7 +45,7 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
       <Fragment>
         <div className="showImpactedSpaces">
           <EuiLink onClick={this.toggleShowImpactedSpaces}>
-            See summary of all spaces privileges
+            View summary of spaces privileges
           </EuiLink>
         </div>
         {flyout}
@@ -105,7 +105,7 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h1 id="showImpactedSpacesTitle">Summary of all space privileges</h1>
+            <h1 id="showImpactedSpacesTitle">Summary of space privileges</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

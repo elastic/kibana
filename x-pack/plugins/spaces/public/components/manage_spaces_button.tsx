@@ -24,7 +24,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
         onClick={this.navigateToManageSpaces}
         style={this.props.style}
       >
-        Manage Spaces
+        Manage spaces
       </EuiButton>
     );
   }

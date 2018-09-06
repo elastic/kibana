@@ -6,4 +6,6 @@
 
 import chrome from 'ui/chrome';
 
+export const SPACES_FEATURE_DESCRIPTION = `Organize your dashboards and other saved objects into meaningful categories.`;
+
 export const MANAGE_SPACES_URL = chrome.addBasePath(`/app/kibana#/management/spaces/list`);
