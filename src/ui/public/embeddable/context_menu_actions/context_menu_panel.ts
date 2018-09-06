@@ -20,23 +20,20 @@
 import { ReactElement } from 'react';
 import { PanelActionAPI } from './types';
 
-interface DashboardContextMenuPanelOptions {
+interface ContextMenuPanelOptions {
   getContent?: (panelActionAPI: PanelActionAPI) => ReactElement<any> | HTMLElement | undefined;
 }
 
-interface DashboardContextMenuPanelConfig {
+interface ContextMenuPanelConfig {
   id: string;
   title: string;
 }
 
-export class DashboardContextMenuPanel {
+export class ContextMenuPanel {
   public readonly id: string;
   public readonly title: string;
 
-  constructor(
-    config: DashboardContextMenuPanelConfig,
-    options: DashboardContextMenuPanelOptions = {}
-  ) {
+  constructor(config: ContextMenuPanelConfig, options: ContextMenuPanelOptions = {}) {
     this.id = config.id;
     this.title = config.title;
 
