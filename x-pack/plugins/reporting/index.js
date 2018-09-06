@@ -19,6 +19,7 @@ import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandbo
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
+import { i18n } from '@kbn/i18n';
 
 const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -47,9 +48,13 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          name: 'PDF footer image',
+          name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
+            defaultMessage: 'PDF footer image'
+          }),
           value: null,
-          description: `Custom image to use in the PDF's footer`,
+          description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
+            defaultMessage: 'Custom image to use in the PDF\'s footer'
+          }),
           type: 'image',
           options: {
             maxSize: {
