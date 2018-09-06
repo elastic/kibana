@@ -108,6 +108,7 @@
     "redux-saga": "^0.16.0",
     "reselect": "^3.0.1",
     "rimraf": "^2.6.2",
+    "styled-components": "^3.4.5",
     "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1",
     "vscode-languageserver-types": "^3.10.0"

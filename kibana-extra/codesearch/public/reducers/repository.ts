@@ -26,12 +26,15 @@ export interface RepositoryState {
   loading: boolean;
   importLoading: boolean;
   repoConfigs?: RepoConfigs;
+  hasImportError: boolean;
+  importError?: Error;
 }
 
 const initialState: RepositoryState = {
   repositories: [],
   loading: false,
   importLoading: false,
+  hasImportError: false,
 };
 
 export const repository = handleActions(
@@ -66,11 +69,16 @@ export const repository = handleActions(
     [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.importLoading = false;
+        draft.hasImportError = false;
         draft.repositories = [...state.repositories, action.payload];
       }),
-    [String(importRepoFailed)]: (state: RepositoryState) =>
+    [String(importRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
-        draft.importLoading = false;
+        if (action.payload) {
+          draft.importError = action.payload.body;
+          draft.hasImportError = true;
+          draft.importLoading = false;
+        }
       }),
     [String(fetchRepoConfigSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {

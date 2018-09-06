@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +34,7 @@ import { Repository } from '../../../model';
 import { RepoConfigs } from '../../../model/workspace';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
+import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
 
 enum Tabs {
   GitAddress,
@@ -47,6 +49,8 @@ interface Props {
   importRepo: (uri: string) => void;
   initRepoCommand: (uri: string) => void;
   repoConfigs?: RepoConfigs;
+  hasImportError: boolean;
+  importError?: Error;
 }
 
 interface State {
@@ -219,6 +223,15 @@ class AdminPage extends React.PureComponent<Props, State> {
     const repos = this.filterRepos();
     const repositoriesCount = repos.length;
     const items = this.getSideNavItems();
+    const { hasImportError, importError } = this.props;
+
+    const errorCallOut = hasImportError &&
+      importError && (
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
+          {importError.message}
+        </EuiCallOut>
+      );
+
     const importRepositoryModal = (
       <EuiOverlayMask>
         <EuiModal onClose={this.closeModal} className="importModal">
@@ -229,7 +242,10 @@ class AdminPage extends React.PureComponent<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiSideNav items={items} />
             </EuiFlexItem>
-            <EuiFlexItem className="tabContent">{this.getTabContent()}</EuiFlexItem>
+            <FlexGrowContainer>
+              <EuiFlexItem className="tabContent">{this.getTabContent()}</EuiFlexItem>
+              {errorCallOut}
+            </FlexGrowContainer>
           </EuiFlexGroup>
         </EuiModal>
       </EuiOverlayMask>
@@ -296,6 +312,8 @@ const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   importLoading: state.repository.importLoading,
   repoConfigs: state.repository.repoConfigs,
+  hasImportError: state.repository.hasImportError,
+  importError: state.repository.importError,
 });
 
 const mapDispatchToProps = {
