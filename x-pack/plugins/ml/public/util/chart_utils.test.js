@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import seriesConfig from './__mocks__/mock_series_config_filebeat';
+import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
 jest.mock('ui/chrome',
   () => ({
@@ -40,7 +40,7 @@ jest.mock('ui/timefilter/lib/parse_querystring',
 import moment from 'moment';
 import { timefilter } from 'ui/timefilter';
 
-import { exploreSeries } from './explore_series';
+import { getExploreSeriesLink } from './chart_utils';
 
 timefilter.enableTimeRangeSelector();
 timefilter.enableAutoRefreshSelector();
@@ -49,9 +49,9 @@ timefilter.setTime({
   to: moment(seriesConfig.selectedLatest).toISOString()
 });
 
-describe('exploreSeries', () => {
+describe('getExploreSeriesLink', () => {
   test('get timeseriesexplorer link', () => {
-    const link = exploreSeries(seriesConfig);
+    const link = getExploreSeriesLink(seriesConfig);
     const expectedLink = `<basepath>/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(population-03)),` +
       `refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2017-02-23T00:00:00.000Z',mode:absolute,` +
       `to:'2017-02-23T23:59:59.999Z'))&_a=(filters%3A!()%2CmlTimeSeriesExplorer%3A(detectorIndex%3A0%2Centities%3A` +

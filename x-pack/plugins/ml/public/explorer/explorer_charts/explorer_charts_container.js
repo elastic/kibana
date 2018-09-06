@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
-import { exploreSeries } from './explore_series';
+import { getExploreSeriesLink } from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
@@ -60,7 +60,7 @@ export function ExplorerChartsContainer({
                     color="warning"
                   />
                 )}
-                <a className="euiLink" onClick={() => window.open(exploreSeries(series), '_blank')}>
+                <a className="euiLink" onClick={() => window.open(getExploreSeriesLink(series), '_blank')}>
                   View <i className="fa fa-external-link" aria-hidden="true" />
                 </a>
               </div>
