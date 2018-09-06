@@ -23,7 +23,7 @@ export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 
-export function wipeLayerList(layerList) {
+export function replaceLayerList(layerList) {
   return {
     type: REPLACE_LAYERLIST,
     layerList: layerList
@@ -146,7 +146,7 @@ export async function loadMapResources(dispatch) {
   await dispatch(setMeta(metaJson));
 
 
-  await dispatch(wipeLayerList(
+  await dispatch(replaceLayerList(
     [
       {
         "dataDirty": false,
@@ -164,24 +164,23 @@ export async function loadMapResources(dispatch) {
         "temporary": false,
         "style": {},
         "type": "TILE"
+      },
+      {
+        "id": "hqoqo",
+        "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
+        "visible": true,
+        "temporary": false,
+        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+        "type": "VECTOR"
+      },
+      {
+        "id": "dx9uf",
+        "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
+        "visible": true,
+        "temporary": false,
+        "style": {},
+        "type": "GEOHASH_GRID"
       }
-      //,
-      // {
-      //   "id": "hqoqo",
-      //   "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
-      //   "type": "VECTOR"
-      // },
-      // {
-      //   "id": "dx9uf",
-      //   "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {},
-      //   "type": "GEOHASH_GRID"
-      // }
     ]
   ));
 
