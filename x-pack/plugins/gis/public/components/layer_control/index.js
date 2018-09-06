@@ -8,9 +8,13 @@ import { connect } from 'react-redux';
 import { LayerControl } from './view';
 import { updateFlyout, getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
 
-const mapDispatchToProps = {
-  showAddLayerWizard: () => updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD)
-};
+function mapDispatchToProps(dispatch) {
+  return {
+    showAddLayerWizard: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+    }
+  };
+}
 
 function mapStateToProps(state = {}) {
   const flyoutDisplay = getFlyoutDisplay(state);

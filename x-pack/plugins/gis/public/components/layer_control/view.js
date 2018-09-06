@@ -16,6 +16,7 @@ import {
 
 import { LayerTOC } from '../layer_toc';
 import { LayerPanel } from '../layer_panel';
+import { AddLayerPanel } from '../layer_addpanel/index';
 
 export class LayerControl extends React.Component {
 
@@ -29,7 +30,7 @@ export class LayerControl extends React.Component {
     if (noFlyoutVisible) {
       return null;
     } else if (addLayerVisible) {
-      return null; //todo
+      return <AddLayerPanel />;
     } else if (layerDetailsVisible) {
       return (
         <LayerPanel
