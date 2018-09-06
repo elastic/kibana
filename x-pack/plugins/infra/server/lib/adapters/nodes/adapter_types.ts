@@ -101,13 +101,6 @@ export enum InfraNodesKey {
   services = 'services',
 }
 
-export enum InfraNodeType {
-  host = 'host',
-  pod = 'pod',
-  container = 'container',
-  service = 'service',
-}
-
 export interface InfraNodesAggregations {
   waffle: {
     nodes: {

@@ -10,11 +10,13 @@ import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kiban
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
 import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
+import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapater';
 import { ElasticsearchNodesAdapter } from '../adapters/nodes/elasticsearch_nodes_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
 import { InfraConfigurationSourcesAdapter } from '../adapters/sources/configuration_sources_adapter';
 import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
+import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraNodesDomain } from '../domains/nodes_domain';
 import { InfraBackendLibs, InfraConfiguration, InfraDomainLibs } from '../infra_types';
 import { InfraSourceStatus } from '../source_status';
@@ -36,6 +38,7 @@ export function compose(server: Server): InfraBackendLibs {
       sources,
     }),
     nodes: new InfraNodesDomain(new ElasticsearchNodesAdapter(framework)),
+    metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
   };
 
   const libs: InfraBackendLibs = {

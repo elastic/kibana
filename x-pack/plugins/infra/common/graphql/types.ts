@@ -21,6 +21,7 @@ export interface InfraSource {
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
   map?: InfraResponse | null /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
+  metrics: InfraMetricData[];
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
@@ -120,6 +121,21 @@ export interface InfraNodeMetric {
   value: number;
 }
 
+export interface InfraMetricData {
+  id?: InfraMetric | null;
+  series: InfraDataSeries[];
+}
+
+export interface InfraDataSeries {
+  id: string;
+  data: InfraDataPoint[];
+}
+
+export interface InfraDataPoint {
+  timestamp?: number | null;
+  value?: number | null;
+}
+
 export namespace QueryResolvers {
   export interface Resolvers {
     source?: SourceResolver /** Get an infrastructure data source by id */;
@@ -143,6 +159,7 @@ export namespace InfraSourceResolvers {
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
     map?: MapResolver /** A hierarchy of hosts, pods, containers, services or arbitrary groups */;
+    metrics?: MetricsResolver;
   }
 
   export type IdResolver = Resolver<string>;
@@ -177,6 +194,14 @@ export namespace InfraSourceResolvers {
   export interface MapArgs {
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
+  }
+
+  export type MetricsResolver = Resolver<InfraMetricData[], MetricsArgs>;
+  export interface MetricsArgs {
+    id: string;
+    type: InfraNodeType;
+    timerange: InfraTimerangeInput;
+    metrics: InfraMetric[];
   }
 }
 /** A set of configuration options for an infrastructure data source */
@@ -375,6 +400,36 @@ export namespace InfraNodeMetricResolvers {
   export type ValueResolver = Resolver<number>;
 }
 
+export namespace InfraMetricDataResolvers {
+  export interface Resolvers {
+    id?: IdResolver;
+    series?: SeriesResolver;
+  }
+
+  export type IdResolver = Resolver<InfraMetric | null>;
+  export type SeriesResolver = Resolver<InfraDataSeries[]>;
+}
+
+export namespace InfraDataSeriesResolvers {
+  export interface Resolvers {
+    id?: IdResolver;
+    data?: DataResolver;
+  }
+
+  export type IdResolver = Resolver<string>;
+  export type DataResolver = Resolver<InfraDataPoint[]>;
+}
+
+export namespace InfraDataPointResolvers {
+  export interface Resolvers {
+    timestamp?: TimestampResolver;
+    value?: ValueResolver;
+  }
+
+  export type TimestampResolver = Resolver<number | null>;
+  export type ValueResolver = Resolver<number | null>;
+}
+
 export interface InfraTimeKeyInput {
   time: number;
   tiebreaker: number;
@@ -447,6 +502,12 @@ export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
   filterQuery?: string | null;
 }
+export interface MetricsInfraSourceArgs {
+  id: string;
+  type: InfraNodeType;
+  timerange: InfraTimerangeInput;
+  metrics: InfraMetric[];
+}
 export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
 }
@@ -490,6 +551,48 @@ export enum InfraMetricAggregationType {
   derivative = 'derivative',
   moving_average = 'moving_average',
   positive_only = 'positive_only',
+}
+
+export enum InfraNodeType {
+  pod = 'pod',
+  container = 'container',
+  host = 'host',
+}
+
+export enum InfraMetric {
+  hostCpuUsage = 'hostCpuUsage',
+  hostFilesystem = 'hostFilesystem',
+  hostK8sCpuCapGauge = 'hostK8sCpuCapGauge',
+  hostK8sCpuCap = 'hostK8sCpuCap',
+  hostK8sDiskCapGauge = 'hostK8sDiskCapGauge',
+  hostK8sDiskCap = 'hostK8sDiskCap',
+  hostK8sMemoryCap = 'hostK8sMemoryCap',
+  hostK8sMemoryCapGauge = 'hostK8sMemoryCapGauge',
+  hostK8sPodCap = 'hostK8sPodCap',
+  hostK8sPodCapGauge = 'hostK8sPodCapGauge',
+  hostLoad = 'hostLoad',
+  hostMemoryUsage = 'hostMemoryUsage',
+  hostNetworkTraffic = 'hostNetworkTraffic',
+  hostCpuUsageGauge = 'hostCpuUsageGauge',
+  hostLoadGauge = 'hostLoadGauge',
+  hostMemoryGauge = 'hostMemoryGauge',
+  hostNetworkInGauge = 'hostNetworkInGauge',
+  hostNetworkOutGauge = 'hostNetworkOutGauge',
+  podCpuUsage = 'podCpuUsage',
+  podDiskUsage = 'podDiskUsage',
+  podLogUsage = 'podLogUsage',
+  podNetworkTraffic = 'podNetworkTraffic',
+  podMemoryGauge = 'podMemoryGauge',
+  podNetInGauge = 'podNetInGauge',
+  podNetOutGauge = 'podNetOutGauge',
+  containerCpuKernel = 'containerCpuKernel',
+  containerCpuUsage = 'containerCpuUsage',
+  containerDiskIOReadsOps = 'containerDiskIOReadsOps',
+  containerDiskIOOps = 'containerDiskIOOps',
+  containerDiskIOBytes = 'containerDiskIOBytes',
+  containerHealth = 'containerHealth',
+  containerMemory = 'containerMemory',
+  containerNetworkTraffic = 'containerNetworkTraffic',
 }
 
 export enum InfraOperator {

@@ -25,4 +25,10 @@ export const sharedSchema = gql`
     LOGS
     METRICS
   }
+
+  enum InfraNodeType {
+    pod
+    container
+    host
+  }
 `;
