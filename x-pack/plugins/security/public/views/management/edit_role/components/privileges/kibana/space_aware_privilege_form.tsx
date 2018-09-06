@@ -144,8 +144,9 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           color={'subdued'}
         >
           <p>
-            Grant more privileges on a per space basis. For example, if users have read privileges
-            in all spaces, you can grant all privileges to an individual space.
+            Grant more privileges on a per space basis. For example, if the privileges are{' '}
+            <strong>read</strong> for all spaces, you can set the privileges to <strong>all</strong>{' '}
+            for an individual space.
           </p>
         </EuiText>
         <EuiSpacer size={'s'} />
