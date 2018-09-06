@@ -123,10 +123,73 @@ describe('monitoring plugin deprecations', function () {
   });
 
   it(`shouldn't log when node_resolver isn't present`, function () {
-    const settings = { };
+    const settings = {};
 
     const log = sinon.spy();
     transformDeprecations(settings, log);
     expect(log.called).to.be(false);
   });
+
+  describe('cluster_alerts.email_notifications.email_address', function () {
+    it(`shouldn't log when email notifications are disabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          email_notifications: {
+            enabled: false
+          }
+        }
+      };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+
+    it(`shouldn't log when cluster alerts are disabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: false,
+          email_notifications: {
+            enabled: true
+          }
+        }
+      };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+
+    it(`shouldn't log when email_address is specified`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: true,
+          email_notifications: {
+            enabled: true,
+            email_address: 'foo@bar.com'
+          }
+        }
+      };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(false);
+    });
+
+    it(`should log when email_address is missing, but alerts/notifications are both enabled`, function () {
+      const settings = {
+        cluster_alerts: {
+          enabled: true,
+          email_notifications: {
+            enabled: true
+          }
+        }
+      };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, log);
+      expect(log.called).to.be(true);
+    });
+  });
+
 });
