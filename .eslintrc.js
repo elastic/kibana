@@ -2,6 +2,8 @@ const { resolve } = require('path');
 const { readdirSync } = require('fs');
 const dedent = require('dedent');
 
+const restrictedModules = { paths: ['gulp-util'] };
+
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
 
@@ -15,6 +17,11 @@ module.exports = {
     react: {
       version: '16.3',
     },
+  },
+
+  rules: {
+    'no-restricted-imports': [2, restrictedModules],
+    'no-restricted-modules': [2, restrictedModules],
   },
 
   overrides: [
