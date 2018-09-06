@@ -11,7 +11,7 @@ declare module '@elastic/eui' {
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
@@ -22,7 +22,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
-  options?: any;
+  options?: ReactElement<any>;
   isDirty: boolean;
   onClose: () => void;
 }
