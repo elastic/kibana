@@ -17,13 +17,18 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials',
-    method: ['GET'],
-    handler: async function (req, reply) {
-      reply(server.getTutorials(req));
+export function serializeToJson(defaultMessages) {
+  const resultJsonObject = { formats: i18n.formats };
+
+  for (const [mapKey, mapValue] of defaultMessages) {
+    if (mapValue.context) {
+      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+    } else {
+      resultJsonObject[mapKey] = mapValue.message;
     }
-  });
+  }
+
+  return JSON.stringify(resultJsonObject, undefined, 2);
 }

@@ -17,13 +17,9 @@
  * under the License.
  */
 
-
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials',
-    method: ['GET'],
-    handler: async function (req, reply) {
-      reply(server.getTutorials(req));
-    }
-  });
-}
+export { extractCodeMessages } from './code';
+export { extractHandlebarsMessages } from './handlebars';
+export { extractHtmlMessages } from './html';
+export { extractI18nCallMessages } from './i18n_call';
+export { extractPugMessages } from './pug';
+export { extractFormattedMessages, extractIntlMessages } from './react';

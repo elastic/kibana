@@ -20,31 +20,31 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
 
   switch (type) {
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = 'Boolean field';
+      ariaLabel = 'boolean type';
       iconClass = 'fa-adjust';
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = 'Date field';
+      ariaLabel = 'date type';
       iconClass = 'fa-clock-o';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = 'Metric field';
+      ariaLabel = 'number type';
       iconChar = '#';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = 'Geo-point field';
+      ariaLabel = 'geo_point type';
       iconClass = 'fa-globe';
       break;
     case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = 'Aggregatable string field';
+      ariaLabel = 'keyword type';
       iconChar = 't';
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = 'String field';
+      ariaLabel = 'text type';
       iconClass = 'fa-file-text-o';
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = 'IP address field';
+      ariaLabel = 'IP type';
       iconClass = 'fa-laptop';
       break;
     default:
@@ -69,7 +69,7 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
     // to support having another component directly inside the tooltip anchor
     // see https://github.com/elastic/eui/issues/839
     return (
-      <EuiToolTip position="left" content={type}>
+      <EuiToolTip position="left" content={`${type} type`}>
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
     );
@@ -86,7 +86,7 @@ FieldTypeIcon.propTypes = {
 // To pass on its properties we apply `rest` to the outer `span` element.
 function FieldTypeIconContainer({ ariaLabel, className, iconChar, ...rest }) {
   return (
-    <span className="field-type-icon-container" {...rest} >
+    <span className="field-type-icon-container" {...rest} tabIndex="0">
       {(iconChar === '') ? (
         <span aria-label={ariaLabel} className={className} />
       ) : (

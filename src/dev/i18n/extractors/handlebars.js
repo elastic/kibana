@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import chalk from 'chalk';
-
-import { formatJSString } from './utils';
-import { createFailError } from '../run';
+import { formatJSString } from '../utils';
+import { createFailError } from '../../run';
 
 const HBS_REGEX = /(?<=\{\{)([\s\S]*?)(?=\}\})/g;
 const TOKENS_REGEX = /[^'\s]+|(?:'([^'\\]|\\[\s\S])*')/g;
@@ -39,29 +37,22 @@ export function* extractHandlebarsMessages(buffer) {
     }
 
     if (tokens.length !== 3) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} Wrong number of arguments for handlebars i18n call.`
-      );
+      throw createFailError(`Wrong number of arguments for handlebars i18n call.`);
     }
 
     if (!idString.startsWith(`'`) || !idString.endsWith(`'`)) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} Message id should be a string literal.`
-      );
+      throw createFailError(`Message id should be a string literal.`);
     }
 
     const messageId = formatJSString(idString.slice(1, -1));
 
     if (!messageId) {
-      throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} Empty id argument in Handlebars i18n is not allowed.`
-      );
+      throw createFailError(`Empty id argument in Handlebars i18n is not allowed.`);
     }
 
     if (!propertiesString.startsWith(`'`) || !propertiesString.endsWith(`'`)) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Properties string in Handlebars i18n should be a string literal ("${messageId}").`
+        `Properties string in Handlebars i18n should be a string literal ("${messageId}").`
       );
     }
 
@@ -70,15 +61,13 @@ Properties string in Handlebars i18n should be a string literal ("${messageId}")
 
     if (typeof message !== 'string') {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
+        `defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
       );
     }
 
     if (!message) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`
+        `Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`
       );
     }
 
@@ -86,8 +75,7 @@ Empty defaultMessage in Handlebars i18n is not allowed ("${messageId}").`
 
     if (context != null && typeof context !== 'string') {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} \
-Context value in Handlebars i18n should be a string ("${messageId}").`
+        `Context value in Handlebars i18n should be a string ("${messageId}").`
       );
     }
 

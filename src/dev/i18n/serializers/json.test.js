@@ -17,13 +17,21 @@
  * under the License.
  */
 
+import { serializeToJson } from './json';
 
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials',
-    method: ['GET'],
-    handler: async function (req, reply) {
-      reply(server.getTutorials(req));
-    }
+describe('dev/i18n/serializers/json', () => {
+  test('should serialize default messages to JSON', () => {
+    const messages = new Map([
+      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
+      [
+        'plugin2.message.id-2',
+        {
+          message: 'Message text 2',
+          context: 'Message context',
+        },
+      ],
+    ]);
+
+    expect(serializeToJson(messages)).toMatchSnapshot();
   });
-}
+});
