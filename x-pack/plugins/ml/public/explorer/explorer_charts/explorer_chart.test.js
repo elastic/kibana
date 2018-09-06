@@ -39,9 +39,7 @@ describe('ExplorerChart', () => {
 
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
-  beforeEach(() => SVGElement.prototype.getBBox = () => {
-    return mockedGetBBox;
-  });
+  beforeEach(() => SVGElement.prototype.getBBox = () => mockedGetBBox);
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
