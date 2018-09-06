@@ -14,9 +14,9 @@ function dashboardReportProvider(Private, $location, dashboardConfig, i18n) {
   return {
     appName: 'dashboard',
     key: 'reporting-dashboard',
-    label: i18n('xpack.reporting.dashboard.reportingTitle', { defaultMessage: 'Reporting' }),
+    label: i18n('xpack.reporting.controls.dashboard.reportingTitle', { defaultMessage: 'Reporting' }),
     template: `<export-config object-type="Dashboard" enabled-export-type="printablePdf"></export-config>`,
-    description: i18n('xpack.reporting.dashboard.reportAriaLabel', { defaultMessage: 'Dashboard Report' }),
+    description: i18n('xpack.reporting.controls.dashboard.reportAriaLabel', { defaultMessage: 'Dashboard Report' }),
     hideButton: () => (
       dashboardConfig.getHideWriteControls()
       || $location.path() === DashboardConstants.LANDING_PAGE_PATH

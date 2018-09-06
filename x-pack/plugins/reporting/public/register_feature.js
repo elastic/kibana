@@ -7,15 +7,14 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { i18n } from '@kbn/i18n';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'reporting',
-    title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
+    title: i18n('xpack.reporting.registerFeature.reportingTitle', {
       defaultMessage: 'Reporting'
     }),
-    description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
+    description: i18n('xpack.reporting.registerFeature.reportingDescription', {
       defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.'
     }),
     icon: 'reportingApp',

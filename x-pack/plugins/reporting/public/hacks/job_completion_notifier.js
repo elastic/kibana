@@ -65,10 +65,15 @@ uiModules.get('kibana')
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>
-            {i18n.translate('xpack.reporting.jobComplitionNotifier.reportLinkDescription', {
-              defaultMessage: 'Pick it up from {reportingSectionUrl}.',
-              values: { reportingSectionUrl: (<a href={reportingSectionUrl}>Management &gt; Kibana &gt; Reporting</a>) }
+            {i18n.translate('xpack.reporting.jobComplitionNotifier.reportLink.pickItUpFromDescription', {
+              defaultMessage: 'Pick it up from'
             })}
+            &nbsp;
+            <a href={reportingSectionUrl}>
+              {i18n.translate('xpack.reporting.jobComplitionNotifier.reportLink.reportingSectionUrlLinkLabel', {
+                defaultMessage: 'Management > Kibana > Reporting.'
+              })}
+            </a>
           </p>
         );
       }

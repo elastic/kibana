@@ -15,14 +15,14 @@ function visualizeReportProvider(Private, $location, i18n) {
     appName: 'visualize',
 
     key: 'reporting-visualize',
-    label: i18n('xpack.reporting.visualize.reportingTitle', { defaultMessage: 'Reporting' }),
+    label: i18n('xpack.reporting.controls.visualize.reportingTitle', { defaultMessage: 'Reporting' }),
     template: `
       <export-config
         object-type="Visualization"
         enabled-export-type="printablePdf"
         options="{ layoutId: 'preserve_layout' }"
       ></export-config>`,
-    description: i18n('xpack.reporting.visualize.reportAriaLabel', { defaultMessage: 'Visualization Report' }),
+    description: i18n('xpack.reporting.controls.visualize.reportAriaLabel', { defaultMessage: 'Visualization Report' }),
     hideButton: () => (
       $location.path() === VisualizeConstants.LANDING_PAGE_PATH
       || $location.path() === VisualizeConstants.WIZARD_STEP_1_PAGE_PATH

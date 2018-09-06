@@ -37,7 +37,7 @@ function mapJobs(jobs) {
 routes.when('/management/kibana/reporting', {
   template,
   controllerAs: 'jobsCtrl',
-  controller($scope, $route, $window, $interval, reportingJobQueue, kbnUrl, Private, reportingPollConfig) {
+  controller($scope, $route, $window, $interval, reportingJobQueue, kbnUrl, Private, reportingPollConfig, i18n) {
     const { jobsRefresh } = reportingPollConfig;
     const xpackInfo = Private(XPackInfoProvider);
 
@@ -76,7 +76,8 @@ routes.when('/management/kibana/reporting', {
           }
 
           if (err.status !== 401 && err.status !== 403) {
-            toastNotifications.addDanger(err.statusText || 'Request failed');
+            toastNotifications.addDanger(err.statusText
+              || i18n('xpack.reporting.views.management.jobs.requestFailedErrorMessage', { defaultMessage: 'Request failed' }));
           }
 
           return {

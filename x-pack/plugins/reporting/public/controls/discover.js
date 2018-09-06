@@ -14,9 +14,9 @@ function discoverReportProvider(Private, i18n) {
     appName: 'discover',
 
     key: 'reporting-discover',
-    label: i18n('xpack.reporting.discover.reportingTitle', { defaultMessage: 'Reporting' }),
+    label: i18n('xpack.reporting.controls.discover.reportingTitle', { defaultMessage: 'Reporting' }),
     template: '<export-config object-type="Search" enabled-export-type="csv"></export-config>',
-    description: i18n('xpack.reporting.discover.searchReportAriaLabel', { defaultMessage: 'Search Report' }),
+    description: i18n('xpack.reporting.controls.discover.searchReportAriaLabel', { defaultMessage: 'Search Report' }),
     hideButton: () => !xpackInfo.get('features.reporting.csv.showLinks', false),
     disableButton: () => !xpackInfo.get('features.reporting.csv.enableLinks', false),
     tooltip: () => xpackInfo.get('features.reporting.csv.message'),
