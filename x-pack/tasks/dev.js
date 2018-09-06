@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const pluginHelpers = require('@kbn/plugin-helpers');
-const getFlags = require('./helpers/get_flags');
+import pluginHelpers from '@kbn/plugin-helpers';
+import getFlags from './helpers/get_flags';
 
-module.exports = (gulp) => {
+export default (gulp) => {
   gulp.task('dev', ['prepare'], () => pluginHelpers.run('start', { flags: getFlags() }));
 };

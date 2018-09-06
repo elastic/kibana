@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-module.exports = function getFlags() {
+export default function getFlags() {
   return process.argv.slice(3);
-};
+}

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const path = require('path');
-const yargs = require('yargs');
-const glob = require('glob');
-const { toArray } = require('rxjs/operators');
-const { findPluginSpecs } = require('../../../src/plugin_discovery');
+import { resolve } from 'path';
+import yargs from 'yargs';
+import glob from 'glob';
+import { toArray } from 'rxjs/operators';
+import { findPluginSpecs } from '../../../src/plugin_discovery';
 
 /*
   Usage:
@@ -22,7 +22,7 @@ const { findPluginSpecs } = require('../../../src/plugin_discovery');
 const argv = yargs
   .describe('plugins', 'Comma-separated list of plugins')
   .argv;
-const allPlugins = glob.sync('*', { cwd: path.resolve(__dirname, '..', '..', 'plugins') });
+const allPlugins = glob.sync('*', { cwd: resolve(__dirname, '..', '..', 'plugins') });
 
 export function getPlugins() {
   const plugins = argv.plugins && argv.plugins.split(',');
@@ -33,7 +33,7 @@ export function getPlugins() {
 }
 
 const { spec$ } = findPluginSpecs({
-  plugins: { paths: [path.resolve(__dirname, '..', '..')] }
+  plugins: { paths: [resolve(__dirname, '..', '..')] }
 });
 
 export async function getEnabledPlugins() {

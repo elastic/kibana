@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const buildVersion = require('./helpers/build_version');
-const gitInfo = require('./helpers/git_info');
+import buildVersion from './helpers/build_version';
+import gitInfo from './helpers/git_info';
 
-module.exports = (gulp, { log, colors, pkg }) => {
+export default (gulp, { log, colors, pkg }) => {
   gulp.task('report', () => {
     return gitInfo()
       .then(function (info) {

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { resolve } = require('path');
-const { writeFileSync } = require('fs');
-const pluginHelpers = require('@kbn/plugin-helpers');
-const { ToolingLog } = require('@kbn/dev-utils');
-const { generateNoticeFromSource } = require('../../src/dev');
+import { resolve } from 'path';
+import { writeFileSync } from 'fs';
+import pluginHelpers from '@kbn/plugin-helpers';
+import { ToolingLog } from '@kbn/dev-utils';
+import { generateNoticeFromSource } from '../../src/dev';
 
-module.exports = (gulp, { buildTarget }) => {
+export default (gulp, { buildTarget }) => {
   gulp.task('build', ['clean', 'report', 'prepare'], async () => {
     await pluginHelpers.run('build', {
       skipArchive: true,

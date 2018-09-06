@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-const del = require('del');
+import del from 'del';
 
-module.exports = (gulp, { coverageDir, buildDir, packageDir, log }) => {
+export default (gulp, { coverageDir, buildDir, packageDir, log }) => {
   gulp.task('clean-test', () => {
     log('Deleting', coverageDir);
     return del([coverageDir]);

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const runSequence = require('run-sequence');
-const pluginHelpers = require('@kbn/plugin-helpers');
-const { getEnabledPlugins } = require('./helpers/get_plugins');
-const fileGlobs = require('./helpers/globs');
-const { createAutoJUnitReporter } = require('../../src/dev');
+import runSequence from 'run-sequence';
+import pluginHelpers from '@kbn/plugin-helpers';
+import { getEnabledPlugins } from './helpers/get_plugins';
+import { forPluginServerTests } from './helpers/globs';
+import { createAutoJUnitReporter } from '../../src/dev';
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
@@ -18,7 +18,7 @@ const MOCHA_OPTIONS = {
   }),
 };
 
-module.exports = (gulp, { mocha }) => {
+export default (gulp, { mocha }) => {
   gulp.task('test', (cb) => {
     const preTasks = ['clean-test'];
     runSequence(preTasks, 'testserver', 'testbrowser', cb);
@@ -30,7 +30,7 @@ module.exports = (gulp, { mocha }) => {
     const globs = [
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
-    ].concat(fileGlobs.forPluginServerTests());
+    ].concat(forPluginServerTests());
 
     return gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));

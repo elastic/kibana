@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { ensureAllBrowsersDownloaded } = require('../plugins/reporting/server/browsers');
+import { ensureAllBrowsersDownloaded } from '../plugins/reporting/server/browsers';
 
-module.exports = gulp => {
+export default gulp => {
   // anything that needs to happen pre-build or pre-dev
   gulp.task('prepare', () => ensureAllBrowsersDownloaded());
 };

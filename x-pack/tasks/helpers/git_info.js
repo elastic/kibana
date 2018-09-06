@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const path = require('path');
-const simpleGit = require('simple-git');
+import path from 'path';
+import simpleGit from 'simple-git';
+
 const gitDir = path.resolve(__dirname, '..', '..');
 
-function gitInfo() {
+export default function gitInfo() {
   const git = simpleGit(gitDir);
 
   return new Promise((resolve, reject) => {
@@ -21,5 +22,3 @@ function gitInfo() {
     });
   });
 }
-
-module.exports = gitInfo;
