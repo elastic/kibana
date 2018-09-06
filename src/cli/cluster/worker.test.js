@@ -52,7 +52,14 @@ function setup(opts = {}) {
 describe('CLI cluster manager', () => {
   afterEach(async () => {
     while(workersToShutdown.length > 0) {
-      await workersToShutdown.pop().shutdown();
+      const worker = workersToShutdown.pop();
+      // If `fork` exists we should set `exitCode` to the non-zero value to
+      // prevent worker from auto restart.
+      if (worker.fork) {
+        worker.fork.exitCode = 1;
+      }
+
+      await worker.shutdown();
     }
 
     cluster.fork.mockClear();
