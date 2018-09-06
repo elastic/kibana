@@ -1,21 +1,5 @@
-
-// SASSTODO: This element is targeted via tests, but can't find
-// where it's actually implemented
-.visEditor nesting-indicator {
-  display: flex;
-  flex: 0 0 auto;
-
-  > span {
-    width: $vis-editor-nesting-width;
-    background-color: $euiColorSuccess;
-  }
-}
-
-.indented {
-  margin-left: 2em;
-}
-
-.vis-editor-agg {
+// Entire container actually found in agg_group.html
+.visEditorAgg {
   @include flex-parent();
   width: 100%;
   max-width: 100%;
@@ -24,66 +8,55 @@
   flex-basis: 100%;
 }
 
-// wraps the .vis-editor-agg and nesting-indicator ^^
-.vis-editor-agg-wrapper {
-  display: flex;
-}
+// Rest of the agg elements found in agg.html
 
-vis-editor-agg-group {
-  @include flex-parent(0, 1, auto);
-}
+//
+// Header
+//
 
-.vis-editor-agg-group {
-  @include flex-parent(0, 1, auto);
-  color: $euiColorDarkShade;
-}
-
-.vis-editor-agg-header {
+.visEditorAggHeader {
   display: flex;
   align-items: center;
   flex: 1 0 auto;
   margin-bottom: $vis-editor-agg-editor-spacing;
 }
 
-.vis-editor-agg-header-toggle {
+.visEditorAggHeader__toggle {
   flex: 0 0 auto;
   margin-right: $vis-editor-agg-editor-spacing;
-  min-width: 22px;
-  min-height: 22px;
+  min-width: $euiSizeL;
+  min-height: $euiSizeL;
   text-align: center;
 }
 
-.vis-editor-agg-header-subagg-icon {
-  flex: 0 1 auto;
-  padding-right: 5px;
-}
-
-.vis-editor-agg-header-title {
+.visEditorAggHeader__title {
   flex: 0 0 auto;
-  @include euiTextTruncate;
   font-weight: $euiFontWeightBold;
+  @include euiTextTruncate;
 }
 
-.vis-editor-agg-header-title--grow {
+.visEditorAggHeader__title--grow {
   flex-grow: 1;
 }
 
-.vis-editor-agg-header-description {
-  font-weight: normal;
-  padding-right: $vis-editor-agg-editor-spacing;
-  padding-left: 5px;
-  @include euiTextTruncate;
+.visEditorAggHeader__description {
   flex: 1 1 0;
-
-  &.danger {
-    color: $euiColorDanger;
-    font-weight: bold;
-  }
+  font-weight: $euiFontWeightRegular;
+  padding-right: $vis-editor-agg-editor-spacing;
+  padding-left: $euiSizeXS;
+  @include euiTextTruncate;
 }
 
-.vis-editor-agg-header-controls {
+.visEditorAggHeader__description--danger {
+  color: $euiColorDanger;
+  font-weight: $euiFontWeightBold;
+}
+
+.visEditorAggHeader__controls {
   flex: 0 0 auto;
 }
+
+////
 
 .vis-editor-agg-error {
   margin: $vis-editor-agg-editor-spacing 0;
@@ -156,10 +129,6 @@ vis-editor-agg-group {
   }
 }
 
-.vis-editor-agg-add {
-  @include flex-parent();
-}
-
 .vis-editor-agg-add-schemas {
   margin-bottom: 10px;
 }
@@ -197,10 +166,6 @@ vis-editor-agg,
 vis-editor-agg-params,
 vis-editor-agg-param {
   @include flex-parent();
-}
-
-.vis-editor-config .ems-hotlink {
-  font-size: $euiFontSizeXS; // 12px
 }
 
 .agg-select-label {

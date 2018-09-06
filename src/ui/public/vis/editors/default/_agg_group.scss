@@ -1,4 +1,4 @@
-.visEditorAggGroup {
+.visEditorAggGroup__wrapper {
   border-top: 0 !important; // override .sidebar-item
   padding: $euiSizeM;
   border-radius: $euiBorderRadius;
@@ -12,3 +12,21 @@
   padding: 0px !important;
   text-transform: capitalize;
 }
+
+.visEditorAggGroup {
+  // wraps the .vis-editor-agg and nesting-indicator
+  color: $euiColorDarkShade;
+}
+
+// SASSTODO: This element is targeted via tests, but can't find
+// where it's actually implemented
+.visEditor nesting-indicator {
+  display: flex;
+  flex: 0 0 auto;
+
+  > span {
+    width: $vis-editor-nesting-width;
+    background-color: $euiColorSuccess;
+  }
+}
+
