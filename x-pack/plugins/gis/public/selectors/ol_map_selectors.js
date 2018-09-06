@@ -31,12 +31,6 @@ function updateMapLayerOrder(mapLayers, oldLayerOrder, newLayerOrder) {
   });
 }
 
-function addLayerIfNotPresent(map, newLayer, currentLayersIds) {
-  if (!currentLayersIds.find(layerId => layerId === newLayer.get('id'))) {
-    map.addLayer(newLayer);
-  }
-}
-
 function removeLayers(map, existingMapLayers, updatedLayersIds) {
   const layersToRemove = [];
   existingMapLayers.forEach((mapLayer, idx) => {
@@ -100,11 +94,6 @@ export const syncOLState = createSelector(
   syncOLMap,
   syncLayers,
   (olMap, layersWithOl) => {
-    const layersIds = getLayersIds(olMap.getLayers());
-    // Adds & updates
-    layersWithOl.forEach(({ olLayer }) => {
-      addLayerIfNotPresent(olMap, olLayer, layersIds);
-    });
     const newLayerIdsOrder = layersWithOl.map(({ layer }) => layer.getId());
     // Deletes
     removeLayers(olMap, olMap.getLayers(), newLayerIdsOrder);

@@ -70,6 +70,7 @@ export class ALayer {
     let olLayer = olLayerArray.find(olLayer => olLayer.get('id') === this.getId());
     if (!olLayer) {
       olLayer = this._createCorrespondingOLLayer(dataSources, olMap);
+      olMap.addLayer(olLayer);
     }
     olLayer.set('id', this.getId());
     olLayer.setVisible(this.isVisible());
