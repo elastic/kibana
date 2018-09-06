@@ -1,5 +1,5 @@
 {
-  "fq-1351": [
+  "mock-job-id": [
     {
       "detector_description": "mean(responsetime)",
       "function": "mean",

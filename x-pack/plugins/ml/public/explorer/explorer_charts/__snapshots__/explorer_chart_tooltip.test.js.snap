@@ -5,7 +5,7 @@ exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
   className="explorer-chart-info-tooltip"
 >
   job ID: 
-  fq-1351
+  mock-job-id
   <br />
   aggregation interval: 
   15m

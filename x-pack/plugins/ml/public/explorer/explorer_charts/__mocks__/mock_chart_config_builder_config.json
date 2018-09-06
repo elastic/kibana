@@ -1,12 +1,12 @@
 {
-  "jobId": "fq-1351",
+  "jobId": "mock-job-id",
   "detectorIndex": 0,
   "metricFunction": "avg",
   "timeField": "@timestamp",
   "interval": "15m",
   "datafeedConfig": {
-    "datafeed_id": "datafeed-fq-1351",
-    "job_id": "fq-1351",
+    "datafeed_id": "datafeed-mock-job-id",
+    "job_id": "mock-job-id",
     "query_delay": "86658ms",
     "indices": [
       "farequote-2017"
@@ -35,7 +35,7 @@
     }
   ],
   "infoTooltip": {
-    "jobId": "fq-1351",
+    "jobId": "mock-job-id",
     "aggregationInterval": "15m",
     "chartFunction": "avg responsetime",
     "entityFields": [

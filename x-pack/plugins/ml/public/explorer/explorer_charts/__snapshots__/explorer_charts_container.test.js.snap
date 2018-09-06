@@ -33,7 +33,7 @@ exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
             },
           ]
         }
-        jobId="fq-1351"
+        jobId="mock-job-id"
       />
     }
     position="left"

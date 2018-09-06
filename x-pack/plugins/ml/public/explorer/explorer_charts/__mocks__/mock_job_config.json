@@ -1,5 +1,5 @@
 {
-  "job_id": "fq-1351",
+  "job_id": "mock-job-id",
   "job_type": "anomaly_detector",
   "job_version": "7.0.0-alpha1",
   "description": "",
@@ -37,7 +37,7 @@
   "model_snapshot_min_version": "6.4.0",
   "results_index_name": "shared",
   "data_counts": {
-    "job_id": "fq-1351",
+    "job_id": "mock-job-id",
     "processed_record_count": 86274,
     "processed_field_count": 172548,
     "input_bytes": 6744642,
@@ -54,7 +54,7 @@
     "input_record_count": 86274
   },
   "model_size_stats": {
-    "job_id": "fq-1351",
+    "job_id": "mock-job-id",
     "result_type": "model_size_stats",
     "model_bytes": 560894,
     "total_by_field_count": 21,
@@ -66,8 +66,8 @@
     "timestamp": 1486855800000
   },
   "datafeed_config": {
-    "datafeed_id": "datafeed-fq-1351",
-    "job_id": "fq-1351",
+    "datafeed_id": "datafeed-mock-job-id",
+    "job_id": "mock-job-id",
     "query_delay": "86658ms",
     "indices": [
       "farequote-2017"
