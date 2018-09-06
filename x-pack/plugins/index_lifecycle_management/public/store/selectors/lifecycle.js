@@ -37,6 +37,7 @@ import {
   phaseToES,
   getSelectedPolicyName,
   getSelectedIndexTemplateName,
+  getFullSelectedIndexTemplate,
   isNumber,
   getSelectedPrimaryShardCount,
   getSelectedReplicaCount,
@@ -47,7 +48,7 @@ import {
   getAliasName,
 } from '.';
 
-export const validatePhase = (type, phase) => {
+export const validatePhase = (type, phase, state) => {
   const errors = {};
 
   if (!phase[PHASE_ENABLED]) {
@@ -87,11 +88,15 @@ export const validatePhase = (type, phase) => {
   }
 
   if (phase[PHASE_SHRINK_ENABLED]) {
-    if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
-      errors[PHASE_PRIMARY_SHARD_COUNT] = ['A number is required.'];
-    }
-    else if (phase[PHASE_PRIMARY_SHARD_COUNT] < 1) {
-      errors[PHASE_PRIMARY_SHARD_COUNT] = ['Only positive numbers above 0 are allowed.'];
+    const selectedTemplate = getFullSelectedIndexTemplate(state);
+    // shrink options not shown in GUI for primary shard count of 1, so don't validate
+    if (selectedTemplate && selectedTemplate.settings.number_of_shards > 1) {
+      if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
+        errors[PHASE_PRIMARY_SHARD_COUNT] = ['A number is required.'];
+      }
+      else if (phase[PHASE_PRIMARY_SHARD_COUNT] < 1) {
+        errors[PHASE_PRIMARY_SHARD_COUNT] = ['Only positive numbers above 0 are allowed.'];
+      }
     }
   }
 
@@ -110,7 +115,6 @@ export const validatePhase = (type, phase) => {
 export const validateLifecycle = state => {
   // This method of deep copy does not always work but it should be fine here
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
-
   if (!getSelectedIndexTemplateName(state)) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][
       STRUCTURE_TEMPLATE_NAME
@@ -173,7 +177,7 @@ export const validateLifecycle = state => {
   };
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_WARM] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_WARM],
-    ...validatePhase(PHASE_WARM, warmPhase)
+    ...validatePhase(PHASE_WARM, warmPhase, state)
   };
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_COLD] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_COLD],
