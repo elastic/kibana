@@ -44,6 +44,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.setTimepickerInDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+
+        // TODO: Remove once https://github.com/elastic/kibana/issues/22561 is fixed
+        await dashboardPanelActions.removePanelByTitle('Filter Bytes Test: timelion split 5 on bytes');
+
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -64,9 +68,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('goal and guages are filtered', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      });
+      // Uncomment once https://github.com/elastic/kibana/issues/22783 is fixed
+      // it('goal and guages are filtered', async () => {
+      //   await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -93,9 +98,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.savedSearchRowCount(0);
       });
 
-      it('timelion is filtered', async () => {
-        await dashboardExpect.timelionLegendCount(0);
-      });
+      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
+      // it('timelion is filtered', async () => {
+      //   await dashboardExpect.timelionLegendCount(0);
+      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -125,9 +131,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('goal and guages are filtered', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      });
+      // Uncomment once https://github.com/elastic/kibana/issues/22783 is fixed
+      // it('goal and guages are filtered', async () => {
+      //   await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -154,9 +161,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.savedSearchRowCount(0);
       });
 
-      it('timelion is filtered', async () => {
-        await dashboardExpect.timelionLegendCount(0);
-      });
+      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
+      // it('timelion is filtered', async () => {
+      //   await dashboardExpect.timelionLegendCount(0);
+      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
