@@ -10,7 +10,9 @@ require('dotenv').config({ silent: true });
 const { writeFileSync } = require('fs');
 
 const gulp = require('gulp');
-const g = require('gulp-load-plugins')();
+const mocha = require('gulp-mocha');
+const fancyLog = require('fancy-log');
+const ansiColors = require('ansi-colors');
 const path = require('path');
 const del = require('del');
 const runSequence = require('run-sequence');
@@ -62,10 +64,10 @@ gulp.task('clean', ['clean-test'], () => {
 gulp.task('report', () => {
   return gitInfo()
     .then(function (info) {
-      g.util.log('Package Name', g.util.colors.yellow(pkg.name));
-      g.util.log('Version', g.util.colors.yellow(buildVersion));
-      g.util.log('Build Number', g.util.colors.yellow(info.number));
-      g.util.log('Build SHA', g.util.colors.yellow(info.sha));
+      fancyLog('Package Name', ansiColors.yellow(pkg.name));
+      fancyLog('Version', ansiColors.yellow(buildVersion));
+      fancyLog('Build Number', ansiColors.yellow(info.number));
+      fancyLog('Build SHA', ansiColors.yellow(info.sha));
     });
 });
 
@@ -105,7 +107,7 @@ gulp.task('testserver', () => {
   ].concat(fileGlobs.forPluginServerTests());
 
   return gulp.src(globs, { read: false })
-    .pipe(g.mocha(MOCHA_OPTIONS));
+    .pipe(mocha(MOCHA_OPTIONS));
 });
 
 gulp.task('testbrowser', () => {
