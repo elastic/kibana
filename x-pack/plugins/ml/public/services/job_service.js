@@ -520,6 +520,7 @@ class JobService {
     delete tempJob.model_snapshot_id;
     delete tempJob.open_time;
     delete tempJob.established_model_memory;
+    delete tempJob.calendars;
 
     delete tempJob.analysis_config.use_per_partition_normalization;
 
