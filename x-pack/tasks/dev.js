@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-module.exports = function logger() {
-  const DEBUG = process.env.DEBUG || false;
+const pluginHelpers = require('@kbn/plugin-helpers');
+const getFlags = require('./helpers/get_flags');
 
-  if (!DEBUG) return;
-  console.log.apply(console, arguments);
+module.exports = (gulp) => {
+  gulp.task('dev', ['prepare'], () => pluginHelpers.run('start', { flags: getFlags() }));
 };

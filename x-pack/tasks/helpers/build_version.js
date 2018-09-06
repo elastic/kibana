@@ -6,13 +6,12 @@
 
 const yargs = require('yargs');
 const semver = require('semver');
-const pkg = require('../package.json');
 
 yargs
   .alias('r', 'release').describe('r', 'Create a release build, not a snapshot');
 const argv = yargs.argv;
 
-function getVersion() {
+function getVersion(pkg) {
   const { version } = pkg;
   if (!version) {
     throw new Error('No version found in package.json');

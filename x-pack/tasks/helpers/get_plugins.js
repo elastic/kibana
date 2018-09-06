@@ -8,7 +8,7 @@ const path = require('path');
 const yargs = require('yargs');
 const glob = require('glob');
 const { toArray } = require('rxjs/operators');
-const { findPluginSpecs } = require('../../src/plugin_discovery');
+const { findPluginSpecs } = require('../../../src/plugin_discovery');
 
 /*
   Usage:
@@ -22,7 +22,7 @@ const { findPluginSpecs } = require('../../src/plugin_discovery');
 const argv = yargs
   .describe('plugins', 'Comma-separated list of plugins')
   .argv;
-const allPlugins = glob.sync('*', { cwd: path.resolve(__dirname, '..', 'plugins') });
+const allPlugins = glob.sync('*', { cwd: path.resolve(__dirname, '..', '..', 'plugins') });
 
 export function getPlugins() {
   const plugins = argv.plugins && argv.plugins.split(',');
@@ -33,7 +33,7 @@ export function getPlugins() {
 }
 
 const { spec$ } = findPluginSpecs({
-  plugins: { paths: [path.resolve(__dirname, '../')] }
+  plugins: { paths: [path.resolve(__dirname, '..', '..')] }
 });
 
 export async function getEnabledPlugins() {

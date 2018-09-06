@@ -6,7 +6,7 @@
 
 const path = require('path');
 const simpleGit = require('simple-git');
-const gitDir = path.resolve(__dirname, '..');
+const gitDir = path.resolve(__dirname, '..', '..');
 
 function gitInfo() {
   const git = simpleGit(gitDir);

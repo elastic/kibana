@@ -116,7 +116,7 @@ module.exports = {
         'packages/kbn-ui-framework/generator-kui/**/*',
         'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*',
-        'x-pack/{dev-tools,gulp_helpers,scripts,test,build_chromium}/**/*',
+        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
         'x-pack/gulpfile.js',
