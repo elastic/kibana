@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
+<div
+  className="explorer-chart-label"
+>
+  <div
+    className="explorer-chart-label-fields"
+  >
+    <span>
+      mean(responsetime)
+       - 
+    </span>
+    <span
+      key="0"
+    >
+      airline
+       
+      AAL
+    </span>
+  </div>
+  <EuiIconTip
+    aria-label="Info"
+    content={
+      <ExplorerChartTooltip
+        aggregationInterval="15m"
+        chartFunction="avg responsetime"
+        entityFields={
+          Array [
+            Object {
+              "fieldName": "airline",
+              "fieldValue": "AAL",
+            },
+          ]
+        }
+        jobId="fq-1351"
+      />
+    }
+    position="left"
+    size="s"
+    type="questionInCircle"
+  />
+  <a
+    className="euiLink"
+    onClick={[Function]}
+  >
+    View 
+    <i
+      aria-hidden="true"
+      className="fa fa-external-link"
+    />
+  </a>
+</div>
+`;
