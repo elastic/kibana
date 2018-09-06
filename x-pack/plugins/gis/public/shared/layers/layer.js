@@ -52,7 +52,7 @@ export class ALayer {
   }
 
   getCurrentStyle() {
-    throw new Error('Style not implemented');
+    return this._style;
   }
 
   renderSourceDetails() {

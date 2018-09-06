@@ -17,10 +17,6 @@ export class TileLayer extends ALayer {
     return tileLayerDescriptor;
   }
 
-  getCurrentStyle() {
-    return null;
-  }
-
   _createCorrespondingOLLayer(dataSources) {
     const tileLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({

@@ -40,10 +40,6 @@ export class VectorLayer extends ALayer {
     return [FillAndOutlineStyle];
   }
 
-  getCurrentStyle() {
-    return this._style;
-  }
-
   isLayerLoading() {
     return !!this._descriptor.dataDirty;
   }
