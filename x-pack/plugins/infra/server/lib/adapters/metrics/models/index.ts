@@ -6,8 +6,8 @@
 
 import { InfraMetric } from '../../../../../common/graphql/types';
 import { InfraMetricModelCreator } from '../adapter_types';
-import { hostCpuUsage } from './host/hostCpuUsage';
-import { hostFilesystem } from './host/hostFilesystem';
+import { hostCpuUsage } from './host/host_cpu_usage';
+import { hostFilesystem } from './host/host_filesystem';
 
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
