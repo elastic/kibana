@@ -132,13 +132,7 @@ export default async function ({ readConfigFile }) {
       ...kibanaCommonConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
-<<<<<<< HEAD
         `--server.uuid=${env.kibana.server.uuid}`,
-        `--server.port=${servers.kibana.port}`,
-        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
-=======
-        '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
->>>>>>> eeee0d800a... x-pack tests should use servers from other config files already loaded (#22739)
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
