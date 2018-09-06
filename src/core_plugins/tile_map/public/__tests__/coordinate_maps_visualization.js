@@ -29,7 +29,7 @@ function mockRawData() {
 mockRawData();
 
 
-const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
+const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
 const manifest = {
   'services': [{
