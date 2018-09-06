@@ -10,6 +10,15 @@ import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_ty
 import { createBasePath } from '../../lib/create_base_path';
 import { getBucketSizeInSeconds } from '../../lib/get_bucket_size_in_seconds';
 
+export function getBucketKey(value: number, interval: number, offset = 0) {
+  return Math.floor((value - offset) / interval) * interval + offset;
+}
+
+export const calculateOffsetInSeconds = (end: number, interval: number) => {
+  const bucketKey = getBucketKey(end, interval);
+  return Math.floor(end - interval - bucketKey);
+};
+
 export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
     const { timerange, sourceConfiguration, groupBy } = options.nodeOptions;
@@ -19,11 +28,14 @@ export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => 
       .subtract(5 * bucketSizeInSeconds, 's')
       .valueOf();
     const path = createBasePath(groupBy).concat('timeseries');
+    const bucketOffset = calculateOffsetInSeconds(timerange.from, bucketSizeInSeconds);
+    const offset = `${Math.floor(bucketOffset)}s`;
     set(doc, path, {
       date_histogram: {
         field: sourceConfiguration.fields.timestamp,
         interval: timerange.interval,
         min_doc_count: 0,
+        offset,
         extended_bounds: {
           min: boundsMin,
           max: timerange.to,
