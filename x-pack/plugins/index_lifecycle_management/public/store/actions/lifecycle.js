@@ -16,10 +16,12 @@ export const saveLifecycle = (lifecycle, indexTemplatePatch) => async dispatch =
     saved = await saveLifecycleApi(lifecycle, indexTemplatePatch);
   }
   catch (err) {
-    return toastNotifications.addDanger(err.data.message);
+    toastNotifications.addDanger(err.data.message);
+    return false;
   }
 
   toastNotifications.addSuccess(`Successfully created lifecycle policy '${lifecycle.name}'`);
 
   dispatch(savedLifecycle(saved));
+  return true;
 };

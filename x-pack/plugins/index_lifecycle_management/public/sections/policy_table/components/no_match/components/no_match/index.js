@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerFetchRoute } from './register_fetch_route';
-import { registerDeleteRoute } from './register_delete_route';
-
-export function registerPoliciesRoutes(server) {
-  registerFetchRoute(server);
-  registerDeleteRoute(server);
-}
+export { NoMatch } from './no_match';

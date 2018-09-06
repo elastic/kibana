@@ -14,7 +14,11 @@ import {
   unsetSelectedPolicy,
   setSelectedPolicyName,
   setSaveAsNewPolicy,
-  setPhaseData
+  setPhaseData,
+  policyFilterChanged,
+  policyPageChanged,
+  policyPageSizeChanged,
+  policySortChanged,
 } from '../actions';
 import { policyFromES } from '../selectors';
 import {
@@ -48,7 +52,14 @@ const defaultState = {
   originalPolicyName: undefined,
   selectedPolicySet: false,
   selectedPolicy: defaultPolicy,
-  policies: []
+  policies: [],
+  sort: {
+    sortField: 'name',
+    isSortAscending: true
+  },
+  pageSize: 10,
+  currentPage: 0,
+  filter: ''
 };
 
 export const policies = handleActions(
@@ -123,6 +134,39 @@ export const policies = handleActions(
             }
           }
         }
+      };
+    },
+    [policyFilterChanged](state, action) {
+      const { filter } = action.payload;
+      return {
+        ...state,
+        filter,
+        currentPage: 0
+      };
+    },
+    [policySortChanged](state, action) {
+      const { sortField, isSortAscending } = action.payload;
+
+      return {
+        ...state,
+        sort: {
+          sortField,
+          isSortAscending,
+        }
+      };
+    },
+    [policyPageChanged](state, action) {
+      const { pageNumber } = action.payload;
+      return {
+        ...state,
+        currentPage: pageNumber,
+      };
+    },
+    [policyPageSizeChanged](state, action) {
+      const { pageSize } = action.payload;
+      return {
+        ...state,
+        pageSize
       };
     }
   },

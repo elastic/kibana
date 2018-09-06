@@ -6,7 +6,8 @@
 
 
 
-
+import { createSelector } from 'reselect';
+import { Pager } from '@elastic/eui';
 import {
   defaultColdPhase,
   defaultDeletePhase,
@@ -37,6 +38,8 @@ import {
   PHASE_SHRINK_ENABLED
 } from '../constants';
 import { getIndexTemplates } from '.';
+import { filterItems, sortTable } from '../../services';
+
 
 export const getPolicies = state => state.policies.policies;
 export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
@@ -44,7 +47,43 @@ export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
 export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
 export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;
+export const getPolicyFilter = (state) => state.policies.filter;
+export const getPolicySort = (state) => state.policies.sort;
+export const getPolicyCurrentPage = (state) => state.policies.currentPage;
+export const getPolicyPageSize = (state) => state.policies.pageSize;
 
+const getFilteredPolicies = createSelector(
+  getPolicies,
+  getPolicyFilter,
+  (policies, filter) => {
+    return filterItems(['name'], filter, policies);
+  }
+);
+export const getTotalPolicies = createSelector(
+  getFilteredPolicies,
+  (filteredPolicies) => {
+    return filteredPolicies.length;
+  }
+);
+export const getPolicyPager = createSelector(
+  getPolicyCurrentPage,
+  getPolicyPageSize,
+  getTotalPolicies,
+  (currentPage, pageSize, totalPolicies) => {
+    return new Pager(totalPolicies, pageSize, currentPage);
+  }
+);
+export const getPageOfPolicies = createSelector(
+  getFilteredPolicies,
+  getPolicySort,
+  getPolicyPager,
+  (filteredPolicies, sort, pager) => {
+    const sortedPolicies = sortTable(filteredPolicies, sort.sortField, sort.isSortAscending);
+    const { firstItemIndex, lastItemIndex } = pager;
+    const pagedPolicies = sortedPolicies.slice(firstItemIndex, lastItemIndex + 1);
+    return pagedPolicies;
+  }
+);
 export const getSaveAsNewPolicy = state =>
   state.policies.selectedPolicy.saveAsNew;
 

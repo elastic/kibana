@@ -16,11 +16,16 @@ export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');
 export const unsetSelectedPolicy = createAction('UNSET_SELECTED_POLICY');
 export const setSelectedPolicyName = createAction('SET_SELECTED_POLICY_NAME');
 export const setSaveAsNewPolicy = createAction('SET_SAVE_AS_NEW_POLICY');
+export const policySortChanged = createAction('POLICY_SORT_CHANGED');
+export const policyPageSizeChanged = createAction('POLICY_PAGE_SIZE_CHANGED');
+export const policyPageChanged = createAction('POLICY_PAGE_CHANGED');
+export const policySortDirectionChanged = createAction('POLICY_SORT_DIRECTION_CHANGED');
+export const policyFilterChanged = createAction('POLICY_FILTER_CHANGED');
 
-export const fetchPolicies = () => async dispatch => {
+export const fetchPolicies = (withIndices) => async dispatch => {
   let policies;
   try {
-    policies = await loadPolicies();
+    policies = await loadPolicies(withIndices);
   }
   catch (err) {
     return toastNotifications.addDanger(err.data.message);
@@ -32,6 +37,5 @@ export const fetchPolicies = () => async dispatch => {
   }
   return policies;
 };
-
 
 export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({ phase, key, value }));

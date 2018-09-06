@@ -9,14 +9,14 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
-function formatHits(hits) {
-  if (hits.status === 404) {
+function formatPolicies(policiesMap) {
+  if (policiesMap.status === 404) {
     return [];
   }
-  return Object.keys(hits).reduce((accum, lifecycleName) => {
-    const hit = hits[lifecycleName];
+  return Object.keys(policiesMap).reduce((accum, lifecycleName) => {
+    const policyEntry = policiesMap[lifecycleName];
     accum.push({
-      ...hit,
+      ...policyEntry,
       name: lifecycleName,
     });
     return accum;
@@ -33,6 +33,25 @@ async function fetchPolicies(callWithRequest) {
 
   return await callWithRequest('transport.request', params);
 }
+async function addCoveredIndices(policiesMap, callWithRequest) {
+  if (policiesMap.status === 404) {
+    return policiesMap;
+  }
+  const params = {
+    method: 'GET',
+    path: '/*/_ilm/explain',
+    // we allow 404 since they may have no policies
+    ignore: [ 404 ]
+  };
+
+  const policyExplanation = await callWithRequest('transport.request', params);
+  Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
+    if (policy) {
+      policiesMap[policy].coveredIndices = policiesMap[policy].coveredIndices || [];
+      policiesMap[policy].coveredIndices.push(indexName);
+    }
+  });
+}
 
 export function registerFetchRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -43,16 +62,17 @@ export function registerFetchRoute(server) {
     method: 'GET',
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
-
+      const { withIndices } = request.query;
       try {
-        const hits = await fetchPolicies(callWithRequest);
-        const response = formatHits(hits);
-        reply(response);
+        const policiesMap = await fetchPolicies(callWithRequest);
+        if (withIndices) {
+          await addCoveredIndices(policiesMap, callWithRequest);
+        }
+        reply(formatPolicies(policiesMap));
       } catch (err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
         }
-
         reply(wrapUnknownError(err));
       }
     },
