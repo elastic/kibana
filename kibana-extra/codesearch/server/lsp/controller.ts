@@ -41,8 +41,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     const file = request.resolvedFilePath;
     if (file) {
       // #todo add test for this
-      // try  file name first, without read contents
-      const lang = await detectLanguage(file);
+      const lang = await detectLanguage(file.replace('file://', ''));
       return this.dispatchRequest(lang, request);
     } else {
       return Promise.reject(
