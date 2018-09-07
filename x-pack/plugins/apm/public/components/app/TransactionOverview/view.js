@@ -13,7 +13,7 @@ import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import Charts from '../../shared/charts/TransactionCharts';
-import { getMlJobUrl } from '../../../utils/url';
+import { getMlJobUrl, KibanaLink } from '../../../utils/url';
 import List from './List';
 import { units, px, fontSizes } from '../../../style/variables';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
@@ -75,15 +75,15 @@ class TransactionOverview extends Component {
           <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
-            <a
-              href={getMlJobUrl(
+            <KibanaLink
+              pathname={getMlJobUrl(
                 serviceName,
                 transactionType,
                 this.props.location
               )}
             >
               View Job
-            </a>
+            </KibanaLink>
           </MLText>
         </MLTipContainer>
       ) : null;
