@@ -159,6 +159,20 @@ export default function ({ getService, getPageObjects }) {
       ]);
     });
 
+    it('should show correct data for a data table with top hits', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
+      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data);
+      expect(data.length).to.be.greaterThan(0);
+    });
+
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
