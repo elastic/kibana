@@ -20,8 +20,6 @@ export class TileLayer extends ALayer {
 
   syncLayerWithMB(mbMap, dataSources) {
 
-    console.warn('TileLayer#syncLayerWithMB - implementation in progress');
-
     const source = mbMap.getSource(this.getId());
     const layerId = this.getId() + '_raster';
     if (!source) {
@@ -43,8 +41,6 @@ export class TileLayer extends ALayer {
     }
 
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-
-
 
   }
 

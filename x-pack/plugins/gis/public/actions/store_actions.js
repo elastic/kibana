@@ -150,16 +150,15 @@ export async function loadMapResources(dispatch) {
         "temporary": false,
         "style": {},
         "type": "TILE"
+      },
+      {
+        "id": "0pmk0",
+        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+        "visible": false,
+        "temporary": false,
+        "style": {},
+        "type": "TILE"
       }
-      // ,
-      // {
-      //   "id": "0pmk0",
-      //   "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-      //   "visible": false,
-      //   "temporary": false,
-      //   "style": {},
-      //   "type": "TILE"
-      // },
       // {
       //   "id": "hqoqo",
       //   "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE" },

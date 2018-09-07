@@ -8,30 +8,44 @@ import { createSelector } from 'reselect';
 import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
 import mapboxgl from 'mapbox-gl';
 
-function removeOrphanedStylesAndSources(mbMap, layerList) {
+function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
-  const ids = layerList.map((layer) => layer.getId());
-  const style = mbMap.getStyle();
-  const sourcesToRemove = [];
-  for (const sourceId in style.sources) {
-    if (ids.indexOf(sourceId) === -1) {
-      sourcesToRemove.push(sourceId);
+  const layerIds = layerList.map((layer) => layer.getId());
+  const mbStyle = mbMap.getStyle();
+  const mbSourcesToRemove = [];
+  for (const sourceId in mbStyle.sources) {
+    if (layerIds.indexOf(sourceId) === -1) {
+      mbSourcesToRemove.push(sourceId);
     }
   }
-
-  const layersToRemove = [];
-  style.layers.forEach(layer => {
-    if (sourcesToRemove.indexOf(layer.source) >= 0) {
-      layersToRemove.push(layer.id);
+  const mbLayersToRemove = [];
+  mbStyle.layers.forEach(layer => {
+    if (mbSourcesToRemove.indexOf(layer.source) >= 0) {
+      mbLayersToRemove.push(layer.id);
     }
   });
-
-  layersToRemove.forEach((layerId) => {
+  mbLayersToRemove.forEach((layerId) => {
     mbMap.removeLayer(layerId);
   });
-  sourcesToRemove.forEach(sourceId => {
+  mbSourcesToRemove.forEach(sourceId => {
     mbMap.removeSource(sourceId);
   });
+
+}
+
+function syncLayerOrder(mbMap, layerList) {
+
+  const mbStyle = mbMap.getStyle();
+  const mbLayers = mbStyle.layers.slice();
+  for (let i = 0; i < layerList.length - 1; i++) {
+    const layer = layerList[i];
+    const nextLayer = layerList[i + 1];
+    const mbLayersToMove = mbLayers.filter((mbLayer) => mbLayer.source === layer.getId());
+    const nextMbLayer = mbLayers.find(mbLayer => mbLayer.source === nextLayer.getId());//first layer of "next" source
+    for (let j = 0; j < mbLayersToMove.length; j++) {
+      mbMap.moveLayer(mbLayersToMove[j].id, nextMbLayer.id);
+    }
+  }
 
 }
 
@@ -55,8 +69,7 @@ window._mb = MB_MAP;
 const syncMBMapWithMapState = createSelector(
   getMBImplementation,
   getMapState,
-  (mbMap, mapState) => {
-    console.warn('must sync mb map with mapstate', mapState, mbMap);
+  (mbMap) => {
     return mbMap;
   }
 );
@@ -66,8 +79,12 @@ export const syncMBState = createSelector(
   getLayerList,
   getDataSources,
   (mbMap, layerList, dataSources) => {
-    removeOrphanedStylesAndSources(mbMap, layerList);
-    layerList.forEach((layer, position) => layer.syncLayerWithMB(mbMap, dataSources, position));
+
+    removeOrphanedSourcesAndLayers(mbMap, layerList);
+    layerList.forEach((layer) => {
+      layer.syncLayerWithMB(mbMap, dataSources);
+    });
+    syncLayerOrder(mbMap, layerList);
     return mbMap;
   }
 );
