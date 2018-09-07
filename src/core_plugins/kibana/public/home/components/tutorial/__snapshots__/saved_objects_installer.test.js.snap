@@ -130,6 +130,84 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             },
           ],
         ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Request failed, Error: {message}",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+        ],
       },
       "formatNumber": [MockFunction],
       "formatPlural": [MockFunction],
@@ -438,6 +516,52 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               "id": "kbn.home.tutorial.savedObject.loadTitle",
             },
           ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
         ],
       },
       "formatNumber": [MockFunction],
