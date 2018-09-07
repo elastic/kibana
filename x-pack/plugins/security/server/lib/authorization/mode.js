@@ -22,7 +22,7 @@ export function authorizationModeFactory(
   savedObjects,
   xpackInfoFeature
 ) {
-  const useRbacForRequestWeakMap = new WeakMap();
+  const useRbacForRequestCache = new WeakMap();
 
   const shouldUseRbacForRequest = async (request) => {
     if (!config.get('xpack.security.authorization.legacyFallback.enabled')) {
@@ -53,27 +53,27 @@ export function authorizationModeFactory(
 
   return {
     async initialize(request) {
-      if (useRbacForRequestWeakMap.has(request)) {
+      if (useRbacForRequestCache.has(request)) {
         throw new Error('Authorization mode is already intitialized');
       }
 
       if (!isRbacEnabled()) {
-        useRbacForRequestWeakMap.set(request, true);
+        useRbacForRequestCache.set(request, true);
         return;
       }
 
       const result = await shouldUseRbacForRequest(request);
-      useRbacForRequestWeakMap.set(request, result);
+      useRbacForRequestCache.set(request, result);
     },
 
     useRbacForRequest(request) {
       // the following can happen when the user isn't authenticated. Either true or false would work here,
       // but we're going to go with false as this is closer to the "legacy" behavior
-      if (!useRbacForRequestWeakMap.has(request)) {
+      if (!useRbacForRequestCache.has(request)) {
         return false;
       }
 
-      return useRbacForRequestWeakMap.get(request);
+      return useRbacForRequestCache.get(request);
     },
   };
 }
