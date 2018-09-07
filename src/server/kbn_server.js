@@ -21,6 +21,7 @@ import { constant, once, compact, flatten } from 'lodash';
 import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
+import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
@@ -30,6 +31,7 @@ import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
+import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
@@ -42,26 +44,25 @@ import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
-import { injectIntoKbnServer as newPlatformMixin } from '../core';
 import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings) {
+  constructor(settings, core) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
 
+    this.core = core;
+
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
 
       // sets this.config, reads this.settings
       configSetupMixin,
-
-      newPlatformMixin,
 
       // sets this.server
       httpMixin,
@@ -115,13 +116,6 @@ export default class KbnServer {
 
       // notify any deferred setup logic that plugins have initialized
       Plugins.waitForInitResolveMixin,
-
-      () => {
-        if (this.config.get('server.autoListen')) {
-          this.ready = constant(Promise.resolve());
-          return this.listen();
-        }
-      }
     ));
 
     this.listen = once(this.listen);
@@ -152,14 +146,17 @@ export default class KbnServer {
   async listen() {
     await this.ready();
 
-    const { server } = this;
-    await fromNode(cb => server.start(cb));
-
     if (isWorker) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }
 
+    const { server, config } = this;
+    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
+      config.get('server.rewriteBasePath')
+        ? config.get('server.basePath')
+        : ''
+    }`);
     return server;
   }
 
@@ -175,7 +172,12 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  async applyLoggingConfiguration(config) {
+  applyLoggingConfiguration(settings) {
+    const config = new Config(
+      this.config.getSchema(),
+      transformDeprecations(settings)
+    );
+
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
