@@ -9,9 +9,6 @@ exports[`Home component should render 1`] = `
     <SetupInstructionsLink />
   </styled.div>
   <Connect(KueryBarView) />
-  <EuiSpacer
-    size="l"
-  />
   <EuiTabbedContent
     className="k6Tab--large"
     tabs={
