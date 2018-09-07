@@ -160,6 +160,12 @@ export class DynamicDllPlugin {
           // in the entry paths before. The majority should come
           // from webpackShims, otherwise we should throw
 
+          // NOTE: is possible we are able to do this reading and searching
+          // through the compilation's webpack modules, however
+          // for a sake of simplicity, and as the webpackShims
+          // should be really small files, we are parsing them
+          // manually and getting the requires
+
           if (requiredModulePath && !requiredModulePath.includes('node_modules')) {
             if (!requiredModulePath.includes('webpackShims')) {
               throw new Error(
