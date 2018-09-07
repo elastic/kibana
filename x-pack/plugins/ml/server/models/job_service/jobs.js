@@ -10,6 +10,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -112,6 +113,7 @@ export function jobsProvider(callWithRequest) {
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimestampMs,
         earliestTimestampMs,
+        isTimeSeriesJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {
