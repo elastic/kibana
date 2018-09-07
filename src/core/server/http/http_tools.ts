@@ -39,6 +39,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         maxBytes: config.maxPayload.getValueInBytes(),
       },
       validate: {
+        failAction: defaultValidationErrorHandler,
         options: {
           abortEarly: false,
         },
@@ -89,4 +90,11 @@ export function createServer(options: ServerOptions) {
   });
 
   return server;
+}
+
+/**
+ * Used to replicate Hapi v16 and below's validation responses. Should be used in the routes.validate.failAction key.
+ */
+export function defaultValidationErrorHandler(request, h, err) {
+  throw err;
 }

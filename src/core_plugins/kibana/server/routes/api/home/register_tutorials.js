@@ -22,8 +22,8 @@ export function registerTutorials(server) {
   server.route({
     path: '/api/kibana/home/tutorials',
     method: ['GET'],
-    handler: function () {
-      return server.getTutorials();
+    handler: function (req) {
+      return server.getTutorials(req);
     }
   });
 }

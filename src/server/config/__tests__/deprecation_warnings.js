@@ -20,7 +20,6 @@
 import { spawn } from 'child_process';
 
 import expect from 'expect.js';
-import { race, delay } from 'bluebird';
 
 const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
 const SETUP_NODE_ENV = require.resolve('../../../setup_node_env');
@@ -41,7 +40,8 @@ describe('config/deprecation warnings mixin', function () {
       env: {
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
-            quiet: false
+            quiet: false,
+            silent: false
           },
           uiSettings: {
             enabled: true
@@ -50,9 +50,9 @@ describe('config/deprecation warnings mixin', function () {
       }
     });
 
-    // Either time out in 5 seconds, or resolve once the line is in our buffer
-    return race([
-      delay(5000),
+    // Either time out in 10 seconds, or resolve once the line is in our buffer
+    return Promise.race([
+      new Promise((resolve) => setTimeout(resolve, 10000)),
       new Promise((resolve, reject) => {
         proc.stdout.on('data', (chunk) => {
           stdio += chunk.toString('utf8');
