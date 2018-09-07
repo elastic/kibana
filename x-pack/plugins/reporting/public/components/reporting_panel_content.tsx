@@ -170,7 +170,7 @@ export class ReportingPanelContent extends Component<Props, State> {
       .catch((kfetchError: KFetchError) => {
         if (kfetchError.message === 'not exportable') {
           return toastNotifications.addWarning({
-            title: 'Only saved dashboards can be exported',
+            title: `Only saved ${this.props.objectType} can be exported`,
             text: 'Please save your work first',
           });
         }

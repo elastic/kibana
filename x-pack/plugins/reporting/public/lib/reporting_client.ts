@@ -15,7 +15,7 @@ import { jobCompletionNotifications } from '../services/job_completion_notificat
 const API_BASE_URL = '/api/reporting/generate';
 
 class ReportingClient {
-  public getReportingJobPath = (exportType: string, jobParams: any) => {
+  public getReportingJobPath = (exportType: string, jobParams: object) => {
     return `${chrome.addBasePath(API_BASE_URL)}/${exportType}?${QueryString.param(
       'jobParams',
       rison.encode(jobParams)
@@ -27,7 +27,7 @@ class ReportingClient {
       jobParams: rison.encode(jobParams),
     };
     return kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${exportType}`, query }).then(
-      (resp: any) => {
+      (resp: { job: { id: string } }) => {
         jobCompletionNotifications.add(resp.job.id);
         return resp;
       }
