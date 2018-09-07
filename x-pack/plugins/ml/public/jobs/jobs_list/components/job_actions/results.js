@@ -41,7 +41,7 @@ function getLink(location, jobs) {
 export function ResultLinks({ jobs })  {
   const tooltipJobs = (jobs.length === 1) ? jobs[0].id : `${jobs.length} jobs`;
   const singleMetricVisible = (jobs.length < 2);
-  const singleMetricEnabled = (jobs.length === 1 && jobs[0].isTimeSeriesJob);
+  const singleMetricEnabled = (jobs.length === 1 && jobs[0].isTimeSeriesViewJob);
   return (
     <React.Fragment>
       {(singleMetricVisible) &&
