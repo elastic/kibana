@@ -3059,7 +3059,7 @@ gulp-load-plugins@1.2.0:
     multimatch "2.0.0"
     resolve "^1.1.6"
 
-gulp-mocha@6.0.0:
+gulp-mocha@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/gulp-mocha/-/gulp-mocha-6.0.0.tgz#80f32bc705ce30747f355ddb8ccd96a1c73bef13"
   dependencies:
