@@ -116,7 +116,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       },
     };
 
-    server.savedObject = {
+    server.savedObjects = {
       SavedObjectsClient: {
         errors: {
           isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),

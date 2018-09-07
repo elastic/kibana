@@ -15,7 +15,7 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: any, reply: any) {
-      const { SavedObjectsClient } = server.savedObject;
+      const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );

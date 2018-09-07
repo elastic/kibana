@@ -16,7 +16,7 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any, reply: any) {
-      const { SavedObjectsClient } = server.savedObject;
+      const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );

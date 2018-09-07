@@ -13,7 +13,7 @@ export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
-      const { SavedObjectsClient } = server.savedObject;
+      const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );

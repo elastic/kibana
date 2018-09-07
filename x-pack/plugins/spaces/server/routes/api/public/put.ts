@@ -17,7 +17,7 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'PUT',
     path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
-      const { SavedObjectsClient } = server.savedObject;
+      const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );

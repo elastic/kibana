@@ -39,7 +39,7 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
     async handler(request: any, reply: any) {
       const spaceId = request.params.id;
 
-      const { SavedObjectsClient } = server.savedObject;
+      const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );
