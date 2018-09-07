@@ -185,7 +185,7 @@ export class DynamicDllPlugin {
 
               // check if the dependency value is relative
               if (isRelative) {
-                absoluteResource = path.resolve(dllOutputPath, requiredModulePath, dep);
+                absoluteResource = path.resolve(path.dirname(requiredModulePath), dep);
               } else {
                 // get the imports and search for alias in the dependency
                 const alias = compilation.compiler.options.resolve.alias;
@@ -233,7 +233,7 @@ export class DynamicDllPlugin {
               }
 
               // Only consider found js entries
-              if (!absoluteResource.includes('.js')) {
+              if (!absoluteResource.includes('.js') || absoluteResource.includes('json')) {
                 return;
               }
 
@@ -309,11 +309,10 @@ export class DynamicDllPlugin {
           );
         }
 
-        // Run the dlls compiler and then increment
+        // Run the dlls compiler and increment
         // the performed compilations
         await this.runDLLCompiler(compiler);
         this.performedCompilations++;
-
         return;
       }
 
