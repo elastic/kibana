@@ -16,145 +16,20 @@
     {
       "laneLabel": "Overall",
       "time": 1486454400,
-      "value": 0
+      "value": 0.1870243
     },
     {
       "laneLabel": "Overall",
       "time": 1486468800,
-      "value": 0
+      "value": 0.5947769
     },
     {
       "laneLabel": "Overall",
       "time": 1486483200,
       "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486497600,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486512000,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486526400,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486540800,
-      "value": 0.02083592
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486555200,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486569600,
-      "value": 0.1870243
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486584000,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486598400,
-      "value": 0.5947769
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486612800,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486627200,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486641600,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486656000,
-      "value": 90.69091
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486670400,
-      "value": 0.015526682078025005
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486684800,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486699200,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486713600,
-      "value": 0.13163353719117646
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486728000,
-      "value": 0.009563844292490468
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486742400,
-      "value": 0.06536897512646485
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486756800,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486771200,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486785600,
-      "value": 0
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486800000,
-      "value": 0.015148845839315169
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486814400,
-      "value": 0.016276979403135612
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486828800,
-      "value": 0.007951060758653105
-    },
-    {
-      "laneLabel": "Overall",
-      "time": 1486843200,
-      "value": 0.00750917782906428
     }
   ],
   "interval": 14400,
   "earliest": 1486425600,
-  "latest": 1486857600
+  "latest": 1486483200
 }
