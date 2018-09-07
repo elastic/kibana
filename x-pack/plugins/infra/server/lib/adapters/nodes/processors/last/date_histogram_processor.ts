@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import moment from 'moment';
 import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
 import { createBasePath } from '../../lib/create_base_path';
@@ -21,6 +21,7 @@ export const calculateOffsetInSeconds = (end: number, interval: number) => {
 
 export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
+    const result = cloneDeep(doc);
     const { timerange, sourceConfiguration, groupBy } = options.nodeOptions;
     const bucketSizeInSeconds = getBucketSizeInSeconds(timerange.interval);
     const boundsMin = moment
@@ -30,7 +31,7 @@ export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => 
     const path = createBasePath(groupBy).concat('timeseries');
     const bucketOffset = calculateOffsetInSeconds(timerange.from, bucketSizeInSeconds);
     const offset = `${Math.floor(bucketOffset)}s`;
-    set(doc, path, {
+    set(result, path, {
       date_histogram: {
         field: sourceConfiguration.fields.timestamp,
         interval: timerange.interval,
@@ -43,6 +44,6 @@ export const dateHistogramProcessor = (options: InfraProcesorRequestOptions) => 
       },
       aggs: {},
     });
-    return doc;
+    return result;
   };
 };

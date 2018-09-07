@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 
 import { InfraESSearchBody, InfraNodeType, InfraProcesorRequestOptions } from '../../adapter_types';
 import { NODE_REQUEST_PARTITION_FACTOR, NODE_REQUEST_PARTITION_SIZE } from '../../constants';
@@ -23,9 +23,10 @@ const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
 
 export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
+    const result = cloneDeep(doc);
     const field = nodeTypeToField(options);
 
-    set(doc, 'aggs.waffle.aggs.nodes.terms', {
+    set(result, 'aggs.waffle.aggs.nodes.terms', {
       field,
       include: {
         num_partitions: options.numberOfPartitions,
@@ -34,6 +35,6 @@ export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
       order: { _key: 'asc' },
       size: NODE_REQUEST_PARTITION_SIZE * NODE_REQUEST_PARTITION_FACTOR,
     });
-    return doc;
+    return result;
   };
 };

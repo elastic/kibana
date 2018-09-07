@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 
 import { InfraPathFilterInput, InfraPathInput } from '../../../../../../common/graphql/types';
 import {
@@ -16,9 +16,10 @@ import { isGroupByFilters, isGroupByTerms } from '../../lib/type_guards';
 
 export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
+    const result = cloneDeep(doc);
     const { groupBy } = options.nodeOptions;
     let aggs = {};
-    set(doc, 'aggs.waffle.aggs.nodes.aggs', aggs);
+    set(result, 'aggs.waffle.aggs.nodes.aggs', aggs);
     groupBy.forEach((grouping: InfraPathInput, index: number) => {
       if (isGroupByTerms(grouping)) {
         const termsAgg = {
@@ -52,6 +53,6 @@ export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
         aggs = filtersAgg.aggs;
       }
     });
-    return doc;
+    return result;
   };
 };
