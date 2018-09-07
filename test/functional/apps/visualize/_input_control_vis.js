@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('input control visualization', () => {
+  describe('input control visualization @visualize-input-control-vis', () => {
 
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();

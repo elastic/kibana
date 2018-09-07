@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
-  describe('full screen mode', async () => {
+  describe('full screen mode @dashboard-full-screen-mode', async () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });

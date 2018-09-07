@@ -23,7 +23,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visualize app', function () {
+  describe('visualize app @visualize-app', function () {
     before(async function () {
       log.debug('Starting visualize before method');
       remote.setWindowSize(1280, 800);

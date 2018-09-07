@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const remote = getService('remote');
 
-  describe('dashboard time', () => {
+  describe('dashboard time @dashboard-time', () => {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

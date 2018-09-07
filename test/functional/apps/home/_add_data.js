@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
-  describe('add data tutorials', function describeIndexTests() {
+  describe('add data tutorials @home-add-data', function describeIndexTests() {
 
     it('directory should display registered tutorials', async ()=> {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory');

@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
 
 
-  describe('index version conflict', function describeIndexTests() {
+  describe('index version conflict @management-handle-version-conflict', function describeIndexTests() {
     before(async function () {
       await remote.setWindowSize(1200, 800);
       await esArchiver.load('discover');

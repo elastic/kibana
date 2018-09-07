@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
 
-  describe('expanding a panel', () => {
+  describe('expanding a panel @dashboard-panel-expand-toggle', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });

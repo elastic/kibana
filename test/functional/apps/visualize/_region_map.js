@@ -22,7 +22,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
 
-  describe('vector map', function () {
+  describe('vector map @visualize-region-map', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 

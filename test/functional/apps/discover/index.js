@@ -21,7 +21,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
 
-  describe('discover app', function () {
+  describe('discover app @discover-app', function () {
     before(function () {
       return remote.setWindowSize(1200, 800);
     });

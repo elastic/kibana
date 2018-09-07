@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const remote = getService('remote');
 
-  describe('dashboard listing page', function describeIndexTests() {
+  describe('dashboard listing page @dashboard-listing', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {

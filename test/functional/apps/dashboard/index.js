@@ -22,7 +22,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard app', function () {
+  describe('dashboard app @dashboard-app', function () {
     describe('using current data', function () {
       before(async () => {
         await remote.setWindowSize(1300, 900);

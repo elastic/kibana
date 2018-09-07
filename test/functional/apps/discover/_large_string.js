@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
     'discover',
   ]);
 
-  describe('test large strings', function () {
+  describe('test large strings @discover-large-string', function () {
     before(async function () {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');

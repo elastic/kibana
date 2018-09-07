@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  describe('creating and deleting default index', function describeIndexTests() {
+  describe('creating and deleting default index @management-index-pattern-create-delete', function describeIndexTests() {
     before(function () {
       // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})

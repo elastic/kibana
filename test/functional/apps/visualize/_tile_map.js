@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
 
-  describe('tile map visualize app', function () {
+  describe('tile map visualize app @visualize-tile-map', function () {
 
 
     describe('incomplete config', function describeIndexTests() {

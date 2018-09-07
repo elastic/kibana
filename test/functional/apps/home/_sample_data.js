@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
-  describe('sample data', function describeIndexTests() {
+  describe('sample data @home-sample-data', function describeIndexTests() {
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');

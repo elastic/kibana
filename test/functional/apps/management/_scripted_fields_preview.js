@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  describe('scripted fields preview', () => {
+  describe('scripted fields preview @management-scripted-fields-preview', () => {
     before(async function () {
       await remote.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it

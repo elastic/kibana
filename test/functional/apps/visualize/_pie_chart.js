@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
-  describe('pie chart', async function () {
+  describe('pie chart @visualize-pie-chart', async function () {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
 

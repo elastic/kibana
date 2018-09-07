@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const PageObjects = getPageObjects(['common', 'home']);
 
-  describe('Kibana takes you home', function describeIndexTests() {
+  describe('Kibana takes you home @home-test', function describeIndexTests() {
 
     it('clicking on kibana logo should take you to home page', async ()=> {
       await PageObjects.common.navigateToApp('settings');

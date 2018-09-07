@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
-  describe('dashboard save', function describeIndexTests() {
+  describe('dashboard save @dashboard-save', function describeIndexTests() {
     const dashboardName = 'Dashboard Save Test';
 
     before(async function () {

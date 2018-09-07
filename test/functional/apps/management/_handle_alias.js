@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
 
-  describe('Index patterns on aliases', function () {
+  describe('Index patterns on aliases @management-handle-alias', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover app', function describeIndexTests() {
+  describe('discover app @discover-test', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const fromTimeString = 'September 19th 2015, 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';

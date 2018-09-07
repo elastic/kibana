@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
-  describe('data table', function indexPatternCreation() {
+  describe('data table @visualize-data-table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
 
     before(async function () {

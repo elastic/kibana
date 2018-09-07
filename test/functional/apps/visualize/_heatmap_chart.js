@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('heatmap chart', function indexPatternCreation() {
+  describe('heatmap chart @visualize-heatmap-chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';

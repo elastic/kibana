@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('errors', function describeIndexTests() {
+  describe('errors @discover-errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('invalid_scripted_field');
       await PageObjects.common.navigateToApp('discover');

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard data-shared attributes', function describeIndexTests() {
+  describe('dashboard data-shared attributes @dashboard-shared-attributes', function describeIndexTests() {
     let originalPanelTitles;
 
     before(async () => {

@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('create and add embeddables', async () => {
+  describe('create and add embeddables @dashboard-create-add-embeddables', async () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });

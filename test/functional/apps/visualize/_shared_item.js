@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('data-shared-item', function indexPatternCreation() {
+  describe('data-shared-item @visualize-data-shared-item', function indexPatternCreation() {
     before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.common.navigateToApp('visualize');

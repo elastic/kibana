@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe.skip('data table with index without time filter', function indexPatternCreation() {
+  describe.skip('data table with index without time filter @visualize-data-table-notimeindex', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';
 
     before(async function () {

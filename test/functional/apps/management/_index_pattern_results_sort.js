@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  describe('index result field sort', function describeIndexTests() {
+  describe('index result field sort @management-index-pattern-results-sort', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});

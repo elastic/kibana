@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  describe('index result popularity', function describeIndexTests() {
+  describe('index result popularity @management-index-pattern-popularity', function describeIndexTests() {
     const fieldName = 'geo.coordinates';
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
