@@ -32,7 +32,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
-        const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div><div id="marius"></div>';
+        const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
         const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
         const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
@@ -257,7 +257,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
         let legendScope = $scope.$new();
         function drawPlot(plotConfig) {
           const emptyChartValues = '<div id="chartValues" style="display: none"></div>';
-          if (!$('.chart-canvas', $elem).length) $elem.html(template + chartValues);
+          if (!$('.chart-canvas', $elem).length) $elem.html(template);
           const canvasElem = $('.chart-canvas', $elem);
 
           // we can't use `$.plot` to draw the chart when the height or width is 0
@@ -365,7 +365,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           //chart has been recreated. Append the new chart values
           chartValues = '<div id="chartValues" style="display: none">' + JSON.stringify(plotConfig) + '</div>';
           const chartValuesClear = $(emptyChartValues);
-          chartValuesClear.html(emptyCaption);
+          chartValuesClear.html('');
           canvasElem.append(chartValues);
         }
         $scope.$watch('chart', drawPlot);
