@@ -52,10 +52,10 @@ describe('get computed fields', function () {
     expect(docvalueFieldNames).to.contain('utc_time');
   });
 
-  it('should request date field doc values in strict_date_optional_time format', function () {
+  it('should request date field doc values in date_time format', function () {
     const docvalueFields = fn().docvalueFields;
     const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
-    expect(timestampField).to.have.property('format', 'strict_date_optional_time');
+    expect(timestampField).to.have.property('format', 'date_time');
   });
 
   it('should not request scripted date fields as docvalue_fields', function () {
