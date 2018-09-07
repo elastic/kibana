@@ -84,3 +84,10 @@ export interface SavedObjectsClient {
     options?: UpdateOptions
   ) => Promise<SavedObject>;
 }
+
+export interface SOCWrapperOptions {
+  client: SavedObjectsClient;
+  request: any;
+}
+
+export type SOCWrapperFactory = (options: SOCWrapperOptions) => SavedObjectsClient;

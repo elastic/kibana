@@ -5,15 +5,8 @@
  */
 
 import { SpacesService } from '../create_spaces_service';
-import { SavedObjectsClient } from './saved_objects_client_types';
+import { SOCWrapperFactory, SOCWrapperOptions } from './saved_objects_client_types';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-
-interface SOCWrapperOptions {
-  client: SavedObjectsClient;
-  request: any;
-}
-
-type SOCWrapperFactory = (options: SOCWrapperOptions) => SavedObjectsClient;
 
 export function spacesSavedObjectsClientWrapperFactory(
   spacesService: SpacesService
