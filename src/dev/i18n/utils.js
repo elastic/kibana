@@ -34,7 +34,7 @@ import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
-const VALUES_REFERENCES_REGEX = /{\w+([,\s\w]|({.*}))*}/g;
+const VALUES_REFERENCES_REGEX = /{\s*\w+([,\s\w]|({.*}))*}/g;
 const EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX = /(?<=^{)\w+(?=[},])/g;
 
 export const readFileAsync = promisify(fs.readFile);
@@ -108,7 +108,7 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
   }
 
   const defaultMessageReferencesKeys = defaultMessageReferences.map(
-    message => message.match(EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX)[0]
+    message => message.trim().match(EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX)[0]
   );
 
   const unusedKeys = difference(defaultMessageReferencesKeys, valuesKeys);
