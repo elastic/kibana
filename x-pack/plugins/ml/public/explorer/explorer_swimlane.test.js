@@ -11,13 +11,13 @@ import React from 'react';
 
 import { ExplorerSwimlane } from './explorer_swimlane';
 
-describe('ExplorerSwimlane', () => {
-  const mockAppState = {
+function getExplorerSwimlaneMocks() {
+  const appState = {
     mlExplorerSwimlane: {},
     save: jest.fn()
   };
 
-  const mockMlExplorerDashboardService = {
+  const mlExplorerDashboardService = {
     allowCellRangeSelection: false,
     dragSelect: {
       watch: jest.fn(),
@@ -31,43 +31,76 @@ describe('ExplorerSwimlane', () => {
     }
   };
 
-  const mockMlTimeBuckets = jest.fn(() => ({
+  const MlTimeBucketsMethods = {
     setInterval: jest.fn(),
     getScaledDateFormat: jest.fn()
-  }));
+  };
+  const MlTimeBuckets = jest.fn(() => MlTimeBucketsMethods);
+  MlTimeBuckets.mockMethods = MlTimeBucketsMethods;
 
-  const mockSwimlaneData = {};
+  const swimlaneData = {};
 
+  return {
+    appState,
+    mlExplorerDashboardService,
+    MlTimeBuckets,
+    swimlaneData
+  };
+}
+
+describe('ExplorerSwimlane', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
   beforeEach(() => SVGElement.prototype.getBBox = () => mockedGetBBox);
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Minimal initialization', () => {
+    const mocks = getExplorerSwimlaneMocks();
+
     const wrapper = mount(<ExplorerSwimlane
-      appState={mockAppState}
+      appState={mocks.appState}
       lanes={{}}
-      mlExplorerDashboardService={mockMlExplorerDashboardService}
-      MlTimeBuckets={mockMlTimeBuckets}
-      swimlaneData={mockSwimlaneData}
+      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
+      MlTimeBuckets={mocks.MlTimeBuckets}
+      swimlaneData={mocks.swimlaneData}
     />);
 
     expect(wrapper.html()).toBe(
       `<div class="ml-swimlanes"><div class="time-tick-labels"><svg height="25">` +
       `<g class="x axis"><path class="domain" d="MNaN,6V0H0V6"></path></g></svg></div></div>`
     );
+
+    // test calls to mock functions
+    expect(mocks.appState.save.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.dragSelect.watch.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
+    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(1);
+    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
+    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
 
   test('Overall swimlane', () => {
+    const mocks = getExplorerSwimlaneMocks();
+
     const wrapper = mount(<ExplorerSwimlane
-      appState={mockAppState}
+      appState={mocks.appState}
       lanes={mockOverallSwimlane}
-      mlExplorerDashboardService={mockMlExplorerDashboardService}
-      MlTimeBuckets={mockMlTimeBuckets}
-      swimlaneData={mockSwimlaneData}
+      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
+      MlTimeBuckets={mocks.MlTimeBuckets}
+      swimlaneData={mocks.swimlaneData}
     />);
 
     expect(wrapper.html()).toMatchSnapshot();
+
+    // test calls to mock functions
+    expect(mocks.appState.save.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.dragSelect.watch.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
+    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(1);
+    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
+    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
 
 });
