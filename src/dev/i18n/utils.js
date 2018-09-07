@@ -34,7 +34,7 @@ import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
-const VALUES_REFERENCES_REGEX = /{\w+([,\s\w]||({.*}))*}/g;
+const VALUES_REFERENCES_REGEX = /{\w+([,\s\w]|({.*}))*}/g;
 const EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX = /(?<=^{)\w+(?=[},])/g;
 
 export const readFileAsync = promisify(fs.readFile);
