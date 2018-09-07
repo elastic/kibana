@@ -19,6 +19,20 @@
 
 import { TaskManager } from './task_pool';
 import { TaskInstance } from './task_pool/task';
+import { FetchOpts, FetchResult } from './task_pool/task_store';
+
+interface ClientCheckResult {
+  error?: Error;
+}
+
+function checkClient(client: TaskManager | null): ClientCheckResult {
+  if (client === null) {
+    return {
+      error: new Error('Task Manager Client has not been set properly!'),
+    };
+  }
+  return {};
+}
 
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;
@@ -32,9 +46,26 @@ export class TaskManagerClientWrapper {
   }
 
   public schedule(task: TaskInstance) {
-    if (this.client == null) {
-      throw new Error('Task Manager Client has not been set properly!');
+    const { error } = checkClient(this.client);
+    if (error) {
+      throw error;
     }
-    this.client.schedule(task);
+    return this.client.schedule(task);
+  }
+
+  public remove(id: string) {
+    const { error } = checkClient(this.client);
+    if (error) {
+      throw error;
+    }
+    return this.client.remove(id);
+  }
+
+  public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+    const { error } = checkClient(this.client);
+    if (error) {
+      throw error;
+    }
+    return this.client.fetch(opts);
   }
 }
