@@ -24,6 +24,7 @@ import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { DRAG_SELECT_ACTION } from './explorer_constants';
 
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
@@ -68,7 +69,7 @@ export class ExplorerSwimlane extends React.Component {
     const element = $(this.rootNode).parent();
     const { swimlaneType } = this.props;
 
-    if (action === 'newSelection' && elements.length > 0) {
+    if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
       const firstCellData = $(elements[0]).data('click');
       if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
         const selectedData = elements.reduce((d, e) => {
@@ -89,10 +90,10 @@ export class ExplorerSwimlane extends React.Component {
       }
 
       this.setState({ cellMouseoverActive: true });
-    } else if (action === 'elementSelect') {
+    } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
       element.addClass('ml-dragselect-dragging');
       return;
-    } else if (action === 'dragStart') {
+    } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
       this.setState({ cellMouseoverActive: false });
       return;
     }

@@ -40,6 +40,7 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
+import { DRAG_SELECT_ACTION } from './explorer_constants';
 
 uiRoutes
   .when('/explorer/?', {
@@ -95,7 +96,7 @@ module.controller('MlExplorerController', function (
 
       if (elements.length > 0) {
         mlExplorerDashboardService.dragSelect.changed({
-          action: 'newSelection',
+          action: DRAG_SELECT_ACTION.NEW_SELECTION,
           elements
         });
       }
@@ -105,7 +106,7 @@ module.controller('MlExplorerController', function (
     onDragStart() {
       if (ALLOW_CELL_RANGE_SELECTION) {
         mlExplorerDashboardService.dragSelect.changed({
-          action: 'dragStart'
+          action: DRAG_SELECT_ACTION.DRAG_START
         });
         disableDragSelectOnMouseLeave = false;
       }
@@ -113,7 +114,7 @@ module.controller('MlExplorerController', function (
     onElementSelect() {
       if (ALLOW_CELL_RANGE_SELECTION) {
         mlExplorerDashboardService.dragSelect.changed({
-          action: 'elementSelect'
+          action: DRAG_SELECT_ACTION.ELEMENT_SELECT
         });
       }
     }
