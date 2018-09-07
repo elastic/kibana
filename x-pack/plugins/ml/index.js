@@ -24,6 +24,7 @@ import { filtersRoutes } from './server/routes/filters';
 import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
+import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -38,9 +39,10 @@ export const ml = (kibana) => {
         description: 'Machine Learning for the Elastic Stack',
         icon: 'plugins/ml/ml.svg',
         main: 'plugins/ml/app',
+        styleSheetPath: `${__dirname}/public/index.scss`,
       },
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
-      home: ['plugins/ml/register_feature']
+      home: ['plugins/ml/register_feature'],
     },
 
 
@@ -72,7 +74,8 @@ export const ml = (kibana) => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
-          esServerUrl: config.get('elasticsearch.url')
+          esServerUrl: config.get('elasticsearch.url'),
+          maxPayloadBytes: config.get('server.maxPayloadBytes'),
         };
       });
 
@@ -90,6 +93,7 @@ export const ml = (kibana) => {
       resultsServiceRoutes(server, commonRouteConfig);
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
+      fileDataVisualizerRoutes(server, commonRouteConfig);
     }
 
   });
