@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-
-declare module '@elastic/eui' {
-  export const EuiToolTip: React.SFC<{ placement?: string; content: string }>;
-}
-
 import { EuiFormRow, EuiToolTip } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 
 interface FormRowProps {
   disableMsg?: string;

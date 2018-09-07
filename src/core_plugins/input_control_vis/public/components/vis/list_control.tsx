@@ -21,10 +21,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { FormRow } from './form_row';
 
-declare module '@elastic/eui' {
-  export const EuiComboBox: React.SFC<any>;
-}
-
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
 interface ComboBoxOption {
