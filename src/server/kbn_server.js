@@ -143,8 +143,6 @@ export default class KbnServer {
 
     await new KibanaMigrator({ kbnServer: this }).migrateIndex();
 
-    await fromNode(cb => server.start(cb));
-
     if (isWorker) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
