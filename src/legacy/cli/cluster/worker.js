@@ -21,10 +21,17 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor, fromRoot } from '../../utils';
+import { BinderFor, fromRoot } from '../../../utils';
 
-const cliPath = fromRoot('src/cli');
-const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
+const cliPath = fromRoot('src/core/cli');
+const baseArgs = process.argv.slice(2).filter((arg) => {
+  // The following arguments should be consumed by main process only,
+  // workers will receive these only from cluster manager if needed.
+  return arg !== 'no-watch'
+    && !arg.startsWith('--server.port')
+    && !arg.startsWith('--server.basePath')
+    && !arg.startsWith('--server.rewriteBasePath');
+});
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
 cluster.setupMaster({

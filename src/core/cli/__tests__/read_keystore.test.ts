@@ -17,30 +17,31 @@
  * under the License.
  */
 
+jest.mock('../../../server/keystore');
+
 import path from 'path';
-import { readKeystore }  from './read_keystore';
+// @ts-ignore: implicit any for JS file
+import { Keystore } from '../../../server/keystore';
+import { readKeystore } from '../read_keystore';
 
-jest.mock('../../server/keystore');
-import { Keystore } from '../../server/keystore';
-
-describe('cli/serve/read_keystore', () => {
+describe('core/cli/read_keystore', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  it('returns structured keystore data', () => {
+  test('returns structured keystore data', () => {
     const keystoreData = { 'elasticsearch.password': 'changeme' };
     Keystore.prototype.data = keystoreData;
 
     const data = readKeystore();
     expect(data).toEqual({
       elasticsearch: {
-        password: 'changeme'
-      }
+        password: 'changeme',
+      },
     });
   });
 
-  it('uses data path provided', () => {
+  test('uses data path provided', () => {
     const keystoreDir = '/foo/';
     const keystorePath = path.join(keystoreDir, 'kibana.keystore');
 

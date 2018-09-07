@@ -105,7 +105,7 @@ export class LegacyService implements CoreService {
         )
       : EMPTY;
 
-    require('../../../cli/cluster/cluster_manager').create(
+    require('../../../legacy/cli/cluster/cluster_manager').create(
       this.env.cliArgs,
       config.toRaw(),
       await basePathProxy$.toPromise()
@@ -133,7 +133,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
-      require('../../../cli/repl').startRepl(kbnServer);
+      require('../../../legacy/cli/repl').startRepl(kbnServer);
     }
 
     const httpConfig = await this.configService

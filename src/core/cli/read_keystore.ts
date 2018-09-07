@@ -17,33 +17,23 @@
  * under the License.
  */
 
-import { accessSync, R_OK } from 'fs';
-import { find } from 'lodash';
-import { fromRoot } from '../../utils';
+import { set } from 'lodash';
+import path from 'path';
 
-const CONFIG_PATHS = [
-  process.env.CONFIG_PATH,
-  fromRoot('config/kibana.yml'),
-  '/etc/kibana/kibana.yml'
-].filter(Boolean);
+// @ts-ignore: implicit any for JS file
+import { Keystore } from '../../server/keystore';
+import { getData } from '../../server/path';
 
-const DATA_PATHS = [
-  process.env.DATA_PATH,
-  fromRoot('data'),
-  '/var/lib/kibana'
-].filter(Boolean);
+export function readKeystore(dataPath = getData()): Record<string, any> {
+  const keystore = new Keystore(path.join(dataPath, 'kibana.keystore'));
+  keystore.load();
 
-function findFile(paths) {
-  const availablePath = find(paths, configPath => {
-    try {
-      accessSync(configPath, R_OK);
-      return true;
-    } catch (e) {
-      //Check the next path
-    }
+  const keys = Object.keys(keystore.data);
+  const data = {};
+
+  keys.forEach(key => {
+    set(data, key, keystore.data[key]);
   });
-  return availablePath || paths[0];
-}
 
-export const getConfig = () => findFile(CONFIG_PATHS);
-export const getData = () => findFile(DATA_PATHS);
+  return data;
+}

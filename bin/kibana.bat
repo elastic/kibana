@@ -14,7 +14,7 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
+"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\core\cli" %*
 
 :finally
 

@@ -24,7 +24,7 @@ export default {
     '<rootDir>/src/core',
     '<rootDir>/src/core_plugins',
     '<rootDir>/src/server',
-    '<rootDir>/src/cli',
+    '<rootDir>/src/legacy/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',

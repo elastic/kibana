@@ -17,5 +17,19 @@
  * under the License.
  */
 
-require('../setup_node_env');
-require('./cli');
+import { accessSync, constants as fsConstants } from 'fs';
+import { getConfig, getData } from './';
+
+const { R_OK } = fsConstants;
+
+describe('Default path finder', () => {
+  it('should find a kibana.yml', () => {
+    const configPath = getConfig();
+    expect(() => accessSync(configPath, R_OK)).not.toThrow();
+  });
+
+  it('should find a data directory', () => {
+    const dataPath = getData();
+    expect(() => accessSync(dataPath, R_OK)).not.toThrow();
+  });
+});

@@ -21,11 +21,11 @@ import { BehaviorSubject, Subject, throwError } from 'rxjs';
 
 jest.mock('../legacy_platform_proxy');
 jest.mock('../../../../server/kbn_server');
-jest.mock('../../../../cli/cluster/cluster_manager');
+jest.mock('../../../../legacy/cli/cluster/cluster_manager');
 
 import { first } from 'rxjs/operators';
 // @ts-ignore: implicit any for JS file
-import MockClusterManager from '../../../../cli/cluster/cluster_manager';
+import MockClusterManager from '../../../../legacy/cli/cluster/cluster_manager';
 // @ts-ignore: implicit any for JS file
 import MockKbnServer from '../../../../server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';

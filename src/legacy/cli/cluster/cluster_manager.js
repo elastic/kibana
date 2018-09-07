@@ -24,8 +24,8 @@ import { first } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
-import { Config } from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { Config } from '../../../server/config/config';
+import { transformDeprecations } from '../../../server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -130,7 +130,7 @@ export default class ClusterManager {
 
   setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../utils');
+    const { fromRoot } = require('../../../utils');
 
     const watchPaths = [
       fromRoot('src/core_plugins'),

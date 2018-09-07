@@ -17,9 +17,33 @@
  * under the License.
  */
 
-import { pkg } from './package_json';
-import { resolve } from 'path';
+import { accessSync, constants as fsConstants } from 'fs';
+import { fromRoot } from '../../utils/from_root';
 
-export function fromRoot(...args) {
-  return resolve(pkg.__dirname, ...args);
+const { R_OK } = fsConstants;
+
+const CONFIG_PATHS = [
+  process.env.CONFIG_PATH || '',
+  fromRoot('config/kibana.yml'),
+  '/etc/kibana/kibana.yml',
+].filter(Boolean);
+
+const DATA_PATHS = [process.env.DATA_PATH || '', fromRoot('data'), '/var/lib/kibana'].filter(
+  Boolean
+);
+
+function findFile(paths: string[]) {
+  const availablePath = paths.find(configPath => {
+    try {
+      accessSync(configPath, R_OK);
+      return true;
+    } catch (e) {
+      // Check the next path
+      return false;
+    }
+  });
+  return availablePath || paths[0];
 }
+
+export const getConfig = () => findFile(CONFIG_PATHS);
+export const getData = () => findFile(DATA_PATHS);

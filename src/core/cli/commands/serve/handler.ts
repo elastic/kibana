@@ -19,53 +19,30 @@
 
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
-import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
-import { Root } from './root';
+import { Arguments } from 'yargs';
+import { Env, RawConfigService } from '../../../server/config';
+import { LegacyObjectToConfigAdapter } from '../../../server/legacy_compat';
+import { Root } from '../../../server/root';
+import { applyConfigOverrides } from '../../apply_config_overrides';
+import { KibanaFeatures } from '../../kibana_features';
 
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in a so called cluster mode in which
-  // Kibana is run as a "worker" process together with optimizer "worker" process
-  // that are orchestrated by the "master" process (dev mode only feature).
-  isClusterModeSupported: boolean;
-
-  // Indicates whether we can run Kibana without X-Pack plugin pack even if it's
-  // installed (dev mode only feature).
-  isOssModeSupported: boolean;
-
-  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
-  isReplModeSupported: boolean;
-
-  // Indicates whether X-Pack plugin pack is installed and available.
-  isXPackInstalled: boolean;
-}
-
-interface BootstrapArgs {
-  configs: string[];
-  cliArgs: CliArgs;
-  applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
-}
-
-export async function bootstrap({
-  configs,
-  cliArgs,
-  applyConfigOverrides,
-  features,
-}: BootstrapArgs) {
-  if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('Kibana REPL mode can only be run in development mode.');
-  }
-
+export async function handler(cliArgs: Arguments, kibanaFeatures: KibanaFeatures) {
   const env = Env.createDefault({
-    configs,
-    cliArgs,
-    isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
+    configs: [].concat(cliArgs.config || []),
+    cliArgs: {
+      dev: !!cliArgs.dev,
+      envName: cliArgs.env ? cliArgs.env.name : undefined,
+      quiet: !!cliArgs.quiet,
+      silent: !!cliArgs.silent,
+      watch: !!cliArgs.watch,
+      repl: !!cliArgs.repl,
+      basePath: !!cliArgs.basePath,
+    },
+    isDevClusterMaster: isMaster && cliArgs.dev && kibanaFeatures.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(
-    env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
+  const rawConfigService = new RawConfigService(env.configs, rawConfig =>
+    applyConfigOverrides(new LegacyObjectToConfigAdapter(rawConfig), cliArgs, kibanaFeatures)
   );
 
   rawConfigService.loadConfig();
