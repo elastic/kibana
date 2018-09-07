@@ -10,6 +10,7 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import _ from 'lodash';
@@ -26,6 +27,9 @@ import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip
 
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
+    appState: PropTypes.object.isRequired,
+    lanes: PropTypes.object.isRequired,
+    mlExplorerDashboardService: PropTypes.object.isRequired
   }
 
   constructor(props) {
