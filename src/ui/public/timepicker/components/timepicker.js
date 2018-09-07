@@ -151,12 +151,20 @@ export class Timepicker extends Component {
 
     const getConfig = (...args) => chrome.getUiSettingsClient().get(...args);
     return (
-      <span
-        className="kuiLocalMenuItem"
+      <button
+        className="euiDatePicker euiFieldText"
         onClick={this.editMode}
+        style={{ textAlign: 'left', fontSize: 12, whiteSpace: 'nowrap' }}
       >
-        {prettyDuration(from, to, getConfig)}
-      </span>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {prettyDuration(from, to, getConfig)}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span className="euiLink euiLink--primary">Show dates</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </button>
     );
   }
 
@@ -167,18 +175,32 @@ export class Timepicker extends Component {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={this.applyTimeFromState}
+            color="secondary"
             fill
             disabled={this.state.isInvalid || !this.state.hasChanged}
           >
-            Go
+            Update
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    } else {
+      updateButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={this.applyTimeFromState}
+            fill
+            disabled={this.state.isInvalid}
+          >
+            Refresh
           </EuiButton>
         </EuiFlexItem>
       );
     }
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" style={{ margin: 4 }}>
         <EuiFlexItem grow={false}>
           <EuiFormControlLayout
+            style={{ maxWidth: '100%' }}
             prepend={(
               <QuickForm
                 setTime={this.setTime}
@@ -189,8 +211,8 @@ export class Timepicker extends Component {
             )}
           >
             <div
-              className="euiDatePickerRange"
-              style={this.state.isInvalid ? { background: 'red' } : undefined}
+              className="euiDatePickerRange euiDatePickerRange--inGroup euiFormControlLayout__child--noStyle"
+              style={this.state.isInvalid ? { background: 'red', minWidth: 340 } : { minWidth: 340 }}
             >
               {this.renderTime()}
             </div>

@@ -69,7 +69,7 @@ export function getUiSettingDefaults() {
     },
     'dateFormat': {
       name: 'Date format',
-      value: 'MMMM Do YYYY, HH:mm:ss.SSS',
+      value: 'MMM D, YYYY @ HH:mm:ss.SSS',
       description: `When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/"
         target="_blank" rel="noopener noreferrer">format</a>`,
     },

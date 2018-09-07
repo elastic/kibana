@@ -113,12 +113,13 @@ export class TimeInput extends Component {
 
   render() {
     const input = (
-      <span
-        className="kuiLocalMenuItem"
+      <button
+        className="euiDatePicker euiFieldText"
         onClick={this.togglePopover}
+        style={{ whiteSpace: 'nowrap', fontSize: 12, minWidth: 175 }}
       >
         {formatTimeString(this.props.value, chrome.getUiSettingsClient().get('dateFormat'))}
-      </span>
+      </button>
     );
 
     return (
@@ -127,8 +128,9 @@ export class TimeInput extends Component {
         isOpen={this.state.isOpen}
         closePopover={this.closePopover}
         anchorPosition="downRight"
-        ownFocus
         panelPaddingSize="none"
+        style={{ flexGrow: '1' }}
+        ownFocus
       >
         <EuiTabbedContent
           tabs={this.renderTabs()}
