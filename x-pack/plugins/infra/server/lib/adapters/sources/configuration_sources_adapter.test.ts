@@ -86,7 +86,7 @@ describe('the InfraConfigurationSourcesAdapter', () => {
             metricAlias: 'METRIC_ALIAS',
             logAlias: 'LOG_ALIAS',
             fields: {
-              containers: 'DIFFERENT_CONTAINER_FIELD',
+              container: 'DIFFERENT_CONTAINER_FIELD',
             },
           },
         },
