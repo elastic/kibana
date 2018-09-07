@@ -16,10 +16,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SpaceSelector } from './space_selector';
 
 const module = uiModules.get('spaces_selector', []);
-module.controller('spacesSelectorController', ($scope, $http, spaces) => {
+module.controller('spacesSelectorController', ($scope, $http, spaces, spaceSelectorURL) => {
   const domNode = document.getElementById('spaceSelectorRoot');
 
-  const spacesManager = new SpacesManager($http, chrome);
+  const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
   render(<SpaceSelector spaces={spaces} spacesManager={spacesManager} />, domNode);
 

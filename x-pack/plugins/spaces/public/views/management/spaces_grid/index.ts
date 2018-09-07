@@ -3,5 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export { SpacesManager } from './spaces_manager';
+export { SpacesGridPage } from './spaces_grid_page';
