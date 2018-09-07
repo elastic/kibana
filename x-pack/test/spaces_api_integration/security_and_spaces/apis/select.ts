@@ -331,7 +331,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(nonExistantSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });

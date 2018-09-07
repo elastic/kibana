@@ -8,7 +8,6 @@ import Boom from 'boom';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { getSpaceById } from '../../lib';
 
 export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
@@ -22,20 +21,12 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
 
       const space = request.payload;
 
-      const id = request.payload.id;
-
-      const existingSpace = await getSpaceById(spacesClient, id, SavedObjectsClient.errors);
-      if (existingSpace) {
-        return reply(
-          Boom.conflict(
-            `A space with the identifier ${id} already exists. Please choose a different identifier`
-          )
-        );
-      }
-
       try {
-        return reply(await spacesClient.create({ ...space }));
+        return reply(await spacesClient.create(space));
       } catch (error) {
+        if (SavedObjectsClient.errors.isConflictError(error)) {
+          return reply(Boom.conflict(`A space with the identifier ${space.id} already exists.`));
+        }
         return reply(wrapError(error));
       }
     },

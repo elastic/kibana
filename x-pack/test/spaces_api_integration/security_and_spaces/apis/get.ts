@@ -232,7 +232,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -247,7 +247,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -262,7 +262,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -277,7 +277,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -292,7 +292,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -307,7 +307,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(scenario.otherSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });

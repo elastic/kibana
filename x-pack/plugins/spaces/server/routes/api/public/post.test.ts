@@ -99,8 +99,7 @@ describe('Spaces Public API', () => {
     expect(statusCode).toEqual(409);
     expect(JSON.parse(responsePayload)).toEqual({
       error: 'Conflict',
-      message:
-        'A space with the identifier a-space already exists. Please choose a different identifier',
+      message: 'A space with the identifier a-space already exists.',
       statusCode: 409,
     });
   });

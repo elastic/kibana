@@ -37,7 +37,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
 
       it(`should return ${tests.default.statusCode}`, async () => {
         return supertest
-          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/v1/space/${spaceId}`)
+          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/space/${spaceId}`)
           .auth(auth.username, auth.password)
           .expect(tests.default.statusCode)
           .then(tests.default.response);
@@ -73,11 +73,10 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     expect(resp.body).to.eql('');
   };
 
-  const createExpectNotFoundResult = (spaceId: string) => (resp: any) => {
+  const createExpectNotFoundResult = () => (resp: any) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
-      message: `Saved object [space/${spaceId}] not found`,
     });
   };
 

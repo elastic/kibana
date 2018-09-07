@@ -5,12 +5,10 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { getSpaceById } from '../../lib';
 
 export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
@@ -22,21 +20,16 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
         request
       );
 
-      const space: Space = omit(request.payload, ['id']);
+      const space: Space = request.payload;
       const id = request.params.id;
-
-      const existingSpace = await getSpaceById(spacesClient, id, SavedObjectsClient.errors);
-
-      if (existingSpace) {
-        space._reserved = existingSpace._reserved;
-      } else {
-        return reply(Boom.notFound(`Unable to find space with ID ${id}`));
-      }
 
       let result: Space;
       try {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
+        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+          return reply(Boom.notFound());
+        }
         return reply(wrapError(error));
       }
 

@@ -36,7 +36,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`should return ${tests.exists.statusCode}`, async () => {
         return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/spaces/v1/space/space_2`)
+          .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_2`)
           .auth(auth.username, auth.password)
           .expect(tests.exists.statusCode)
           .then(tests.exists.response);
@@ -45,7 +45,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe(`when the space is reserved`, async () => {
         it(`should return ${tests.reservedSpace.statusCode}`, async () => {
           return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/v1/space/default`)
+            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
             .auth(auth.username, auth.password)
             .expect(tests.reservedSpace.statusCode)
             .then(tests.reservedSpace.response);
@@ -55,7 +55,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe(`when the space doesn't exist`, () => {
         it(`should return ${tests.doesntExist.statusCode}`, async () => {
           return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/v1/space/space_3`)
+            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_3`)
             .auth(auth.username, auth.password)
             .expect(tests.doesntExist.statusCode)
             .then(tests.doesntExist.response);
@@ -78,7 +78,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
-      message: `Saved object [space/space_3] not found`,
     });
   };
 

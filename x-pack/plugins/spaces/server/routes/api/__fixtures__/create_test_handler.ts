@@ -106,20 +106,28 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
           saved_objects: spaces,
         };
       }),
-      create: jest.fn(() => ({})),
-      update: jest.fn(() => ({})),
+      create: jest.fn((type, attributes, { id }) => {
+        if (spaces.find(s => s.id === id)) {
+          throw new Error('conflict');
+        }
+        return {};
+      }),
+      update: jest.fn((type, id) => {
+        if (!spaces.find(s => s.id === id)) {
+          throw new Error('not found: during update');
+        }
+        return {};
+      }),
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
-      errors: {
-        isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),
-      },
     };
 
     server.savedObjects = {
       SavedObjectsClient: {
         errors: {
           isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),
+          isConflictError: jest.fn((e: any) => e.message.startsWith('conflict')),
         },
       },
     };
