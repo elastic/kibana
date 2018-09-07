@@ -5,17 +5,21 @@
  */
 
 import { Action } from 'redux';
-import { Epic } from 'redux-observable';
+import { combineEpics, Epic } from 'redux-observable';
 import { timer } from 'rxjs';
 import { exhaustMap, filter, map, takeUntil, withLatestFrom } from 'rxjs/operators';
 
-import { jumpToTime, startAutoReload, stopAutoReload } from './actions';
+import { createUrlStateEpic } from '../../../utils/url_state';
+import { jumpToTime, restoreFromUrl, startAutoReload, stopAutoReload } from './actions';
+
+export const createWaffleTimeEpic = <State>() =>
+  combineEpics(createWaffleAutoReloadEpic<State>(), createWaffleTimeUrlStateEpic<State>());
 
 interface WaffleTimeEpicDependencies<State> {
   selectWaffleTimeUpdatePolicyInterval: (state: State) => number | null;
 }
 
-export const createWaffleTimeEpic = <State>(): Epic<
+export const createWaffleAutoReloadEpic = <State>(): Epic<
   Action,
   Action,
   State,
@@ -37,5 +41,25 @@ export const createWaffleTimeEpic = <State>(): Epic<
     )
   );
 };
+
+interface WaffleTimeUrlState {
+  time?: number;
+}
+
+const createWaffleTimeUrlStateEpic = <State>() =>
+  createUrlStateEpic<WaffleTimeUrlState, State, {}>('waffleTime', isWaffleTimeUrlState)
+    .restoreOnAction(
+      restoreFromUrl,
+      (urlState, { payload: { defaultTime } }) =>
+        urlState && urlState.time ? [jumpToTime(urlState.time)] : [jumpToTime(defaultTime)]
+    )
+    .restoreOnChange(({ time }) => time, time => (time ? [jumpToTime(time)] : []))
+    .persistOnAction(jumpToTime, (urlState, state, { payload }) => ({
+      ...urlState,
+      time: payload,
+    }));
+
+const isWaffleTimeUrlState = (value: any): value is WaffleTimeUrlState =>
+  value && (!('time' in value) || typeof value.time === 'number');
 
 const isNotNull = <T>(value: T | null): value is T => value !== null;

@@ -53,7 +53,7 @@ export class HomePage extends React.PureComponent {
               </WithKueryAutocompletion>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <WithWaffleTime>
+              <WithWaffleTime initializeOnMount>
                 {({
                   currentTime,
                   isAutoReloading,
