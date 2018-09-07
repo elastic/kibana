@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
-export { DashboardPanelAction } from './dashboard_panel_action';
-export { DashboardPanelActionsRegistryProvider } from './dashboard_panel_actions_registry';
+// @ts-ignore: implicit any for JS file
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const ContextMenuActionsRegistryProvider = uiRegistry({
+  index: ['name'],
+  name: 'ContextMenuActions',
+});

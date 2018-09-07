@@ -17,10 +17,10 @@
  * under the License.
  */
 import { EuiContextMenuItemIcon } from '@elastic/eui';
-import { DashboardContextMenuPanel } from './dashboard_context_menu_panel';
+import { ContextMenuPanel } from './context_menu_panel';
 import { PanelActionAPI } from './types';
 
-interface DashboardPanelActionOptions {
+interface ContextMenuActionOptions {
   /**
    * An optional action to take when the action is clicked on. Either this or childContextMenuPanel should be
    * given.
@@ -30,7 +30,7 @@ interface DashboardPanelActionOptions {
   /**
    * An optional child context menu to display when the action is clicked.
    */
-  childContextMenuPanel?: DashboardContextMenuPanel;
+  childContextMenuPanel?: ContextMenuPanel;
 
   /**
    * Whether this action should be disabled based on the parameters given.
@@ -47,7 +47,7 @@ interface DashboardPanelActionOptions {
   isVisible?: (panelActionAPI: PanelActionAPI) => boolean;
 
   /**
-   * Determines which DashboardContextMenuPanel this action is displayed on.
+   * Determines which ContextMenuPanel this action is displayed on.
    */
   parentPanelId?: string;
 
@@ -57,7 +57,7 @@ interface DashboardPanelActionOptions {
   icon?: EuiContextMenuItemIcon;
 }
 
-interface DashboardPanelActionsConfig {
+interface ContextMenuActionsConfig {
   id: string;
 
   /**
@@ -66,12 +66,12 @@ interface DashboardPanelActionsConfig {
   displayName: string;
 
   /**
-   * Determines which DashboardContextMenuPanel this action is displayed on.
+   * Determines which ContextMenuPanel this action is displayed on.
    */
   parentPanelId: string;
 }
 
-export class DashboardPanelAction {
+export class ContextMenuAction {
   public readonly id: string;
 
   /**
@@ -87,10 +87,10 @@ export class DashboardPanelAction {
   /**
    * Optional child context menu to open when the action is clicked.
    */
-  public readonly childContextMenuPanel?: DashboardContextMenuPanel;
+  public readonly childContextMenuPanel?: ContextMenuPanel;
 
   /**
-   * Determines which DashboardContextMenuPanel this action is displayed on.
+   * Determines which ContextMenuPanel this action is displayed on.
    */
   public readonly parentPanelId: string;
 
@@ -100,15 +100,12 @@ export class DashboardPanelAction {
    * @param {string} config.displayName
    * @param {string} config.parentPanelId - set if this action belongs on a nested child panel
    * @param {function} options.onClick
-   * @param {DashboardContextMenuPanel} options.childContextMenuPanel - optional child panel to open when clicked.
+   * @param {ContextMenuPanel} options.childContextMenuPanel - optional child panel to open when clicked.
    * @param {function} options.isDisabled - optionally set a custom disabled function
    * @param {function} options.isVisible - optionally set a custom isVisible function
    * @param {Element} options.icon
    */
-  public constructor(
-    config: DashboardPanelActionsConfig,
-    options: DashboardPanelActionOptions = {}
-  ) {
+  public constructor(config: ContextMenuActionsConfig, options: ContextMenuActionOptions = {}) {
     this.id = config.id;
     this.displayName = config.displayName;
     this.parentPanelId = config.parentPanelId;

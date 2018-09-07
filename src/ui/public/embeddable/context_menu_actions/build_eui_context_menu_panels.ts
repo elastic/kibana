@@ -19,22 +19,20 @@
 
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
-import { DashboardContextMenuPanel, DashboardPanelAction } from 'ui/dashboard_panel_actions';
-import { ContainerState, Embeddable } from 'ui/embeddable';
-import { PanelId } from '../../../selectors';
+import { ContainerState, ContextMenuAction, ContextMenuPanel, Embeddable } from 'ui/embeddable';
 
 /**
  * Loops through allActions and extracts those that belong on the given contextMenuPanelId
  * @param {string} contextMenuPanelId
- * @param {Array.<DashboardPanelAction>} allActions
+ * @param {Array.<ContextMenuAction>} allActions
  */
-function getActionsForPanel(contextMenuPanelId: PanelId, allActions: DashboardPanelAction[]) {
+function getActionsForPanel(contextMenuPanelId: string, allActions: ContextMenuAction[]) {
   return allActions.filter(action => action.parentPanelId === contextMenuPanelId);
 }
 
 /**
  * @param {String} contextMenuPanelId
- * @param {Array.<DashboardPanelAction>} actions
+ * @param {Array.<ContextMenuAction>} actions
  * @param {Embeddable} embeddable
  * @param {ContainerState} containerState
  * @return {{
@@ -50,8 +48,8 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
   embeddable,
   containerState,
 }: {
-  contextMenuPanelId: PanelId;
-  actions: DashboardPanelAction[];
+  contextMenuPanelId: string;
+  actions: ContextMenuAction[];
   embeddable?: Embeddable;
   containerState: ContainerState;
 }) {
@@ -90,8 +88,8 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
 /**
  * Transforms a DashboardContextMenuPanel to the shape EuiContextMenuPanel expects, inserting any registered pluggable
  * panel actions.
- * @param {DashboardContextMenuPanel} contextMenuPanel
- * @param {Array.<DashboardPanelAction>} actions to build the context menu with
+ * @param {ContextMenuPanel} contextMenuPanel
+ * @param {Array.<ContextMenuAction>} actions to build the context menu with
  * @param {Embeddable} embeddable
  * @param {ContainerState} containerState
  * @return {EuiContextMenuPanelDescriptor[]} An array of context menu panels to be used in the eui react component.
@@ -102,8 +100,8 @@ export function buildEuiContextMenuPanels({
   embeddable,
   containerState,
 }: {
-  contextMenuPanel: DashboardContextMenuPanel;
-  actions: DashboardPanelAction[];
+  contextMenuPanel: ContextMenuPanel;
+  actions: ContextMenuAction[];
   embeddable?: Embeddable;
   containerState: ContainerState;
 }): EuiContextMenuPanelDescriptor[] {
@@ -128,7 +126,7 @@ export function buildEuiContextMenuPanels({
 
 /**
  *
- * @param {DashboardPanelAction} action
+ * @param {ContextMenuAction} action
  * @param {ContainerState} containerState
  * @param {Embeddable} embeddable
  * @return {EuiContextMenuPanelItemDescriptor}
@@ -138,7 +136,7 @@ function convertPanelActionToContextMenuItem({
   containerState,
   embeddable,
 }: {
-  action: DashboardPanelAction;
+  action: ContextMenuAction;
   containerState: ContainerState;
   embeddable?: Embeddable;
 }): EuiContextMenuPanelItemDescriptor {
