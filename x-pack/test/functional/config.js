@@ -84,7 +84,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'), // 12 seconds
       resolve(__dirname, './apps/grok_debugger'), // 10 seconds
       resolve(__dirname, './apps/logstash'), // 2 minutes
-      
+
       resolve(__dirname, './apps/dashboard_mode'), // 8 minutes
 
       resolve(__dirname, './apps/security'), // 8 minutes
