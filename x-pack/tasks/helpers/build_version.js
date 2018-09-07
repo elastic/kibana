@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const yargs = require('yargs');
-const semver = require('semver');
-const pkg = require('../package.json');
+import yargs from 'yargs';
+import semver from 'semver';
 
 yargs
   .alias('r', 'release').describe('r', 'Create a release build, not a snapshot');
 const argv = yargs.argv;
 
-function getVersion() {
+export default function getVersion(pkg) {
   const { version } = pkg;
   if (!version) {
     throw new Error('No version found in package.json');
@@ -24,5 +23,3 @@ function getVersion() {
   const snapshotText = (argv.release) ? '' : '-SNAPSHOT';
   return `${version}${snapshotText}`;
 }
-
-module.exports = getVersion;
