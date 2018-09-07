@@ -73,8 +73,14 @@ function checkout_sibling {
         return 0
       fi
 
-      # remove xpack_ prefix from target branch if all other options fail
+      # try removing xpack_ prefix from target branch
       cloneBranch="${PR_TARGET_BRANCH#xpack_}"
+      if clone_target_is_valid ; then
+        return 0
+      fi
+      
+      # if all else fails, use master
+      cloneBranch=master
       return 0
     }
 
