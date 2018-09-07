@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+// @ts-ignore: implicit any for JS file
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import React from 'react';
+import { ShareActionProps } from 'ui/share/share_action';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
-function reportingProvider(Private) {
+function reportingProvider(Private: any) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getShareActions = ({ objectType, objectId, sharingData, isDirty, onClose }) => {
+  const getShareActions = ({
+    objectType,
+    objectId,
+    sharingData,
+    isDirty,
+    onClose,
+  }: ShareActionProps) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -46,8 +54,8 @@ function reportingProvider(Private) {
               isDirty={isDirty}
               onClose={onClose}
             />
-          )
-        }
+          ),
+        },
       });
     }
 

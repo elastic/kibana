@@ -17,10 +17,10 @@
  * under the License.
  */
 
+// @ts-ignore: implicit any for JS file
 import { uiRegistry } from 'ui/registry/_registry';
 
 export const ShareContextMenuExtensionsRegistryProvider = uiRegistry({
   name: 'shareContextMenuExtensions',
   index: ['id'],
 });
-
