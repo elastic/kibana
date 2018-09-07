@@ -113,7 +113,7 @@ export function jobsProvider(callWithRequest) {
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimestampMs,
         earliestTimestampMs,
-        isTimeSeriesViewJob: isTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {
