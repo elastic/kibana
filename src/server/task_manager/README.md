@@ -201,7 +201,7 @@ const manager = server.taskManager;
 // Schedules a task. All properties are as documented in the previous
 // storage section, except that here, params is an object, not a JSON
 // string.
-const task = manager.schedule({
+const task = await manager.schedule({
   taskType,
   runAt,
   interval,

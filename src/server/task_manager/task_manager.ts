@@ -19,7 +19,7 @@
 
 import { TaskInstance } from './task';
 import { TaskPoller } from './task_poller';
-import { FetchOpts, FetchResult, TaskStore } from './task_store';
+import { FetchOpts, FetchResult, RawTaskDoc, TaskStore } from './task_store';
 
 interface Opts {
   poller: TaskPoller;
@@ -35,16 +35,17 @@ export class TaskManager {
     this.store = opts.store;
   }
 
-  public async schedule(task: TaskInstance) {
-    await this.store.schedule(task);
-    this.poller.attemptWork();
+  public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
+    const result = await this.store.schedule(task);
+    this.poller.attemptWork(); // TODO await this?
+    return result;
   }
 
   public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
     return this.store.fetch(opts);
   }
 
-  public remove(id: string): Promise<void> {
+  public remove(id: string): Promise<RawTaskDoc> {
     return this.store.remove(id);
   }
 }

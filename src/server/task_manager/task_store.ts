@@ -39,7 +39,7 @@ export interface FetchResult {
 }
 
 // Internal, the raw document, as stored in the Kibana index.
-interface RawTaskDoc {
+export interface RawTaskDoc {
   _id: string;
   _index: string;
   _type: string;
@@ -133,7 +133,7 @@ export class TaskStore {
     }
   }
 
-  public schedule(task: TaskInstance) {
+  public schedule(task: TaskInstance): Promise<RawTaskDoc> {
     return this.callCluster('index', {
       index: this.index,
       type: DOC_TYPE,
@@ -218,7 +218,7 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async remove(id: string): Promise<void> {
+  public async remove(id: string): Promise<RawTaskDoc> {
     return this.callCluster('delete', {
       id,
       index: this.index,
@@ -240,7 +240,7 @@ export class TaskStore {
 
 function paginatableSort(sort: any[] = []) {
   if (!sort.length) {
-    return [{ runAt: 'asc' }, { _id: 'desc' }];
+    return [{ 'task.runAt': 'asc' }, { _id: 'desc' }];
   }
 
   if (sort.find(({ _id }) => !!_id)) {
