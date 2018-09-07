@@ -43,7 +43,7 @@ import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -52,7 +52,6 @@ import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_action
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 

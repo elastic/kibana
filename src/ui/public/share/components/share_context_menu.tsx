@@ -23,6 +23,7 @@ import './share_panel_content.less';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
+import { ShareAction, ShareActionProvider } from 'ui/share/share_action';
 import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
@@ -30,7 +31,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getUnhashableStates: () => object[];
-  shareContextMenuExtensions?: any[];
+  shareContextMenuExtensions?: ShareActionProvider[];
   sharingData: any;
   isDirty: boolean;
   onClose: () => void;
@@ -100,9 +101,9 @@ export class ShareContextMenu extends Component<Props> {
         isDirty,
         onClose,
       } = this.props;
-      this.props.shareContextMenuExtensions.forEach((provider: any) => {
+      this.props.shareContextMenuExtensions.forEach((provider: ShareActionProvider) => {
         provider
-          .getMenuItems({
+          .getShareActions({
             objectType,
             objectId,
             getUnhashableStates,
@@ -110,25 +111,17 @@ export class ShareContextMenu extends Component<Props> {
             isDirty,
             onClose,
           })
-          .forEach(
-            ({
-              shareMenuItem,
-              panel,
-            }: {
-              shareMenuItem: EuiContextMenuPanelItemDescriptor;
-              panel: EuiContextMenuPanelDescriptor;
-            }) => {
-              const panelId = panels.length + 1;
-              panels.push({
-                ...panel,
-                id: panelId,
-              });
-              menuItems.push({
-                ...shareMenuItem,
-                panel: panelId,
-              });
-            }
-          );
+          .forEach(({ shareMenuItem, panel }: ShareAction) => {
+            const panelId = panels.length + 1;
+            panels.push({
+              ...panel,
+              id: panelId,
+            });
+            menuItems.push({
+              ...shareMenuItem,
+              panel: panelId,
+            });
+          });
       });
     }
 

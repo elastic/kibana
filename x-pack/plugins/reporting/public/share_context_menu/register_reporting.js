@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 import moment from 'moment-timezone';
 import { unhashUrl } from 'ui/state_management/state_hashing';
@@ -14,7 +14,7 @@ import chrome from 'ui/chrome';
 
 function reportingProvider(Private, dashboardConfig) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = ({ objectType, objectId, getUnhashableStates, sharingData, isDirty, onClose }) => {
+  const getShareActions = ({ objectType, objectId, getUnhashableStates, sharingData, isDirty, onClose }) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
@@ -42,11 +42,11 @@ function reportingProvider(Private, dashboardConfig) {
       };
     };
 
-    const menuItems = [];
+    const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = 'PDF Reports';
 
-      menuItems.push({
+      shareActions.push({
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
@@ -72,12 +72,12 @@ function reportingProvider(Private, dashboardConfig) {
 
     // TODO register PNG menu item once PNG is supported on server side
 
-    return menuItems;
+    return shareActions;
   };
 
   return {
     id: 'screenCaptureReports',
-    getMenuItems,
+    getShareActions,
   };
 }
 

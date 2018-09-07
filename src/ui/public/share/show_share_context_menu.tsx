@@ -26,6 +26,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { ShareContextMenu } from './components/share_context_menu';
+import { ShareActionProvider } from './share_action';
 
 import { EuiWrappingPopover } from '@elastic/eui';
 
@@ -44,7 +45,7 @@ interface ShowProps {
   getUnhashableStates: () => object[];
   objectId?: string;
   objectType: string;
-  shareContextMenuExtensions?: any[];
+  shareContextMenuExtensions?: ShareActionProvider[];
   sharingData: any;
   isDirty: boolean;
 }

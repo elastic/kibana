@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
+import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
 function reportingProvider(Private) {
   const xpackInfo = Private(XPackInfoProvider);
-  const getMenuItems = ({ objectType, objectId, sharingData, isDirty, onClose }) => {
+  const getShareActions = ({ objectType, objectId, sharingData, isDirty, onClose }) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -23,11 +23,11 @@ function reportingProvider(Private) {
       };
     };
 
-    const menuItems = [];
+    const shareActions = [];
     if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
       const panelTitle = 'CSV Reports';
 
-      menuItems.push({
+      shareActions.push({
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
@@ -51,12 +51,12 @@ function reportingProvider(Private) {
       });
     }
 
-    return menuItems;
+    return shareActions;
   };
 
   return {
     id: 'csvReports',
-    getMenuItems,
+    getShareActions,
   };
 }
 

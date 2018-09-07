@@ -42,9 +42,8 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/registry/share_context_menu_extensions';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {

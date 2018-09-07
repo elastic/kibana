@@ -17,5 +17,26 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
-export { ShareContextMenuExtensionsRegistryProvider } from './share_action_registry';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+
+interface ShareActionProps {
+  objectType: string;
+  objectId?: string;
+  getUnhashableStates: () => object[];
+  sharingData: any;
+  isDirty: boolean;
+  onClose: () => void;
+}
+
+export interface ShareAction {
+  shareMenuItem: EuiContextMenuPanelItemDescriptor;
+  panel: EuiContextMenuPanelDescriptor;
+}
+
+export interface ShareActionProvider {
+  readonly id: string;
+
+  getShareActions: (
+    { objectType, objectId, getUnhashableStates, sharingData, isDirty, onClose }: ShareActionProps
+  ) => ShareAction[];
+}

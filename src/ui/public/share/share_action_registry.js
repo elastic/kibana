@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
+import { uiRegistry } from 'ui/registry/_registry';
 
 export const ShareContextMenuExtensionsRegistryProvider = uiRegistry({
   name: 'shareContextMenuExtensions',
