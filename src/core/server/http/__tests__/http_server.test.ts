@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getEnvOptions } from '../../config/__tests__/__mocks__/env';
+import { Server } from 'http';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
@@ -26,7 +26,6 @@ jest.mock('fs', () => ({
 import Chance from 'chance';
 import supertest from 'supertest';
 
-import { Env } from '../../config';
 import { ByteSizeValue } from '../../config/schema';
 import { logger } from '../../logging/__mocks__';
 import { HttpConfig } from '../http_config';
@@ -35,13 +34,8 @@ import { Router } from '../router';
 
 const chance = new Chance();
 
-let env: Env;
 let server: HttpServer;
 let config: HttpConfig;
-
-function getServerListener(httpServer: HttpServer) {
-  return (httpServer as any).server.listener;
-}
 
 beforeEach(() => {
   config = {
@@ -51,8 +45,7 @@ beforeEach(() => {
     ssl: {},
   } as HttpConfig;
 
-  env = new Env('/kibana', getEnvOptions());
-  server = new HttpServer(logger.get(), env);
+  server = new HttpServer(logger.get());
 });
 
 afterEach(async () => {
@@ -77,9 +70,9 @@ test('200 OK with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(200)
     .then(res => {
@@ -96,9 +89,9 @@ test('202 Accepted with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(202)
     .then(res => {
@@ -115,9 +108,9 @@ test('204 No content', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(204)
     .then(res => {
@@ -136,9 +129,9 @@ test('400 Bad request with error', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/')
     .expect(400)
     .then(res => {
@@ -165,9 +158,9 @@ test('valid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
@@ -194,9 +187,9 @@ test('invalid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
     .then(res => {
@@ -226,9 +219,9 @@ test('valid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
     .then(res => {
@@ -255,9 +248,9 @@ test('invalid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
     .then(res => {
@@ -287,9 +280,9 @@ test('valid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -320,9 +313,9 @@ test('invalid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
@@ -352,9 +345,9 @@ test('handles putting', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
@@ -382,9 +375,9 @@ test('handles deleting', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
     .then(res => {
@@ -407,9 +400,9 @@ test('filtered headers', async () => {
 
   server.registerRouter(router);
 
-  await server.start(config);
+  const { server: innerServer } = await server.start(config);
 
-  await supertest(getServerListener(server))
+  await supertest(innerServer.listener)
     .get('/foo/?bar=quux')
     .set('x-kibana-foo', 'bar')
     .set('x-kibana-bar', 'quux');
@@ -422,6 +415,7 @@ test('filtered headers', async () => {
 
 describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   let configWithBasePath: HttpConfig;
+  let innerServerListener: Server;
 
   beforeEach(async () => {
     configWithBasePath = {
@@ -438,29 +432,30 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 
     server.registerRouter(router);
 
-    await server.start(configWithBasePath);
+    const { server: innerServer } = await server.start(configWithBasePath);
+    innerServerListener = innerServer.listener;
   });
 
   test('/bar => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar')
       .expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/')
       .expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(404);
   });
 
   test('/ => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/')
       .expect(200)
       .then(res => {
@@ -469,7 +464,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/foo => /foo', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
       .then(res => {
@@ -480,6 +475,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
 
 describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   let configWithBasePath: HttpConfig;
+  let innerServerListener: Server;
 
   beforeEach(async () => {
     configWithBasePath = {
@@ -496,11 +492,12 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 
     server.registerRouter(router);
 
-    await server.start(configWithBasePath);
+    const { server: innerServer } = await server.start(configWithBasePath);
+    innerServerListener = innerServer.listener;
   });
 
   test('/bar => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
       .then(res => {
@@ -509,7 +506,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/bar/ => /', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
       .then(res => {
@@ -518,7 +515,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/bar/foo => /foo', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
       .then(res => {
@@ -527,13 +524,13 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 
   test('/ => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/')
       .expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(getServerListener(server))
+    await supertest(innerServerListener)
       .get('/foo')
       .expect(404);
   });
@@ -564,21 +561,13 @@ describe('with defined `redirectHttpFromPort`', () => {
   });
 });
 
-test('broadcasts server and connection options to the legacy "channel"', async () => {
-  const onConnectionListener = jest.fn();
-  env.legacy.on('connection', onConnectionListener);
-
-  expect(onConnectionListener).not.toHaveBeenCalled();
-
-  await server.start({
+test('returns server and connection options on start', async () => {
+  const { server: innerServer, options } = await server.start({
     ...config,
     port: 12345,
   });
 
-  expect(onConnectionListener).toHaveBeenCalledTimes(1);
-
-  const [[{ options, server: rawServer }]] = onConnectionListener.mock.calls;
-  expect(rawServer).toBeDefined();
-  expect(rawServer).toBe((server as any).server);
+  expect(innerServer).toBeDefined();
+  expect(innerServer).toBe((server as any).server);
   expect(options).toMatchSnapshot();
 });
