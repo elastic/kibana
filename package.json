@@ -317,6 +317,7 @@
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
     "postcss": "^7.0.2",
+    "precinct": "^5.0.1",
     "prettier": "^1.14.0",
     "proxyquire": "1.7.11",
     "regenerate": "^1.4.0",

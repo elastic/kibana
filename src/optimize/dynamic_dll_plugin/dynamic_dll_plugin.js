@@ -24,6 +24,7 @@ import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
+import { paperwork } from 'precinct';
 
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
@@ -38,11 +39,13 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, log }) {
+  constructor({ uiBundles, log, maxCompilations = 1 }) {
     this.log = log || (() => null);
     this.dllCompiler = new DllCompiler(uiBundles, log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
+    this.maxCompilations = maxCompilations;
+    this.performedCompilations = 0;
   }
 
   async init() {
@@ -118,7 +121,7 @@ export class DynamicDllPlugin {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
         // Verify if we must proceed and check if a dll compilation is needed.
         // We must compile the dll, at least run the procedures to understand)
-        // if we already have everything we need inside the dll, everytime
+        // if we already have everything we need inside the dll, every time
         // we are not under a distributable environment, or dll wasn't
         // yet created.
         if (!this.mustCompileDll()) {
@@ -127,25 +130,151 @@ export class DynamicDllPlugin {
 
         // Run the procedures in order to decide if we need
         // a Dll compilation
-        const requires = [];
         const rawDllConfig = this.dllCompiler.rawDllConfig;
         const dllContext = rawDllConfig.context;
         const dllOutputPath = rawDllConfig.outputPath;
+        const requiresMap = {};
+        const resolvedShimsDependenciesMap = {};
 
         for (const module of compilation.modules) {
+          let requiredModulePath = null;
+
           // re-include requires for modules already handled by the dll
           if (module.delegateData) {
             const absoluteResource = path.resolve(dllContext, module.userRequest);
-            requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
+            if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
+              requiresMap[`require('${path.relative(dllOutputPath, absoluteResource)}');`] = true;
+              requiredModulePath = absoluteResource;
+            }
+            // requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requires.push(`require('${path.relative(dllOutputPath, module.stubResource)}');`);
+            requiresMap[`require('${path.relative(dllOutputPath, module.stubResource)}');`] = true;
+            requiredModulePath = module.stubResource;
+          }
+
+          // read new requires for modules that reaches the compilation,
+          // aren't already being handled by dll and were not also
+          // in the entry paths before. The majority should come
+          // from webpackShims, otherwise we should throw
+
+          if (requiredModulePath && !requiredModulePath.includes('node_modules')) {
+            if (!requiredModulePath.includes('webpackShims')) {
+              throw new Error(
+                `The following module is reaching the compilation and ins\'t  either a node_module or webpackShim:
+                 ${requiredModulePath}
+                 `
+              );
+            }
+
+            // Discover the requires inside the webpackShims
+            const shimsDependencies = paperwork(requiredModulePath, { includeCore: true, es6: { mixedImports: true } });
+
+            // Resolve webpackShims dependencies with alias
+            shimsDependencies.forEach((dep) => {
+              const isRelative = dep && dep.charAt(0) === '.';
+              let absoluteResource = null;
+
+              // check if the dependency value is relative
+              if (isRelative) {
+                absoluteResource = path.resolve(dllOutputPath, requiredModulePath, dep);
+              } else {
+                // get the imports and search for alias in the dependency
+                const alias = compilation.compiler.options.resolve.alias;
+                const aliasFound = Object.keys(alias).find((aliasKey) => {
+                  return dep.search(`${aliasKey}/`) !== -1;
+                });
+                // search for imports with webpack-loaders
+                const webpackLoaderFoundIdx = dep.search('!');
+
+                if (webpackLoaderFoundIdx !== -1) {
+                  // get the loader
+                  const loader = dep.substring(0, webpackLoaderFoundIdx);
+                  // get the rest of the dependency require value
+                  // after the webpack loader char (!)
+                  const restImport = dep.substring(webpackLoaderFoundIdx + 1);
+                  // build the first part with the loader resolved
+                  const absoluteResourceFirstPart = require.resolve(loader);
+                  // check if we have a relative path in the script require
+                  // path being passed to the loader
+                  const isRestImportRelative = restImport && restImport.charAt(0) === '.';
+                  // resolve the relative script dependency path
+                  // in case we have one
+                  const sanitizedRestImport = isRestImportRelative
+                    ? path.resolve(path.dirname(requiredModulePath), restImport)
+                    : restImport;
+                  // replace the alias in the script dependency require path
+                  // in case we have found the alias
+                  const absoluteResourceSecondPart = aliasFound
+                    ? require.resolve(`${alias[aliasFound]}${sanitizedRestImport.substring(aliasFound.length)}`)
+                    : require.resolve(sanitizedRestImport);
+
+                  // finally build our absolute entry path again in the
+                  // original loader format `webpack-loader!script_path`
+                  absoluteResource = `${absoluteResourceFirstPart}!${absoluteResourceSecondPart}`;
+                } else {
+                  // in case we don't have any webpack loader in the
+                  // dependency require value, just replace the alias
+                  // if we have one and then resolve the result,
+                  // or just resolve the dependency path if we don't
+                  // have any alias
+                  absoluteResource = aliasFound
+                    ? require.resolve(`${alias[aliasFound]}${dep.substring(aliasFound.length)}`)
+                    : require.resolve(dep);
+                }
+              }
+
+              // Only consider found js entries
+              if (!absoluteResource.includes('.js')) {
+                return;
+              }
+
+              // add the absolute built resource to the list of
+              // entry paths found inside the webpackShims
+              // to be merged with the general requiresMap
+              // in the end
+              resolvedShimsDependenciesMap[absoluteResource] = true;
+            });
           }
         }
 
-        this.afterCompilationEntryPaths = requires.sort().join('\n');
+        // Adds the discovered dep modules in webpackShims
+        // to the final require results
+        const resolvedShimsDependencies = Object.keys(resolvedShimsDependenciesMap);
+        resolvedShimsDependencies.forEach((resolvedDep) => {
+          if (resolvedDep) {
+            // check if this is a require shim dependency with
+            // an webpack-loader
+            const webpackLoaderFoundIdx = resolvedDep.search('!');
+
+            if (webpackLoaderFoundIdx !== -1) {
+              // get the webpack-loader
+              const loader = resolvedDep.substring(0, webpackLoaderFoundIdx);
+              // get the rest of the dependency require value
+              // after the webpack-loader char (!)
+              const restImport = resolvedDep.substring(webpackLoaderFoundIdx + 1);
+              // resolve the loader and the restImport parts separately
+              const resolvedDepToRequireFirstPart = path.relative(dllOutputPath, loader);
+              const resolvedDepToRequireSecondPart = path.relative(dllOutputPath, restImport);
+
+              // rebuild our final webpackShim entry path in the original
+              // webpack loader format `webpack-loader!script_path`
+              // but right now resolved relatively to the dll output path
+              requiresMap[`require('${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}');`] = true;
+            } else {
+              // in case we didn't have any webpack-loader in the require path
+              // resolve the dependency path relative to the dllOutput path
+              // to get our final entry path
+              requiresMap[`require('${path.relative(dllOutputPath, resolvedDep)}');`] = true;
+            }
+          }
+        });
+
+        // Sort and join all the discovered require deps
+        // in order to create a consistent entry file
+        this.afterCompilationEntryPaths = Object.keys(requiresMap).sort().join('\n');
         compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths)
           || !this.dllCompiler.dllExistsSync();
         this.entryPaths = this.afterCompilationEntryPaths;
@@ -165,9 +294,24 @@ export class DynamicDllPlugin {
   registerDoneHook(compiler) {
     compiler.hooks.done.tapPromise('DynamicDllPlugin', async stats => {
       if (stats.compilation.needsDLLCompilation) {
-        return await this.runDLLCompiler(compiler);
+        // Logic to run the max compilation requirements.
+        // Only enable this for CI builds in order to ensure
+        // we have an healthy dll ecosystem.
+        if (IS_KIBANA_DISTRIBUTABLE && this.performedCompilations === this.maxCompilations) {
+          throw new Error(
+            'All the allowed dll compilations were already performed and one more is needed which is not possible'
+          );
+        }
+
+        // Run the dlls compiler and then increment
+        // the performed compilations
+        await this.runDLLCompiler(compiler);
+        this.performedCompilations++;
+
+        return;
       }
 
+      this.performedCompilations = 0;
       this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
   }
@@ -238,6 +382,7 @@ export class DynamicDllPlugin {
     );
     stubModule.stubType = DLL_ENTRY_STUB_MODULE_TYPE;
     stubModule.stubResource = module.resource;
+    stubModule.stubOriginalModule = module;
 
     return stubModule;
   }
