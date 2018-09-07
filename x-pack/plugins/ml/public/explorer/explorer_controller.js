@@ -58,10 +58,10 @@ const module = uiModules.get('apps/ml');
 
 function getDefaultViewBySwimlaneData() {
   return {
-    'fieldName': '',
-    'laneLabels': [],
-    'points': [],
-    'interval': 3600
+    fieldName: '',
+    laneLabels: [],
+    points: [],
+    interval: 3600
   };
 }
 
@@ -375,7 +375,13 @@ module.controller('MlExplorerController', function (
           cellData.laneLabels : $scope.getSelectedJobIds();
         const influencers = getSelectionInfluencers(cellData);
 
-        const listenerData = { jobIds, influencers, start: timerange.earliestMs, end: timerange.latestMs, cellData };
+        const listenerData = {
+          jobIds,
+          influencers,
+          start: timerange.earliestMs,
+          end: timerange.latestMs,
+          cellData
+        };
         if (_.isEqual(listenerData, previousListenerData)) {
           return;
         }
