@@ -19,7 +19,15 @@
 
 import path from 'path';
 
-import { difference, globAsync, normalizePath, readFileAsync, writeFileAsync, accessAsync, makeDirAsync } from './utils';
+import {
+  difference,
+  globAsync,
+  normalizePath,
+  readFileAsync,
+  writeFileAsync,
+  accessAsync,
+  makeDirAsync,
+} from './utils';
 import { paths } from '../../../.i18nrc.json';
 import { getDefaultMessagesMap } from './extract_default_translations';
 
@@ -72,10 +80,10 @@ export async function integrateLocaleFiles(localesPath) {
     verifyMessages(localizedMessagesMap, defaultMessagesMap, normalizedFilePath);
 
     const localizedMessagesByNamespace = new Map();
-    const knownPaths = Object.keys(paths);
+    const knownNamespaces = Object.keys(paths);
 
     for (const [messageId, messageValue] of localizedMessagesMap) {
-      const namespace = knownPaths.find(key => messageId.startsWith(`${key}.`));
+      const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
 
       if (!namespace) {
         throw new Error(`Error in ${normalizedFilePath}:\nUnknown namespace in id ${messageId}.`);
