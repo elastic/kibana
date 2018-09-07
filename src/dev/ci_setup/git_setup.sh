@@ -81,13 +81,12 @@ function checkout_sibling {
     function checkout_clone_target {
       pick_clone_target
       if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
-        echo " -> using snapshot for ${cloneAuthor}/${cloneBranch}"
         export TEST_ES_FROM=snapshot
-      else
-        echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
-        git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
-        echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
       fi
+
+      echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
+      git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
+      echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
       echo
     }
 
