@@ -5,7 +5,10 @@ import { DatasourceComponent } from './datasource_component';
 
 const branches = [
   // rendered when there is no datasource in the expression
-  branch(({ datasource }) => !datasource, renderComponent(NoDatasource)),
+  branch(
+    ({ datasource, stateDatasource }) => !datasource || !stateDatasource,
+    renderComponent(NoDatasource)
+  ),
 ];
 
 export const Datasource = compose(...branches)(DatasourceComponent);

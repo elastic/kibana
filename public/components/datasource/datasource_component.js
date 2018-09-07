@@ -36,8 +36,13 @@ export class DatasourceComponent extends PureComponent {
   };
 
   componentDidUpdate(prevProps) {
-    if (!isEqual(prevProps.args, this.props.args)) {
-      this.props.resetArgs();
+    const { args, resetArgs, datasource, selectDatasource } = this.props;
+    if (!isEqual(prevProps.args, args)) {
+      resetArgs();
+    }
+
+    if (!isEqual(prevProps.datasource, datasource)) {
+      selectDatasource(datasource);
     }
   }
 
