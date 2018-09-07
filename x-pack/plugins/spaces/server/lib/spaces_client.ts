@@ -6,6 +6,7 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { isReservedSpace } from '../../common/is_reserved_space';
+import { Space } from '../../common/model/space';
 
 export class SpacesClient {
   private readonly authorization: any;
@@ -25,7 +26,7 @@ export class SpacesClient {
     this.request = request;
   }
 
-  public async getAll() {
+  public async getAll(): Promise<[Space]> {
     if (this.useRbac()) {
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
@@ -35,7 +36,7 @@ export class SpacesClient {
 
       const spaces = saved_objects.map(this.transformSavedObjectToSpace);
 
-      const spaceIds = spaces.map((space: any) => space.id);
+      const spaceIds = spaces.map((space: Space) => space.id);
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
       const { spacePrivileges } = await checkPrivileges.atSpaces(
         spaceIds,
@@ -47,7 +48,7 @@ export class SpacesClient {
       });
 
       if (authorized.length === 0) {
-        return Boom.forbidden();
+        throw Boom.forbidden();
       }
 
       return spaces.filter((space: any) => authorized.includes(space.id));
@@ -62,7 +63,7 @@ export class SpacesClient {
     }
   }
 
-  public async get(id: string) {
+  public async get(id: string): Promise<Space> {
     if (this.useRbac()) {
       await this.ensureAuthorizedAtSpace(
         id,
@@ -78,7 +79,7 @@ export class SpacesClient {
     return this.transformSavedObjectToSpace(savedObject);
   }
 
-  public async create(space: any) {
+  public async create(space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.manageSpaces,
@@ -95,7 +96,7 @@ export class SpacesClient {
     return this.transformSavedObjectToSpace(createdSavedObject);
   }
 
-  public async update(id: string, space: any) {
+  public async update(id: string, space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.manageSpaces,
@@ -160,10 +161,10 @@ export class SpacesClient {
     }
   }
 
-  private transformSavedObjectToSpace(savedObject: any) {
+  private transformSavedObjectToSpace(savedObject: any): Space {
     return {
       id: savedObject.id,
       ...savedObject.attributes,
-    };
+    } as Space;
   }
 }
