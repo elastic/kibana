@@ -37,12 +37,19 @@ export class SavedObjectsRepository {
       mappings,
       callCluster,
       migrator = { migrateDocument: (doc) => doc },
-      onBeforeWrite = () => {},
+      onBeforeWrite = () => { },
     } = options;
 
+    // It's important that we migrate documents / mark them as up-to-date
+    // prior to writing them to the index. Otherwise, we'll cause unecessary
+    // index migrations to run at Kibana startup, and those will probably fail
+    // due to invalidly versioned documents in the index.
+    //
+    // The migrator performs double-duty, and validates the documents prior
+    // to returning them.
+    this._migrator = migrator;
     this._index = index;
     this._mappings = mappings;
-    this._migrator = migrator;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
