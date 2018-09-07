@@ -56,6 +56,15 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+function getDefaultViewBySwimlaneData() {
+  return {
+    'fieldName': '',
+    'laneLabels': [],
+    'points': [],
+    'interval': 3600
+  };
+}
+
 module.controller('MlExplorerController', function (
   $scope,
   $timeout,
@@ -128,8 +137,7 @@ module.controller('MlExplorerController', function (
   };
 
   $scope.viewBySwimlaneOptions = [];
-  $scope.viewBySwimlaneData = { 'fieldName': '', 'laneLabels': [],
-    'points': [], 'interval': 3600 };
+  $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store filters.
@@ -343,6 +351,10 @@ module.controller('MlExplorerController', function (
     return influencers;
   }
 
+  // swimlaneCellClickListener could trigger multiple times with the same data.
+  // we track the previous click data here to be able to compare it and filter
+  // consecutive calls with the same data.
+  let previousListenerData = null;
   // Listener for click events in the swimlane and load corresponding anomaly data.
   // Empty cellData is passed on clicking outside a cell with score > 0.
   const swimlaneCellClickListener = function (cellData) {
@@ -353,11 +365,22 @@ module.controller('MlExplorerController', function (
         loadViewBySwimlane([]);
       }
       clearSelectedAnomalies();
+      previousListenerData = null;
     } else {
       const timerange = getSelectionTimeRange(cellData);
       $scope.cellData = cellData;
 
       if (cellData.score > 0) {
+        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+          cellData.laneLabels : $scope.getSelectedJobIds();
+        const influencers = getSelectionInfluencers(cellData);
+
+        const listenerData = { jobIds, influencers, start: timerange.earliestMs, end: timerange.latestMs, cellData };
+        if (_.isEqual(listenerData, previousListenerData)) {
+          return;
+        }
+        previousListenerData = listenerData;
+
         if (cellData.fieldName === undefined) {
           // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
           // to show the top 'view by' values for the selected time.
@@ -365,12 +388,8 @@ module.controller('MlExplorerController', function (
           $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
         }
 
-        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ?
-          cellData.laneLabels : $scope.getSelectedJobIds();
-        const influencers = getSelectionInfluencers(cellData);
-
-        loadAnomaliesTableData();
         loadDataForCharts(jobIds, influencers, timerange.earliestMs, timerange.latestMs);
+        loadAnomaliesTableData();
       } else {
         // Multiple cells are selected, all with a score of 0 - clear all anomalies.
         $scope.$evalAsync(() => {
@@ -724,7 +743,7 @@ module.controller('MlExplorerController', function (
 
     if ($scope.selectedJobs === undefined ||
         $scope.swimlaneViewByFieldName === undefined  || $scope.swimlaneViewByFieldName === null) {
-      $scope.viewBySwimlaneData = { 'fieldName': '', 'laneLabels': [], 'points': [], 'interval': 3600 };
+      $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
       finish();
     } else {
       // Ensure the search bounds align to the bucketing interval used in the swimlane so
