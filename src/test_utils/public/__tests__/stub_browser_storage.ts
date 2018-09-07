@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 
-import StubBrowserStorage from '../stub_browser_storage';
+import { StubBrowserStorage } from '../stub_browser_storage';
 
 describe('StubBrowserStorage', () => {
   describe('#getItem() / #setItem()', () => {
