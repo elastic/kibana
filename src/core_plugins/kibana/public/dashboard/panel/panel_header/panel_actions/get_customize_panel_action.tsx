@@ -19,7 +19,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { DashboardContextMenuPanel, DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { ContextMenuAction, ContextMenuPanel } from 'ui/embeddable';
 import { DashboardViewMode } from '../../../dashboard_view_mode';
 import { PanelOptionsMenuForm } from '../panel_options_menu_form';
 
@@ -33,15 +33,15 @@ export function getCustomizePanelAction({
   onUpdatePanelTitle: (title: string) => void;
   closeContextMenu: () => void;
   title?: string;
-}): DashboardPanelAction {
-  return new DashboardPanelAction(
+}): ContextMenuAction {
+  return new ContextMenuAction(
     {
       displayName: 'Customize panel',
       id: 'customizePanel',
       parentPanelId: 'mainMenu',
     },
     {
-      childContextMenuPanel: new DashboardContextMenuPanel(
+      childContextMenuPanel: new ContextMenuPanel(
         {
           id: 'panelSubOptionsMenu',
           title: 'Customize panel',
