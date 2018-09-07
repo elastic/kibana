@@ -34,7 +34,6 @@ export async function FailureDebuggingProvider({ getService }) {
   const remote = getService('remote');
 
   await del(config.get('failureDebugging.htmlDirectory'));
-  await del(config.get('failureDebugging.logDirectory'));
 
   async function logCurrentUrl() {
     const currentUrl = await remote.getCurrentUrl();
@@ -49,13 +48,10 @@ export async function FailureDebuggingProvider({ getService }) {
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
-  async function saveBrowserLogs(name) {
-    await mkdirAsync(config.get('failureDebugging.logDirectory'));
-    const browserOutputFileName = resolve(config.get('failureDebugging.logDirectory'), `${name}-browser.log`);
+  async function logBrowserConsole() {
     const browserLogs = await remote.getLogsFor('browser');
     const browserOutput = browserLogs.reduce((acc, log) => acc += `${log.message.replace(/\\n/g, '\n')}\n`, '');
-    log.info(`Saving browser output to: ${browserOutputFileName}`);
-    await writeFileAsync(browserOutputFileName, browserOutput);
+    log.info(`Browser output is: ${browserOutput}`);
   }
 
   async function onFailure(error, test) {
@@ -66,11 +62,15 @@ export async function FailureDebuggingProvider({ getService }) {
       screenshots.takeForFailure(name),
       logCurrentUrl(),
       savePageHtml(name),
-      saveBrowserLogs(name),
+      logBrowserConsole(),
     ]);
   }
 
   lifecycle
     .on('testFailure', onFailure)
     .on('testHookFailure', onFailure);
+
+  return {
+    logBrowserConsole
+  };
 }
