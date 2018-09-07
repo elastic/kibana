@@ -28,8 +28,7 @@ this import API.
 ==== Response body
 
 The response body will have a top level `objects` property that contains an
-array of the saved objects that were created. The order of these objects is not
-guaranteed.
+array of the saved objects that were created.
 
 ==== Examples
 
@@ -92,4 +91,6 @@ POST api/kibana/dashboards/import?exclude=index-pattern
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200`.
+A response code of `200` will be returned even if there are errors importing
+individual saved objects. In that case, error information will be returned in
+the response body on an object-by-object basis.
