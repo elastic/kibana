@@ -1,0 +1,217 @@
+{
+	"index_patterns" : ["avl_webtech-*"],
+	"order" : 1,
+	"settings" : {
+		"number_of_shards" : 1,
+		"number_of_replicas" : 2
+	},
+	"mappings" : {
+		"_doc" : {
+			"properties" : {
+				"tags" : {
+					"type" : "keyword"
+				},
+				"avlAddress" : {
+					"type" : "keyword"
+				},
+				"avlVehType" : {
+					"type" : "keyword"
+				},
+				"avlVehName" : {
+					"type" : "keyword"
+				},
+				"avlSecond" : {
+					"type" : "byte"
+				},
+				"avlVelocity" : {
+					"type" : "byte"
+				},
+				"avlDirection" : {
+					"type" : "short"
+				},
+				"avlPlowStatus" : {
+					"type" : "byte"
+				},
+				"avlBlast" : {
+					"type" : "byte"
+				},
+				"avlDryRate" : {
+					"type" : "double"
+				},
+				"avlLiquidRate" : {
+					"type" : "double"
+				},
+				"avlAirTemp" : {
+					"type" : "double"
+				},
+				"avlRoadTemp" : {
+					"type" : "double"
+				},
+				"avlLatitudeDD" : {
+					"type" : "double"
+				},
+				"avlLongitudeDD" : {
+					"type" : "double"
+				},
+				"avlPoint" : {
+					"type" : "geo_point"
+				},
+				"kytcDataCaptureTimeUTC" : {
+					"type" : "date",
+					"format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+				},
+				"kytcDateExistsUTC" : {
+					"type" : "date",
+					"format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+				},
+				"kytcDateExistsET" : {
+					"type" : "date",
+					"format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+				},
+				"kytcYearET" : {
+					"type" : "short"
+				},
+				"kytcMonthET" : {
+					"type" : "byte"
+				},
+				"kytcDayET" : {
+					"type" : "byte"
+				},
+				"kytcYearDayET" : {
+					"type" : "short"
+				},
+				"kytcWeekDayTxtET" : {
+					"type" : "keyword"
+				},
+				"kytcHourET" : {
+					"type" : "byte"
+				},
+				"kytcMinuteET" : {
+					"type" : "byte"
+				},
+				"kytcLatDDRdSnap" : {
+					"type" : "double"
+				},
+				"kytcLongDDRdSnap" : {
+					"type" : "double"
+				},
+				"kytcSnapPoint" : {
+					"type" : "geo_point"
+				},
+				"kytcSnapStatus" : {
+					"type" : "keyword"
+				},
+				"kytcSnapPercentAlong" : {
+					"type" : "double"
+				},
+				"kytcSnapDistanceOnLine" : {
+					"type" : "double"
+				},
+				"kytcSnapDistanceToLine" : {
+					"type" : "double"
+				},
+				"kytcSnapHeadingRadians" : {
+					"type" : "double"
+				},
+				"kytcSnapProbability" : {
+					"type" : "double"
+				},
+				"kytcSnapped10" : {
+					"type" : "keyword"
+				},
+				"kytcSnapped25" : {
+					"type" : "keyword"
+				},
+				"kytcSnapped50" : {
+					"type" : "keyword"
+				},
+				"kytcSnapped500" : {
+					"type" : "keyword"
+				},
+				"kytcSnapped1000" : {
+					"type" : "keyword"
+				},
+				"kytcDistrict" : {
+					"type" : "double"
+				},
+				"kytcCountyNmbr" : {
+					"type" : "double"
+				},
+				"kytcCountyName" : {
+					"type" : "keyword"
+				},
+				"kytcRtUniqueInitial" : {
+					"type" : "keyword"
+				},
+				"kytcMPInitial" : {
+					"type" : "double"
+				},
+				"kytcRoadID" : {
+					"type" : "double"
+				},
+				"kytcRtPrefix" : {
+					"type" : "keyword"
+				},
+				"kytcRtNumber" : {
+					"type" : "double"
+				},
+				"kytcRtSuffix" : {
+					"type" : "keyword"
+				},
+				"kytcRtSection" : {
+					"type" : "double"
+				},
+				"kytcRoute" : {
+					"type" : "keyword"
+				},
+				"kytcRouteLbl" : {
+					"type" : "keyword"
+				},
+				"kytcRdName" : {
+					"type" : "text",
+					"fields" : {
+						"kw" : {
+							"type" : "keyword"
+						}
+					}
+				},
+				"kytcRouteType" : {
+					"type" : "keyword"
+				},
+				"kytcGovLevelTxt" : {
+					"type" : "keyword"
+				},
+				"kytcTypeOp" : {
+					"type" : "keyword"
+				},
+				"kytcFunctionalClass" : {
+					"type" : "keyword"
+				},
+				"kytcCityTxt" : {
+					"type" : "keyword"
+				},
+				"kytcADTLastCnt" : {
+					"type" : "double"
+				},
+				"kytcADTLastCntYr" : {
+					"type" : "double"
+				},
+				"kytcSnwIcePriority" : {
+					"type" : "keyword"
+				},
+				"kytcDryRateCalc" : {
+					"type" : "double"
+				},
+				"kytcDryRateCalcCost" : {
+					"type" : "double"
+				},
+				"kytcLiquidRateCalc" : {
+					"type" : "double"
+				},
+				"kytcLiquidRateCalcCost" : {
+					"type" : "double"
+				}
+			}
+		}
+	}
+}
