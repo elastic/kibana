@@ -22,7 +22,7 @@ import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
-import { getConfigFromFiles } from '../../../core/server/config';
+import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
