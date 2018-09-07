@@ -207,6 +207,9 @@ export class Timepicker extends Component {
                 applyTime={this.applyTime}
                 stepForward={this.stepForward}
                 stepBackward={this.stepBackward}
+                setRefresh={this.props.setRefresh}
+                isPaused={this.props.isPaused}
+                refreshInterval={this.props.refreshInterval}
               />
             )}
           >
@@ -235,6 +238,9 @@ Timepicker.propTypes = {
   from: timeType,
   to: timeType,
   setTime: PropTypes.func,
+  setRefresh: PropTypes.func,
+  isPaused: PropTypes.bool,
+  refreshInterval: PropTypes.number,
 };
 
 Timepicker.defaultProps = {

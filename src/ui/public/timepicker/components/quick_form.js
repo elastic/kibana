@@ -25,6 +25,7 @@ import React, { Component, Fragment } from 'react';
 import { timeUnits } from '../time_units';
 import { timeHistory } from '../../timefilter/time_history';
 import { prettyDuration } from '../pretty_duration';
+import { RefreshIntervalForm } from './refresh_interval_form';
 
 import {
   EuiButtonEmpty,
@@ -114,8 +115,6 @@ export class QuickForm extends Component {
       to: 'now'
     });
   }
-
-
 
   setTime = ({ from, to }) => {
     this.props.setTime({
@@ -298,6 +297,12 @@ export class QuickForm extends Component {
         ownFocus
       >
         <div style={{ width: '400px' }}>
+          <RefreshIntervalForm
+            setRefresh={this.props.setRefresh}
+            isPaused={this.props.isPaused}
+            refreshInterval={this.props.refreshInterval}
+          />
+          <EuiHorizontalRule />
           {this.renderTimeNavigation()}
           <EuiHorizontalRule />
           {this.renderQuickSelect()}
@@ -316,4 +321,7 @@ QuickForm.propTypes = {
   setTime: PropTypes.func.isRequired,
   stepForward: PropTypes.func.isRequired,
   stepBackward: PropTypes.func.isRequired,
+  setRefresh: PropTypes.func,
+  isPaused: PropTypes.bool,
+  refreshInterval: PropTypes.number,
 };
