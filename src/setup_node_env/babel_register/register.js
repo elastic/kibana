@@ -26,9 +26,14 @@ if (!process.env.BABEL_CACHE_PATH) {
 }
 
 // paths that babel-register should ignore
-var ignore = [
-  /\/bower_components\//,
-  /\/kbn-pm\/dist\//,
+function ignore(filepath) {
+  if (filepath.match(/\/bower_components\//) || filepath.match(/\/kbn-pm\/dist\//)) {
+    return true;
+  }
+
+  if (filepath.match(/node_modules/) === null) {
+    return false;
+  }
 
   // TODO: remove this and just transpile plugins at build time, but
   // has tricky edge cases that will probably require better eslint
@@ -39,8 +44,17 @@ var ignore = [
 
   // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
   // is `x-pack` and `b` is not `node_modules`
-  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/
-];
+  if (filepath.match(/\/node_modules\/x-pack\/(?!node_modules)/)) {
+    return false;
+  }
+
+  if (filepath.match(/\/node_modules\/@kbn\/(pm|test|dev-utils|datemath|i81n)/)) {
+    return false;
+  }
+
+  return true;
+}
+
 
 if (global.__BUILT_WITH_BABEL__) {
   // when building the Kibana source we replace the statement
