@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mockOverallSwimlane from './__mocks__/mock_overall_swimlane.json';
+import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import { mount } from 'enzyme';
 import React from 'react';
@@ -59,7 +59,7 @@ describe('ExplorerSwimlane', () => {
 
     const wrapper = mount(<ExplorerSwimlane
       appState={mocks.appState}
-      lanes={{}}
+      lanes={[]}
       mlExplorerDashboardService={mocks.mlExplorerDashboardService}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mocks.swimlaneData}
@@ -84,23 +84,28 @@ describe('ExplorerSwimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
     const wrapper = mount(<ExplorerSwimlane
-      appState={mocks.appState}
-      lanes={mockOverallSwimlane}
-      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
+      lanes={mockOverallSwimlaneData.laneLabels}
+      startTime={mockOverallSwimlaneData.earliest}
+      endTime={mockOverallSwimlaneData.latest}
+      stepSecs={mockOverallSwimlaneData.interval}
+      points={mockOverallSwimlaneData.points}
+      chartWidth={800}
       MlTimeBuckets={mocks.MlTimeBuckets}
-      swimlaneData={mocks.swimlaneData}
+      swimlaneData={mockOverallSwimlaneData}
+      swimlaneType="overall"
+      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
+      appState={mocks.appState}
     />);
 
     expect(wrapper.html()).toMatchSnapshot();
 
     // test calls to mock functions
-    expect(mocks.appState.save.mock.calls).toHaveLength(1);
+    expect(mocks.appState.save.mock.calls).toHaveLength(0);
     expect(mocks.mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls).toHaveLength(1);
     expect(mocks.mlExplorerDashboardService.dragSelect.watch.mock.calls).toHaveLength(1);
     expect(mocks.mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
-    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(1);
+    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(0);
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
-
 });

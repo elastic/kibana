@@ -29,7 +29,7 @@ import { DRAG_SELECT_ACTION } from './explorer_constants';
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
     appState: PropTypes.object.isRequired,
-    lanes: PropTypes.object.isRequired,
+    lanes: PropTypes.array.isRequired,
     mlExplorerDashboardService: PropTypes.object.isRequired
   }
 
