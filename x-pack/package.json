@@ -55,7 +55,7 @@
     "jest": "^22.4.3",
     "jest-cli": "^22.4.3",
     "jest-styled-components": "^5.0.1",
-    "mocha": "5.2.0",
+    "mocha": "^5.2.0",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
