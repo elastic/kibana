@@ -6,10 +6,11 @@
 
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
+import { syncMBState } from './mb_map_selector';
 
-function mapStateToProps() {
+function mapStateToProps(state = {}) {
   return {
-    mbMap: null
+    mbMap: syncMBState(state)
   };
 }
 

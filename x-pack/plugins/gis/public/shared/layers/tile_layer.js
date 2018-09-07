@@ -17,6 +17,37 @@ export class TileLayer extends ALayer {
     return tileLayerDescriptor;
   }
 
+
+  syncLayerWithMB(mbMap, dataSources) {
+
+    console.warn('TileLayer#syncLayerWithMB - implementation in progress');
+
+    const source = mbMap.getSource(this.getId());
+    const layerId = this.getId() + '_raster';
+    if (!source) {
+      const url = this._source.getUrlTemplate(dataSources);
+      mbMap.addSource(this.getId(), {
+        type: 'raster',
+        tiles: [url],
+        tileSize: 256,
+        scheme: 'xyz',
+      });
+
+      mbMap.addLayer({
+        id: layerId,
+        type: 'raster',
+        source: this.getId(),
+        minzoom: 0,
+        maxzoom: 22,
+      });
+    }
+
+    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
+
+
+  }
+
   _createCorrespondingOLLayer(dataSources) {
     const tileLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({

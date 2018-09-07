@@ -9,13 +9,17 @@ import React from 'react';
 export class MBMapContainer extends React.Component {
 
   componentDidMount() {
+    const container = this.props.mbMap.getContainer();
+    container.style.width = '100%';
+    container.style.height = '100%';
+    this.refs.mapContainer.appendChild(container);
+    this.props.mbMap.resize();
   }
 
   render() {
     return (
       <div>
         <div className="mapContainer" ref="mapContainer"/>
-        Must implement mapbox-gl map
       </div>
     );
   }

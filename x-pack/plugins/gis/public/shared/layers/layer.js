@@ -92,6 +92,10 @@ export class ALayer {
     return olLayer;
   }
 
+  syncLayerWithMB(mbMap, dataSources, newPosition) {
+    console.warn('Layers should implement syncing their state with mapbox', mbMap, dataSources, newPosition);
+  }
+
   _syncOLStyle() {
     //no-op by default
   }

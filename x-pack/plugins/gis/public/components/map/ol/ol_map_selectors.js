@@ -37,7 +37,7 @@ function getOLImplementation() {
 }
 
 // Selectors
-const syncOLMap = createSelector(
+const syncOLMapWithMapState = createSelector(
   getOLImplementation,
   getMapState,
   (olMap, mapState) => {
@@ -59,7 +59,7 @@ const syncOLMap = createSelector(
 );
 
 export const syncOLState = createSelector(
-  syncOLMap,
+  syncOLMapWithMapState,
   getLayerList,
   getDataSources,
   (olMap, layerList, dataSources) => {
