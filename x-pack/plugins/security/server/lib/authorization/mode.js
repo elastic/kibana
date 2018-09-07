@@ -7,13 +7,11 @@ import { GLOBAL_RESOURCE } from '../../../common/constants';
 import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
 const hasAnyPrivileges = privileges => {
-  return Object.values(privileges).some(hasPrivilege => hasPrivilege);
+  return Object.values(privileges).some(hasPrivilege => hasPrivilege === true);
 };
 
 const hasAnyResourcePrivileges = resourcePrivileges => {
-  return Object.values(resourcePrivileges).some(resource =>
-    Object.values(resource).some(privilege => privilege === true)
-  );
+  return Object.values(resourcePrivileges).some(resource => hasAnyPrivileges(resource));
 };
 
 export function authorizationModeFactory(
