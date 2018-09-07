@@ -27,6 +27,7 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import chalk from 'chalk';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
@@ -83,4 +84,27 @@ export function* traverseNodes(nodes) {
       yield* traverseNodes(Object.values(node).filter(value => value && typeof value === 'object'));
     }
   }
+}
+
+/**
+ * @param {string} content
+ * @param {{ loc: { line: number, column: number }, message: string }} error
+ * @returns {string}
+ */
+export function createParserErrorMessage(content, error) {
+  const line = error.loc.line - 1;
+  const column = error.loc.column;
+
+  const contentLines = content.split(/\n/);
+  const firstLine = Math.max(line - 2, 0);
+  const lastLine = Math.min(line + 2, contentLines.length - 1);
+
+  contentLines[line] =
+    contentLines[line].substring(0, column) +
+    chalk.white.bgRed(contentLines[line][column] || ' ') +
+    contentLines[line].substring(column + 1);
+
+  const context = contentLines.slice(firstLine, lastLine + 1).join('\n');
+
+  return `${error.message}:\n${context}`;
 }
