@@ -17,112 +17,114 @@
  * under the License.
  */
 
-export default class StubBrowserStorage {
-  constructor() {
-    this._keys = [];
-    this._values = [];
-    this._size = 0;
-    this._sizeLimit = 5000000; // 5mb, minimum browser storage size
-  }
+export class StubBrowserStorage {
+  private keys: string[] = [];
+  private values: string[] = [];
+  private size: number = 0;
+  private sizeLimit: number = 5000000; // 5mb, minimum browser storage size;
 
   // -----------------------------------------------------------------------------------------------
   // Browser-specific methods.
   // -----------------------------------------------------------------------------------------------
 
   get length() {
-    return this._keys.length;
+    return this.keys.length;
   }
 
-  key(i) {
-    return this._keys[i];
+  public key(i: number) {
+    return this.keys[i];
   }
 
-  getItem(key) {
+  public getItem(key: any) {
     key = String(key);
 
-    const i = this._keys.indexOf(key);
-    if (i === -1) return null;
-    return this._values[i];
+    const i = this.keys.indexOf(key);
+    if (i === -1) {
+      return null;
+    }
+    return this.values[i];
   }
 
-  setItem(key, value) {
+  public setItem(key: any, value: any) {
     key = String(key);
     value = String(value);
     const sizeOfAddition = this._getSizeOfAddition(key, value);
     this._updateSize(sizeOfAddition);
 
-    const i = this._keys.indexOf(key);
+    const i = this.keys.indexOf(key);
     if (i === -1) {
-      this._keys.push(key);
-      this._values.push(value);
+      this.keys.push(key);
+      this.values.push(value);
     } else {
-      this._values[i] = value;
+      this.values[i] = value;
     }
   }
 
-  removeItem(key) {
+  public removeItem(key: any) {
     key = String(key);
     const sizeOfRemoval = this._getSizeOfRemoval(key);
     this._updateSize(sizeOfRemoval);
 
-    const i = this._keys.indexOf(key);
-    if (i === -1) return;
-    this._keys.splice(i, 1);
-    this._values.splice(i, 1);
+    const i = this.keys.indexOf(key);
+    if (i === -1) {
+      return;
+    }
+    this.keys.splice(i, 1);
+    this.values.splice(i, 1);
   }
 
   // -----------------------------------------------------------------------------------------------
   // Test-specific methods.
   // -----------------------------------------------------------------------------------------------
 
-  getStubbedKeys() {
-    return this._keys.slice();
+  public getStubbedKeys() {
+    return this.keys.slice();
   }
 
-  getStubbedValues() {
-    return this._values.slice();
+  public getStubbedValues() {
+    return this.values.slice();
   }
 
-  setStubbedSizeLimit(sizeLimit) {
+  public setStubbedSizeLimit(sizeLimit: number) {
     // We can't reconcile a size limit with the "stored" items, if the stored items size exceeds it.
-    if (sizeLimit < this._size) {
+    if (sizeLimit < this.size) {
       throw new Error(`You can't set a size limit smaller than the current size.`);
     }
 
-    this._sizeLimit = sizeLimit;
+    this.sizeLimit = sizeLimit;
   }
 
-  getStubbedSizeLimit() {
-    return this._sizeLimit;
+  public getStubbedSizeLimit() {
+    return this.sizeLimit;
   }
 
-  getStubbedSize() {
-    return this._size;
+  public getStubbedSize() {
+    return this.size;
   }
 
-  _getSizeOfAddition(key, value) {
-    const i = this._keys.indexOf(key);
+  private _getSizeOfAddition(key: any, value: any) {
+    const i = this.keys.indexOf(key);
     if (i === -1) {
       return key.length + value.length;
     }
     // Return difference of what's been stored, and what *will* be stored.
-    return value.length - this._values[i].length;
+    return value.length - this.values[i].length;
   }
 
-  _getSizeOfRemoval(key) {
-    const i = this._keys.indexOf(key);
+  private _getSizeOfRemoval(key: any) {
+    const i = this.keys.indexOf(key);
     if (i === -1) {
       return 0;
     }
     // Return negative value.
-    return -(key.length + this._values[i].length);
+    return -(key.length + this.values[i].length);
   }
 
-  _updateSize(delta) {
-    if (this._size + delta > this._sizeLimit) {
+  private _updateSize(delta: number) {
+    if (this.size + delta > this.sizeLimit) {
       throw new Error('something about quota exceeded, browsers are not consistent here');
     }
 
-    this._size += delta;
+    this.size += delta;
   }
 }
