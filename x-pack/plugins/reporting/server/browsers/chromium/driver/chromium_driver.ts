@@ -21,8 +21,6 @@ export interface ChromiumDriverOptions {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  public documentNode?: Chrome.JSHandle;
-
   private readonly page: Chrome.Page;
   private readonly logger: Logger;
 
@@ -39,8 +37,6 @@ export class HeadlessChromiumDriver {
 
     await this.page.setExtraHTTPHeaders(headers);
     await this.page.goto(url, { waitUntil: 'networkidle0' });
-
-    this.documentNode = await this.page.evaluateHandle(() => document);
     await this.page.waitFor(waitForSelector);
   }
 
