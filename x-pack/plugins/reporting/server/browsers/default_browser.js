@@ -16,7 +16,7 @@ const distroSupportsChromium = (distro, release) => {
     return true;
   }
   const releaseNumber = parseInt(release, 10);
-  return releaseNumber >= 7.0;
+  return releaseNumber >= 7;
 };
 
 
