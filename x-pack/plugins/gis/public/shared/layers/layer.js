@@ -89,7 +89,6 @@ export class ALayer {
     olLayer.setVisible(this.isVisible());
     this._syncOLStyle(olLayer, olMap);
     this._syncOLData(olLayer);
-    return olLayer;
   }
 
   syncLayerWithMB(mbMap, dataSources, newPosition) {

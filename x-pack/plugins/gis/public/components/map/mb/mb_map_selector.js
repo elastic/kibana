@@ -8,9 +8,31 @@ import { createSelector } from 'reselect';
 import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
 import mapboxgl from 'mapbox-gl';
 
+function removeOrphanedStylesAndSources(mbMap, layerList) {
 
-function removeOrphanedSylesAndSources() {
-  console.log('must remove orphaned layers from mapbox');
+  const ids = layerList.map((layer) => layer.getId());
+  const style = mbMap.getStyle();
+  const sourcesToRemove = [];
+  for (const sourceId in style.sources) {
+    if (ids.indexOf(sourceId) === -1) {
+      sourcesToRemove.push(sourceId);
+    }
+  }
+
+  const layersToRemove = [];
+  style.layers.forEach(layer => {
+    if (sourcesToRemove.indexOf(layer.source) >= 0) {
+      layersToRemove.push(layer.id);
+    }
+  });
+
+  layersToRemove.forEach((layerId) => {
+    mbMap.removeLayer(layerId);
+  });
+  sourcesToRemove.forEach(sourceId => {
+    mbMap.removeSource(sourceId);
+  });
+
 }
 
 
@@ -19,8 +41,7 @@ const MB_MAP = new mapboxgl.Map({
   container: container,
   style: {
     version: 8,
-    sources: {
-    },
+    sources: {},
     layers: [],
   },
 });
@@ -45,7 +66,7 @@ export const syncMBState = createSelector(
   getLayerList,
   getDataSources,
   (mbMap, layerList, dataSources) => {
-    removeOrphanedSylesAndSources(mbMap, layerList);
+    removeOrphanedStylesAndSources(mbMap, layerList);
     layerList.forEach((layer, position) => layer.syncLayerWithMB(mbMap, dataSources, position));
     return mbMap;
   }
