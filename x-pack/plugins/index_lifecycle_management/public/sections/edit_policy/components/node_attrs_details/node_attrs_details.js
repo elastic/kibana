@@ -18,8 +18,10 @@ import {
   EuiCallOut,
   EuiPortal,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class NodeAttrsDetails extends PureComponent {
+
+export class NodeAttrsDetailsUi extends PureComponent {
   static propTypes = {
     fetchNodeDetails: PropTypes.func.isRequired,
     close: PropTypes.func.isRequired,
@@ -34,14 +36,20 @@ export class NodeAttrsDetails extends PureComponent {
   }
 
   render() {
-    const { selectedNodeAttrs, allocationRules, details, close } = this.props;
+    const { selectedNodeAttrs, allocationRules, details, close, intl } = this.props;
 
     return (
       <EuiPortal>
         <EuiFlyout ownFocus onClose={close}>
           <EuiFlyoutBody>
             <EuiTitle>
-              <h2>Nodes that contain the attribute: `{selectedNodeAttrs}`</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.nodeAttrDetails.title"
+                  defaultMessage="Nodes that contain the attribute: {selectedNodeAttrs}"
+                  values={{ selectedNodeAttrs }}
+                />
+              </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             {allocationRules ? (
@@ -51,8 +59,10 @@ export class NodeAttrsDetails extends PureComponent {
                   title="Heads up"
                   color="warning"
                 >
-                  Be aware that this index template has existing allocation rules
-                  which will affect the list of nodes these indices can be allocated to.
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.nodeAttrDetails.existingAllocationRulesWarning"
+                    defaultMessage="Be aware that this index template has existing allocation rules which will affect the list of nodes these indices can be allocated to." //eslint-disable-line max-len
+                  />
                 </EuiCallOut>
                 <EuiSpacer size="s" />
               </Fragment>
@@ -60,9 +70,18 @@ export class NodeAttrsDetails extends PureComponent {
             <EuiInMemoryTable
               items={details}
               columns={[
-                { field: 'nodeId', name: 'ID' },
-                { field: 'stats.name', name: 'Name' },
-                { field: 'stats.host', name: 'Host' },
+                { field: 'nodeId', name: intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.idField',
+                  defaultMessage: 'ID',
+                }) },
+                { field: 'stats.name', name: intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.nameField',
+                  defaultMessage: 'Name',
+                }) },
+                { field: 'stats.host', name: intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.nodeAttrDetails.hostField',
+                  defaultMessage: 'Host',
+                }) },
               ]}
               pagination={true}
               sorting={true}
@@ -70,7 +89,10 @@ export class NodeAttrsDetails extends PureComponent {
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
-              Close
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.nodeAttrDetails.closeLabel"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlyoutFooter>
         </EuiFlyout>
@@ -78,3 +100,5 @@ export class NodeAttrsDetails extends PureComponent {
     );
   }
 }
+export const NodeAttrsDetails = injectI18n(NodeAttrsDetailsUi);
+
