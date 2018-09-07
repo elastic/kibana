@@ -8,8 +8,10 @@ import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { deletePolicies } from '../../../../api';
-export class ConfirmDelete extends Component {
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+export class ConfirmDeleteUi extends Component {
   deletePolicies = async () => {
+    const { intl } = this.props;
     const { policiesToDelete, callback } = this.props;
     const policyNames = policiesToDelete.map(policy => {
       return policy.name;
@@ -17,20 +19,30 @@ export class ConfirmDelete extends Component {
 
     try {
       await deletePolicies(policyNames);
-      toastNotifications.addSuccess(`Deleted policies ${policyNames.join(', ')}`);
+      const message = intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.confirmDelete.successMessage',
+        defaultMessage: 'Deleted {numPolicies, plural, one {policy} other {policies}} {policies}',
+      }, { numPolicies: policiesToDelete.length, policies: policyNames.join(', ') });
+      toastNotifications.addSuccess(message);
     } catch (e) {
-      toastNotifications.addDanger(`Error deleting policies ${policyNames.join(', ')}`);
+      const message = intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.confirmDelete.errorMessage',
+        defaultMessage: 'Error deleting {numPolicies, plural, one {policy} other {policies}} {policies}',
+      }, { numPolicies: policiesToDelete.length, policies: policyNames.join(', ') });
+      toastNotifications.addDanger(message);
     }
     if (callback) {
       callback();
     }
   };
   render() {
+    const { intl } = this.props;
     const { policiesToDelete, onCancel } = this.props;
-    const moreThanOne = policiesToDelete.length > 1;
-    const title = moreThanOne
-      ? `Delete ${policiesToDelete.length} policies`
-      : `Delete policy '${policiesToDelete[0].name}'`;
+    const numPolicies = policiesToDelete.length;
+    const title = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.confirmDelete.title',
+      defaultMessage: 'Delete {numPolicies, plural, one {{name}} other {# policies}}',
+    }, { numPolicies, name: policiesToDelete[0].name });
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -45,8 +57,10 @@ export class ConfirmDelete extends Component {
           <div>
             <Fragment>
               <p>
-                You are about to delete {moreThanOne ? 'these' : 'this'} polic
-                {moreThanOne ? 'ies' : 'y'}:
+                {intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.confirmDelete.deleteSummary',
+                  defaultMessage: 'You are about to delete {numPolicies, plural, one {this} other {these}} {numPolicies, plural, one {policy} other {policies}}:', // eslint-disable-line max-len
+                }, { numPolicies })}
               </p>
               <ul>
                 {policiesToDelete.map(
@@ -58,10 +72,14 @@ export class ConfirmDelete extends Component {
                 )}
               </ul>
             </Fragment>
-            <p>This operation cannot be undone.</p>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
+              defaultMessage="This operation cannot be undone."
+            />
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
   }
 }
+export const ConfirmDelete = injectI18n(ConfirmDeleteUi);

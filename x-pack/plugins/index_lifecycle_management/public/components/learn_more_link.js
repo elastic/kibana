@@ -7,11 +7,11 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
 
 
-export class LearnMoreLink extends React.PureComponent {
+export class LearnMoreLinkUi extends React.PureComponent {
   render() {
     const { href, docPath } = this.props;
     let url;
@@ -22,9 +22,13 @@ export class LearnMoreLink extends React.PureComponent {
     }
     return (
       <EuiLink href={url} target="_blank">
-        Learn more
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.wizard.learnMore"
+          defaultMessage="Learn more"
+        />
       </EuiLink>
     );
 
   }
 }
+export const LearnMoreLink = injectI18n(LearnMoreLinkUi);

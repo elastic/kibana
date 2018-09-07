@@ -11,6 +11,7 @@ import { IndexTemplate } from './components/index_template';
 import { PolicyConfiguration } from './components/policy_configuration';
 import { Review } from './components/review';
 import { goToPolicyList } from '../../services/navigation';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   EuiPage,
   EuiPageBody,
@@ -29,7 +30,7 @@ import {
 const STEP_INDEX_TEMPLATE = 1;
 const STEP_POLICY_CONFIGURATION = 2;
 const STEP_REVIEW = 3;
-export class Wizard extends Component {
+export class WizardUi extends Component {
   static propTypes = {
     saveLifecycle: PropTypes.func.isRequired,
     validateLifecycle: PropTypes.func.isRequired,
@@ -80,7 +81,7 @@ export class Wizard extends Component {
   };
 
   bootstrap = async () => {
-    const { indexName, aliasName, bootstrapEnabled } = this.props;
+    const { indexName, aliasName, bootstrapEnabled, intl } = this.props;
     if (!bootstrapEnabled) {
       return true;
     }
@@ -88,13 +89,21 @@ export class Wizard extends Component {
     const bootstrapSuccess = await bootstrap(indexName, aliasName);
     if (bootstrapSuccess) {
       toastNotifications.addSuccess(
-        'Successfully bootstrapped an index and alias'
+        intl.formatMessage({
+          id: 'xpack.indexLifecycleMgmt.wizard.bootstrapSuccess',
+          defaultMessage: 'Successfully bootstrapped an index and alias',
+        })
       );
       // Bounce back to management
       // this.onSelectedStepChanged(1);
       // TODO: also clear state?
     } else {
-      toastNotifications.addDanger('Unable to bootstrap an index and alias');
+      toastNotifications.addDanger(
+        intl.formatMessage({
+          id: 'xpack.indexLifecycleMgmt.wizard.bootstrapFailure',
+          defaultMessage: 'Unable to bootstrap an index and alias',
+        })
+      );
     }
     return bootstrapSuccess;
   };
@@ -140,7 +149,7 @@ export class Wizard extends Component {
     };
   }
   render() {
-    const { indexTemplates } = this.props;
+    const { indexTemplates, intl } = this.props;
     if (indexTemplates === null) {
       // Loading...
       return null;
@@ -152,9 +161,18 @@ export class Wizard extends Component {
       );
     }
     const steps = [
-      this.createStep('Select an index template', STEP_INDEX_TEMPLATE),
-      this.createStep('Configure a lifecycle policy', STEP_POLICY_CONFIGURATION),
-      this.createStep('Review and save', STEP_REVIEW),
+      this.createStep(intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.wizard.selectIndexTemplateStepTitle',
+        defaultMessage: 'Select an index template',
+      }), STEP_INDEX_TEMPLATE),
+      this.createStep(intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.wizard.configurePolicyStepTitle',
+        defaultMessage: 'Configure a lifecycle policy',
+      }), STEP_POLICY_CONFIGURATION),
+      this.createStep(intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.wizard.reviewStepTitle',
+        defaultMessage: 'Review and save',
+      }), STEP_REVIEW),
     ];
 
     return (
@@ -162,7 +180,12 @@ export class Wizard extends Component {
         <EuiPageBody>
           <EuiPageContent verticalPosition="center" horizontalPosition="center" className="ilmContent">
             <EuiTitle size="m">
-              <h2>Index lifecycle management</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.wizard.title"
+                  defaultMessage="Index lifecycle management"
+                />
+              </h2>
             </EuiTitle>
             <EuiSpacer />
             <EuiStepsHorizontal steps={steps} />
@@ -175,3 +198,5 @@ export class Wizard extends Component {
     );
   }
 }
+export const Wizard = injectI18n(WizardUi);
+

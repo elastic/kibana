@@ -20,8 +20,8 @@ import {
   STRUCTURE_TEMPLATE_SELECTION,
   STRUCTURE_CONFIGURATION,
 } from '../../../../store/constants';
-
-export class IndexTemplate extends Component {
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+export class IndexTemplateUi extends Component {
   static propTypes = {
     done: PropTypes.func.isRequired,
 
@@ -42,11 +42,16 @@ export class IndexTemplate extends Component {
   };
 
   submit = async () => {
+    const { intl } = this.props;
     this.setState({ isShowingErrors: true });
     if (await this.validate()) {
       this.props.done();
     } else {
-      toastNotifications.addDanger('Please fix the errors on the page');
+      const message = intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.indexTemplate.errorMessage',
+        defaultMessage: 'Please fix the errors on the page',
+      });
+      toastNotifications.addDanger(message);
     }
   };
 
@@ -75,9 +80,13 @@ export class IndexTemplate extends Component {
           iconType="sortRight"
           onClick={this.submit}
         >
-          Continue
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.indexTemplate.continue"
+            defaultMessage="Continue"
+          />
         </EuiButton>
       </div>
     );
   }
 }
+export const IndexTemplate = injectI18n(IndexTemplateUi);

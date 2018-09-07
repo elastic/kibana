@@ -26,8 +26,9 @@ import {
 
 import { ErrableFormRow } from '../../../../form_errors';
 import { NodeAttrsDetails } from '../../../node_attrs_details';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class Configuration extends Component {
+export class ConfigurationUi extends Component {
   static propTypes = {
     fetchNodes: PropTypes.func.isRequired,
     setSelectedNodeAttrs: PropTypes.func.isRequired,
@@ -69,6 +70,7 @@ export class Configuration extends Component {
       errors,
       isShowingErrors,
       isPrimaryShardCountHigherThanSelectedNodeAttrsCount,
+      intl
     } = this.props;
 
     const primaryNodeErrors = isPrimaryShardCountHigherThanSelectedNodeAttrsCount ? (
@@ -78,20 +80,40 @@ export class Configuration extends Component {
         color="warning"
         iconType="help"
       >
-        The shard count should be lower than the number of nodes that match the selected attributes.
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.templateConfiguration.shardCountWarning"
+          defaultMessage="The shard count should be lower than the number of nodes that match the selected attributes."
+        />
       </EuiCallOut>
     ) : null;
 
     return (
       <div>
         <EuiDescribedFormGroup
-          title={<h4>Configure hot indices</h4>}
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.templateConfiguration.title"
+                defaultMessage="Configure hot indices"
+              />
+            </h4>
+          }
           titleSize="s"
-          description="A hot index is actively being written to."
+          description={
+            intl.formatMessage({
+              id: 'xpack.indexLifecycleMgmt.templateConfiguration.description',
+              defaultMessage: 'A hot index is actively being written to.',
+            })
+          }
           fullWidth
         >
           <ErrableFormRow
-            label="Choose where to allocate indices by node attribute"
+            label={
+              intl.formatMessage({
+                id: 'xpack.indexLifecycleMgmt.templateConfiguration.nodeAttributeLabel',
+                defaultMessage: 'Choose where to allocate indices by node attribute.',
+              })
+            }
             errorKey={STRUCTURE_NODE_ATTRS}
             isShowingErrors={isShowingErrors}
             errors={errors}
@@ -102,7 +124,10 @@ export class Configuration extends Component {
                   iconType="eye"
                   onClick={() => this.setState({ isShowingNodeDetailsFlyout: true })}
                 >
-                  View a list of nodes attached to this configuration
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.templateConfiguration.viewNodes"
+                    defaultMessage="View a list of nodes attached to this configuration"
+                  />
                 </EuiButtonEmpty>
               ) : null
             }
@@ -121,8 +146,11 @@ export class Configuration extends Component {
             size="s"
             title={
               <p>
-                The best way to determine how many shards you need is to benchmark using realistic
-                data and queries on your hardware.{' '}
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.templateConfiguration.shardCountExplanation"
+                  defaultMessage="The best way to determine how many shards you need is to benchmark using realistic data and queries on your hardware." // eslint-disable-line max-len
+                />
+                {' '}
                 <LearnMoreLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right" />
               </p>
             }
@@ -131,7 +159,12 @@ export class Configuration extends Component {
           <EuiFlexGroup>
             <EuiFlexItem style={{ maxWidth: 188 }}>
               <ErrableFormRow
-                label="Primary shards"
+                label={
+                  intl.formatMessage({
+                    id: 'xpack.indexLifecycleMgmt.templateConfiguration.primaryShards',
+                    defaultMessage: 'Primary shards',
+                  })
+                }
                 errorKey={STRUCTURE_PRIMARY_NODES}
                 isShowingErrors={isShowingErrors}
                 errors={errors}
@@ -148,7 +181,12 @@ export class Configuration extends Component {
             </EuiFlexItem>
             <EuiFlexItem style={{ maxWidth: 188 }}>
               <ErrableFormRow
-                label="Replicas"
+                label={
+                  intl.formatMessage({
+                    id: 'xpack.indexLifecycleMgmt.templateConfiguration.replicas',
+                    defaultMessage: 'Replicas',
+                  })
+                }
                 errorKey={STRUCTURE_REPLICAS}
                 isShowingErrors={isShowingErrors}
                 errors={errors}
@@ -177,3 +215,4 @@ export class Configuration extends Component {
     );
   }
 }
+export const Configuration = injectI18n(ConfigurationUi);
