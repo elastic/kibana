@@ -23,7 +23,7 @@ test(`1, 2, 3`, () => {
   priorityCollection.add(1, 1);
   priorityCollection.add(2, 2);
   priorityCollection.add(3, 3);
-  expect(priorityCollection.toArray()).toEqual([1, 2, 3]);
+  expect(priorityCollection.toPrioritizedArray()).toEqual([1, 2, 3]);
 });
 
 test(`3, 2, 1`, () => {
@@ -31,7 +31,7 @@ test(`3, 2, 1`, () => {
   priorityCollection.add(3, 3);
   priorityCollection.add(2, 2);
   priorityCollection.add(1, 1);
-  expect(priorityCollection.toArray()).toEqual([1, 2, 3]);
+  expect(priorityCollection.toPrioritizedArray()).toEqual([1, 2, 3]);
 });
 
 test(`2, 3, 1`, () => {
@@ -39,7 +39,7 @@ test(`2, 3, 1`, () => {
   priorityCollection.add(2, 2);
   priorityCollection.add(3, 3);
   priorityCollection.add(1, 1);
-  expect(priorityCollection.toArray()).toEqual([1, 2, 3]);
+  expect(priorityCollection.toPrioritizedArray()).toEqual([1, 2, 3]);
 });
 
 test(`Number.MAX_VALUE, NUMBER.MIN_VALUE, 1`, () => {
@@ -47,7 +47,7 @@ test(`Number.MAX_VALUE, NUMBER.MIN_VALUE, 1`, () => {
   priorityCollection.add(Number.MAX_VALUE, 3);
   priorityCollection.add(Number.MIN_VALUE, 1);
   priorityCollection.add(1, 2);
-  expect(priorityCollection.toArray()).toEqual([1, 2, 3]);
+  expect(priorityCollection.toPrioritizedArray()).toEqual([1, 2, 3]);
 });
 
 test(`1, 1 throws Error`, () => {

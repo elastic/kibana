@@ -41,7 +41,7 @@ export class PriorityCollection<T> {
     this.array.splice(i, 0, { priority, value });
   }
 
-  public toArray(): T[] {
+  public toPrioritizedArray(): T[] {
     return this.array.map(entry => entry.value);
   }
 }
