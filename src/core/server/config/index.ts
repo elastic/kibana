@@ -24,4 +24,3 @@ export { Config, ConfigPath } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { Env, CliArgs } from './env';
 export { ConfigWithSchema } from './config_with_schema';
-export { getConfigFromFiles } from './read_config';
