@@ -5,9 +5,9 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
+import { SpacesClient } from '../../../lib/spaces_client';
 import { getSpaceById } from '../../lib';
 
 export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
@@ -15,13 +15,16 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObject;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
-      const space = omit(request.payload, ['id', '_reserved']);
+      const space = request.payload;
 
       const id = request.payload.id;
 
-      const existingSpace = await getSpaceById(client, id);
+      const existingSpace = await getSpaceById(spacesClient, id, SavedObjectsClient.errors);
       if (existingSpace) {
         return reply(
           Boom.conflict(
@@ -31,7 +34,7 @@ export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
       }
 
       try {
-        return reply(await client.create('space', { ...space }, { id, overwrite: false }));
+        return reply(await spacesClient.create({ ...space }));
       } catch (error) {
         return reply(wrapError(error));
       }

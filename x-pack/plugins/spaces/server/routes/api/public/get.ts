@@ -5,25 +5,23 @@
  */
 
 import Boom from 'boom';
+import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
-import { convertSavedObjectToSpace } from '../../lib';
+import { SpacesClient } from '../../../lib/spaces_client';
 
 export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'GET',
     path: '/api/spaces/space',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
-      let spaces;
+      let spaces: Space[];
 
       try {
-        const result = await client.find({
-          type: 'space',
-          sortField: 'name.keyword',
-        });
-
-        spaces = result.saved_objects.map(convertSavedObjectToSpace);
+        spaces = await spacesClient.getAll();
       } catch (error) {
         return reply(wrapError(error));
       }
@@ -41,14 +39,15 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
     async handler(request: any, reply: any) {
       const spaceId = request.params.id;
 
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObject;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
       try {
-        const response = await client.get('space', spaceId);
-
-        return reply(convertSavedObjectToSpace(response));
+        return reply(await spacesClient.get(spaceId));
       } catch (error) {
-        if (client.errors.isNotFoundError(error)) {
+        if (SavedObjectsClient.errors.isNotFoundError(error)) {
           return reply(Boom.notFound());
         }
         return reply(wrapError(error));

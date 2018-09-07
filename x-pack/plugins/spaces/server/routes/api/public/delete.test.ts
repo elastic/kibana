@@ -52,6 +52,7 @@ describe('Spaces Public API', () => {
     const { response } = await request('DELETE', '/api/spaces/space/a-space', {
       preCheckLicenseImpl: (req: any, reply: any) =>
         reply(Boom.forbidden('test forbidden message')),
+      expectSpacesClientCall: false,
     });
 
     const { statusCode, payload } = response;
@@ -62,12 +63,12 @@ describe('Spaces Public API', () => {
     });
   });
 
-  test('DELETE spaces/{id} pretends to delete a non-existent space', async () => {
+  test('DELETE spaces/{id} throws when deleting a non-existent space', async () => {
     const { response } = await request('DELETE', '/api/spaces/space/not-a-space');
 
     const { statusCode } = response;
 
-    expect(statusCode).toEqual(204);
+    expect(statusCode).toEqual(404);
   });
 
   test(`'DELETE spaces/{id}' cannot delete reserved spaces`, async () => {

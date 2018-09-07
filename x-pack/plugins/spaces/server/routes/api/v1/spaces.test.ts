@@ -56,6 +56,7 @@ describe('Spaces API', () => {
     const { response } = await request('POST', '/api/spaces/v1/space/a-space/select', {
       preCheckLicenseImpl: (req: any, reply: any) =>
         reply(Boom.forbidden('test forbidden message')),
+      expectSpacesClientCall: false,
     });
 
     const { statusCode, payload } = response;
