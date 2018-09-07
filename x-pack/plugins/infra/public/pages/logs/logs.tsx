@@ -89,7 +89,7 @@ export class LogsPage extends React.Component {
               </LogCustomizationMenu>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <WithLogPosition>
+              <WithLogPosition initializeOnMount>
                 {({
                   visibleMidpoint,
                   isAutoReloading,
@@ -117,7 +117,7 @@ export class LogsPage extends React.Component {
                   {({ textScale }) => (
                     <WithTextWrap>
                       {({ wrap }) => (
-                        <WithLogPosition initializeOnMount>
+                        <WithLogPosition>
                           {({
                             isAutoReloading,
                             jumpToTargetPosition,
