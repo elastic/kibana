@@ -1,6 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`i18n utils should escape linebreaks 1`] = `"Text with\\\\n\\\\n\\\\nline-breaks and \\\\n\\\\n\\\\n      \\\\n\\\\n\\\\n      "`;
+exports[`i18n utils should not escape linebreaks 1`] = `
+"Text
+ with
+   line-breaks
+"
+`;
 
 exports[`i18n utils should throw if "values" has a value that is unused in the message 1`] = `
 "some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):

@@ -34,7 +34,6 @@ import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
-const LINE_BREAK_REGEX = /\n/g;
 const VALUES_REFERENCES_REGEX = /{\w+([,\s\w]||({.*}))*}/g;
 const EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX = /(?<=^{)\w+(?=[},])/g;
 
@@ -68,7 +67,7 @@ export function isI18nTranslateFunction(node) {
 }
 
 export function formatJSString(string) {
-  return (string || '').replace(ESCAPE_LINE_BREAK_REGEX, '').replace(LINE_BREAK_REGEX, '\\n');
+  return (string || '').replace(ESCAPE_LINE_BREAK_REGEX, '');
 }
 
 export function formatHTMLString(string) {
