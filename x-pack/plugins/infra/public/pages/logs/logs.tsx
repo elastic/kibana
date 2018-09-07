@@ -39,7 +39,7 @@ export class LogsPage extends React.Component {
             <EuiFlexItem>
               <WithKueryAutocompletion>
                 {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                  <WithLogFilter>
+                  <WithLogFilter initializeOnMount>
                     {({
                       applyFilterQueryFromKueryExpression,
                       filterQueryDraft,

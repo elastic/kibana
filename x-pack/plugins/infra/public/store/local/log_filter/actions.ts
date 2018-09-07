@@ -13,3 +13,5 @@ const actionCreator = actionCreatorFactory('x-pack/infra/local/log_filter');
 export const setLogFilterQueryDraft = actionCreator<FilterQuery>('SET_LOG_FILTER_QUERY_DRAFT');
 
 export const applyLogFilterQuery = actionCreator<FilterQuery>('APPLY_LOG_FILTER_QUERY');
+
+export const restoreFromUrl = actionCreator('RESTORE_FROM_URL');

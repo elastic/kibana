@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { History } from 'history';
 import { Action, applyMiddleware, compose, createStore as createBasicStore } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 import {
   createRootEpic,
@@ -20,6 +21,7 @@ import {
   waffleTimeSelectors,
 } from '.';
 import { InfraApolloClient, InfraObservableApi } from '../lib/lib';
+import { createHistoryEventObservable } from '../utils/observable_history';
 
 declare global {
   interface Window {
@@ -29,15 +31,18 @@ declare global {
 
 export interface StoreDependencies {
   apolloClient: Observable<InfraApolloClient>;
+  history: Observable<History>;
   observableApi: Observable<InfraObservableApi>;
 }
 
-export function createStore({ apolloClient, observableApi }: StoreDependencies) {
+export function createStore({ apolloClient, history, observableApi }: StoreDependencies) {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     apolloClient$: apolloClient,
+    historyEvent$: history.pipe(switchMap(createHistoryEventObservable)),
+    replaceLocation$: history.pipe(map(({ replace }) => replace)),
     selectIsLoadingLogEntries: logEntriesSelectors.selectIsLoadingEntries,
     selectLogEntriesEnd: logEntriesSelectors.selectEntriesEnd,
     selectLogEntriesStart: logEntriesSelectors.selectEntriesStart,

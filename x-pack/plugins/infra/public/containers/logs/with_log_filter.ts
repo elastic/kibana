@@ -23,6 +23,7 @@ export const withLogFilter = connect(
         kind: 'kuery',
         expression,
       }),
+    restoreFromUrl: logFilterActions.restoreFromUrl,
     setFilterQueryDraft: logFilterActions.setLogFilterQueryDraft,
     setFilterQueryDraftFromKueryExpression: (expression: string) =>
       logFilterActions.setLogFilterQueryDraft({
@@ -32,4 +33,6 @@ export const withLogFilter = connect(
   })
 );
 
-export const WithLogFilter = asChildFunctionRenderer(withLogFilter);
+export const WithLogFilter = asChildFunctionRenderer(withLogFilter, {
+  onInitialize: ({ restoreFromUrl }) => restoreFromUrl(),
+});

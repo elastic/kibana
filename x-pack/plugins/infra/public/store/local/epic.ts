@@ -6,8 +6,13 @@
 
 import { combineEpics } from 'redux-observable';
 
+import { createLogFilterEpic } from './log_filter';
 import { createLogPositionEpic } from './log_position';
 import { createWaffleTimeEpic } from './waffle_time';
 
 export const createLocalEpic = <State>() =>
-  combineEpics(createLogPositionEpic<State>(), createWaffleTimeEpic<State>());
+  combineEpics(
+    createLogFilterEpic<State>(),
+    createLogPositionEpic<State>(),
+    createWaffleTimeEpic<State>()
+  );

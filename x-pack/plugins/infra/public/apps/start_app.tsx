@@ -8,7 +8,7 @@ import { createHashHistory } from 'history';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { ThemeProvider } from 'styled-components';
 
@@ -25,6 +25,7 @@ export async function startApp(libs: InfraFrontendLibs) {
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),
+    history: of(history),
     observableApi: libs$.pipe(pluck('observableApi')),
   });
 
