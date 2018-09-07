@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server as HapiServer } from 'hapi-latest';
+import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';

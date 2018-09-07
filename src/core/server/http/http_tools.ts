@@ -18,7 +18,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { Server, ServerOptions } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions } from 'hapi';
 import { ServerOptions as TLSOptions } from 'https';
 import { HttpConfig } from './http_config';
 
@@ -95,6 +95,10 @@ export function createServer(options: ServerOptions) {
 /**
  * Used to replicate Hapi v16 and below's validation responses. Should be used in the routes.validate.failAction key.
  */
-export function defaultValidationErrorHandler(request, h, err) {
+export function defaultValidationErrorHandler(
+  request: Request,
+  h: ResponseToolkit,
+  err?: Error
+): Lifecycle.ReturnValue {
   throw err;
 }

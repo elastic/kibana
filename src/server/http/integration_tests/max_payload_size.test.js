@@ -29,7 +29,7 @@ beforeAll(async () => {
     path: '/payload_size_check/test/route',
     method: 'POST',
     config: { payload: { maxBytes: 200 } },
-    handler: (req, reply) => reply(null, req.payload.data.slice(0, 5)),
+    handler: (req) => req.payload.data.slice(0, 5),
   });
 }, 30000);
 
