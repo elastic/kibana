@@ -1,23 +1,26 @@
 const path = require('path');
 
+const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
+const buildDir = path.resolve(__dirname, '../../canvas_plugin');
+
 module.exports = {
   entry: {
-    'elements/all': './canvas_plugin_src/elements/register.js',
-    'renderers/all': './canvas_plugin_src/renderers/register.js',
-    'uis/transforms/all': './canvas_plugin_src/uis/transforms/register.js',
-    'uis/models/all': './canvas_plugin_src/uis/models/register.js',
-    'uis/views/all': './canvas_plugin_src/uis/views/register.js',
-    'uis/datasources/all': './canvas_plugin_src/uis/datasources/register.js',
-    'uis/arguments/all': './canvas_plugin_src/uis/arguments/register.js',
-    'functions/browser/all': './canvas_plugin_src/functions/browser/register.js',
-    'functions/common/all': './canvas_plugin_src/functions/common/register.js',
-    'functions/server/all': './canvas_plugin_src/functions/server/register.js',
-    'types/all': './canvas_plugin_src/types/register.js',
+    'elements/all': path.join(sourceDir, 'elements/register.js'),
+    'renderers/all': path.join(sourceDir, 'renderers/register.js'),
+    'uis/transforms/all': path.join(sourceDir, 'uis/transforms/register.js'),
+    'uis/models/all': path.join(sourceDir, 'uis/models/register.js'),
+    'uis/views/all': path.join(sourceDir, 'uis/views/register.js'),
+    'uis/datasources/all': path.join(sourceDir, 'uis/datasources/register.js'),
+    'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
+    'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
+    'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
+    'functions/server/all': path.join(sourceDir, 'functions/server/register.js'),
+    'types/all': path.join(sourceDir, 'types/register.js'),
   },
   target: 'webworker',
 
   output: {
-    path: path.resolve(__dirname, 'canvas_plugin'),
+    path: buildDir,
     filename: '[name].js', // Need long paths here.
     libraryTarget: 'umd',
   },
@@ -25,6 +28,24 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.json'],
   },
+
+  plugins: [
+    function loaderFailHandler() {
+      // bails on error, including loader errors
+      // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
+      let isWatch = true;
+
+      this.plugin('run', function(compiler, callback) {
+        isWatch = false;
+        callback.call(compiler);
+      });
+
+      this.plugin('done', function(stats) {
+        if (stats.compilation.errors && stats.compilation.errors.length && !isWatch)
+          throw stats.compilation.errors[0];
+      });
+    },
+  ],
 
   module: {
     rules: [
