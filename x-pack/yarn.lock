@@ -124,6 +124,10 @@
     url-join "^4.0.0"
     ws "^4.1.0"
 
+"@types/angular@^1.6.45":
+  version "1.6.50"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.50.tgz#8b6599088d80f68ef0cad7d3a2062248ebe72b3d"
+
 "@types/delay@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
@@ -153,6 +157,10 @@
 "@types/jest@^22.2.3":
   version "22.2.3"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
+
+"@types/joi@^10.4.4":
+  version "10.6.4"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-10.6.4.tgz#0989d69e792a7db13e951852e6949df6787f113f"
 
 "@types/loglevel@^1.5.3":
   version "1.5.3"

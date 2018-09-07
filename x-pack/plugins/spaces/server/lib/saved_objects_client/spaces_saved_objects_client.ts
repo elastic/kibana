@@ -5,18 +5,36 @@
  */
 
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { SpacesService } from '../create_spaces_service';
+import {
+  BaseOptions,
+  BulkCreateObject,
+  BulkGetObjects,
+  CreateOptions,
+  FindOptions,
+  SavedObjectAttributes,
+  SavedObjectsClient,
+  UpdateOptions,
+} from './saved_objects_client_types';
 
-export class SpacesSavedObjectsClient {
-  constructor(options) {
-    const {
-      baseClient,
-      request,
-      spacesService,
-    } = options;
+interface SpacesSavedObjectsClientOptions {
+  baseClient: SavedObjectsClient;
+  request: any;
+  spacesService: SpacesService;
+}
+
+export class SpacesSavedObjectsClient implements SavedObjectsClient {
+  public errors: any;
+
+  private client: any;
+  private spaceId: string;
+
+  constructor(options: SpacesSavedObjectsClientOptions) {
+    const { baseClient, request, spacesService } = options;
 
     this.errors = baseClient.errors;
-    this._client = baseClient;
-    this._spaceId = spacesService.getSpaceId(request);
+    this.client = baseClient;
+    this.spaceId = spacesService.getSpaceId(request);
   }
 
   /**
@@ -29,15 +47,15 @@ export class SpacesSavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
-  */
-  async create(type, attributes = {}, options = {}) {
+   */
+  public async create(type: string, attributes = {}, options: CreateOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.create(type, attributes, {
+    return await this.client.create(type, attributes, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -50,14 +68,14 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
-  async bulkCreate(objects, options = {}) {
+  public async bulkCreate(objects: BulkCreateObject[], options: CreateOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.bulkCreate(objects, {
+    return await this.client.bulkCreate(objects, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -70,14 +88,14 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id, options = {}) {
+  public async delete(type: string, id: string, options: BaseOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.delete(type, id, {
+    return await this.client.delete(type, id, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -95,14 +113,14 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find(options = {}) {
+  public async find(options: FindOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.find({
+    return await this.client.find({
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -120,14 +138,14 @@ export class SpacesSavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = [], options = {}) {
+  public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.bulkGet(objects, {
+    return await this.client.bulkGet(objects, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -140,14 +158,14 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id, options = {}) {
+  public async get(type: string, id: string, options: BaseOptions = {}) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.get(type, id, {
+    return await this.client.get(type, id, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
@@ -161,18 +179,23 @@ export class SpacesSavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async update(type, id, attributes, options = {}) {
+  public async update(
+    type: string,
+    id: string,
+    attributes: SavedObjectAttributes,
+    options: UpdateOptions = {}
+  ) {
     if (options.namespace) {
       throw new Error('Spaces currently determines the namespaces');
     }
 
-    return await this._client.update(type, id, attributes, {
+    return await this.client.update(type, id, attributes, {
       ...options,
-      namespace: this._getNamespace(this._spaceId)
+      namespace: this._getNamespace(this.spaceId),
     });
   }
 
-  _getNamespace(spaceId) {
+  public _getNamespace(spaceId: string) {
     if (spaceId === DEFAULT_SPACE_ID) {
       return undefined;
     }

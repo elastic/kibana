@@ -5,21 +5,28 @@
  */
 
 import { isReservedSpace } from './is_reserved_space';
+import { Space } from './model/space';
 
 test('it returns true for reserved spaces', () => {
-  const space = {
-    _reserved: true
+  const space: Space = {
+    id: '',
+    name: '',
+    _reserved: true,
   };
 
   expect(isReservedSpace(space)).toEqual(true);
 });
 
 test('it returns false for non-reserved spaces', () => {
-  const space = {};
+  const space: Space = {
+    id: '',
+    name: '',
+  };
 
   expect(isReservedSpace(space)).toEqual(false);
 });
 
-test('it handles empty imput', () => {
+test('it handles empty input', () => {
+  // @ts-ignore
   expect(isReservedSpace()).toEqual(false);
 });

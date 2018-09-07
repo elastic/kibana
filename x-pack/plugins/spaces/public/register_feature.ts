@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueRegistryProvider,
+  // @ts-ignore
+} from 'ui/registry/feature_catalogue';
 import { SPACES_FEATURE_DESCRIPTION } from './lib/constants';
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -17,6 +19,6 @@ FeatureCatalogueRegistryProvider.register(() => {
     icon: 'spacesApp',
     path: '/app/kibana#/management/spaces/list',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

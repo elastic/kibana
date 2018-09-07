@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { SpaceAvatar } from './space_avatar';
 
 test('renders without crashing', () => {
-  const wrapper = shallow(<SpaceAvatar space={{}} />);
+  const wrapper = shallow(<SpaceAvatar space={{ name: '', id: '' }} />);
   expect(wrapper).toMatchSnapshot();
 });

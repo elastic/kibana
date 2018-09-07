@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { createSpacesService } from '../create_spaces_service';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { Space } from '../../../common/model/space';
+import { createSpacesService } from '../create_spaces_service';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
-const config = {
-  'server.basePath': '/'
+const config: any = {
+  'server.basePath': '/',
 };
 
 const server = {
   config: () => ({
-    get: (key) => {
+    get: (key: string) => {
       return config[key];
-    }
-  })
+    },
+  }),
 };
 
-const createMockRequest = (space) => ({
-  getBasePath: () => space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : '',
+const createMockRequest = (space: Partial<Space>) => ({
+  getBasePath: () => (space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : ''),
 });
 
 const createMockClient = () => {
@@ -41,10 +42,9 @@ const createMockClient = () => {
 
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
-  { id: 'space_1', expectedNamespace: 'space_1' }
+  { id: 'space_1', expectedNamespace: 'space_1' },
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
-
     describe('#get', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
@@ -57,7 +57,9 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.get(null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          client.get('foo', 'bar', { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -75,10 +77,14 @@ const createMockClient = () => {
         const type = Symbol();
         const id = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.get(type, id, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.get).toHaveBeenCalledWith(type, id, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.get).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -94,7 +100,9 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.bulkGet(null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          client.bulkGet(['foo'], { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -112,10 +120,14 @@ const createMockClient = () => {
 
         const objects = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.bulkGet(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -148,10 +160,14 @@ const createMockClient = () => {
         });
 
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.find(options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.find).toHaveBeenCalledWith({ foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.find).toHaveBeenCalledWith({
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -165,10 +181,11 @@ const createMockClient = () => {
           request,
           baseClient,
           spacesService,
-
         });
 
-        await expect(client.create('foo', {}, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          client.create('foo', {}, { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -187,10 +204,14 @@ const createMockClient = () => {
         const type = Symbol();
         const attributes = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.create(type, attributes, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.create).toHaveBeenCalledWith(type, attributes, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.create).toHaveBeenCalledWith(type, attributes, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -206,7 +227,10 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.bulkCreate(null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          // @ts-ignore
+          client.bulkCreate(null, { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -224,10 +248,14 @@ const createMockClient = () => {
 
         const objects = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.bulkCreate(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.bulkCreate).toHaveBeenCalledWith(objects, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -243,7 +271,10 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.update(null, null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          // @ts-ignore
+          client.update(null, null, null, { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -263,10 +294,14 @@ const createMockClient = () => {
         const id = Symbol();
         const attributes = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.update(type, id, attributes, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.update).toHaveBeenCalledWith(type, id, attributes, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
@@ -282,7 +317,10 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.delete(null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          // @ts-ignore
+          client.delete(null, null, { namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -301,12 +339,15 @@ const createMockClient = () => {
         const type = Symbol();
         const id = Symbol();
         const options = Object.freeze({ foo: 'bar' });
+        // @ts-ignore
         const actualReturnValue = await client.delete(type, id, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.delete).toHaveBeenCalledWith(type, id, { foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.delete).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
   });
-
 });

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpaceInitials, getSpaceColor } from "./space_attributes";
+import { getSpaceColor, getSpaceInitials } from './space_attributes';
 
-describe("getSpaceColor", () => {
+describe('getSpaceColor', () => {
   test('uses color on the space, when provided', () => {
     const space = {
       name: 'Foo',
-      color: '#aabbcc'
+      color: '#aabbcc',
     };
 
     expect(getSpaceColor(space)).toEqual('#aabbcc');
@@ -37,11 +37,11 @@ describe("getSpaceColor", () => {
   });
 });
 
-describe("getSpaceInitials", () => {
+describe('getSpaceInitials', () => {
   test('uses initials on the space, when provided', () => {
     const space = {
       name: 'Foo',
-      initials: 'JK'
+      initials: 'JK',
     };
 
     expect(getSpaceInitials(space)).toEqual('JK');

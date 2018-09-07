@@ -5,14 +5,16 @@
  */
 
 import Boom from 'boom';
+import { Space } from '../../common/model/space';
 import { wrapError } from './errors';
+import { SavedObjectsClient } from './saved_objects_client/saved_objects_client_types';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
 export async function getActiveSpace(
-  savedObjectsClient: any,
+  savedObjectsClient: SavedObjectsClient,
   requestBasePath: string,
   serverBasePath: string
-) {
+): Promise<Space> {
   const spaceId = getSpaceIdFromPath(requestBasePath, serverBasePath);
 
   let space;
@@ -32,9 +34,9 @@ export async function getActiveSpace(
   return {
     id: space.id,
     ...space.attributes,
-  };
+  } as Space;
 }
 
-async function getSpaceById(savedObjectsClient: any, spaceId: string) {
+async function getSpaceById(savedObjectsClient: SavedObjectsClient, spaceId: string) {
   return savedObjectsClient.get('space', spaceId);
 }

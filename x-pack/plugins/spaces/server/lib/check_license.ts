@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * @typedef {Object} LicenseCheckResult Result of the license check.
- * @property {boolean} showSpaces Indicates whether spaces should be enabled
- */
+export interface LicenseCheckResult {
+  showSpaces: boolean;
+}
 
 /**
  * Returns object that defines behavior of the spaces related features based
@@ -15,7 +14,7 @@
  * @param {XPackInfo} xPackInfo XPackInfo instance to extract license information from.
  * @returns {LicenseCheckResult}
  */
-export function checkLicense(xPackInfo: any) {
+export function checkLicense(xPackInfo: any): LicenseCheckResult {
   if (!xPackInfo.isAvailable()) {
     return {
       showSpaces: false,
