@@ -5,27 +5,39 @@
  */
 
 import React, { Component } from 'react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { deletePolicy } from '../../../../api';
-export class ConfirmDelete extends Component {
+export class ConfirmDeleteUi extends Component {
   deletePolicy = async () => {
-    const { policyToDelete, callback } = this.props;
+    const { intl, policyToDelete, callback } = this.props;
     const policyName = policyToDelete.name;
 
     try {
       await deletePolicy(policyName);
-      toastNotifications.addSuccess(`Deleted policy ${policyName}`);
+      const message = intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.confirmDelete.successMessage',
+        defaultMessage: 'Deleted policy {policyName}',
+      }, { policyName });
+      toastNotifications.addSuccess(message);
     } catch (e) {
-      toastNotifications.addDanger(`Error deleting policy ${policyName}`);
+      const message = intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.confirmDelete.errorMessage',
+        defaultMessage: 'Error deleting policy}{policyName}',
+      }, { policyName });
+      toastNotifications.addDanger(message);
     }
     if (callback) {
       callback();
     }
   };
   render() {
-    const { policyToDelete, onCancel } = this.props;
-    const title = `Delete policy '${policyToDelete.name}'`;
+    const { intl, policyToDelete, onCancel } = this.props;
+    const title = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.confirmDelete.title',
+      defaultMessage: 'Delete {name}',
+    }, { name: policyToDelete.name });
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -38,10 +50,14 @@ export class ConfirmDelete extends Component {
           onClose={onCancel}
         >
           <div>
-            <p>This operation cannot be undone.</p>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
+              defaultMessage="This operation cannot be undone."
+            />
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
   }
 }
+export const ConfirmDelete = injectI18n(ConfirmDeleteUi);
