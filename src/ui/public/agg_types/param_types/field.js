@@ -77,23 +77,24 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
  * filter the fields to the available ones
  */
 FieldParamType.prototype.getAvailableFields = function (fields) {
+  const filteredFields = fields.filter(field => {
+    const { onlyAggregatable, scriptable, filterFieldTypes } = this;
+
+    if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      return false;
+    }
+
+    if (!filterFieldTypes) {
+      return true;
+    }
+
+    return filterByType([field], filterFieldTypes).length !== 0;
+  });
 
   return new IndexedArray({
     index: ['name'],
     group: ['type'],
-    initialSet: sortBy(fields.filter(field => {
-      const { onlyAggregatable, scriptable, filterFieldTypes } = this;
-
-      if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
-        return false;
-      }
-
-      if (!filterFieldTypes) {
-        return true;
-      }
-
-      return filterByType([field], filterFieldTypes).length !== 0;
-    }), ['type', 'name']),
+    initialSet: sortBy(filteredFields, ['type', 'name']),
   });
 };
 

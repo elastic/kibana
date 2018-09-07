@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { Vis } from 'ui/vis';
 import { AggTypeFieldFilters } from './field_filters';
 
 describe('AggTypeFieldFilters', () => {
   let registry: AggTypeFieldFilters;
   const fieldParamType = {};
   const aggConfig = {};
-  const vis = {};
+  const vis = {} as Vis;
 
   beforeEach(() => {
     registry = new AggTypeFieldFilters();
