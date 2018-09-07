@@ -8,5 +8,5 @@ import pluginHelpers from '@kbn/plugin-helpers';
 import getFlags from './helpers/get_flags';
 
 export default (gulp) => {
-  gulp.task('dev', ['prepare'], () => pluginHelpers.run('start', { flags: getFlags() }));
+  gulp.task('dev', ['prepare:dev'], () => pluginHelpers.run('start', { flags: getFlags() }));
 };
