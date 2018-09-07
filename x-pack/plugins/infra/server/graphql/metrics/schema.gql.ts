@@ -45,12 +45,12 @@ export const metricsSchema: any = gql`
 
   type InfraMetricData {
     id: InfraMetric
-    series: [InfraDataSeries]!
+    series: [InfraDataSeries!]!
   }
 
   type InfraDataSeries {
     id: ID!
-    data: [InfraDataPoint]!
+    data: [InfraDataPoint!]!
   }
 
   type InfraDataPoint {
@@ -64,6 +64,6 @@ export const metricsSchema: any = gql`
       type: InfraNodeType!
       timerange: InfraTimerangeInput!
       metrics: [InfraMetric!]!
-    ): [InfraMetricData]!
+    ): [InfraMetricData!]!
   }
 `;

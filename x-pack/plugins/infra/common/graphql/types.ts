@@ -605,6 +605,44 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
+export namespace MetricsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: InfraTimerangeInput;
+    metrics: InfraMetric[];
+    nodeId: string;
+    type: InfraNodeType;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    metrics: Metrics[];
+  };
+
+  export type Metrics = {
+    __typename?: 'InfraMetricData';
+    id?: InfraMetric | null;
+    series: Series[];
+  };
+
+  export type Series = {
+    __typename?: 'InfraDataSeries';
+    id: string;
+    data: Data[];
+  };
+
+  export type Data = {
+    __typename?: 'InfraDataPoint';
+    timestamp?: number | null;
+    value?: number | null;
+  };
+}
 export namespace WaffleNodesQuery {
   export type Variables = {
     sourceId: string;

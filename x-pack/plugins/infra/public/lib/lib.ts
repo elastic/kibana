@@ -164,8 +164,6 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  sourceId: string;
-  timerange: InfraTimerangeInput;
   formatter: InfraWaffleMapFormatterType;
   formatTemplate: string;
   metrics: InfraMetricInput[];
@@ -174,6 +172,8 @@ export interface InfraWaffleMapOptions {
 }
 
 export interface InfraOptions {
+  sourceId: string;
+  timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
 }
 

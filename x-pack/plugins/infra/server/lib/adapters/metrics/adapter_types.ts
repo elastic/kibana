@@ -34,6 +34,10 @@ export enum InfraMetricModelMetricType {
   max = 'max',
   min = 'min',
   calculation = 'calculation',
+  cardinality = 'cardinality',
+  series_agg = 'series_agg',
+  positive_only = 'positive_only',
+  derivative = 'derivative',
 }
 
 export interface InfraMetricModel {
@@ -45,6 +49,7 @@ export interface InfraMetricModel {
   type: string;
   series: InfraMetricModelSeries[];
   filter?: string;
+  map_field_to?: string;
 }
 
 export interface InfraMetricModelSeries {
@@ -62,6 +67,19 @@ export interface InfraMetricModelBasicMetric {
   type: InfraMetricModelMetricType;
 }
 
+export interface InfraMetricModelSeriesAgg {
+  id: string;
+  function: string;
+  type: InfraMetricModelMetricType.series_agg;
+}
+
+export interface InfraMetricModelDerivative {
+  id: string;
+  field: string;
+  unit: string;
+  type: InfraMetricModelMetricType;
+}
+
 export interface InfraMetricModelBucketScriptVariable {
   field: string;
   id: string;
@@ -75,7 +93,11 @@ export interface InfraMetricModelBucketScript {
   variables: InfraMetricModelBucketScriptVariable[];
 }
 
-export type InfraMetricModelMetric = InfraMetricModelBasicMetric | InfraMetricModelBucketScript;
+export type InfraMetricModelMetric =
+  | InfraMetricModelBasicMetric
+  | InfraMetricModelBucketScript
+  | InfraMetricModelDerivative
+  | InfraMetricModelSeriesAgg;
 
 export type InfraMetricModelCreator = (
   timeField: string,

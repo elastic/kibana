@@ -80,7 +80,7 @@ export class HomePage extends React.PureComponent {
         </Toolbar>
         <PageContent>
           <WithOptions>
-            {({ wafflemap }) => (
+            {({ wafflemap, sourceId, timerange }) => (
               <WithWaffleFilter>
                 {({ filterQueryAsJson }) => (
                   <WithWaffleTime>
@@ -89,7 +89,7 @@ export class HomePage extends React.PureComponent {
                         filterQuery={filterQueryAsJson}
                         metrics={wafflemap.metrics}
                         path={wafflemap.path}
-                        sourceId={wafflemap.sourceId}
+                        sourceId={sourceId}
                         timerange={currentTimeRange}
                       >
                         {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}

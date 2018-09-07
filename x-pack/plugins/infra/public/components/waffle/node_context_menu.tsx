@@ -41,6 +41,10 @@ export const NodeContextMenu: React.SFC<Props> = ({
             ]
           : []),
         {
+          name: `View metrics for this ${nodeType}`,
+          href: `#/metrics/${nodeType}/${node.name}`,
+        },
+        {
           name: `View APM Traces for this ${nodeType}`,
           href: `/app/apm`,
         },
