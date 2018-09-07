@@ -17,10 +17,27 @@
  * under the License.
  */
 
-export { ConfigService } from './config_service';
-export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath } from './config';
-/** @internal */
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { Env, CliArgs } from './env';
-export { ConfigWithSchema } from './config_with_schema';
+// Test helpers to simplify mocking environment options.
+
+import { EnvOptions } from '../env';
+
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>
+};
+
+export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
+  return {
+    configs: options.configs || [],
+    cliArgs: {
+      dev: true,
+      quiet: false,
+      silent: false,
+      watch: false,
+      repl: false,
+      basePath: false,
+      ...(options.cliArgs || {}),
+    },
+    isDevClusterMaster:
+      options.isDevClusterMaster !== undefined ? options.isDevClusterMaster : false,
+  };
+}
