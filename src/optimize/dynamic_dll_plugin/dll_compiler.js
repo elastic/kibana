@@ -185,6 +185,10 @@ export class DllCompiler {
       webpack(config, (err, stats) => {
         // If a critical error occurs
         // reject the promise
+        //
+        // NOTE: maybe this can be improved checking also
+        // for some hard errors on stats but for now
+        // it looks like not necessary
         if (err) {
           this.log(
             ['fatal', 'optimize:dynamic_dll_plugin'],
