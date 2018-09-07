@@ -3,7 +3,8 @@
     "kbn": "src/core_plugins/kibana",
     "common.server": "src/server",
     "common.ui": "src/ui",
-    "xpack.idxMgmt": "xpack/plugins/index_management"
+    "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.reporting": "x-pack/plugins/reporting"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
