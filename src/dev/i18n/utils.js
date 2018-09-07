@@ -111,20 +111,20 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     message => message.trim().match(EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX)[0]
   );
 
-  const unusedKeys = difference(defaultMessageReferencesKeys, valuesKeys);
-  const missingKeys = difference(valuesKeys, defaultMessageReferencesKeys);
+  const missingValuesKeys = difference(defaultMessageReferencesKeys, valuesKeys);
+  const unusedValuesKeys = difference(valuesKeys, defaultMessageReferencesKeys);
 
-  if (unusedKeys.length) {
+  if (unusedValuesKeys.length) {
     throw createFailError(
       `"values" object contains unused properties ("${messageId}"):
-[${unusedKeys}].`
+[${unusedValuesKeys}].`
     );
   }
 
-  if (missingKeys.length) {
+  if (missingValuesKeys.length) {
     throw createFailError(
       `some properties are missing in "values" object ("${messageId}"):
-[${missingKeys}].`
+[${missingValuesKeys}].`
     );
   }
 }
