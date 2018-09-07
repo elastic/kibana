@@ -68,7 +68,7 @@ export const calculateGradientColor = (
   if (legend.rules.length === 1) {
     return last(legend.rules).color;
   }
-  const { min, max } = legend.bounds || bounds;
+  const { min, max } = legend.boundsOverride || bounds;
   const sortedRules = sortBy(legend.rules, 'value');
   const normValue = normalizeValue(min, max, Number(value));
   const startRule = sortedRules.reduce((acc, rule) => {

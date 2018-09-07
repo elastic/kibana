@@ -53,7 +53,7 @@ const initialState = {
       */
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
-        bounds: {
+        boundsOverride: {
           min: 0,
           max: 1,
         },

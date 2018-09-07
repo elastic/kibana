@@ -155,7 +155,7 @@ export interface InfraWaffleMapStepLegend {
 export interface InfraWaffleMapGradientLegend {
   type: InfraWaffleMapLegendMode.gradient;
   rules: InfraWaffleMapGradientRule[];
-  bounds: {
+  boundsOverride?: {
     min: number;
     max: number;
   };
