@@ -23,8 +23,9 @@ import {
   STRUCTURE_INDEX_NAME,
   STRUCTURE_ALIAS_NAME,
 } from '../../../../../../store/constants';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class TemplateSelection extends Component {
+export class TemplateSelectionUi extends Component {
   static propTypes = {
     fetchIndexTemplates: PropTypes.func.isRequired,
     setSelectedIndexTemplate: PropTypes.func.isRequired,
@@ -66,6 +67,7 @@ export class TemplateSelection extends Component {
       selectedIndexTemplateName,
       errors,
       isShowingErrors,
+      intl
     } = this.props;
 
     const { isIncludingSystemIndices } = this.state;
@@ -79,13 +81,23 @@ export class TemplateSelection extends Component {
 
     return (
       <EuiDescribedFormGroup
-        title={<h4>Select an index template</h4>}
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.templateSelection.title"
+              defaultMessage="Select an index template"
+            />
+          </h4>
+        }
         fullWidth
         titleSize="s"
         description={
           <p>
-            An index template defines the settings, mappings, and aliases to apply
-            when you create an index.{' '}
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.templateSelection.description"
+              defaultMessage="An index template defines the settings, mappings, and aliases to apply when you create an index."
+            />
+            {' '}
             <LearnMoreLink
               docPath="indices-templates.html"
             />
@@ -93,13 +105,23 @@ export class TemplateSelection extends Component {
         }
       >
         <EuiSwitch
-          label="Include system indices"
+          label={
+            intl.formatMessage({
+              id: 'xpack.indexLifecycleMgmt.templateSelection.includeSystemIndices',
+              defaultMessage: 'Include system indices',
+            })
+          }
           checked={isIncludingSystemIndices}
           onChange={this.onChangeIncludingSystemIndices}
         />
         <EuiSpacer/>
         <ErrableFormRow
-          label="Your existing index templates"
+          label={
+            intl.formatMessage({
+              id: 'xpack.indexLifecycleMgmt.templateSelection.existingIndexTemplates',
+              defaultMessage: 'Your existing index templates',
+            })
+          }
           errorKey={STRUCTURE_TEMPLATE_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -114,7 +136,12 @@ export class TemplateSelection extends Component {
           />
         </ErrableFormRow>
         <ErrableFormRow
-          label="Alias name"
+          label={
+            intl.formatMessage({
+              id: 'xpack.indexLifecycleMgmt.templateSelection.aliasName',
+              defaultMessage: 'Alias name',
+            })
+          }
           errorKey={STRUCTURE_ALIAS_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}
@@ -134,13 +161,23 @@ export class TemplateSelection extends Component {
                 style={{ maxWidth: '100%' }}
                 checked={bootstrapEnabled}
                 onChange={e => setBootstrapEnabled(e.target.checked)}
-                label={<span>Create an index with this index template</span>}
+                label={
+                  intl.formatMessage({
+                    id: 'xpack.indexLifecycleMgmt.templateSelection.createIndex',
+                    defaultMessage: 'Create an index with this index template',
+                  })
+                }
               />
             </EuiFormRow>
             {bootstrapEnabled ? (
               <Fragment>
                 <ErrableFormRow
-                  label="Index name"
+                  label={
+                    intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.templateSelection.indexName',
+                      defaultMessage: 'Index name',
+                    })
+                  }
                   errorKey={STRUCTURE_INDEX_NAME}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -161,3 +198,4 @@ export class TemplateSelection extends Component {
     );
   }
 }
+export const TemplateSelection = injectI18n(TemplateSelectionUi);
