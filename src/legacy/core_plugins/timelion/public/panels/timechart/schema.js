@@ -32,7 +32,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
     return {
       help: 'Draw a timeseries chart',
       render: function ($scope, $elem) {
-        const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div>';
+        const template = '<div class="chart-top-title"></div><div class="chart-canvas"></div><div id="marius"></div>';
         const tickFormatters = require('plugins/timelion/services/tick_formatters')();
         const getxAxisFormatter = Private(require('plugins/timelion/panels/timechart/xaxis_formatter'));
         const generateTicks = Private(require('plugins/timelion/panels/timechart/tick_generator'));
@@ -49,6 +49,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
 
         let legendValueNumbers;
         let legendCaption;
+        let chartValues;
         const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, DEBOUNCE_DELAY, {
           maxWait: DEBOUNCE_DELAY,
           leading: true,
@@ -255,7 +256,8 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
 
         let legendScope = $scope.$new();
         function drawPlot(plotConfig) {
-          if (!$('.chart-canvas', $elem).length) $elem.html(template);
+          const emptyChartValues = '<div id="chartValues" style="display: none"></div>';
+          if (!$('.chart-canvas', $elem).length) $elem.html(template + chartValues);
           const canvasElem = $('.chart-canvas', $elem);
 
           // we can't use `$.plot` to draw the chart when the height or width is 0
@@ -354,13 +356,17 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
             legendCaption = $('<caption class="timChart__legendCaption"></caption>');
             legendCaption.html(emptyCaption);
             canvasElem.find('div.legend table').append(legendCaption);
-
             // legend has been re-created. Apply focus on legend element when previously set
             if (focusedSeries || focusedSeries === 0) {
               const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
               $legendLabels.get(focusedSeries).focus();
             }
           }
+          //chart has been recreated. Append the new chart values
+          chartValues = '<div id="chartValues" style="display: none">' + JSON.stringify(plotConfig) + '</div>';
+          const chartValuesClear = $(emptyChartValues);
+          chartValuesClear.html(emptyCaption);
+          canvasElem.append(chartValues);
         }
         $scope.$watch('chart', drawPlot);
       }
