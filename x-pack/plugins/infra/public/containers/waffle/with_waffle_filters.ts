@@ -24,6 +24,7 @@ export const withWaffleFilter = connect(
         kind: 'kuery',
         expression,
       }),
+    restoreFromUrl: waffleFilterActions.restoreFromUrl,
     setFilterQueryDraft: waffleFilterActions.setWaffleFilterQueryDraft,
     setFilterQueryDraftFromKueryExpression: (expression: string) =>
       waffleFilterActions.setWaffleFilterQueryDraft({
@@ -33,4 +34,6 @@ export const withWaffleFilter = connect(
   })
 );
 
-export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter);
+export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter, {
+  onInitialize: ({ restoreFromUrl }) => restoreFromUrl(),
+});

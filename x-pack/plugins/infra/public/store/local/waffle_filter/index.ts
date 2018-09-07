@@ -8,4 +8,5 @@ import * as waffleFilterActions from './actions';
 import * as waffleFilterSelectors from './selectors';
 
 export { waffleFilterActions, waffleFilterSelectors };
+export * from './epic';
 export * from './reducer';

@@ -30,7 +30,7 @@ export class HomePage extends React.PureComponent {
             <EuiFlexItem>
               <WithKueryAutocompletion>
                 {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                  <WithWaffleFilter>
+                  <WithWaffleFilter initializeOnMount>
                     {({
                       applyFilterQueryFromKueryExpression,
                       filterQueryDraft,

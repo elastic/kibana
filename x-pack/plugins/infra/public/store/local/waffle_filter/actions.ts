@@ -15,3 +15,5 @@ export const setWaffleFilterQueryDraft = actionCreator<FilterQuery>(
 );
 
 export const applyWaffleFilterQuery = actionCreator<FilterQuery>('APPLY_WAFFLE_FILTER_QUERY');
+
+export const restoreFromUrl = actionCreator('RESTORE_FROM_URL');
