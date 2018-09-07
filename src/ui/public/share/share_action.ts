@@ -55,7 +55,5 @@ export interface ShareAction {
 export interface ShareActionProvider {
   readonly id: string;
 
-  getShareActions: (
-    { objectType, objectId, getUnhashableStates, sharingData, isDirty, onClose }: ShareActionProps
-  ) => ShareAction[];
+  getShareActions: (actionProps: ShareActionProps) => ShareAction[];
 }
