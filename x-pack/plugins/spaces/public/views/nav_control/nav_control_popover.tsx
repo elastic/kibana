@@ -22,19 +22,22 @@ interface Props {
 }
 
 interface State {
-  isOpen: boolean;
+  showSpaceSelector: boolean;
   loading: boolean;
-  activeSpaceExists: boolean;
+  activeSpace: Space | null;
   spaces: Space[];
 }
 
 export class NavControlPopover extends Component<Props, State> {
-  public state = {
-    isOpen: false,
-    loading: false,
-    activeSpaceExists: true,
-    spaces: [],
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      showSpaceSelector: false,
+      loading: false,
+      activeSpace: props.activeSpace.space,
+      spaces: [],
+    };
+  }
 
   public componentDidMount() {
     this.loadSpaces();
@@ -63,8 +66,8 @@ export class NavControlPopover extends Component<Props, State> {
       <EuiPopover
         id={'spacesMenuPopover'}
         button={button}
-        isOpen={this.state.isOpen}
-        closePopover={this.closePortal}
+        isOpen={this.state.showSpaceSelector}
+        closePopover={this.closeSpaceSelector}
         anchorPosition={'rightCenter'}
         panelPaddingSize="none"
         ownFocus
@@ -83,46 +86,41 @@ export class NavControlPopover extends Component<Props, State> {
 
     const spaces = await spacesManager.getSpaces();
 
-    let activeSpaceExists = this.state.activeSpaceExists;
+    // Update the active space definition, if it changed since the last load operation
+    let activeSpaceEntry: Space | null = activeSpace.space;
+
     if (activeSpace.valid) {
-      activeSpaceExists = !!spaces.find(space => space.id === this.props.activeSpace.space.id);
+      activeSpaceEntry = spaces.find(space => space.id === this.props.activeSpace.space.id) || null;
     }
 
     this.setState({
       spaces,
-      activeSpaceExists,
-      isOpen: this.state.isOpen || !activeSpaceExists,
+      activeSpace: activeSpaceEntry,
       loading: false,
     });
   }
 
   private getActiveSpaceButton = () => {
-    const { activeSpace } = this.props;
+    const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return null;
-    }
-
-    if (activeSpace.valid && activeSpace.space) {
-      return this.getButton(
-        <SpaceAvatar space={activeSpace.space} size={'s'} className={'spaceNavGraphic'} />,
-        activeSpace.space.name
-      );
-    } else if (activeSpace.error) {
       return this.getButton(
         <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
         'error'
       );
     }
 
-    return null;
+    return this.getButton(
+      <SpaceAvatar space={activeSpace} size={'s'} className={'spaceNavGraphic'} />,
+      (activeSpace as Space).name
+    );
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
     // Mimics the current angular-based navigation link
     return (
       <div className="global-nav-link">
-        <a className="global-nav-link__anchor" onClick={this.togglePortal}>
+        <a className="global-nav-link__anchor" onClick={this.toggleSpaceSelector}>
           <div className="global-nav-link__icon"> {linkIcon} </div>
           <div className="global-nav-link__title"> {linkTitle} </div>
         </a>
@@ -130,20 +128,20 @@ export class NavControlPopover extends Component<Props, State> {
     );
   };
 
-  private togglePortal = () => {
-    const isOpening = !this.state.isOpen;
+  private toggleSpaceSelector = () => {
+    const isOpening = !this.state.showSpaceSelector;
     if (isOpening) {
       this.loadSpaces();
     }
 
     this.setState({
-      isOpen: !this.state.isOpen,
+      showSpaceSelector: !this.state.showSpaceSelector,
     });
   };
 
-  private closePortal = () => {
+  private closeSpaceSelector = () => {
     this.setState({
-      isOpen: false,
+      showSpaceSelector: false,
     });
   };
 

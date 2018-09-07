@@ -53,10 +53,11 @@ export const spaces = (kibana: any) =>
         },
       },
       home: ['plugins/spaces/register_feature'],
-      injectDefaultVars() {
+      injectDefaultVars(server: any) {
         return {
           spaces: [],
           activeSpace: null,
+          spaceSelectorURL: server.config().get('server.basePath') || '/',
         };
       },
       async replaceInjectedVars(vars: any, request: any, server: any) {

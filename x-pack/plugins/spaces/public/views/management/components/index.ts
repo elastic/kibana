@@ -3,4 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { SpacesGridPage } from './spaces_grid_page';
+
+export { ConfirmDeleteModal } from './confirm_delete_modal';
