@@ -13,11 +13,11 @@ const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
   const { fields } = options.nodeOptions.sourceConfiguration;
   switch (options.nodeType) {
     case InfraNodeType.pod:
-      return fields.pods;
+      return fields.pod;
     case InfraNodeType.container:
-      return fields.containers;
+      return fields.container;
     default:
-      return fields.hosts;
+      return fields.host;
   }
 };
 

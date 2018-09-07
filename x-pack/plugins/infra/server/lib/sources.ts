@@ -35,10 +35,10 @@ export interface InfraSourceConfiguration {
   metricAlias: string;
   logAlias: string;
   fields: {
-    containers: string;
-    hosts: string;
+    container: string;
+    host: string;
     message: string[];
-    pods: string;
+    pod: string;
     tiebreaker: string;
     timestamp: string;
   };

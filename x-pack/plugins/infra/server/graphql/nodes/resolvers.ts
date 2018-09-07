@@ -34,13 +34,12 @@ export const createNodeResolvers = (
   InfraSource: {
     async map(source, args, { req }, info) {
       const { metrics, path } = extractPathsAndMetrics(info);
-      const { groupBy, nodeField, nodeType } = extractGroupByAndNodeFromPath(path);
+      const { groupBy, nodeType } = extractGroupByAndNodeFromPath(path);
 
       const options: InfraNodeRequestOptions = {
         filterQuery: parseFilterQuery(args.filterQuery),
         nodeType,
         groupBy,
-        nodeField,
         sourceConfiguration: source.configuration,
         metrics,
         timerange: args.timerange,

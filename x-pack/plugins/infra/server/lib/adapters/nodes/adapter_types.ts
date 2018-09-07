@@ -87,7 +87,6 @@ export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 
 export interface InfraNodeRequestOptions {
   nodeType: InfraNodeType;
-  nodeField: string;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   groupBy: InfraPathInput[];

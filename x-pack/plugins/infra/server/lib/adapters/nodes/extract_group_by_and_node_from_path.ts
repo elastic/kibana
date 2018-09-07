@@ -5,7 +5,6 @@
  */
 import { InfraPathInput, InfraPathType } from '../../../../common/graphql/types';
 import { InfraNodeType } from './adapter_types';
-import { DOMAIN_TO_FIELD } from './constants';
 
 const getNodeType = (type: InfraPathType): InfraNodeType => {
   switch (type) {
@@ -23,7 +22,6 @@ const getNodeType = (type: InfraPathType): InfraNodeType => {
 export function extractGroupByAndNodeFromPath(path: InfraPathInput[]) {
   const nodePart = path[path.length - 1];
   const nodeType = getNodeType(nodePart.type);
-  const nodeField = DOMAIN_TO_FIELD[nodePart.type];
   const groupBy = path.slice(0, path.length - 1);
-  return { nodeField, groupBy, nodeType };
+  return { groupBy, nodeType };
 }
