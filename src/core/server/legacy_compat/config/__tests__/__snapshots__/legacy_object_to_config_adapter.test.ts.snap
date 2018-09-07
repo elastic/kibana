@@ -2,6 +2,7 @@
 
 exports[`#get correctly handles server config. 1`] = `
 Object {
+  "autoListen": true,
   "basePath": "/abc",
   "cors": false,
   "host": "host",

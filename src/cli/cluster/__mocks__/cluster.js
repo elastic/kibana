@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* eslint-env jest */
 
 import EventEmitter from 'events';
 import { assign, random } from 'lodash';
-import sinon from 'sinon';
-import cluster from 'cluster';
 import { delay } from 'bluebird';
 
-export default class MockClusterFork extends EventEmitter {
-  constructor() {
+class MockClusterFork extends EventEmitter {
+  constructor(cluster) {
     super();
 
     let dead = true;
@@ -35,7 +34,7 @@ export default class MockClusterFork extends EventEmitter {
 
     assign(this, {
       process: {
-        kill: sinon.spy(() => {
+        kill: jest.fn(() => {
           (async () => {
             await wait();
             this.emit('disconnect');
@@ -46,13 +45,13 @@ export default class MockClusterFork extends EventEmitter {
           })();
         }),
       },
-      isDead: sinon.spy(() => dead),
-      send: sinon.stub()
+      isDead: jest.fn(() => dead),
+      send: jest.fn()
     });
 
-    sinon.spy(this, 'on');
-    sinon.spy(this, 'removeListener');
-    sinon.spy(this, 'emit');
+    jest.spyOn(this, 'on');
+    jest.spyOn(this, 'removeListener');
+    jest.spyOn(this, 'emit');
 
     (async () => {
       await wait();
@@ -60,4 +59,13 @@ export default class MockClusterFork extends EventEmitter {
       this.emit('online');
     })();
   }
+}
+
+class MockCluster extends EventEmitter {
+  fork = jest.fn(() => new MockClusterFork(this));
+  setupMaster = jest.fn();
+}
+
+export function mockCluster() {
+  return new MockCluster();
 }
