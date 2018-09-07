@@ -80,7 +80,7 @@ export function initPutRolesApi(
     }),
     kibana: Joi.object().keys({
       global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.global))),
-      space: Joi.object().pattern(/^/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.space))))
+      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.space))))
     })
   });
 

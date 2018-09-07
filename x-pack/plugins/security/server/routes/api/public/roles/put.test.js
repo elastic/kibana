@@ -165,6 +165,52 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`doesn't allow * space ID`, {
+      name: 'foo-role',
+      payload: {
+        kibana: {
+          space: {
+            '*': ['test-space-privilege-1']
+          }
+        }
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"&#x2a;\" is not allowed]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.space.&#x2a;'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
+    putRoleTest(`doesn't allow * in a space ID`, {
+      name: 'foo-role',
+      payload: {
+        kibana: {
+          space: {
+            'foo-*': ['test-space-privilege-1']
+          }
+        }
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-&#x2a;\" is not allowed]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.space.foo-&#x2a;'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
     putRoleTest(`returns result of routePreCheckLicense`, {
       name: 'foo-role',
       payload: {},
