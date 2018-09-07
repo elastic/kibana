@@ -5,6 +5,7 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import { sortBy } from 'lodash';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
@@ -51,7 +52,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
           actionHandler={this.handleBeatsActions}
           assignmentOptions={this.state.tags}
           assignmentTitle="Set tags"
-          items={this.state.beats.sort(this.sortBeats) || []}
+          items={sortBy(this.state.beats, 'id') || []}
           ref={this.state.tableRef}
           showAssignmentOptions={true}
           renderAssignmentOptions={this.renderTagAssignment}
@@ -65,8 +66,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       </div>
     );
   }
-
-  private sortBeats = (a: CMPopulatedBeat, b: CMPopulatedBeat) => (a.id < b.id ? 0 : 1);
 
   private renderTagAssignment = (tag: BeatTag) => (
     <TagAssignment
