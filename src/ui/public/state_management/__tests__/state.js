@@ -33,7 +33,7 @@ import {
   isStateHash,
 } from '../state_storage';
 import { HashedItemStore } from '../state_storage/hashed_item_store';
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 
 describe('State Management', () => {

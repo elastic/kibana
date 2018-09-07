@@ -72,59 +72,68 @@
 
 import { pull, sortBy } from 'lodash';
 
+const PERSISTED_INDEX_KEY = 'kbn.hashedItemsIndex.v1';
+
+interface HashedItem {
+  hash: string;
+  touched: number; // date the item was last "touched"
+}
+
 export class HashedItemStore {
+  private sessionStorage: Storage;
+  private indexedItems: HashedItem[];
 
   /**
    * HashedItemStore uses objects called indexed items to refer to items that have been persisted
    * in sessionStorage. An indexed item is shaped {hash, touched}. The touched date is when the item
    * was last referenced by the browser history.
    */
-  constructor(sessionStorage) {
-    this._sessionStorage = sessionStorage;
+  constructor(sessionStorage: Storage) {
+    this.sessionStorage = sessionStorage;
 
     // Store indexed items in descending order by touched (oldest first, newest last). We'll use
     // this to remove older items when we run out of storage space.
-    this._indexedItems = [];
+    this.indexedItems = [];
 
     // Potentially restore a previously persisted index. This happens when
     // we re-open a closed tab.
-    const persistedItemIndex = this._sessionStorage.getItem(HashedItemStore.PERSISTED_INDEX_KEY);
+    const persistedItemIndex = this.sessionStorage.getItem(PERSISTED_INDEX_KEY);
     if (persistedItemIndex) {
-      this._indexedItems = sortBy(JSON.parse(persistedItemIndex) || [], 'touched');
+      this.indexedItems = sortBy(JSON.parse(persistedItemIndex) || [], 'touched');
     }
   }
 
-  setItem(hash, item) {
-    const isItemPersisted = this._persistItem(hash, item);
+  public setItem(hash: string, item: string) {
+    const isItemPersisted = this.persistItem(hash, item);
 
     if (isItemPersisted) {
-      this._touchHash(hash);
+      this.touchHash(hash);
     }
 
     return isItemPersisted;
   }
 
-  getItem(hash) {
-    const item = this._sessionStorage.getItem(hash);
+  public getItem(hash: string) {
+    const item = this.sessionStorage.getItem(hash);
 
     if (item !== null) {
-      this._touchHash(hash);
+      this.touchHash(hash);
     }
 
     return item;
   }
 
-  _getIndexedItem(hash) {
-    return this._indexedItems.find(indexedItem => indexedItem.hash === hash);
+  private getIndexedItem(hash: string) {
+    return this.indexedItems.find(indexedItem => indexedItem.hash === hash);
   }
 
-  _persistItem(hash, item) {
+  private persistItem(hash: string, item: string): boolean {
     try {
-      this._sessionStorage.setItem(hash, item);
+      this.sessionStorage.setItem(hash, item);
       return true;
     } catch (e) {
       // If there was an error then we need to make some space for the item.
-      if (this._indexedItems.length === 0) {
+      if (this.indexedItems.length === 0) {
         // If there's nothing left to remove, then we've run out of space and we're trying to
         // persist too large an item.
         return false;
@@ -132,39 +141,36 @@ export class HashedItemStore {
 
       // We need to try to make some space for the item by removing older items (i.e. items that
       // haven't been accessed recently).
-      this._removeOldestItem();
+      this.removeOldestItem();
 
       // Try to persist again.
-      return this._persistItem(hash, item);
+      return this.persistItem(hash, item);
     }
   }
 
-  _removeOldestItem() {
-    const oldestIndexedItem = this._indexedItems.shift();
-    // Remove oldest item from storage.
-    this._sessionStorage.removeItem(oldestIndexedItem.hash);
+  private removeOldestItem() {
+    const oldestIndexedItem = this.indexedItems.shift();
+    if (oldestIndexedItem) {
+      // Remove oldest item from storage.
+      this.sessionStorage.removeItem(oldestIndexedItem.hash);
+    }
   }
 
-  _touchHash(hash) {
+  private touchHash(hash: string) {
     // Touching a hash indicates that it's been used recently, so it won't be the first in line
     // when we remove items to free up storage space.
 
     // either get or create an indexedItem
-    const indexedItem = this._getIndexedItem(hash) || { hash };
+    const indexedItem = this.getIndexedItem(hash) || { hash, touched: Date.now() };
 
     // set/update the touched time to now so that it's the "newest" item in the index
-    indexedItem.touched =  Date.now();
+    indexedItem.touched = Date.now();
 
     // ensure that the item is last in the index
-    pull(this._indexedItems, indexedItem);
-    this._indexedItems.push(indexedItem);
+    pull(this.indexedItems, indexedItem);
+    this.indexedItems.push(indexedItem);
 
     // Regardless of whether this is a new or updated item, we need to persist the index.
-    this._sessionStorage.setItem(
-      HashedItemStore.PERSISTED_INDEX_KEY,
-      JSON.stringify(this._indexedItems)
-    );
+    this.sessionStorage.setItem(PERSISTED_INDEX_KEY, JSON.stringify(this.indexedItems));
   }
 }
-
-HashedItemStore.PERSISTED_INDEX_KEY = 'kbn.hashedItemsIndex.v1';
