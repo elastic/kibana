@@ -39,11 +39,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       tableRef: React.createRef(),
       tags: null,
     };
-
-    this.loadBeats();
   }
   public componentDidMount() {
     this.mounted = true;
+    this.loadBeats();
   }
   public componentWillUnmount() {
     this.mounted = false;
