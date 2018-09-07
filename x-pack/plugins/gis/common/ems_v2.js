@@ -109,7 +109,6 @@ export class EMS_V2 {
     return await response.json();
   }
 
-
   async getFileLayers() {
     return await this._loadFileLayers();
   }

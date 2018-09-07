@@ -161,7 +161,7 @@ export async function loadMapResources(dispatch) {
       },
       {
         "id": "hqoqo",
-        "sourceDescriptor": { "type": "REGIONMAP_FILE", "url": "../api/gis/junk" },
+        "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE" },
         "visible": true,
         "temporary": false,
         "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
