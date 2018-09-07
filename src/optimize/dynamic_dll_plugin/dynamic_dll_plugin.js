@@ -297,7 +297,7 @@ export class DynamicDllPlugin {
         // Logic to run the max compilation requirements.
         // Only enable this for CI builds in order to ensure
         // we have an healthy dll ecosystem.
-        if (IS_KIBANA_DISTRIBUTABLE && this.performedCompilations === this.maxCompilations) {
+        if (IS_KIBANA_DISTRIBUTABLE && (this.performedCompilations === this.maxCompilations)) {
           throw new Error(
             'All the allowed dll compilations were already performed and one more is needed which is not possible'
           );
