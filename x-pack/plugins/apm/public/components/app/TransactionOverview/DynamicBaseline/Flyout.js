@@ -101,7 +101,11 @@ export default class DynamicBaselineFlyout extends Component {
     } = this.props;
     const { isLoading, hasIndexPattern } = this.state;
 
-    const flyout = (
+    if (!isOpen) {
+      return null;
+    }
+
+    return (
       <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
@@ -199,8 +203,6 @@ export default class DynamicBaselineFlyout extends Component {
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
-
-    return <React.Fragment>{isOpen && flyout}</React.Fragment>;
   }
 }
 

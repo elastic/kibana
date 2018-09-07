@@ -12,11 +12,11 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
-import Charts from '../../shared/charts/TransactionCharts';
+import TransactionCharts from '../../shared/charts/TransactionCharts';
 import { getMlJobUrl, KibanaLink } from '../../../utils/url';
 import List from './List';
 import { units, px, fontSizes } from '../../../style/variables';
-import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
+import { TransactionOverviewChartsRequest } from '../../../store/reactReduxRequest/transactionOverviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
@@ -111,10 +111,10 @@ class TransactionOverview extends Component {
 
         <TabNavigation />
 
-        <OverviewChartsRequest
+        <TransactionOverviewChartsRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <Charts
+            <TransactionCharts
               charts={data}
               urlParams={urlParams}
               location={location}
