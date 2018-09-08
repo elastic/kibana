@@ -118,7 +118,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
    * uiSettingDefaults or was previously added as a custom setting via the `set()` method.
    */
   public isDeclared(key: string) {
-    return Boolean(key in this.cache);
+    return key in this.cache;
   }
 
   /**
