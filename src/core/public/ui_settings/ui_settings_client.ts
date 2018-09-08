@@ -33,9 +33,9 @@ interface Params {
 export class UiSettingsClient {
   private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
 
-  private api: UiSettingsApi;
-  private onUpdateError: (error: Error) => void;
-  private defaults: UiSettingsState;
+  private readonly api: UiSettingsApi;
+  private readonly onUpdateError: (error: Error) => void;
+  private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
   constructor(readonly params: Params) {
