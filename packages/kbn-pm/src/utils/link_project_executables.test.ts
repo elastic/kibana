@@ -81,6 +81,7 @@ expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 afterEach(() => {
   jest.resetAllMocks();
+  jest.restoreAllMocks();
 });
 
 describe('bin script points nowhere', () => {
@@ -102,7 +103,6 @@ describe('bin script points to a file', () => {
       // noop
     });
     await linkProjectExecutables(projectsByName, projectGraph);
-    logMock.mockRestore();
 
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
     expect(logMock.mock.calls).toMatchSnapshot('logs');

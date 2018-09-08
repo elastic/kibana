@@ -80,7 +80,7 @@ describe('getIndices', () => {
 
     it('should throw exceptions', async () => {
       const es = {
-        search: () => { throw 'Fail'; }
+        search: () => { throw new Error('Fail'); }
       };
 
       await expect(getIndices(es, 'kibana', 1)).rejects.toThrow();
