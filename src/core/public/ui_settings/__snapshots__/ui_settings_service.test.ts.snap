@@ -10,6 +10,12 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
       "kibanaVersion",
     ],
   ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
 }
 `;
 
@@ -22,6 +28,14 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
           "getLoadingCount$": [MockFunction] {
             "calls": Array [
               Array [],
+            ],
+            "results": Array [
+              Object {
+                "isThrow": false,
+                "value": Object {
+                  "loadingCountObservable": true,
+                },
+              },
             ],
           },
           "stop": [MockFunction],
@@ -36,6 +50,12 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
       },
     ],
   ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
 }
 `;
 
@@ -47,6 +67,12 @@ exports[`#start passes the uiSettings loading count to the loading count api: lo
         "loadingCountObservable": true,
       },
     ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
   ],
 }
 `;
