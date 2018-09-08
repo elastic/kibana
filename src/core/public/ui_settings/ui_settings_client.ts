@@ -24,7 +24,7 @@ import { UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
 interface Params {
-  api: UiSettingsClient['api'];
+  api: UiSettingsApi;
   onUpdateError: UiSettingsClient['onUpdateError'];
   defaults: UiSettingsState;
   initialSettings: UiSettingsState;
