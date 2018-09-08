@@ -26,7 +26,7 @@
  * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
  * @return {string} the relative url transformed into an absolute url
  */
-export function relativeToAbsolute(url) {
+export function relativeToAbsolute(url: string) {
   // convert all link urls to absolute urls
   const a = document.createElement('a');
   a.setAttribute('href', url);

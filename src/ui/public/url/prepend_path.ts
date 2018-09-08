@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { parse, format } from 'url';
 import { isString } from 'lodash';
+import { format, parse } from 'url';
 
 /**
  *
@@ -28,7 +28,7 @@ import { isString } from 'lodash';
  * the relative path isn't in the right format (e.g. doesn't start with a "/") the relativePath is returned
  * unchanged.
  */
-export function prependPath(relativePath, newPath = '') {
+export function prependPath(relativePath: string, newPath = '') {
   if (!relativePath || !isString(relativePath)) {
     return relativePath;
   }
