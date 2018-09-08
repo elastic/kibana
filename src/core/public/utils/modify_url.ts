@@ -19,7 +19,7 @@
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-export interface UrlParts {
+interface UrlParts {
   protocol?: string;
   slashes?: boolean;
   auth?: string;
@@ -30,7 +30,7 @@ export interface UrlParts {
   hash?: string;
 }
 
-export interface UrlFormatParts {
+interface UrlFormatParts {
   protocol?: string;
   slashes?: boolean;
   auth?: string;
@@ -79,7 +79,7 @@ export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatPart
   // pathname + search, or search and query) and keeping
   // track of which property is actually used when they
   // are formatted is harder than necessary
-  const meaningfulParts: UrlParts = {
+  const meaningfulParts = {
     protocol: parsed.protocol,
     slashes: parsed.slashes,
     auth: parsed.auth,
