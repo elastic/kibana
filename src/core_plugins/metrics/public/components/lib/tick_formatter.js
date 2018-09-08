@@ -20,19 +20,7 @@
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
 import { capitalize, isNumber } from 'lodash';
-
-import { createDurationFormat } from '../../../../kibana/common/field_formats/types/duration';
-import { createNumberFormat } from '../../../../kibana/common/field_formats/types/number';
-import { FieldFormat } from '../../../../../ui/field_formats/field_format';
-
-const DurationFormat = createDurationFormat(FieldFormat);
-const NumberFormat = createNumberFormat(FieldFormat);
-
-const formatLookup = {
-  'bytes': '0.0b',
-  'number': '0,0.[00]',
-  'percent': '0.[00]%'
-};
+import { fieldFormats } from 'ui/registry/field_formats';
 
 const durationsLookup = durationInputOptions.reduce((acc, row) => {
   acc[row.value] = row.label;
@@ -48,14 +36,21 @@ export default (format = '0,0.[00]', template, getConfig = null) => {
     const [from, to, decimals] = format.split(',');
     const inputFormat = durationsLookup[from];
     const outputFormat = `as${capitalize(durationsLookup[to])}`;
+    const DurationFormat = fieldFormats.getType('duration');
     formatter = new DurationFormat({
       inputFormat,
       outputFormat,
       outputPrecision: decimals
     });
   } else {
-    const formatString = formatLookup[format] || format;
-    formatter = new NumberFormat({ pattern: formatString }, getConfig);
+    let FieldFormat = fieldFormats.getType(format);
+    if (FieldFormat) {
+      formatter = new FieldFormat(null, getConfig);
+    }
+    else {
+      FieldFormat = fieldFormats.getType('number');
+      formatter = new FieldFormat({ pattern: format }, getConfig);
+    }
   }
   return (val) => {
     let value;
