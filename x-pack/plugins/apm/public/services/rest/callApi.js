@@ -27,13 +27,11 @@ function fetchOptionsWithDebug(fetchOptions) {
   };
 }
 
-export async function callApi(fetchOptions, kibanaOptions) {
-  const combinedKibanaOptions = {
-    camelcase: true,
-    ...kibanaOptions
-  };
-
+export async function callApi(
+  fetchOptions,
+  { camelcase = true, prependBasePath = true } = {}
+) {
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
-  return combinedKibanaOptions.camelcase ? camelizeKeys(res) : res;
+  const res = await kfetch(combinedFetchOptions, { prependBasePath });
+  return camelcase ? camelizeKeys(res) : res;
 }

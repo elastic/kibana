@@ -12,7 +12,7 @@ import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';
 import { loadCharts } from '../../services/rest/apm';
 
-const ID = 'overviewCharts';
+const ID = 'transactionOverviewCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
@@ -21,7 +21,7 @@ const INITIAL_DATA = {
   overallAvgDuration: null
 };
 
-export const getOverviewCharts = createSelector(
+export const getTransactionOverviewCharts = createSelector(
   getUrlParams,
   state => state.reactReduxRequest[ID],
   (urlParams, overviewCharts = {}) => {
@@ -41,7 +41,7 @@ export function hasDynamicBaseline(state) {
   );
 }
 
-export function OverviewChartsRequest({ urlParams, render }) {
+export function TransactionOverviewChartsRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;
 
   if (!(serviceName && start && end && transactionType)) {
@@ -53,7 +53,7 @@ export function OverviewChartsRequest({ urlParams, render }) {
       id={ID}
       fn={loadCharts}
       args={[{ serviceName, start, end, transactionType, kuery }]}
-      selector={getOverviewCharts}
+      selector={getTransactionOverviewCharts}
       render={render}
     />
   );
