@@ -48,7 +48,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
-import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
+import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
@@ -84,7 +84,7 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
-      const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+      const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
       const getUnhashableStates = Private(getUnhashableStatesProvider);
       const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 

@@ -9,7 +9,6 @@ exports[`should only render permalink panel when there are no other panels 1`] =
       Object {
         "content": <UrlPanelContent
           getUnhashableStates={[Function]}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 1,
@@ -29,7 +28,6 @@ exports[`should render context menu panel when there are more than one panel 1`]
       Object {
         "content": <UrlPanelContent
           getUnhashableStates={[Function]}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 1,
@@ -39,7 +37,6 @@ exports[`should render context menu panel when there are more than one panel 1`]
         "content": <UrlPanelContent
           getUnhashableStates={[Function]}
           isEmbedded={true}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 2,

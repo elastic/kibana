@@ -35,7 +35,7 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
-import 'uiExports/dashboardPanelActions';
+import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/devTools';
 import 'uiExports/docViews';

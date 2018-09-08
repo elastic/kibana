@@ -35,12 +35,12 @@ function getPluginPaths(plugins, opts = {}) {
   }, []);
 }
 
-exports.forPlugins = function () {
+export function forPlugins() {
   const plugins = getPlugins();
   return getPluginPaths(plugins, { browser: true });
-};
+}
 
-exports.forPluginServerTests = function () {
+export function forPluginServerTests() {
   const plugins = getPlugins();
   return getPluginPaths(plugins, { tests: true });
-};
+}
