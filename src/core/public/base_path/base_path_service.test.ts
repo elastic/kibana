@@ -91,4 +91,14 @@ describe('startContract.removeFromPath()', () => {
       'http://localhost:5601/foo/bar/a/b'
     );
   });
+
+  it('returns slash if path is just basePath', () => {
+    const { startContract } = setup();
+    expect(startContract.removeFromPath('/foo/bar')).toBe('/');
+  });
+
+  it('returns full path if basePath is not its own segment', () => {
+    const { startContract } = setup();
+    expect(startContract.removeFromPath('/foo/barhop')).toBe('/foo/barhop');
+  });
 });

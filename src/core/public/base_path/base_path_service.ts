@@ -57,7 +57,15 @@ export class BasePathService {
           return path;
         }
 
-        return path.startsWith(basePath) ? path.slice(basePath.length) : path;
+        if (path === basePath) {
+          return '/';
+        }
+
+        if (path.startsWith(basePath + '/')) {
+          return path.slice(basePath.length);
+        }
+
+        return path;
       },
     };
   }
