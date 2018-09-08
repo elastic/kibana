@@ -30,7 +30,7 @@ jest.mock('./legacy_compat/legacy_service', () => ({
 import { BehaviorSubject } from 'rxjs';
 import { Server } from '.';
 import { Env } from './config';
-import { getEnvOptions } from './config/__tests__/__mocks__/env';
+import { getEnvOptions } from './config/__mocks__/env';
 import { logger } from './logging/__mocks__';
 
 const mockConfigService = { atPath: jest.fn(), getUnusedPaths: jest.fn().mockReturnValue([]) };
