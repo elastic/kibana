@@ -18,41 +18,26 @@
  */
 
 import { UiSettingsClient } from './ui_settings_client';
-import { sendRequest } from './send_request';
 
-jest.useFakeTimers();
-jest.mock('./send_request', () => ({
-  sendRequest: jest.fn(() => ({}))
-}));
-
-beforeEach(() => {
-  sendRequest.mockRestore();
-  jest.clearAllMocks();
-});
-
-function setup(options = {}) {
-  const {
-    defaults = { dateFormat: { value: 'Browser' } },
-    initialSettings = {}
-  } = options;
+function setup(options: { defaults?: any; initialSettings?: any } = {}) {
+  const { defaults = { dateFormat: { value: 'Browser' } }, initialSettings = {} } = options;
 
   const batchSet = jest.fn(() => ({
-    settings: {}
+    settings: {},
   }));
+
+  const onUpdateError = jest.fn();
 
   const config = new UiSettingsClient({
     defaults,
     initialSettings,
     api: {
-      batchSet
-    },
-    notify: {
-      log: jest.fn(),
-      error: jest.fn(),
-    }
+      batchSet,
+    } as any,
+    onUpdateError,
   });
 
-  return { config, batchSet };
+  return { config, batchSet, onUpdateError };
 }
 
 describe('#get', () => {
@@ -88,7 +73,7 @@ describe('#get', () => {
     expect(config.get('dataFormat', defaultDateFormat)).toBe(defaultDateFormat);
   });
 
-  it('throws on unknown properties that don\'t have a value yet.', () => {
+  it("throws on unknown properties that don't have a value yet.", () => {
     const { config } = setup();
     expect(() => config.get('throwableProperty')).toThrowErrorMatchingSnapshot();
   });
@@ -129,9 +114,9 @@ describe('#set', () => {
       initialSettings: {
         foo: {
           isOverridden: true,
-          value: 'bar'
-        }
-      }
+          value: 'bar',
+        },
+      },
     });
     await expect(config.set('foo', true)).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -158,9 +143,9 @@ describe('#remove', () => {
       initialSettings: {
         bar: {
           isOverridden: true,
-          userValue: true
-        }
-      }
+          userValue: true,
+        },
+      },
     });
     await expect(config.remove('bar')).rejects.toThrowErrorMatchingSnapshot();
   });
@@ -209,12 +194,12 @@ describe('#isCustom', () => {
   });
 });
 
-describe('#subscribe', () => {
-  it('calls handler with { key, newValue, oldValue } when config changes', () => {
+describe('#getUpdate$', () => {
+  it('sends { key, newValue, oldValue } notifications when config changes', () => {
     const handler = jest.fn();
     const { config } = setup();
 
-    config.subscribe(handler);
+    config.getUpdate$().subscribe(handler);
     expect(handler).not.toHaveBeenCalled();
 
     config.set('foo', 'bar');
@@ -227,21 +212,17 @@ describe('#subscribe', () => {
     expect(handler.mock.calls).toMatchSnapshot();
   });
 
-  it('returns a subscription object which unsubs when .unsubscribe() is called', () => {
-    const handler = jest.fn();
+  it('observables complete when client is stopped', () => {
+    const onComplete = jest.fn();
     const { config } = setup();
 
-    const subscription = config.subscribe(handler);
-    expect(handler).not.toHaveBeenCalled();
+    config.getUpdate$().subscribe({
+      complete: onComplete,
+    });
 
-    config.set('foo', 'bar');
-    expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls).toMatchSnapshot();
-    handler.mockClear();
-
-    subscription.unsubscribe();
-    config.set('foo', 'baz');
-    expect(handler).not.toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
+    config.stop();
+    expect(onComplete).toHaveBeenCalled();
   });
 });
 
@@ -267,7 +248,7 @@ describe('#overrideLocalDefault', () => {
       const handler = jest.fn();
       const { config } = setup();
 
-      config.subscribe(handler);
+      config.getUpdate$().subscribe(handler);
       config.overrideLocalDefault('dateFormat', 'bar');
       expect(handler.mock.calls).toMatchSnapshot('single subscriber call');
     });
@@ -297,7 +278,7 @@ describe('#overrideLocalDefault', () => {
       const { config } = setup();
 
       config.set('dateFormat', 'foo');
-      config.subscribe(handler);
+      config.getUpdate$().subscribe(handler);
       config.overrideLocalDefault('dateFormat', 'bar');
       expect(handler).not.toHaveBeenCalled();
     });
@@ -323,55 +304,40 @@ describe('#overrideLocalDefault', () => {
       const { config } = setup();
       expect(config.isOverridden('foo')).toBe(false);
     });
+
     it('returns false if key is no overridden', () => {
       const { config } = setup({
         initialSettings: {
           foo: {
-            userValue: 1
+            userValue: 1,
           },
           bar: {
             isOverridden: true,
-            userValue: 2
-          }
-        }
+            userValue: 2,
+          },
+        },
       });
       expect(config.isOverridden('foo')).toBe(false);
     });
+
     it('returns true when key is overridden', () => {
       const { config } = setup({
         initialSettings: {
           foo: {
-            userValue: 1
+            userValue: 1,
           },
           bar: {
             isOverridden: true,
-            userValue: 2
+            userValue: 2,
           },
-        }
+        },
       });
       expect(config.isOverridden('bar')).toBe(true);
     });
+
     it('returns false for object prototype properties', () => {
       const { config } = setup();
       expect(config.isOverridden('hasOwnProperty')).toBe(false);
-    });
-  });
-
-  describe('#assertUpdateAllowed()', () => {
-    it('returns false if no settings defined', () => {
-      const { config } = setup();
-      expect(config.assertUpdateAllowed('foo')).toBe(undefined);
-    });
-    it('throws error when keys is overridden', () => {
-      const { config } = setup({
-        initialSettings: {
-          foo: {
-            isOverridden: true,
-            userValue: 'bar'
-          }
-        }
-      });
-      expect(() => config.assertUpdateAllowed('foo')).toThrowErrorMatchingSnapshot();
     });
   });
 });

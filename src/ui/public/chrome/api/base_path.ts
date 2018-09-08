@@ -17,18 +17,19 @@
  * under the License.
  */
 
-let newPlatformUiSettingsClient;
+import { BasePathStartContract } from '../../../../core/public/base_path';
+let newPlatformBasePath: BasePathStartContract;
 
-export function __newPlatformInit__(instance) {
-  if (newPlatformUiSettingsClient) {
-    throw new Error('ui/chrome/api/ui_settings already initialized');
+export function __newPlatformInit__(instance: BasePathStartContract) {
+  if (newPlatformBasePath) {
+    throw new Error('ui/chrome/api/base_path is already initialized');
   }
 
-  newPlatformUiSettingsClient = instance;
+  newPlatformBasePath = instance;
 }
 
-export function initUiSettingsApi(chrome) {
-  chrome.getUiSettingsClient = function () {
-    return newPlatformUiSettingsClient;
-  };
+export function initChromeBasePathApi(chrome: any) {
+  chrome.getBasePath = () => newPlatformBasePath.get();
+  chrome.addBasePath = (path: string) => newPlatformBasePath.addToPath(path);
+  chrome.removeBasePath = (path: string) => newPlatformBasePath.removeFromPath(path);
 }
