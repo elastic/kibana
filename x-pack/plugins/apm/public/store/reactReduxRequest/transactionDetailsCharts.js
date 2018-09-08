@@ -12,7 +12,7 @@ import { Request } from 'react-redux-request';
 import { loadCharts } from '../../services/rest/apm';
 import { createInitialDataSelector } from './helpers';
 
-const ID = 'detailsCharts';
+const ID = 'transactionDetailsCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
@@ -23,7 +23,7 @@ const INITIAL_DATA = {
 
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export const getDetailsCharts = createSelector(
+export const getTransactionDetailsCharts = createSelector(
   getUrlParams,
   state => withInitialData(state.reactReduxRequest[ID]),
   (urlParams, detailCharts) => {
@@ -34,7 +34,7 @@ export const getDetailsCharts = createSelector(
   }
 );
 
-export function DetailsChartsRequest({ urlParams, render }) {
+export function TransactionDetailsChartsRequest({ urlParams, render }) {
   const {
     serviceName,
     start,
@@ -55,7 +55,7 @@ export function DetailsChartsRequest({ urlParams, render }) {
       args={[
         { serviceName, start, end, transactionType, transactionName, kuery }
       ]}
-      selector={getDetailsCharts}
+      selector={getTransactionDetailsCharts}
       render={render}
     />
   );
