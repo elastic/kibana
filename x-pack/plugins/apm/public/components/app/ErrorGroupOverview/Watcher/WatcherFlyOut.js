@@ -199,17 +199,17 @@ export default class WatcherFlyout extends Component {
   };
 
   render() {
+    if (!this.props.isOpen) {
+      return null;
+    }
+
     const userTimezoneSetting = getUserTimezone();
-
     const dailyTime = this.state.daily;
-
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
     const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz
-
     const dailyTimeFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('HH:mm'); // Format as 24h
-
     const dailyTime12HourFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('hh:mm A (z)'); // Format as 12h w. tz
@@ -397,7 +397,7 @@ export default class WatcherFlyout extends Component {
       </EuiText>
     );
 
-    const flyout = (
+    return (
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
@@ -421,8 +421,6 @@ export default class WatcherFlyout extends Component {
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
-
-    return <React.Fragment>{this.props.isOpen && flyout}</React.Fragment>;
   }
 }
 
