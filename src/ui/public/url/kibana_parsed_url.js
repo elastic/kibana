@@ -20,7 +20,7 @@
 import { parse } from 'url';
 
 import { prependPath } from './prepend_path';
-import { modifyUrl } from '.';
+import { modifyUrl } from '../../../core/public/utils';
 
 /**
  * Represents the pieces that make up a url in Kibana, offering some helpful functionality for
