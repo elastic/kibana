@@ -194,6 +194,17 @@ describe('#start()', () => {
       expect(mockBasePathInit).toHaveBeenCalledWith(basePathStartContract);
     });
 
+    it('passes basePath service to ui/chrome/api/ui_settings', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockUiSettingsInit).toHaveBeenCalledTimes(1);
+      expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsStartContract);
+    });
+
     describe('useLegacyTestHarness = false', () => {
       it('passes the targetDomElement to ui/chrome', () => {
         const legacyPlatform = new LegacyPlatformService({
