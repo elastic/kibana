@@ -83,7 +83,7 @@ export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatPart
     slashes: parsed.slashes,
     auth: parsed.auth,
     hostname: parsed.hostname,
-    port: parsed.port ? parseInt(parsed.port, 10) : undefined,
+    port: parsed.port ? Number(parsed.port) : undefined,
     pathname: parsed.pathname,
     query: parsed.query || {},
     hash: parsed.hash,
