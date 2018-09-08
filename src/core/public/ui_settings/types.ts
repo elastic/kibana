@@ -17,18 +17,23 @@
  * under the License.
  */
 
-let newPlatformUiSettingsClient;
-
-export function __newPlatformInit__(instance) {
-  if (newPlatformUiSettingsClient) {
-    throw new Error('ui/chrome/api/ui_settings already initialized');
-  }
-
-  newPlatformUiSettingsClient = instance;
+// properties that come from legacyInjectedMetadata.uiSettings.defaults
+interface InjectedUiSettingsDefault {
+  name?: string;
+  value?: any;
+  description?: string;
+  category?: string[];
+  type?: string;
+  readOnly?: boolean;
+  options?: string[] | { [key: string]: any };
 }
 
-export function initUiSettingsApi(chrome) {
-  chrome.getUiSettingsClient = function () {
-    return newPlatformUiSettingsClient;
-  };
+// properties that come from legacyInjectedMetadata.uiSettings.user
+interface InjectedUiSettingsUser {
+  userValue?: any;
+  isOverridden?: boolean;
+}
+
+export interface UiSettingsState {
+  [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }

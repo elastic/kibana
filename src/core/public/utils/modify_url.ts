@@ -17,7 +17,29 @@
  * under the License.
  */
 
-import { parse as parseUrl, format as formatUrl } from 'url';
+import { format as formatUrl, parse as parseUrl } from 'url';
+
+interface UrlParts {
+  protocol?: string;
+  slashes?: boolean;
+  auth?: string;
+  hostname?: string;
+  port?: number;
+  pathname?: string;
+  query: { [key: string]: string | string[] | undefined };
+  hash?: string;
+}
+
+interface UrlFormatParts {
+  protocol?: string;
+  slashes?: boolean;
+  auth?: string;
+  hostname?: string;
+  port?: string | number;
+  pathname?: string;
+  query?: { [key: string]: string | string[] | undefined };
+  hash?: string;
+}
 
 /**
  *  Takes a URL and a function that takes the meaningful parts
@@ -42,17 +64,12 @@ import { parse as parseUrl, format as formatUrl } from 'url';
  *      lead to the modifications being ignored (depending on which
  *      property was modified)
  *    - It's not always clear wither to use path/pathname, host/hostname,
- *      so this trys to add helpful constraints
+ *      so this tries to add helpful constraints
  *
- *  @param  {String} url - the url to parse
- *  @param  {Function<Object|undefined>} block - a function that will modify the parsed url, or return a new one
- *  @return {String} the modified and reformatted url
+ *  @param url the url to parse
+ *  @param block a function that will modify the parsed url, or return a new one
  */
-export function modifyUrl(url, block) {
-  if (typeof block !== 'function') {
-    throw new TypeError('You must pass a block to define the modifications desired');
-  }
-
+export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatParts | void) {
   const parsed = parseUrl(url, true);
 
   // copy over the most specific version of each
@@ -66,7 +83,7 @@ export function modifyUrl(url, block) {
     slashes: parsed.slashes,
     auth: parsed.auth,
     hostname: parsed.hostname,
-    port: parsed.port,
+    port: parsed.port ? Number(parsed.port) : undefined,
     pathname: parsed.pathname,
     query: parsed.query || {},
     hash: parsed.hash,
