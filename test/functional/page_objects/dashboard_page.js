@@ -312,9 +312,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm that the Dashboard has actually been saved
-      if (!await testSubjects.exists('saveDashboardSuccess')) {
-        throw new Error('Expected to find "saveDashboardSuccess" toast after saving dashboard');
-      }
+      await testSubjects.existOrFail('saveDashboardSuccess');
 
       await this.waitForSaveModalToClose();
     }

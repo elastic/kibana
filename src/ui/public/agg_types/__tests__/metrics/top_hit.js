@@ -90,7 +90,7 @@ describe('Top hit metric', function () {
   it('requests both source and docvalues_fields for non-text aggregatable fields', function () {
     init({ field: 'bytes' });
     expect(aggDsl.top_hits._source).to.be('bytes');
-    expect(aggDsl.top_hits.docvalue_fields).to.eql([ 'bytes' ]);
+    expect(aggDsl.top_hits.docvalue_fields).to.eql([ { field: 'bytes', format: 'use_field_mapping' } ]);
   });
 
   it('requests just source for aggregatable text fields', function () {

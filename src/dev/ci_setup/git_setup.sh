@@ -70,6 +70,7 @@ function checkout_sibling {
 
       cloneBranch="$PR_TARGET_BRANCH"
       if clone_target_is_valid ; then
+        export TEST_ES_FROM=snapshot
         return 0
       fi
 

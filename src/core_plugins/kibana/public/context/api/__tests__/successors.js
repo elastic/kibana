@@ -103,7 +103,7 @@ describe('context app', function () {
           // should have started at the given time
           expect(intervals[0].lte).to.eql(MS_PER_DAY * 3000);
           // should have ended with a half-open interval
-          expect(_.last(intervals)).to.only.have.key('lte');
+          expect(_.last(intervals)).to.only.have.keys('lte', 'format');
           expect(intervals.length).to.be.greaterThan(1);
 
           expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
