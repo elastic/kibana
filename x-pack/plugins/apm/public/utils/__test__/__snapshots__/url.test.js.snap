@@ -18,3 +18,24 @@ exports[`RelativeLinkComponent should render correct markup 1`] = `
   Go to Discover
 </a>
 `;
+
+exports[`ViewMLJob should render component 1`] = `
+<Connect(KibanaLinkComponent)
+  hash="/timeseriesexplorer"
+  pathname="/app/ml"
+  query={
+    Object {
+      "_a": null,
+      "_g": Object {
+        "ml": Object {
+          "jobIds": Array [
+            "myServiceName-myTransactionType-high_mean_response_time",
+          ],
+        },
+      },
+    }
+  }
+>
+  View Job
+</Connect(KibanaLinkComponent)>
+`;
