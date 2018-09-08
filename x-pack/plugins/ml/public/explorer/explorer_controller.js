@@ -93,7 +93,10 @@ module.controller('MlExplorerController', function (
   const VIEW_BY_JOB_LABEL = 'job ID';
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
+  // make sure dragSelect is only available if the mouse point is actually over a swimlane
   let disableDragSelectOnMouseLeave = true;
+  // skip listening to clicks on swimlanes while they are loading to avoid race conditions
+  let skipCellClicks = true;
   $scope.queryFilters = [];
 
   const dragSelect = new DragSelect({
@@ -358,6 +361,10 @@ module.controller('MlExplorerController', function (
   // Listener for click events in the swimlane and load corresponding anomaly data.
   // Empty cellData is passed on clicking outside a cell with score > 0.
   const swimlaneCellClickListener = function (cellData) {
+    if (skipCellClicks === true) {
+      return;
+    }
+
     if (_.keys(cellData).length === 0) {
       // Swimlane deselection - clear anomalies section.
       if ($scope.viewByLoadedForTimeFormatted) {
@@ -712,6 +719,7 @@ module.controller('MlExplorerController', function (
       $timeout(() => {
         $scope.$broadcast('render');
         mlExplorerDashboardService.swimlaneDataChange.changed('overall');
+        skipCellClicks = false;
       }, 0);
     });
 
@@ -736,6 +744,7 @@ module.controller('MlExplorerController', function (
   }
 
   function loadViewBySwimlane(fieldValues) {
+    skipCellClicks = true;
     // finish() function, called after each data set has been loaded and processed.
     // The last one to call it will trigger the page render.
     function finish() {
@@ -743,6 +752,7 @@ module.controller('MlExplorerController', function (
       // Fire event to indicate swimlane data has changed.
       // Need to use $timeout to ensure this happens after the child scope is updated with the new data.
       $timeout(() => {
+        skipCellClicks = false;
         mlExplorerDashboardService.swimlaneDataChange.changed('viewBy');
       }, 0);
     }
