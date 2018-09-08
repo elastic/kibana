@@ -94,7 +94,7 @@ describe('#start', () => {
     expect(start).toBeInstanceOf(MockUiSettingsClient);
   });
 
-  it('contstructs UiSettingsClient and UiSettingsApi', () => {
+  it('constructs UiSettingsClient and UiSettingsApi', () => {
     new UiSettingsService().start(defaultDeps);
 
     expect(MockUiSettingsApi).toMatchSnapshot('UiSettingsApi args');

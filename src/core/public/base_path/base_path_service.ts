@@ -38,7 +38,7 @@ export class BasePathService {
 
       /**
        * Add the current basePath to a path string.
-       * @param path a relative url including the leading `/`, otherwise it will be returned without modification
+       * @param path A relative url including the leading `/`, otherwise it will be returned without modification
        */
       addToPath(path: string) {
         return modifyUrl(path, parts => {
@@ -50,7 +50,7 @@ export class BasePathService {
 
       /**
        * Remove the basePath from a path that starts with it
-       * @param path a relative url that starts with the basePath, which will be stripped
+       * @param path A relative url that starts with the basePath, which will be stripped
        */
       removeFromPath(path: string) {
         if (!basePath) {

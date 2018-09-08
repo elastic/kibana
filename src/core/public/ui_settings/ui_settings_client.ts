@@ -184,7 +184,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
   }
 
   /**
-   * Prepares the uiSettingsClient to be discarded, completing any update$ observerables
+   * Prepares the uiSettingsClient to be discarded, completing any update$ observables
    * that have been created.
    */
   public stop() {

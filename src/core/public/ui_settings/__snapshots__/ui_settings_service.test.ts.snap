@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#start contstructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
 [MockFunction MockUiSettingsApi] {
   "calls": Array [
     Array [
@@ -13,7 +13,7 @@ exports[`#start contstructs UiSettingsClient and UiSettingsApi: UiSettingsApi ar
 }
 `;
 
-exports[`#start contstructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
 [MockFunction MockUiSettingsClient] {
   "calls": Array [
     Array [

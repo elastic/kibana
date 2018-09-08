@@ -64,7 +64,7 @@ export interface UrlFormatParts {
  *      lead to the modifications being ignored (depending on which
  *      property was modified)
  *    - It's not always clear wither to use path/pathname, host/hostname,
- *      so this trys to add helpful constraints
+ *      so this tries to add helpful constraints
  *
  *  @param  {String} url - the url to parse
  *  @param  {Function<Object|undefined>} block - a function that will modify the parsed url, or return a new one
