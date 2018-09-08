@@ -172,9 +172,11 @@ export default class DynamicBaselineFlyout extends Component {
               Jobs can be created per transaction type and based on the average
               response time. Once a job is created, you can manage it and see
               more details in the{' '}
-              <a href="/app/ml">Machine Learning jobs management page</a>. It
-              might take some time for the job to calculate the results. Please
-              refresh the graph a few minutes after creating the job.
+              <KibanaLink pathname={'/app/ml'}>
+                Machine Learning jobs management page
+              </KibanaLink>
+              . It might take some time for the job to calculate the results.
+              Please refresh the graph a few minutes after creating the job.
             </p>
             <p>
               {/* <a href="#">Learn more</a> about the Machine Learning integration. */}
