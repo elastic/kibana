@@ -32,6 +32,12 @@ Array [
               "starting legacy service",
             ],
           ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
+          ],
         },
         "error": [MockFunction],
         "fatal": [MockFunction],
