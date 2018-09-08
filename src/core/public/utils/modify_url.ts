@@ -66,9 +66,8 @@ interface UrlFormatParts {
  *    - It's not always clear wither to use path/pathname, host/hostname,
  *      so this tries to add helpful constraints
  *
- *  @param  {String} url - the url to parse
- *  @param  {Function<Object|undefined>} block - a function that will modify the parsed url, or return a new one
- *  @return {String} the modified and reformatted url
+ *  @param url the url to parse
+ *  @param block a function that will modify the parsed url, or return a new one
  */
 export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatParts | void) {
   const parsed = parseUrl(url, true);
