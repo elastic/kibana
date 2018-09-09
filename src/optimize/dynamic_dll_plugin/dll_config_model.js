@@ -44,8 +44,6 @@ function generateDLL(config) {
     /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
   ];
   const POSTCSS_CONFIG_PATH = require.resolve('../postcss.config');
-  const { Project } = require('../../dev/typescript');
-  const browserProject = new Project(fromRoot('tsconfig.browser.json'));
 
   return {
     entry: dllEntry,
