@@ -74,33 +74,6 @@ function generateDLL(config) {
         {
           resource: [
             {
-              test: /\.tsx?$/,
-              exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
-            },
-            {
-              test: /\.tsx?$/,
-              include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
-            }
-          ],
-          use: {
-            loader: 'ts-loader',
-            options: {
-              transpileOnly: true,
-              experimentalWatchApi: true,
-              onlyCompileBundledFiles: true,
-              configFile: fromRoot('tsconfig.json'),
-              compilerOptions: {
-                ...browserProject.config.compilerOptions,
-                sourceMap: false,
-              }
-            }
-          }
-          ,
-        },
-        {
-          resource: [
-            {
               test: /\.js$/,
               exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
             },
