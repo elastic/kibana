@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
-import { getMlJobUrl, KibanaLink } from '../../../utils/url';
+import { ViewMLJob } from '../../../utils/url';
 import TransactionCharts from '../../shared/charts/TransactionCharts';
 import List from './List';
 import { units, px, fontSizes } from '../../../style/variables';
@@ -75,15 +75,13 @@ class TransactionOverview extends Component {
           <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
-            <KibanaLink
-              pathname={getMlJobUrl(
-                serviceName,
-                transactionType,
-                this.props.location
-              )}
+            <ViewMLJob
+              serviceName={serviceName}
+              transactionType={transactionType}
+              location={this.props.location}
             >
-              View Job
-            </KibanaLink>
+              View job
+            </ViewMLJob>
           </MLText>
         </MLTipContainer>
       ) : null;
