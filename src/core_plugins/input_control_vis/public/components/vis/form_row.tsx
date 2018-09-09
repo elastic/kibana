@@ -18,11 +18,11 @@
  */
 
 import { EuiFormRow, EuiToolTip } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 
 interface FormRowProps {
   disableMsg?: string;
-  children: ReactNode;
+  children: ReactElement<any>;
   controlIndex: number;
   label: string;
   id: string;
@@ -31,7 +31,7 @@ interface FormRowProps {
 export function FormRow(props: FormRowProps) {
   const control = props.children;
   const disabledControl = props.disableMsg ? (
-    <EuiToolTip placement="top" content={props.disableMsg}>
+    <EuiToolTip position="top" content={props.disableMsg}>
       {control}
     </EuiToolTip>
   ) : (

@@ -21,6 +21,8 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { FormRow } from './form_row';
 
+// TODO: remove once EUI is bumped to > 3.8.0
+// @ts-ignore
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
 interface ComboBoxOption {
