@@ -40,7 +40,6 @@ function inPluginNodeModules(checkPath) {
 
 export class DynamicDllPlugin {
   constructor({ uiBundles, log, maxCompilations = 1 }) {
-    this.uiBundles = uiBundles;
     this.log = log || (() => null);
     this.dllCompiler = new DllCompiler(uiBundles, log);
     this.entryPaths = '';
@@ -325,7 +324,7 @@ export class DynamicDllPlugin {
   mustCompileDll() {
     const forceDllCreation = process && process.env && process.env.FORCE_DLL_CREATION;
 
-    return !IS_KIBANA_DISTRIBUTABLE || this.uiBundles.isDevMode() || forceDllCreation;
+    return !IS_KIBANA_DISTRIBUTABLE || forceDllCreation;
   }
 
   async runDLLCompiler(mainCompiler) {
