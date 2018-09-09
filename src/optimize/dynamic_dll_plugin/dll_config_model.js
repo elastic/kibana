@@ -27,6 +27,8 @@ function generateDLL(config) {
   const {
     dllAlias,
     dllNoParseRules,
+    dllPluginProviders,
+    dllPostLoaders,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -41,6 +43,9 @@ function generateDLL(config) {
   const BABEL_EXCLUDE_RE = [
     /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
   ];
+  const POSTCSS_CONFIG_PATH = require.resolve('../postcss.config');
+  const { Project } = require('../../dev/typescript');
+  const browserProject = new Project(fromRoot('tsconfig.browser.json'));
 
   return {
     entry: dllEntry,
@@ -53,7 +58,7 @@ function generateDLL(config) {
     },
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
-      extensions: ['.js', '.json'],
+      extensions: ['.js', '.json', 'ts', 'tsx'],
       mainFields: ['browser', 'browserify', 'main'],
       alias: dllAlias,
       modules: [
@@ -66,6 +71,33 @@ function generateDLL(config) {
     },
     module: {
       rules: [
+        {
+          resource: [
+            {
+              test: /\.tsx?$/,
+              exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
+            },
+            {
+              test: /\.tsx?$/,
+              include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+            }
+          ],
+          use: {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+              experimentalWatchApi: true,
+              onlyCompileBundledFiles: true,
+              configFile: fromRoot('tsconfig.json'),
+              compilerOptions: {
+                ...browserProject.config.compilerOptions,
+                sourceMap: false,
+              }
+            }
+          }
+          ,
+        },
         {
           resource: [
             {
@@ -96,7 +128,41 @@ function generateDLL(config) {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 1,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  path: POSTCSS_CONFIG_PATH,
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.less$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 2,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  path: POSTCSS_CONFIG_PATH,
+                },
+              },
+            },
+            'less-loader'
           ],
         },
         {
@@ -107,6 +173,10 @@ function generateDLL(config) {
           test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
           loader: 'file-loader'
         },
+        dllPostLoaders.map(loader => ({
+          enforce: 'post',
+          ...loader
+        })),
       ],
       noParse: dllNoParseRules,
     },
@@ -118,7 +188,31 @@ function generateDLL(config) {
       }),
       new MiniCssExtractPlugin({
         filename: dllStyleFilename
-      })
+      }),
+      // replace imports for `uiExports/*` modules with a synthetic module
+      // created by create_ui_exports_module.js
+      new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+        // the map of uiExport types to module ids
+        const extensions = this.uiBundles.getAppExtensions();
+
+        // everything following the first / in the request is
+        // treated as a type of appExtension
+        const type = resource.request.slice(resource.request.indexOf('/') + 1);
+
+        resource.request = [
+          // the "val-loader" is used to execute create_ui_exports_module
+          // and use its return value as the source for the module in the
+          // bundle. This allows us to bypass writing to the file system
+          require.resolve('val-loader'),
+          '!',
+          require.resolve('./create_ui_exports_module'),
+          '?',
+          // this JSON is parsed by create_ui_exports_module and determines
+          // what require() calls it will execute within the bundle
+          JSON.stringify({ type, modules: extensions[type] || [] })
+        ].join('');
+      }),
+      ...dllPluginProviders.map(provider => provider(webpack)),
     ],
     performance: {
       // NOTE: we are disabling this as those hints
@@ -133,6 +227,8 @@ function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
   const dllAlias = rawConfig.alias;
   const dllNoParseRules = rawConfig.noParseRules;
+  const dllPluginProviders = rawConfig.pluginProviders;
+  const dllPostLoaders = rawConfig.postLoaders;
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -158,6 +254,8 @@ function extendRawConfig(rawConfig) {
   return {
     dllAlias,
     dllNoParseRules,
+    dllPluginProviders,
+    dllPostLoaders,
     dllContext,
     dllEntry,
     dllOutputPath,
