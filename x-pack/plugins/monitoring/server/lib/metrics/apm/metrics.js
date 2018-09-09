@@ -59,16 +59,6 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B'
   }),
-  apm_mem_total: new ApmMetric({
-    field: 'beats_stats.metrics.beat.memstats.memory_total',
-    label: 'Total Memory',
-    title: 'Memory',
-    description:
-      'Total memory',
-    format: LARGE_BYTES,
-    metricAgg: 'max',
-    units: 'B'
-  }),
   apm_mem_alloc: new ApmMetric({
     field: 'beats_stats.metrics.beat.memstats.memory_alloc',
     label: 'Allocated Memory',
