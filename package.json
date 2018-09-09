@@ -290,7 +290,6 @@
     "husky": "0.8.1",
     "image-diff": "1.6.0",
     "istanbul-instrumenter-loader": "^3.0.1",
-    "istanbul-instrumenter-loader": "3.0.0",
     "jest": "^23.5.0",
     "jest-cli": "^23.5.0",
     "jest-raw-loader": "^1.0.1",
