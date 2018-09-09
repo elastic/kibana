@@ -104,7 +104,6 @@ export async function buildDistributables(options) {
   await run(CreateReadmeTask);
   await run(TranspileScssTask);
   await run(TranspileBabelTask);
-  await run(TranspileTypescriptTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
@@ -113,6 +112,7 @@ export async function buildDistributables(options) {
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
+  await run(TranspileTypescriptTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanExtraFilesFromModulesTask);
