@@ -53,7 +53,7 @@ function generateDLL(config) {
     },
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
-      extensions: ['.js', '.json', 'ts', 'tsx'],
+      extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
       alias: dllAlias,
       modules: [
