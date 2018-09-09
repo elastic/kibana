@@ -37,7 +37,7 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
+        '--env.name=production',
         '--logging.json=false',
 
         ...flags,
