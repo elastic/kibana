@@ -20,7 +20,7 @@ import { isEmpty, capitalize, get, sortBy, last } from 'lodash';
 import StickyTransactionProperties from './StickyTransactionProperties';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
 import Spans from './Spans';
 import DiscoverButton from '../../../shared/DiscoverButton';
@@ -111,7 +111,7 @@ function getCurrentTab(tabs = [], detailTab) {
 
 function getTabs(transactionData) {
   const dynamicProps = Object.keys(transactionData.context || {});
-  return getLevelOneProps(dynamicProps);
+  return getPropertyTabNames(dynamicProps);
 }
 
 function Transaction({ transaction, location, urlParams }) {

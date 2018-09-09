@@ -22,7 +22,7 @@ import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import DiscoverButton from '../../../shared/DiscoverButton';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
 import Stacktrace from '../../../shared/Stacktrace';
 import {
@@ -72,7 +72,7 @@ function getTabs(context, logStackframes) {
   return [
     ...(logStackframes ? [LOG_STACKTRACE_TAB] : []),
     EXC_STACKTRACE_TAB,
-    ...getLevelOneProps(dynamicProps)
+    ...getPropertyTabNames(dynamicProps)
   ];
 }
 
