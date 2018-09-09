@@ -23,16 +23,20 @@ function removeOrphanedOLLayers(olMap, layerList) {
   layersToRemove.forEach(layerIdx => existingMapLayers.removeAt(layerIdx));
 }
 
-const OL_VIEW = new ol.View({
-  center: ol.proj.fromLonLat([0, 0]),
-  zoom: 0
-});
-const OL_MAP = new ol.Map({
-  layers: [],
-  view: OL_VIEW
-});
+
+let OL_MAP = null;
 
 function getOLImplementation() {
+  if (!OL_MAP) {
+    const OL_VIEW = new ol.View({
+      center: ol.proj.fromLonLat([0, 0]),
+      zoom: 0
+    });
+    OL_MAP = new ol.Map({
+      layers: [],
+      view: OL_VIEW
+    });
+  }
   return OL_MAP;
 }
 

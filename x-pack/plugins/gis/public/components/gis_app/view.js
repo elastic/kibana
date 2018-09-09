@@ -16,10 +16,10 @@ const MAP_LIBS = { "OPEN_LAYERS": "OPEN_LAYERS", "MAPBOX_GL": "MAPBOX_GL" };
 const SELECTED_MAPLIB = MAP_LIBS.OPEN_LAYERS;
 
 export function GISApp() {
-  const MapImp = SELECTED_MAPLIB === MAP_LIBS.OPEN_LAYERS ? <OLMapContainer/> : <MBMapContainer/>;
+  const MapImplementation = SELECTED_MAPLIB === MAP_LIBS.OPEN_LAYERS ? <OLMapContainer/> : <MBMapContainer/>;
   return (
     <div className="wrapper">
-      {MapImp}
+      {MapImplementation}
       <LayerControl/>
     </div>
   );
