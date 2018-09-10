@@ -61,10 +61,22 @@ export class PhraseFilterManager extends FilterManager {
       return;
     }
 
-    return kbnFilters
+    const values = kbnFilters
       .map((kbnFilter) => {
         return this._getValueFromFilter(kbnFilter);
       })
+      .filter(value => {
+        if (typeof value === 'undefined' || value == null) {
+          return false;
+        }
+        return true;
+      });
+
+    if (values.length === 0) {
+      return;
+    }
+
+    return values
       .reduce((accumulator, currentValue) => {
         return accumulator.concat(currentValue);
       }, [])

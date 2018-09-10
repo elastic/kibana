@@ -76,7 +76,10 @@ export class RangeFilterManager extends FilterManager {
       range = _.get(kbnFilters[0], ['range', this.fieldName]);
     }
 
-    return fromRange(range);
+    if (range == null) {
+      return;
+    }
 
+    return fromRange(range);
   }
 }
