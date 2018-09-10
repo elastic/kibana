@@ -149,7 +149,7 @@ export interface InfraGroupByTerms {
 }
 
 export interface InfraBucketWithKey {
-  key: string;
+  key: string | number;
   doc_count: number;
 }
 
