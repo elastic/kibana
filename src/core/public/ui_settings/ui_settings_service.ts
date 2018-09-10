@@ -40,9 +40,9 @@ export class UiSettingsService {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
     loadingCount.add(this.uiSettingsApi.getLoadingCount$());
 
-    // TODO: when we have time to refactor the UiSettingsClient and all consumers
-    // we should stop using the legacy format and pick a better one
-    const legacyMetadata = injectedMetadata.getLegacyMetadata();
+    // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
+    const legacyMetadata: any = injectedMetadata.getLegacyMetadata();
+
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
       onUpdateError: error => {
