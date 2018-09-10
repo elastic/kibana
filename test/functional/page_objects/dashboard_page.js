@@ -582,7 +582,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      log.debug('waitForRenderComplete');
+      log.debug(`DashboardPage.waitForRenderComplete`);
       const count = await this.getSharedItemsCount();
       await renderable.waitForRender(parseInt(count));
     }

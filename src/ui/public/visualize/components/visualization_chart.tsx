@@ -44,17 +44,24 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     visData: any;
     container: HTMLElement;
   }>;
-  private renderSubscription: Rx.Subscription;
+  private renderSubscription?: Rx.Subscription;
 
   constructor(props: VisualizationChartProps) {
     super(props);
 
     this.renderSubject = new Rx.Subject();
+    this.setupRenderSubscription();
+  }
+
+  public setupRenderSubscription() {
     const render$ = this.renderSubject.asObservable().pipe(share());
 
     const success$ = render$.pipe(
       tap(() => {
         if (this.chartDiv.current) {
+          if (this.props.visData && this.props.visData.sheet) {
+            console.error('VisualizationChart: dispatchRenderStart');
+          }
           dispatchRenderStart(this.chartDiv.current);
         }
       }),
@@ -72,13 +79,25 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
         vis.size = [container.clientWidth, container.clientHeight];
         const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
-        return this.visualization.render(visData, status);
+
+        if (this.props.visData && this.props.visData.sheet) {
+          console.error(`VisualizationChart: Calling this.visualization.render`);
+        }
+        await this.visualization.render(visData, status);
+        if (this.props.visData && this.props.visData.sheet) {
+          console.error(`VisualizationChart: Returned from this.visualization.render`);
+        }
       })
     );
 
     const requestError$ = render$.pipe(filter(({ vis }) => vis.requestError));
 
     this.renderSubscription = Rx.merge(success$, requestError$).subscribe(() => {
+      if (this.props.visData && this.props.visData.sheet) {
+        console.error(
+          `VisualizationChart: success$ merged, chartDiv.current: ${!this.chartDiv.current}`
+        );
+      }
       if (this.chartDiv.current !== null) {
         dispatchRenderComplete(this.chartDiv.current);
       }
@@ -127,10 +146,16 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
   }
 
   public componentDidUpdate() {
+    if (this.props.visData && this.props.visData.sheet) {
+      console.error('VisualizationChart: componentDidUpdate');
+    }
     this.startRenderVisualization();
   }
 
   public componentWillUnmount() {
+    if (this.props.visData && this.props.visData.sheet) {
+      console.error('VisualizationChart: componentWillUnmount');
+    }
     if (this.renderSubscription) {
       this.renderSubscription.unsubscribe();
     }
@@ -144,6 +169,9 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
   private startRenderVisualization(): void {
     if (this.containerDiv.current && this.chartDiv.current) {
+      if (this.props.visData && this.props.visData.sheet) {
+        console.error('VisualizationChart: this.renderSubject.next');
+      }
       this.renderSubject.next({
         vis: this.props.vis,
         visData: this.props.visData,

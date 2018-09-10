@@ -23,6 +23,7 @@ const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
+const CUSTOMIZE_PANEL_TITLE_INPUT_DATA_TEST_SUBJ = 'customDashboardPanelTitleInput';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -105,9 +106,22 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async isCustomizePanelOpen() {
+      log.debug('isCustomizePanelOpen');
+      return testSubjects.exists(CUSTOMIZE_PANEL_TITLE_INPUT_DATA_TEST_SUBJ);
+    }
+
     async customizePanel(parent) {
+      log.debug('customizePanel');
       await this.openContextMenu(parent);
-      await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+      const customizePanelOpen = await this.isCustomizePanelOpen(parent);
+      if (!customizePanelOpen) {
+        await retry.try(async () => {
+          await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+          const panelOpen = await this.isCustomizePanelOpen();
+          if (!panelOpen) { throw new Error('Customize panel still not open'); }
+        });
+      }
     }
 
     async openInspector(parent) {
@@ -130,12 +144,6 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
-    async customizePanelActionExists(parent) {
-      return parent ?
-        await testSubjects.descendantExists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent) :
-        await testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
-    }
-
     async getPanelHeading(title) {
       return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
     }
@@ -153,7 +161,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      await testSubjects.setValue(CUSTOMIZE_PANEL_TITLE_INPUT_DATA_TEST_SUBJ, customTitle);
     }
 
     async resetCustomPanelTitle(panel) {

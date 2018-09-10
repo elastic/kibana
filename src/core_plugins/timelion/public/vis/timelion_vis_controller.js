@@ -27,8 +27,12 @@ import { uiModules } from 'ui/modules';
 uiModules
   .get('kibana/timelion_vis', ['kibana'])
   .controller('TimelionVisController', function ($scope) {
+    console.error('TimelionVisController');
+
     $scope.$on('timelionChartRendered', event => {
       event.stopPropagation();
+
+      console.error('TimelionVisController: Calling scope.renderComplete');
       $scope.renderComplete();
     });
   });

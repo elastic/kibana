@@ -111,8 +111,8 @@ export function FindProvider({ getService }) {
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
-      log.debug('in findAllByCssSelector: ' + selector);
-      return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
+      log.debug(`find.allByCssSelector(selector: ${selector}, timeout: ${timeout})`);
+      return await this.allByCustom(async remote => await remote.findAllByCssSelector(selector), timeout);
     }
 
     async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {

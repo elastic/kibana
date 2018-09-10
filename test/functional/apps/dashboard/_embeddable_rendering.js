@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
+    await PageObjects.dashboard.waitForRenderComplete();
     await dashboardExpect.pieSliceCount(16);
     await dashboardExpect.seriesElementCount(19);
     await dashboardExpect.dataTableRowCount(5);
@@ -57,6 +58,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   const expectNoDataRenders = async () => {
+    await PageObjects.dashboard.waitForRenderComplete();
     await dashboardExpect.pieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableRowCount(0);

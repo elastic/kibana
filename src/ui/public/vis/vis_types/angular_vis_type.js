@@ -30,9 +30,10 @@ export function AngularVisTypeProvider($compile, $rootScope) {
     }
 
     render(esResponse, status) {
-
+      console.error(`AngularVisController: render (${this.vis.title})`);
       return new Promise((resolve, reject) => {
         const updateScope = () => {
+          console.error(`AngularVisController.updateScope: (${this.vis.title})`);
           this.$scope.vis = this.vis;
           this.$scope.visState = this.vis.getState();
           this.$scope.esResponse = esResponse;

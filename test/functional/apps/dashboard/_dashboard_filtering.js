@@ -25,7 +25,9 @@ import expect from 'expect.js';
  */
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const failureDebugging = getService('failureDebugging');
   const queryBar = getService('queryBar');
+  const log = getService('log');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
@@ -35,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard filtering', async () => {
     before(async () => {
+      await failureDebugging.logBrowserConsole();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
@@ -46,7 +49,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        log.debug('about to wait for first render complete');
+        await failureDebugging.logBrowserConsole();
         await PageObjects.dashboard.waitForRenderComplete();
+        await failureDebugging.logBrowserConsole();
         await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -64,9 +70,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('goal and guages are filtered', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      });
+      // it('correct number of no result found messages', async () => {
+      //   await dashboardExpect.countOfNoResultFoundMessages(5);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -125,9 +131,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      it('goal and guages are filtered', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      });
+      // it('correct number of no result found messages', async () => {
+      //   await dashboardExpect.countOfNoResultFoundMessages(5);
+      // });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -266,9 +272,25 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(1);
       });
 
+      it('Removing filter pills and query unfiters data as expected', async () => {
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        await filterBar.removeFilter('sound.keyword');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboardExpect.pieSliceCount(5);
+
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.header.clickDashboard();
+
+        await dashboardExpect.pieSliceCount(5);
+      });
+
       it('Pie chart linked to saved search filters data', async () => {
         await dashboardAddPanel.addVisualization('Filter Test: animals: linked to search with filter');
-        await dashboardExpect.pieSliceCount(3);
+        await dashboardExpect.pieSliceCount(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -276,7 +298,7 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await dashboardExpect.pieSliceCount(0);
+        await dashboardExpect.pieSliceCount(5);
       });
     });
   });
