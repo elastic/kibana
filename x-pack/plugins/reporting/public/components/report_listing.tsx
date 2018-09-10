@@ -17,7 +17,15 @@ import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
 import { jobQueueClient } from '../lib/job_queue_client';
 
-import { EuiBasicTable, EuiPage, EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface Props {
   xpackInfo: any;
@@ -34,6 +42,7 @@ interface State {
 export class ReportListing extends Component<Props, State> {
   private mounted?: boolean;
   private poller?: any;
+  private isInitialJobsFetch: boolean;
 
   constructor(props: Props) {
     super(props);
@@ -44,6 +53,8 @@ export class ReportListing extends Component<Props, State> {
       jobs: [],
       isLoading: false,
     };
+
+    this.isInitialJobsFetch = true;
   }
 
   public render() {
@@ -138,8 +149,8 @@ export class ReportListing extends Component<Props, State> {
         name: 'Actions',
         actions: [
           {
-            render: (job: any) => {
-              return <div />;
+            render: (record: any) => {
+              return this.renderDownloadButton(record);
             },
           },
         ],
@@ -166,6 +177,30 @@ export class ReportListing extends Component<Props, State> {
     );
   }
 
+  private renderDownloadButton = (record: any) => {
+    if (record.status !== 'completed') {
+      return;
+    }
+
+    const button = (
+      <EuiButtonIcon
+        onClick={() => this.download(record.id)}
+        iconType="importAction"
+        aria-label="Download report"
+      />
+    );
+
+    if (record.max_size_reached) {
+      return (
+        <EuiToolTip position="top" content="Max size reached, contains partial data.">
+          {button}
+        </EuiToolTip>
+      );
+    }
+
+    return button;
+  };
+
   private onTableChange = ({ page }: { page: any }) => {
     const { index: pageIndex } = page;
 
@@ -178,13 +213,17 @@ export class ReportListing extends Component<Props, State> {
   };
 
   private fetchJobs = async () => {
-    this.setState({ isLoading: true, jobs: [] });
+    // avoid page flicker when poller is updating table - only display loading screen on first load
+    if (this.isInitialJobsFetch) {
+      this.setState({ isLoading: true });
+    }
 
     let jobs;
     let total;
     try {
       jobs = await jobQueueClient.list(this.state.page);
       total = await jobQueueClient.total();
+      this.isInitialJobsFetch = false;
     } catch (kfetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
         toastNotifications.addDanger(
@@ -224,6 +263,10 @@ export class ReportListing extends Component<Props, State> {
         }),
       });
     }
+  };
+
+  private download = (jobId: string) => {
+    window.open(`../api/reporting/jobs/download/${jobId}`);
   };
 
   private licenseAllowsToShowThisPage = () => {
