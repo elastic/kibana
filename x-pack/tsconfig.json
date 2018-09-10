@@ -1,8 +1,9 @@
 {
-  "extends": "../tsconfig.json",
-  "include": [
-    "common/**/*",
-    "server/**/*",
-    "plugins/**/*"
-  ]
+    "extends": "../tsconfig.json",
+    "include": [
+        "common/**/*",
+        "server/**/*",
+        "plugins/**/*",
+        "test/**/*",
+    ]
 }

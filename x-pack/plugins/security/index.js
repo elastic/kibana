@@ -16,7 +16,6 @@ import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
-import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
@@ -161,7 +160,6 @@ export const security = (kibana) => new kibana.Plugin({
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
-    initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
 

@@ -27,6 +27,7 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -120,16 +121,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       spaces,
     } = $route.current.locals;
 
-    // todo: don't hard-code this...
-    const kibanaApplicationPrivilege = [{ name: 'all' }, { name: 'read' } ];
-
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('editRoleReactRoot');
 
       render(<EditRolePage
         runAsUsers={users}
         role={role}
-        kibanaAppPrivileges={kibanaApplicationPrivilege}
+        kibanaAppPrivileges={KibanaAppPrivileges}
         indexPatterns={indexPatterns}
         rbacEnabled={true}
         rbacApplication={rbacApplication}

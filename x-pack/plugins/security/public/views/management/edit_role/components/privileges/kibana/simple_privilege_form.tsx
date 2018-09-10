@@ -10,7 +10,6 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import { KibanaApplicationPrivilege } from '../../../../../../../common/model/kibana_application_privilege';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -19,7 +18,7 @@ import { copyRole } from '../../../lib/copy_role';
 import { PrivilegeSelector } from './privilege_selector';
 
 interface Props {
-  kibanaAppPrivileges: KibanaApplicationPrivilege[];
+  kibanaAppPrivileges: KibanaPrivilege[];
   role: Role;
   onChange: (role: Role) => void;
   editable: boolean;
@@ -30,7 +29,6 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
     const { kibanaAppPrivileges, role } = this.props;
 
     const assignedPrivileges = role.kibana;
-    const availablePrivileges = kibanaAppPrivileges.map(privilege => privilege.name);
 
     const kibanaPrivilege: KibanaPrivilege =
       assignedPrivileges.global.length > 0
@@ -45,7 +43,7 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
           <EuiFormRow hasEmptyLabelSpace>
             <PrivilegeSelector
               data-test-subj={'kibanaPrivilege'}
-              availablePrivileges={availablePrivileges}
+              availablePrivileges={kibanaAppPrivileges}
               value={kibanaPrivilege}
               disabled={isReservedRole(role)}
               allowNone={true}

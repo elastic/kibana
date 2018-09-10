@@ -21,6 +21,7 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
     const checkPrivilegesAtResources = async (resources, privilegeOrPrivileges) => {
       const privileges = Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
+
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{

@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { KibanaApplicationPrivilege } from '../../../../../../../common/model/kibana_application_privilege';
+import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
@@ -18,7 +18,7 @@ interface Props {
   spacesEnabled: boolean;
   spaces?: Space[];
   editable: boolean;
-  kibanaAppPrivileges: KibanaApplicationPrivilege[];
+  kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
   validator: RoleValidator;
 }

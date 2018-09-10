@@ -38,14 +38,7 @@ const buildProps = (customProps: any = {}) => {
       },
     ],
     editable: true,
-    kibanaAppPrivileges: [
-      {
-        name: 'all',
-      },
-      {
-        name: 'read',
-      },
-    ],
+    kibanaAppPrivileges: ['all', 'read'],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     ...customProps,
