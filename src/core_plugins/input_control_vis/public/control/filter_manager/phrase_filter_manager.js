@@ -65,12 +65,7 @@ export class PhraseFilterManager extends FilterManager {
       .map((kbnFilter) => {
         return this._getValueFromFilter(kbnFilter);
       })
-      .filter(value => {
-        if (typeof value === 'undefined' || value == null) {
-          return false;
-        }
-        return true;
-      });
+      .filter(value => value != null);
 
     if (values.length === 0) {
       return;

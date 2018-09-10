@@ -69,14 +69,14 @@ export class RangeFilterManager extends FilterManager {
       return;
     }
 
-    let range = null;
+    let range;
     if (_.has(kbnFilters[0], 'script')) {
       range = _.get(kbnFilters[0], 'script.script.params');
     } else {
       range = _.get(kbnFilters[0], ['range', this.fieldName]);
     }
 
-    if (range == null) {
+    if (!range) {
       return;
     }
 
