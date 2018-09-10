@@ -11,6 +11,8 @@ import React, {
 
 import {
   EuiHorizontalRule,
+  EuiTabbedContent,
+
 } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
@@ -32,6 +34,15 @@ export class ResultsView extends Component {
 
     console.log(results);
 
+    const tabs = [{
+      id: 'file-stats',
+      name: 'File stats',
+      content: <FileStats
+        results={results}
+      />,
+    }
+    ];
+
     return (
       <div className="results">
         <FileContents
@@ -48,8 +59,11 @@ export class ResultsView extends Component {
 
         <EuiHorizontalRule margin="l" />
 
-        <FileStats
-          results={results}
+
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          onTabClick={() => { }}
         />
 
       </div>

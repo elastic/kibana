@@ -9,14 +9,17 @@ import React, {
   Component,
 } from 'react';
 
-import {
-  EuiDescriptionList,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+// import {
+//   EuiDescriptionList,
+//   EuiTitle,
+//   EuiSpacer,
+// } from '@elastic/eui';
+
+import { FieldStatsCard } from './field_stats_card';
 
 export class FileStats extends Component {
   constructor(props) {
+    super(props);
     super(props);
 
     this.fields = createFields(this.props.results);
@@ -25,47 +28,26 @@ export class FileStats extends Component {
 
   render() {
     return (
-      <React.Fragment>
+      <div className="field-stats">
         {
           this.fields.map(f => (
-            <FieldStats
+            <FieldStatsCard
               field={f}
               key={f.name}
             />
           ))
         }
-      </React.Fragment>
+      </div>
     );
   }
-}
-
-function FieldStats({ field }) {
-  const items = createDisplayItems(field);
-
-  return (
-    <React.Fragment>
-      <div className="field">
-        <EuiTitle size="s">
-          <h3><span style={{ fontWeight: 600 }}>{field.name}</span> ({field.percent}%)</h3>
-        </EuiTitle>
-
-        <EuiDescriptionList
-          type="column"
-          listItems={items}
-          style={{ maxWidth: '300px' }}
-        />
-      </div>
-      <EuiSpacer size="s" />
-    </React.Fragment>
-  );
 }
 
 function createFields(results) {
   const { mappings, field_stats: fieldStats } = results;
   let fields = [];
 
-  if (results.input_fields && results.input_fields.length) {
-    fields = results.input_fields.map((fName) => {
+  if (mappings && fieldStats) {
+    fields = Object.keys(fieldStats).map((fName) => {
       const field = { name: fName };
       const f  = fieldStats[fName];
       const m  = mappings[fName];
@@ -85,64 +67,6 @@ function createFields(results) {
 
       return field;
     });
-    return fields;
   }
-}
-
-function createDisplayItems(field) {
-  const items = [];
-  if (field.type) {
-    items.push(
-      {
-        title: 'Type',
-        description: field.type,
-      }
-    );
-  }
-
-  if (field.cardinality) {
-    items.push(
-      {
-        title: 'Distinct count',
-        description: field.cardinality,
-      }
-    );
-  }
-
-  if (field.min_value) {
-    items.push(
-      {
-        title: 'Min',
-        description: field.min_value,
-      }
-    );
-  }
-
-  if (field.max_value) {
-    items.push(
-      {
-        title: 'Max',
-        description: field.max_value,
-      }
-    );
-  }
-
-  if (field.mean_value) {
-    items.push(
-      {
-        title: 'Mean',
-        description: field.mean_value,
-      }
-    );
-  }
-
-  if (field.median_value) {
-    items.push(
-      {
-        title: 'Median',
-        description: field.median_value,
-      }
-    );
-  }
-  return items;
+  return fields;
 }

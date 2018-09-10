@@ -1,0 +1,88 @@
+.card-container {
+  display: inline-grid;
+  padding: 0px 10px 10px 0px;
+}
+
+.ml-field-data-card {
+  width: 360px;
+  height: 400px;
+
+  .stats {
+    padding: 10px 10px 0px 10px;
+    text-align: center;
+  }
+
+  .stat {
+    padding-bottom: 6px;
+  }
+  .stat.heading {
+    padding-bottom: 0px;
+  }
+
+  .stat.min, .stat.max, .stat.median {
+    width: 30%;
+    display: inline-block;
+  }
+
+  .card-contents {
+    height: 370px;
+    border-color: #d9d9d9;
+    border-style: solid;
+    border-width: 0px 1px 1px 1px;
+    border-radius: 0px 0px 5px 5px;
+    overflow: hidden;
+    line-height: 21px;
+  }
+
+  .top-value {
+    height: 21px;
+    font-size: 13px;
+  }
+  .top-value .field-label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .top-value .count-label {
+    display: inline-block;
+    width: 70px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-value .top-value-bar-holder {
+    display: inline-block;
+    width: 160px;
+  }
+  .top-value .top-value-bar {
+    height: 15px;
+    min-width: 3px;
+  }
+}
+
+.ml-field-title-bar {
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 5px 5px 0px 0px;
+  padding: 5px 6px;
+
+  .field-type-icon {
+    vertical-align: middle;
+    padding-right: 4px;
+    display: inline-block;
+  }
+
+  .field-name {
+    vertical-align: middle;
+    padding-right: 8px;
+    max-width: 290px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
