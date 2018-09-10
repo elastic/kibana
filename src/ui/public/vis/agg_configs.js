@@ -89,11 +89,19 @@ class AggConfigs extends IndexedArray {
 
   setTimeRange(timeRange) {
     this.timeRange = timeRange;
-    this.forEach(agg => {
+
+    const updateAggTimeRange = (agg) => {
+      _.each(agg.params, param => {
+        if (param instanceof AggConfig) {
+          updateAggTimeRange(param);
+        }
+      });
       if (agg.type.name === 'date_histogram') {
         agg.params.timeRange = timeRange;
       }
-    });
+    };
+
+    this.forEach(updateAggTimeRange);
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
