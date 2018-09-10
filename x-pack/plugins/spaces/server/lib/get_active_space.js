@@ -8,13 +8,13 @@ import Boom from 'boom';
 import { wrapError } from './errors';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
-export async function getActiveSpace(savedObjectsClient, requestBasePath, serverBasePath) {
+export async function getActiveSpace(spacesClient, requestBasePath, serverBasePath) {
   const spaceId = getSpaceIdFromPath(requestBasePath, serverBasePath);
 
   let space;
 
   try {
-    space = await getSpaceById(savedObjectsClient, spaceId);
+    space = spacesClient.get(spaceId);
   }
   catch (e) {
     throw wrapError(e);
@@ -26,12 +26,5 @@ export async function getActiveSpace(savedObjectsClient, requestBasePath, server
     );
   }
 
-  return {
-    id: space.id,
-    ...space.attributes
-  };
-}
-
-async function getSpaceById(savedObjectsClient, spaceId) {
-  return savedObjectsClient.get('space', spaceId);
+  return space;
 }
