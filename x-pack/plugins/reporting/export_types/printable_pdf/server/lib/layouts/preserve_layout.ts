@@ -7,6 +7,7 @@ import path from 'path';
 import { Size } from '../../../../../types';
 import { Layout, PageSizeParams } from './layout';
 
+// We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
 
 export class PreserveLayout extends Layout {

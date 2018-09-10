@@ -21,11 +21,11 @@ import React from 'react';
 import { openFlyout } from 'ui/flyout';
 
 import {
-  DashboardPanelAction,
-  DashboardPanelActionsRegistryProvider,
-} from 'ui/dashboard_panel_actions';
+  ContextMenuAction,
+  ContextMenuActionsRegistryProvider,
+} from 'ui/embeddable';
 
-class SamplePanelAction extends DashboardPanelAction {
+class SamplePanelAction extends ContextMenuAction {
   constructor() {
     super({
       displayName: 'Sample Panel Action',
@@ -52,4 +52,4 @@ class SamplePanelAction extends DashboardPanelAction {
   }
 }
 
-DashboardPanelActionsRegistryProvider.register(() => new SamplePanelAction());
+ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());
