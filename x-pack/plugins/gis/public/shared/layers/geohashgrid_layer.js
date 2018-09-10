@@ -59,6 +59,71 @@ export class GeohashGridLayer extends ALayer {
     return [HeatmapStyle];
   }
 
+  syncLayerWithMB(mbMap) {
+
+    const mbSource = mbMap.getSource(this.getId());
+    const heatmapLayerId = this.getId() + '_heatmap';
+
+    if (!mbSource) {
+      mbMap.addSource(this.getId(), {
+        type: 'geojson',
+        data: { 'type': 'FeatureCollection', 'features': [] }
+      });
+
+
+      mbMap.addLayer({
+        id: heatmapLayerId,
+        type: 'heatmap',
+        source: this.getId(),
+        paint: {//needs tweaking
+          "heatmap-radius": 16,
+          "heatmap-weight": {
+            "type": "identity",
+            "property": "__kbn_heatmap_weight__"
+          }
+        }
+      });
+    }
+
+    //todo: similar problem as OL here. keeping track of data via MB source directly
+    const mbSourceAfter = mbMap.getSource(this.getId());
+    if (!this._descriptor.data) {
+      mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
+      return;
+    }
+
+    if (this._descriptor.data !== mbSourceAfter._data) {
+      let max = 0;
+      for (let i = 0; i < this._descriptor.data.features.length; i++) {
+        max = Math.max(this._descriptor.data.features[i].properties.doc_count, max);
+      }
+      for (let i = 0; i < this._descriptor.data.features.length; i++) {
+        this._descriptor.data.features[i].properties.__kbn_heatmap_weight__ = this._descriptor.data.features[i].properties.doc_count / max;
+      }
+      mbSourceAfter.setData(this._descriptor.data);
+    }
+
+    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
+  }
+
+
+  isLayerLoading() {
+    return !!this._descriptor.dataDirty;
+  }
+
+  async syncDataToMapState(mapState, requestToken, dispatch) {
+    const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
+    if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
+      const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
+      const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
+      if (samePrecision && isContained) {
+        return;
+      }
+    }
+    return this._fetchNewData(mapState, requestToken, targetPrecision, dispatch);
+  }
+
   _createCorrespondingOLLayer() {
     const vectorModel = new ol.source.Vector({});
     const placeHolderLayer = new ol.layer.Heatmap({
@@ -124,20 +189,4 @@ export class GeohashGridLayer extends ALayer {
     dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
-  isLayerLoading() {
-    return !!this._descriptor.dataDirty;
-  }
-
-  async syncDataToMapState(mapState, requestToken, dispatch) {
-    console.log('syncdata to map state', arguments);
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
-    if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
-      const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
-      const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
-      if (samePrecision && isContained) {
-        return;
-      }
-    }
-    return this._fetchNewData(mapState, requestToken, targetPrecision, dispatch);
-  }
 }
