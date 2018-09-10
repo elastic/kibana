@@ -46,7 +46,7 @@
       type="text"
       readonly
       data-test-subj="reportGenerationUrl"
-      value="{{ exportConfig.absoluteUrl || ('xpack.reporting.exportConfig.generationUrl.loadingPlaceholder' | i18n: { defaultMessage: 'Loading...' }) }}"
+      value="{{ exportConfig.absoluteUrl }}"
       ng-click="updateUrl()"
     />
   </div>

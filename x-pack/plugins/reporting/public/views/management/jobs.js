@@ -29,7 +29,7 @@ function mapJobs(jobs) {
       completed_at: job._source.completed_at,
       status: job._source.status,
       content_type: job._source.output ? job._source.output.content_type : false,
-      max_size_reached: job._source.output ? job._source.output.max_size_reached : false
+      max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
     };
   });
 }
@@ -62,7 +62,14 @@ routes.when('/management/kibana/reporting', {
         .then((jobs) => {
           return reportingJobQueue.total()
             .then((total) => {
-              const mappedJobs = mapJobs(jobs);
+              const downloadReportButtonTooltip = i18n('xpack.reporting.views.management.jobs.downloadReportTooltip',
+                { defaultMessage: 'Max size reached, contains partial data.' });
+              const mappedJobs = mapJobs(jobs).map(job => {
+                return {
+                  ...job,
+                  download_button_tooltip: job.max_size_reached ? downloadReportButtonTooltip : null
+                };
+              });
               return {
                 jobs: mappedJobs,
                 total: total,

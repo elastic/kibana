@@ -17,7 +17,7 @@ import url from 'url';
 
 const module = uiModules.get('xpack/reporting');
 
-module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportingExportTypes, $location, $compile) => {
+module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportingExportTypes, $location, $compile, i18n) => {
   const createAbsoluteUrl = relativePath => {
     return url.resolve($location.absUrl(), relativePath);
   };
@@ -56,7 +56,8 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
       $scope.updateUrl = (options) => {
         return $scope.getRelativePath(options)
           .then(relativePath => {
-            $scope.exportConfig.absoluteUrl = createAbsoluteUrl(relativePath);
+            $scope.exportConfig.absoluteUrl = createAbsoluteUrl(relativePath)
+              || i18n('xpack.reporting.exportConfig.generationUrl.loadingPlaceholder', { defaultMessage: 'Loading...' });
           });
       };
 
