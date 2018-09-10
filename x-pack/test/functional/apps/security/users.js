@@ -13,8 +13,6 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
 
   describe('users', function () {
-    const cloud = config.get('servers.elasticsearch.hostname').includes('found');
-
     before(async () => {
 
       log.debug('users');
@@ -26,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
-      if (!cloud) {
+      if (config.get('servers.elasticsearch.hostname') === 'localhost') {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
         expect(users.kibana.roles).to.eql(['kibana_system']);

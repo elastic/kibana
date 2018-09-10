@@ -6,7 +6,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring app', () => {
-
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
     loadTestFile(require.resolve('./cluster/alerts'));

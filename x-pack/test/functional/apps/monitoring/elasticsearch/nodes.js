@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should have a nodes table with correct rows with default sorting @skipcloud', async () => {
+      it('should have a nodes table with correct rows with default sorting', async () => {
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(3);
 
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should sort by cpu @skipcloud', async () => {
+      it('should sort by cpu', async () => {
         await nodesList.clickCpuCol();
         await nodesList.clickCpuCol();
 
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should sort by load average @skipcloud', async () => {
+      it('should sort by load average', async () => {
         await nodesList.clickLoadCol();
         await nodesList.clickLoadCol();
 
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should sort by memory @skipcloud', async () => {
+      it('should sort by memory', async () => {
         await nodesList.clickMemoryCol();
         await nodesList.clickMemoryCol();
 
