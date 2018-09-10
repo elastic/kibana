@@ -59,7 +59,7 @@ module.service(`config`, function ($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = uiSettings.subscribe(({ key, newValue, oldValue }) => {
+  const subscription = uiSettings.getUpdate$().subscribe(({ key, newValue, oldValue }) => {
     const emit = () => {
       $rootScope.$broadcast('change:config',        newValue, oldValue, key, this);
       $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);

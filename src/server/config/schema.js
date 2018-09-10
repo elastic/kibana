@@ -186,7 +186,7 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    useUTC: Joi.boolean().default(true),
+    timezone: Joi.string().allow(false).default('UTC')
   }).default(),
 
   ops: Joi.object({

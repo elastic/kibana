@@ -17,10 +17,10 @@ import {
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import { isEmpty, capitalize, get, sortBy, last } from 'lodash';
 
-import { ContextProperties } from '../../../shared/ContextProperties';
+import StickyTransactionProperties from './StickyTransactionProperties';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
 import Spans from './Spans';
 import DiscoverButton from '../../../shared/DiscoverButton';
@@ -28,12 +28,9 @@ import {
   TRANSACTION_ID,
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
-  TRANSACTION_DURATION,
-  TRANSACTION_RESULT,
-  USER_ID
+  TRANSACTION_DURATION
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
-import { asTime } from '../../../../utils/formatters';
 import EmptyMessage from '../../../shared/EmptyMessage';
 
 const Container = styled.div`
@@ -114,7 +111,7 @@ function getCurrentTab(tabs = [], detailTab) {
 
 function getTabs(transactionData) {
   const dynamicProps = Object.keys(transactionData.context || {});
-  return getLevelOneProps(dynamicProps);
+  return getPropertyTabNames(dynamicProps);
 }
 
 function Transaction({ transaction, location, urlParams }) {
@@ -128,27 +125,6 @@ function Transaction({ transaction, location, urlParams }) {
       />
     );
   }
-
-  const timestamp = get(transaction, '@timestamp');
-  const url = get(transaction, 'context.request.url.full', 'N/A');
-  const duration = get(transaction, TRANSACTION_DURATION);
-  const stickyProperties = [
-    {
-      label: 'Duration',
-      fieldName: TRANSACTION_DURATION,
-      val: duration ? asTime(duration) : 'N/A'
-    },
-    {
-      label: 'Result',
-      fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, 'N/A')
-    },
-    {
-      label: 'User ID',
-      fieldName: USER_ID,
-      val: get(transaction, USER_ID, 'N/A')
-    }
-  ];
 
   const agentName = get(transaction, SERVICE_AGENT_NAME);
   const tabs = getTabs(transaction);
@@ -181,11 +157,7 @@ function Transaction({ transaction, location, urlParams }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <ContextProperties
-        timestamp={timestamp}
-        url={url}
-        stickyProperties={stickyProperties}
-      />
+      <StickyTransactionProperties transaction={transaction} />
 
       <TabContainer>
         {[DEFAULT_TAB, ...tabs].map(key => {

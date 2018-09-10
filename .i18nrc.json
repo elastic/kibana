@@ -1,10 +1,10 @@
 {
   "paths": {
-    "kbn": "src/core_plugins/kibana",
-    "common.server": "src/server",
     "common.ui": "src/ui",
-    "xpack.idxMgmt": "xpack/plugins/index_management",
-    "inputControl":"src/core_plugins/input_control_vis"
+    "inputControl":"src/core_plugins/input_control_vis",
+    "kbn": "src/core_plugins/kibana",
+    "statusPage": "src/core_plugins/status_page",
+    "xpack.idxMgmt": "x-pack/plugins/index_management"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

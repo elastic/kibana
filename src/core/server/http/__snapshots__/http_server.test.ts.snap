@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`returns server and connection options on start 1`] = `
+Object {
+  "host": "127.0.0.1",
+  "port": 12345,
+  "routes": Object {
+    "cors": undefined,
+    "payload": Object {
+      "maxBytes": 1024,
+    },
+    "validate": Object {
+      "options": Object {
+        "abortEarly": false,
+      },
+    },
+  },
+  "state": Object {
+    "strictHeader": false,
+  },
+}
+`;

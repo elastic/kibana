@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`fails with 400 if payload size is larger than default and route config allows 1`] = `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Payload content length greater than maximum allowed: 200\\"}"`;
