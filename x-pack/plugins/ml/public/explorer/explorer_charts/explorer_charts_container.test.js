@@ -21,6 +21,12 @@ jest.mock('../../services/field_format_service', () => ({
     getFieldFormat: jest.fn()
   }
 }));
+jest.mock('ui/chrome', () => ({
+  getBasePath: (path) => path,
+  getUiSettingsClient: () => ({
+    get: () => null
+  }),
+}));
 
 import { shallow } from 'enzyme';
 import React from 'react';

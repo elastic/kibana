@@ -39,7 +39,7 @@ exports[`TelemetryForm renders as expected 1`] = `
         setting={
           Object {
             "defVal": false,
-            "description": <UNDEFINED>
+            "description": <React.Fragment>
               <p>
                 Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
               </p>
@@ -62,7 +62,7 @@ exports[`TelemetryForm renders as expected 1`] = `
                   Read our usage data privacy statement
                 </EuiLink>
               </p>
-            </UNDEFINED>,
+            </React.Fragment>,
             "type": "boolean",
             "value": false,
           }
