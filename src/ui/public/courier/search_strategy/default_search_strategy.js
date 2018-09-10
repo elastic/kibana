@@ -57,7 +57,7 @@ async function serializeAllFetchParams(fetchParams, searchRequests, serializeFet
 export const defaultSearchStrategy = {
   id: 'default',
 
-  search: async ({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests }) => {
+  search: async ({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests = 0 }) => {
     // Flatten the searchSource within each searchRequest to get the fetch params,
     // e.g. body, filters, index pattern, query.
     const allFetchParams = await getAllFetchParams(searchRequests, Promise);
