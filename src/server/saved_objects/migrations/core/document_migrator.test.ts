@@ -24,13 +24,54 @@ describe('DocumentMigrator', () => {
   it('validates the migration definition', () => {
     const invalidDefinition: any = {
       kibanaVersion: '3.2.3',
+      migrations: 'hello',
+      validateDoc: _.noop,
+    };
+    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+      /Migration definition should be an object/i
+    );
+  });
+
+  it('validates individual migration definitions', () => {
+    const invalidDefinition: any = {
+      kibanaVersion: '3.2.3',
       migrations: {
         foo: _.noop,
       },
       validateDoc: _.noop,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-      /Migration for type foo should be an object/
+      /Migration for type foo should be an object/i
+    );
+  });
+
+  it('validates individual migration semvers', () => {
+    const invalidDefinition: any = {
+      kibanaVersion: '3.2.3',
+      migrations: {
+        foo: {
+          bar: _.noop,
+        },
+      },
+      validateDoc: _.noop,
+    };
+    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+      /Expected all properties to be semvers/i
+    );
+  });
+
+  it('validates the migration function', () => {
+    const invalidDefinition: any = {
+      kibanaVersion: '3.2.3',
+      migrations: {
+        foo: {
+          '1.2.3': 23,
+        },
+      },
+      validateDoc: _.noop,
+    };
+    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
+      /expected a function, but got 23/i
     );
   });
 

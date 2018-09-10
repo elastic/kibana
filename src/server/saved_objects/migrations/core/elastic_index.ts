@@ -209,11 +209,13 @@ export async function deleteIndex(callCluster: CallCluster, index: string) {
 }
 
 /**
- * Converts the specified index to an alias.
+ * Converts an index to an alias. The `alias` parameter is the desired alias name which currently
+ * is a concrete index. This function will reindex `alias` into a new index, delete the `alias`
+ * index, and then create an alias `alias` that points to the new index.
  *
- * @param {CallCluster} callCluster
- * @param {FullIndexInfo} info
- * @param {string} alias
+ * @param {CallCluster} callCluster - The connection to ElasticSearch
+ * @param {FullIndexInfo} info - Information about the mappings and name of the new index
+ * @param {string} alias - The name of the index being converted to an alias
  */
 export async function convertToAlias(callCluster: CallCluster, info: FullIndexInfo, alias: string) {
   await callCluster('indices.create', {

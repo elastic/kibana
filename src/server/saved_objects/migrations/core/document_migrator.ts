@@ -178,30 +178,30 @@ function validateMigrationDefinition(migrations: MigrationDefinition) {
     }
   }
 
-  function assertValidSemver(semver: string, type: string) {
-    if (!/\d+.\d+\.\d+/.test(semver)) {
+  function assertValidSemver(version: string, type: string) {
+    if (!Semver.valid(version)) {
       throw new Error(
-        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${semver}.`
+        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${version}.`
       );
     }
   }
 
-  function assertValidTransform(fn: any, semver: string, type: string) {
+  function assertValidTransform(fn: any, version: string, type: string) {
     if (typeof fn !== 'function') {
-      throw new Error(`Invalid migration ${type}.${semver}: expected a function, but got ${fn}.`);
+      throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
     }
   }
 
   assertObject(migrations, 'Migration definition should be an object.');
 
-  Object.entries(migrations).forEach(([type, semvers]: any) => {
+  Object.entries(migrations).forEach(([type, versions]: any) => {
     assertObject(
-      semvers,
+      versions,
       `Migration for type ${type} should be an object like { '2.0.0': (doc) => doc }.`
     );
-    Object.entries(semvers).forEach(([semver, fn]) => {
-      assertValidSemver(semver, type);
-      assertValidTransform(fn, semver, type);
+    Object.entries(versions).forEach(([version, fn]) => {
+      assertValidSemver(version, type);
+      assertValidTransform(fn, version, type);
     });
   });
 }
