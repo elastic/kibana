@@ -18,8 +18,8 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
     getTest,
     createExpectResults,
     createExpectNotFoundResult,
-    createExpectLegacyForbidden,
     createExpectRbacForbidden,
+    createExpectLegacyForbidden,
     nonExistantSpaceId,
   } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 

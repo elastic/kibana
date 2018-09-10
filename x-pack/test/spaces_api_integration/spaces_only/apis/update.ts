@@ -13,7 +13,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { updateTest, createExpectResult, createExpectNotFoundResult } = updateTestSuiteFactory(
+  const { updateTest, expectAlreadyExistsResult, expectNewSpaceNotFound } = updateTestSuiteFactory(
     esArchiver,
     supertestWithoutAuth
   );
@@ -39,12 +39,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               _reserved: true,
             },
             statusCode: 200,
-            response: createExpectResult({
-              name: 'space 1',
-              id: 'space_1',
-              description: 'a description',
-              color: '#5c5959',
-            }),
+            response: expectAlreadyExistsResult,
           },
           newSpace: {
             space: {
@@ -54,7 +49,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               color: '#5c5959',
             },
             statusCode: 404,
-            response: createExpectNotFoundResult('marketing'),
+            response: expectNewSpaceNotFound,
           },
         },
       });

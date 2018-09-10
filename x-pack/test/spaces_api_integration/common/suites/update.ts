@@ -5,12 +5,14 @@
  */
 import expect from 'expect.js';
 import { SuperTest } from 'supertest';
+import { Space } from '../../../../plugins/spaces/common/model/space';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;
   response: (resp: any) => void;
+  space?: Space;
 }
 
 interface UpdateTests {

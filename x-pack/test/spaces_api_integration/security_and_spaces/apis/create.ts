@@ -16,8 +16,8 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
   const {
     createTest,
-    expectReservedSpecifiedResult,
     expectNewSpaceResult,
+    expectReservedSpecifiedResult,
     expectConflictResponse,
     expectRbacForbiddenResponse,
     createExpectLegacyForbiddenResponse,
