@@ -10,21 +10,21 @@ import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPage, EuiPageBody } from '@elas
 import { Status } from './status';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
-  const metricsToShow = [
-    metrics.apm_cpu,
-    metrics.apm_os_load,
-
-    metrics.apm_memory,
-    metrics.apm_requests,
-
-    metrics.apm_incoming_requests_size,
-    metrics.apm_transformations,
+  const seriesToShow = [
+    metrics.apm_responses_valid,
+    metrics.apm_responses_errors,
 
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
-    metrics.apm_responses_valid,
-    metrics.apm_responses_errors,
+    metrics.apm_requests,
+    metrics.apm_transformations,
+
+
+    metrics.apm_cpu,
+    metrics.apm_memory,
+
+    metrics.apm_os_load,
   ];
 
   return (
@@ -33,7 +33,7 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
           <EuiFlexGrid columns={2} gutterSize="none">
-            {metricsToShow.map((metric, index) => (
+            {seriesToShow.map((metric, index) => (
               <EuiFlexItem key={index} style={{ width: '50%' }}>
                 <MonitoringTimeseriesContainer
                   series={metric}
