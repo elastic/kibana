@@ -450,16 +450,20 @@ export class JobCreateUi extends Component {
   }
 
   renderNavigation() {
-    const { nextStepId, previousStepId } = this.state;
+    const { nextStepId, previousStepId, areStepErrorsVisible } = this.state;
     const { isSaving } = this.props;
+    const hasNextStep = nextStepId != null;
+    // Users can click the next step button as long as validation hasn't executed.
+    const canGoToNextStep = hasNextStep && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation
         isSaving={isSaving}
-        hasNextStep={nextStepId != null}
+        hasNextStep={hasNextStep}
         hasPreviousStep={previousStepId != null}
         goToNextStep={this.goToNextStep}
         goToPreviousStep={this.goToPreviousStep}
+        canGoToNextStep={canGoToNextStep}
         save={this.save}
       />
     );
