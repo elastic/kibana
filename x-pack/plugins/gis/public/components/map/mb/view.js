@@ -11,9 +11,11 @@ export class MBMapContainer extends React.Component {
   _getMapState() {
     const zoom = this.props.mbMap.getZoom();
     const center = this.props.mbMap.getCenter();
+    const bounds = this.props.mbMap.getBounds();
     const mapState =  {
       zoom: zoom,
-      center: [center.lng, center.lat]
+      center: [center.lng, center.lat],
+      extent: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
     };
     return mapState;
   }
@@ -24,6 +26,12 @@ export class MBMapContainer extends React.Component {
     container.style.height = '100%';
     this.refs.mapContainer.appendChild(container);
     this.props.mbMap.resize();
+
+
+    this.props.mbMap.on('moveend', () => {
+      const newMapState = this._getMapState();
+      this.props.extentChanged(newMapState);
+    });
 
     const newMapState = this._getMapState();
     this.props.initialize(newMapState);

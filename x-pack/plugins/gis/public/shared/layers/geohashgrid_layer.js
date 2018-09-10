@@ -129,6 +129,7 @@ export class GeohashGridLayer extends ALayer {
   }
 
   async syncDataToMapState(mapState, requestToken, dispatch) {
+    console.log('syncdata to map state', arguments);
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);

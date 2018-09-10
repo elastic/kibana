@@ -17,8 +17,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    extentChanged: () => {
-      console.warn('etentChanged not implemented');
+    extentChanged: (e) => {
+      dispatch(mapExtentChanged(e));
     },
     initialize: (e) => {
       dispatch(mapExtentChanged(e));
@@ -26,6 +26,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedKibanaMap = connect(mapStateToProps, mapDispatchToProps, null,
-  { withRef: true })(MBMapContainer);
+const connectedKibanaMap = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(MBMapContainer);
 export { connectedKibanaMap as MBMapContainer };
