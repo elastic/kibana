@@ -484,7 +484,12 @@ module.controller('MlExplorerController', function (
     navListener();
   });
 
+  // track the last request time to be able to ignore out of date requests
+  // and avoid race conditions ending up with the wrong charts.
+  let lastRequestTime = null;
   function loadDataForCharts(jobIds, influencers, earliestMs, latestMs) {
+    const requestTime = new Date().getTime();
+    lastRequestTime = requestTime;
     // Loads the data used to populate the anomaly charts and the Top Influencers List.
     if (influencers.length === 0) {
       getTopInfluencers(jobIds, earliestMs, latestMs);
@@ -495,6 +500,11 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
+        // Ignore this response if it's returned by an out of date request.
+        if (requestTime < lastRequestTime) {
+          return;
+        }
+
         if ($scope.cellData !== undefined && _.keys($scope.cellData).length > 0) {
           $scope.anomalyChartRecords = resp.records;
           console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);

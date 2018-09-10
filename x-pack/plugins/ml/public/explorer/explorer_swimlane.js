@@ -42,7 +42,7 @@ export class ExplorerSwimlane extends React.Component {
 
   componentWillUnmount() {
     const { mlExplorerDashboardService } = this.props;
-    mlExplorerDashboardService.dragSelect.unwatch(this.dragSelectListener.bind(this));
+    mlExplorerDashboardService.dragSelect.unwatch(this.boundDragSelectListener);
 
   }
   componentDidMount() {
@@ -54,7 +54,11 @@ export class ExplorerSwimlane extends React.Component {
       element.addClass('ml-hide-range-selection');
     }
 
-    mlExplorerDashboardService.dragSelect.watch(this.dragSelectListener.bind(this));
+    // save the bound dragSelectListener to this property so it can be accessed again
+    // in componentWillUnmount(), otherwise mlExplorerDashboardService.dragSelect.unwatch
+    // is not able to check properly if it's still the same listener
+    this.boundDragSelectListener = this.dragSelectListener.bind(this);
+    mlExplorerDashboardService.dragSelect.watch(this.boundDragSelectListener);
 
     this.renderSwimlane();
   }
@@ -63,6 +67,13 @@ export class ExplorerSwimlane extends React.Component {
   componentDidUpdate() {
     this.renderSwimlane();
   }
+
+  // property to remember the bound dragSelectListener
+  boundDragSelectListener = null;
+
+  // property for cellClick data comparison to be able to filter
+  // consecutive click events with the same data.
+  previousSelectedData = null;
 
   // Listen for dragSelect events
   dragSelectListener({ action, elements = [] }) {
@@ -86,7 +97,10 @@ export class ExplorerSwimlane extends React.Component {
 
         selectedData.laneLabels = _.uniq(selectedData.laneLabels);
         selectedData.times = _.uniq(selectedData.times);
-        this.cellClick(elements, selectedData);
+        if (_.isEqual(selectedData, this.previousSelectedData) === false) {
+          this.cellClick(elements, selectedData);
+          this.previousSelectedData = selectedData;
+        }
       }
 
       this.setState({ cellMouseoverActive: true });
@@ -98,6 +112,7 @@ export class ExplorerSwimlane extends React.Component {
       return;
     }
 
+    this.previousSelectedData = null;
     element.removeClass('ml-dragselect-dragging');
     elements.map(e => $(e).removeClass('ds-selected'));
   }
