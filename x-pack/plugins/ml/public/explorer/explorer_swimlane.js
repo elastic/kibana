@@ -43,7 +43,8 @@ export class ExplorerSwimlane extends React.Component {
   componentWillUnmount() {
     const { mlExplorerDashboardService } = this.props;
     mlExplorerDashboardService.dragSelect.unwatch(this.boundDragSelectListener);
-
+    const element = $(this.rootNode);
+    element.empty();
   }
   componentDidMount() {
     const element = $(this.rootNode).parent();

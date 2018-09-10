@@ -354,14 +354,29 @@ module.controller('MlExplorerController', function (
     return influencers;
   }
 
+  // This queue tracks click events while the swimlanes are loading.
+  // To avoid race conditions we keep the click events cellData in this queue
+  // and trigger another event only after the current loading is done.
+  // The queue is necessary since a click in the overall swimlane triggers
+  // an update of the viewby swimlanes. If we'd just ignored click events
+  // during the loading, we could miss programmatically triggered events like
+  // those coming via AppState when a selection is part of the URL.
+  const swimlaneCellClickListenerQueue = [];
+
   // swimlaneCellClickListener could trigger multiple times with the same data.
   // we track the previous click data here to be able to compare it and filter
   // consecutive calls with the same data.
   let previousListenerData = null;
+
   // Listener for click events in the swimlane and load corresponding anomaly data.
   // Empty cellData is passed on clicking outside a cell with score > 0.
-  const swimlaneCellClickListener = function (cellData) {
+  // The reset argument is useful when we intentionally want to reset state comparison
+  // of click events and want to pass through.
+  // For example, toggling showCharts isn't considered in the comparison
+  // and would therefor fail to update properly.
+  const swimlaneCellClickListener = function (cellData, skipComparison = false) {
     if (skipCellClicks === true) {
+      swimlaneCellClickListenerQueue.push(cellData);
       return;
     }
 
@@ -389,7 +404,7 @@ module.controller('MlExplorerController', function (
           end: timerange.latestMs,
           cellData
         };
-        if (_.isEqual(listenerData, previousListenerData)) {
+        if (_.isEqual(listenerData, previousListenerData) && skipComparison === false) {
           return;
         }
         previousListenerData = listenerData;
@@ -430,7 +445,8 @@ module.controller('MlExplorerController', function (
   const checkboxShowChartsListener = function () {
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
     if (showCharts && $scope.cellData !== undefined) {
-      swimlaneCellClickListener($scope.cellData);
+      // passing true as the second argument skips click event filtering
+      swimlaneCellClickListener($scope.cellData, true);
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
       mlExplorerDashboardService.anomalyDataChange.changed(
@@ -484,12 +500,19 @@ module.controller('MlExplorerController', function (
     navListener();
   });
 
-  // track the last request time to be able to ignore out of date requests
+  // track the request to be able to ignore out of date requests
   // and avoid race conditions ending up with the wrong charts.
-  let lastRequestTime = null;
+  let requestCount = 0;
   function loadDataForCharts(jobIds, influencers, earliestMs, latestMs) {
-    const requestTime = new Date().getTime();
-    lastRequestTime = requestTime;
+    // Just skip doing the request when this function is called without
+    // the minimum required data.
+    if ($scope.cellData === undefined && influencers.length === 0) {
+      return;
+    }
+
+    const newRequestCount = requestCount + 1;
+    requestCount = newRequestCount;
+
     // Loads the data used to populate the anomaly charts and the Top Influencers List.
     if (influencers.length === 0) {
       getTopInfluencers(jobIds, earliestMs, latestMs);
@@ -500,8 +523,8 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
-        // Ignore this response if it's returned by an out of date request.
-        if (requestTime < lastRequestTime) {
+        // Ignore this response if it's returned by an out of date promise
+        if (newRequestCount < requestCount) {
           return;
         }
 
@@ -754,11 +777,20 @@ module.controller('MlExplorerController', function (
   }
 
   function loadViewBySwimlane(fieldValues) {
+    // reset the swimlane data to avoid flickering where the old dataset would briefly show up.
+    $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
+
     skipCellClicks = true;
     // finish() function, called after each data set has been loaded and processed.
     // The last one to call it will trigger the page render.
     function finish() {
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);
+      if (swimlaneCellClickListenerQueue.length > 0) {
+        const cellData = swimlaneCellClickListenerQueue.pop();
+        swimlaneCellClickListenerQueue.length = 0;
+        swimlaneCellClickListener(cellData);
+        return;
+      }
       // Fire event to indicate swimlane data has changed.
       // Need to use $timeout to ensure this happens after the child scope is updated with the new data.
       $timeout(() => {
@@ -767,9 +799,11 @@ module.controller('MlExplorerController', function (
       }, 0);
     }
 
-    if ($scope.selectedJobs === undefined ||
-        $scope.swimlaneViewByFieldName === undefined  || $scope.swimlaneViewByFieldName === null) {
-      $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
+    if (
+      $scope.selectedJobs === undefined ||
+      $scope.swimlaneViewByFieldName === undefined  ||
+      $scope.swimlaneViewByFieldName === null
+    ) {
       finish();
     } else {
       // Ensure the search bounds align to the bucketing interval used in the swimlane so
