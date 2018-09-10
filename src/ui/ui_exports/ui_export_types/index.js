@@ -44,7 +44,7 @@ export {
   inspectorViews,
   chromeNavControls,
   navbarExtensions,
-  dashboardPanelActions,
+  contextMenuActions,
   managementSections,
   devTools,
   docViews,
