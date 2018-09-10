@@ -29,6 +29,7 @@ interface BeatsPageState {
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = BeatsActionArea;
+  private mounted: boolean = false;
   constructor(props: BeatsPageProps) {
     super(props);
 
@@ -38,8 +39,13 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       tableRef: React.createRef(),
       tags: null,
     };
-
+  }
+  public componentDidMount() {
+    this.mounted = true;
     this.loadBeats();
+  }
+  public componentWillUnmount() {
+    this.mounted = false;
   }
   public componentDidUpdate(prevProps: any) {
     if (this.props.location !== prevProps.location) {
@@ -111,9 +117,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private async loadBeats() {
     const beats = await this.props.libs.beats.getAll();
-    this.setState({
-      beats,
-    });
+    if (this.mounted) {
+      this.setState({
+        beats,
+      });
+    }
   }
 
   // todo: add reference to ES filter endpoint
@@ -123,7 +131,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
-
     this.setState({
       tags,
     });
