@@ -26,7 +26,7 @@ describe('validateSpaceName', () => {
       name: ''
     };
 
-    expect(validator.validateSpaceName(space)).toEqual({ isInvalid: true, error: `Please provide a space name` });
+    expect(validator.validateSpaceName(space)).toEqual({ isInvalid: true, error: `Name is required` });
   });
 
   test('it cannot exceed 1024 characters', () => {
@@ -55,13 +55,13 @@ describe('validateSpaceDescription', () => {
   });
 });
 
-describe('validateSpaceIdentifier', () => {
+describe('validateURLIdentifier', () => {
   test('it does not validate reserved spaces', () => {
     const space = {
       _reserved: true
     };
 
-    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: false });
+    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
   });
 
   test('it requires a non-empty value', () => {
@@ -69,7 +69,7 @@ describe('validateSpaceIdentifier', () => {
       id: ''
     };
 
-    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: true, error: `Space Identifier is required` });
+    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: true, error: `URL identifier is required` });
   });
 
   test('it requires a valid Space Identifier', () => {
@@ -77,8 +77,8 @@ describe('validateSpaceIdentifier', () => {
       id: 'invalid identifier'
     };
 
-    expect(validator.validateSpaceIdentifier(space))
-      .toEqual({ isInvalid: true, error: 'Space Identifier only allows a-z, 0-9, "_", and the "-" character' });
+    expect(validator.validateURLIdentifier(space))
+      .toEqual({ isInvalid: true, error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"' });
   });
 
   test('it allows a valid Space Identifier', () => {
@@ -86,6 +86,6 @@ describe('validateSpaceIdentifier', () => {
       id: '01-valid-context-01'
     };
 
-    expect(validator.validateSpaceIdentifier(space)).toEqual({ isInvalid: false });
+    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
   });
 });

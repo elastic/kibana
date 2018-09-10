@@ -71,7 +71,7 @@ export class LoggingService implements LoggerFactory {
       this.appenders.set(appenderKey, Appenders.create(appenderConfig));
     }
 
-    for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
       loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
     }
 

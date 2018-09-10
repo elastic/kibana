@@ -7,12 +7,13 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { SPACES_FEATURE_DESCRIPTION } from './lib/constants';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'spaces',
     title: 'Spaces',
-    description: 'Organize your dashboards, visualizations, and other saved objects',
+    description: SPACES_FEATURE_DESCRIPTION,
     icon: 'spacesApp',
     path: '/app/kibana#/management/spaces/list',
     showOnHomePage: true,

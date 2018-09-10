@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { ContextMenuAction } from 'ui/embeddable';
 import { Inspector } from 'ui/inspector';
 
 /**
@@ -29,7 +29,7 @@ import { Inspector } from 'ui/inspector';
  * This will check if the embeddable inside the panel actually exposes inspector adapters
  * via its embeddable.getInspectorAdapters() method. If so - and if an inspector
  * could be shown for those adapters - the inspector icon will be visible.
- * @return {DashboardPanelAction}
+ * @return {ContextMenuAction}
  */
 export function getInspectorPanelAction({
   closeContextMenu,
@@ -38,7 +38,7 @@ export function getInspectorPanelAction({
   closeContextMenu: () => void;
   panelTitle?: string;
 }) {
-  return new DashboardPanelAction(
+  return new ContextMenuAction(
     {
       id: 'openInspector',
       displayName: 'Inspect',

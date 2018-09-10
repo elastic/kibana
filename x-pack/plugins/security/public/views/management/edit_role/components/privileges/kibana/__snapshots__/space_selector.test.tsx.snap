@@ -6,7 +6,6 @@ exports[`SpaceSelector renders without crashing 1`] = `
   isClearable={true}
   onChange={[Function]}
   options={Array []}
-  placeholder="choose space(s)"
   renderOption={[Function]}
   selectedOptions={Array []}
   singleSelection={false}

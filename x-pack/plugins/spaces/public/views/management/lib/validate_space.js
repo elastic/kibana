@@ -23,7 +23,7 @@ export class SpaceValidator {
     if (!this._shouldValidate) return valid();
 
     if (!space.name) {
-      return invalid(`Please provide a space name`);
+      return invalid(`Name is required`);
     }
 
     if (space.name.length > 1024) {
@@ -43,17 +43,17 @@ export class SpaceValidator {
     return valid();
   }
 
-  validateSpaceIdentifier(space) {
+  validateURLIdentifier(space) {
     if (!this._shouldValidate) return valid();
 
     if (isReservedSpace(space)) return valid();
 
     if (!space.id) {
-      return invalid(`Space Identifier is required`);
+      return invalid(`URL identifier is required`);
     }
 
     if (!isValidSpaceIdentifier(space.id)) {
-      return invalid('Space Identifier only allows a-z, 0-9, "_", and the "-" character');
+      return invalid('URL identifier can only contain a-z, 0-9, and the characters "_" and "-"');
     }
 
     return valid();
@@ -62,7 +62,7 @@ export class SpaceValidator {
   validateForSave(space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
-    const { isInvalid: isIdentifierInvalid } = this.validateSpaceIdentifier(space);
+    const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
 
     if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid) {
       return invalid();
