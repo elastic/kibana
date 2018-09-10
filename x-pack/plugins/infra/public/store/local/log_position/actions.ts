@@ -45,3 +45,9 @@ export const reportVisibleSummary = actionCreator<ReportVisibleSummaryPayload>(
 export const startAutoReload = actionCreator<number>('START_AUTO_RELOAD');
 
 export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');
+
+interface RestoreFromUrlPayload {
+  defaultPositionTime: number;
+}
+
+export const restoreFromUrl = actionCreator<RestoreFromUrlPayload>('RESTORE_FROM_URL');

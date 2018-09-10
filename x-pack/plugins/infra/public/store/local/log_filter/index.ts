@@ -8,4 +8,5 @@ import * as logFilterActions from './actions';
 import * as logFilterSelectors from './selectors';
 
 export { logFilterActions, logFilterSelectors };
+export * from './epic';
 export * from './reducer';

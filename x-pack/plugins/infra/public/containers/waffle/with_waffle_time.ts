@@ -18,9 +18,15 @@ export const withWaffleTime = connect(
   }),
   bindPlainActionCreators({
     jumpToTime: waffleTimeActions.jumpToTime,
+    restoreFromUrl: waffleTimeActions.restoreFromUrl,
     startAutoReload: waffleTimeActions.startAutoReload,
     stopAutoReload: waffleTimeActions.stopAutoReload,
   })
 );
 
-export const WithWaffleTime = asChildFunctionRenderer(withWaffleTime);
+export const WithWaffleTime = asChildFunctionRenderer(withWaffleTime, {
+  onInitialize: ({ restoreFromUrl }) =>
+    restoreFromUrl({
+      defaultTime: Date.now(),
+    }),
+});

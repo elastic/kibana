@@ -24,11 +24,15 @@ export const withLogPosition = connect(
     jumpToTargetPositionTime: logPositionActions.jumpToTargetPositionTime,
     reportVisiblePositions: logPositionActions.reportVisiblePositions,
     reportVisibleSummary: logPositionActions.reportVisibleSummary,
+    restoreFromUrl: logPositionActions.restoreFromUrl,
     startLiveStreaming: logPositionActions.startAutoReload,
     stopLiveStreaming: logPositionActions.stopAutoReload,
   })
 );
 
 export const WithLogPosition = asChildFunctionRenderer(withLogPosition, {
-  onInitialize: props => props.jumpToTargetPositionTime(Date.now()),
+  onInitialize: props =>
+    props.restoreFromUrl({
+      defaultPositionTime: Date.now(),
+    }),
 });

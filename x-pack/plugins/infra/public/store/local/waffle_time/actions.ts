@@ -13,3 +13,9 @@ export const jumpToTime = actionCreator<number>('JUMP_TO_TIME');
 export const startAutoReload = actionCreator('START_AUTO_RELOAD');
 
 export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');
+
+interface RestoreFromUrlPayload {
+  defaultTime: number;
+}
+
+export const restoreFromUrl = actionCreator<RestoreFromUrlPayload>('RESTORE_FROM_URL');

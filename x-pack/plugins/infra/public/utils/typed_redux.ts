@@ -5,6 +5,7 @@
  */
 
 import { bindActionCreators, Dispatch } from 'redux';
+import { Meta } from 'typescript-fsa';
 
 /**
  * Selectors
@@ -66,3 +67,9 @@ export const bindPlainActionCreators = <WrappedActionCreators extends ActionCrea
   bindActionCreators(actionCreators, dispatch) as {
     [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>
   };
+
+export const hasTypedMeta = (action: {
+  type: string;
+  meta?: Meta;
+}): action is { type: string; meta: Meta } =>
+  !!action && !!action.meta && typeof action.meta === 'object';
