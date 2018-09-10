@@ -62,7 +62,7 @@ export const topHitMetricAgg = new MetricAggType({
           };
         } else {
           if (field.readFromDocValues) {
-            output.params.docvalue_fields = [ field.name ];
+            output.params.docvalue_fields = [ { field: field.name, format: 'use_field_mapping' } ];
           }
           output.params._source = field.name === '_source' ? true : field.name;
         }
