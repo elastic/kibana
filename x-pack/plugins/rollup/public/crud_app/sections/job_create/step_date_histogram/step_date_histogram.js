@@ -202,7 +202,11 @@ export class StepDateHistogramUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.description"
-                defaultMessage="How should this date histogram data be rolled up?"
+                defaultMessage={`
+                  How long should we wait before rolling up new documents? By default, the indexer
+                  attempts to roll up all data that is available. You can also customize the time
+                  zone stored with the rolled-up documents.
+                `}
               />
             )}
             fullWidth
