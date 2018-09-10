@@ -6,7 +6,14 @@
 
 import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiPage, EuiPageBody } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGroup
+} from '@elastic/eui';
 import { Status } from './status';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
@@ -27,24 +34,26 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
     metrics.apm_os_load,
   ];
 
+  const charts = seriesToShow.map((data, index) => (
+    <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
+      <EuiPanel>
+        <MonitoringTimeseriesContainer
+          series={data}
+          {...props}
+        />
+      </EuiPanel>
+    </EuiFlexItem>
+  ));
+
   return (
-    <div>
-      <Status stats={summary} />
-      <EuiPage style={{ backgroundColor: 'white' }}>
-        <EuiPageBody>
-          <EuiFlexGrid columns={2} gutterSize="none">
-            {seriesToShow.map((metric, index) => (
-              <EuiFlexItem key={index} style={{ width: '50%' }}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
-                <EuiSpacer size="m"/>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        </EuiPageBody>
-      </EuiPage>
-    </div>
+    <EuiPage style={{ backgroundColor: 'white' }}>
+      <EuiPageBody>
+        <Status stats={summary}/>
+        <EuiSpacer size="s"/>
+        <EuiFlexGroup wrap>
+          {charts}
+        </EuiFlexGroup>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
