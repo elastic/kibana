@@ -18,6 +18,12 @@ exports[`SourceFiltersTable should add a filter 1`] = `
           "calls": Array [
             Array [],
           ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
+          ],
         },
         "sourceFilters": Array [
           Object {
@@ -105,6 +111,12 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         "save": [MockFunction] {
           "calls": Array [
             Array [],
+          ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
           ],
         },
         "sourceFilters": Array [
@@ -307,6 +319,12 @@ exports[`SourceFiltersTable should update a filter 1`] = `
         "save": [MockFunction] {
           "calls": Array [
             Array [],
+          ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
           ],
         },
         "sourceFilters": Array [

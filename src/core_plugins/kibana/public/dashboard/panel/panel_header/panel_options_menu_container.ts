@@ -18,11 +18,15 @@
  */
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import * as Redux from 'react-redux';
-import { ContainerState, Embeddable } from 'ui/embeddable';
-import { panelActionsStore } from '../../store/panel_actions_store';
+import { connect } from 'react-redux';
 import {
   buildEuiContextMenuPanels,
+  ContainerState,
+  ContextMenuPanel,
+  Embeddable,
+} from 'ui/embeddable';
+import { panelActionsStore } from '../../store/panel_actions_store';
+import {
   getCustomizePanelAction,
   getEditPanelAction,
   getInspectorPanelAction,
@@ -41,7 +45,7 @@ import {
   setVisibleContextMenuPanelId,
 } from '../../actions';
 
-import { DashboardContextMenuPanel } from 'ui/dashboard_panel_actions';
+import { Dispatch } from 'redux';
 import { CoreKibanaState } from '../../../selectors';
 import { DashboardViewMode } from '../../dashboard_view_mode';
 import {
@@ -106,7 +110,7 @@ const mapStateToProps = (
  * @param panelId {string}
  */
 const mapDispatchToProps = (
-  dispatch: Redux.Dispatch<CoreKibanaState>,
+  dispatch: Dispatch,
   { panelId }: PanelOptionsMenuContainerOwnProps
 ) => ({
   onDeletePanel: () => {
@@ -162,7 +166,7 @@ const mergeProps = (
   // Don't build the panels if the pop over is not open, or this gets expensive - this function is called once for
   // every panel, every time any state changes.
   if (isPopoverOpen) {
-    const contextMenuPanel = new DashboardContextMenuPanel({
+    const contextMenuPanel = new ContextMenuPanel({
       title: 'Options',
       id: 'mainMenu',
     });
@@ -200,7 +204,7 @@ const mergeProps = (
   };
 };
 
-export const PanelOptionsMenuContainer = Redux.connect<
+export const PanelOptionsMenuContainer = connect<
   PanelOptionsMenuContainerStateProps,
   PanelOptionsMenuContainerDispatchProps,
   PanelOptionsMenuContainerOwnProps,

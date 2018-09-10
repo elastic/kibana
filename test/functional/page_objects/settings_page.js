@@ -570,26 +570,15 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
-    async setImportIndexFieldOption(child) {
+    async associateIndexPattern(oldIndexPatternId, newIndexPatternTitle) {
       await find.clickByCssSelector(
-        `select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`
+        `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
+        [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
       );
     }
 
     async clickChangeIndexConfirmButton() {
       await testSubjects.click('changeIndexConfirmButton');
-    }
-
-    async clickVisualizationsTab() {
-      await testSubjects.click('objectsTab-visualizations');
-    }
-
-    async clickSearchesTab() {
-      await testSubjects.click('objectsTab-searches');
-    }
-
-    async getVisualizationRows() {
-      return await testSubjects.findAll(`objectsTableRow`);
     }
 
     async waitUntilSavedObjectsTableIsNotLoading() {

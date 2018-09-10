@@ -6,18 +6,22 @@
 
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import createHistory from 'history/createMemoryHistory';
-
 import {
   toQuery,
   fromQuery,
   KibanaLinkComponent,
   RelativeLinkComponent,
   encodeKibanaSearchParams,
-  decodeKibanaSearchParams
+  decodeKibanaSearchParams,
+  ViewMLJob
 } from '../url';
 import { toJson } from '../testHelpers';
+
+jest.mock('ui/chrome', () => ({
+  addBasePath: path => `myBasePath${path}`
+}));
 
 describe('encodeKibanaSearchParams and decodeKibanaSearchParams should return the original string', () => {
   it('should convert string to object', () => {
@@ -207,11 +211,48 @@ describe('KibanaLinkComponent', () => {
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+      "myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
     );
   });
 
   it('should render correct markup', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
+  });
+});
+
+describe('ViewMLJob', () => {
+  it('should render component', () => {
+    const location = { search: '' };
+    const wrapper = shallow(
+      <ViewMLJob
+        serviceName="myServiceName"
+        transactionType="myTransactionType"
+        location={location}
+      />
+    );
+
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
+  it('should have correct path props', () => {
+    const location = { search: '' };
+    const wrapper = shallow(
+      <ViewMLJob
+        serviceName="myServiceName"
+        transactionType="myTransactionType"
+        location={location}
+      />
+    );
+
+    expect(wrapper.prop('pathname')).toBe('/app/ml');
+    expect(wrapper.prop('hash')).toBe('/timeseriesexplorer');
+    expect(wrapper.prop('query')).toEqual({
+      _a: null,
+      _g: {
+        ml: {
+          jobIds: ['myServiceName-myTransactionType-high_mean_response_time']
+        }
+      }
+    });
   });
 });
