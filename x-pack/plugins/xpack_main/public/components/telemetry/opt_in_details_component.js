@@ -58,7 +58,7 @@ export class OptInExampleFlyout extends Component {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl"/>
+            <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -79,7 +79,7 @@ export class OptInExampleFlyout extends Component {
 
     return (
       <EuiCodeBlock language="js">
-        { JSON.stringify(data, null, 2) }
+        {JSON.stringify(data, null, 2)}
       </EuiCodeBlock>
     );
   }
@@ -90,21 +90,22 @@ export class OptInExampleFlyout extends Component {
         <EuiFlyout
           ownFocus
           onClose={this.props.onClose}
-          size="s"
+          maxWidth={true}
         >
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h2>Cluster Statistics</h2>
+              <h2>Cluster statistics</h2>
             </EuiTitle>
             <EuiTextColor color="subdued">
               <EuiText>
-                This is an example of the basic cluster statistics we&rsquo;ll gather, which includes number of indexes,
-                number of shards, number of nodes, and high-level usage statistics, such as whether monitoring is enabled.
+                This is an example of the basic cluster statistics that we&rsquo;ll collect.
+                It includes the number of indices, shards, and nodes.
+                It also includes high-level usage statistics, such as whether monitoring is turned on.
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            { this.renderBody(this.state) }
+            {this.renderBody(this.state)}
           </EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
