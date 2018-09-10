@@ -7,6 +7,11 @@
 
 import React from 'react';
 
+import {
+  EuiSpacer,
+
+} from '@elastic/eui';
+
 import { FieldTypeIcon } from '../../../components/field_type_icon';
 
 export function FieldStatsCard({ field }) {
@@ -59,27 +64,30 @@ export function FieldStatsCard({ field }) {
 
             {
               (field.top_hits) &&
-              <div className="stats">
-                <div className="stat">top values</div>
-                {field.top_hits.map(h => {
-                  const pcnt = Math.round(((h.count / field.count) * 100) * 100) / 100;
-                  return (
-                    <div key={h.value} className="top-value">
-                      <div className="field-label">{h.value}&nbsp;</div>
-                      <div className="top-value-bar-holder">
-                        <div
-                          className="top-value-bar"
-                          style={{ width: `${pcnt}%`, backgroundColor: typeColor }}
-                        />
+              <React.Fragment>
+
+                <EuiSpacer size="s" />
+
+                <div className="stats">
+                  <div className="stat">top values</div>
+                  {field.top_hits.map(h => {
+                    const pcnt = Math.round(((h.count / field.count) * 100) * 100) / 100;
+                    return (
+                      <div key={h.value} className="top-value">
+                        <div className="field-label">{h.value}&nbsp;</div>
+                        <div className="top-value-bar-holder">
+                          <div
+                            className="top-value-bar"
+                            style={{ width: `${pcnt}%`, backgroundColor: typeColor }}
+                          />
+                        </div>
+                        <div className="count-label">{pcnt}%</div>
                       </div>
-                      <div className="count-label">{pcnt}%</div>
-                    </div>
-                  );
-                }
-                )}
-
-
-              </div>
+                    );
+                  }
+                  )}
+                </div>
+              </React.Fragment>
             }
 
           </div>
