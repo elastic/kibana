@@ -9,12 +9,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
-export function validateRollupIndex(rollupIndex) {
+export function validateRollupIndex(rollupIndex, indexPattern) {
   if (!rollupIndex || !rollupIndex.trim()) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupIndexMissing"
         defaultMessage="You must provide a rollup index"
+      />
+    )];
+  }
+
+  if (rollupIndex === indexPattern) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.rollupIndexSameAsIndexPattern"
+        defaultMessage="Rollup index must not be the same as the index pattern"
       />
     )];
   }

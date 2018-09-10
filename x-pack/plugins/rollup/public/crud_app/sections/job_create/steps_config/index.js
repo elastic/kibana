@@ -47,8 +47,8 @@ export const stepIdToStepConfigMap = {
 
       const errors = {
         id: validateId(id),
-        indexPattern: validateIndexPattern(indexPattern),
-        rollupIndex: validateRollupIndex(rollupIndex),
+        indexPattern: validateIndexPattern(indexPattern, rollupIndex),
+        rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
       };
