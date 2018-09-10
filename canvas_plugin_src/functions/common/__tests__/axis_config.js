@@ -57,5 +57,62 @@ describe('axisConfig', () => {
           });
       });
     });
+
+    describe('min', () => {
+      it('sets the minimum value shown of the axis', () => {
+        let result = fn(testTable, { min: -100 });
+        expect(result).to.have.property('min', -100);
+        result = fn(testTable, { min: 1010101010101 });
+        expect(result).to.have.property('min', 1010101010101);
+        result = fn(testTable, { min: '2017-09-01T00:00:00Z' });
+        expect(result).to.have.property('min', 1504224000000);
+        result = fn(testTable, { min: '2017-09-01' });
+        expect(result).to.have.property('min', 1504224000000);
+        result = fn(testTable, { min: '1 Sep 2017' });
+        expect(result).to.have.property('min', 1504224000000);
+      });
+
+      it('throws when given an invalid date string', () => {
+        expect(fn)
+          .withArgs(testTable, { min: 'foo' })
+          .to.throwException(e => {
+            expect(e.message).to.be(
+              `Invalid date string 'foo' found. 'min' must be a number, date in ms, or ISO8601 date string`
+            );
+          });
+      });
+    });
+
+    describe('max', () => {
+      it('sets the maximum value shown of the axis', () => {
+        let result = fn(testTable, { max: 2000 });
+        expect(result).to.have.property('max', 2000);
+        result = fn(testTable, { max: 1234567000000 });
+        expect(result).to.have.property('max', 1234567000000);
+        result = fn(testTable, { max: '2018-10-06T00:00:00Z' });
+        expect(result).to.have.property('max', 1538784000000);
+        result = fn(testTable, { max: '10/06/2018' });
+        expect(result).to.have.property('max', 1538784000000);
+        result = fn(testTable, { max: 'October 6 2018' });
+        expect(result).to.have.property('max', 1538784000000);
+      });
+
+      it('throws when given an invalid date string', () => {
+        expect(fn)
+          .withArgs(testTable, { max: '20/02/17' })
+          .to.throwException(e => {
+            expect(e.message).to.be(
+              `Invalid date string '20/02/17' found. 'max' must be a number, date in ms, or ISO8601 date string`
+            );
+          });
+      });
+    });
+
+    describe('tickSize ', () => {
+      it('sets the increment size between ticks of the axis', () => {
+        const result = fn(testTable, { tickSize: 100 });
+        expect(result).to.have.property('tickSize', 100);
+      });
+    });
   });
 });

@@ -5,17 +5,22 @@ export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {})
   if (!argValue || argValue.show === false) return { show: false };
 
   const config = { show: true };
+  const axisType = get(columns, `${axis}.type`);
 
   if (getType(argValue) === 'axisConfig') {
+    const { position, min, max, tickSize } = argValue;
     // first value is used as the default
     const acceptedPositions = axis === 'x' ? ['bottom', 'top'] : ['left', 'right'];
 
-    config.position = acceptedPositions.includes(argValue.position)
-      ? argValue.position
-      : acceptedPositions[0];
-  }
+    config.position = acceptedPositions.includes(position) ? position : acceptedPositions[0];
 
-  const axisType = get(columns, `${axis}.type`);
+    if (axisType === 'number' || axisType === 'date') {
+      if (min) config.min = min;
+      if (max) config.max = max;
+    }
+
+    if (tickSize && axisType === 'number') config.tickSize = tickSize;
+  }
 
   if (axisType === 'string') {
     config.ticks = map(ticks[axis].hash, (position, name) => [position, name]);
