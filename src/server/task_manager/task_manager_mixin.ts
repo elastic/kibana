@@ -20,20 +20,23 @@
 import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
 import {
-  Logger,
   TaskDefinition,
   TaskDictionary,
   TaskManager,
+  TaskManagerLogger,
   TaskPool,
   TaskStore,
   validateTaskDefinition,
 } from './task_pool';
-import { SanitizedTaskDefinition } from './task_pool/task';
+import { fillPool } from './task_pool/fill_pool';
+import { ConcreteTaskInstance, SanitizedTaskDefinition } from './task_pool/task';
+import { TaskPoller } from './task_pool/task_poller';
+import { TaskManagerRunner } from './task_pool/task_runner';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  const logger = new Logger((...args) => server.log(...args));
-  const numWorkers = config.get('taskManager.num_workers');
-  const definitions = extractTaskDefinitions(numWorkers, kbnServer.uiExports.taskDefinitions);
+  const logger = new TaskManagerLogger((...args) => server.log(...args));
+  const totalCapacity = config.get('taskManager.num_workers');
+  const definitions = extractTaskDefinitions(totalCapacity, kbnServer.uiExports.taskDefinitions);
 
   server.decorate('server', 'taskManager', new TaskManagerClientWrapper());
 
@@ -43,6 +46,7 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
       index: config.get('taskManager.index'),
       callCluster,
       maxAttempts: config.get('taskManager.max_attempts'),
+      supportedTypes: Object.keys(definitions),
     });
 
     logger.debug('Initializing the task manager index');
@@ -50,17 +54,36 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
 
     const pool = new TaskPool({
       logger,
-      callCluster,
-      numWorkers,
-      store,
-      definitions,
-      pollInterval: config.get('taskManager.poll_interval'),
-      kbnServer,
+      totalCapacity,
     });
 
-    pool.start();
+    const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({
+      callCluster,
+      kbnServer,
+      taskInstance,
+    });
 
-    const client = new TaskManager({ store, pool });
+    const poller = new TaskPoller({
+      logger,
+      pollInterval: config.get('taskManager.poll_interval'),
+      work: () =>
+        fillPool(
+          pool.run,
+          store.fetchAvailableTasks,
+          (instance: ConcreteTaskInstance) =>
+            new TaskManagerRunner({
+              logger,
+              instance,
+              store,
+              contextProvider,
+              definition: definitions[instance.taskType],
+            })
+        ),
+    });
+
+    poller.start();
+
+    const client = new TaskManager({ store, poller });
     server.taskManager.setClient(client);
   });
 }

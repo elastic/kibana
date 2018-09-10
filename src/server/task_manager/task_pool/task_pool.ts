@@ -18,143 +18,110 @@
  */
 
 import { Logger } from './logger';
-import { ConcreteTaskInstance, ElasticJs, SanitizedTaskDefinition, TaskDictionary } from './task';
 import { TaskRunner } from './task_runner';
-import { TaskStore } from './task_store';
 
 interface Opts {
-  callCluster: ElasticJs;
+  totalCapacity: number;
   logger: Logger;
-  numWorkers: number;
-  pollInterval: number;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
-  store: TaskStore;
-  kbnServer: object;
 }
 
+/**
+ * Runs tasks in batches, taking costs into account.
+ *
+ * @export
+ * @class TaskPool
+ */
 export class TaskPool {
-  private callCluster: ElasticJs;
+  private totalCapacity: number;
   private running = new Set<TaskRunner>();
-  private cancelling = new Set<TaskRunner>();
-  private numWorkers: number;
   private logger: Logger;
-  private pollInterval: number;
-  private store: TaskStore;
-  private isChecking = false;
-  private isPolling = false;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
-  private availableTypes: string[];
-  private kbnServer: object;
 
+  /**
+   * Creates an instance of TaskPool.
+   *
+   * @param {Opts} opts
+   * @prop {number} totalCapacity - The total number of workers / work slots available
+   * @prop {Logger} logger - The task manager logger.
+   * @memberof TaskPool
+   */
   constructor(opts: Opts) {
-    this.callCluster = opts.callCluster;
-    this.numWorkers = opts.numWorkers;
+    this.totalCapacity = opts.totalCapacity;
     this.logger = opts.logger;
-    this.pollInterval = opts.pollInterval;
-    this.store = opts.store;
-    this.definitions = opts.definitions;
-    this.availableTypes = Object.values(opts.definitions).map(d => d.type);
-    this.kbnServer = opts.kbnServer;
   }
 
-  get occupiedSlots() {
+  /**
+   * Gets how many workers are currently in use.
+   *
+   * @readonly
+   * @memberof TaskPool
+   */
+  get occupiedWorkers() {
     let total = 0;
 
-    this.running.forEach(t => {
-      total += this.definitions[t.type].workersOccupied;
-    });
+    this.running.forEach(({ numWorkers }) => (total += numWorkers));
 
     return total;
   }
 
-  get availableSlots() {
-    return this.numWorkers - this.occupiedSlots;
+  /**
+   * Gets how many workers are currently available.
+   *
+   * @readonly
+   * @memberof TaskPool
+   */
+  get availableWorkers() {
+    return this.totalCapacity - this.occupiedWorkers;
   }
 
-  public start() {
-    if (this.isPolling) {
-      return;
-    }
-
-    this.isPolling = true;
-
-    const poll = async () => {
-      try {
-        await this.checkForWork();
-        await this.checkForExpiredTasks();
-      } catch (error) {
-        this.logger.warning(`Task pool failed to poll. ${error.stack}`);
-      }
-      setTimeout(poll, this.pollInterval);
-    };
-
-    poll();
-  }
-
-  public checkForWork = async () => {
-    if (this.isChecking) {
-      return;
-    }
-
-    this.isChecking = true;
-
-    try {
-      while (true) {
-        const instances = await this.store.availableTasks({
-          types: this.availableTypes,
-          size: this.availableSlots,
-        });
-
-        // There's no more work for us in the index
-        if (!instances.length) {
-          return;
-        }
-
-        // Try to claim tasks
-        for (const instance of instances) {
-          if (this.availableSlots < this.definitions[instance.taskType].workersOccupied) {
-            return;
-          }
-
-          await this.run(instance);
-        }
-      }
-    } finally {
-      this.isChecking = false;
-    }
+  /**
+   * Attempts to run the specified list of tasks. Returns true if it was able
+   * to start every task in the list, false if there was not enough capacity
+   * to run every task.
+   *
+   * @param {TaskRunner[]} tasks
+   * @returns {Promise<boolean>}
+   * @memberof TaskPool
+   */
+  public run = (tasks: TaskRunner[]) => {
+    this.cancelExpiredTasks();
+    return this.checkForWork(tasks);
   };
 
-  private async run(instance: ConcreteTaskInstance) {
-    const task = new TaskRunner({
-      instance,
-      callCluster: this.callCluster,
-      definition: this.definitions[instance.taskType],
-      logger: this.logger,
-      store: this.store,
-      kbnServer: this.kbnServer,
-    });
+  private async checkForWork(tasks: TaskRunner[]) {
+    for (const task of tasks) {
+      if (this.availableWorkers < task.numWorkers) {
+        return false;
+      }
 
-    if (await task.claimOwnership()) {
-      this.running.add(task);
+      if (await task.claimOwnership()) {
+        this.running.add(task);
+        task
+          .run()
+          .catch(error => {
+            this.logger.warning(`Task ${task} failed: ${error.stack}`);
+          })
+          .then(() => this.running.delete(task));
+      }
+    }
 
-      task.run().then(() => {
-        this.running.delete(task);
-        this.checkForWork();
-      });
+    return true;
+  }
+
+  private cancelExpiredTasks() {
+    for (const task of this.running) {
+      if (task.isExpired) {
+        this.cancelTask(task);
+      }
     }
   }
 
-  private checkForExpiredTasks() {
-    for (const task of this.running) {
-      if (task.isTimedOut) {
-        this.cancelling.add(task);
-        this.running.delete(task);
-
-        task
-          .cancel()
-          .catch(error => this.logger.warning(`Failed to cancel task ${task}. ${error.stack}`))
-          .then(() => this.cancelling.delete(task));
-      }
+  private async cancelTask(task: TaskRunner) {
+    try {
+      this.logger.debug(`Cancelling expired task ${task}.`);
+      this.running.delete(task);
+      await task.cancel();
+    } catch (error) {
+      this.logger.error(`Failed to cancel task ${task}: ${error.stack}`);
     }
   }
 }

@@ -46,11 +46,11 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 ## Task definitions
 
-Plugins define tasks by adding a `tasks` property to their `uiExports`.
+Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`.
 
 ```js
 {
-  tasks: {
+  taskDefinitions: {
     // clusterMonitoring is the task type, and must be unique across the entire system
     clusterMonitoring: {
       // Human friendly name, used to represent this task in logs, UI, etc

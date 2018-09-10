@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { Logger } from './logger';
+export { TaskManagerLogger } from './logger';
 export { TaskPool } from './task_pool';
 export { TaskStore } from './task_store';
 export { TaskManager } from './task_manager';

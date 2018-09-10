@@ -18,26 +18,26 @@
  */
 
 import { TaskInstance } from './task';
-import { TaskPool } from './task_pool';
+import { TaskPoller } from './task_poller';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
 
 interface Opts {
-  pool: TaskPool;
+  poller: TaskPoller;
   store: TaskStore;
 }
 
 export class TaskManager {
-  private pool: TaskPool;
+  private poller: TaskPoller;
   private store: TaskStore;
 
   constructor(opts: Opts) {
-    this.pool = opts.pool;
+    this.poller = opts.poller;
     this.store = opts.store;
   }
 
   public async schedule(task: TaskInstance) {
     await this.store.schedule(task);
-    this.pool.checkForWork();
+    this.poller.attemptWork();
   }
 
   public fetch(opts: FetchOpts = {}): Promise<FetchResult> {

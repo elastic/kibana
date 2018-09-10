@@ -22,9 +22,9 @@ import sinon from 'sinon';
 import { Cancellable } from '../../../utils/cancellable/cancellable';
 import { ConcreteTaskInstance, TaskDefinition } from './task';
 import { minutesFromNow } from './task_intervals';
-import { TaskRunner } from './task_runner';
+import { TaskManagerRunner } from './task_runner';
 
-describe('TaskRunner', () => {
+describe('TaskManagerRunner', () => {
   test('provides details about the task that is running', () => {
     const { runner } = testOpts({
       instance: {
@@ -34,7 +34,7 @@ describe('TaskRunner', () => {
     });
 
     expect(runner.id).toEqual('foo');
-    expect(runner.type).toEqual('bar');
+    expect(runner.taskType).toEqual('bar');
     expect(runner.toString()).toEqual('bar "foo"');
   });
 
@@ -160,16 +160,18 @@ describe('TaskRunner', () => {
       definition: {
         run: () => {
           let timeout: any;
+          let resolve: any;
 
           return new Cancellable<undefined>()
-            .then(
-              () =>
-                new Promise(r => {
-                  timeout = setTimeout(r, 1000);
-                })
-            )
+            .then(() => {
+              return new Promise(r => {
+                resolve = r;
+                timeout = setTimeout(r, 1000);
+              });
+            })
             .cancelled(() => {
               clearTimeout(timeout);
+              resolve();
               wasCancelled = true;
             });
         },
@@ -177,6 +179,7 @@ describe('TaskRunner', () => {
     });
 
     const promise = runner.run();
+    await new Promise(r => setTimeout(r, 1));
     await runner.cancel();
     await promise;
 
@@ -207,6 +210,7 @@ describe('TaskRunner', () => {
     const callCluster = sinon.stub();
     const run = sinon.stub();
     const logger = {
+      error: sinon.stub(),
       debug: sinon.stub(),
       info: sinon.stub(),
       warning: sinon.stub(),
@@ -215,11 +219,14 @@ describe('TaskRunner', () => {
       update: sinon.stub(),
       remove: sinon.stub(),
     };
-    const runner = new TaskRunner({
-      callCluster,
+    const runner = new TaskManagerRunner({
+      contextProvider: async (taskInstance: ConcreteTaskInstance) => ({
+        callCluster,
+        kbnServer: sinon.stub(),
+        taskInstance,
+      }),
       logger,
       store,
-      kbnServer: sinon.stub(),
       instance: Object.assign(
         {
           id: 'foo',

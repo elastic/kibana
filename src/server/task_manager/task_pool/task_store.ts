@@ -25,6 +25,7 @@ export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
   maxAttempts: number;
+  supportedTypes: string[];
 }
 
 export interface FetchOpts {
@@ -59,11 +60,6 @@ interface RawTaskDoc {
   };
 }
 
-export interface TaskQuery {
-  types: string[];
-  size: number;
-}
-
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -72,6 +68,7 @@ export class TaskStore {
   private callCluster: ElasticJs;
   private index: string;
   private maxAttempts: number;
+  private supportedTypes: string[];
 
   /**
    * Constructs a new TaskStore.
@@ -79,11 +76,13 @@ export class TaskStore {
    * @prop {CallCluster} callCluster - The elastic search connection
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
+   * @prop {string[]} supportedTypes - The task types supported by this store
    */
   constructor(opts: StoreOpts) {
     this.callCluster = opts.callCluster;
     this.index = opts.index;
     this.maxAttempts = opts.maxAttempts;
+    this.supportedTypes = opts.supportedTypes;
   }
 
   public async init() {
@@ -165,28 +164,26 @@ export class TaskStore {
    * @param {TaskQuery} query
    * @prop {string[]} types - Task types to be queried
    * @prop {number} size - The number of task instances to retrieve
-   * @returns {Promise<TaskDoc[]>}
+   * @returns {Promise<ConcreteTaskInstance[]>}
    */
-  public availableTasks(query: TaskQuery): Promise<ConcreteTaskInstance[]> {
-    const { types, size } = query;
-
+  public fetchAvailableTasks = () => {
     return this.search({
       body: {
         query: {
           bool: {
             must: [
-              { terms: { 'task.taskType': types } },
+              { terms: { 'task.taskType': this.supportedTypes } },
               { range: { 'task.attempts': { lte: this.maxAttempts } } },
               { range: { 'task.runAt': { lte: 'now' } } },
             ],
           },
         },
-        size,
+        size: 10,
         sort: { 'task.runAt': { order: 'asc' } },
         version: true,
       },
     });
-  }
+  };
 
   /**
    * Updates the specified doc in the index, returning the doc

@@ -18,9 +18,9 @@
  */
 
 import Joi from 'joi';
+import { Logger } from './logger';
 import {
   ConcreteTaskInstance,
-  ElasticJs,
   RunContext,
   RunResult,
   TaskDefinition,
@@ -28,10 +28,13 @@ import {
 } from './task';
 import { intervalFromNow, minutesFromNow } from './task_intervals';
 
-interface Logger {
-  info: (msg: string) => void;
-  debug: (msg: string) => void;
-  warning: (msg: string) => void;
+export interface TaskRunner {
+  numWorkers: number;
+  isExpired: boolean;
+  cancel: () => Promise<void>;
+  claimOwnership: () => Promise<boolean>;
+  run: () => Promise<RunResult>;
+  toString?: () => string;
 }
 
 interface Updatable {
@@ -39,56 +42,111 @@ interface Updatable {
   remove(id: string): Promise<void>;
 }
 
+type ContextProvider = (instance: ConcreteTaskInstance) => Promise<RunContext>;
+
 interface Opts {
   logger: Logger;
-  callCluster: ElasticJs;
   definition: TaskDefinition;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  kbnServer: object;
+  contextProvider: ContextProvider;
 }
 
-export class TaskRunner {
+/**
+ * Runs a background task, ensures that errors are properly handled,
+ * allows for cancellation.
+ *
+ * @export
+ * @class TaskManagerRunner
+ * @implements {TaskRunner}
+ */
+export class TaskManagerRunner implements TaskRunner {
   private promise?: PromiseLike<RunResult | undefined>;
   private instance: ConcreteTaskInstance;
   private definition: TaskDefinition;
   private logger: Logger;
   private store: Updatable;
-  private context: RunContext;
+  private contextProvider: ContextProvider;
 
+  /**
+   * Creates an instance of TaskManagerRunner.
+   * @param {Opts} opts
+   * @prop {Logger} logger - The task manager logger
+   * @prop {TaskDefinition} definition - The definition of the task being run
+   * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
+   * @prop {Updatable} store - The store used to read / write tasks instance info
+   * @prop {ContextProvider} contextProvider - An async function that provides the task's run context
+   * @memberof TaskManagerRunner
+   */
   constructor(opts: Opts) {
-    this.instance = opts.instance;
+    this.instance = sanitizeInstance(opts.instance);
     this.definition = opts.definition;
     this.logger = opts.logger;
     this.store = opts.store;
-    this.context = {
-      callCluster: opts.callCluster,
-      params: opts.instance.params || {},
-      state: opts.instance.state || {},
-      kbnServer: opts.kbnServer,
-    };
+    this.contextProvider = opts.contextProvider;
   }
 
+  /**
+   * Gets how many workers are occupied by this task instance.
+   *
+   * @readonly
+   * @memberof TaskManagerRunner
+   */
+  public get numWorkers() {
+    return this.definition.numWorkers || 1;
+  }
+
+  /**
+   * Gets the id of this task instance.
+   *
+   * @readonly
+   * @memberof TaskManagerRunner
+   */
   public get id() {
     return this.instance.id;
   }
 
-  public get type() {
+  /**
+   * Gets the task type of this task instance.
+   *
+   * @readonly
+   * @memberof TaskManagerRunner
+   */
+  public get taskType() {
     return this.instance.taskType;
   }
 
-  public get isTimedOut() {
+  /**
+   * Gets whether or not this task has run longer than its expiration setting allows.
+   *
+   * @readonly
+   * @memberof TaskManagerRunner
+   */
+  public get isExpired() {
     return this.instance.runAt < new Date();
   }
 
+  /**
+   * Returns a log-friendly representation of this task.
+   *
+   * @returns
+   * @memberof TaskManagerRunner
+   */
   public toString() {
     return `${this.instance.taskType} "${this.instance.id}"`;
   }
 
+  /**
+   * Runs the task, handling the task result, errors, etc, rescheduling if need be.
+   *
+   * @returns {Promise<RunResult>}
+   * @memberof TaskManagerRunner
+   */
   public async run(): Promise<RunResult> {
     try {
       this.logger.debug(`Running task ${this}`);
-      this.promise = this.definition.run(this.context);
+      const context = await this.contextProvider(this.instance);
+      this.promise = this.definition.run(context);
       return this.processResult(this.validateResult(await this.promise));
     } catch (error) {
       this.logger.warning(`Task ${this} failed ${error.stack}`);
@@ -98,7 +156,14 @@ export class TaskRunner {
     }
   }
 
-  public async claimOwnership() {
+  /**
+   * Attempts to claim exclusive rights to run the task. If the attempt fails
+   * with a 409 (http conflict), we assume another Kibana instance beat us to the punch.
+   *
+   * @returns
+   * @memberof TaskManagerRunner
+   */
+  public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
 
     try {
@@ -118,10 +183,17 @@ export class TaskRunner {
     return false;
   }
 
+  /**
+   * Attempts to cancel the task.
+   *
+   * @returns
+   * @memberof TaskManagerRunner
+   */
   public async cancel() {
     const promise: any = this.promise;
 
     if (promise && promise.cancel) {
+      this.promise = undefined;
       return promise.cancel();
     }
 
@@ -155,4 +227,12 @@ export class TaskRunner {
 
     return result;
   }
+}
+
+function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance {
+  return {
+    ...instance,
+    params: instance.params || {},
+    state: instance.state || {},
+  };
 }

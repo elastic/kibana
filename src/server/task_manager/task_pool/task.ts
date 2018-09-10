@@ -48,19 +48,9 @@ export interface RunContext {
   kbnServer: object;
 
   /**
-   * Task-specific parameters. e.g. for a monitoring task, this might
-   * look something like { cluster: 'elasticsearch-1', email: 'admin@example.com' }.
-   * As far as the task manager is concerned, this is just a data blob.
+   * The document describing the task instance, its params, state, id, etc.
    */
-  params: object;
-
-  /**
-   * Task-specific state. Unlike params (which are usually user generated, task-specific
-   * configuration), the state is something that may change with each run. Each run
-   * can return a state object which will be passed to the next run, allowing tasks
-   * to essentially be stateful without having to manage the state themselves.
-   */
-  state: object;
+  taskInstance: ConcreteTaskInstance;
 }
 
 /**
@@ -131,7 +121,7 @@ export interface TaskDefinition {
    * The numer of workers / slots a running instance of this task occupies.
    * This defaults to 1.
    */
-  workersOccupied?: number;
+  numWorkers?: number;
 
   /**
    * A function which, does the work this task is built to do. Note,
@@ -147,7 +137,7 @@ export interface TaskDefinition {
  * A task definition with all of its properties set to a valid value.
  */
 export interface SanitizedTaskDefinition extends TaskDefinition {
-  workersOccupied: number;
+  numWorkers: number;
 }
 
 export const validateTaskDefinition = Joi.object({
@@ -155,7 +145,7 @@ export const validateTaskDefinition = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeOut: Joi.string().default('5m'),
-  workersOccupied: Joi.number().default(1),
+  numWorkers: Joi.number().default(1),
   run: Joi.func().required(),
 }).default();
 
