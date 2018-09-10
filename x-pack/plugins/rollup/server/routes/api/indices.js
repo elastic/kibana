@@ -60,9 +60,7 @@ export function registerIndicesRoute(server) {
           callWithRequest('rollup.rollupIndexCapabilities', { indexPattern }),
         ]);
 
-        // If there are no field capabilities then the API will return a 404, and we will end up
-        // in the error handler. So if we're at this point, then we know we have matching indices.
-        const doesMatchIndices = true;
+        const doesMatchIndices = Object.entries(fieldCapabilities.fields).length !== 0;
         const doesMatchRollupIndices = Object.entries(rollupIndexCapabilities).length !== 0;
 
         const fieldCapabilitiesEntries = Object.entries(fieldCapabilities.fields);
