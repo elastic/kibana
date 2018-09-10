@@ -9,6 +9,9 @@ import { validateIndexPattern } from './validate_index_pattern';
 import { validateRollupIndex } from './validate_rollup_index';
 import { validateRollupCron } from './validate_rollup_cron';
 import { validateRollupPageSize } from './validate_rollup_page_size';
+import { validateDateHistogramField } from './validate_date_histogram_field';
+import { validateDateHistogramInterval } from './validate_date_histogram_interval';
+import { validateDateHistogramDelay } from './validate_date_histogram_delay';
 
 export const STEP_LOGISTICS = 'STEP_LOGISTICS';
 export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
@@ -55,10 +58,25 @@ export const stepIdToStepConfigMap = {
   },
   [STEP_DATE_HISTOGRAM]: {
     defaultFields: {
-      dateHistogramInterval: '1h',
+      dateHistogramField: null,
+      dateHistogramInterval: null,
       dateHistogramDelay: null,
       dateHistogramTimeZone: null,
-      dateHistogramField: 'utc_time',
+    },
+    fieldsValidator: fields => {
+      const {
+        dateHistogramField,
+        dateHistogramInterval,
+        dateHistogramDelay,
+      } = fields;
+
+      const errors = {
+        dateHistogramField: validateDateHistogramField(dateHistogramField),
+        dateHistogramInterval: validateDateHistogramInterval(dateHistogramInterval),
+        dateHistogramDelay: validateDateHistogramDelay(dateHistogramDelay),
+      };
+
+      return errors;
     },
   },
   [STEP_GROUPS]: {

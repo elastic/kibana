@@ -174,7 +174,7 @@ export class StepDateHistogramUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
-                      defaultMessage="Example intervals: 30s, 20m, 1h, 2d, 5M."
+                      defaultMessage="Example intervals: 30s, 20m, 5h, 1d, 1M."
                     />
                   </p>
                 </Fragment>
