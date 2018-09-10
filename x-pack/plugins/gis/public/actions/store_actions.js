@@ -23,11 +23,19 @@ export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 
-export function replaceLayerList(layerList) {
-  return {
-    type: REPLACE_LAYERLIST,
-    layerList: layerList
+export function replaceLayerList(newLayerList) {
+  return async (dispatch, getState) => {
+    await dispatch({
+      type: REPLACE_LAYERLIST,
+      layerList: newLayerList
+    });
+    const layerList = getLayerList(getState());
+    const mapState = getMapState(getState());
+    layerList.forEach((layer) => {
+      layer.syncDataToMapState(mapState, Symbol('data_request_sync_layerreplacement'), dispatch);
+    });
   };
+
 }
 
 export function toggleLayerVisible(layerId) {
@@ -158,15 +166,15 @@ export async function loadMapResources(dispatch) {
         "temporary": false,
         "style": {},
         "type": "TILE"
-      }
-      // {
-      //   "id": "hqoqo",
-      //   "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
-      //   "type": "VECTOR"
-      // },
+      },
+      {
+        "id": "hqoqo",
+        "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE" },
+        "visible": true,
+        "temporary": false,
+        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+        "type": "VECTOR"
+      },
       // {
       //   "id": "dx9uf",
       //   "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },

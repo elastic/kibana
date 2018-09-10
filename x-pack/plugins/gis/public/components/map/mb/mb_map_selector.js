@@ -42,8 +42,10 @@ function syncLayerOrder(mbMap, layerList) {
     const nextLayer = layerList[i + 1];
     const mbLayersToMove = mbLayers.filter((mbLayer) => mbLayer.source === layer.getId());
     const nextMbLayer = mbLayers.find(mbLayer => mbLayer.source === nextLayer.getId());//first layer of "next" source
-    for (let j = 0; j < mbLayersToMove.length; j++) {
-      mbMap.moveLayer(mbLayersToMove[j].id, nextMbLayer.id);
+    if (nextMbLayer) {
+      for (let j = 0; j < mbLayersToMove.length; j++) {
+        mbMap.moveLayer(mbLayersToMove[j].id, nextMbLayer.id);
+      }
     }
   }
 

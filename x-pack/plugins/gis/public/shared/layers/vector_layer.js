@@ -53,6 +53,35 @@ export class VectorLayer extends ALayer {
     dispatch(endDataLoad(this.getId(), data, requestToken));
   }
 
+  syncLayerWithMB(mbMap) {
+
+    const mbSource = mbMap.getSource(this.getId());
+    if (!mbSource) {
+      mbMap.addSource(this.getId(), {
+        type: 'geojson',
+        data: { 'type': 'FeatureCollection', 'features': [] }
+      });
+      mbMap.addLayer({
+        id: this.getId() + '_fill',
+        type: 'fill',
+        source: this.getId(),
+        paint: {
+          'fill-color': 'rgb(220,0,0)',
+          'fill-opacity': 0.6
+        }
+      });
+    }
+
+    const mbSourceAfter = mbMap.getSource(this.getId());
+
+    //todo: similar problem as OL here. keeping track of data on source
+    if (this._descriptor.data !== mbSourceAfter._data) {
+      mbSourceAfter.setData(this._descriptor.data);
+    }
+
+    mbMap.setLayoutProperty(this.getId() + '_fill', 'visibility', this.isVisible() ? 'visible' : 'none');
+  }
+
   _createCorrespondingOLLayer() {
     const vectorLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
