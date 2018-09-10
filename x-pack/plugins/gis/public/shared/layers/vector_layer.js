@@ -6,7 +6,6 @@
 
 import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
-import { getOlLayerStyle } from '../ol_layer_defaults';
 import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
@@ -91,13 +90,14 @@ export class VectorLayer extends ALayer {
     });
     vectorLayer.setVisible(this.isVisible());
     const style = this.getCurrentStyle();
-    vectorLayer.setStyle(getOlLayerStyle(style, this.isTemporary()));
+    const olStyle = style.getOLLayerStyle(this.isTemporary());
+    vectorLayer.setStyle(olStyle);
     return vectorLayer;
   }
 
   _syncOLStyle(olLayer) {
     const style = this.getCurrentStyle();
-    const appliedStyle = getOlLayerStyle(style, this.isTemporary());
+    const appliedStyle = style.getOLLayerStyle(this.isTemporary());
     olLayer.setStyle(appliedStyle);
   }
 

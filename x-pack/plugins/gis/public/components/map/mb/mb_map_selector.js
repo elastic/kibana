@@ -61,6 +61,8 @@ const MB_MAP = new mapboxgl.Map({
     layers: [],
   },
 });
+MB_MAP.dragRotate.disable();
+MB_MAP.touchZoomRotate.disableRotation();
 
 const getMBImplementation = createSelector(() => {
   return MB_MAP;

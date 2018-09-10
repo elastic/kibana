@@ -13,6 +13,14 @@ import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
 
+import * as ol from 'openlayers';
+
+const DEFAULT_COLOR = '#e6194b';
+const TEMP_FILL_OPACITY = '05';
+const FILL_OPACITY = '15';
+const TEMP_STROKE_OPACITY = '77';
+const STROKE_OPACITY = 'FF';
+
 export class FillAndOutlineStyle {
 
   static type = 'FILL_AND_OUTLINE';
@@ -73,4 +81,21 @@ export class FillAndOutlineStyle {
   getHexColor() {
     return this._descriptor.color;
   }
+
+
+  getOLLayerStyle(temp = false) {
+    const color = this.getHexColor() || DEFAULT_COLOR;
+    return new ol.style.Style({
+      fill: new ol.style.Fill({
+        // TODO: Make alpha channel adjustable
+        color: `${color}${temp ? TEMP_FILL_OPACITY : FILL_OPACITY}`,
+      }),
+      stroke: new ol.style.Stroke({
+        color: `${color}${temp ? TEMP_STROKE_OPACITY : STROKE_OPACITY}`,
+        width: temp ? 1 : 2
+      })
+    });
+  }
+
+
 }
