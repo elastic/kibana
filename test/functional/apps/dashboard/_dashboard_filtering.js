@@ -68,10 +68,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      // Uncomment once https://github.com/elastic/kibana/issues/22783 is fixed
-      // it('goal and guages are filtered', async () => {
-      //   await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      // });
+      it('goal and guages are filtered', async () => {
+        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
@@ -131,10 +130,9 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.dataTableRowCount(0);
       });
 
-      // Uncomment once https://github.com/elastic/kibana/issues/22783 is fixed
-      // it('goal and guages are filtered', async () => {
-      //   await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      // });
+      it('goal and guages are filtered', async () => {
+        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
+      });
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
