@@ -38,8 +38,8 @@ function createNodeMetrics(
   const { timerange, metrics } = options;
   const bucketSize = getBucketSizeInSeconds(timerange.interval);
   const lastBucket = findLastFullBucket(bucket, bucketSize, options);
-  return metrics.filter(metric => lastBucket[metric.type.toString()]).map(metric => {
-    const metricObj = lastBucket[metric.type.toString()];
+  return metrics.filter(metric => lastBucket[metric.type]).map(metric => {
+    const metricObj = lastBucket[metric.type];
     return { name: metric.type, value: (metricObj && metricObj.value) || 0 };
   });
 }
