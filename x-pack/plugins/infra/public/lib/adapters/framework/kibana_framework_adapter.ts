@@ -138,6 +138,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     uiRoutes.enable();
 
     uiRoutes.otherwise({
+      reloadOnSearch: false,
       template:
         '<infra-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></infra-ui-kibana-adapter>',
     });
