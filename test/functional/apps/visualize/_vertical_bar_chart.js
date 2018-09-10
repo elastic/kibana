@@ -22,7 +22,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('vertical bar chart', function () {
@@ -291,11 +290,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split Series');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const error = await find.byCssSelector('.vis-editor-agg-error');
-        const errorMessage = await error.getProperty('innerText');
-        log.debug(errorMessage);
+        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
         expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
       });
 
