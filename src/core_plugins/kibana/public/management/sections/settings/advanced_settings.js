@@ -25,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   Query,
 } from '@elastic/eui';
 
@@ -36,6 +35,8 @@ import { Form } from './components/form';
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import './advanced_settings.less';
+import { registerDefaultComponents, PAGE_TITLE_COMPONENT, PAGE_FOOTER_COMPONENT } from './components/default_component_registry';
+import { getSettingsComponent } from './components/component_registry';
 
 export class AdvancedSettings extends Component {
   static propTypes = {
@@ -50,8 +51,11 @@ export class AdvancedSettings extends Component {
     this.init(config);
     this.state = {
       query: parsedQuery,
+      footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
     };
+
+    registerDefaultComponents();
   }
 
   init(config) {
@@ -59,9 +63,9 @@ export class AdvancedSettings extends Component {
     this.groupedSettings = this.mapSettings(this.settings);
 
     this.categories = Object.keys(this.groupedSettings).sort((a, b) => {
-      if(a === DEFAULT_CATEGORY) return -1;
-      if(b === DEFAULT_CATEGORY) return 1;
-      if(a > b) return 1;
+      if (a === DEFAULT_CATEGORY) return -1;
+      if (b === DEFAULT_CATEGORY) return 1;
+      if (a > b) return 1;
       return a === b ? 0 : -1;
     });
 
@@ -126,20 +130,28 @@ export class AdvancedSettings extends Component {
   clearQuery = () => {
     this.setState({
       query: Query.parse(''),
+      footerQueryMatched: false,
       filteredSettings: this.groupedSettings,
     });
   }
 
+  onFooterQueryMatchChange = (matched) => {
+    this.setState({
+      footerQueryMatched: matched
+    });
+  }
+
   render() {
-    const { filteredSettings, query } = this.state;
+    const { filteredSettings, query, footerQueryMatched } = this.state;
+
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
       <div className="advancedSettings">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
-            <EuiText>
-              <h1 data-test-subj="managementSettingsTitle">Settings</h1>
-            </EuiText>
+            <PageTitle />
           </EuiFlexItem>
           <EuiFlexItem>
             <Search
@@ -150,7 +162,7 @@ export class AdvancedSettings extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <CallOuts/>
+        <CallOuts />
         <EuiSpacer size="m" />
         <Form
           settings={filteredSettings}
@@ -159,7 +171,9 @@ export class AdvancedSettings extends Component {
           clearQuery={this.clearQuery}
           save={this.saveConfig}
           clear={this.clearConfig}
+          showNoResultsMessage={!footerQueryMatched}
         />
+        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
       </div>
     );
   }

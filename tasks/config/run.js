@@ -60,6 +60,7 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
+  const esFrom = process.env.TEST_ES_FROM || 'source';
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
@@ -96,6 +97,15 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
       ]
     },
 
@@ -156,7 +166,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
@@ -168,7 +178,7 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
@@ -180,7 +190,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
@@ -194,7 +204,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--',
@@ -207,7 +217,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
+        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,

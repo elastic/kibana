@@ -17,39 +17,35 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { catchError, first, map, shareReplay } from 'rxjs/operators';
+import { ConnectableObservable, Observable, Subscription } from 'rxjs';
+import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { Server } from '..';
-import { ConfigService, Env, RawConfig } from '../config';
-
+import { Config, ConfigService, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
-
-export type OnShutdown = (reason?: Error) => void;
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
  */
 export class Root {
   public readonly logger: LoggerFactory;
-  protected readonly configService: ConfigService;
+  private readonly configService: ConfigService;
   private readonly log: Logger;
-  private server?: Server;
+  private readonly server: Server;
   private readonly loggingService: LoggingService;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
-    rawConfig$: Observable<RawConfig>,
+    config$: Observable<Config>,
     private readonly env: Env,
-    private readonly onShutdown: OnShutdown = () => {
-      // noop
-    }
+    private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
-
     this.log = this.logger.get('root');
-    this.configService = new ConfigService(rawConfig$, env, this.logger);
+
+    this.configService = new ConfigService(config$, env, this.logger);
+    this.server = new Server(this.configService, this.logger, this.env);
   }
 
   public async start() {
@@ -57,62 +53,63 @@ export class Root {
 
     try {
       await this.setupLogging();
-      await this.startServer();
+      await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;
     }
   }
 
-  public async shutdown(reason?: Error) {
+  public async shutdown(reason?: any) {
     this.log.debug('shutting root down');
 
-    await this.stopServer();
+    if (reason) {
+      if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {
+        reason = new Error(
+          `Port ${reason.port} is already in use. Another instance of Kibana may be running!`
+        );
+      }
+
+      this.log.fatal(reason);
+    }
+
+    await this.server.stop();
 
     if (this.loggingConfigSubscription !== undefined) {
       this.loggingConfigSubscription.unsubscribe();
       this.loggingConfigSubscription = undefined;
     }
-
     await this.loggingService.stop();
 
-    this.onShutdown(reason);
-  }
-
-  protected async startServer() {
-    this.server = new Server(this.configService, this.logger, this.env);
-    return this.server.start();
-  }
-
-  protected async stopServer() {
-    if (this.server === undefined) {
-      return;
+    if (this.onShutdown !== undefined) {
+      this.onShutdown(reason);
     }
-
-    await this.server.stop();
-    this.server = undefined;
   }
 
   private async setupLogging() {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = this.configService.atPath('logging', LoggingConfig).pipe(
       map(config => this.loggingService.upgrade(config)),
-      catchError(err => {
-        // This specifically console.logs because we were not able to configure the logger.
-        // tslint:disable-next-line no-console
-        console.error('Configuring logger failed:', err);
+      // This specifically console.logs because we were not able to configure the logger.
+      // tslint:disable-next-line no-console
+      tap({ error: err => console.error('Configuring logger failed:', err) }),
+      publishReplay(1)
+    ) as ConnectableObservable<void>;
 
-        throw err;
-      }),
-      shareReplay(1)
-    );
-
-    // Wait for the first update to complete and throw if it fails.
+    // Subscription and wait for the first update to complete and throw if it fails.
+    const connectSubscription = update$.connect();
     await update$.pipe(first()).toPromise();
 
     // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
     this.loggingConfigSubscription = update$.subscribe({
-      error: error => this.shutdown(error),
+      error: err => this.shutdown(err),
     });
+
+    // Add subscription we got from `connect` so that we can dispose both of them
+    // at once. We can't inverse this and add consequent updates subscription to
+    // the one we got from `connect` because in the error case the latter will be
+    // automatically disposed before the error is forwarded to the former one so
+    // the shutdown logic won't be called.
+    this.loggingConfigSubscription.add(connectSubscription);
   }
 }

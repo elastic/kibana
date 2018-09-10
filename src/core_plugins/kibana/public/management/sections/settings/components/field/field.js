@@ -87,7 +87,7 @@ export class Field extends PureComponent {
 
   getEditableValue(type, value, defVal) {
     const val = (value === null || value === undefined) ? defVal : value;
-    switch(type) {
+    switch (type) {
       case 'array':
         return val.join(', ');
       case 'boolean':
@@ -102,10 +102,10 @@ export class Field extends PureComponent {
   }
 
   getDisplayedDefaultValue(type, defVal) {
-    if(defVal === undefined || defVal === null || defVal === '') {
+    if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
-    switch(type) {
+    switch (type) {
       case 'array':
         return defVal.join(', ');
       default:
@@ -193,7 +193,7 @@ export class Field extends PureComponent {
   }
 
   onImageChange = async (files) => {
-    if(!files.length) {
+    if (!files.length) {
       this.clearError();
       this.setState({
         unsavedValue: null,
@@ -212,18 +212,18 @@ export class Field extends PureComponent {
         changeImage: true,
         unsavedValue: base64Image,
       });
-    } catch(err) {
+    } catch (err) {
       toastNotifications.addDanger('Image could not be saved');
       this.cancelChangeImage();
     }
   }
 
   getImageAsBase64(file) {
-    if(!file instanceof File) {
+    if (!file instanceof File) {
       return null;
     }
 
-    const reader  = new FileReader();
+    const reader = new FileReader();
     reader.readAsDataURL(file);
 
     return new Promise((resolve, reject) => {
@@ -245,7 +245,7 @@ export class Field extends PureComponent {
   cancelChangeImage = () => {
     const { savedValue } = this.state;
 
-    if(this.changeImageForm) {
+    if (this.changeImageForm) {
       this.changeImageForm.fileInput.value = null;
       this.changeImageForm.handleChange();
     }
@@ -268,14 +268,14 @@ export class Field extends PureComponent {
     const { name, defVal, type } = this.props.setting;
     const { changeImage, savedValue, unsavedValue, isJsonArray } = this.state;
 
-    if(savedValue === unsavedValue) {
+    if (savedValue === unsavedValue) {
       return;
     }
 
     let valueToSave = unsavedValue;
     let isSameValue = false;
 
-    switch(type) {
+    switch (type) {
       case 'array':
         valueToSave = valueToSave.split(',').map(val => val.trim());
         isSameValue = valueToSave.join(',') === defVal.join(',');
@@ -295,10 +295,10 @@ export class Field extends PureComponent {
         await this.props.save(name, valueToSave);
       }
 
-      if(changeImage) {
+      if (changeImage) {
         this.cancelChangeImage();
       }
-    } catch(e) {
+    } catch (e) {
       toastNotifications.addDanger(`Unable to save ${name}`);
     }
     this.setLoading(false);
@@ -311,7 +311,7 @@ export class Field extends PureComponent {
       await this.props.clear(name);
       this.cancelChangeImage();
       this.clearError();
-    } catch(e) {
+    } catch (e) {
       toastNotifications.addDanger(`Unable to reset ${name}`);
     }
     this.setLoading(false);
@@ -321,7 +321,7 @@ export class Field extends PureComponent {
     const { loading, changeImage, unsavedValue } = this.state;
     const { name, value, type, options, isOverridden } = setting;
 
-    switch(type) {
+    switch (type) {
       case 'boolean':
         return (
           <EuiSwitch
@@ -359,7 +359,7 @@ export class Field extends PureComponent {
           </div>
         );
       case 'image':
-        if(!isDefaultValue(setting) && !changeImage) {
+        if (!isDefaultValue(setting) && !changeImage) {
           return (
             <EuiImage
               allowFullScreen
@@ -419,7 +419,7 @@ export class Field extends PureComponent {
   }
 
   renderLabel(setting) {
-    return(
+    return (
       <span aria-label={setting.ariaName}>
         {setting.name}
       </span>
@@ -438,7 +438,7 @@ export class Field extends PureComponent {
     const defaultLink = this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
 
-    if(defaultLink || imageLink) {
+    if (defaultLink || imageLink) {
       return (
         <span>
           {defaultLink}
@@ -462,8 +462,12 @@ export class Field extends PureComponent {
   }
 
   renderDescription(setting) {
-    return (
-      <Fragment>
+    let description;
+
+    if (React.isValidElement(setting.description)) {
+      description = setting.description;
+    } else {
+      description = (
         <div
           /*
            * Justification for dangerouslySetInnerHTML:
@@ -471,6 +475,12 @@ export class Field extends PureComponent {
            */
           dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
         />
+      );
+    }
+
+    return (
+      <Fragment>
+        {description}
         {this.renderDefaultValue(setting)}
       </Fragment>
     );
@@ -478,14 +488,14 @@ export class Field extends PureComponent {
 
   renderDefaultValue(setting) {
     const { type, defVal } = setting;
-    if(isDefaultValue(setting)) {
+    if (isDefaultValue(setting)) {
       return;
     }
     return (
       <Fragment>
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          { type === 'json' ? (
+          {type === 'json' ? (
             <Fragment>
               Default:
               <EuiCodeBlock
@@ -498,9 +508,9 @@ export class Field extends PureComponent {
             </Fragment>
           ) : (
             <Fragment>
-              Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
+                Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
             </Fragment>
-          ) }
+          )}
         </EuiText>
       </Fragment>
     );
@@ -508,7 +518,7 @@ export class Field extends PureComponent {
 
   renderResetToDefaultLink(setting) {
     const { ariaName, name } = setting;
-    if(isDefaultValue(setting)) {
+    if (isDefaultValue(setting)) {
       return;
     }
     return (
@@ -528,7 +538,7 @@ export class Field extends PureComponent {
   renderChangeImageLink(setting) {
     const { changeImage } = this.state;
     const { type, value, ariaName, name } = setting;
-    if(type !== 'image' || !value || changeImage) {
+    if (type !== 'image' || !value || changeImage) {
       return;
     }
     return (
@@ -554,7 +564,7 @@ export class Field extends PureComponent {
     }
 
     return (
-      <EuiFormRow className="advancedSettings__field__actions" hasEmptyLabelSpace>
+      <EuiFormRow className="advancedSettings__field__actions">
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton

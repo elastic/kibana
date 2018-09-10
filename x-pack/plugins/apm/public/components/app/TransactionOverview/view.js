@@ -9,13 +9,14 @@ import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
-import Charts from '../../shared/charts/TransactionCharts';
-import { getMlJobUrl } from '../../../utils/url';
+import TransactionCharts from '../../shared/charts/TransactionCharts';
+import { ViewMLJob } from '../../../utils/url';
 import List from './List';
 import { units, px, fontSizes } from '../../../style/variables';
-import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
+import { TransactionOverviewChartsRequest } from '../../../store/reactReduxRequest/transactionOverviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
@@ -69,20 +70,18 @@ class TransactionOverview extends Component {
     const mlEnabled = chrome.getInjected('mlEnabled');
 
     const ChartHeaderContent =
-      hasDynamicBaseline && license.data.features.ml.isAvailable ? (
+      hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
         <MLTipContainer>
           <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
-            <a
-              href={getMlJobUrl(
-                serviceName,
-                transactionType,
-                this.props.location
-              )}
+            <ViewMLJob
+              serviceName={serviceName}
+              transactionType={transactionType}
+              location={this.props.location}
             >
-              View Job
-            </a>
+              View job
+            </ViewMLJob>
           </MLText>
         </MLTipContainer>
       ) : null;
@@ -91,7 +90,7 @@ class TransactionOverview extends Component {
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          {license.data.features.ml.isAvailable &&
+          {get(license.data, 'features.ml.isAvailable') &&
             mlEnabled && (
               <DynamicBaselineButton onOpenFlyout={this.onOpenFlyout} />
             )}
@@ -110,10 +109,10 @@ class TransactionOverview extends Component {
 
         <TabNavigation />
 
-        <OverviewChartsRequest
+        <TransactionOverviewChartsRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <Charts
+            <TransactionCharts
               charts={data}
               urlParams={urlParams}
               location={location}

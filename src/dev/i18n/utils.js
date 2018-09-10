@@ -30,7 +30,6 @@ import { promisify } from 'util';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
-const LINE_BREAK_REGEX = /\n/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -58,7 +57,7 @@ export function isI18nTranslateFunction(node) {
 }
 
 export function formatJSString(string) {
-  return (string || '').replace(ESCAPE_LINE_BREAK_REGEX, '').replace(LINE_BREAK_REGEX, '\\n');
+  return (string || '').replace(ESCAPE_LINE_BREAK_REGEX, '');
 }
 
 export function formatHTMLString(string) {

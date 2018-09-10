@@ -34,7 +34,6 @@ export function cephMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Ceph server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.cephMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
 [Learn more]({learnMoreLink}).',
       values: {
