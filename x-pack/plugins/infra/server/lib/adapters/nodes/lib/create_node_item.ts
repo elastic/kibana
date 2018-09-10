@@ -5,6 +5,7 @@
  */
 
 import { last } from 'lodash';
+import { isNumber } from 'lodash';
 import moment from 'moment';
 import { InfraNode, InfraNodeMetric } from '../../../../../common/graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
@@ -22,7 +23,8 @@ const findLastFullBucket = (
   const { buckets } = bucket.timeseries;
   const to = moment.utc(options.timerange.to);
   return buckets.reduce((current, item) => {
-    const date = moment.utc(item.key + bucketSize * 1000);
+    const itemKey = isNumber(item.key) ? item.key : parseInt(item.key, 10);
+    const date = moment.utc(itemKey + bucketSize * 1000);
     if (!date.isAfter(to) && item.doc_count > 0) {
       return item;
     }
