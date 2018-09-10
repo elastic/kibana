@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getTelemetryOptIn } from "./get_telemetry_opt_in";
+
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
-  const withXpackInfo = () => ({
+  const withXpackInfo = async () => ({
     ...originalInjectedVars,
+    telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined
   });
 
   // security feature is disabled
   if (!server.plugins.security) {
-    return withXpackInfo();
+    return await withXpackInfo();
   }
 
   // not enough license info to make decision one way or another
@@ -23,7 +26,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
 
   // authentication is not a thing you can do
   if (xpackInfo.license.isOneOf('basic')) {
-    return withXpackInfo();
+    return await withXpackInfo();
   }
 
   // request is not authenticated
@@ -32,5 +35,5 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // plugin enabled, license is appropriate, request is authenticated
-  return withXpackInfo();
+  return await withXpackInfo();
 }

@@ -18,7 +18,7 @@ exports[`Field for array setting should render as read only with help text if ov
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -26,7 +26,7 @@ exports[`Field for array setting should render as read only with help text if ov
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -34,15 +34,15 @@ exports[`Field for array setting should render as read only with help text if ov
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   default_value
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -119,7 +119,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -127,7 +127,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -202,7 +202,7 @@ exports[`Field for array setting should render default value if there is no user
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -210,7 +210,7 @@ exports[`Field for array setting should render default value if there is no user
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -280,7 +280,7 @@ exports[`Field for array setting should render user value if there is user value
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -288,7 +288,7 @@ exports[`Field for array setting should render user value if there is user value
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -296,15 +296,15 @@ exports[`Field for array setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   default_value
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -389,7 +389,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -397,7 +397,7 @@ exports[`Field for boolean setting should render as read only with help text if 
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -405,15 +405,15 @@ exports[`Field for boolean setting should render as read only with help text if 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   true
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -488,7 +488,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -496,7 +496,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -569,7 +569,7 @@ exports[`Field for boolean setting should render default value if there is no us
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -577,7 +577,7 @@ exports[`Field for boolean setting should render default value if there is no us
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -645,7 +645,7 @@ exports[`Field for boolean setting should render user value if there is user val
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -653,7 +653,7 @@ exports[`Field for boolean setting should render user value if there is user val
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -661,15 +661,15 @@ exports[`Field for boolean setting should render user value if there is user val
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   true
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -752,7 +752,7 @@ exports[`Field for image setting should render as read only with help text if ov
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -760,7 +760,7 @@ exports[`Field for image setting should render as read only with help text if ov
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -768,15 +768,15 @@ exports[`Field for image setting should render as read only with help text if ov
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -850,7 +850,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -858,7 +858,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -932,7 +932,7 @@ exports[`Field for image setting should render default value if there is no user
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -940,7 +940,7 @@ exports[`Field for image setting should render default value if there is no user
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1009,7 +1009,7 @@ exports[`Field for image setting should render user value if there is user value
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1017,7 +1017,7 @@ exports[`Field for image setting should render user value if there is user value
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1025,15 +1025,15 @@ exports[`Field for image setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1126,7 +1126,7 @@ exports[`Field for json setting should render as read only with help text if ove
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1134,7 +1134,7 @@ exports[`Field for json setting should render as read only with help text if ove
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1142,7 +1142,7 @@ exports[`Field for json setting should render as read only with help text if ove
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default:
                 <EuiCodeBlock
                   language="json"
@@ -1151,10 +1151,10 @@ exports[`Field for json setting should render as read only with help text if ove
                 >
                   {}
                 </EuiCodeBlock>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1247,7 +1247,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1255,7 +1255,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1346,7 +1346,7 @@ exports[`Field for json setting should render default value if there is no user 
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1354,7 +1354,7 @@ exports[`Field for json setting should render default value if there is no user 
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1362,7 +1362,7 @@ exports[`Field for json setting should render default value if there is no user 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default:
                 <EuiCodeBlock
                   language="json"
@@ -1371,10 +1371,10 @@ exports[`Field for json setting should render default value if there is no user 
                 >
                   {}
                 </EuiCodeBlock>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1475,7 +1475,7 @@ exports[`Field for json setting should render user value if there is user value 
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1483,7 +1483,7 @@ exports[`Field for json setting should render user value if there is user value 
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1491,7 +1491,7 @@ exports[`Field for json setting should render user value if there is user value 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default:
                 <EuiCodeBlock
                   language="json"
@@ -1500,10 +1500,10 @@ exports[`Field for json setting should render user value if there is user value 
                 >
                   {}
                 </EuiCodeBlock>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1604,7 +1604,7 @@ exports[`Field for markdown setting should render as read only with help text if
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1612,7 +1612,7 @@ exports[`Field for markdown setting should render as read only with help text if
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1620,15 +1620,15 @@ exports[`Field for markdown setting should render as read only with help text if
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1721,7 +1721,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1729,7 +1729,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1820,7 +1820,7 @@ exports[`Field for markdown setting should render default value if there is no u
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1828,7 +1828,7 @@ exports[`Field for markdown setting should render default value if there is no u
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1914,7 +1914,7 @@ exports[`Field for markdown setting should render user value if there is user va
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1922,7 +1922,7 @@ exports[`Field for markdown setting should render user value if there is user va
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1930,15 +1930,15 @@ exports[`Field for markdown setting should render user value if there is user va
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2039,7 +2039,7 @@ exports[`Field for number setting should render as read only with help text if o
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2047,7 +2047,7 @@ exports[`Field for number setting should render as read only with help text if o
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2055,15 +2055,15 @@ exports[`Field for number setting should render as read only with help text if o
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   5
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2140,7 +2140,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2148,7 +2148,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2223,7 +2223,7 @@ exports[`Field for number setting should render default value if there is no use
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2231,7 +2231,7 @@ exports[`Field for number setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2301,7 +2301,7 @@ exports[`Field for number setting should render user value if there is user valu
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2309,7 +2309,7 @@ exports[`Field for number setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2317,15 +2317,15 @@ exports[`Field for number setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   5
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2410,7 +2410,7 @@ exports[`Field for select setting should render as read only with help text if o
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2418,7 +2418,7 @@ exports[`Field for select setting should render as read only with help text if o
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2426,15 +2426,15 @@ exports[`Field for select setting should render as read only with help text if o
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   orange
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2528,7 +2528,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2536,7 +2536,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2628,7 +2628,7 @@ exports[`Field for select setting should render default value if there is no use
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2636,7 +2636,7 @@ exports[`Field for select setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2723,7 +2723,7 @@ exports[`Field for select setting should render user value if there is user valu
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2731,7 +2731,7 @@ exports[`Field for select setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2739,15 +2739,15 @@ exports[`Field for select setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   orange
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2849,7 +2849,7 @@ exports[`Field for string setting should render as read only with help text if o
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2857,7 +2857,7 @@ exports[`Field for string setting should render as read only with help text if o
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2865,15 +2865,15 @@ exports[`Field for string setting should render as read only with help text if o
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2950,7 +2950,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2958,7 +2958,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -3033,7 +3033,7 @@ exports[`Field for string setting should render default value if there is no use
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -3041,7 +3041,7 @@ exports[`Field for string setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -3111,7 +3111,7 @@ exports[`Field for string setting should render user value if there is user valu
     <EuiDescribedFormGroup
       className="advancedSettings__field__wrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -3119,7 +3119,7 @@ exports[`Field for string setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -3127,15 +3127,15 @@ exports[`Field for string setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
+              <React.Fragment>
                 Default: 
                 <EuiCode>
                   null
                 </EuiCode>
-              </UNDEFINED>
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"

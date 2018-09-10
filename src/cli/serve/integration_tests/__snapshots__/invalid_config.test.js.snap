@@ -4,12 +4,15 @@ exports[`cli invalid config support exits with statusCode 64 and logs a single l
 Array [
   Object {
     "@timestamp": "## @timestamp ##",
+    "error": "## Error with stack trace ##",
+    "level": "fatal",
     "message": "\\"unknown.key\\", \\"other.unknown.key\\", \\"other.third\\", \\"some.flat.key\\", and \\"some.array\\" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.",
     "pid": "## PID ##",
     "tags": Array [
       "fatal",
+      "root",
     ],
-    "type": "log",
+    "type": "error",
   },
 ]
 `;
