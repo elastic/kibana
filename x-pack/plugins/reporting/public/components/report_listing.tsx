@@ -9,6 +9,7 @@ declare module '@elastic/eui' {
   export const EuiBasicTable: React.SFC<any>;
 }
 
+import moment from 'moment';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { jobQueueClient } from '../lib/job_queue_client';
@@ -73,15 +74,55 @@ export class ReportListing extends Component<Props, State> {
     const tableColumns = [
       {
         field: 'object_title',
-        name: 'Report title',
+        name: 'Report',
+        render: (objectTitle: string, record: any) => {
+          return (
+            <div>
+              <div>{objectTitle}</div>
+              <div>{record.object_type}</div>
+            </div>
+          );
+        },
       },
       {
         field: 'created_at',
         name: 'Created at',
+        render: (createdAt: string, record: any) => {
+          if (record.created_by) {
+            return (
+              <div>
+                <div>this.formatDate(createdAt)</div>
+                <span>{record.created_by}</span>
+              </div>
+            );
+          }
+          return this.formatDate(createdAt);
+        },
       },
       {
         field: 'status',
         name: 'Status',
+        render: (status: string, record: any) => {
+          let maxSizeReached;
+          if (record.max_size_reached) {
+            maxSizeReached = <span> - max size reached</span>;
+          }
+          let statusTimestamp;
+          if (status === 'processing') {
+            statusTimestamp = this.formatDate(record.started_at);
+          } else if (status === 'completed' || status === 'failed') {
+            statusTimestamp = this.formatDate(record.completed_at);
+          }
+          return (
+            <div>
+              <div>
+                {status}
+                {maxSizeReached}
+              </div>
+              <div>{statusTimestamp}</div>
+            </div>
+          );
+        },
       },
       {
         name: 'Actions',
@@ -181,4 +222,13 @@ export class ReportListing extends Component<Props, State> {
       this.props.xpackInfo.get('features.reporting.management.enableLinks')
     );
   };
+
+  private formatDate(timestamp: string) {
+    try {
+      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
+    } catch (error) {
+      // ignore parse error and display unformatted value
+      return timestamp;
+    }
+  }
 }
