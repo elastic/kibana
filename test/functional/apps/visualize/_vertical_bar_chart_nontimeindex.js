@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'common']);
 
   describe('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
@@ -123,7 +123,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
+        await PageObjects.common.sleep(6000);
         const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.common.sleep(6000);
         const expectedLabels = [
           '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
           '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
@@ -134,7 +136,9 @@ export default function ({ getService, getPageObjects }) {
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
+        await PageObjects.common.sleep(6000);
         const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.common.sleep(6000);
         const expectedLabels = [
           '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
           '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
