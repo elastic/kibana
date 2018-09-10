@@ -5,13 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiInMemoryTable,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { PIPELINE_LIST } from '../../../common/constants';
 
 function getColumns(openPipeline, clonePipeline) {
@@ -22,51 +16,52 @@ function getColumns(openPipeline, clonePipeline) {
       sortable: true,
       render: (id, { isCentrallyManaged }) => {
         const openPipelineClicked = () => openPipeline(id);
-        return isCentrallyManaged
-          ? <EuiLink onClick={openPipelineClicked} data-test-subj="cellId">{id}</EuiLink>
-          : (
-            <span>
-              {id} &nbsp;
-              <EuiIconTip
-                content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
-                type="questionInCircle"
-              />
-            </span>
-          );
-      }
+        return isCentrallyManaged ? (
+          <EuiLink onClick={openPipelineClicked} data-test-subj="cellId">
+            {id}
+          </EuiLink>
+        ) : (
+          <span>
+            {id} &nbsp;
+            <EuiIconTip
+              content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
+              type="questionInCircle"
+            />
+          </span>
+        );
+      },
     },
     {
       field: 'description',
       name: 'Description',
+      render: description => <span data-test-subj="cellDescription">{description}</span>,
       sortable: true,
       truncateText: true,
     },
     {
       field: 'lastModifiedHumanized',
       name: 'Last Modified',
+      render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
       sortable: true,
     },
     {
       field: 'username',
       name: 'Modified By',
+      render: username => <span data-test-subj="cellUsername">{username}</span>,
       sortable: true,
     },
     {
       field: 'id',
       name: '',
       render: (id, { isCentrallyManaged }) => {
-        const cloneClicked = () => { clonePipeline(id); };
-        return isCentrallyManaged
-          ? (
-            <EuiButtonEmpty
-              iconType="copy"
-              onClick={cloneClicked}
-              size="xs"
-            >
-              Clone
-            </EuiButtonEmpty>
-          )
-          : null;
+        const cloneClicked = () => {
+          clonePipeline(id);
+        };
+        return isCentrallyManaged ? (
+          <EuiButtonEmpty iconType="copy" onClick={cloneClicked} size="xs">
+            Clone
+          </EuiButtonEmpty>
+        ) : null;
       },
       sortable: false,
     },
@@ -89,7 +84,6 @@ export function PipelinesTable({
   // pageSize,
   // pipelines,
 }) {
-
   // const pagination = {
   //   pageIndex,
   //   pageSize,
@@ -97,9 +91,10 @@ export function PipelinesTable({
   //   pageSizeOptions: [2, 3, 5, 8]
   // };
 
-  const selectableMessage = (selectable, { id }) => selectable
-    ? `Select pipeline "${id}"`
-    : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
+  const selectableMessage = (selectable, { id }) =>
+    selectable
+      ? `Select pipeline "${id}"`
+      : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
 
   const selectionOptions = isSelectable
     ? {
@@ -124,10 +119,10 @@ export function PipelinesTable({
       key="btnDeletePipelines"
       color="danger"
       onClick={onDeleteSelectedPipelines}
-      data-test-subj="btnDelete"
+      data-test-subj="btnDeletePipeline"
     >
       Delete
-    </EuiButton>
+    </EuiButton>,
   ];
 
   const search = {

@@ -31,21 +31,14 @@ export class PipelineEditor extends React.Component {
     super(props);
 
     const {
-      pipeline: {
-        id,
-        description,
-        pipeline,
-        settings,
-      },
+      pipeline: { id, description, pipeline, settings },
       username,
     } = this.props;
 
     // TODO: clean up this regex pattern
     this.pipelineIdPattern = /[a-zA-Z_][a-zA-Z0-9_\-]*/;
 
-    const pipelineWorkers = settings['pipeline.workers']
-      ? settings['pipeline.workers']
-      : 1;
+    const pipelineWorkers = settings['pipeline.workers'] ? settings['pipeline.workers'] : 1;
 
     this.state = {
       pipeline: {
@@ -62,7 +55,7 @@ export class PipelineEditor extends React.Component {
           'queue.max_bytes.units': settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
         },
-        username
+        username,
       },
       pipelineIdErrors: [],
       showConfirmDeleteModal: false,
@@ -71,27 +64,23 @@ export class PipelineEditor extends React.Component {
   }
 
   componentDidMount = () => {
-    const {
-      isReadOnly,
-      licenseMessage,
-      toastNotifications,
-    } = this.props;
+    const { isReadOnly, licenseMessage, toastNotifications } = this.props;
     if (isReadOnly) {
       toastNotifications.addWarning(licenseMessage);
     }
-  }
+  };
 
   hideConfirmDeleteModal = () => {
     this.setState({
       showConfirmDeleteModal: false,
     });
-  }
+  };
 
   showConfirmDeleteModal = () => {
     this.setState({
       showConfirmDeleteModal: true,
     });
-  }
+  };
 
   onPipelineIdChange = ({ target: { value } }) => {
     const pipelineIdErrors = [];
@@ -108,61 +97,62 @@ export class PipelineEditor extends React.Component {
       pipeline: {
         ...this.state.pipeline,
         id: value,
-      }
+      },
     });
-  }
+  };
 
   isSaveDisabled = () => {
     return this.state.showPipelineIdError || isEmpty(this.state.pipeline.id);
-  }
+  };
 
   onClose = async () => {
     await this.props.close();
-  }
+  };
 
   open = async () => {
     const { id } = this.state.pipeline;
     if (id) {
       await this.props.open(id);
     }
-  }
+  };
 
   onPipelineSave = () => {
     const { pipelineService, toastNotifications } = this.props;
     const { id } = this.state.pipeline;
-    return pipelineService.savePipeline({
-      id,
-      upstreamJSON: this.state.pipeline
-    })
+    return pipelineService
+      .savePipeline({
+        id,
+        upstreamJSON: this.state.pipeline,
+      })
       .then(() => {
         toastNotifications.addSuccess(`Saved "${id}"`);
         this.onClose();
       })
       .catch(this.notifyOnError);
-  }
+  };
 
   onPipelineDescriptionChange = ({ target: { value } }) => {
     this.setState({
       pipeline: {
         ...this.state.pipeline,
         description: value,
-      }
+      },
     });
-  }
+  };
 
   onPipelineChange = e => {
     this.setState({
       pipeline: {
         ...this.state.pipeline,
         pipeline: e,
-      }
+      },
     });
-  }
+  };
 
   handleNumberChange = (settingName, value) => {
     const numberValue = parseInt(value, 10);
     this.handleSettingChange(settingName, isNaN(numberValue) ? value : numberValue);
-  }
+  };
 
   handleSettingChange = (settingName, value) => {
     const settings = { ...this.state.pipeline.settings };
@@ -171,32 +161,15 @@ export class PipelineEditor extends React.Component {
       pipeline: {
         ...this.state.pipeline,
         settings,
-      }
+      },
     });
-  }
-
-  renderDeletePipelineButton = () => (
-    this.props.isNewPipeline
-      ? null
-      : (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="danger"
-            onClick={this.showConfirmDeleteModal}
-          >
-            Delete pipeline
-          </EuiButton>
-        </EuiFlexItem>
-      )
-  )
+  };
 
   notifyOnError = err => {
     const { notifier, licenseService } = this.props;
 
-    return licenseService
-      .checkValidity()
-      .then(() => notifier.error(err));
-  }
+    return licenseService.checkValidity().then(() => notifier.error(err));
+  };
 
   deletePipeline = () => {
     const {
@@ -207,31 +180,29 @@ export class PipelineEditor extends React.Component {
 
     this.hideConfirmDeleteModal();
 
-    return pipelineService.deletePipeline(id)
+    return pipelineService
+      .deletePipeline(id)
       .then(() => {
         toastNotifications.addSuccess(`Deleted "${id}"`);
         this.onClose();
       })
       .catch(this.notifyOnError);
-  }
+  };
 
   render() {
     return (
-      <EuiPage
-        data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
-      >
+      <EuiPage data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
         <EuiPageContent
           style={{
-            width: 1100
+            width: 1100,
           }}
           verticalPosition="center"
           horizontalPosition="center"
         >
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-          >
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="btnSavePipeline"
                 fill
                 isDisabled={this.isSaveDisabled()}
                 onClick={this.onPipelineSave}
@@ -240,58 +211,55 @@ export class PipelineEditor extends React.Component {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={this.onClose}>
+              <EuiButton data-test-subj="btnCancel" onClick={this.onClose}>
                 Cancel
               </EuiButton>
             </EuiFlexItem>
-            {this.renderDeletePipelineButton()}
+            {this.props.isNewPipeline && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="danger" data-test-subj="btnDeletePipeline" onClick={this.showConfirmDeleteModal}>
+                  Delete pipeline
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiForm
-            isInvalid={this.state.showPipelineIdError}
-            error={this.state.pipelineIdErrors}
-          >
-            {
-              this.props.isNewPipeline &&
-              <EuiFormRow
-                fullWidth
-                label="Pipeline ID"
-              >
+          <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
+            {this.props.isNewPipeline && (
+              <EuiFormRow fullWidth label="Pipeline ID">
                 <EuiFieldText
                   fullWidth
+                  data-test-subj="inputId"
+                  isInvalid={this.state.showPipelineIdError}
                   name="pipelineId"
                   onBlur={this.onPipelineIdChange}
                   onChange={this.onPipelineIdChange}
-                  isInvalid={this.state.showPipelineIdError}
                   value={this.state.pipeline.id}
                 />
               </EuiFormRow>
-            }
-            <EuiFormRow
-              fullWidth
-              label="Description"
-            >
+            )}
+            <EuiFormRow fullWidth label="Description">
               <EuiFieldText
+                data-test-subj="inputDescription"
                 fullWidth
                 name="pipelineDescription"
                 onChange={this.onPipelineDescriptionChange}
                 value={this.state.pipeline.description}
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label="Pipeline"
-            >
-              <EuiCodeEditor
-                onChange={this.onPipelineChange}
-                setOptions={{
-                  minLines: 25,
-                  maxLines: Infinity,
-                  readOnly: this.props.isReadOnly,
-                }}
-                value={this.state.pipeline.pipeline}
-                width={'1017'}
-              />
+            <EuiFormRow fullWidth label="Pipeline">
+              <div data-test-subj="acePipeline">
+                <EuiCodeEditor
+                  onChange={this.onPipelineChange}
+                  setOptions={{
+                    minLines: 25,
+                    maxLines: Infinity,
+                    readOnly: this.props.isReadOnly,
+                  }}
+                  value={this.state.pipeline.pipeline}
+                  width={'1017'}
+                />
+              </div>
             </EuiFormRow>
             <EuiFormRow
               label={
@@ -302,6 +270,7 @@ export class PipelineEditor extends React.Component {
               }
             >
               <EuiFieldNumber
+                data-test-subj="inputWorkers"
                 onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
                 value={this.state.pipeline.settings['pipeline.workers']}
               />
@@ -312,6 +281,7 @@ export class PipelineEditor extends React.Component {
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
               >
                 <EuiFieldNumber
+                  data-test-subj="inputBatchSize"
                   onChange={e => this.handleNumberChange('pipeline.batch.size', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.size']}
                 />
@@ -321,6 +291,7 @@ export class PipelineEditor extends React.Component {
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
               >
                 <EuiFieldNumber
+                  data-test-subj="inputBatchDelay"
                   onChange={e => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.delay']}
                 />
@@ -332,6 +303,7 @@ export class PipelineEditor extends React.Component {
                 formRowTooltipText={TOOLTIPS.settings['queue.type']}
               >
                 <EuiSelect
+                  data-test-subj="selectQueueType"
                   onChange={e => this.handleSettingChange('queue.type', e.target.value)}
                   options={PIPELINE_EDITOR.QUEUE_TYPES}
                   value={this.state.pipeline.settings['queue.type']}
@@ -342,12 +314,14 @@ export class PipelineEditor extends React.Component {
                 formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
               >
                 <EuiFieldNumber
+                  data-test-subj="inputQueueMaxBytesNumber"
                   onChange={e => this.handleNumberChange('queue.max_bytes.number', e.target.value)}
                   value={this.state.pipeline.settings['queue.max_bytes.number']}
                 />
               </FlexItemSetting>
               <FlexItemSetting>
                 <EuiSelect
+                  data-test-subj="selectQueueMaxBytesUnits"
                   onChange={e => this.handleSettingChange('queue.max_bytes.units', e.target.value)}
                   options={PIPELINE_EDITOR.UNITS}
                   value={this.state.pipeline.settings['queue.max_bytes.units']}
@@ -358,6 +332,7 @@ export class PipelineEditor extends React.Component {
                 formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
               >
                 <EuiFieldNumber
+                  data-test-subj="inputQueueCheckpointWrites"
                   onChange={e => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
                   value={this.state.pipeline.settings['queue.checkpoint.writes']}
                 />
@@ -365,14 +340,13 @@ export class PipelineEditor extends React.Component {
             </EuiFlexGroup>
           </EuiForm>
         </EuiPageContent>
-        {
-          this.state.showConfirmDeleteModal &&
+        {this.state.showConfirmDeleteModal && (
           <ConfirmDeletePipelineModal
             id={this.props.pipeline.id}
             cancelDeleteModal={this.hideConfirmDeleteModal}
             confirmDeletePipeline={this.deletePipeline}
           />
-        }
+        )}
       </EuiPage>
     );
   }

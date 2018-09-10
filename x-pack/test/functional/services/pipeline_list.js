@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { filter as filterAsync, props as propsAsync } from 'bluebird';
+import { props as propsAsync } from 'bluebird';
 import { times, mapValues } from 'lodash';
 
 export function PipelineListProvider({ getService }) {
@@ -26,11 +26,11 @@ export function PipelineListProvider({ getService }) {
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
   const SUBJ_BTN_ADD = `pipelineList btnAdd`;
-  const SUBJ_BTN_DELETE = `pipelineList btnDelete`;
+  const SUBJ_BTN_DELETE = `pipelineList btnDeletePipeline`;
   const getCloneLinkSubjForId = id => `pipelineList lnkPipelineClone-${id}`;
   const SUBJ_FILTER = `pipelineList filter`;
-  const SUBJ_SELECT_ALL = `pipelineList pipelineTable chkSelectAll`;
-  const SUBJ_ROW_SELECT = `pipelineList pipelineTable chkSelectRow`;
+  const SUBJ_SELECT_ALL = `pipelineList pipelineTable checkboxSelectAll`;
+  const getSelectCheckbox = id => `pipelineList pipelineTable checkboxSelectRow-${id}`;
   const SUBJ_CELL_ID = `pipelineList pipelineTable cellId`;
   const SUBJ_CELL_DESCRIPTION = `pipelineList pipelineTable cellDescription`;
   const SUBJ_CELL_LAST_MODIFIED = `pipelineList pipelineTable cellLastModified`;
@@ -53,7 +53,8 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Object>}
      */
     async getRowCounts() {
-      const isSelecteds = await testSubjects.isSelectedAll(SUBJ_ROW_SELECT);
+      const ids = await this.getRowIds();
+      const isSelecteds = await Promise.all(ids.map(id => testSubjects.isSelected(getSelectCheckbox(id))));
       const total = isSelecteds.length;
       const isSelected = isSelecteds.filter(Boolean).length;
       const isUnselected = total - isSelected;
@@ -66,13 +67,15 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Array<Object>>}
      */
     async getRowsFromTable() {
+      // TODO: clean this up
       const valuesByKey = await propsAsync({
-        selected: testSubjects.isSelectedAll(SUBJ_ROW_SELECT),
-        id: testSubjects.getVisibleTextAll(SUBJ_CELL_ID),
+        selected: [],
+        id: await this.getRowIds(),
         description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
         lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
         username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME)
       });
+      valuesByKey.selected = await Promise.all(valuesByKey.id.map(id => testSubjects.isSelected(getSelectCheckbox(id))));
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows
@@ -129,12 +132,16 @@ export function PipelineListProvider({ getService }) {
 
       // get pick an unselected selectbox and click it
       await retry.try(async () => {
-        const rows = await testSubjects.findAll(SUBJ_ROW_SELECT);
-        const unselected = await filterAsync(rows, async row => {
-          return !await row.isSelected();
-        });
+        const ids = await this.getRowIds();
+        const rowToClick = await random.pickOne(ids);
+        const checkboxId = getSelectCheckbox(rowToClick);
+        const isSelected = await testSubjects.isSelected(checkboxId);
 
-        await random.pickOne(unselected).click();
+        if (isSelected) {
+          throw new Error('randomly chosen row was already selected');
+        }
+
+        await testSubjects.click(checkboxId);
       });
 
       // wait for the selected count to grow
@@ -144,6 +151,10 @@ export function PipelineListProvider({ getService }) {
           throw new Error(`randomly selected row still not selected`);
         }
       });
+    }
+
+    async getRowIds() {
+      return await testSubjects.getVisibleTextAll(SUBJ_CELL_ID);
     }
 
     /**

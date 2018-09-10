@@ -24,7 +24,7 @@ export function UpgradeFailure({ isNewPipeline, isManualUpgrade, onClose, onRetr
     : UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.NOT_MANUAL_UPGRADE;
 
   return (
-    <EuiPage style={{ minHeight: '100vh' }}>
+    <EuiPage data-test-subj="pipelineEdit upgradeFailure" style={{ minHeight: '100vh' }}>
       <EuiPageContent>
         <EuiEmptyPrompt
           actions={

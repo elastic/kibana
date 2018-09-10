@@ -259,7 +259,6 @@ export class PipelineList extends React.Component {
     return (
       <EuiPage style={{ minHeight: '100vh' }} data-test-subj="pipelineList">
         <EuiPageContent
-          verticalPosition="center"
           horizontalPosition="center"
         >
           {

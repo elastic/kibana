@@ -10,36 +10,44 @@ export const PIPELINE_EDITOR = {
     'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers',
   QUEUE_TYPES: [
     {
+      'data-test-subj': 'selectQueueType-memory',
       text: 'memory',
       value: 'memory',
     },
     {
+      'data-test-subj': 'selectQueueType-persisted',
       text: 'persisted',
       value: 'persisted',
     },
   ],
   UNITS: [
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-b',
       text: 'bytes',
       value: 'b',
     },
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-kb',
       text: 'kilobytes',
       value: 'kb',
     },
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-mb',
       text: 'megabytes',
       value: 'mb',
     },
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-gb',
       text: 'gigabytes',
       value: 'gb',
     },
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-tb',
       text: 'terabytes',
       value: 'tb',
     },
     {
+      'data-test-subj': 'selectQueueMaxBytesUnits-pb',
       text: 'petabytes',
       value: 'pb',
     },

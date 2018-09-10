@@ -42,12 +42,12 @@ export function PipelineEditorProvider({ getService }) {
       'output {',
       '}',
     ].join('\n'),
-    workers: '',
-    batchSize: 125,
+    workers: '1',
+    batchSize: '125',
     queueType: 'memory',
-    queueMaxBytesNumber: 1,
+    queueMaxBytesNumber: '1',
     queueMaxBytesUnits: 'gb',
-    queueCheckpointWrites: 1024
+    queueCheckpointWrites: '1024'
   };
 
   return new class PipelineEditor {
