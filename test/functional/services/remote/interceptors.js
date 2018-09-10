@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from '../../../../src/utils';
+import { modifyUrl } from '../../../../src/core/utils';
 
 export const createRemoteInterceptors = remote => ({
   // inject _t=Date query param on navigation

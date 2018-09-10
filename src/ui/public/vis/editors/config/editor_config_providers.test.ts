@@ -18,7 +18,7 @@
  */
 
 import { EditorConfigProviderRegistry } from './editor_config_providers';
-import { EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
+import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
 
 describe('EditorConfigProvider', () => {
   let registry: EditorConfigProviderRegistry;
@@ -111,6 +111,49 @@ describe('EditorConfigProvider', () => {
       }).toThrowError();
     });
 
+    it('should allow same timeBase values', () => {
+      registry.register(singleConfig({ timeBase: '2h', default: '2h' }));
+      registry.register(singleConfig({ timeBase: '2h', default: '2h' }));
+      const config = getOutputConfig(registry) as TimeIntervalParam;
+      expect(config).toHaveProperty('timeBase');
+      expect(config).toHaveProperty('default');
+      expect(config.timeBase).toBe('2h');
+      expect(config.default).toBe('2h');
+    });
+
+    it('should merge multiple compatible timeBase values, using least common interval', () => {
+      registry.register(singleConfig({ timeBase: '2h', default: '2h' }));
+      registry.register(singleConfig({ timeBase: '3h', default: '3h' }));
+      registry.register(singleConfig({ timeBase: '4h', default: '4h' }));
+      const config = getOutputConfig(registry) as TimeIntervalParam;
+      expect(config).toHaveProperty('timeBase');
+      expect(config).toHaveProperty('default');
+      expect(config.timeBase).toBe('12h');
+      expect(config.default).toBe('12h');
+    });
+
+    it('should throw on combining incompatible timeBase values', () => {
+      registry.register(singleConfig({ timeBase: '2h', default: '2h' }));
+      registry.register(singleConfig({ timeBase: '1d', default: '1d' }));
+      expect(() => {
+        getOutputConfig(registry);
+      }).toThrowError();
+    });
+
+    it('should throw on invalid timeBase values', () => {
+      registry.register(singleConfig({ timeBase: '2w', default: '2w' }));
+      expect(() => {
+        getOutputConfig(registry);
+      }).toThrowError();
+    });
+
+    it('should throw if timeBase and default are different', () => {
+      registry.register(singleConfig({ timeBase: '1h', default: '2h' }));
+      expect(() => {
+        getOutputConfig(registry);
+      }).toThrowError();
+    });
+
     it('should merge hidden together with fixedValue', () => {
       registry.register(singleConfig({ fixedValue: 'foo', hidden: true }));
       registry.register(singleConfig({ fixedValue: 'foo', hidden: false }));
@@ -131,12 +174,24 @@ describe('EditorConfigProvider', () => {
       expect(config.hidden).toBe(false);
     });
 
-    it('should merge warnings together into one string', () => {
-      registry.register(singleConfig({ warning: 'Warning' }));
-      registry.register(singleConfig({ warning: 'Another warning' }));
+    it('should merge hidden together with timeBase', () => {
+      registry.register(singleConfig({ timeBase: '2h', default: '2h', hidden: false }));
+      registry.register(singleConfig({ timeBase: '4h', default: '4h', hidden: false }));
+      const config = getOutputConfig(registry) as TimeIntervalParam;
+      expect(config).toHaveProperty('timeBase');
+      expect(config).toHaveProperty('default');
+      expect(config).toHaveProperty('hidden');
+      expect(config.timeBase).toBe('4h');
+      expect(config.default).toBe('4h');
+      expect(config.hidden).toBe(false);
+    });
+
+    it('should merge helps together into one string', () => {
+      registry.register(singleConfig({ help: 'Warning' }));
+      registry.register(singleConfig({ help: 'Another help' }));
       const config = getOutputConfig(registry);
-      expect(config).toHaveProperty('warning');
-      expect(config.warning).toBe('Warning\n\nAnother warning');
+      expect(config).toHaveProperty('help');
+      expect(config.help).toBe('Warning\n\nAnother help');
     });
   });
 });

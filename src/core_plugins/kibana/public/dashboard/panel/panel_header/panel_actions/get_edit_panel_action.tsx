@@ -21,15 +21,15 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { ContextMenuAction } from 'ui/embeddable';
 import { DashboardViewMode } from '../../../dashboard_view_mode';
 
 /**
  *
- * @return {DashboardPanelAction}
+ * @return {ContextMenuAction}
  */
 export function getEditPanelAction() {
-  return new DashboardPanelAction(
+  return new ContextMenuAction(
     {
       displayName: 'Edit visualization',
       id: 'editPanel',
