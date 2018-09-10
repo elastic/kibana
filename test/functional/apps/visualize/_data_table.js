@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
       });
-      it('should show correct data for a data table with top hits', async () => {
+      it('should show correct data for a data table with top hits', function () {
         log.debug('navigateToApp visualize');
         return PageObjects.common.navigateToUrl('visualize', 'new')
         .then(function () {
