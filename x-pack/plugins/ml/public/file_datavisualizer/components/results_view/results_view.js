@@ -15,7 +15,7 @@ import {
 
 import { FileContents } from '../file_contents';
 import { Summary } from '../summary';
-// import { FileStats } from '../file_stats';
+import { FileStats } from '../file_stats';
 
 export class ResultsView extends Component {
   constructor(props) {
@@ -48,9 +48,9 @@ export class ResultsView extends Component {
 
         <EuiHorizontalRule margin="l" />
 
-        {/* <FileStats
+        <FileStats
           results={results}
-        /> */}
+        />
 
       </div>
     );

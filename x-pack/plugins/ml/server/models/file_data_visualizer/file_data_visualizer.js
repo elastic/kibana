@@ -5,6 +5,7 @@
  */
 
 
+import Boom from 'boom';
 import fs from 'fs';
 import os from 'os';
 const util = require('util');
@@ -15,7 +16,12 @@ const writeFile = util.promisify(fs.writeFile);
 export function fileDataVisualizerProvider(callWithRequest) {
   async function analyseFile(data) {
     const cached = await cacheData(data);
-    const results = await callWithRequest('ml.fileStructure');
+    let results = [];
+    try {
+      results = await callWithRequest('ml.fileStructure', { body: data });
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
     return {
       cached,
       results,

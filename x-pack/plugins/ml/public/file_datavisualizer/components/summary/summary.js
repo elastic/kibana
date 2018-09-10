@@ -13,6 +13,23 @@ import {
 } from '@elastic/eui';
 
 export function Summary({ results }) {
+  const items = createDisplayItems(results);
+
+  return (
+    <React.Fragment>
+      <EuiTitle size="s">
+        <h3>Summary</h3>
+      </EuiTitle>
+      <EuiDescriptionList
+        type="column"
+        listItems={items}
+        style={{ maxWidth: '400px' }}
+      />
+    </React.Fragment>
+  );
+}
+
+function createDisplayItems(results) {
   const items = [
     {
       title: 'Number of lines analysed',
@@ -36,19 +53,29 @@ export function Summary({ results }) {
         title: 'Delimiter',
         description: results.delimiter,
       });
+
+      items.push({
+        title: 'Has header row',
+        description: `${results.has_header_row}`,
+      });
+
     }
   }
 
-  return (
-    <React.Fragment>
-      <EuiTitle size="s">
-        <h3>Summary</h3>
-      </EuiTitle>
-      <EuiDescriptionList
-        type="column"
-        listItems={items}
-        style={{ maxWidth: '400px' }}
-      />
-    </React.Fragment>
-  );
+  if (results.timestamp_field !== undefined) {
+    items.push({
+      title: 'Time field',
+      description: results.timestamp_field,
+    });
+  }
+
+  if (results.timestamp_formats !== undefined) {
+    const s = (results.timestamp_formats.length > 1) ? 's' : '';
+    items.push({
+      title: `Time format${s}`,
+      description: results.timestamp_formats.join(', '),
+    });
+  }
+
+  return items;
 }

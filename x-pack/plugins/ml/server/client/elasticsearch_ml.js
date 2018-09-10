@@ -570,11 +570,6 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     urls: [
       {
         fmt: '/_xpack/ml/find_file_structure',
-        req: {
-          filterId: {
-            type: 'string'
-          }
-        }
       }
     ],
     needBody: true,
