@@ -11,7 +11,10 @@ declare module '@elastic/eui' {
 
 import moment from 'moment';
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+// @ts-ignore: implicit any for JS file
+import { Poller } from '../../../../common/poller';
 import { jobQueueClient } from '../lib/job_queue_client';
 
 import { EuiBasicTable, EuiPage, EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
@@ -30,6 +33,7 @@ interface State {
 
 export class ReportListing extends Component<Props, State> {
   private mounted?: boolean;
+  private poller?: any;
 
   constructor(props: Props) {
     super(props);
@@ -57,17 +61,24 @@ export class ReportListing extends Component<Props, State> {
     );
   }
 
-  public componentWillMount() {
-    this.mounted = true;
-  }
-
   public componentWillUnmount() {
     this.mounted = false;
+    this.poller.stop();
   }
 
   public componentDidMount() {
     this.mounted = true;
-    this.fetchJobs();
+    const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
+    this.poller = new Poller({
+      functionToPoll: () => {
+        return this.fetchJobs();
+      },
+      pollFrequencyInMillis: jobsRefresh.interval,
+      trailing: false,
+      continuePollingOnError: true,
+      pollFrequencyErrorMultiplier: jobsRefresh.intervalErrorMultiplier,
+    });
+    this.poller.start();
   }
 
   private renderTable() {
@@ -115,11 +126,10 @@ export class ReportListing extends Component<Props, State> {
           }
           return (
             <div>
-              <div>
-                {status}
-                {maxSizeReached}
-              </div>
-              <div>{statusTimestamp}</div>
+              {status}
+              {' at '}
+              <span className="eui-textNoWrap">{statusTimestamp}</span>
+              {maxSizeReached}
             </div>
           );
         },
@@ -149,7 +159,7 @@ export class ReportListing extends Component<Props, State> {
         items={this.state.jobs}
         loading={this.state.isLoading}
         columns={tableColumns}
-        noItemsMessage="No reports have been created"
+        noItemsMessage={this.state.isLoading ? 'Loading reports' : 'No reports have been created'}
         pagination={pagination}
         onChange={this.onTableChange}
       />
