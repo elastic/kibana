@@ -97,5 +97,14 @@ export class FillAndOutlineStyle {
     });
   }
 
+  setMBPaintProperties(mbMap, fillLayerId, lineLayerId, temp) {
+    const color = this.getHexColor() || DEFAULT_COLOR;
+    mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
+    mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
+    mbMap.setPaintProperty(lineLayerId, 'line-color', color);
+    mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
+    mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
+  }
+
 
 }

@@ -55,30 +55,49 @@ export class VectorLayer extends ALayer {
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
+
+    const fillLayerId = this.getId() +  '_fill';
+    const strokeLayerId = this.getId() +  '_line';
+
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
         type: 'geojson',
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
+
+
       mbMap.addLayer({
-        id: this.getId() + '_fill',
+        id: fillLayerId,
         type: 'fill',
         source: this.getId(),
         paint: {
-          'fill-color': 'rgb(220,0,0)',
-          'fill-opacity': 0.6
+          // 'fill-color': 'rgb(220,0,0)',
+          // 'fill-opacity': 0.6
+        }
+      });
+      mbMap.addLayer({
+        id: strokeLayerId,
+        type: 'line',
+        source: this.getId(),
+        paint: {
+          // 'line-color': 'rgb(0,0,0)',
+          // 'line-width': 1
         }
       });
     }
 
+    //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfter = mbMap.getSource(this.getId());
-
-    //todo: similar problem as OL here. keeping track of data on source
     if (this._descriptor.data !== mbSourceAfter._data) {
       mbSourceAfter.setData(this._descriptor.data);
     }
 
-    mbMap.setLayoutProperty(this.getId() + '_fill', 'visibility', this.isVisible() ? 'visible' : 'none');
+    // window._ly = mbMap.getLayer();
+    this._style.setMBPaintProperties(mbMap, fillLayerId, strokeLayerId, this.isTemporary());
+
+
+    mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
   _createCorrespondingOLLayer() {
