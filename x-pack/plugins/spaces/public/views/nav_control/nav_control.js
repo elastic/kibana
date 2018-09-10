@@ -25,22 +25,33 @@ const module = uiModules.get('spaces_nav', ['kibana']);
 
 let spacesManager;
 
-module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) => {
+module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, spaceSelectorURL) => {
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
-  spacesManager = new SpacesManager($http, chrome);
+  spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-  render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+  let mounted = false;
+
+  $scope.$parent.$watch('isVisible', function (isVisible) {
+    if (isVisible && !mounted) {
+      render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+      mounted = true;
+    }
+  });
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {
     unmountComponentAtNode(domNode);
+    mounted = false;
   });
 
 });
 
-module.service('spacesNavState', () => {
+module.service('spacesNavState', (activeSpace) => {
   return {
+    getActiveSpace: () => {
+      return activeSpace.space;
+    },
     refreshSpacesList: () => {
       if (spacesManager) {
         spacesManager.requestRefresh();

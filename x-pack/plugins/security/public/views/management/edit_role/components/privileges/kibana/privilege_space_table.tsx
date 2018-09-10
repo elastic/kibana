@@ -76,7 +76,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         search={{
           box: {
             incremental: true,
-            placeholder: 'Filter...',
+            placeholder: 'Filter',
           },
           onChange: (search: any) => {
             this.setState({

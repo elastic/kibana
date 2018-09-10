@@ -139,7 +139,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     try {
       const request = reply.request;
       const translations = await server.getUiTranslations();
-      const basePath = config.get('server.basePath');
+      const basePath = request.getBasePath();
 
       return reply.view('ui_app', {
         uiPublicUrl: `${basePath}/ui`,
@@ -149,6 +149,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         injectedMetadata: {
           version: kbnServer.version,
           buildNumber: config.get('pkg.buildNum'),
+          basePath,
           legacyMetadata: await getLegacyKibanaPayload({
             app,
             translations,

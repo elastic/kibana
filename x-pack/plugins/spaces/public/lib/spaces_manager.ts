@@ -12,16 +12,18 @@ import { Space } from '../../common/model/space';
 export class SpacesManager extends EventEmitter {
   private httpAgent: any;
   private baseUrl: any;
+  private spaceSelectorURL: string;
 
-  constructor(httpAgent: any, chrome: any) {
+  constructor(httpAgent: any, chrome: any, spaceSelectorURL: string) {
     super();
     this.httpAgent = httpAgent;
-    this.baseUrl = chrome.addBasePath(`/api/spaces/v1`);
+    this.baseUrl = chrome.addBasePath(`/api/spaces`);
+    this.spaceSelectorURL = spaceSelectorURL;
   }
 
   public async getSpaces(): Promise<Space[]> {
     return await this.httpAgent
-      .get(`${this.baseUrl}/spaces`)
+      .get(`${this.baseUrl}/space`)
       .then((response: IHttpResponse<Space[]>) => response.data);
   }
 
@@ -43,7 +45,7 @@ export class SpacesManager extends EventEmitter {
 
   public async changeSelectedSpace(space: Space) {
     return await this.httpAgent
-      .post(`${this.baseUrl}/space/${space.id}/select`)
+      .post(`${this.baseUrl}/v1/space/${space.id}/select`)
       .then((response: IHttpResponse<any>) => {
         if (response.data && response.data.location) {
           window.location = response.data.location;
@@ -52,6 +54,10 @@ export class SpacesManager extends EventEmitter {
         }
       })
       .catch(() => this._displayError());
+  }
+
+  public redirectToSpaceSelector() {
+    window.location.href = this.spaceSelectorURL;
   }
 
   public async requestRefresh() {

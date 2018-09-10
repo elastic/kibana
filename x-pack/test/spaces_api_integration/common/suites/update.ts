@@ -5,12 +5,14 @@
  */
 import expect from 'expect.js';
 import { SuperTest } from 'supertest';
+import { Space } from '../../../../plugins/spaces/common/model/space';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;
   response: (resp: any) => void;
+  space?: Space;
 }
 
 interface UpdateTests {
@@ -35,7 +37,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`should return ${tests.alreadyExists.statusCode}`, async () => {
         return supertest
-          .put(`${getUrlPrefix(spaceId)}/api/spaces/v1/space/space_1`)
+          .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
           .auth(auth.username, auth.password)
           .send({
             name: 'space 1',
@@ -51,7 +53,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe(`when space doesn't exist`, () => {
         it(`should return ${tests.newSpace.statusCode}`, async () => {
           return supertest
-            .put(`${getUrlPrefix(spaceId)}/api/spaces/v1/space/marketing`)
+            .put(`${getUrlPrefix(spaceId)}/api/spaces/space/marketing`)
             .auth(auth.username, auth.password)
             .send({
               name: 'marketing',
@@ -72,7 +74,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
-      message: `Saved object [space/${spaceId}] not found`,
     });
   };
 

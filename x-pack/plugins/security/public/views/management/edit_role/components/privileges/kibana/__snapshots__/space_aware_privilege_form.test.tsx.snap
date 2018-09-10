@@ -47,14 +47,14 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-        Specifies the lowest permission level for all spaces, unless a custom privilege is specified.
+        Specify the minimum actions users can perform in your spaces.
       </p>
     }
     fullWidth={false}
     gutterSize="l"
     title={
       <h3>
-        Minimum privilege
+        Minimum privileges for all spaces
       </h3>
     }
     titleSize="xs"
@@ -63,7 +63,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
-      helpText="No access"
+      helpText="No access to spaces"
     >
       <PrivilegeSelector
         allowNone={true}
@@ -88,7 +88,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       size="xs"
     >
       <h3>
-        Space privileges
+        Higher privileges for individual spaces
       </h3>
     </EuiTitle>
     <EuiSpacer
@@ -100,12 +100,22 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       size="s"
     >
       <p>
-        Customize permission levels per space. If a space is not customized, its permissions will default to the minimum privilege specified above.
-      </p>
-      <p>
-        You can bulk-create space privileges though they will be saved individually upon saving the role.
+        Grant more privileges on a per space basis. For example, if the privileges are
+         
+        <strong>
+          read
+        </strong>
+         for all spaces, you can set the privileges to 
+        <strong>
+          all
+        </strong>
+         
+        for an individual space.
       </p>
     </EuiText>
+    <EuiSpacer
+      size="s"
+    />
     <React.Fragment>
       <PrivilegeSpaceTable
         availablePrivileges={

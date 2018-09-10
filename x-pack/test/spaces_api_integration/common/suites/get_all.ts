@@ -34,7 +34,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`should return ${tests.exists.statusCode}`, async () => {
         return supertest
-          .get(`${getUrlPrefix(spaceId)}/api/spaces/v1/spaces`)
+          .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
           .auth(auth.username, auth.password)
           .expect(tests.exists.statusCode)
           .then(tests.exists.response);

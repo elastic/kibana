@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { get } from 'lodash';
-import React, { ChangeEvent, Component, HTMLProps } from 'react';
+import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
@@ -66,18 +66,29 @@ export class EditRolePage extends Component<Props, State> {
   }
 
   public render() {
+    const description = this.props.spacesEnabled
+      ? `Set privileges on your Elasticsearch data and control access to your Kibana spaces.`
+      : `Set privileges on your Elasticsearch data and control access to Kibana.`;
+
     return (
       <EuiPage className="editRolePage" restrictWidth>
         <EuiPageBody>
           <EuiForm {...this.state.formError}>
             {this.getFormTitle()}
 
+            <EuiSpacer />
+
+            <EuiText size="s">{description}</EuiText>
+
             {isReservedRole(this.props.role) && (
-              <EuiText size="s" color="subdued">
-                <p id="reservedRoleDescription" tabIndex={1}>
-                  Reserved roles are built-in and cannot be removed or modified.
-                </p>
-              </EuiText>
+              <Fragment>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p id="reservedRoleDescription" tabIndex={1}>
+                    Reserved roles are built-in and cannot be removed or modified.
+                  </p>
+                </EuiText>
+              </Fragment>
             )}
 
             <EuiSpacer />

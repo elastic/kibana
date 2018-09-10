@@ -48,7 +48,6 @@ export class SpaceSelector extends Component<Props, {}> {
 
     return (
       <EuiComboBox
-        placeholder={`choose space(s)`}
         options={this.props.spaces.map(spaceToOption)}
         renderOption={renderOption}
         selectedOptions={this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces))}

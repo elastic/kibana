@@ -16,11 +16,11 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     deleteTest,
-    expectEmptyResult,
-    expectReservedSpaceResult,
-    expectNotFoundResult,
-    expectRbacForbidden,
     createExpectLegacyForbidden,
+    expectRbacForbidden,
+    expectEmptyResult,
+    expectNotFoundResult,
+    expectReservedSpaceResult,
   } = deleteTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('delete', () => {

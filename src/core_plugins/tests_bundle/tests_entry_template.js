@@ -60,7 +60,7 @@ const legacyMetadata = {
     },
     mapConfig: {
       includeElasticMapsService: true,
-      manifestServiceUrl: 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'
+      manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
     },
     vegaConfig: {
       enabled: true,

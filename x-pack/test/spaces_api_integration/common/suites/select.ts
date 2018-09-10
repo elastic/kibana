@@ -77,11 +77,10 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql('');
   };
 
-  const createExpectNotFoundResult = (spaceId: string) => (resp: any) => {
+  const createExpectNotFoundResult = () => (resp: any) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
-      message: `Saved object [space/${spaceId}] not found`,
     });
   };
   const createExpectRbacForbidden = (spaceId: any) => (resp: any) => {

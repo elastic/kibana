@@ -19,7 +19,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Space(s)"
+      label="Spaces"
     >
       <SpaceSelector
         onChange={[Function]}

@@ -37,7 +37,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`should return ${tests.newSpace.statusCode}`, async () => {
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/v1/space`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
           .auth(auth.username, auth.password)
           .send({
             name: 'marketing',
@@ -52,7 +52,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe('when it already exists', () => {
         it(`should return ${tests.alreadyExists.statusCode}`, async () => {
           return supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/v1/space`)
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
             .auth(auth.username, auth.password)
             .send({
               name: 'space_1',
@@ -68,7 +68,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe('when _reserved is specified', () => {
         it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved`, async () => {
           return supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/v1/space`)
+            .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
             .auth(auth.username, auth.password)
             .send({
               name: 'reserved space',
@@ -87,13 +87,10 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   const createTest = makeCreateTest(describe);
 
   const expectConflictResponse = (resp: any) => {
-    const spaceId = 'space_1';
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
     expect(resp.body.statusCode).to.equal(409);
-    expect(resp.body.message).to.match(
-      new RegExp(`\\[doc]\\[space:${spaceId}]: version conflict, document already exists.*`)
-    );
+    expect(resp.body.message).to.match(new RegExp(`A space with the identifier .*`));
   };
 
   const expectRbacForbiddenResponse = (resp: any) => {

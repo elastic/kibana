@@ -16,10 +16,10 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     selectTest,
+    nonExistantSpaceId,
     createExpectSpaceResponse,
     createExpectRbacForbidden,
     createExpectNotFoundResult,
-    nonExistantSpaceId,
     createExpectLegacyForbidden,
   } = selectTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
@@ -331,7 +331,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 404,
-              response: createExpectNotFoundResult(nonExistantSpaceId),
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -346,7 +346,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           tests: {
             default: {
               statusCode: 403,
-              response: createExpectRbacForbidden(nonExistantSpaceId),
+              response: createExpectRbacForbidden(scenario.otherSpaceId),
             },
           },
         });

@@ -39,7 +39,7 @@ class FieldFormatRegistry extends IndexedArray {
   init() {
     this.parseDefaultTypeMap(this._uiSettings.get('format:defaultTypeMap'));
 
-    this._uiSettings.subscribe(({ key, newValue }) => {
+    this._uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === 'format:defaultTypeMap') {
         this.parseDefaultTypeMap(newValue);
       }

@@ -3,11 +3,9 @@
 exports[`it renders without crashing 1`] = `
 <div
   className="euiPage spaceSelector__page"
-  style={undefined}
 >
   <div
     className="euiPageBody"
-    style={undefined}
   >
     <div
       className="euiPageHeader euiPageHeader--responsive spaceSelector__heading"
@@ -27,7 +25,6 @@ exports[`it renders without crashing 1`] = `
                 "fill": undefined,
               }
             }
-            tabIndex={undefined}
             viewBox="0 0 30 40"
             width="30"
             xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +70,7 @@ exports[`it renders without crashing 1`] = `
             className="euiText euiText--extraSmall"
           >
             <p>
-              You can change your space at anytime from within Kibana.
+              You can change your space at anytime.
             </p>
           </div>
         </div>

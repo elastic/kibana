@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
