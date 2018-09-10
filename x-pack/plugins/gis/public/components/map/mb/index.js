@@ -7,6 +7,7 @@
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
 import { syncMBState } from './mb_map_selector';
+import { mapExtentChanged } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -14,13 +15,13 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps() {
+function mapDispatchToProps(dispatch) {
   return {
     extentChanged: () => {
-      console.warn('not implemented');
+      console.warn('etentChanged not implemented');
     },
-    initialize: () => {
-      console.warn('not implemented');
+    initialize: (e) => {
+      dispatch(mapExtentChanged(e));
     }
   };
 }

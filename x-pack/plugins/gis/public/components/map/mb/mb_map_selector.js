@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
 import mapboxgl from 'mapbox-gl';
+import _ from 'lodash';
 
 function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
@@ -51,7 +52,6 @@ function syncLayerOrder(mbMap, layerList) {
 
 }
 
-
 const container = document.createElement('div');
 const MB_MAP = new mapboxgl.Map({
   container: container,
@@ -67,13 +67,20 @@ MB_MAP.touchZoomRotate.disableRotation();
 const getMBImplementation = createSelector(() => {
   return MB_MAP;
 });
-window._mb = MB_MAP;
 
 // Selectors
 const syncMBMapWithMapState = createSelector(
   getMBImplementation,
   getMapState,
-  (mbMap) => {
+  (mbMap, mapState) => {
+    const center = mbMap.getCenter();
+    const zoom = mbMap.getZoom();
+    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
+      mbMap.setZoom(mapState.zoom);
+    }
+    if (mapState.center && !_.isEqual(mapState.center, [center.lng, center.lat])) {
+      mbMap.setCenter(mapState.center);
+    }
     return mbMap;
   }
 );

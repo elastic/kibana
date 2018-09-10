@@ -33,14 +33,13 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 const INITIAL_STATE = {
   mapState: {
     zoom: 4,
-    center: [37.41, 8.82]
+    center: [-100.41, 32.82]
   },
   selectedLayerId: null,
   layerList: []
 };
 
 export function map(state = INITIAL_STATE, action) {
-  window._gs = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case REPLACE_LAYERLIST:
