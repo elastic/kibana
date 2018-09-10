@@ -25,7 +25,7 @@ const units: UnitsToSeconds = {
 export const getBucketSizeInSeconds = (interval: string): number => {
   const matches = interval.match(INTERVAL_STRING_RE);
   if (matches) {
-    return Number(matches[1]) * units[matches[2]];
+    return parseFloat(matches[1]) * units[matches[2]];
   }
   return 60;
 };
