@@ -9,6 +9,12 @@ import React, {
   Component,
 } from 'react';
 
+// import {
+//   EuiDescriptionList,
+//   EuiTitle,
+//   EuiSpacer,
+// } from '@elastic/eui';
+
 import { FieldStatsCard } from './field_stats_card';
 
 export class FileStats extends Component {
@@ -37,13 +43,7 @@ export class FileStats extends Component {
 }
 
 function createFields(results) {
-  const {
-    mappings,
-    field_stats: fieldStats,
-    num_messages_analyzed: numMessagesAnalyzed,
-    timestamp_field: timestampField,
-  } = results;
-
+  const { mappings, field_stats: fieldStats } = results;
   let fields = [];
 
   if (mappings && fieldStats) {
@@ -51,12 +51,6 @@ function createFields(results) {
       const field = { name: fName };
       const f  = fieldStats[fName];
       const m  = mappings[fName];
-
-      // sometimes the timestamp field is not in the mappings, and so our
-      // collection of fields will be missing a time field with a type of date
-      if (fName === timestampField && field.type === undefined) {
-        field.type = 'date';
-      }
 
       if (f !== undefined) {
         Object.assign(field, f);
@@ -69,7 +63,7 @@ function createFields(results) {
         }
       }
 
-      field.percent = ((field.count / numMessagesAnalyzed) * 100);
+      field.percent = ((field.count / results.num_messages_analyzed) * 100);
 
       return field;
     });
