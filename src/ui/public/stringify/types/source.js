@@ -19,7 +19,7 @@ export function stringifySource(Private, shortDotsFilter) {
   Source.prototype._convert = {
     text: angular.toJson,
     html: function sourceToHtml(source, field, hit) {
-      if (!field) return this.getConverterFor('text')(source, field, hit);
+      if (!field) return _.escape(this.getConverterFor('text')(source));
 
       const highlights = (hit && hit.highlight) || {};
       const formatted = field.indexPattern.formatHit(hit);

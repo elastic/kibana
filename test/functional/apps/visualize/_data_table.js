@@ -84,7 +84,50 @@ export default function ({ getService, getPageObjects }) {
           });
         });
       });
-
+      it('should show correct data for a data table with top hits', function () {
+        log.debug('navigateToApp visualize');
+        return PageObjects.common.navigateToUrl('visualize', 'new')
+        .then(function () {
+          log.debug('clickDataTable');
+          return PageObjects.visualize.clickDataTable();
+        })
+        .then(function clickNewSearch() {
+          log.debug('clickNewSearch');
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickMetricEditor() {
+          log.debug('clickMetricEditor');
+          return PageObjects.visualize.clickMetricEditor();
+        })
+        .then(function selectAggregation() {
+          log.debug('Select aggregation');
+          return PageObjects.visualize.selectAggregation('Top Hit');
+        })
+        .then(function selectField() {
+          log.debug('Field = _source');
+          return PageObjects.visualize.selectField('_source', 'metrics');
+        })
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function () {
+          return PageObjects.header.waitUntilLoadingHasFinished();
+        })
+        .then(function () {
+          return retry.try(function () {
+            return PageObjects.visualize.getDataTableData()
+              .then(function showData(data) {
+                const tableData = data.trim().split('\n');
+                log.debug(tableData);
+                expect(tableData.length).to.be(1);
+              });
+          });
+        });
+      });
     });
   });
 }
