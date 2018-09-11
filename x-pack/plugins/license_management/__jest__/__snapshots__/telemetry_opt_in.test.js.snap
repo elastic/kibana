@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
+<TelemetryOptIn>
+  <EuiSpacer
+    size="m"
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
+  <EuiText
+    grow={true}
+  >
+    <div
+      className="euiText"
+    >
+      Gold and platinum customers: help support give you better service.
+      <EuiCheckbox
+        checked={false}
+        compressed={false}
+        disabled={false}
+        id="isOptingInToTelemetry"
+        indeterminate={false}
+        label="Send basic feature usage statistics to Elastic periodically"
+        onChange={[Function]}
+      >
+        <div
+          className="euiCheckbox"
+        >
+          <input
+            checked={false}
+            className="euiCheckbox__input"
+            disabled={false}
+            id="isOptingInToTelemetry"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <div
+            className="euiCheckbox__square"
+          />
+          <label
+            className="euiCheckbox__label"
+            htmlFor="isOptingInToTelemetry"
+          >
+            Send basic feature usage statistics to Elastic periodically
+          </label>
+        </div>
+      </EuiCheckbox>
+      <EuiLink
+        color="primary"
+        onClick={[Function]}
+        type="button"
+      >
+        <button
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          type="button"
+        >
+          Read more
+        </button>
+      </EuiLink>
+    </div>
+  </EuiText>
+</TelemetryOptIn>
+`;
+
+exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `<TelemetryOptIn />`;

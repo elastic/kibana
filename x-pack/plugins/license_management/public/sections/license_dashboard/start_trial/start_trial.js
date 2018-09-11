@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-
+import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
+import { optInToTelemetry } from '../../../lib/telemetry';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 const securityDocumentationLink = `${esBase}/security-settings.html`;
 
@@ -30,19 +31,25 @@ export class StartTrial extends React.PureComponent {
   componentWillMount() {
     this.props.loadTrialStatus();
   }
-
+  startLicenseTrial = () => {
+    const { startLicenseTrial } = this.props;
+    if (this.telemetryOptIn.isOptingInToTelemetry()) {
+      optInToTelemetry(true);
+    }
+    startLicenseTrial();
+  }
   acknowledgeModal() {
     const { showConfirmation } = this.state;
     if (!showConfirmation) {
       return null;
     }
-    const { startLicenseTrial } = this.props;
+
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title="Start your free 30-day trial"
           onCancel={() => this.setState({ showConfirmation: false })}
-          onConfirm={() => startLicenseTrial()}
+          onConfirm={this.startLicenseTrial}
           cancelButtonText="Cancel"
           confirmButtonText="Start my trial"
         >
@@ -85,6 +92,7 @@ export class StartTrial extends React.PureComponent {
                 </EuiLink>.
               </p>
             </EuiText>
+            <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
           </div>
         </EuiConfirmModal>
       </EuiOverlayMask>
