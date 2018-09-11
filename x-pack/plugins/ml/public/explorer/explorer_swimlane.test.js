@@ -6,6 +6,7 @@
 
 import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
+import moment from 'moment-timezone';
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -51,8 +52,14 @@ function getExplorerSwimlaneMocks() {
 describe('ExplorerSwimlane', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
-  beforeEach(() => SVGElement.prototype.getBBox = () => mockedGetBBox);
-  afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
+  beforeEach(() => {
+    moment.tz.setDefault('UTC');
+    SVGElement.prototype.getBBox = () => mockedGetBBox;
+  });
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+    SVGElement.prototype.getBBox = originalGetBBox;
+  });
 
   test('Minimal initialization', () => {
     const mocks = getExplorerSwimlaneMocks();
@@ -80,7 +87,6 @@ describe('ExplorerSwimlane', () => {
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
 
-  /*
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
@@ -109,5 +115,4 @@ describe('ExplorerSwimlane', () => {
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
-  */
 });
