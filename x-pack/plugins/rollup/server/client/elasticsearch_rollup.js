@@ -10,7 +10,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   Client.prototype.rollup = components.clientAction.namespaceFactory();
   const rollup = Client.prototype.rollup.prototype;
 
-  rollup.capabilitiesByRollupIndex = ca({
+  rollup.rollupIndexCapabilities = ca({
     urls: [
       {
         fmt: '<%=indexPattern%>/_xpack/rollup/data',
@@ -19,23 +19,6 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'string'
           }
         }
-      }
-    ],
-    method: 'GET'
-  });
-
-  rollup.capabilitiesByIndex = ca({
-    urls: [
-      {
-        fmt: '/_xpack/rollup/data/<%=indices%>',
-        req: {
-          indices: {
-            type: 'string'
-          }
-        }
-      },
-      {
-        fmt: '/_xpack/rollup/data/',
       }
     ],
     method: 'GET'
@@ -54,6 +37,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'POST'
+  });
+
+  rollup.fieldCapabilities = ca({
+    urls: [
+      {
+        fmt: '/<%=indexPattern%>/_field_caps?fields=*',
+        req: {
+          indexPattern: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
   });
 
   rollup.jobs = ca({

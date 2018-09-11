@@ -8,10 +8,15 @@ export {
   createJob,
   deleteJobs,
   loadJobs,
-  setHttpClient,
   startJobs,
   stopJobs,
+  validateIndexPattern,
 } from './api';
+
+export {
+  setHttp,
+  getHttp,
+} from './http_provider';
 
 export { sortTable } from './sort_table';
 export { filterItems } from './filter_items';
@@ -31,6 +36,8 @@ export {
 
 export {
   logisticalDetailsUrl,
+  dateHistogramDetailsUrl,
+  dateHistogramAggregationUrl,
 } from './documentation_links';
 
 export {
