@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export { SavedObjectDoc, DocumentMigrator } from './document_migrator';
+export { DocumentMigrator } from './document_migrator';
 export { IndexMigrator } from './index_migrator';
 export { buildActiveMappings } from './build_active_mappings';
 export { CallCluster, MappingProperties } from './call_cluster';
 export { LogFn } from './migration_logger';
+export {
+  SavedObjectDoc,
+  RawDoc,
+  rawToSavedObject,
+  savedObjectToRaw,
+} from './saved_object_conversion';

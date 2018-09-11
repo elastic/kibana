@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import * as Index from './elastic_index';
+import { ROOT_TYPE } from './saved_object_conversion';
 
 describe('ElasticIndex', () => {
   describe('fetchInfo', () => {
@@ -123,7 +124,7 @@ describe('ElasticIndex', () => {
       const callCluster = sinon.spy(async (path: string, { body, type, index }: any) => {
         expect(path).toEqual('indices.putMapping');
         expect(index).toEqual('.shazm');
-        expect(type).toEqual('doc');
+        expect(type).toEqual(ROOT_TYPE);
         expect(body).toEqual({
           dynamic: 'strict',
           properties: {
@@ -613,7 +614,7 @@ describe('ElasticIndex', () => {
             },
           },
           index: '.myalias',
-          type: 'doc',
+          type: ROOT_TYPE,
         },
       ]);
     });

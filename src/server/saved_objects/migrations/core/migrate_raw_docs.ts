@@ -21,8 +21,8 @@
  * This file provides logic for migrating raw documents.
  */
 
-import { RawDoc } from './call_cluster';
-import { SavedObjectDoc, TransformFn } from './document_migrator';
+import { TransformFn } from './document_migrator';
+import { RawDoc, rawToSavedObject, savedObjectToRaw } from './saved_object_conversion';
 
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -44,40 +44,4 @@ export function migrateRawDocs(migrateDoc: TransformFn, rawDocs: RawDoc[]): RawD
 function isRawSavedObject(rawDoc: RawDoc) {
   const { type } = rawDoc._source;
   return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
-}
-
-/**
- * Converts a document from the format that is stored in elasticsearch to the saved object client format.
- */
-function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
-  const { type } = _source;
-  const id = _id.slice(type.length + 1);
-  const doc = {
-    ..._source,
-    attributes: _source[type],
-    id,
-    migrationVersion: _source.migrationVersion || {},
-  };
-
-  delete doc[type];
-  return doc;
-}
-
-/**
- * Converts a document from the saved object client format to the format that is stored in elasticsearch.
- */
-function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-  const { id, type, attributes } = savedObj;
-  const source = {
-    ...savedObj,
-    [type]: attributes,
-  };
-
-  delete source.id;
-  delete source.attributes;
-
-  return {
-    _id: `${type}:${id}`,
-    _source: source,
-  };
 }

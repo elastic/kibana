@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
-import { MigrationVersion } from './document_migrator';
+import { MigrationVersion, ROOT_TYPE } from './saved_object_conversion';
 
 // Require rather than import gets us around the lack of TypeScript definitions
 // for "getTypes"
@@ -113,7 +113,7 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
         index: {
           _id: doc._id,
           _index: index,
-          _type: 'doc',
+          _type: ROOT_TYPE,
         },
       });
 
@@ -179,7 +179,7 @@ export async function migrationsUpToDate(
       },
     },
     index,
-    type: 'doc',
+    type: ROOT_TYPE,
   });
 
   return count === 0;
@@ -193,7 +193,7 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: 'doc' });
+  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
 }
 
 export async function createIndex(
@@ -275,7 +275,7 @@ export async function claimAlias(
  */
 async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
   const currentTypes = getTypes(indexInfo.mappings);
-  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== 'doc';
+  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
   if (isV5Index) {
     throw new Error(
       `Index ${indexInfo.indexName} belongs to a version of Kibana ` +

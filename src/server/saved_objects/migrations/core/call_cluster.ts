@@ -56,13 +56,13 @@ export interface CountOpts {
     query: object;
   };
   index: string;
-  type: 'doc';
+  type: string;
 }
 
 export interface PutMappingOpts {
   body: DocMapping;
   index: string;
-  type: 'doc';
+  type: string;
 }
 
 export interface PutTemplateOpts {

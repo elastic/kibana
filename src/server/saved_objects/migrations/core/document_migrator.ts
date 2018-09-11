@@ -62,25 +62,7 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
-
-export interface MigrationVersion {
-  [type: string]: string;
-}
-
-/**
- * A saved object type definition that allows for miscellaneous, unknown
- * properties, as current discussions around security, ACLs, etc indicate
- * that future props are likely to be added. Migrations support this
- * scenario out of the box.
- */
-export interface SavedObjectDoc {
-  attributes: object;
-  id: string;
-  type: string;
-  migrationVersion?: MigrationVersion;
-
-  [rootProp: string]: any;
-}
+import { MigrationVersion, SavedObjectDoc } from './saved_object_conversion';
 
 export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
 

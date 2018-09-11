@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { DocumentMigrator, SavedObjectDoc } from './document_migrator';
+import { DocumentMigrator } from './document_migrator';
+import { SavedObjectDoc } from './saved_object_conversion';
 
 describe('DocumentMigrator', () => {
   it('validates the migration definition', () => {

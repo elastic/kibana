@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { migrateRawDocs } from './migrate_raw_docs';
+import { ROOT_TYPE } from './saved_object_conversion';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
@@ -30,8 +31,16 @@ describe('migrateRawDocs', () => {
     ]);
 
     expect(result).toEqual([
-      { _id: 'a:b', _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {} } },
-      { _id: 'c:d', _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {} } },
+      {
+        _id: 'a:b',
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {} },
+        _type: ROOT_TYPE,
+      },
+      {
+        _id: 'c:d',
+        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {} },
+        _type: ROOT_TYPE,
+      },
     ]);
 
     sinon.assert.calledTwice(transform);
@@ -46,7 +55,11 @@ describe('migrateRawDocs', () => {
 
     expect(result).toEqual([
       { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
-      { _id: 'c:d', _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {} } },
+      {
+        _id: 'c:d',
+        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {} },
+        _type: ROOT_TYPE,
+      },
     ]);
 
     expect(transform.args).toEqual([

@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { CallCluster } from './call_cluster';
-import { SavedObjectDoc } from './document_migrator';
 import { IndexMigrator } from './index_migrator';
+import { ROOT_TYPE, SavedObjectDoc } from './saved_object_conversion';
 
 describe('IndexMigrator', () => {
   test('patches the index mappings if the index is already migrated', async () => {
@@ -51,7 +51,7 @@ describe('IndexMigrator', () => {
         },
       },
       index: '.kibana_1',
-      type: 'doc',
+      type: ROOT_TYPE,
     });
   });
 
@@ -275,13 +275,13 @@ describe('IndexMigrator', () => {
     expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2', _type: 'doc' } },
+        { index: { _id: 'foo:1', _index: '.kibana_2', _type: ROOT_TYPE } },
         { foo: { name: 1 }, type: 'foo', migrationVersion: {} },
       ],
     });
     sinon.assert.calledWith(callCluster, 'bulk', {
       body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2', _type: 'doc' } },
+        { index: { _id: 'foo:2', _index: '.kibana_2', _type: ROOT_TYPE } },
         { foo: { name: 2 }, type: 'foo', migrationVersion: {} },
       ],
     });
