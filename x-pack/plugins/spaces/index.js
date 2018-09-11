@@ -20,6 +20,8 @@ import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SpacesClient } from './server/lib/spaces_client';
+import { SpacesAuditLogger } from './server/lib/audit_logger';
+import { AuditLogger } from '../../server/lib/audit_logger';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -93,6 +95,8 @@ export const spaces = (kibana) => new kibana.Plugin({
     const spacesService = createSpacesService(server);
     server.expose('getSpaceId', (request) => spacesService.getSpaceId(request));
 
+    const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+
     server.expose('spacesClient', {
       getScopedClient: (request) => {
         const adminCluster = server.plugins.elasticsearch.getCluster('admin');
@@ -102,7 +106,7 @@ export const spaces = (kibana) => new kibana.Plugin({
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
         const authorization = server.plugins.security ? server.plugins.security.authorization : null;
-        return new SpacesClient(authorization, callWithRequestRepository, internalRepository, request);
+        return new SpacesClient(spacesAuditLogger, authorization, callWithRequestRepository, internalRepository, request);
       }
     });
 

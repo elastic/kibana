@@ -7,19 +7,23 @@ import Boom from 'boom';
 import { omit } from 'lodash';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';
+import { SpacesAuditLogger } from './audit_logger';
 
 export class SpacesClient {
+  private readonly auditLogger: SpacesAuditLogger;
   private readonly authorization: any;
   private readonly callWithRequestSavedObjectRepository: any;
   private readonly internalSavedObjectRepository: any;
   private readonly request: any;
 
   constructor(
+    auditLogger: SpacesAuditLogger,
     authorization: any,
     callWithRequestSavedObjectRepository: any,
     internalSavedObjectRepository: any,
     request: any
   ) {
+    this.auditLogger = auditLogger;
     this.authorization = authorization;
     this.callWithRequestSavedObjectRepository = callWithRequestSavedObjectRepository;
     this.internalSavedObjectRepository = internalSavedObjectRepository;
@@ -38,7 +42,7 @@ export class SpacesClient {
 
       const spaceIds = spaces.map((space: Space) => space.id);
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-      const { spacePrivileges } = await checkPrivileges.atSpaces(
+      const { username, spacePrivileges } = await checkPrivileges.atSpaces(
         spaceIds,
         this.authorization.actions.login
       );
@@ -48,9 +52,11 @@ export class SpacesClient {
       });
 
       if (authorized.length === 0) {
+        this.auditLogger.spacesAuthorizationFailure(username, 'getAll');
         throw Boom.forbidden();
       }
 
+      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized);
       return spaces.filter((space: any) => authorized.includes(space.id));
     } else {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
@@ -137,26 +143,26 @@ export class SpacesClient {
 
   private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { hasAllRequested } = await checkPrivileges.globally(action);
+    const { username, hasAllRequested } = await checkPrivileges.globally(action);
 
     if (hasAllRequested) {
-      // TODO: LOG SOMETHING HERE
+      this.auditLogger.spacesAuthorizationSuccess(username, action);
       return;
     } else {
-      // TODO: LOG SOMETHING HERE
+      this.auditLogger.spacesAuthorizationFailure(username, action);
       throw Boom.forbidden(forbiddenMessage);
     }
   }
 
   private async ensureAuthorizedAtSpace(spaceId: string, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
+    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
 
     if (hasAllRequested) {
-      // TODO: LOG SOMETHING HERE
+      this.auditLogger.spacesAuthorizationSuccess(username, action, [spaceId]);
       return;
     } else {
-      // TODO: LOG SOMETHING HERE
+      this.auditLogger.spacesAuthorizationSuccess(username, action, [spaceId]);
       throw Boom.forbidden(forbiddenMessage);
     }
   }
