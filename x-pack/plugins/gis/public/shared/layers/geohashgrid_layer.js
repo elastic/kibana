@@ -76,7 +76,7 @@ export class GeohashGridLayer extends ALayer {
         type: 'heatmap',
         source: this.getId(),
         paint: {//needs tweaking
-          "heatmap-radius": 16,
+          "heatmap-radius": 64,
           "heatmap-weight": {
             "type": "identity",
             "property": "__kbn_heatmap_weight__"

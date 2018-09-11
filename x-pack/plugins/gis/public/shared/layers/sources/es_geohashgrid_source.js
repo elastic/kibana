@@ -7,7 +7,8 @@
 import React, { Fragment } from 'react';
 
 import {
-  EuiButton
+  EuiButton,
+  EuiSelect
 } from '@elastic/eui';
 
 import { ASource } from './source';
@@ -26,24 +27,18 @@ export class ESGeohashGridSource extends ASource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
-    return (
-      <Fragment>
-        <EuiButton
-          size="s"
-          onClick={() => {
-            const sourceDescriptor = ESGeohashGridSource.createDescriptor({
-              esIndexPattern: "log*",
-              pointField: "geo.coordinates"
-            });
-            const source = new ESGeohashGridSource(sourceDescriptor);
-            onPreviewSource(source);
-          }}
-        >
-          Show heatmap for log* index with geo.coordinates field.
-        </EuiButton>
-      </Fragment>
-    );
+  static renderEditor({ onPreviewSource, dataSourcesMeta }) {
+    const indexPatterns = dataSourcesMeta.elasticsearch.indexPatterns.filter(indexPattern => indexPattern.isGeohashable);
+    const onSelect = (selection) => {
+      const sourceDescriptor = ESGeohashGridSource.createDescriptor({
+        esIndexPattern: selection.esIndexPattern,
+        pointField: selection.pointField
+      });
+      const source = new ESGeohashGridSource(sourceDescriptor);
+      onPreviewSource(source);
+    };
+
+    return (<GeohashableIndexPatternEditor indexPatterns={indexPatterns} onSelect={onSelect}/>);
   }
 
   renderDetails() {
@@ -96,6 +91,103 @@ export class ESGeohashGridSource extends ASource {
 
   getDisplayName() {
     return this._descriptor.esIndexPattern + ' grid';
+  }
+
+
+}
+
+class GeohashableIndexPatternEditor extends React.Component {
+
+  constructor() {
+    super();
+    this.state = {
+      selectedIndexPattern: null,
+      selectedPointField: null
+    };
+    this._pointFieldSelect = null;
+  }
+
+  _getSelectedIndexPattern() {
+    return this.props.indexPatterns.find(indexPattern => indexPattern.id === this.state.selectedIndexPattern);
+  }
+
+  _getPointFields() {
+    const indexPattern = this._getSelectedIndexPattern();
+    return indexPattern.fields.filter(field => field.type === 'geo_point');
+  }
+
+  render() {
+
+    const indexPatterns = this.props.indexPatterns.map((indexPattern) => {
+      return {
+        value: indexPattern.id,
+        text: indexPattern.title
+      };
+    });
+    let pointOptions;
+    if (this.state.selectedIndexPattern) {
+      const pointFields = this._getPointFields();
+      pointOptions = pointFields.map(field => {
+        return {
+          text: field.name,
+          value: field.name
+        };
+      });
+    } else {
+      pointOptions = [];
+    }
+
+    const onIndexPatternChange = (e) => {
+      this.setState({
+        selectedIndexPattern: e.target.value,
+        selectedPointField: null
+      });
+    };
+    const onPointFieldChange = (e) => {
+      this.setState({
+        selectedPointField: e.target.value
+      });
+    };
+
+    return (
+      <Fragment>
+        <EuiSelect
+          hasNoInitialSelection
+          options={indexPatterns}
+          onChange={onIndexPatternChange}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+        <EuiSelect
+          options={pointOptions}
+          aria-label="Use aria labels when no actual label is in use"
+          onChange={onPointFieldChange}
+          className={this.state.selectedIndexPattern ? '' : 'hidden'}
+        />
+        <EuiButton
+          size="s"
+          onClick={() => {
+            if (!this.state.selectedIndexPattern) {
+              return;
+            }
+            const indexPattern = this._getSelectedIndexPattern();
+            let pointField;
+            if (this.state.selectedPointField) {
+              pointField = this.state.selectedPointField;
+            } else {
+              const pointFields = this._getPointFields();
+              pointField = pointFields[0].name;
+            }
+            this.props.onSelect({
+              esIndexPattern: indexPattern.title,
+              pointField: pointField
+            });
+          }}
+          isDisabled={!this.state.selectedIndexPattern}
+        >
+          Preview geohash layer
+        </EuiButton>
+      </Fragment>
+    );
   }
 
 

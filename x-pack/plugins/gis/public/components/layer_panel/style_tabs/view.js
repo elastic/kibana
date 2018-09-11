@@ -64,7 +64,6 @@ export class StyleTabs extends React.Component {
     });
 
     const styleEditors = supportedStyles.map((style, index) => {
-
       const seedStyle = (style.canEdit(currentStyle)) ? currentStyle : null;
       const styleEditor = style.renderEditor({
         handleStyleChange: (styleDescriptor) => {
@@ -73,7 +72,6 @@ export class StyleTabs extends React.Component {
         style: seedStyle,
         reset: () => this.props.reset()
       });
-
       return (
         <Fragment key={index}>
           {styleEditor}
