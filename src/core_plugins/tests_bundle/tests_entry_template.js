@@ -45,8 +45,8 @@ document.body.appendChild(rootDomElement)
 
 new CoreSystem({
   injectedMetadata: {
-    version: legacyMetadata.version,
-    buildNumber: legacyMetadata.buildNum,
+    version: '1.2.3',
+    buildNumber: 1234,
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
