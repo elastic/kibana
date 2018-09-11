@@ -31,7 +31,6 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-import { updateEditorStateWithChanges } from './update_editor_state';
 
 
 const defaultEditor = function ($rootScope, $compile) {
@@ -143,8 +142,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
-              lockDirty = true;
+            if (!_.isEqual(newState, $scope.oldState)) {
+              $scope.state = $scope.vis.copyCurrentState(true);
+              $scope.oldState = newState;
             }
           }, true);
 
