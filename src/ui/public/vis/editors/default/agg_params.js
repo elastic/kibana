@@ -29,6 +29,7 @@ import { documentationLinks } from '../../../documentation_links/documentation_l
 import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { editorConfigProviders } from '../config/editor_config_providers';
+import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 
 uiModules
   .get('app/visualize')
@@ -129,7 +130,6 @@ uiModules
 
           // create child scope, used in the editors
           $aggParamEditorsScope = $scope.$new();
-          $aggParamEditorsScope.indexedFields = $scope.agg.getFieldOptions();
           const aggParamHTML = {
             basic: [],
             advanced: []
@@ -146,10 +146,10 @@ uiModules
                 return;
               }
               // if field param exists, compute allowed fields
-              if (param.name === 'field') {
-                fields = $aggParamEditorsScope.indexedFields;
-              } else if (param.type === 'field') {
-                fields = $aggParamEditorsScope[`${param.name}Options`] = param.getFieldOptions($scope.agg);
+              if (param.type === 'field') {
+                const availableFields = param.getAvailableFields($scope.agg.getIndexPattern().fields);
+                fields = $scope.indexedFields = $aggParamEditorsScope[`${param.name}Options`] =
+                  aggTypeFieldFilters.filter(availableFields, param.type, $scope.agg, $scope.vis);
               }
 
               if (fields) {
