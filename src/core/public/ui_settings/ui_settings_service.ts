@@ -41,7 +41,7 @@ export class UiSettingsService {
     loadingCount.add(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
-    const legacyMetadata: any = injectedMetadata.getLegacyMetadata();
+    const legacyMetadata = injectedMetadata.getLegacyMetadata();
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,

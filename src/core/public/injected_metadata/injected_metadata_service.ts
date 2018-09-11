@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
@@ -29,7 +30,21 @@ export interface InjectedMetadataParams {
       [key: string]: unknown;
     };
     legacyMetadata: {
-      [key: string]: unknown;
+      app: unknown;
+      translations: unknown;
+      bundleId: string;
+      nav: unknown;
+      version: string;
+      branch: string;
+      buildNum: number;
+      buildSha: string;
+      basePath: string;
+      serverName: string;
+      devMode: boolean;
+      uiSettings: {
+        defaults: UiSettingsState;
+        user?: UiSettingsState;
+      };
     };
   };
 }
