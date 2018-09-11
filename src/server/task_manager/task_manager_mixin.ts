@@ -36,7 +36,7 @@ import { TaskManagerRunner } from './task_runner';
 import { TaskStore } from './task_store';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  const logger = new TaskManagerLogger((...args) => server.log(...args));
+  const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
   const totalCapacity = config.get('taskManager.num_workers');
   const definitions = extractTaskDefinitions(totalCapacity, kbnServer.uiExports.taskDefinitions);
 
