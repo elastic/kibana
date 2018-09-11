@@ -50,13 +50,13 @@ exports[`PipelinesTable component renders component as expected 1`] = `
   message={null}
   pagination={
     Object {
+      "initialPageSize": 20,
       "pageIndex": undefined,
-      "pageSize": undefined,
       "pageSizeOptions": Array [
-        2,
-        3,
         5,
         8,
+        20,
+        50,
       ],
       "totalItemCount": 1,
     }
