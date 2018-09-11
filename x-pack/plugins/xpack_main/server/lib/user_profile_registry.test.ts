@@ -14,7 +14,7 @@ describe('UserProfileRegistry', () => {
   beforeEach(() => removeAllFactories());
 
   it('should produce an empty user profile', async () => {
-    expect(await buildUserProfile(null, null)).toEqual({});
+    expect(await buildUserProfile(null)).toEqual({});
   });
 
   it('should accumulate the results of all registered factories', async () => {
@@ -27,7 +27,7 @@ describe('UserProfileRegistry', () => {
       anotherCapability: true,
     }));
 
-    expect(await buildUserProfile(null, null)).toEqual({
+    expect(await buildUserProfile(null)).toEqual({
       foo: true,
       bar: false,
       anotherCapability: true,

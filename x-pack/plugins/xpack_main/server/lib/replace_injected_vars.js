@@ -13,7 +13,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
     ...originalInjectedVars,
     telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
-    userProfile: await buildUserProfile(server, request),
+    userProfile: await buildUserProfile(request),
   });
 
   // security feature is disabled

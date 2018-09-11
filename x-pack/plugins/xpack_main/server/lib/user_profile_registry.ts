@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type CapabilityFactory = (
-  server: any,
-  request: any
-) => Promise<{ [capability: string]: boolean }>;
+export type CapabilityFactory = (request: any) => Promise<{ [capability: string]: boolean }>;
 
 let factories: CapabilityFactory[] = [];
 
@@ -19,9 +16,9 @@ export function registerUserProfileCapabilityFactory(factory: CapabilityFactory)
   factories.push(factory);
 }
 
-export async function buildUserProfile(server: any, request: any) {
+export async function buildUserProfile(request: any) {
   const factoryPromises = factories.map(async factory => ({
-    ...(await factory(server, request)),
+    ...(await factory(request)),
   }));
 
   const factoryResults = await Promise.all(factoryPromises);
