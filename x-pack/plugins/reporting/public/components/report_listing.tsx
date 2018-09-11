@@ -28,6 +28,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+interface Job {
+  id: string;
+  type: string;
+  object_type: string;
+  object_title: string;
+  created_by?: string;
+  created_at: string;
+  started_at?: string;
+  completed_at?: string;
+  status: string;
+  max_size_reached: boolean;
+}
+
 interface Props {
   xpackInfo: any;
   kbnUrl: any;
@@ -36,7 +49,7 @@ interface Props {
 interface State {
   page: number;
   total: number;
-  jobs: [];
+  jobs: Job[];
   isLoading: boolean;
 }
 
@@ -98,7 +111,7 @@ export class ReportListing extends Component<Props, State> {
       {
         field: 'object_title',
         name: 'Report',
-        render: (objectTitle: string, record: any) => {
+        render: (objectTitle: string, record: Job) => {
           return (
             <div>
               <div>{objectTitle}</div>
@@ -110,7 +123,7 @@ export class ReportListing extends Component<Props, State> {
       {
         field: 'created_at',
         name: 'Created at',
-        render: (createdAt: string, record: any) => {
+        render: (createdAt: string, record: Job) => {
           if (record.created_by) {
             return (
               <div>
@@ -125,15 +138,15 @@ export class ReportListing extends Component<Props, State> {
       {
         field: 'status',
         name: 'Status',
-        render: (status: string, record: any) => {
+        render: (status: string, record: Job) => {
           let maxSizeReached;
           if (record.max_size_reached) {
             maxSizeReached = <span> - max size reached</span>;
           }
           let statusTimestamp;
-          if (status === 'processing') {
+          if (status === 'processing' && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
-          } else if (status === 'completed' || status === 'failed') {
+          } else if (record.completed_at && (status === 'completed' || status === 'failed')) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
           return (
@@ -150,7 +163,7 @@ export class ReportListing extends Component<Props, State> {
         name: 'Actions',
         actions: [
           {
-            render: (record: any) => {
+            render: (record: Job) => {
               return (
                 <div className="euiTableCellContent__hoverItem">
                   {this.renderDownloadButton(record)}
@@ -271,7 +284,6 @@ export class ReportListing extends Component<Props, State> {
             started_at: job._source.started_at,
             completed_at: job._source.completed_at,
             status: job._source.status,
-            content_type: job._source.output ? job._source.output.content_type : false,
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
           };
         }),
