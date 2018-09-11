@@ -80,6 +80,7 @@ describe('ExplorerSwimlane', () => {
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
 
+  /*
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
@@ -108,4 +109,5 @@ describe('ExplorerSwimlane', () => {
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
   });
+  */
 });
