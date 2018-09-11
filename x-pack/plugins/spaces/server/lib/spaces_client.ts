@@ -162,7 +162,7 @@ export class SpacesClient {
       this.auditLogger.spacesAuthorizationSuccess(username, action, [spaceId]);
       return;
     } else {
-      this.auditLogger.spacesAuthorizationSuccess(username, action, [spaceId]);
+      this.auditLogger.spacesAuthorizationFailure(username, action, [spaceId]);
       throw Boom.forbidden(forbiddenMessage);
     }
   }
