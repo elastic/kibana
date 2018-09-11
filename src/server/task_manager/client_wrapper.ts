@@ -21,51 +21,36 @@ import { TaskInstance } from './task';
 import { TaskManager } from './task_manager';
 import { FetchOpts, FetchResult } from './task_pool/task_store';
 
-interface ClientCheckResult {
-  error?: Error;
-}
-
-function checkClient(client: TaskManager | null): ClientCheckResult {
-  if (client === null) {
-    return {
-      error: new Error('Task Manager Client has not been set properly!'),
-    };
-  }
-  return {};
-}
-
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;
 
-  constructor() {
+  constructor(
+    private logger: TaskManagerLogger,
+    private totalCapacity: number,
+    private definitions: TaskDictionary<SanitizedTaskDefinition>
+  ) {
     this.client = null;
   }
 
-  public setClient(client: TaskManager) {
-    this.client = client;
+  public async setClient(
+    cb: (
+      logger: TaskManagerLogger,
+      totalCapacity: number,
+      definitions: TaskDictionary<SanitizedTaskDefinition>
+    ) => Promise<TaskManager>
+  ) {
+    this.client = await cb(this.logger, this.totalCapacity, this.definitions);
   }
 
   public schedule(task: TaskInstance) {
-    const { error } = checkClient(this.client);
-    if (error) {
-      throw error;
-    }
-    return this.client.schedule(task);
+    return this.client ? this.client.schedule(task) : null;
   }
 
   public remove(id: string) {
-    const { error } = checkClient(this.client);
-    if (error) {
-      throw error;
-    }
-    return this.client.remove(id);
+    return this.client ? this.client.remove(id) : null;
   }
 
-  public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
-    const { error } = checkClient(this.client);
-    if (error) {
-      throw error;
-    }
-    return this.client.fetch(opts);
+  public fetch(opts: FetchOpts = {}) {
+    return this.client ? this.client.fetch(opts) : null;
   }
 }

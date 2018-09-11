@@ -21,6 +21,7 @@ import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
 import { fillPool } from './fill_pool';
 import { TaskManagerLogger } from './logger';
+import { getDefaultClient } from './default_client';
 import {
   ConcreteTaskInstance,
   SanitizedTaskDefinition,
@@ -39,53 +40,20 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
   const totalCapacity = config.get('taskManager.num_workers');
   const definitions = extractTaskDefinitions(totalCapacity, kbnServer.uiExports.taskDefinitions);
 
-  server.decorate('server', 'taskManager', new TaskManagerClientWrapper());
+  server.decorate(
+    'server',
+    'taskManager',
+    new TaskManagerClientWrapper(logger, totalCapacity, definitions)
+  );
 
   kbnServer.afterPluginsInit(async () => {
-    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-    const store = new TaskStore({
-      index: config.get('taskManager.index'),
-      callCluster,
-      maxAttempts: config.get('taskManager.max_attempts'),
-      supportedTypes: Object.keys(definitions),
-    });
-
-    logger.debug('Initializing the task manager index');
-    await store.init();
-
-    const pool = new TaskPool({
-      logger,
-      totalCapacity,
-    });
-
-    const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({
-      callCluster,
-      kbnServer,
-      taskInstance,
-    });
-
-    const poller = new TaskPoller({
-      logger,
-      pollInterval: config.get('taskManager.poll_interval'),
-      work: () =>
-        fillPool(
-          pool.run,
-          store.fetchAvailableTasks,
-          (instance: ConcreteTaskInstance) =>
-            new TaskManagerRunner({
-              logger,
-              instance,
-              store,
-              contextProvider,
-              definition: definitions[instance.taskType],
-            })
-        ),
-    });
-
-    poller.start();
-
-    const client = new TaskManager({ store, poller });
-    server.taskManager.setClient(client);
+    server.taskManager.setClient(
+      (
+        cLogger: TaskManagerLogger,
+        cTotalCapacity: number,
+        cDefinitions: TaskDictionary<SanitizedTaskDefinition>
+      ) => getDefaultClient(kbnServer, server, config, cLogger, cTotalCapacity, cDefinitions)
+    );
   });
 }
 
