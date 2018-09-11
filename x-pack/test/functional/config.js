@@ -56,6 +56,15 @@ export default async function ({ readConfigFile }) {
   const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
 
+  const env = {
+    kibana: {
+      server: {
+        uuid: '5b2de169-2785-441b-ae8c-186a1936b17d', // Kibana UUID for "primary" cluster in monitoring data
+      }
+    }
+  };
+
+
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [

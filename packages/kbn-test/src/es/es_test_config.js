@@ -56,14 +56,6 @@ export const esTestConfig = new class EsTestConfig {
     const username = process.env.TEST_ES_USERNAME || adminTestUser.username;
     const password = process.env.TEST_ES_PASSWORD || adminTestUser.password;
 
-    const env = {	
-      kibana: {	
-        server: {	
-          uuid: '5b2de169-2785-441b-ae8c-186a1936b17d', // Kibana UUID for "primary" cluster in monitoring data	
-        }	
-      }	
-    };
-    
     return {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from ../kbn/users.js)
