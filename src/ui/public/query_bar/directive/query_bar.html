@@ -21,7 +21,6 @@
         <input
           ng-if="queryBar.localQuery.language === 'lucene'"
           parse-query
-          input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           ng-change="queryBar.updateSuggestions()"
@@ -46,7 +45,6 @@
           ng-keydown="queryBar.handleKeyDown($event)"
           ng-change="queryBar.updateSuggestions()"
           ng-click="queryBar.updateSuggestions()"
-          input-focus
           match-pairs
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input

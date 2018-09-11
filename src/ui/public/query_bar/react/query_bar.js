@@ -24,7 +24,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
+  EuiFieldText,
 } from '@elastic/eui';
 
 export class QueryBar extends Component {
@@ -78,39 +78,49 @@ export class QueryBar extends Component {
 
   render() {
     return (
-      <div
-        className="kuiLocalSearch"
-        role="search"
+      <form
+        role="form"
+        name="queryBarForm"
+        onSubmit={(e) => {
+          e.preventDefault();
+          this.props.onSubmit({
+            query: this.state.query.query,
+            language: this.state.query.language,
+          });
+        }
+        }
       >
-        <div className="kuiLocalSearchAssistedInput">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
-              <EuiFieldSearch
-                placeholder="Search..."
-                value={this.state.query.query}
-                onChange={this.onChange}
-                onSearch={() => this.props.onSubmit({
-                  query: this.state.query.query,
-                  language: this.state.query.language,
-                })}
-                fullWidth
-              />
-              <div className="kuiLocalSearchAssistedInput__assistance">
-                <QueryLanguageSwitcher
-                  language={this.state.query.language}
-                  onSelectLanguage={(language) => {
-                    this.props.onSubmit({
-                      query: this.state.query.query,
-                      language: language,
-                    });
-                  }}
+        <div
+          className="kuiLocalSearch"
+          role="search"
+        >
+          <div className="kuiLocalSearchAssistedInput">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
+                <EuiFieldText
+                  placeholder="Search..."
+                  value={this.state.query.query}
+                  onChange={this.onChange}
+                  fullWidth
+                  autoFocus={!this.props.disableAutoFocus}
                 />
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                <div className="kuiLocalSearchAssistedInput__assistance">
+                  <QueryLanguageSwitcher
+                    language={this.state.query.language}
+                    onSelectLanguage={(language) => {
+                      this.props.onSubmit({
+                        query: this.state.query.query,
+                        language: language,
+                      });
+                    }}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </div>
-      </div>
+      </form>
     );
   }
 }
@@ -122,4 +132,5 @@ QueryBar.propTypes = {
     language: PropTypes.string,
   }),
   onSubmit: PropTypes.func,
+  disableAutoFocus: PropTypes.bool,
 };
