@@ -16,6 +16,7 @@ import { toastNotifications } from 'ui/notify';
 // @ts-ignore: implicit any for JS file
 import { Poller } from '../../../../common/poller';
 import { jobQueueClient } from '../lib/job_queue_client';
+import { ReportErrorButton } from './report_error_button';
 
 import {
   EuiBasicTable,
@@ -150,7 +151,12 @@ export class ReportListing extends Component<Props, State> {
         actions: [
           {
             render: (record: any) => {
-              return this.renderDownloadButton(record);
+              return (
+                <div className="euiTableCellContent__hoverItem">
+                  {this.renderDownloadButton(record)}
+                  {this.renderReportErrorButton(record)}
+                </div>
+              );
             },
           },
         ],
@@ -199,6 +205,14 @@ export class ReportListing extends Component<Props, State> {
     }
 
     return button;
+  };
+
+  private renderReportErrorButton = (record: any) => {
+    if (record.status !== 'failed') {
+      return;
+    }
+
+    return <ReportErrorButton jobId={record.id} />;
   };
 
   private onTableChange = ({ page }: { page: any }) => {

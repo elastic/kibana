@@ -27,6 +27,14 @@ class JobQueueClient {
       headers: addSystemApiHeader({}),
     });
   }
+
+  public getContent(jobId: string) {
+    return kfetch({
+      method: 'GET',
+      pathname: `${API_BASE_URL}/output/${jobId}`,
+      headers: addSystemApiHeader({}),
+    });
+  }
 }
 
 export const jobQueueClient = new JobQueueClient();
