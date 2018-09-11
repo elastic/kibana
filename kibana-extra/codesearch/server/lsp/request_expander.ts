@@ -5,6 +5,7 @@
  */
 
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { DidChangeWorkspaceFoldersParams } from 'vscode-languageserver-protocol';
 import { LspRequest } from '../../model';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
@@ -15,19 +16,17 @@ interface Job {
 }
 
 export class RequestExpander implements ILanguageServerHandler {
-  public get initialized() {
-    return this.currentWorkspace !== null;
-  }
-
   private proxy: LanguageServerProxy;
   private jobQueue: Job[] = [];
-  private currentWorkspace: { workspacePath: string; workspaceRevision: string } | null = null;
+  private workspaces: string[] = [];
+  private initialized: boolean = false;
 
-  constructor(proxy: LanguageServerProxy) {
+  constructor(proxy: LanguageServerProxy, readonly builtinWorkspace: boolean) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
     proxy.onDisconnected(() => {
-      this.currentWorkspace = null;
+      this.initialized = false;
+      this.workspaces = [];
     });
   }
 
@@ -43,13 +42,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   public workspaceChanged(request: LspRequest) {
-    if (!this.initialized) {
-      return true;
-    }
-    return (
-      request.workspacePath !== this.currentWorkspace!.workspacePath ||
-      request.workspaceRevision !== this.currentWorkspace!.workspaceRevision
-    );
+    return !this.workspaces.includes(request.workspacePath!);
   }
 
   public async exit() {
@@ -85,23 +78,63 @@ export class RequestExpander implements ILanguageServerHandler {
 
   private async expand(request: LspRequest): Promise<ResponseMessage> {
     if (request.workspacePath) {
-      if (this.workspaceChanged(request)) {
-        if (this.initialized) {
-          await this.proxy.shutdown();
-        }
+      if (!this.initialized) {
+        this.workspaces = [request.workspacePath];
         await this.proxy.initialize({}, [
           {
             name: request.workspacePath,
             uri: `file://${request.workspacePath}`,
           },
         ]);
-        this.currentWorkspace = {
-          workspacePath: request.workspacePath,
-          workspaceRevision: request.workspaceRevision || 'HEAD',
-        };
+        this.initialized = true;
+      } else {
+        if (this.workspaceChanged(request)) {
+          await this.changeWorkspaceFolders(request.workspacePath);
+        }
       }
     }
 
     return await this.proxy.handleRequest(request);
+  }
+
+  private async changeWorkspaceFolders(workspacePath: string) {
+    let params: DidChangeWorkspaceFoldersParams;
+    // support multiple workspaces;
+    if (this.builtinWorkspace) {
+      this.workspaces.push(workspacePath);
+      params = {
+        event: {
+          added: [
+            {
+              name: workspacePath!,
+              uri: `file://${workspacePath}`,
+            },
+          ],
+          removed: [],
+        },
+      };
+    } else {
+      params = {
+        event: {
+          added: [
+            {
+              name: workspacePath!,
+              uri: `file://${workspacePath}`,
+            },
+          ],
+          removed: [
+            {
+              name: this.workspaces[0],
+              uri: `file://${this.workspaces[0]}`,
+            },
+          ],
+        },
+      };
+      this.workspaces = [workspacePath];
+    }
+    return await this.proxy.handleRequest({
+      method: 'workspace/didChangeWorkspaceFolders',
+      params,
+    });
   }
 }

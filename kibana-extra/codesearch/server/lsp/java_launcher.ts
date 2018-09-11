@@ -22,7 +22,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     readonly server: Hapi.Server
   ) {}
 
-  public async launch() {
+  public async launch(builtinWorkspace = true) {
     let port = 2090;
 
     if (!this.detach) {
@@ -98,6 +98,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
       });
     }
     proxy.listen();
-    return new RequestExpander(proxy);
+    return new RequestExpander(proxy, builtinWorkspace);
   }
 }

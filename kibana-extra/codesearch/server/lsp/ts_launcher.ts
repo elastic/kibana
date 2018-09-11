@@ -9,6 +9,7 @@ import getPort from 'get-port';
 import * as Hapi from 'hapi';
 import path from 'path';
 import { Log } from '../log';
+import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
@@ -20,7 +21,7 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     readonly server: Hapi.Server
   ) {}
 
-  public async launch() {
+  public async launch(builtinWorkspace = false) {
     let port = 2090;
 
     if (!this.detach) {
@@ -31,6 +32,12 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
 
     if (this.detach) {
       log.info('Detach mode, expected LSP launch externally');
+      proxy.onDisconnected(() => {
+        if (!proxy.isClosed) {
+          log.warn('language server disconnected, reconnecting');
+          setTimeout(() => proxy.connect(), 1000);
+        }
+      });
     } else {
       const spawnTs = () =>
         spawn(
@@ -53,18 +60,29 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
         );
       let child = spawnTs();
       log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
+      const reconnect = () => {
+        log.info('reconnecting');
+        promiseTimeout(3000, proxy.connect()).then(
+          () => {
+            log.info('connected');
+          },
+          () => {
+            log.error('unable to connect within 3s, respawn ts server.');
+            child.kill();
+            child = spawnTs();
+            setTimeout(reconnect, 1000);
+          }
+        );
+      };
       proxy.onDisconnected(() => {
-        child.kill();
-        child = spawnTs();
+        if (!proxy.isClosed) {
+          log.warn('language server disconnected, reconnecting');
+          setTimeout(reconnect, 1000);
+        }
       });
     }
-    proxy.onDisconnected(() => {
-      if (!proxy.isClosed) {
-        log.warn('language server disconnected, reconnecting');
-        setTimeout(() => proxy.connect(), 1000);
-      }
-    });
     proxy.listen();
-    return new RequestExpander(proxy);
+    await proxy.connect();
+    return new RequestExpander(proxy, builtinWorkspace);
   }
 }

@@ -119,7 +119,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     for (const ls of this.languageServers) {
       if (ls.builtinWorkspaceFolders) {
         try {
-          ls.workspaceHandlers = await ls.launcher.launch();
+          ls.workspaceHandlers = await ls.launcher.launch(true);
         } catch (e) {
           this.log.error(e);
         }
@@ -139,7 +139,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       const maxWorkspace = languageServer.maxWorkspace || 5;
       const handlerArray = Object.entries(handlers);
       if (handlerArray.length < maxWorkspace) {
-        handler = await languageServer.launcher.launch();
+        handler = await languageServer.launcher.launch(languageServer.builtinWorkspaceFolders);
         handlers[request.workspacePath!] = handler;
         return handler;
       } else {

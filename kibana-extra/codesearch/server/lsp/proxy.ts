@@ -36,7 +36,11 @@ export interface ILanguageServerHandler {
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {
+  public get isClosed() {
+    return this.closed;
+  }
   public initialized: boolean = false;
+  private socket: any;
 
   private conn: IConnection;
   private clientConnection: MessageConnection | null = null;
@@ -48,6 +52,8 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private readonly targetPort: number;
   private readonly logger?: Logger;
   private eventEmitter = new EventEmitter();
+
+  private connectingPromise?: Promise<MessageConnection>;
 
   constructor(targetPort: number, targetHost: string, logger?: Logger) {
     this.targetHost = targetHost;
@@ -76,9 +82,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       this.replies.set(message.id as number, [resolve, reject]);
       this.httpEmitter.emit('message', message);
     });
-  }
-  public get isClosed() {
-    return this.closed;
   }
   public async initialize(
     clientCapabilities: ClientCapabilities,
@@ -195,28 +198,30 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       return Promise.resolve(this.clientConnection);
     }
     this.closed = false;
-    return new Promise(resolve => {
-      const socket = new net.Socket();
+    if (!this.connectingPromise) {
+      this.connectingPromise = new Promise((resolve, reject) => {
+        this.socket = new net.Socket();
 
-      socket.on('connect', () => {
-        const reader = new SocketMessageReader(socket);
-        const writer = new SocketMessageWriter(socket);
-        this.clientConnection = createMessageConnection(reader, writer, this.logger);
-        this.clientConnection.listen();
-        resolve(this.clientConnection);
-        this.eventEmitter.emit('connect');
+        this.socket.on('connect', () => {
+          const reader = new SocketMessageReader(this.socket);
+          const writer = new SocketMessageWriter(this.socket);
+          this.clientConnection = createMessageConnection(reader, writer, this.logger);
+          this.clientConnection.listen();
+          resolve(this.clientConnection);
+          this.eventEmitter.emit('connect');
+        });
+
+        this.socket.on('close', () => this.onSocketClosed());
+
+        this.socket.on('error', () => void 0);
+        this.socket.on('timeout', () => void 0);
+        this.socket.on('drain', () => void 0);
+        this.socket.connect(this.targetPort, this.targetHost);
       });
-
-      socket.on('close', () => this.onSocketClosed());
-
-      socket.on('error', () => void 0);
-      socket.on('timeout', () => void 0);
-      socket.on('drain', () => void 0);
-      socket.connect(
-        this.targetPort,
-        this.targetHost
-      );
-    });
+    } else {
+      this.socket.connect(this.targetPort, this.targetHost);
+    }
+    return this.connectingPromise;
   }
 
   private onSocketClosed() {
