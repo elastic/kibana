@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Visualization VerticalBarChart';
 
-      log.debug('navigateToApp visualize');
+      log.debug('log in as kibanauser with rbac_all role');
       await PageObjects.security.login('kibanauser', 'changeme');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Viz VerticalBarChart';
 
-      log.debug('navigateToApp visualize');
+      log.debug('log in as kibanareadonly with rbac_read role');
       await PageObjects.security.login('kibanareadonly', 'changeme');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       log.debug('clickVerticalBarChart');

@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Management', () => {
     before(async () => {
-      await PageObjects.security.login('elastic', 'changeme');
+      // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
