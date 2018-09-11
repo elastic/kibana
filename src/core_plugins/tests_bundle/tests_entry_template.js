@@ -50,6 +50,10 @@ new CoreSystem({
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
+      uiSettings: {
+        defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
+        user: {}
+      }
     },
     vars: {
       kbnIndex: '.kibana',
@@ -77,10 +81,6 @@ new CoreSystem({
         enableExternalUrls: true
       },
     },
-    uiSettings: {
-      defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
-      user: {}
-    }
   },
   rootDomElement,
   useLegacyTestHarness: true,
