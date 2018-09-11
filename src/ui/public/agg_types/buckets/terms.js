@@ -127,6 +127,7 @@ export const termsBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {

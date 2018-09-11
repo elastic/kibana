@@ -72,6 +72,7 @@ export const geoHashBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'geo_point'
     },
     {
