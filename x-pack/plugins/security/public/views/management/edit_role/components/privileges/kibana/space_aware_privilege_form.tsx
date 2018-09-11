@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
+import { ScopedUserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -37,6 +38,7 @@ interface Props {
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
+  spacesUserProfile: ScopedUserProfile;
 }
 
 interface PrivilegeForm {
@@ -190,7 +192,11 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ImpactedSpacesFlyout role={role} spaces={spaces} />
+            <ImpactedSpacesFlyout
+              role={role}
+              spaces={spaces}
+              userProfile={this.props.spacesUserProfile}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

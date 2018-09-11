@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
+import { ScopedUserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -17,6 +18,7 @@ interface Props {
   role: Role;
   spacesEnabled: boolean;
   spaces?: Space[];
+  spacesUserProfile: ScopedUserProfile;
   editable: boolean;
   kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
@@ -38,6 +40,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
       role,
       spacesEnabled,
       spaces = [],
+      spacesUserProfile,
       onChange,
       editable,
       validator,
@@ -49,6 +52,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           kibanaAppPrivileges={kibanaAppPrivileges}
           role={role}
           spaces={spaces}
+          spacesUserProfile={spacesUserProfile}
           onChange={onChange}
           editable={editable}
           validator={validator}

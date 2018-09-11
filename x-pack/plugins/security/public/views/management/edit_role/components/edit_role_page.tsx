@@ -23,6 +23,7 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
+import { ScopedUserProfile } from '../../../../../../xpack_main/public/services/user_profile';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
@@ -46,6 +47,7 @@ interface Props {
   notifier: any;
   spaces?: Space[];
   spacesEnabled: boolean;
+  spacesUserProfile: ScopedUserProfile;
 }
 
 interface State {
@@ -212,6 +214,7 @@ export class EditRolePage extends Component<Props, State> {
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
+          spacesUserProfile={this.props.spacesUserProfile}
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
