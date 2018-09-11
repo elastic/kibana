@@ -23,11 +23,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  ShareUrlContent,
-} from './share_url_content';
+  UrlPanelContent,
+} from './url_panel_content';
 
 test('render', () => {
-  const component = shallow(<ShareUrlContent
+  const component = shallow(<UrlPanelContent
     objectType="dashboard"
     getUnhashableStates={() => {}}
   />);
@@ -35,7 +35,7 @@ test('render', () => {
 });
 
 test('should enable saved object export option when objectId is provided', () => {
-  const component = shallow(<ShareUrlContent
+  const component = shallow(<UrlPanelContent
     objectId="id1"
     objectType="dashboard"
     getUnhashableStates={() => {}}

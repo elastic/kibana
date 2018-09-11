@@ -43,7 +43,7 @@ import { showCloneModal } from './top_nav/show_clone_modal';
 import { showSaveModal } from './top_nav/show_save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -86,6 +86,7 @@ app.directive('dashboardApp', function ($injector) {
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
       const getUnhashableStates = Private(getUnhashableStatesProvider);
+      const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
@@ -131,14 +132,6 @@ app.directive('dashboardApp', function ($injector) {
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
-      };
-
-      this.getSharingTitle = () => {
-        return dash.title;
-      };
-
-      this.getSharingType = () => {
-        return 'dashboard';
       };
 
       dashboardStateManager.registerChangeListener(status => {
@@ -409,6 +402,11 @@ app.directive('dashboardApp', function ($injector) {
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
+          shareContextMenuExtensions,
+          sharingData: {
+            title: dash.title,
+          },
+          isDirty: dashboardStateManager.getIsDirty(),
         });
       };
 
