@@ -215,7 +215,7 @@ export class PipelineEditor extends React.Component {
                 Cancel
               </EuiButton>
             </EuiFlexItem>
-            {this.props.isNewPipeline && (
+            {!this.props.isNewPipeline && (
               <EuiFlexItem grow={false}>
                 <EuiButton color="danger" data-test-subj="btnDeletePipeline" onClick={this.showConfirmDeleteModal}>
                   Delete pipeline
