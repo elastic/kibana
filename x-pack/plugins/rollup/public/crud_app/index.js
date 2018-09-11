@@ -13,7 +13,7 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttpClient } from './services';
+import { setHttp } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
@@ -27,22 +27,6 @@ esSection.register('rollup_jobs', {
   order: 2,
   url: `#${CRUD_APP_BASE_PATH}`,
 });
-
-export const manageAngularLifecycle = ($scope, $route, elem) => {
-  const lastRoute = $route.current;
-
-  const deregister = $scope.$on('$locationChangeSuccess', () => {
-    const currentRoute = $route.current;
-    if (lastRoute.$$route.template === currentRoute.$$route.template) {
-      $route.current = lastRoute;
-    }
-  });
-
-  $scope.$on('$destroy', () => {
-    deregister && deregister();
-    elem && unmountComponentAtNode(elem);
-  });
-};
 
 const renderReact = async (elem) => {
   render(
@@ -61,15 +45,27 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
   template: template,
   controllerAs: 'rollupJobs',
   controller: class IndexRollupJobsController {
-    constructor($scope, $route, $http) {
+    constructor($scope, $route, $injector) {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
-      setHttpClient($http);
+      setHttp($injector.get('$http'));
 
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('rollupJobsReactRoot');
-        renderReact(elem);
-        manageAngularLifecycle($scope, $route, elem);
+        const appElement = document.getElementById('rollupJobsReactRoot');
+        renderReact(appElement);
+
+        const lastRoute = $route.current;
+        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+          const currentRoute = $route.current;
+          if (lastRoute.$$route.template === currentRoute.$$route.template) {
+            $route.current = lastRoute;
+          }
+        });
+
+        $scope.$on('$destroy', () => {
+          stopListeningForLocationChange();
+          unmountComponentAtNode(appElement);
+        });
       });
     }
   }

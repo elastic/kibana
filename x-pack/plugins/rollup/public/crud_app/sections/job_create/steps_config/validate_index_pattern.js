@@ -9,12 +9,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 
-export function validateIndexPattern(indexPattern) {
+export function validateIndexPattern(indexPattern, rollupIndex) {
   if (!indexPattern || !indexPattern.trim()) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternMissing"
         defaultMessage="You must provide an index pattern"
+      />
+    )];
+  }
+
+  if (indexPattern === rollupIndex) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.indexPatternSameAsRollupIndex"
+        defaultMessage="Index pattern must not be the same as the rollup index"
       />
     )];
   }
@@ -28,7 +37,7 @@ export function validateIndexPattern(indexPattern) {
   }, []);
 
   if (illegalCharacters.length) {
-    return[(
+    return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
         defaultMessage="You must remove these characters from your index pattern: {characterList}"

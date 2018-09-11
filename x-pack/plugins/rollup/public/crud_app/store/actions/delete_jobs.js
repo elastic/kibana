@@ -7,7 +7,6 @@
 import { toastNotifications } from 'ui/notify';
 
 import { deleteJobs as sendDeleteJobsRequest } from '../../services';
-import { DELETE_JOBS_SUCCESS } from '../action_types';
 import { getDetailPanelJob } from '../selectors';
 
 import { loadJobs } from './load_jobs';
@@ -20,9 +19,11 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
     return toastNotifications.addDanger(error.data.message);
   }
 
-  dispatch({
-    type: DELETE_JOBS_SUCCESS,
-  });
+  if (jobIds.length === 1) {
+    toastNotifications.addSuccess(`Rollup job '${jobIds[0]}' was deleted`);
+  } else {
+    toastNotifications.addSuccess(`${jobIds.length} rollup jobs were deleted`);
+  }
 
   dispatch(loadJobs());
 

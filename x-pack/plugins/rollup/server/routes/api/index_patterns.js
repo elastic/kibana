@@ -48,7 +48,7 @@ export function registerFieldsForWildcardRoute(server) {
         const rollupFields = [];
         const rollupFieldNames = [];
         const fieldsFromFieldCapsApi = indexBy(await getFieldCapabilities(callWithRequest, [rollupIndex], metaFields), 'name');
-        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('rollup.capabilitiesByRollupIndex', {
+        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('rollup.rollupIndexCapabilities', {
           indexPattern: rollupIndex
         }))[rollupIndex].aggs;
 
