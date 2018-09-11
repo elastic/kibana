@@ -61,7 +61,7 @@ const VislibResponseHandlerProvider = function (Private) {
   }
 
   function convertTable(vis, table) {
-    return vis.type.responseConverter ? vis.type.responseConverter(vis, table) : table;
+    return vis.type.responseConverter ? vis.type.responseConverter(table) : table;
   }
 
   return {

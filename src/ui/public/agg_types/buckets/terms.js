@@ -127,6 +127,7 @@ export const termsBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
@@ -147,7 +148,7 @@ export const termsBucketAgg = new BucketAggType({
       makeOrderAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
-        const orderAgg = new AggConfig(termsAgg.vis, state);
+        const orderAgg = this.aggConfigs.createAggConfig(state);
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
