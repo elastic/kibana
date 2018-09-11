@@ -12,12 +12,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { MLJobEditor } from '../../../jobs/jobs_list/components/ml_job_editor';
+import { MLJobEditor, EDITOR_MODE } from '../../../jobs/jobs_list/components/ml_job_editor';
 
 export function FileContents({ data, format, numberOfLines }) {
-  let mode = 'text';
-  if (format === 'json') {
-    mode = 'json';
+  let mode = EDITOR_MODE.TEXT;
+  if (format === EDITOR_MODE.JSON) {
+    mode = EDITOR_MODE.JSON;
   }
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
@@ -28,7 +28,7 @@ export function FileContents({ data, format, numberOfLines }) {
         <h3>File contents</h3>
       </EuiTitle>
 
-      <div>First {numberOfLines} lines</div>
+      <div>First {numberOfLines} line{(numberOfLines > 1) ? 's' : ''}</div>
 
       <EuiSpacer size="s" />
 

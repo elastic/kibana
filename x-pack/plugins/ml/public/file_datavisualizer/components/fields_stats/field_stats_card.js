@@ -22,15 +22,13 @@ export function FieldStatsCard({ field }) {
   if (type === 'double' || type === 'long') {
     type = 'number';
   }
-  const typeColor = getTypeColor(type);
 
   return (
     <React.Fragment>
       <div className="card-container">
         <div className="ml-field-data-card">
           <div
-            style={{ backgroundColor: typeColor }}
-            className="ml-field-title-bar"
+            className={`ml-field-title-bar ${type}`}
           >
             <FieldTypeIcon type={type} />
             <div className="field-name">{field.name}</div>
@@ -39,10 +37,10 @@ export function FieldStatsCard({ field }) {
           <div className="card-contents">
             <div className="stats">
               <div className="stat">
-                <i className="fa fa-files-o" aria-hidden="true" /> {field.count} documents ({percent}%)
+                <i className="fa fa-files-o" aria-hidden="true" /> {field.count} document{(field.count > 1) ? 's' : ''} ({percent}%)
               </div>
               <div className="stat">
-                <i className="fa fa-cubes" aria-hidden="true" /> {field.cardinality} distinct values
+                <i className="fa fa-cubes" aria-hidden="true" /> {field.cardinality} distinct value{(field.cardinality > 1) ? 's' : ''}
               </div>
 
               {
@@ -77,8 +75,8 @@ export function FieldStatsCard({ field }) {
                         <div className="field-label">{h.value}&nbsp;</div>
                         <div className="top-value-bar-holder">
                           <div
-                            className="top-value-bar"
-                            style={{ width: `${pcnt}%`, backgroundColor: typeColor }}
+                            className={`top-value-bar ${type}`}
+                            style={{ width: `${pcnt}%` }}
                           />
                         </div>
                         <div className="count-label">{pcnt}%</div>
@@ -95,29 +93,4 @@ export function FieldStatsCard({ field }) {
       </div>
     </React.Fragment>
   );
-}
-
-function getTypeColor(type) {
-
-  switch (type) {
-    case 'boolean':
-      return '#e6c220';
-    case 'date':
-      return '#f98510';
-    case 'document_count':
-      return '#db1374';
-    case 'geo_point':
-      return '#461a0a';
-    case 'ip':
-      return '#490092';
-    case 'keyword':
-      return '#00b3a4';
-    case 'number':
-      return '#3185fc';
-    case 'text':
-      return '#920000';
-
-    default:
-      return '#bfa180';
-  }
 }

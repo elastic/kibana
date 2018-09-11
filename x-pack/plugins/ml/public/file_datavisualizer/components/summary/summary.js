@@ -32,7 +32,7 @@ export function Summary({ results }) {
 function createDisplayItems(results) {
   const items = [
     {
-      title: 'Number of lines analysed',
+      title: 'Number of lines analyzed',
       description: results.num_lines_analyzed,
     },
     {

@@ -18,7 +18,7 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
       iconType="cross"
     >
       <p>
-        File size uploaded is {fileSize}, the max file size for uploading to Kibana is {maxFileSize}
+        The size of the file you selected for upload is {fileSize} which exceeds the maximum of {maxFileSize} permitted by Kibana
       </p>
     </EuiCallOut>
   );

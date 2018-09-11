@@ -14,7 +14,7 @@ const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
 
 export function fileDataVisualizerProvider(callWithRequest) {
-  async function analyseFile(data) {
+  async function analyzeFile(data) {
     let cached = false;
     let results = [];
     try {
@@ -43,47 +43,6 @@ export function fileDataVisualizerProvider(callWithRequest) {
       return false;
     }
   }
-
-  // async function cacheData2(data) {
-  //   return new Promise(async (resolve, reject) => {
-  //     const lccPath = `${__dirname}/../../../../lcc`;
-  //     const outputPath = `${os.tmpdir()}/elasticsearch.ML`;
-  //     const tempFile = 'es-ml-tempFile';
-  //     const tempFilePath = `${outputPath}/${tempFile}`;
-
-  //     createOutputDir(outputPath);
-  //     await deleteOutputFiles(outputPath);
-  //     await writeFile(tempFilePath, logData.body);
-  //     const lccProcess = spawn(`${lccPath}/bin/log-config-creator`, [`-n${tempFile}`, `-o${outputPath}`, tempFilePath]);
-
-  //     lccProcess.on('close', () => {
-  //       readAllResultsFiles(outputPath, tempFilePath)
-  //         .then((content) => {
-  //           const results = {};
-  //           outputFiles.forEach((f, i) => results[f.id] = content[i]);
-  //           resolve(results);
-  //         })
-  //         .catch((err) => {
-  //           reject(err);
-  //         });
-  //     });
-
-  //     lccProcess.stderr.on('data', (data) => {
-  //       console.error(data);
-  //       // reject(data);
-  //     });
-
-  //   });
-  // }
-
-  // async function readAllResultsFiles(outputPath, tempFilePath) {
-  //   return Promise.all(outputFiles.map(async f => await loadFile(`${tempFilePath}${f.name}`)));
-  // }
-
-  // async function loadFile(fileName) {
-  //   const exists = fs.existsSync(fileName);
-  //   return (exists) ? await readFile(fileName, 'utf-8') : undefined;
-  // }
 
   function createOutputDir(dir) {
     if (fs.existsSync(dir) === false) {
@@ -115,6 +74,6 @@ export function fileDataVisualizerProvider(callWithRequest) {
   }
 
   return {
-    analyseFile
+    analyzeFile
   };
 }

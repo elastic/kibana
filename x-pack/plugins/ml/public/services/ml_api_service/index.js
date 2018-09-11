@@ -408,7 +408,7 @@ export const ml = {
     });
   },
 
-  analyseFile(obj) {
+  analyzeFile(obj) {
     return http({
       url: `${basePath}/file_data_visualizer/analyze_file`,
       method: 'POST',

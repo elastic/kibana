@@ -9,9 +9,9 @@ import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { fileDataVisualizerProvider } from '../models/file_data_visualizer';
 
-function analyseFiles(callWithRequest, data) {
-  const { analyseFile } = fileDataVisualizerProvider(callWithRequest);
-  return analyseFile(data);
+function analyzeFiles(callWithRequest, data) {
+  const { analyzeFile } = fileDataVisualizerProvider(callWithRequest);
+  return analyzeFile(data);
 }
 
 export function fileDataVisualizerRoutes(server, commonRouteConfig) {
@@ -21,7 +21,7 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       const data = request.payload;
-      return analyseFiles(callWithRequest, data)
+      return analyzeFiles(callWithRequest, data)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

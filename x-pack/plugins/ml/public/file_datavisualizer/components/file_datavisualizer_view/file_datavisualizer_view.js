@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../services/ml_api_service';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 
@@ -50,13 +50,13 @@ export class FileDataVisualizerView extends Component {
       results: undefined,
     }, () => {
       if (files.length) {
-        this.analyseFile(files[0]);
+        this.analyzeFile(files[0]);
       }
     });
 
   };
 
-  async analyseFile(file) {
+  async analyzeFile(file) {
     if (file.size < this.maxPayloadBytes) {
       let data = null;
       try {
@@ -73,7 +73,7 @@ export class FileDataVisualizerView extends Component {
 
       if (data !== null) {
         try {
-          const resp = await  ml.analyseFile(data);
+          const resp = await  ml.analyzeFile(data);
           this.setState({
             results: resp.results,
             loaded: true,
