@@ -19,6 +19,6 @@ export function FormLabelWithIconTip({ formRowLabelText, formRowTooltipText }) {
 }
 
 FormLabelWithIconTip.propTypes = {
-  labelText: PropTypes.string.isRequired,
-  tooltipText: PropTypes.string.isRequired,
+  formRowLabelText: PropTypes.string.isRequired,
+  formRowTooltipText: PropTypes.string.isRequired,
 };

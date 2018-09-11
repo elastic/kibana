@@ -30,6 +30,6 @@ export function FlexItemSetting(props) {
 }
 
 FlexItemSetting.propTypes = {
-  formRowLabelText: PropTypes.string.isRequired,
-  formRowTooltipText: PropTypes.string.isRequired,
+  formRowLabelText: PropTypes.string,
+  formRowTooltipText: PropTypes.string,
 };

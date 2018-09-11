@@ -5,6 +5,10 @@
  */
 
 import React from 'react';
+
+import 'brace/mode/plain_text';
+import 'brace/theme/github';
+
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
@@ -51,8 +55,7 @@ export class PipelineEditor extends React.Component {
           'pipeline.workers': pipelineWorkers,
           // TODO: this setting isn't getting saved
           'queue.checkpoint.writes': settings['queue.checkpoint.writes'],
-          'queue.max_bytes.number': settings['queue.max_bytes.number'],
-          'queue.max_bytes.units': settings['queue.max_bytes.units'],
+          'queue.max_bytes': settings['queue.max_bytes.number'] + settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
         },
         username,
@@ -60,6 +63,8 @@ export class PipelineEditor extends React.Component {
       pipelineIdErrors: [],
       showConfirmDeleteModal: false,
       showPipelineIdError: false,
+      maxBytesNumber: settings['queue.max_bytes.number'],
+      maxBytesUnit: settings['queue.max_bytes.units'],
     };
   }
 
@@ -153,6 +158,16 @@ export class PipelineEditor extends React.Component {
     const numberValue = parseInt(value, 10);
     this.handleSettingChange(settingName, isNaN(numberValue) ? value : numberValue);
   };
+
+  handleMaxByteNumberChange = value => {
+    this.setState({ maxBytesNumber: parseInt(value, 10), });
+    this.handleSettingChange('queue.max_bytes', value + this.state.maxBytesUnit);
+  }
+
+  handleMaxByteUnitChange = value => {
+    this.setState({ maxBytesUnit: value });
+    this.handleSettingChange('queue.max_bytes', this.state.maxBytesNumber + value);
+  }
 
   handleSettingChange = (settingName, value) => {
     const settings = { ...this.state.pipeline.settings };
@@ -250,12 +265,14 @@ export class PipelineEditor extends React.Component {
             <EuiFormRow fullWidth label="Pipeline">
               <div data-test-subj="acePipeline">
                 <EuiCodeEditor
+                  mode="plain_text"
                   onChange={this.onPipelineChange}
                   setOptions={{
                     minLines: 25,
                     maxLines: Infinity,
                     readOnly: this.props.isReadOnly,
                   }}
+                  theme="github"
                   value={this.state.pipeline.pipeline}
                   width={'1017'}
                 />
@@ -315,16 +332,16 @@ export class PipelineEditor extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueMaxBytesNumber"
-                  onChange={e => this.handleNumberChange('queue.max_bytes.number', e.target.value)}
-                  value={this.state.pipeline.settings['queue.max_bytes.number']}
+                  onChange={e => this.handleMaxByteNumberChange(e.target.value)}
+                  value={this.state.maxBytesNumber}
                 />
               </FlexItemSetting>
               <FlexItemSetting>
                 <EuiSelect
                   data-test-subj="selectQueueMaxBytesUnits"
-                  onChange={e => this.handleSettingChange('queue.max_bytes.units', e.target.value)}
+                  onChange={e => this.handleMaxByteUnitChange(e.target.value)}
                   options={PIPELINE_EDITOR.UNITS}
-                  value={this.state.pipeline.settings['queue.max_bytes.units']}
+                  value={this.state.maxBytesUnit}
                 />
               </FlexItemSetting>
               <FlexItemSetting
