@@ -342,10 +342,12 @@ export class ExplorerChart extends React.Component {
 
       lineChartGroup.append('rect')
         .attr('class', 'selected-interval')
-        .attr('x', lineChartXScale(new Date(rectStart)))
-        .attr('y', 1)
-        .attr('width', rectWidth)
-        .attr('height', chartHeight - 1);
+        .attr('x', lineChartXScale(new Date(rectStart)) + 2)
+        .attr('y', 2)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', rectWidth - 4)
+        .attr('height', chartHeight - 4);
     }
 
     function drawLineChartPaths(data) {
