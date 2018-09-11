@@ -93,7 +93,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
-    const spacesUserProfile = Private(UserProfileProvider).getScopedProfile('spaces');
+    const userProfile = Private(UserProfileProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');
@@ -139,7 +139,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         notifier={Notifier}
         spaces={spaces}
         spacesEnabled={enableSpaceAwarePrivileges}
-        spacesUserProfile={spacesUserProfile}
+        userProfile={userProfile}
       />, domNode);
 
       // unmount react on controller destroy

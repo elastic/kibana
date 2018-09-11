@@ -125,7 +125,7 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     initSpacesRequestInterceptors(server);
 
-    registerUserProfileCapabilityFactory('spaces', async (server, request) => {
+    registerUserProfileCapabilityFactory(async (server, request) => {
       const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
 
       return {

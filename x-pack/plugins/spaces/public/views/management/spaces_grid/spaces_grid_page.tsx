@@ -22,7 +22,7 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
-import { ScopedUserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
@@ -33,7 +33,7 @@ import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 interface Props {
   spacesManager: SpacesManager;
   spacesNavState: any;
-  userProfile: ScopedUserProfile;
+  userProfile: UserProfile;
 }
 
 interface State {

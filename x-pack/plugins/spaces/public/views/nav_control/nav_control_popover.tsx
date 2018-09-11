@@ -6,7 +6,7 @@
 
 import { EuiAvatar, EuiPopover } from '@elastic/eui';
 import React, { Component } from 'react';
-import { ScopedUserProfile } from '../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -20,7 +20,7 @@ interface Props {
     error: string;
     space: Space;
   };
-  userProfile: ScopedUserProfile;
+  userProfile: UserProfile;
 }
 
 interface State {

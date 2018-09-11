@@ -17,7 +17,7 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { ManageSpacesButton } from '../../../../../../../../spaces/public/components';
-import { ScopedUserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
@@ -26,7 +26,7 @@ import './impacted_spaces_flyout.less';
 interface Props {
   role: Role;
   spaces: Space[];
-  userProfile: ScopedUserProfile;
+  userProfile: UserProfile;
 }
 
 interface State {

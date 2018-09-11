@@ -6,13 +6,13 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { ScopedUserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { ManageSpacesButton } from '../../../components';
 import { SPACES_FEATURE_DESCRIPTION } from '../../../lib/constants';
 import './spaces_description.less';
 
 interface Props {
-  userProfile: ScopedUserProfile;
+  userProfile: UserProfile;
 }
 
 export const SpacesDescription: SFC<Props> = (props: Props) => {

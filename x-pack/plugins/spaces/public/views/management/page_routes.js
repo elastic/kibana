@@ -22,7 +22,7 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 routes.when('/management/spaces/list', {
   template,
   controller: function ($scope, $http, chrome, Private, spacesNavState, spaceSelectorURL) {
-    const userProfile = Private(UserProfileProvider).getScopedProfile('spaces');
+    const userProfile = Private(UserProfileProvider);
 
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
@@ -46,7 +46,7 @@ routes.when('/management/spaces/list', {
 routes.when('/management/spaces/create', {
   template,
   controller: function ($scope, $http, chrome, Private, spacesNavState, spaceSelectorURL) {
-    const userProfile = Private(UserProfileProvider).getScopedProfile('spaces');
+    const userProfile = Private(UserProfileProvider);
 
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
@@ -74,7 +74,7 @@ routes.when('/management/spaces/edit', {
 routes.when('/management/spaces/edit/:space', {
   template,
   controller: function ($scope, $http, $route, chrome, Private, spacesNavState, spaceSelectorURL) {
-    const userProfile = Private(UserProfileProvider).getScopedProfile('spaces');
+    const userProfile = Private(UserProfileProvider);
 
     $scope.$$postDigest(() => {
 

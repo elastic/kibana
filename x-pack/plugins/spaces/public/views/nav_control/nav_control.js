@@ -27,7 +27,7 @@ const module = uiModules.get('spaces_nav', ['kibana']);
 let spacesManager;
 
 module.controller('spacesNavController', ($scope, $http, chrome, Private, activeSpace, spaceSelectorURL) => {
-  const userProfile = Private(UserProfileProvider).getScopedProfile('spaces');
+  const userProfile = Private(UserProfileProvider);
 
   const domNode = document.getElementById(`spacesNavReactRoot`);
 

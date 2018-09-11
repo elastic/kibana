@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const factories: any = {};
+export type CapabilityFactory = (
+  server: any,
+  request: any
+) => Promise<{ [capability: string]: boolean }>;
 
-export function registerUserProfileCapabilityFactory(namespace: string, factory: () => any) {
-  if (namespace in factories) {
-    throw new Error(`Namespace ${namespace} is already registered`);
-  }
-  factories[namespace] = factory;
+let factories: CapabilityFactory[] = [];
+
+export function removeAllFactories() {
+  factories = [];
+}
+
+export function registerUserProfileCapabilityFactory(factory: CapabilityFactory) {
+  factories.push(factory);
 }
 
 export async function buildUserProfile(server: any, request: any) {
-  const factoryPromises = Object.keys(factories).map(async key => ({
-    [key]: await factories[key](server, request),
+  const factoryPromises = factories.map(async factory => ({
+    ...(await factory(server, request)),
   }));
+
   const factoryResults = await Promise.all(factoryPromises);
 
   return factoryResults.reduce((acc, capabilities) => {

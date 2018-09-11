@@ -38,6 +38,7 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
+    userProfile: { hasCapability: () => true },
     editable: true,
     kibanaAppPrivileges: ['all' as KibanaPrivilege],
     onChange: jest.fn(),

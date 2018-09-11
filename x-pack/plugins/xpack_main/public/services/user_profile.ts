@@ -8,36 +8,22 @@ interface Capabilities {
   [capability: string]: boolean;
 }
 
-interface RawUserProfileData {
-  [namespace: string]: Capabilities;
-}
-
 export interface UserProfile {
-  getScopedProfile: (namespace: string) => ScopedUserProfile;
-}
-
-export interface ScopedUserProfile {
   hasCapability: (capability: string) => boolean;
 }
 
-export function UserProfileProvider(userProfile: RawUserProfileData) {
+export function UserProfileProvider(userProfile: Capabilities) {
   class UserProfileClass implements UserProfile {
-    private capabilities: RawUserProfileData;
+    private capabilities: Capabilities;
 
-    constructor(profileData: RawUserProfileData = {}) {
+    constructor(profileData: Capabilities = {}) {
       this.capabilities = {
         ...profileData,
       };
     }
 
-    public getScopedProfile(namespace: string): ScopedUserProfile {
-      const scopedCapabilities: Capabilities = {
-        ...this.capabilities[namespace],
-      };
-
-      return {
-        hasCapability: (capability: string) => scopedCapabilities[capability],
-      };
+    public hasCapability(capability: string, defaultValue: boolean = true): boolean {
+      return capability in this.capabilities ? this.capabilities[capability] : defaultValue;
     }
   }
 

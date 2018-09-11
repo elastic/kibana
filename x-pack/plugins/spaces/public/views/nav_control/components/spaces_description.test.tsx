@@ -10,6 +10,8 @@ import { SpacesDescription } from './spaces_description';
 
 describe('SpacesDescription', () => {
   it('renders without crashing', () => {
-    expect(shallow(<SpacesDescription />)).toMatchSnapshot();
+    expect(
+      shallow(<SpacesDescription userProfile={{ hasCapability: () => true }} />)
+    ).toMatchSnapshot();
   });
 });

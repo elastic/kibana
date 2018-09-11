@@ -6,14 +6,14 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { Component, CSSProperties } from 'react';
-import { ScopedUserProfile } from '../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../xpack_main/public/services/user_profile';
 import { MANAGE_SPACES_URL } from '../lib/constants';
 
 interface Props {
   isDisabled?: boolean;
   size?: 's' | 'l';
   style?: CSSProperties;
-  userProfile: ScopedUserProfile;
+  userProfile: UserProfile;
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
