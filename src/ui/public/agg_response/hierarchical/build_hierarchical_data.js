@@ -36,7 +36,8 @@ export function BuildHierarchicalDataProvider(Private) {
         let dataLevel = slices;
         // we always have one bucket column and one metric column (for every level)
         for (let columnIndex = 0; columnIndex < table.columns.length; columnIndex += 2) {
-          const name = row[columnIndex].value;
+          const fieldFormatter = table.columns[columnIndex].aggConfig.fieldFormatter('text');
+          const name = fieldFormatter(row[columnIndex].value);
           const size = row[columnIndex + 1].value;
           const aggConfig = table.columns[columnIndex].aggConfig;
           const aggConfigResult = row[columnIndex + 1];
