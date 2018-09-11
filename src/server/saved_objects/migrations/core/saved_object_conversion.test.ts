@@ -99,7 +99,7 @@ describe('saved object conversion', () => {
       expect(actual.id).toEqual('universe');
     });
 
-    test('it passes unknown properties through', () => {
+    test('it does not pass unknown properties through', () => {
       const actual = rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
@@ -111,7 +111,27 @@ describe('saved object conversion', () => {
           banjo: 'Steve Martin',
         },
       });
-      expect(actual.banjo).toEqual('Steve Martin');
+      expect(actual).toEqual({
+        id: 'universe',
+        type: 'hello',
+        attributes: {
+          world: 'earth',
+        },
+      });
+    });
+
+    test('it does not create attributes if [type] is missing', () => {
+      const actual = rawToSavedObject({
+        _id: 'universe',
+        _type: ROOT_TYPE,
+        _source: {
+          type: 'hello',
+        },
+      });
+      expect(actual).toEqual({
+        id: 'universe',
+        type: 'hello',
+      });
     });
 
     test('it fails for documents which do not specify a type', () => {

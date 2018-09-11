@@ -75,16 +75,14 @@ export function isRawSavedObject(rawDoc: RawDoc) {
  */
 export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
   const { type } = _source;
-  const id = trimIdPrefix(type, _id);
-  const doc = {
-    ..._source,
+  return {
+    type,
+    id: trimIdPrefix(type, _id),
     attributes: _source[type],
-    id,
+    ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
+    ...(_source.updated_at && { updated_at: _source.updated_at }),
     ...(_version != null && { version: _version }),
   };
-
-  delete doc[type];
-  return doc;
 }
 
 /**
