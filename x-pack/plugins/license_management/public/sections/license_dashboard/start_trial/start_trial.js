@@ -56,7 +56,7 @@ export class StartTrial extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiModal
-          style={{ maxWidth: '70vw' }}
+          className="licenseManagement__modal"
           onClose={this.cancel}
         >
           <EuiModalHeader>
@@ -110,12 +110,12 @@ export class StartTrial extends React.PureComponent {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+                <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="confirmModalCancelButton"

@@ -32,6 +32,7 @@ export class TelemetryOptIn extends React.Component {
   render() {
     const { showMoreTelemetryInfo, isOptingInToTelemetry, showExample } = this.state;
     const { isStartTrial } = this.props;
+
     let example = null;
     if (showExample) {
       example = (
@@ -41,11 +42,25 @@ export class TelemetryOptIn extends React.Component {
         />
       );
     }
+
+    let toCurrentCustomers;
+    if (!isStartTrial) {
+      toCurrentCustomers = (
+        <Fragment>
+          <EuiText>
+            <p>Gold and platinum customers: help support give you better service.</p>
+          </EuiText>
+          <EuiSpacer  size="s"/>
+        </Fragment>
+      );
+    }
+
     const readMoreButton = (
       <EuiLink onClick={() => { this.setState({ showMoreTelemetryInfo: !showMoreTelemetryInfo });}}>
       Read more
       </EuiLink>
     );
+
     const popover = (
       <EuiPopover
         ownFocus
@@ -53,11 +68,12 @@ export class TelemetryOptIn extends React.Component {
         button={readMoreButton}
         isOpen={showMoreTelemetryInfo}
         closePopover={this.closeReadMorePopover}
+        style={{ verticalAlign: 'baseline' }}
       >
-        <EuiText>
+        <EuiText style={{ width: 240 }} >
           <p>
-        This feature periodically sends basic feature usage statistics.<br/>
-        This information will not be shared outside of Elastic.<br/>
+        This feature periodically sends basic feature usage statistics.
+        This information will not be shared outside of Elastic.
         See an <EuiLink onClick={() => { this.setState({ showExample: true }); this.closeReadMorePopover(); }}>example</EuiLink>
             {' '}
           or read our
@@ -67,29 +83,26 @@ export class TelemetryOptIn extends React.Component {
               target="_blank"
             >
           telemetry privacy statement
-            </EuiLink>.<br/>
+            </EuiLink>.
         You can disable this feature any time.
           </p>
         </EuiText>
       </EuiPopover>
     );
+
     return showTelemetryOptIn() ? (
       <Fragment>
         {example}
-        <EuiSpacer size="m" />
-        <EuiText>
-          {isStartTrial ? null : 'Gold and platinum customers: help support give you better service.' }
-          <EuiCheckbox
-            label={<div>Send basic feature usage statistics to Elastic periodically. {popover}</div>}
-            id="isOptingInToTelemetry"
-            checked={isOptingInToTelemetry}
-            onChange={event => {
-              const isOptingInToTelemetry = event.target.checked;
-              this.setState({ isOptingInToTelemetry });
-            }}
-          />
-
-        </EuiText>
+        {toCurrentCustomers}
+        <EuiCheckbox
+          label={<span>Send basic feature usage statistics to Elastic periodically. {popover}</span>}
+          id="isOptingInToTelemetry"
+          checked={isOptingInToTelemetry}
+          onChange={event => {
+            const isOptingInToTelemetry = event.target.checked;
+            this.setState({ isOptingInToTelemetry });
+          }}
+        />
       </Fragment>
     ) : null;
   }

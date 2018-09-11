@@ -18,3 +18,12 @@
 .licenseManagement__contain {
   margin: auto;
 }
+
+// EUITODO: Fix modal width/max-width
+.licenseManagement__modal {
+  width: 70vw;
+
+  @media only screen and (max-width: 767px) {
+    width: ~"calc(100vw + 2px)";
+  }
+}

@@ -120,6 +120,7 @@ export class UploadLicense extends React.PureComponent {
                 onChange={this.handleFile}
               />
             </EuiText>
+            <EuiSpacer size="m" />
             <TelemetryOptIn ref={(ref) => {this.telemetryOptIn = ref; }}/>
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="spaceBetween">
