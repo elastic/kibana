@@ -187,3 +187,38 @@ export function numTicksForDateFormat(axisWidth, dateFormat) {
   const tickWidth = calculateTextWidth(moment().format(dateFormat), false);
   return axisWidth / (1.75 * tickWidth);
 }
+
+// Based on a fixed starting timestamp and an interval, get tick values within
+// the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
+// to align axis ticks with the gray area resembling the swimlane cell selection.
+export function getTickValues(startTs, tickInterval, earliest, latest) {
+  const tickValues = [];
+
+  function addTicks(ts, operator) {
+    let newTick;
+    let addAnotherTick;
+
+    switch (operator) {
+      case 'previous':
+        newTick = ts - tickInterval;
+        addAnotherTick = newTick >= earliest;
+        break;
+      case 'next':
+        newTick = ts + tickInterval;
+        addAnotherTick = newTick <= latest;
+        break;
+    }
+
+    if (addAnotherTick) {
+      tickValues.push(newTick);
+      addTicks(newTick, operator);
+    }
+  }
+
+  addTicks(startTs, 'previous');
+  addTicks(startTs, 'next');
+
+  tickValues.sort();
+
+  return tickValues;
+}

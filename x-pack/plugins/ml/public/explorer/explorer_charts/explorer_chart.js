@@ -23,7 +23,7 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
-import { drawLineChartDots, numTicksForDateFormat } from '../../util/chart_utils';
+import { drawLineChartDots, getTickValues } from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlEscape } from '../../util/string_utils';
@@ -176,12 +176,18 @@ export class ExplorerChart extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
+      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
+      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      // +1 ms to account for the ms that was substracted for query aggregations.
+      const interval = emphasisEnd - emphasisStart + 1;
+      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat))
+        .tickValues(tickValues)
         .tickFormat(d => moment(d).format(xAxisTickFormat));
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
@@ -196,7 +202,7 @@ export class ExplorerChart extends React.Component {
 
       const axes = lineChartGroup.append('g');
 
-      axes.append('g')
+      const gAxis = axes.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
@@ -204,6 +210,30 @@ export class ExplorerChart extends React.Component {
       axes.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+      // remove overlapping labels
+      let overlapCheck = 0;
+      gAxis.selectAll('g.tick').each(function () {
+        const tick = d3.select(this);
+        const xTransform = d3.transform(tick.attr('transform')).translate[0];
+        const tickWidth = tick.select('text').node().getBBox().width;
+        const xMinOffset = xTransform - (tickWidth / 2);
+        const xMaxOffset = xTransform + (tickWidth / 2);
+        // if the tick label overlaps the previous label
+        // (or overflows the chart to the left), remove it;
+        // otherwise pick that label's offset as the new offset to check against
+        if (xMinOffset < overlapCheck) {
+          tick.select('text').remove();
+        } else {
+          overlapCheck = xTransform + (tickWidth / 2);
+          tick.select('line').classed('ml-tick-emphasis', true);
+        }
+        // if the last tick label overflows the chart to the right, remove it
+        if (xMaxOffset > vizWidth) {
+          tick.select('text').remove();
+        }
+      });
+
     }
 
     function drawLineChartHighlightedSpan() {
