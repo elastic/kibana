@@ -7,23 +7,12 @@
 
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
-import React, {
-  Component
-} from 'react';
+import React from 'react';
 
-export class FileDataVisualizerPage extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-    };
-  }
-
-  render() {
-    return (
-      <div className="file-datavisualizer-container">
-        <FileDataVisualizerView maxPayloadBytes={this.props.maxPayloadBytes} />
-      </div>
-    );
-  }
+export function FileDataVisualizerPage({ maxPayloadBytes }) {
+  return (
+    <div className="file-datavisualizer-container">
+      <FileDataVisualizerView maxPayloadBytes={maxPayloadBytes} />
+    </div>
+  );
 }

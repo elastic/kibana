@@ -70,7 +70,7 @@ export function FieldStatsCard({ field }) {
 
                 <div className="stats">
                   <div className="stat">top values</div>
-                  {field.top_hits.map(h => {
+                  {field.top_hits.map((h) => {
                     const pcnt = Math.round(((h.count / field.count) * 100) * 100) / 100;
                     return (
                       <div key={h.value} className="top-value">

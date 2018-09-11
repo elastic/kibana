@@ -14,7 +14,6 @@ import { FieldStatsCard } from './field_stats_card';
 export class FieldsStats extends Component {
   constructor(props) {
     super(props);
-    super(props);
 
     this.fields = createFields(this.props.results);
     console.log(this.fields);

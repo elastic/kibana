@@ -33,11 +33,12 @@ export class ResultsView extends Component {
 
     console.log(results);
 
-    const tabs = [{
-      id: 'file-stats',
-      name: 'File stats',
-      content: <FieldsStats results={results} />,
-    }
+    const tabs = [
+      {
+        id: 'file-stats',
+        name: 'File stats',
+        content: <FieldsStats results={results} />,
+      }
     ];
 
     return (
@@ -55,7 +56,6 @@ export class ResultsView extends Component {
         />
 
         <EuiHorizontalRule margin="l" />
-
 
         <EuiTabbedContent
           tabs={tabs}

@@ -12,12 +12,12 @@ import React, {
 import {
   EuiFilePicker,
   EuiSpacer,
-  EuiCallOut,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { ResultsView } from '../results_view';
+import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 
 
 export class FileDataVisualizerView extends Component {
@@ -141,34 +141,6 @@ export class FileDataVisualizerView extends Component {
       </React.Fragment>
     );
   }
-}
-
-function FileTooLarge({ fileSize, maxFileSize }) {
-  return (
-    <EuiCallOut
-      title="File size is too large"
-      color="danger"
-      iconType="cross"
-    >
-      <p>
-        File size uploaded is {fileSize}, the max file size for uploading to Kibana is {maxFileSize}
-      </p>
-    </EuiCallOut>
-  );
-}
-
-function FileCouldNotBeRead() {
-  return (
-    <EuiCallOut
-      title="File size is too large"
-      color="danger"
-      iconType="cross"
-    >
-      <p>
-        File could not be read.
-      </p>
-    </EuiCallOut>
-  );
 }
 
 function readFile(file) {

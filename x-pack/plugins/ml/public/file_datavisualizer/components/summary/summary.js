@@ -39,7 +39,6 @@ function createDisplayItems(results) {
       title: 'Charset',
       description: results.charset,
     }
-
   ];
 
   if (results.format !== undefined) {
