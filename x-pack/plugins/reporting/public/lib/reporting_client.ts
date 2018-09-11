@@ -22,16 +22,13 @@ class ReportingClient {
     )}`;
   };
 
-  public createReportingJob = (exportType: string, jobParams: any) => {
+  public createReportingJob = async (exportType: string, jobParams: any) => {
     const query = {
       jobParams: rison.encode(jobParams),
     };
-    return kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${exportType}`, query }).then(
-      (resp: { job: { id: string } }) => {
-        jobCompletionNotifications.add(resp.job.id);
-        return resp;
-      }
-    );
+    const resp = await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${exportType}`, query });
+    jobCompletionNotifications.add(resp.job.id);
+    return resp;
   };
 }
 

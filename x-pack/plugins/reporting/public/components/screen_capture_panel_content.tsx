@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import { ReportingPanelContent } from './reporting_panel_content';
