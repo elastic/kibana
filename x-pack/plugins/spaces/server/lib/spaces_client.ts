@@ -31,7 +31,7 @@ export class SpacesClient {
   }
 
   public async canEnumerateSpaces(): Promise<boolean> {
-    if (this.useRbac) {
+    if (this.useRbac()) {
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges.globally(
         this.authorization.actions.manageSpaces
