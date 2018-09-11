@@ -27,6 +27,8 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class OptionsTab extends Component {
 
   setVisParam = (paramName, paramValue) => {
@@ -54,7 +56,10 @@ export class OptionsTab extends Component {
           id="updateFiltersOnChange"
         >
           <EuiSwitch
-            label="Update Kibana filters on each change"
+            label={<FormattedMessage
+              id="inputControl.editor.optionsTab.updateFilterLabel"
+              defaultMessage="Update Kibana filters on each change"
+            />}
             checked={this.props.editorState.params.updateFiltersOnChange}
             onChange={this.handleUpdateFiltersChange}
             data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
@@ -65,7 +70,10 @@ export class OptionsTab extends Component {
           id="useTimeFilter"
         >
           <EuiSwitch
-            label="Use time filter"
+            label={<FormattedMessage
+              id="inputControl.editor.optionsTab.useTimeFielterLabel"
+              defaultMessage="Use time filter"
+            />}
             checked={this.props.editorState.params.useTimeFilter}
             onChange={this.handleUseTimeFilter}
             data-test-subj="inputControlEditorUseTimeFilterCheckbox"
@@ -76,7 +84,10 @@ export class OptionsTab extends Component {
           id="pinFilters"
         >
           <EuiSwitch
-            label="Pin filters to global state"
+            label={<FormattedMessage
+              id="inputControl.editor.optionsTab.pinFieltersLabel"
+              defaultMessage="Pin filters to global state"
+            />}
             checked={this.props.editorState.params.pinFilters}
             onChange={this.handlePinFilters}
             data-test-subj="inputControlEditorPinFiltersCheckbox"

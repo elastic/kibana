@@ -24,20 +24,9 @@ interface UrlParts {
   slashes?: boolean;
   auth?: string;
   hostname?: string;
-  port?: number;
+  port?: string;
   pathname?: string;
   query: { [key: string]: string | string[] | undefined };
-  hash?: string;
-}
-
-interface UrlFormatParts {
-  protocol?: string;
-  slashes?: boolean;
-  auth?: string;
-  hostname?: string;
-  port?: string | number;
-  pathname?: string;
-  query?: { [key: string]: string | string[] | undefined };
   hash?: string;
 }
 
@@ -69,7 +58,7 @@ interface UrlFormatParts {
  *  @param url the url to parse
  *  @param block a function that will modify the parsed url, or return a new one
  */
-export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatParts | void) {
+export function modifyUrl(url: string, block: (parts: UrlParts) => Partial<UrlParts> | void) {
   const parsed = parseUrl(url, true);
 
   // copy over the most specific version of each
@@ -83,7 +72,7 @@ export function modifyUrl(url: string, block: (parts: UrlParts) => UrlFormatPart
     slashes: parsed.slashes,
     auth: parsed.auth,
     hostname: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : undefined,
+    port: parsed.port,
     pathname: parsed.pathname,
     query: parsed.query || {},
     hash: parsed.hash,

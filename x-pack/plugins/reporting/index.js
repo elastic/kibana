@@ -15,7 +15,7 @@ import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
 import { validateConfig } from './server/lib/validate_config';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
-import { createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
+import { PHANTOM, createBrowserDriverFactory, getDefaultBrowser, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
 
 import { getReportingUsageCollector } from './server/usage';
@@ -87,7 +87,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),
+            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: remove support in 7.0
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -144,6 +144,10 @@ export const reporting = (kibana) => {
       const config = server.config();
       validateConfig(config, message => server.log(['reporting', 'warning'], message));
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+
+      if (config.get('xpack.reporting.capture.browser.type') === PHANTOM) {
+        server.log(['reporting', 'warning'], 'Phantom browser type for reporting will be deprecated starting in 7.0');
+      }
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
 
