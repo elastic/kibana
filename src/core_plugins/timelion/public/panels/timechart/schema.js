@@ -18,7 +18,6 @@
  */
 
 require('./flot');
-require('plugins/timelion/panels/timechart/timechart.less');
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';

@@ -1,8 +1,3 @@
-@import "~ui/styles/variables.less";
-@import (reference) "~ui/styles/mixins";
-@import './chart.less';
-@import './suggestions.less';
-
 [chart] {
   height: 100%;
   width: 100%;
@@ -51,11 +46,11 @@
 
 .timelion-container-drawer-tab {
   width: 100%;
-  background-color: @gray-lighter;
+  background-color: $euiColorLightShade;
 }
 
 .timelion-subnav {
-  background-color: @gray-lighter;
+  background-color: $euiColorLightShade;
   margin: 0px
 }
 
@@ -68,8 +63,8 @@
   right: 0px;
   display: inline-block;
   padding: 5px 20px;
-  background-color: @navbar-default-bg;
-  border-bottom-left-radius: @border-radius-base;
+  background-color: $euiColorLightestShade;
+  border-bottom-left-radius: $euiBorderRadius;
 
   a {
     margin: 5px;

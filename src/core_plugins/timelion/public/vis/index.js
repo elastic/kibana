@@ -28,7 +28,7 @@ import './timelion_vis_controller';
 import '../directives/timelion_expression_input';
 
 // Styling
-import './timelion_vis.less';
+import '../index.css';
 
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
