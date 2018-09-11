@@ -48,7 +48,7 @@ export function createSourceFormat(FieldFormat) {
   SourceFormat.prototype._convert = {
     text: (value) => toJson(value),
     html: function sourceToHtml(source, field, hit) {
-      if (!field) return this.getConverterFor('text')(source, field, hit);
+      if (!field) return _.escape(this.getConverterFor('text')(source));
 
       const highlights = (hit && hit.highlight) || {};
       const formatted = field.indexPattern.formatHit(hit);

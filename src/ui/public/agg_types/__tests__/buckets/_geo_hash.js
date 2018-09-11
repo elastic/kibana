@@ -30,6 +30,17 @@ describe('Geohash Agg', () => {
     top_left: { lat: 1.0, lon: -1.0 },
     bottom_right: { lat: -1.0, lon: 1.0 }
   };
+
+  const BucketAggTypeMock = (aggOptions) => {
+    return aggOptions;
+  };
+  const AggConfigMock = (parent, aggOptions) => {
+    return aggOptions;
+  };
+  const createAggregationMock = (aggOptions) => {
+    return new AggConfigMock(null, aggOptions);
+  };
+
   const aggMock = {
     getField: () => {
       return {
@@ -41,17 +52,11 @@ describe('Geohash Agg', () => {
       useGeocentroid: true,
       mapZoom: initialZoom
     },
-    vis: {
-      aggs: []
-    },
+    aggConfigs: {},
     type: 'geohash_grid',
   };
-  const BucketAggTypeMock = (aggOptions) => {
-    return aggOptions;
-  };
-  const AggConfigMock = (vis, aggOptions) => {
-    return aggOptions;
-  };
+  aggMock.aggConfigs.createAggConfig = createAggregationMock;
+
 
   before(function () {
     sinon.stub(AggConfigModule, 'AggConfig').callsFake(AggConfigMock);
