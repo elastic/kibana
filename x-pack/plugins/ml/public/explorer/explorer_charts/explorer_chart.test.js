@@ -112,7 +112,7 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('height')).toBe(169);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
-    expect([...xAxisTicks]).toHaveLength(1);
+    expect([...xAxisTicks]).toHaveLength(0);
     const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(10);
 
