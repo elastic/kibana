@@ -24,16 +24,17 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
   );
 }
 
-export function FileCouldNotBeRead() {
+export function FileCouldNotBeRead({ error }) {
   return (
     <EuiCallOut
-      title="File size is too large"
+      title="File could not be read"
       color="danger"
       iconType="cross"
     >
-      <p>
-        File could not be read.
-      </p>
+      {
+        (error !== undefined) &&
+        <p>{error}</p>
+      }
     </EuiCallOut>
   );
 }

@@ -30,6 +30,7 @@ export class FileDataVisualizerView extends Component {
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
+      serverErrorMessage: '',
       loading: false,
       loaded: false,
       results: undefined,
@@ -47,6 +48,7 @@ export class FileDataVisualizerView extends Component {
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
+      serverErrorMessage: '',
       results: undefined,
     }, () => {
       if (files.length) {
@@ -69,6 +71,11 @@ export class FileDataVisualizerView extends Component {
 
       } catch (error) {
         console.error(error);
+        this.setState({
+          loaded: false,
+          loading: false,
+          fileCouldNotBeRead: true,
+        });
       }
 
       if (data !== null) {
@@ -78,18 +85,23 @@ export class FileDataVisualizerView extends Component {
             results: resp.results,
             loaded: true,
             loading: false,
-            fileTooLarge: false,
-            fileCouldNotBeRead: false,
           });
         } catch (error) {
           console.error(error);
+          const msg = (error.message || '').split('::')[0];
+          this.setState({
+            results: undefined,
+            loaded: false,
+            loading: false,
+            fileCouldNotBeRead: true,
+            serverErrorMessage: msg,
+          });
         }
       } else {
         this.setState({
           loaded: false,
           loading: false,
           fileCouldNotBeRead: true,
-          fileSize: file.size,
         });
       }
     } else {
@@ -103,39 +115,50 @@ export class FileDataVisualizerView extends Component {
   }
 
   render() {
+    const {
+      loading,
+      loaded,
+      results,
+      fileContents,
+      fileSize,
+      fileTooLarge,
+      fileCouldNotBeRead,
+      serverErrorMessage,
+    } = this.state;
+
     return (
       <React.Fragment>
         <div style={{ textAlign: 'center' }} >
           <EuiFilePicker
             id="filePicker"
-            initialPromptText="Select or drag and drop a log file"
+            initialPromptText="Select or drag and drop a file"
             onChange={files => this.onChange(files)}
           />
         </div>
 
         <EuiSpacer size="l" />
 
-        {(this.state.loading) &&
+        {(loading) &&
           <div style={{ textAlign: 'center' }} >
             <EuiLoadingSpinner size="xl"/>
           </div>
         }
 
-        {(this.state.fileTooLarge) &&
+        {(fileTooLarge) &&
           <FileTooLarge
-            fileSize={this.state.fileSize}
+            fileSize={fileSize}
             maxFileSize={this.maxPayloadBytes}
           />
         }
 
-        {(this.state.fileCouldNotBeRead) &&
-          <FileCouldNotBeRead />
+        {(fileCouldNotBeRead) &&
+          <FileCouldNotBeRead error={serverErrorMessage} />
         }
 
-        {(this.state.loaded) &&
+        {(loaded) &&
           <ResultsView
-            results={this.state.results}
-            data={this.state.fileContents}
+            results={results}
+            data={fileContents}
           />
         }
       </React.Fragment>

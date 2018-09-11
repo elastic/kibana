@@ -14,7 +14,14 @@ import {
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json' };
 
-export function MLJobEditor({ value, height = '500px', width = '100%', mode = EDITOR_MODE.JSON, readOnly = false, onChange = () => {} }) {
+export function MLJobEditor({
+  value,
+  height = '500px',
+  width = '100%',
+  mode = EDITOR_MODE.JSON,
+  readOnly = false,
+  onChange = () => {}
+}) {
   return (
     <EuiCodeEditor
       value={value}
