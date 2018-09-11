@@ -25,7 +25,12 @@ export class SearchError extends Error {
     this.title = title;
     this.message = message;
     this.path = path;
-    Error.captureStackTrace(this, SearchError);
+
+    // captureStackTrace is only available in the V8 engine, so any browser using
+    // a different JS engine won't have access to this method.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, SearchError);
+    }
 
     // Babel doesn't support traditional `extends` syntax for built-in classes.
     // https://babeljs.io/docs/en/caveats/#classes
