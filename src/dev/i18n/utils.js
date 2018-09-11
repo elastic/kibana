@@ -87,9 +87,15 @@ export function* traverseNodes(nodes) {
 }
 
 /**
- * @param {string} content
- * @param {{ loc: { line: number, column: number }, message: string }} error
- * @returns {string}
+ * Forms an formatted error message for parser errors.
+ *
+ * This function returns a string which represents an error message and a place in the code where the error happened.
+ * In total five lines of the code are displayed: the line where the error occured, two lines before and two lines after.
+ *
+ * @param {string} content a code string where parsed error happened
+ * @param {{ loc: { line: number, column: number }, message: string }} error an object that contains an error message and
+ * the line number and the column number in the file that raised this error
+ * @returns {string} a formatted string representing parser error message
  */
 export function createParserErrorMessage(content, error) {
   const line = error.loc.line - 1;
