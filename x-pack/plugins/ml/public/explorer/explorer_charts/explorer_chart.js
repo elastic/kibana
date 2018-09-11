@@ -212,27 +212,112 @@ export class ExplorerChart extends React.Component {
         .call(yAxis);
 
       // remove overlapping labels
-      let overlapCheck = 0;
-      gAxis.selectAll('g.tick').each(function () {
-        const tick = d3.select(this);
-        const xTransform = d3.transform(tick.attr('transform')).translate[0];
-        const tickWidth = tick.select('text').node().getBBox().width;
-        const xMinOffset = xTransform - (tickWidth / 2);
-        const xMaxOffset = xTransform + (tickWidth / 2);
-        // if the tick label overlaps the previous label
-        // (or overflows the chart to the left), remove it;
-        // otherwise pick that label's offset as the new offset to check against
-        if (xMinOffset < overlapCheck) {
-          tick.select('text').remove();
-        } else {
-          overlapCheck = xTransform + (tickWidth / 2);
-          tick.select('line').classed('ml-tick-emphasis', true);
+      function removeLabelOverlap(startTs, tickInterval, earliest, latest) {
+        // Put emphasis on all tick lines, will again de-emphasize the
+        // ones where we remove the label in the next steps.
+        gAxis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
+
+        function getTickData(ts, operator) {
+          const filteredTicks = gAxis.selectAll('g.tick').filter(d => d === ts);
+
+          if (filteredTicks[0].length === 0) {
+            return false;
+          }
+
+          const tick = d3.selectAll(filteredTicks[0]);
+          const textNode = tick.select('text').node();
+
+          if (textNode === null) {
+            switch (operator) {
+              case 'previous':
+                return getTickData(ts - tickInterval, operator);
+              case 'next':
+                return getTickData(ts + tickInterval, operator);
+              default:
+                return false;
+            }
+          }
+
+          const tickWidth = textNode.getBBox().width;
+          const padding = 15;
+          const xTransform = d3.transform(tick.attr('transform')).translate[0];
+          const xMinOffset = xTransform - (tickWidth / 2 + padding);
+          const xMaxOffset = xTransform + (tickWidth / 2 + padding);
+
+          return {
+            operator,
+            tick,
+            ts,
+            xTransform,
+            xMinOffset,
+            xMaxOffset
+          };
         }
-        // if the last tick label overflows the chart to the right, remove it
-        if (xMaxOffset > vizWidth) {
-          tick.select('text').remove();
+
+        function checkTicks(ts, operator) {
+
+          const currentTick = ts;
+          const currentTickData = getTickData(ts, operator);
+
+          if (currentTickData === false) {
+            return;
+          }
+
+          let newTickData;
+          let checkAnotherTick;
+
+          switch (operator) {
+            case 'previous':
+              newTickData = getTickData(ts - tickInterval, operator);
+              checkAnotherTick = newTickData.ts >= earliest;
+              break;
+            case 'next':
+              newTickData = getTickData(ts + tickInterval, operator);
+              checkAnotherTick = newTickData.ts <= latest;
+              break;
+          }
+          const newTick = newTickData.ts;
+
+          if (checkAnotherTick && newTickData !== false) {
+
+            let remove = false;
+
+            switch (operator) {
+              case 'previous':
+                if (newTickData.xMaxOffset > currentTickData.xMinOffset) {
+                  remove = true;
+                }
+                if (newTickData.xMinOffset < 0) {
+                  remove = true;
+                }
+                break;
+              case 'next':
+                if (newTickData.xMinOffset < currentTickData.xMaxOffset) {
+                  remove = true;
+                }
+                if (newTickData.xMaxOffset > vizWidth) {
+                  remove = true;
+                }
+                break;
+            }
+
+            if (remove === true) {
+              newTickData.tick.select('text').remove();
+              newTickData.tick.select('line').classed('ml-tick-emphasis', false);
+              checkTicks(currentTick, operator);
+            } else {
+              checkTicks(newTick, operator);
+            }
+
+          }
         }
-      });
+
+        checkTicks(startTs, 'previous');
+        checkTicks(startTs, 'next');
+        return;
+      }
+
+      removeLabelOverlap(emphasisStart, interval, config.plotEarliest, config.plotLatest);
 
     }
 
