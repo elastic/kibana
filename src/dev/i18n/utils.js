@@ -29,13 +29,12 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import parser from 'intl-messageformat-parser';
 
 import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
-const VALUES_REFERENCES_REGEX = /(?<={)\s*\w+([,\s\w]|({.*}))*(?=})/g;
-const EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX = /^\w+(?=[\W]|$)/g;
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -96,20 +95,27 @@ export function* traverseNodes(nodes) {
 }
 
 /**
+ * Checks whether values from "values" and "defaultMessage" correspond to each other.
+ *
  * @param {string[]} valuesKeys array of "values" property keys
  * @param {string} defaultMessage "defaultMessage" value
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
 export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
-  const defaultMessageReferences = defaultMessage.match(VALUES_REFERENCES_REGEX);
+  const defaultMessageAst = parser.parse(defaultMessage);
+  const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 
-  if (!defaultMessageReferences) {
+  if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
     return;
   }
 
-  const defaultMessageReferencesKeys = defaultMessageReferences.map(
-    message => message.trim().match(EXTRACT_VALUE_KEY_FROM_REFERENCE_REGEX)[0]
-  );
+  const defaultMessageReferencesKeys = defaultMessageAst.elements.reduce((keys, element) => {
+    if (element.type === ARGUMENT_ELEMENT_TYPE) {
+      keys.push(element.id);
+    }
+    return keys;
+  },
+  []);
 
   const missingValuesKeys = difference(defaultMessageReferencesKeys, valuesKeys);
   const unusedValuesKeys = difference(valuesKeys, defaultMessageReferencesKeys);
