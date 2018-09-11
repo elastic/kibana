@@ -15,6 +15,7 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore: implicit any for JS file
 import { Poller } from '../../../../common/poller';
+import { downloadReport } from '../lib/download_report';
 import { jobQueueClient } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
 
@@ -203,7 +204,7 @@ export class ReportListing extends Component<Props, State> {
 
     const button = (
       <EuiButtonIcon
-        onClick={() => this.download(record.id)}
+        onClick={() => downloadReport(record.id)}
         iconType="importAction"
         aria-label="Download report"
       />
@@ -289,10 +290,6 @@ export class ReportListing extends Component<Props, State> {
         }),
       });
     }
-  };
-
-  private download = (jobId: string) => {
-    window.open(`../api/reporting/jobs/download/${jobId}`);
   };
 
   private licenseAllowsToShowThisPage = () => {

@@ -11,11 +11,16 @@ import { addSystemApiHeader } from 'ui/system_api';
 const API_BASE_URL = '/api/reporting/jobs';
 
 class JobQueueClient {
-  public list = (page = 0) => {
+  public list = (page = 0, jobIds?: string[]) => {
+    const query = { page };
+    if (jobIds && jobIds.length > 0) {
+      // Only getting the first 10, to prevent URL overflows
+      query.ids = jobIds.slice(0, 10).join(',');
+    }
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/list`,
-      query: { page },
+      query,
       headers: addSystemApiHeader({}),
     });
   };
