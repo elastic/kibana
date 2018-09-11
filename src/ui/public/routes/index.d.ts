@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiRoutes, UIRoutes } from './routes';
+import { uiRoutes, UIRoutes } from 'ui/routes/routes';
 
 export default uiRoutes;
 export { UIRoutes };

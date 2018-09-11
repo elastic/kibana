@@ -8,7 +8,7 @@ import { darken } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import {
-  InfraWaffleMapFormatter,
+  InfraFormatter,
   InfraWaffleMapRuleOperator,
   InfraWaffleMapStepLegend,
   InfraWaffleMapStepRule,
@@ -24,13 +24,10 @@ const OPERATORS = {
 
 interface Props {
   legend: InfraWaffleMapStepLegend;
-  formatter: InfraWaffleMapFormatter;
+  formatter: InfraFormatter;
 }
 
-const createStep = (formatter: InfraWaffleMapFormatter) => (
-  rule: InfraWaffleMapStepRule,
-  index: number
-) => {
+const createStep = (formatter: InfraFormatter) => (rule: InfraWaffleMapStepRule, index: number) => {
   const label =
     rule.label != null ? rule.label : `${OPERATORS[rule.operator]} ${formatter(rule.value)}`;
   const squareStyle = { backgroundColor: darken(0.4, rule.color) };

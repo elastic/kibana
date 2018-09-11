@@ -54,7 +54,7 @@ export const metricsSchema: any = gql`
   }
 
   type InfraDataPoint {
-    timestamp: Float
+    timestamp: Float!
     value: Float
   }
 

@@ -114,6 +114,7 @@ declare module '@elastic/eui' {
   export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
 
   type EuiSideNavProps = CommonProps & {
+    style?: any;
     items: {
       id: string | number;
       name: string;
@@ -125,4 +126,9 @@ declare module '@elastic/eui' {
     }[];
   };
   export const EuiSideNav: React.SFC<EuiSideNavProps>;
+
+  type EuiSeriesChartProps = CommonProps & {
+    xType: string;
+  }
+  export const EuiSeriesChart: React.SFC<EuiSeriesChartProps>;
 }

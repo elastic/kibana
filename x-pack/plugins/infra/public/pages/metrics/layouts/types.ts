@@ -5,16 +5,43 @@
  */
 
 import { InfraMetric } from '../../../../common/graphql/types';
+import { InfraFormatterType } from '../../../lib/lib';
+
+export enum InfraMetricLayoutVisualizationType {
+  line = 'line',
+  area = 'area',
+  bar = 'bar',
+}
+
+export enum InfraMetricLayoutSectionType {
+  chart = 'chart',
+}
+
+interface SeriesOverrides {
+  type?: InfraMetricLayoutVisualizationType;
+  color: string;
+  name?: string;
+}
+
+interface SeriesOverrideObject {
+  [name: string]: SeriesOverrides | undefined;
+}
 
 export interface InfraMetricLayoutVisualizationConfig {
-  [key: string]: any;
+  stacked?: boolean;
+  type?: InfraMetricLayoutVisualizationType;
+  formatter?: InfraFormatterType;
+  formatterTemplate?: string;
+  bounds?: { min: number; max: number };
+  seriesOverrides: SeriesOverrideObject;
 }
 
 export interface InfraMetricLayoutSection {
   id: InfraMetric;
   label: string;
   requires: string;
-  config: InfraMetricLayoutVisualizationConfig;
+  visConfig: InfraMetricLayoutVisualizationConfig;
+  type: InfraMetricLayoutSectionType;
 }
 
 export interface InfraMetricLayout {
@@ -23,3 +50,5 @@ export interface InfraMetricLayout {
   requires: string;
   sections: InfraMetricLayoutSection[];
 }
+
+export type InfraMetricLayoutCreator = (theme: { eui: any }) => InfraMetricLayout[];

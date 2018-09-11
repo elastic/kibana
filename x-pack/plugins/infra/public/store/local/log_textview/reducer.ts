@@ -5,7 +5,7 @@
  */
 
 import { combineReducers } from 'redux';
-import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 
 import { TextScale } from '../../../../common/log_text_scale';
 import { setTextviewScale, setTextviewWrap } from './actions';

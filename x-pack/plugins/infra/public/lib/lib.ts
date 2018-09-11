@@ -164,7 +164,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  formatter: InfraWaffleMapFormatterType;
+  formatter: InfraFormatterType;
   formatTemplate: string;
   metrics: InfraMetricInput[];
   path: InfraPathInput[];
@@ -184,8 +184,8 @@ export interface InfraWaffleMapBounds {
   max: number;
 }
 
-export type InfraWaffleMapFormatter = (value: string | number) => string;
-export enum InfraWaffleMapFormatterType {
+export type InfraFormatter = (value: string | number) => string;
+export enum InfraFormatterType {
   number = 'number',
   bytes = 'bytes',
   bits = 'bits',

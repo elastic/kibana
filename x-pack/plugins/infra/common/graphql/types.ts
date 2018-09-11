@@ -132,7 +132,7 @@ export interface InfraDataSeries {
 }
 
 export interface InfraDataPoint {
-  timestamp?: number | null;
+  timestamp: number;
   value?: number | null;
 }
 
@@ -426,7 +426,7 @@ export namespace InfraDataPointResolvers {
     value?: ValueResolver;
   }
 
-  export type TimestampResolver = Resolver<number | null>;
+  export type TimestampResolver = Resolver<number>;
   export type ValueResolver = Resolver<number | null>;
 }
 
@@ -639,7 +639,7 @@ export namespace MetricsQuery {
 
   export type Data = {
     __typename?: 'InfraDataPoint';
-    timestamp?: number | null;
+    timestamp: number;
     value?: number | null;
   };
 }

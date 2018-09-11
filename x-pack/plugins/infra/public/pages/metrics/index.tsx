@@ -17,14 +17,16 @@ import {
   EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { withTheme } from 'styled-components';
 import { InfraMetric, InfraNodeType } from '../../../common/graphql/types';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { sections } from '../../components/metrics/sections';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import { WithOptions } from '../../containers/with_options';
-import { layouts } from './layouts';
+import { layoutCreators } from './layouts';
+import { InfraMetricLayoutSection } from './layouts/types';
 
 const DetailPageContent = styled(PageContent)`
   overflow: auto;
@@ -32,6 +34,7 @@ const DetailPageContent = styled(PageContent)`
 `;
 
 interface Props {
+  theme: { eui: any };
   match: {
     params: {
       type: string;
@@ -40,12 +43,12 @@ interface Props {
   };
 }
 
-export class MetricDetail extends React.PureComponent<Props> {
+class MetricDetailPage extends React.PureComponent<Props> {
   public render() {
     const nodeName = this.props.match.params.node;
     const nodeType = this.props.match.params.type as InfraNodeType;
-    const layout = layouts[nodeType];
-    if (!layout) {
+    const layoutCreator = layoutCreators[nodeType];
+    if (!layoutCreator) {
       return (
         <ColumnarPage>
           <Header />
@@ -77,6 +80,7 @@ export class MetricDetail extends React.PureComponent<Props> {
         </ColumnarPage>
       );
     }
+    const layout = layoutCreator(this.props.theme);
     const breadcrumbs = [{ text: nodeName }];
     const sideNav = layout.map(item => {
       return {
@@ -85,7 +89,7 @@ export class MetricDetail extends React.PureComponent<Props> {
         items: item.sections.map(section => ({
           id: section.id as string,
           name: section.label,
-          onClick: this.handleClick(section.id),
+          onClick: this.handleClick(section),
         })),
       };
     });
@@ -105,7 +109,7 @@ export class MetricDetail extends React.PureComponent<Props> {
                 {({ metrics }) => (
                   <EuiPage style={{ flex: '1 0 auto' }}>
                     <EuiPageSideBar>
-                      <EuiSideNav items={sideNav} />
+                      <EuiSideNav items={sideNav} style={{ position: 'fixed' }} />
                     </EuiPageSideBar>
                     <EuiPageBody>
                       <EuiPageHeader style={{ flex: '0 0 auto' }}>
@@ -129,7 +133,12 @@ export class MetricDetail extends React.PureComponent<Props> {
     );
   }
 
-  private handleClick = (section: InfraMetric) => () => {
-    alert(`Clicked ${section}`);
+  private handleClick = (section: InfraMetricLayoutSection) => () => {
+    const el = document.getElementById(section.id);
+    if (el) {
+      el.scrollIntoView();
+    }
   };
 }
+
+export const MetricDetail = withTheme(MetricDetailPage);

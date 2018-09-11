@@ -9,8 +9,8 @@ import React from 'react';
 
 import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
 import {
+  InfraFormatterType,
   InfraOptions,
-  InfraWaffleMapFormatterType,
   InfraWaffleMapLegendMode,
   // InfraWaffleMapRuleOperator,
 } from '../lib/lib';
@@ -28,7 +28,7 @@ const initialState = {
         .valueOf(),
     },
     wafflemap: {
-      formatter: InfraWaffleMapFormatterType.bytes,
+      formatter: InfraFormatterType.bytes,
       formatTemplate: '{{value}}',
       metrics: [{ type: InfraMetricType.count }],
       path: [{ type: InfraPathType.hosts }],

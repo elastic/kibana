@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hostLayoutCreator } from './host';
-import { InfraMetricLayoutCreator } from './types';
-interface Layouts {
-  [key: string]: InfraMetricLayoutCreator;
-}
-export const layoutCreators: Layouts = {
-  host: hostLayoutCreator,
+import { InfraMetricLayoutSectionType } from '../../../pages/metrics/layouts/types';
+import { ChartSection } from './chart_section';
+
+export const sections = {
+  [InfraMetricLayoutSectionType.chart]: ChartSection,
 };

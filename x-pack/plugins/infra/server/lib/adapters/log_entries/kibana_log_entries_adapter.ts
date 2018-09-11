@@ -11,17 +11,17 @@ import zip from 'lodash/fp/zip';
 
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import {
-  InfraDateRangeAggregationBucket,
-  InfraDateRangeAggregationResponse,
-  InfraFrameworkRequest,
-  SortedSearchHit,
-} from '../../adapters/framework';
-import {
   LogEntriesAdapter,
   LogEntryDocument,
   LogEntryQuery,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
+import {
+  InfraDateRangeAggregationBucket,
+  InfraDateRangeAggregationResponse,
+  InfraFrameworkRequest,
+  SortedSearchHit,
+} from '../framework';
 import { InfraBackendFrameworkAdapter } from '../framework';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
