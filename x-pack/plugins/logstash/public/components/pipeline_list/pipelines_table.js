@@ -79,17 +79,15 @@ export function PipelinesTable({
   openPipeline,
   pipelines,
   selection,
-  // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
-  // pageIndex,
-  // pageSize,
-  // pipelines,
+  pageIndex,
+  pageSize,
 }) {
-  // const pagination = {
-  //   pageIndex,
-  //   pageSize,
-  //   totalItemCount: pipelines.length,
-  //   pageSizeOptions: [2, 3, 5, 8]
-  // };
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: pipelines.length,
+    pageSizeOptions: [2, 3, 5, 8]
+  };
 
   const selectableMessage = (selectable, { id }) =>
     selectable
@@ -150,14 +148,15 @@ export function PipelinesTable({
   return (
     <EuiInMemoryTable
       columns={columns}
+      data-test-subj="pipelineTable"
+      isSelectable={isSelectable}
       itemId="id"
       items={pipelines}
       message={message}
+      pagination={pagination}
       search={search}
-      sorting={true}
-      isSelectable={isSelectable}
       selection={selectionOptions}
-      data-test-subj="pipelineTable"
+      sorting={true}
     />
   );
 }

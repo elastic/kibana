@@ -13,17 +13,20 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       Object {
         "field": "description",
         "name": "Description",
+        "render": [Function],
         "sortable": true,
         "truncateText": true,
       },
       Object {
         "field": "lastModifiedHumanized",
         "name": "Last Modified",
+        "render": [Function],
         "sortable": true,
       },
       Object {
         "field": "username",
         "name": "Modified By",
+        "render": [Function],
         "sortable": true,
       },
       Object {
@@ -34,6 +37,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       },
     ]
   }
+  data-test-subj="pipelineTable"
   isSelectable={true}
   itemId="id"
   items={
@@ -44,11 +48,24 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     ]
   }
   message={null}
-  pagination={false}
+  pagination={
+    Object {
+      "pageIndex": undefined,
+      "pageSize": undefined,
+      "pageSizeOptions": Array [
+        2,
+        3,
+        5,
+        8,
+      ],
+      "totalItemCount": 1,
+    }
+  }
   responsive={true}
   search={
     Object {
       "box": Object {
+        "data-test-subj": "filter",
         "incremental": true,
       },
       "filters": Array [
@@ -69,6 +86,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       "toolsRight": Array [
         <EuiButton
           color="primary"
+          data-test-subj="btnAdd"
           fill={true}
           iconSide="left"
           isDisabled={false}
@@ -79,6 +97,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         </EuiButton>,
         <EuiButton
           color="danger"
+          data-test-subj="btnDeletePipeline"
           fill={false}
           iconSide="left"
           isDisabled={true}

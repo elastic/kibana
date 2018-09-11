@@ -2,6 +2,7 @@
 
 exports[`UpgradeFailure component renders component as expected 1`] = `
 <EuiPage
+  data-test-subj="pipelineEdit upgradeFailure"
   restrictWidth={false}
   style={
     Object {

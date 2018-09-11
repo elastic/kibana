@@ -129,38 +129,38 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // TODO: re-enable once pagination added to pipeline list
-    // describe('next page button', () => {
-    //   it('is enabled', async () => {
-    //     await pipelineList.assertNextPageButton({ enabled: true });
-    //   });
+    // TODO: re-enable these after EUI releases next version and Kibana updates @elastic/eui dependency
+    xdescribe('next page button', () => {
+      it('is enabled', async () => {
+        await pipelineList.assertNextPageButton({ enabled: true });
+      });
 
-    //   it('takes user to the second page', async () => {
-    //     await pipelineList.clickNextPage();
-    //     const rows = await pipelineList.getRowsFromTable();
-    //     const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+      it('takes user to the second page', async () => {
+        await pipelineList.clickNextPage();
+        const rows = await pipelineList.getRowsFromTable();
+        const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
 
-    //     for (const time of rows.map(row => row.lastModified)) {
-    //       // last modified is a relative time string. Check for 'ago' suffix
-    //       expect(time).to.be.a('string').match(/ ago$/);
-    //     }
+        for (const time of rows.map(row => row.lastModified)) {
+          // last modified is a relative time string. Check for 'ago' suffix
+          expect(time).to.be.a('string').match(/ ago$/);
+        }
 
-    //     expect(rowsWithoutTime).to.eql([
-    //       {
-    //         selected: false,
-    //         id: 'empty_pipeline_20',
-    //         description: 'an empty pipeline',
-    //         username: 'elastic'
-    //       },
-    //       {
-    //         selected: false,
-    //         id: 'empty_pipeline_21',
-    //         description: 'an empty pipeline',
-    //         username: 'elastic'
-    //       }
-    //     ]);
-    //   });
-    // });
+        expect(rowsWithoutTime).to.eql([
+          {
+            selected: false,
+            id: 'empty_pipeline_20',
+            description: 'an empty pipeline',
+            username: 'elastic'
+          },
+          {
+            selected: false,
+            id: 'empty_pipeline_21',
+            description: 'an empty pipeline',
+            username: 'elastic'
+          }
+        ]);
+      });
+    });
 
     describe('clone button', () => {
       it('links to the pipeline editor with cloned pipeline details', async () => {
