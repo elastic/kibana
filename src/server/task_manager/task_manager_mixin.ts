@@ -19,72 +19,34 @@
 
 import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
+import { getDefaultClient } from './default_client';
 import {
   TaskDefinition,
   TaskDictionary,
-  TaskManager,
   TaskManagerLogger,
-  TaskPool,
-  TaskStore,
   validateTaskDefinition,
 } from './task_pool';
-import { fillPool } from './task_pool/fill_pool';
-import { ConcreteTaskInstance, SanitizedTaskDefinition } from './task_pool/task';
-import { TaskPoller } from './task_pool/task_poller';
-import { TaskManagerRunner } from './task_pool/task_runner';
+import { SanitizedTaskDefinition } from './task_pool/task';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
   const logger = new TaskManagerLogger((...args) => server.log(...args));
   const totalCapacity = config.get('taskManager.num_workers');
   const definitions = extractTaskDefinitions(totalCapacity, kbnServer.uiExports.taskDefinitions);
 
-  server.decorate('server', 'taskManager', new TaskManagerClientWrapper());
+  server.decorate(
+    'server',
+    'taskManager',
+    new TaskManagerClientWrapper(logger, totalCapacity, definitions)
+  );
 
   kbnServer.afterPluginsInit(async () => {
-    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-    const store = new TaskStore({
-      index: config.get('taskManager.index'),
-      callCluster,
-      maxAttempts: config.get('taskManager.max_attempts'),
-      supportedTypes: Object.keys(definitions),
-    });
-
-    logger.debug('Initializing the task manager index');
-    await store.init();
-
-    const pool = new TaskPool({
-      logger,
-      totalCapacity,
-    });
-
-    const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({
-      callCluster,
-      kbnServer,
-      taskInstance,
-    });
-
-    const poller = new TaskPoller({
-      logger,
-      pollInterval: config.get('taskManager.poll_interval'),
-      work: () =>
-        fillPool(
-          pool.run,
-          store.fetchAvailableTasks,
-          (instance: ConcreteTaskInstance) =>
-            new TaskManagerRunner({
-              logger,
-              instance,
-              store,
-              contextProvider,
-              definition: definitions[instance.taskType],
-            })
-        ),
-    });
-
-    poller.start();
-
-    const client = new TaskManager({ store, poller });
-    server.taskManager.setClient(client);
+    server.taskManager.setClient(
+      (
+        cLogger: TaskManagerLogger,
+        cTotalCapacity: number,
+        cDefinitions: TaskDictionary<SanitizedTaskDefinition>
+      ) => getDefaultClient(kbnServer, server, config, cLogger, cTotalCapacity, cDefinitions)
+    );
   });
 }
 
