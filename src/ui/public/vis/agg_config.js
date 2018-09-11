@@ -277,16 +277,6 @@ class AggConfig {
     return _.get(this.aggConfigs, 'timeRange', null);
   }
 
-  getFieldOptions() {
-    const fieldParamType = this.type && this.type.params.byName.field;
-
-    if (!fieldParamType || !fieldParamType.getFieldOptions) {
-      return null;
-    }
-
-    return fieldParamType.getFieldOptions(this);
-  }
-
   fieldFormatter(contentType, defaultFormat) {
     const format = this.type && this.type.getFormat(this);
     if (format) return format.getConverterFor(contentType);
@@ -335,13 +325,15 @@ class AggConfig {
 
     this.__type = type;
 
+    const fieldParam = _.get(this, 'type.params.byName.field');
+    const availableFields = fieldParam ? fieldParam.getAvailableFields(this.getIndexPattern().fields) : [];
     // clear out the previous params except for a few special ones
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it
       row: this.params.row,
 
       // almost every agg has fields, so we try to persist that when type changes
-      field: _.get(this.getFieldOptions(), ['byName', this.getField()])
+      field: _.get(availableFields, ['byName', this.getField()])
     });
   }
 
