@@ -25,8 +25,13 @@ const module = uiModules.get('spaces_nav', ['kibana']);
 
 let spacesManager;
 
-module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, spaceSelectorURL) => {
+module.controller('spacesNavController', ($scope, $http, chrome, spacesEnabled, activeSpace) => {
+  if (!spacesEnabled) {
+    return;
+  }
+
   const domNode = document.getElementById(`spacesNavReactRoot`);
+  const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
   spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 

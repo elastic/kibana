@@ -17,7 +17,7 @@ export const AdvancedSettingsSubtitle = (props: Props) => (
     <EuiSpacer size={'m'} />
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="spacesApp"
       title={
         <p>
           Unless otherwise specified, settings on this page apply only to the{' '}

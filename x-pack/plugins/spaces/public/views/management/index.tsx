@@ -21,7 +21,7 @@ const MANAGE_SPACES_KEY = 'manage_spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection(activeSpace: any) {
+    spacesManagementSection(activeSpace: any, spacesEnabled: boolean) {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -31,6 +31,10 @@ routes.defaults(/\/management/, {
       }
 
       function ensureSpagesRegistered() {
+        if (!spacesEnabled) {
+          return;
+        }
+
         const kibanaSection = getKibanaSection();
 
         if (!kibanaSection.hasItem(MANAGE_SPACES_KEY)) {
