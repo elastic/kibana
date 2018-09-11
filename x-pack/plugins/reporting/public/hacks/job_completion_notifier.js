@@ -13,7 +13,7 @@ import { get } from 'lodash';
 import {
   API_BASE_URL
 } from '../../common/constants';
-import 'plugins/reporting/services/job_queue';
+import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import 'plugins/reporting/services/job_completion_notifications';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
@@ -26,7 +26,7 @@ import {
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run(($http, reportingJobQueue, Private, reportingPollConfig, reportingJobCompletionNotifications) => {
+  .run(($http, Private, reportingPollConfig, reportingJobCompletionNotifications) => {
     // Don't show users any reporting toasts until they're logged in.
     if (Private(PathProvider).isLoginOrLogout()) {
       return;
@@ -44,7 +44,7 @@ uiModules.get('kibana')
       const isJobSuccessful = get(job, '_source.status') === 'completed';
 
       if (!isJobSuccessful) {
-        const errorDoc = await reportingJobQueue.getContent(job._id);
+        const errorDoc = await jobQueueClient.getContent(job._id);
         const text = errorDoc.content;
         return toastNotifications.addDanger({
           title: `Couldn't create report for ${reportObjectType} '${reportObjectTitle}'`,
