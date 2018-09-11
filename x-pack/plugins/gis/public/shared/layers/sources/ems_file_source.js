@@ -7,6 +7,8 @@
 import { GIS_API_PATH } from '../../../../common/constants';
 import { VectorSource } from './source';
 import React, { Fragment } from 'react';
+import * as topojson from 'topojson-client';
+import _ from 'lodash';
 import {
   EuiText,
   EuiSelect,
@@ -55,13 +57,26 @@ export class EMSFileSource extends VectorSource {
   }
 
   async getGeoJson() {
+    let jsonFeatures;
     try {
       const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`);
-      return await vectorFetch.json();
+      const fetchedJson = await vectorFetch.json();
+      const { type } = fetchedJson;
+
+      if (type === 'FeatureCollection') {
+        jsonFeatures = fetchedJson;
+      } else if (type === 'Topology') {
+        const features = _.get(fetchedJson, 'objects.data'); // + meta.feature_collection_path);
+        jsonFeatures = topojson.feature(fetchedJson, features);//conversion to geojson
+      } else {
+        //should never happen
+        throw new Error('Unrecognized format ' + type);
+      }
     } catch (e) {
       console.error(e);
       throw e;
     }
+    return jsonFeatures;
   }
 
   renderDetails() {
