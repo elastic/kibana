@@ -96,6 +96,8 @@ export class JobCreateUi extends Component {
         return;
       }
 
+      // Set the state outside of `requestIndexPatternValidation`, because that function is
+      // debounced.
       this.setState({
         isValidatingIndexPattern: true,
       });
@@ -455,11 +457,22 @@ export class JobCreateUi extends Component {
   }
 
   renderNavigation() {
-    const { nextStepId, previousStepId, areStepErrorsVisible } = this.state;
+    const {
+      isValidatingIndexPattern,
+      nextStepId,
+      previousStepId,
+      areStepErrorsVisible,
+    } = this.state;
+
     const { isSaving } = this.props;
     const hasNextStep = nextStepId != null;
-    // Users can click the next step button as long as validation hasn't executed.
-    const canGoToNextStep = hasNextStep && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
+
+    // Users can click the next step button as long as validation hasn't executed, and as long
+    // as we're not waiting on async validation to complete.
+    const canGoToNextStep =
+      !isValidatingIndexPattern
+      && hasNextStep
+      && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation
