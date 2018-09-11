@@ -37,7 +37,7 @@ export class TaskManager {
 
   public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
     const result = await this.store.schedule(task);
-    this.poller.attemptWork(); // TODO await this?
+    this.poller.attemptWork();
     return result;
   }
 
