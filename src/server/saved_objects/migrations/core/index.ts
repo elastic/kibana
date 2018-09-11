@@ -25,6 +25,7 @@ export { LogFn } from './migration_logger';
 export {
   SavedObjectDoc,
   RawDoc,
+  generateRawId,
   rawToSavedObject,
   savedObjectToRaw,
 } from './saved_object_conversion';

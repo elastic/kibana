@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import uuid from 'uuid';
+
 /**
  * The root document type. In 7.0, this needs to change to '_doc'.
  */
@@ -29,6 +31,7 @@ export interface RawDoc {
   _id: string;
   _source: any;
   _type?: string;
+  _version?: number;
 }
 
 /**
@@ -50,6 +53,7 @@ export interface SavedObjectDoc {
   id: string;
   type: string;
   migrationVersion?: MigrationVersion;
+  version?: number;
 
   [rootProp: string]: any;
 }
@@ -57,14 +61,15 @@ export interface SavedObjectDoc {
 /**
  * Converts a document from the format that is stored in elasticsearch to the saved object client format.
  */
-export function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
+export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
   const { type } = _source;
-  const id = _id.slice(type.length + 1);
+  const id = trimIdPrefix(type, _id);
   const doc = {
     ..._source,
     attributes: _source[type],
     id,
     migrationVersion: _source.migrationVersion || {},
+    ...(_version != null && { version: _version }),
   };
 
   delete doc[type];
@@ -75,7 +80,7 @@ export function rawToSavedObject({ _id, _source }: RawDoc): SavedObjectDoc {
  * Converts a document from the saved object client format to the format that is stored in elasticsearch.
  */
 export function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-  const { id, type, attributes } = savedObj;
+  const { id, type, attributes, version } = savedObj;
   const source = {
     ...savedObj,
     [type]: attributes,
@@ -83,10 +88,41 @@ export function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
 
   delete source.id;
   delete source.attributes;
+  delete source.version;
 
   return {
-    _id: `${type}:${id}`,
+    _id: generateRawId(type, id),
     _source: source,
     _type: ROOT_TYPE,
+    ...(version != null && { _version: version }),
   };
+}
+
+/**
+ * Given a saved object type and id, generates the compound id that is stored in the raw document.
+ *
+ * @param {string} type - The saved object type
+ * @param {string} id - The id of the saved object
+ */
+export function generateRawId(type: string, id?: string) {
+  return `${type}:${id || uuid.v1()}`;
+}
+
+function assertNonEmptyString(value: string, name: string) {
+  if (!value || typeof value !== 'string') {
+    throw new TypeError(`Expected "${value}" to be a ${name}`);
+  }
+}
+
+function trimIdPrefix(type: string, id: string) {
+  assertNonEmptyString(id, 'document id');
+  assertNonEmptyString(type, 'saved object type');
+
+  const prefix = `${type}:`;
+
+  if (!id.startsWith(prefix)) {
+    return id;
+  }
+
+  return id.slice(prefix.length);
 }

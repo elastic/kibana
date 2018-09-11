@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import uuid from 'uuid';
-
 import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
-import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
+import { savedObjectToRaw, rawToSavedObject, generateRawId } from '../../migrations';
 import * as errors from './errors';
 
 
@@ -82,28 +80,22 @@ export class SavedObjectsRepository {
         type,
         attributes,
         migrationVersion,
+        updated_at: time,
       });
 
+      const raw = savedObjectToRaw(migrated);
+
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(migrated.type, migrated.id),
+        id: raw._id,
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type: migrated.type,
-          updated_at: time,
-          [migrated.type]: migrated.attributes,
-          migrationVersion: migrated.migrationVersion,
-        },
+        body: raw._source,
       });
 
       return {
-        id: trimIdPrefix(response._id, migrated.type),
-        type: migrated.type,
-        updated_at: time,
+        ...migrated,
         version: response._version,
-        attributes: migrated.attributes,
-        migrationVersion: migrated.migrationVersion,
       };
     } catch (error) {
       if (errors.isNotFoundError(error)) {
@@ -135,21 +127,18 @@ export class SavedObjectsRepository {
         type: object.type,
         attributes: object.attributes,
         migrationVersion: object.migrationVersion,
+        updated_at: time,
       });
+      const raw = savedObjectToRaw(migrated);
 
       return [
         {
           [method]: {
-            _id: this._generateEsId(migrated.type, migrated.id),
+            _id: raw._id,
             _type: this._type,
           }
         },
-        {
-          type: migrated.type,
-          updated_at: time,
-          [migrated.type]: migrated.attributes,
-          migrationVersion: migrated.migrationVersion,
-        }
+        raw._source,
       ];
     };
 
@@ -213,7 +202,7 @@ export class SavedObjectsRepository {
    */
   async delete(type, id) {
     const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -305,17 +294,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
-        return {
-          id: trimIdPrefix(hit._id, type),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-          migrationVersion: hit._source.migrationVersion,
-        };
-      }),
+      saved_objects: response.hits.hits.map(rawToSavedObject),
     };
   }
 
@@ -340,7 +319,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: generateRawId(object.type, object.id),
           _type: this._type,
         }))
       }
@@ -380,7 +359,7 @@ export class SavedObjectsRepository {
    */
   async get(type, id) {
     const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -416,8 +395,14 @@ export class SavedObjectsRepository {
    */
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
+    const raw = savedObjectToRaw({
+      id,
+      type,
+      attributes,
+    });
+
     const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+      id: raw._id,
       type: this._type,
       index: this._index,
       version: options.version,
@@ -425,8 +410,8 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         doc: {
+          ...raw._source,
           updated_at: time,
-          [type]: attributes
         }
       },
     });
@@ -460,10 +445,6 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
-  }
-
-  _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
   }
 
   _getCurrentTime() {
