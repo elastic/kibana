@@ -60,11 +60,11 @@ function extractTaskDefinitions(
       const rawDefinition = taskDefinitions[type];
       rawDefinition.type = type;
       const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      const workersOccupied = Math.min(numWorkers, definition.workersOccupied || 1);
+      const workersOccupied = Math.min(numWorkers, definition.numWorkers || 1);
 
       acc[type] = {
         ...definition,
-        workersOccupied,
+        numWorkers: workersOccupied,
       };
 
       return acc;
