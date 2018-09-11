@@ -36,8 +36,7 @@ export class ByteSizeValue {
     const match = /([1-9][0-9]*)(b|kb|mb|gb)/.exec(text);
     if (!match) {
       throw new Error(
-        `could not parse byte size value [${text}]. value must start with a ` +
-          `number and end with bytes size unit, e.g. 10kb, 23mb, 3gb, 239493b`
+        `could not parse byte size value [${text}]. Value must be a safe positive integer.`
       );
     }
 
