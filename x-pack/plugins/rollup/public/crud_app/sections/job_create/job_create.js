@@ -155,6 +155,11 @@ export class JobCreateUi extends Component {
         indexPatternTimeFields,
         isValidatingIndexPattern: false,
       });
+
+      // Select first time field by default.
+      this.onFieldsChange({
+        dateHistogramField: indexPatternTimeFields.length ? indexPatternTimeFields[0] : null,
+      }, STEP_DATE_HISTOGRAM);
     }).catch(() => {
       // Ignore all responses except that to the most recent request.
       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
@@ -440,7 +445,7 @@ export class JobCreateUi extends Component {
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}
-            indexPatternTimeFields={indexPatternTimeFields}
+            timeFields={indexPatternTimeFields}
           />
         );
 

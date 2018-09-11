@@ -19,6 +19,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -35,7 +36,18 @@ export class StepDateHistogramUi extends Component {
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    indexPatternTimeFields: PropTypes.array.isRequired,
+    timeFields: PropTypes.array.isRequired,
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { timeFields } = props;
+
+    const dateHistogramFieldOptions = timeFields.map(timeField => ({
+      value: timeField,
+      text: timeField,
+    }));
+
+    return { dateHistogramFieldOptions };
   }
 
   constructor(props) {
@@ -43,7 +55,7 @@ export class StepDateHistogramUi extends Component {
 
     this.state = {
       isLoadingTimeFields: true,
-      timeFields: [],
+      dateHistogramFieldOptions: [],
     };
   }
 
@@ -68,6 +80,10 @@ export class StepDateHistogramUi extends Component {
       dateHistogramTimeZone: errorDateHistogramTimeZone,
       dateHistogramField: errorDateHistogramField,
     } = fieldErrors;
+
+    const {
+      dateHistogramFieldOptions,
+    } = this.state;
 
     return (
       <Fragment>
@@ -153,9 +169,10 @@ export class StepDateHistogramUi extends Component {
               error={errorDateHistogramField}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
             >
-              <EuiFieldText
+              <EuiSelect
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
-                value={dateHistogramField || ''}
+                options={dateHistogramFieldOptions}
+                value={dateHistogramField || dateHistogramFieldOptions[0]}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
               />
             </EuiFormRow>
