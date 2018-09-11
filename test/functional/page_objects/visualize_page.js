@@ -1132,6 +1132,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const pieSlices = await this.getAllPieSlices(name);
       return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
     }
+
+    async selectSortMetric(agg, metric) {
+      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
+      return await sortMetric.click();
+    }
+
+    async selectCustomSortMetric(agg, metric, field) {
+      await this.selectSortMetric(agg, 'custom');
+      await this.selectAggregation(metric, 'groupName');
+      await this.selectField(field, 'groupName');
+    }
   }
 
   return new VisualizePage();

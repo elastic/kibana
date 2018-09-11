@@ -96,7 +96,7 @@ class AggConfigs extends IndexedArray {
           updateAggTimeRange(param);
         }
       });
-      if (agg.type.name === 'date_histogram') {
+      if (_.get(agg, 'type.name') === 'date_histogram') {
         agg.params.timeRange = timeRange;
       }
     };
