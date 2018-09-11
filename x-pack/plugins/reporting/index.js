@@ -32,10 +32,9 @@ export const reporting = (kibana) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
-      navbarExtensions: [
-        'plugins/reporting/controls/discover',
-        'plugins/reporting/controls/visualize',
-        'plugins/reporting/controls/dashboard',
+      shareContextMenuExtensions: [
+        'plugins/reporting/share_context_menu/register_csv_reporting',
+        'plugins/reporting/share_context_menu/register_reporting',
       ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],

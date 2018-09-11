@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './export_config';
+declare class JobCompletionNotifications {
+  public add(jobId: string): void;
+}
+
+declare const jobCompletionNotifications: JobCompletionNotifications;
+
+export { jobCompletionNotifications };
