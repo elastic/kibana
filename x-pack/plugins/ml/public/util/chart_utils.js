@@ -192,7 +192,7 @@ export function numTicksForDateFormat(axisWidth, dateFormat) {
 // the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
 // to align axis ticks with the gray area resembling the swimlane cell selection.
 export function getTickValues(startTs, tickInterval, earliest, latest) {
-  const tickValues = [];
+  const tickValues = [startTs];
 
   function addTicks(ts, operator) {
     let newTick;
