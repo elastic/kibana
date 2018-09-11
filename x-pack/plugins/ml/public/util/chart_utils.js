@@ -222,3 +222,89 @@ export function getTickValues(startTs, tickInterval, earliest, latest) {
 
   return tickValues;
 }
+
+const TICK_DIRECTION = {
+  NEXT: 'next',
+  PREVIOUS: 'previous'
+};
+
+export function removeLabelOverlap(axis, startTs, tickInterval, width) {
+  // Put emphasis on all tick lines, will again de-emphasize the
+  // ones where we remove the label in the next steps.
+  axis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
+
+  function getNeighourTickFactory(operator) {
+    return function (ts) {
+      switch (operator) {
+        case TICK_DIRECTION.PREVIOUS:
+          return ts - tickInterval;
+        case TICK_DIRECTION.NEXT:
+          return ts + tickInterval;
+      }
+    };
+  }
+
+  function getTickDataFactory(operator) {
+    const getNeighourTick = getNeighourTickFactory(operator);
+    const fn = function (ts) {
+      const filteredTicks = axis.selectAll('g.tick').filter(d => d === ts);
+
+      if (filteredTicks[0].length === 0) {
+        return false;
+      }
+
+      const tick = d3.selectAll(filteredTicks[0]);
+      const textNode = tick.select('text').node();
+
+      if (textNode === null) {
+        return fn(getNeighourTick(ts));
+      }
+
+      const tickWidth = textNode.getBBox().width;
+      const padding = 15;
+      const xTransform = d3.transform(tick.attr('transform')).translate[0];
+      const xMinOffset = xTransform - (tickWidth / 2 + padding);
+      const xMaxOffset = xTransform + (tickWidth / 2 + padding);
+
+      return {
+        tick,
+        ts,
+        xMinOffset,
+        xMaxOffset
+      };
+    };
+    return fn;
+  }
+
+  function checkTicks(ts, operator) {
+    const getTickData = getTickDataFactory(operator);
+    const currentTickData = getTickData(ts);
+
+    if (currentTickData === false) {
+      return;
+    }
+
+    const getNeighourTick = getNeighourTickFactory(operator);
+    const newTickData = getTickData(getNeighourTick(ts));
+
+    if (
+      newTickData !== false
+    ) {
+      if (
+        newTickData.xMinOffset < 0 ||
+        newTickData.xMaxOffset > width ||
+        (newTickData.xMaxOffset > currentTickData.xMinOffset && operator === TICK_DIRECTION.PREVIOUS) ||
+        (newTickData.xMinOffset < currentTickData.xMaxOffset && operator === TICK_DIRECTION.NEXT)
+      ) {
+        newTickData.tick.select('text').remove();
+        newTickData.tick.select('line').classed('ml-tick-emphasis', false);
+        checkTicks(currentTickData.ts, operator);
+      } else {
+        checkTicks(newTickData.ts, operator);
+      }
+    }
+  }
+
+  checkTicks(startTs, TICK_DIRECTION.PREVIOUS);
+  checkTicks(startTs, TICK_DIRECTION.NEXT);
+}
