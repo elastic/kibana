@@ -89,6 +89,7 @@
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework",
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@slack/client": "^4.2.2",
+    "@types/moment-timezone": "^0.5.8",
     "angular-paging": "2.2.1",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.4.9",

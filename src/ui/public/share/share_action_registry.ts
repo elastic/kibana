@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
-export { ShareContextMenuExtensionsRegistryProvider } from './share_action_registry';
+// @ts-ignore: implicit any for JS file
+import { uiRegistry } from 'ui/registry/_registry';
+
+export const ShareContextMenuExtensionsRegistryProvider = uiRegistry({
+  name: 'shareContextMenuExtensions',
+  index: ['id'],
+});
