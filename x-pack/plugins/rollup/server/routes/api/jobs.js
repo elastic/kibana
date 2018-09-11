@@ -5,14 +5,19 @@
 */
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 
 export function registerJobsRoute(server) {
   const isEsError = isEsErrorFactory(server);
+  const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/rollup/jobs',
     method: 'GET',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       try {
         const callWithRequest = callWithRequestFactory(server, request);
@@ -31,6 +36,9 @@ export function registerJobsRoute(server) {
   server.route({
     path: '/api/rollup/create',
     method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       try {
         const {
@@ -62,6 +70,9 @@ export function registerJobsRoute(server) {
   server.route({
     path: '/api/rollup/start',
     method: 'POST',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       try {
         const { jobIds } = request.payload;
@@ -82,6 +93,9 @@ export function registerJobsRoute(server) {
   server.route({
     path: '/api/rollup/stop',
     method: 'POST',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       try {
         const { jobIds } = request.payload;
@@ -102,6 +116,9 @@ export function registerJobsRoute(server) {
   server.route({
     path: '/api/rollup/delete',
     method: 'POST',
+    config: {
+      pre: [ licensePreRouting ]
+    },
     handler: async (request, reply) => {
       try {
         const { jobIds } = request.payload;

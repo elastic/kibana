@@ -119,7 +119,6 @@ export class JobTableUi extends Component {
     pageChanged: PropTypes.func.isRequired,
     pageSizeChanged: PropTypes.func.isRequired,
     sortChanged: PropTypes.func.isRequired,
-    dispatch: PropTypes.func.isRequired,
   }
 
   static defaultProps = {

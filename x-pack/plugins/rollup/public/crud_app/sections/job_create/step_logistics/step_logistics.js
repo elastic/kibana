@@ -5,11 +5,13 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,7 +21,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiDescribedFormGroup,
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
@@ -27,12 +28,23 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl } from '../../../services';
 
 export class StepLogisticsUi extends Component {
+  static propTypes = {
+    fields: PropTypes.object.isRequired,
+    onFieldsChange: PropTypes.func.isRequired,
+    fieldErrors: PropTypes.object.isRequired,
+    areStepErrorsVisible: PropTypes.bool.isRequired,
+    isValidatingIndexPattern: PropTypes.bool.isRequired,
+    indexPatternAsyncErrors: PropTypes.array,
+  }
+
   render() {
     const {
       fields,
       onFieldsChange,
-      showStepErrors,
+      areStepErrorsVisible,
       fieldErrors,
+      isValidatingIndexPattern,
+      indexPatternAsyncErrors,
     } = this.props;
 
     const {
@@ -117,11 +129,11 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               error={errorId}
-              isInvalid={Boolean(showStepErrors && errorId)}
+              isInvalid={Boolean(areStepErrorsVisible && errorId)}
               fullWidth
             >
               <EuiFieldText
-                isInvalid={Boolean(showStepErrors && errorId)}
+                isInvalid={Boolean(areStepErrorsVisible && errorId)}
                 value={id}
                 onChange={e => onFieldsChange({ id: e.target.value })}
                 fullWidth
@@ -155,8 +167,8 @@ export class StepLogisticsUi extends Component {
                   defaultMessage="Index pattern"
                 />
               )}
-              error={errorIndexPattern}
-              isInvalid={Boolean(showStepErrors && errorIndexPattern)}
+              error={errorIndexPattern || indexPatternAsyncErrors}
+              isInvalid={Boolean((areStepErrorsVisible && errorIndexPattern)) || Boolean(indexPatternAsyncErrors)}
               helpText={(
                 <Fragment>
                   <p>
@@ -180,7 +192,8 @@ export class StepLogisticsUi extends Component {
               <EuiFieldText
                 value={indexPattern}
                 onChange={e => onFieldsChange({ indexPattern: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorIndexPattern)}
+                isInvalid={Boolean(areStepErrorsVisible && errorIndexPattern) || Boolean(indexPatternAsyncErrors)}
+                isLoading={isValidatingIndexPattern}
                 fullWidth
               />
             </EuiFormRow>
@@ -193,7 +206,7 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               error={errorRollupIndex}
-              isInvalid={Boolean(showStepErrors && errorRollupIndex)}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
               helpText={(
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.helpDisallow.label"
@@ -206,7 +219,7 @@ export class StepLogisticsUi extends Component {
               <EuiFieldText
                 value={rollupIndex}
                 onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorRollupIndex)}
+                isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
                 fullWidth
               />
             </EuiFormRow>
@@ -242,13 +255,13 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               error={errorRollupCron}
-              isInvalid={Boolean(showStepErrors && errorRollupCron)}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
               fullWidth
             >
               <EuiFieldText
                 value={rollupCron}
                 onChange={e => onFieldsChange({ rollupCron: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorRollupCron)}
+                isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
                 fullWidth
               />
             </EuiFormRow>
@@ -261,13 +274,13 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               error={errorRollupPageSize}
-              isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
               fullWidth
             >
               <EuiFieldNumber
                 value={rollupPageSize}
                 onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
-                isInvalid={Boolean(showStepErrors && errorRollupPageSize)}
+                isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
               />
             </EuiFormRow>
@@ -280,9 +293,9 @@ export class StepLogisticsUi extends Component {
   }
 
   renderErrors = () => {
-    const { showStepErrors } = this.props;
+    const { areStepErrorsVisible } = this.props;
 
-    if (!showStepErrors) {
+    if (!areStepErrorsVisible) {
       return null;
     }
 

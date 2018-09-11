@@ -5,36 +5,35 @@
  */
 
 import chrome from 'ui/chrome';
-
-let httpClient;
-
-export const setHttpClient = (client) => {
-  httpClient = client;
-};
+import { getHttp } from './http_provider';
 
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
 export async function loadJobs() {
-  const { data: { jobs } } = await httpClient.get(`${apiPrefix}/jobs`);
+  const { data: { jobs } } = await getHttp().get(`${apiPrefix}/jobs`);
   return jobs;
 }
 
 export async function startJobs(jobIds) {
   const body = { jobIds };
-  return await httpClient.post(`${apiPrefix}/start`, body);
+  return await getHttp().post(`${apiPrefix}/start`, body);
 }
 
 export async function stopJobs(jobIds) {
   const body = { jobIds };
-  return await httpClient.post(`${apiPrefix}/stop`, body);
+  return await getHttp().post(`${apiPrefix}/stop`, body);
 }
 
 export async function deleteJobs(jobIds) {
   const body = { jobIds };
-  return await httpClient.post(`${apiPrefix}/delete`, body);
+  return await getHttp().post(`${apiPrefix}/delete`, body);
 }
 
 export async function createJob(job) {
   const body = { job };
-  return await httpClient.put(`${apiPrefix}/create`, body);
+  return await getHttp().put(`${apiPrefix}/create`, body);
+}
+
+export async function validateIndexPattern(indexPattern) {
+  return await getHttp().get(`${apiPrefix}/index_pattern_validity/${indexPattern}`);
 }

@@ -23,6 +23,7 @@ export const Navigation = ({
   goToNextStep,
   goToPreviousStep,
   save,
+  canGoToNextStep,
 }) => {
   if (isSaving) {
     return (
@@ -60,6 +61,7 @@ export const Navigation = ({
           iconType="arrowRight"
           iconSide="right"
           onClick={goToNextStep}
+          isDisabled={!canGoToNextStep}
           fill
         >
           Next
@@ -90,10 +92,11 @@ export const Navigation = ({
 };
 
 Navigation.propTypes = {
-  hasNextStep: PropTypes.bool,
-  hasPreviousStep: PropTypes.bool,
-  isSaving: PropTypes.bool,
+  hasNextStep: PropTypes.bool.isRequired,
+  hasPreviousStep: PropTypes.bool.isRequired,
+  isSaving: PropTypes.bool.isRequired,
   goToNextStep: PropTypes.func,
   goToPreviousStep: PropTypes.func,
-  save: PropTypes.func,
+  save: PropTypes.func.isRequired,
+  canGoToNextStep: PropTypes.bool.isRequired,
 };
