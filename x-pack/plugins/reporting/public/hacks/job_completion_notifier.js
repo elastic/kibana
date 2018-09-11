@@ -10,7 +10,7 @@ import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
-import 'plugins/reporting/services/job_completion_notifications';
+import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
@@ -23,7 +23,7 @@ import { downloadReport } from '../lib/download_report';
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run((Private, reportingPollConfig, reportingJobCompletionNotifications) => {
+  .run((Private, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
     if (Private(PathProvider).isLoginOrLogout()) {
       return;
@@ -109,7 +109,7 @@ uiModules.get('kibana')
           return;
         }
 
-        const jobIds = reportingJobCompletionNotifications.getAll();
+        const jobIds = jobCompletionNotifications.getAll();
         if (!jobIds.length) {
           return;
         }
@@ -118,13 +118,13 @@ uiModules.get('kibana')
         jobIds.forEach(async jobId => {
           const job = jobs.find(j => j._id === jobId);
           if (!job) {
-            reportingJobCompletionNotifications.remove(jobId);
+            jobCompletionNotifications.remove(jobId);
             return;
           }
 
           if (job._source.status === 'completed' || job._source.status === 'failed') {
             await showCompletionNotification(job);
-            reportingJobCompletionNotifications.remove(job.id);
+            jobCompletionNotifications.remove(job.id);
             return;
           }
         });
