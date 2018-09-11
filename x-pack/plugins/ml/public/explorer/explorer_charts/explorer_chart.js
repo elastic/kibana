@@ -32,6 +32,11 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
+const TICK_DIRECTION = {
+  NEXT: 'next',
+  PREVIOUS: 'previous'
+};
+
 export class ExplorerChart extends React.Component {
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
@@ -222,113 +227,89 @@ export class ExplorerChart extends React.Component {
         .call(yAxis);
 
       // remove overlapping labels
-      function removeLabelOverlap(startTs, tickInterval, earliest, latest) {
+      function removeLabelOverlap(axis, startTs, tickInterval) {
         // Put emphasis on all tick lines, will again de-emphasize the
         // ones where we remove the label in the next steps.
-        gAxis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
+        axis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
 
-        function getTickData(ts, operator) {
-          const filteredTicks = gAxis.selectAll('g.tick').filter(d => d === ts);
-
-          if (filteredTicks[0].length === 0) {
-            return false;
-          }
-
-          const tick = d3.selectAll(filteredTicks[0]);
-          const textNode = tick.select('text').node();
-
-          if (textNode === null) {
+        function getNeighourTickFactory(operator) {
+          return function (ts) {
             switch (operator) {
-              case 'previous':
-                return getTickData(ts - tickInterval, operator);
-              case 'next':
-                return getTickData(ts + tickInterval, operator);
-              default:
-                return false;
+              case TICK_DIRECTION.PREVIOUS:
+                return ts - tickInterval;
+              case TICK_DIRECTION.NEXT:
+                return ts + tickInterval;
             }
-          }
-
-          const tickWidth = textNode.getBBox().width;
-          const padding = 15;
-          const xTransform = d3.transform(tick.attr('transform')).translate[0];
-          const xMinOffset = xTransform - (tickWidth / 2 + padding);
-          const xMaxOffset = xTransform + (tickWidth / 2 + padding);
-
-          return {
-            operator,
-            tick,
-            ts,
-            xTransform,
-            xMinOffset,
-            xMaxOffset
           };
         }
 
-        function checkTicks(ts, operator) {
+        function getTickDataFactory(operator) {
+          const getNeighourTick = getNeighourTickFactory(operator);
+          const fn = function (ts) {
+            const filteredTicks = axis.selectAll('g.tick').filter(d => d === ts);
 
-          const currentTick = ts;
-          const currentTickData = getTickData(ts, operator);
+            if (filteredTicks[0].length === 0) {
+              return false;
+            }
+
+            const tick = d3.selectAll(filteredTicks[0]);
+            const textNode = tick.select('text').node();
+
+            if (textNode === null) {
+              return fn(getNeighourTick(ts));
+            }
+
+            const tickWidth = textNode.getBBox().width;
+            const padding = 15;
+            const xTransform = d3.transform(tick.attr('transform')).translate[0];
+            const xMinOffset = xTransform - (tickWidth / 2 + padding);
+            const xMaxOffset = xTransform + (tickWidth / 2 + padding);
+
+            return {
+              tick,
+              ts,
+              xMinOffset,
+              xMaxOffset
+            };
+          };
+          return fn;
+        }
+
+        function checkTicks(ts, operator) {
+          const getTickData = getTickDataFactory(operator);
+          const currentTickData = getTickData(ts);
 
           if (currentTickData === false) {
             return;
           }
 
-          let newTickData;
-          let checkAnotherTick;
+          const getNeighourTick = getNeighourTickFactory(operator);
+          const newTickData = getTickData(getNeighourTick(ts));
 
-          switch (operator) {
-            case 'previous':
-              newTickData = getTickData(ts - tickInterval, operator);
-              checkAnotherTick = newTickData.ts >= earliest;
-              break;
-            case 'next':
-              newTickData = getTickData(ts + tickInterval, operator);
-              checkAnotherTick = newTickData.ts <= latest;
-              break;
-          }
-          const newTick = newTickData.ts;
-
-          if (checkAnotherTick && newTickData !== false) {
-
-            let remove = false;
-
-            switch (operator) {
-              case 'previous':
-                if (newTickData.xMaxOffset > currentTickData.xMinOffset) {
-                  remove = true;
-                }
-                if (newTickData.xMinOffset < 0) {
-                  remove = true;
-                }
-                break;
-              case 'next':
-                if (newTickData.xMinOffset < currentTickData.xMaxOffset) {
-                  remove = true;
-                }
-                if (newTickData.xMaxOffset > vizWidth) {
-                  remove = true;
-                }
-                break;
-            }
-
-            if (remove === true) {
+          if (
+            newTickData !== false
+          ) {
+            if (
+              newTickData.xMinOffset < 0 ||
+              newTickData.xMaxOffset > vizWidth ||
+              (newTickData.xMaxOffset > currentTickData.xMinOffset && operator === TICK_DIRECTION.PREVIOUS) ||
+              (newTickData.xMinOffset < currentTickData.xMaxOffset && operator === TICK_DIRECTION.NEXT)
+            ) {
               newTickData.tick.select('text').remove();
               newTickData.tick.select('line').classed('ml-tick-emphasis', false);
-              checkTicks(currentTick, operator);
+              checkTicks(currentTickData.ts, operator);
             } else {
-              checkTicks(newTick, operator);
+              checkTicks(newTickData.ts, operator);
             }
-
           }
         }
 
-        checkTicks(startTs, 'previous');
-        checkTicks(startTs, 'next');
-        return;
+        checkTicks(startTs, TICK_DIRECTION.PREVIOUS);
+        checkTicks(startTs, TICK_DIRECTION.NEXT);
       }
 
       if (tooManyBuckets === false) {
-        removeLabelOverlap(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+        removeLabelOverlap(gAxis, emphasisStart, interval);
       }
     }
 
