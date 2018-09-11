@@ -7,13 +7,19 @@
 import React from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiButton,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
   EuiLink,
   EuiOverlayMask,
-  EuiConfirmModal,
-  EuiText
+  EuiText,
+  EuiModal,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalHeaderTitle
 } from '@elastic/eui';
 
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
@@ -38,6 +44,9 @@ export class StartTrial extends React.PureComponent {
     }
     startLicenseTrial();
   }
+  cancel = () => {
+    this.setState({ showConfirmation: false });
+  }
   acknowledgeModal() {
     const { showConfirmation } = this.state;
     if (!showConfirmation) {
@@ -46,55 +55,92 @@ export class StartTrial extends React.PureComponent {
 
     return (
       <EuiOverlayMask>
-        <EuiConfirmModal
-          title="Start your free 30-day trial"
-          onCancel={() => this.setState({ showConfirmation: false })}
-          onConfirm={this.startLicenseTrial}
-          cancelButtonText="Cancel"
-          confirmButtonText="Start my trial"
+        <EuiModal
+          style={{ maxWidth: '70vw' }}
+          onClose={this.cancel}
         >
-          <div>
-            <EuiText>
-              <p>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+            Start your free 30-day trial
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText data-test-subj="confirmModalBodyText">
+              <div>
+                <EuiText>
+                  <p>
                 This trial is for the full set of{' '}
-                <EuiLink
-                  href="https://www.elastic.co/subscriptions/xpack"
-                  target="_blank"
-                >
+                    <EuiLink
+                      href="https://www.elastic.co/subscriptions/xpack"
+                      target="_blank"
+                    >
                   Platinum features
-                </EuiLink> of the Elastic Stack. You&apos;ll get immediate access to:
-              </p>
-              <ul>
-                <li>Machine learning</li>
-                <li>Alerting</li>
-                <li>Graph capabilities</li>
-                <li>JDBC connectivity for SQL</li>
-              </ul>
-              <p>
+                    </EuiLink> of the Elastic Stack. You&apos;ll get immediate access to:
+                  </p>
+                  <ul>
+                    <li>Machine learning</li>
+                    <li>Alerting</li>
+                    <li>Graph capabilities</li>
+                    <li>JDBC connectivity for SQL</li>
+                  </ul>
+                  <p>
                 Security features, such as authentication (native, AD/LDAP, SAML,
                 PKI), role-based access control, and auditing, require
                 configuration. See the{' '}
-                <EuiLink
-                  href={securityDocumentationLink}
-                  target="_blank"
-                >
+                    <EuiLink
+                      href={securityDocumentationLink}
+                      target="_blank"
+                    >
                   documentation
-                </EuiLink>{' '}
+                    </EuiLink>{' '}
                 for instructions.
-              </p>
-              <p>
+                  </p>
+                  <p>
                 By starting this trial, you agree that it is subject to these{' '}
-                <EuiLink
-                  href="https://elastic.co/legal/trial_license"
-                  target="_blank"
-                >
+                    <EuiLink
+                      href="https://elastic.co/legal/trial_license"
+                      target="_blank"
+                    >
                   terms and conditions
-                </EuiLink>.
-              </p>
+                    </EuiLink>.
+                  </p>
+                </EuiText>
+              </div>
             </EuiText>
-            <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
-          </div>
-        </EuiConfirmModal>
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="confirmModalCancelButton"
+                      onClick={this.cancel}
+                      buttonRef={this.cancelRef}
+                    >
+                Cancel
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="confirmModalConfirmButton"
+                      onClick={this.startLicenseTrial}
+                      fill
+                      buttonRef={this.confirmRef}
+                      color="primary"
+                    >
+              Start my trial
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalFooter>
+        </EuiModal>
       </EuiOverlayMask>
     );
   }
