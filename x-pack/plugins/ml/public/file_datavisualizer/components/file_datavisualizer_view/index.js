@@ -5,4 +5,4 @@
  */
 
 
-export { MLJobEditor, EDITOR_MODE } from './ml_job_editor';
+export { FileDataVisualizerView } from './file_datavisualizer_view';

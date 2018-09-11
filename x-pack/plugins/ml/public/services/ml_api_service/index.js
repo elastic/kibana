@@ -408,6 +408,14 @@ export const ml = {
     });
   },
 
+  analyzeFile(obj) {
+    return http({
+      url: `${basePath}/file_data_visualizer/analyze_file`,
+      method: 'POST',
+      data: obj
+    });
+  },
+
   filters,
   results,
   jobs,

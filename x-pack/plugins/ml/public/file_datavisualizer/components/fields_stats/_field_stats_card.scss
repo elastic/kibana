@@ -1,0 +1,13 @@
+.card-container {
+  display: inline-grid;
+  padding: 0px 10px 10px 0px;
+}
+
+.ml-field-data-card {
+  height: 408px;
+
+  .card-contents {
+    height: 378px;
+    line-height: 21px;
+  }
+}

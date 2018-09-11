@@ -566,5 +566,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  ml.fileStructure = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/find_file_structure',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
 };
 
