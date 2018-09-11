@@ -231,14 +231,16 @@ describe('SavedObjectsRepository', () => {
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
-      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
-        body: [
-          { create: { _type: 'doc', _id: 'config:one' } },
-          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, migrationVersion: undefined },
-          { create: { _type: 'doc', _id: 'index-pattern:two' } },
-          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' }, migrationVersion: undefined }
-        ]
-      }));
+      const bulkCalls = callAdminCluster.args.filter(([path]) => path === 'bulk');
+
+      expect(bulkCalls.length).toEqual(1);
+
+      expect(bulkCalls[0][1].body).toEqual([
+        { create: { _type: 'doc', _id: 'config:one' } },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+        { create: { _type: 'doc', _id: 'index-pattern:two' } },
+        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+      ]);
 
       sinon.assert.calledOnce(onBeforeWrite);
     });

@@ -93,10 +93,10 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      return {
-        ...migrated,
-        version: response._version,
-      };
+      return rawToSavedObject({
+        ...raw,
+        ...response,
+      });
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -395,14 +395,8 @@ export class SavedObjectsRepository {
    */
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
-    const raw = savedObjectToRaw({
-      id,
-      type,
-      attributes,
-    });
-
     const response = await this._writeToCluster('update', {
-      id: raw._id,
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,
@@ -410,7 +404,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         doc: {
-          ...raw._source,
+          [type]: attributes,
           updated_at: time,
         }
       },

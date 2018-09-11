@@ -59,7 +59,19 @@ export interface SavedObjectDoc {
 }
 
 /**
+ * Determines whether or not the raw document can be converted to a saved object.
+ *
+ * @param {RawDoc} rawDoc - The raw ES document to be tested
+ */
+export function isRawSavedObject(rawDoc: RawDoc) {
+  const { type } = rawDoc._source;
+  return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
+}
+
+/**
  * Converts a document from the format that is stored in elasticsearch to the saved object client format.
+ *
+ *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
  */
 export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
   const { type } = _source;
@@ -68,7 +80,6 @@ export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjec
     ..._source,
     attributes: _source[type],
     id,
-    migrationVersion: _source.migrationVersion || {},
     ...(_version != null && { version: _version }),
   };
 
@@ -78,6 +89,8 @@ export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjec
 
 /**
  * Converts a document from the saved object client format to the format that is stored in elasticsearch.
+ *
+ * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
  */
 export function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
   const { id, type, attributes, version } = savedObj;

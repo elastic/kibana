@@ -22,7 +22,12 @@
  */
 
 import { TransformFn } from './document_migrator';
-import { RawDoc, rawToSavedObject, savedObjectToRaw } from './saved_object_conversion';
+import {
+  isRawSavedObject,
+  RawDoc,
+  rawToSavedObject,
+  savedObjectToRaw,
+} from './saved_object_conversion';
 
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -33,15 +38,13 @@ import { RawDoc, rawToSavedObject, savedObjectToRaw } from './saved_object_conve
  * @returns {RawDoc[]}
  */
 export function migrateRawDocs(migrateDoc: TransformFn, rawDocs: RawDoc[]): RawDoc[] {
-  return rawDocs.map(
-    raw => (isRawSavedObject(raw) ? savedObjectToRaw(migrateDoc(rawToSavedObject(raw))) : raw)
-  );
-}
+  return rawDocs.map(raw => {
+    if (isRawSavedObject(raw)) {
+      const savedObject = rawToSavedObject(raw);
+      savedObject.migrationVersion = savedObject.migrationVersion || {};
+      return savedObjectToRaw(migrateDoc(savedObject));
+    }
 
-/**
- * Determines whether or not the raw document can be converted to a saved object.
- */
-function isRawSavedObject(rawDoc: RawDoc) {
-  const { type } = rawDoc._source;
-  return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
+    return raw;
+  });
 }

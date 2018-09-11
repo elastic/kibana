@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import {
   generateRawId,
+  isRawSavedObject,
   rawToSavedObject,
   ROOT_TYPE,
   savedObjectToRaw,
@@ -80,7 +81,6 @@ describe('saved object conversion', () => {
         attributes: {
           world: 'earth',
         },
-        migrationVersion: {},
       };
       expect(expected).toEqual(actual);
     });
@@ -168,6 +168,68 @@ describe('saved object conversion', () => {
 
     expect(v1._id).toMatch(/foo\:[\w-]+$/);
     expect(v1._id).not.toEqual(v2._id);
+  });
+
+  describe('isRawSavedObject', () => {
+    test('is true if the id is prefixed and the type matches', () => {
+      expect(
+        isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'hello',
+            hello: {},
+          },
+        })
+      ).toBeTruthy();
+    });
+
+    test('is false if the id is not prefixed', () => {
+      expect(
+        isRawSavedObject({
+          _id: 'world',
+          _source: {
+            type: 'hello',
+            hello: {},
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if the type attribute is missing', () => {
+      expect(
+        isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            hello: {},
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if the type attribute does not match the id', () => {
+      expect(
+        isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'jam',
+            jam: {},
+            hello: {},
+          },
+        })
+      ).toBeFalsy();
+    });
+
+    test('is false if there is no [type] attribute', () => {
+      expect(
+        isRawSavedObject({
+          _id: 'hello:world',
+          _source: {
+            type: 'hello',
+            jam: {},
+          },
+        })
+      ).toBeFalsy();
+    });
   });
 
   test('generateRawId generates an id, if none is specified', () => {
