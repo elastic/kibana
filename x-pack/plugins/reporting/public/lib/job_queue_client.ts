@@ -12,7 +12,7 @@ const API_BASE_URL = '/api/reporting/jobs';
 
 class JobQueueClient {
   public list = (page = 0, jobIds?: string[]) => {
-    const query = { page };
+    const query = { page } as any;
     if (jobIds && jobIds.length > 0) {
       // Only getting the first 10, to prevent URL overflows
       query.ids = jobIds.slice(0, 10).join(',');
