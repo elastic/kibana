@@ -12,12 +12,11 @@ import React, {
 import {
   EuiHorizontalRule,
   EuiTabbedContent,
-
 } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
 import { Summary } from '../summary';
-import { FileStats } from '../file_stats';
+import { FieldsStats } from '../fields_stats';
 
 export class ResultsView extends Component {
   constructor(props) {
@@ -37,9 +36,7 @@ export class ResultsView extends Component {
     const tabs = [{
       id: 'file-stats',
       name: 'File stats',
-      content: <FileStats
-        results={results}
-      />,
+      content: <FieldsStats results={results} />,
     }
     ];
 

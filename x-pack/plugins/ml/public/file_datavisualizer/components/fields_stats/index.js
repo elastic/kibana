@@ -5,4 +5,4 @@
  */
 
 
-export { FileStats } from './file_stats';
+export { FieldsStats } from './fields_stats';

@@ -56,24 +56,6 @@ export class FileDataVisualizerView extends Component {
 
   };
 
-  renderFiles = () => {
-    if (this.state.files.length > 0) {
-      return (
-        <React.Fragment>
-          <ul>
-            {Object.keys(this.state.files).map((item, i) => (
-              <li key={i}>
-                <strong>{this.state.files[item].name}</strong> ({this.state.files[item].size} bytes)
-              </li>)
-            )}
-          </ul>
-        </React.Fragment>
-      );
-    } else {
-      return <p>Add some files to see a demo of retrieving from the FileList</p>;
-    }
-  }
-
   async analyseFile(file) {
     if (file.size < this.maxPayloadBytes) {
       let data = null;

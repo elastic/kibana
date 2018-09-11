@@ -11,7 +11,7 @@ import React, {
 
 import { FieldStatsCard } from './field_stats_card';
 
-export class FileStats extends Component {
+export class FieldsStats extends Component {
   constructor(props) {
     super(props);
     super(props);
@@ -22,7 +22,7 @@ export class FileStats extends Component {
 
   render() {
     return (
-      <div className="field-stats">
+      <div className="fields-stats">
         {
           this.fields.map(f => (
             <FieldStatsCard
