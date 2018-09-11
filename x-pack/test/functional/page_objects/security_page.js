@@ -19,7 +19,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
 
   class LoginPage {
-    async login(username, password) {
+    async login(username, password, expectSuccess = true) {
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
       username = username || superUsername;
@@ -29,6 +29,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
+      // wait for either kibanaChrome or loginErrorMessage
+      if (expectSuccess) {
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        log.debug(`Finished login process currentUrl = ${await remote.getCurrentUrl()}`);
+      }
     }
 
     async getErrorMessage() {
