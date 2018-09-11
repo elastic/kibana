@@ -384,7 +384,7 @@ export function explorerChartsContainerServiceFactory(
 
     });
 
-    //console.log('explorer charts aggregatedData is:', aggregatedData);
+    console.log('explorer charts aggregatedData is:', aggregatedData);
     let recordsForSeries = [];
     // Convert to an array of the records with the highest record_score per unique series.
     _.each(aggregatedData, (detectorsForJob) => {

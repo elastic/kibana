@@ -510,7 +510,7 @@ module.controller('MlExplorerController', function (
       return;
     }
 
-    const newRequestCount = requestCount + 1;
+    const newRequestCount = ++requestCount;
     requestCount = newRequestCount;
 
     // Loads the data used to populate the anomaly charts and the Top Influencers List.
