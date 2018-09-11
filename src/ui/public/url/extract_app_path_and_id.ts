@@ -25,15 +25,15 @@ import { parse } from 'url';
  * @param {string} url - a relative or absolute url which contains an appPath, an appId, and optionally, a basePath.
  * @param {string} basePath - optional base path, if given should start with "/".
  */
-export function extractAppPathAndId(url, basePath = '') {
+export function extractAppPathAndId(url: string, basePath = '') {
   const parsedUrl = parse(url);
   if (!parsedUrl.path) {
-    return { };
+    return {};
   }
   const pathWithoutBase = parsedUrl.path.slice(basePath.length);
 
   if (!pathWithoutBase.startsWith('/app/')) {
-    return { };
+    return {};
   }
 
   const appPath = parsedUrl.hash && parsedUrl.hash.length > 0 ? parsedUrl.hash.slice(1) : '';

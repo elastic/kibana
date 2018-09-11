@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { parse } from 'url';
+
 import { extractAppPathAndId } from './extract_app_path_and_id';
 import { KibanaParsedUrl } from './kibana_parsed_url';
-import { parse } from 'url';
 
 /**
  *
@@ -29,8 +30,15 @@ import { parse } from 'url';
  * "/gra".
  * @return {KibanaParsedUrl}
  */
-export function absoluteToParsedUrl(absoluteUrl, basePath = '') {
+export function absoluteToParsedUrl(absoluteUrl: string, basePath = '') {
   const { appPath, appId } = extractAppPathAndId(absoluteUrl, basePath);
   const { hostname, port, protocol } = parse(absoluteUrl);
-  return new KibanaParsedUrl({ basePath, appId, appPath, hostname, port, protocol });
+  return new KibanaParsedUrl({
+    basePath,
+    appId: appId!,
+    appPath,
+    hostname,
+    port,
+    protocol,
+  });
 }
