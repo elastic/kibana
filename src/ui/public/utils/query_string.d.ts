@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
-export { ShareContextMenuExtensionsRegistryProvider } from './share_action_registry';
+declare class QueryStringClass {
+  public param(key: string, value: string): string;
+}
+
+declare const QueryString: QueryStringClass;
+
+export { QueryString };

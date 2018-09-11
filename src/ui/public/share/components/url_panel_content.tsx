@@ -24,7 +24,6 @@ declare module '@elastic/eui' {
 }
 
 import React, { Component } from 'react';
-import './share_url_content.less';
 
 import {
   EuiButton,
@@ -67,7 +66,7 @@ interface State {
   shortUrlErrorMsg?: string;
 }
 
-export class ShareUrlContent extends Component<Props, State> {
+export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -99,22 +98,25 @@ export class ShareUrlContent extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiForm className="shareUrlContentForm" data-test-subj="shareUrlForm">
+      <EuiForm className="sharePanelContent" data-test-subj="shareUrlForm">
         {this.renderExportAsRadioGroup()}
 
         {this.renderShortUrlSwitch()}
 
-        <EuiCopy textToCopy={this.state.url}>
+        <EuiCopy textToCopy={this.state.url} anchorClassName="sharePanel__copyAnchor">
           {(copy: () => void) => (
-            <EuiButton
-              fill
-              onClick={copy}
-              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-              data-share-url={this.state.url}
-              data-test-subj="copyShareUrlButton"
-            >
-              Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
-            </EuiButton>
+            <EuiFormRow>
+              <EuiButton
+                fill
+                onClick={copy}
+                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+                data-share-url={this.state.url}
+                data-test-subj="copyShareUrlButton"
+                size="s"
+              >
+                Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
+              </EuiButton>
+            </EuiFormRow>
           )}
         </EuiCopy>
       </EuiForm>
