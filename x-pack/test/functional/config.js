@@ -7,7 +7,6 @@
 /* eslint-disable kibana-custom/no-default-export */
 
 import { resolve } from 'path';
-import { format as formatUrl } from 'url';
 
 import {
   SecurityPageProvider,
@@ -56,25 +55,6 @@ export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
   const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
-
-  const servers = {
-    elasticsearch: {
-      protocol: process.env.TEST_ES_PROTOCOL || 'http',
-      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_ES_PORT, 10) || 9240,
-      auth: 'elastic:changeme',
-      username: 'elastic',
-      password: 'changeme',
-    },
-    kibana: {
-      protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
-      hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 5640,
-      auth: 'elastic:changeme',
-      username: 'elastic',
-      password: 'changeme',
-    },
-  };
 
   return {
     // list paths to the files that contain your plugins tests
@@ -137,7 +117,7 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
     },
 
-    servers,
+    servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
       license: 'trial',
@@ -153,8 +133,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        `--server.port=${servers.kibana.port}`,
-        `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],

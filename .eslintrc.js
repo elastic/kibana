@@ -2,6 +2,8 @@ const { resolve } = require('path');
 const { readdirSync } = require('fs');
 const dedent = require('dedent');
 
+const restrictedModules = { paths: ['gulp-util'] };
+
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
 
@@ -15,6 +17,11 @@ module.exports = {
     react: {
       version: '16.3',
     },
+  },
+
+  rules: {
+    'no-restricted-imports': [2, restrictedModules],
+    'no-restricted-modules': [2, restrictedModules],
   },
 
   overrides: [
@@ -116,7 +123,7 @@ module.exports = {
         'packages/kbn-ui-framework/generator-kui/**/*',
         'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*',
-        'x-pack/{dev-tools,gulp_helpers,scripts,test,build_chromium}/**/*',
+        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
         'x-pack/gulpfile.js',

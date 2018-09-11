@@ -34,12 +34,12 @@ installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-
+export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom=source --grep @ciGroup01
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup01
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom=source --grep @ciGroup02
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup02
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --esFrom=source --grep @ciGroup03
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup03
 echo ""

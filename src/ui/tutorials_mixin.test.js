@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createServer } from '../test_utils/kbn_server';
+import { tutorialsMixin } from './tutorials_mixin';
 
 const validTutorial = {
   id: 'spec1',
@@ -42,15 +42,22 @@ const validTutorial = {
 };
 
 describe('tutorial mixins', () => {
-
-  let kbnServer;
+  let getTutorials;
+  let registerTutorial;
+  let addScopedTutorialContextFactory;
+  const serverMock = { decorate: jest.fn() };
   beforeEach(async () => {
-    kbnServer = createServer();
-    await kbnServer.ready();
+    await tutorialsMixin({}, serverMock);
+
+    [
+      [,, getTutorials],
+      [,, registerTutorial],
+      [,, addScopedTutorialContextFactory]
+    ] = serverMock.decorate.mock.calls;
   });
 
-  afterEach(async () => {
-    await kbnServer.close();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('scoped context', () => {
@@ -70,12 +77,12 @@ describe('tutorial mixins', () => {
       return tutorial;
     };
     beforeEach(async () => {
-      kbnServer.server.addScopedTutorialContextFactory(spacesContextFactory);
-      kbnServer.server.registerTutorial(specProvider);
+      addScopedTutorialContextFactory(spacesContextFactory);
+      registerTutorial(specProvider);
     });
 
     test('passes scoped context to specProviders', () => {
-      const tutorials = kbnServer.server.getTutorials(mockRequest);
+      const tutorials = getTutorials(mockRequest);
       expect(tutorials.length).toBe(1);
       expect(tutorials[0].shortDescription).toBe('I have been provided with scoped context, spaceId: my-space');
     });
