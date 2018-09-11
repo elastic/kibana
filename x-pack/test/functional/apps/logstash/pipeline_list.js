@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
         username: 'elastic'
       }];
 
-      for (let emptyPipelineId = 1; emptyPipelineId <= 21; ++emptyPipelineId) {
+      for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,

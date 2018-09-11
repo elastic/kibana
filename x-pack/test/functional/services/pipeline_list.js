@@ -153,6 +153,10 @@ export function PipelineListProvider({ getService }) {
       });
     }
 
+    /**
+     * Get a list of all pipeline IDs in the current table
+     * @return {Promise<any>}
+     */
     async getRowIds() {
       return await testSubjects.getVisibleTextAll(SUBJ_CELL_ID);
     }

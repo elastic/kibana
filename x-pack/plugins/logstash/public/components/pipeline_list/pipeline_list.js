@@ -15,7 +15,6 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-import { PIPELINE_LIST } from '../../../common/constants/pipeline_list';
 import { InfoAlerts } from './info_alerts';
 import { PipelinesTable } from './pipelines_table';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -29,8 +28,6 @@ export class PipelineList extends React.Component {
       isForbidden: false,
       isLoading: true,
       isSelectable: false,
-      pageIndex: 0,
-      pageSize: PIPELINE_LIST.INITIAL_PAGE_SIZE,
       pipelines: [],
       showAddRoleAlert: false,
       showConfirmDeleteModal: false,
@@ -226,21 +223,6 @@ export class PipelineList extends React.Component {
   }
 
   onSelectionChange = selection => this.setState({ selection });
-
-  // TODO: add pagination once EuiInMemoryTable bug fixed: https://github.com/elastic/eui/issues/1007
-  // onTableChange = (props) => {
-  //   const {
-  //     page: {
-  //       index,
-  //       size,
-  //     }
-  //   } = props;
-
-  //   this.setState({
-  //     pageIndex: index,
-  //     pageSize: size,
-  //   });
-  // };
 
   render() {
     const {

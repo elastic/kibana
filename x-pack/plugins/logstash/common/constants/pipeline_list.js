@@ -5,7 +5,8 @@
  */
 
 export const PIPELINE_LIST = {
-  INITIAL_PAGE_SIZE: 5,
+  INITIAL_PAGE_SIZE: 20,
+  PAGE_SIZE_OPTIONS: [5, 8, 20, 50],
   PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT:
     `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`,
   INFO_ALERTS: {

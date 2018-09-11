@@ -80,13 +80,12 @@ export function PipelinesTable({
   pipelines,
   selection,
   pageIndex,
-  pageSize,
 }) {
   const pagination = {
     pageIndex,
-    pageSize,
+    initialPageSize: PIPELINE_LIST.INITIAL_PAGE_SIZE,
     totalItemCount: pipelines.length,
-    pageSizeOptions: [2, 3, 5, 8]
+    pageSizeOptions: PIPELINE_LIST.PAGE_SIZE_OPTIONS,
   };
 
   const selectableMessage = (selectable, { id }) =>
