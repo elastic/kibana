@@ -60,8 +60,8 @@ export class ReportListing extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage restrictWidth>
-        <EuiPageBody>
+      <EuiPage className="repReportListing__page">
+        <EuiPageBody restrictWidth>
           <EuiPageContent horizontalPosition="center">
             <EuiTitle>
               <h1>Reports</h1>
