@@ -147,7 +147,7 @@ export const termsBucketAgg = new BucketAggType({
       makeOrderAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
-        const orderAgg = this.aggConfigs.createAggConfig(state);
+        const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
