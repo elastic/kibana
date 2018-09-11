@@ -32,6 +32,7 @@ import { createRepliesMap } from './replies_map';
 
 export interface ILanguageServerHandler {
   handleRequest(request: LspRequest): Promise<ResponseMessage>;
+  exit(): Promise<any>;
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {

@@ -16,6 +16,8 @@ import getPort from 'get-port';
 
 import path from 'path';
 import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
+import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { DidChangeWorkspaceFoldersParams } from 'vscode-languageserver';
 import { LspRequest } from '../../model';
 import { RequestExpander } from './request_expander';
 
@@ -25,7 +27,18 @@ import { RequestExpander } from './request_expander';
  */
 export class LanguageServerController implements ILanguageServerHandler {
   /** Map from language type to Lsp Server Controller */
-  private languageServers: { [name: string]: ILanguageServerHandler } = {};
+  private readonly builtinWorkspaceFolders: { [name: string]: boolean } = {
+    typescript: true,
+    java: true,
+  }; // TODO flip typescript: false one multiple workspace is implemented
+  private readonly serverLangMap: { [name: string]: string[] } = {
+    typescript: ['typescript', 'javascript', 'html'],
+    java: ['java'],
+  };
+
+  // Use languageServers[lang][workspace] to get a handler, If a server has builtin support multi workspace support
+  // juse use '*' to get handler for all workspace
+  private languageServers: { [name: string]: { [name: string]: ILanguageServerHandler } } = {};
   private readonly targetHost: string;
   private log: Log;
   private readonly detach: boolean = process.env.LSP_DETACH === 'true';
@@ -49,15 +62,68 @@ export class LanguageServerController implements ILanguageServerHandler {
       );
     }
   }
-  public dispatchRequest(lang: string, request: LspRequest) {
+
+  public dispatchRequest(lang: string, request: LspRequest): Promise<ResponseMessage> {
     if (lang) {
-      const handler = this.languageServers[lang.toLowerCase()];
-      if (handler) {
-        return handler.handleRequest(request);
+      if (this.builtinWorkspaceFolders[lang]) {
+        const handler = this.languageServers[lang.toLowerCase()]['*'];
+        if (handler) {
+          return handler.handleRequest(request);
+        } else {
+          return Promise.reject(
+            new ResponseError(ErrorCodes.UnknownErrorCode, `no server found for language ${lang}`)
+          );
+        }
       } else {
-        return Promise.reject(
-          new ResponseError(ErrorCodes.UnknownErrorCode, `no server found for language ${lang}`)
-        );
+        const serversMap = this.languageServers[lang.toLowerCase()];
+
+        if (request.method === 'workspace/didChangeWorkspaceFolders') {
+          const param: DidChangeWorkspaceFoldersParams = request.params;
+
+          const removePromises: Array<Promise<any>> = param.event.removed.map(workspace => {
+            const handler = serversMap[workspace.uri];
+
+            for (const supportLang of this.serverLangMap[lang.toLowerCase()]) {
+              const supportLangServers = this.languageServers[supportLang];
+              delete supportLangServers[workspace.uri];
+            }
+
+            return handler.exit();
+          });
+
+          const addPromises: Array<Promise<any>> = param.event.added.map(workspace => {
+            return this.launchServer(lang).then(server => {
+              for (const supportLang of this.serverLangMap[lang.toLowerCase()]) {
+                this.languageServers[supportLang][workspace.uri] = server;
+              }
+            });
+          });
+
+          // TODO check this
+          const dummyResponse: ResponseMessage = { id: -1, jsonrpc: request.method };
+          return Promise.all(removePromises.concat(addPromises)).then(
+            () => dummyResponse,
+            () => dummyResponse
+          );
+        } else {
+          const workspace = ''; // TODO extract workspace from request
+
+          let handler = null;
+          // TODO check if this loop is correct in typescript
+          for (const ws in serversMap) {
+            // Find a handler that can handle this workspace
+            if (ws === workspace) {
+              handler = serversMap[ws];
+            }
+          }
+
+          if (handler) {
+            return handler.handleRequest(request);
+          }
+          return Promise.reject(
+            new ResponseError(ErrorCodes.UnknownErrorCode, `unimplemented handler for ${lang}`)
+          );
+        }
       }
     } else {
       return Promise.reject(
@@ -67,6 +133,10 @@ export class LanguageServerController implements ILanguageServerHandler {
         )
       );
     }
+  }
+
+  public async exit() {
+    // Shouldn't be use here
   }
 
   /** Lancuch a LSP proxy and register a proxy */
@@ -117,6 +187,18 @@ export class LanguageServerController implements ILanguageServerHandler {
     proxy.listen();
     const handler = new RequestExpander(proxy);
     this.registerServer(['typescript', 'javascript', 'html'], handler);
+    return handler;
+  }
+
+  public async launchServer(lang: string): Promise<ILanguageServerHandler> {
+    switch (lang) {
+      case 'typescript':
+        return this.launchTypescript();
+      case 'java':
+        return this.launchJava();
+      default:
+        return Promise.reject(`Can't launch server for ${lang}`);
+    }
   }
 
   public async launchJava() {
@@ -196,12 +278,15 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
     proxy.listen();
     const handler = new RequestExpander(proxy);
-    this.registerServer(['java'], handler);
+    this.registerServer(this.serverLangMap.java, handler);
+    return handler;
   }
 
   private registerServer(languages: string[], handler: RequestExpander) {
     for (const language of languages) {
-      this.languageServers[language.toLowerCase()] = handler;
+      if (this.builtinWorkspaceFolders[language]) {
+        this.languageServers[language.toLowerCase()]['*'] = handler;
+      }
     }
   }
 }

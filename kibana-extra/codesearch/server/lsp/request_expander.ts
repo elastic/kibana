@@ -52,6 +52,10 @@ export class RequestExpander implements ILanguageServerHandler {
     );
   }
 
+  public async exit() {
+    return this.proxy.exit();
+  }
+
   private handle() {
     const job = this.jobQueue.shift();
     if (job) {
