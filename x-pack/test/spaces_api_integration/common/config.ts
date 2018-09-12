@@ -13,7 +13,7 @@ import { EsProvider } from './services/es';
 
 interface CreateTestConfigOptions {
   license: string;
-  disabledPlugins?: [string];
+  disabledPlugins?: string[];
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
