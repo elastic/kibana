@@ -65,6 +65,19 @@ export class StepTermsUi extends Component {
       return !fields.terms.includes(termField);
     });
 
+    const columns = [{
+      field: 'name',
+      name: 'Name',
+      truncateText: true,
+      sortable: true,
+    }, {
+      field: 'type',
+      name: 'Type',
+      truncateText: true,
+      sortable: true,
+      width: '180px',
+    }];
+
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -109,6 +122,7 @@ export class StepTermsUi extends Component {
         </EuiFlexGroup>
 
         <FieldList
+          columns={columns}
           fields={terms}
           onRemoveField={this.onRemoveField}
         />
@@ -116,6 +130,7 @@ export class StepTermsUi extends Component {
         <EuiSpacer />
 
         <FieldChooser
+          columns={columns}
           label={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"

@@ -15,6 +15,7 @@ import {
 import './field_chooser.less';
 
 export const FieldList = ({
+  columns,
   fields,
   onRemoveField,
 }) => {
@@ -22,18 +23,7 @@ export const FieldList = ({
     return null;
   }
 
-  const columns = [{
-    field: 'name',
-    name: 'Name',
-    truncateText: true,
-    sortable: true,
-  }, {
-    field: 'type',
-    name: 'Type',
-    truncateText: true,
-    sortable: true,
-    width: '180px',
-  }, {
+  const extendedColumns = columns.concat({
     name: 'Remove',
     width: '80px',
     actions: [{
@@ -45,7 +35,7 @@ export const FieldList = ({
       color: 'danger',
       onClick: (field) => onRemoveField(field),
     }]
-  }];
+  });
 
   const search = {
     box: {
@@ -65,7 +55,7 @@ export const FieldList = ({
       <EuiInMemoryTable
         items={fields}
         itemId="name"
-        columns={columns}
+        columns={extendedColumns}
         search={search}
         pagination={pagination}
         sorting={true}
@@ -75,6 +65,7 @@ export const FieldList = ({
 };
 
 FieldList.propTypes = {
+  columns: PropTypes.array.isRequired,
   fields: PropTypes.array.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };

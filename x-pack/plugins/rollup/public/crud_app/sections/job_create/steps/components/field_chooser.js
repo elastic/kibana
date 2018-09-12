@@ -19,6 +19,7 @@ import './field_chooser.less';
 
 export class FieldChooser extends Component {
   static propTypes = {
+    columns: PropTypes.array.isRequired,
     label: PropTypes.node.isRequired,
     fields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
@@ -53,6 +54,7 @@ export class FieldChooser extends Component {
 
   render() {
     const {
+      columns,
       label,
       fields,
       onSelectField,
@@ -61,19 +63,6 @@ export class FieldChooser extends Component {
     const {
       searchValue,
     } = this.state;
-
-    const columns = [{
-      field: 'name',
-      name: 'Name',
-      truncateText: true,
-      sortable: true,
-    }, {
-      field: 'type',
-      name: 'Type',
-      truncateText: true,
-      sortable: true,
-      width: '180px',
-    }];
 
     const getRowProps = (field) => {
       return {
@@ -95,9 +84,9 @@ export class FieldChooser extends Component {
       </EuiButton>
     );
 
-    const items = searchValue ? fields.filter(({ name }) => {
-      return name.toLowerCase().includes(searchValue.trim().toLowerCase());
-    }) : fields;
+    const items = searchValue ? fields.filter(({ name }) => (
+      name.toLowerCase().includes(searchValue.trim().toLowerCase())
+    )) : fields;
 
     return (
       <EuiPopover

@@ -62,6 +62,13 @@ export class StepHistogramUi extends Component {
       // histogramInterval,
     } = fields;
 
+    const columns = [{
+      field: 'name',
+      name: 'Name',
+      truncateText: true,
+      sortable: true,
+    }];
+
     const unselectedHistogramFields = histogramFields.filter(histogramField => {
       return !fields.histogram.includes(histogramField);
     });
@@ -109,6 +116,7 @@ export class StepHistogramUi extends Component {
         </EuiFlexGroup>
 
         <FieldList
+          columns={columns}
           fields={histogram}
           onRemoveField={this.onRemoveField}
         />
@@ -116,6 +124,7 @@ export class StepHistogramUi extends Component {
         <EuiSpacer />
 
         <FieldChooser
+          columns={columns}
           label={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepHistogram.fieldsChooser.label"
