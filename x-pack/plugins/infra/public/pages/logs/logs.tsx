@@ -20,9 +20,9 @@ import { ScrollableLogTextStreamView } from '../../components/logging/log_text_s
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithLogFilter } from '../../containers/logs/with_log_filter';
-import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
-import { WithLogPosition } from '../../containers/logs/with_log_position';
+import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithLogMinimap, WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
+import { WithLogPosition, WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
 import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
@@ -33,6 +33,9 @@ export class LogsPage extends React.Component {
   public render() {
     return (
       <ColumnarPage>
+        <WithLogFilterUrlState />
+        <WithLogPositionUrlState />
+        <WithLogMinimapUrlState />
         <Header breadcrumbs={[{ text: 'Logs' }]} />
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
@@ -42,6 +45,7 @@ export class LogsPage extends React.Component {
                   <WithLogFilter>
                     {({
                       applyFilterQueryFromKueryExpression,
+                      filterQuery,
                       filterQueryDraft,
                       isFilterQueryDraftValid,
                       setFilterQueryDraftFromKueryExpression,
@@ -91,14 +95,14 @@ export class LogsPage extends React.Component {
             <EuiFlexItem grow={false}>
               <WithLogPosition>
                 {({
-                  visibleMidpoint,
+                  visibleMidpointTime,
                   isAutoReloading,
                   jumpToTargetPositionTime,
                   startLiveStreaming,
                   stopLiveStreaming,
                 }) => (
                   <LogTimeControls
-                    currentTime={visibleMidpoint}
+                    currentTime={visibleMidpointTime}
                     isLiveStreaming={isAutoReloading}
                     jumpToTime={jumpToTargetPositionTime}
                     startLiveStreaming={startLiveStreaming}
@@ -117,7 +121,7 @@ export class LogsPage extends React.Component {
                   {({ textScale }) => (
                     <WithTextWrap>
                       {({ wrap }) => (
-                        <WithLogPosition initializeOnMount>
+                        <WithLogPosition>
                           {({
                             isAutoReloading,
                             jumpToTargetPosition,
@@ -172,7 +176,7 @@ export class LogsPage extends React.Component {
                             {({
                               jumpToTargetPosition,
                               reportVisibleSummary,
-                              visibleMidpoint,
+                              visibleMidpointTime,
                               visibleTimeInterval,
                             }) => (
                               <LogMinimap
@@ -183,7 +187,7 @@ export class LogsPage extends React.Component {
                                 jumpToTarget={jumpToTargetPosition}
                                 reportVisibleInterval={reportVisibleSummary}
                                 summaryBuckets={buckets}
-                                target={visibleMidpoint}
+                                target={visibleMidpointTime}
                               />
                             )}
                           </WithLogPosition>
