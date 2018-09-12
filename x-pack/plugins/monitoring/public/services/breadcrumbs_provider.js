@@ -81,6 +81,19 @@ function getBeatsBreadcrumbs(mainInstance) {
   return breadcrumbs;
 }
 
+// generate Apm breadcrumbs
+function getApmBreadcrumbs(mainInstance) {
+  const breadcrumbs = [];
+  if (mainInstance.instance) {
+    breadcrumbs.push(createCrumb('#/apm', 'Apm'));
+    breadcrumbs.push(createCrumb('#/apm/instances', 'Instances'));
+  } else {
+    // don't link to Overview when we're possibly on Overview or its sibling tabs
+    breadcrumbs.push(createCrumb(null, 'Apm'));
+  }
+  return breadcrumbs;
+}
+
 export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
     let breadcrumbs = [ createCrumb('#/home', 'Clusters', 'breadcrumbClusters') ];
@@ -100,6 +113,9 @@ export function breadcrumbsProvider() {
     }
     if (mainInstance.inBeats) {
       breadcrumbs = breadcrumbs.concat(getBeatsBreadcrumbs(mainInstance));
+    }
+    if (mainInstance.inApm) {
+      breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
     return breadcrumbs;
