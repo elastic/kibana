@@ -30,6 +30,19 @@ export class SpacesClient {
     this.request = request;
   }
 
+  public async canEnumerateSpaces(): Promise<boolean> {
+    if (this.useRbac()) {
+      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const { hasAllRequested } = await checkPrivileges.globally(
+        this.authorization.actions.manageSpaces
+      );
+      return hasAllRequested;
+    }
+
+    // If not RBAC, then we are legacy, and all legacy users can enumerate all spaces
+    return true;
+  }
+
   public async getAll(): Promise<[Space]> {
     if (this.useRbac()) {
       const { saved_objects } = await this.internalSavedObjectRepository.find({

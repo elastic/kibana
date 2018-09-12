@@ -217,9 +217,39 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
               },
             ]
           }
+          userProfile={
+            Object {
+              "hasCapability": [Function],
+            }
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   </React.Fragment>
 </React.Fragment>
+`;
+
+exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  size="m"
+  title={
+    <p>
+      Insufficient Privileges
+    </p>
+  }
+>
+  <p>
+    You are not authorized to view all available spaces.
+  </p>
+  <p>
+    Please ensure your account has all privileges granted by the
+     
+    <strong>
+      kibana_user
+    </strong>
+     role, and try again.
+  </p>
+</EuiCallOut>
 `;

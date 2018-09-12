@@ -7,6 +7,7 @@
 import 'ui/autoload/styles';
 import 'plugins/spaces/views/management/manage_spaces.less';
 import template from 'plugins/spaces/views/management/template.html';
+import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -20,7 +21,9 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
-  controller: function ($scope, $http, chrome, spacesNavState, spaceSelectorURL) {
+  controller: function ($scope, $http, chrome, Private, spacesNavState, spaceSelectorURL) {
+    const userProfile = Private(UserProfileProvider);
+
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
@@ -29,6 +32,7 @@ routes.when('/management/spaces/list', {
       render(<SpacesGridPage
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        userProfile={userProfile}
       />, domNode);
 
       // unmount react on controller destroy
@@ -41,7 +45,9 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
-  controller: function ($scope, $http, chrome, spacesNavState, spaceSelectorURL) {
+  controller: function ($scope, $http, chrome, Private, spacesNavState, spaceSelectorURL) {
+    const userProfile = Private(UserProfileProvider);
+
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
@@ -50,6 +56,7 @@ routes.when('/management/spaces/create', {
       render(<ManageSpacePage
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        userProfile={userProfile}
       />, domNode);
 
       // unmount react on controller destroy
@@ -66,7 +73,9 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:space', {
   template,
-  controller: function ($scope, $http, $route, chrome, spacesNavState, spaceSelectorURL) {
+  controller: function ($scope, $http, $route, chrome, Private, spacesNavState, spaceSelectorURL) {
+    const userProfile = Private(UserProfileProvider);
+
     $scope.$$postDigest(() => {
 
       const domNode = document.getElementById(reactRootNodeId);
@@ -81,6 +90,7 @@ routes.when('/management/spaces/edit/:space', {
         chrome={chrome}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        userProfile={userProfile}
       />, domNode);
 
       // unmount react on controller destroy

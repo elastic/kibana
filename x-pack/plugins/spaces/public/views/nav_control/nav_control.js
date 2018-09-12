@@ -10,6 +10,7 @@ import { uiModules } from 'ui/modules';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
 import 'plugins/spaces/views/nav_control/nav_control.less';
+import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -25,7 +26,9 @@ const module = uiModules.get('spaces_nav', ['kibana']);
 
 let spacesManager;
 
-module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, spaceSelectorURL) => {
+module.controller('spacesNavController', ($scope, $http, chrome, Private, activeSpace, spaceSelectorURL) => {
+  const userProfile = Private(UserProfileProvider);
+
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
   spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
@@ -34,7 +37,7 @@ module.controller('spacesNavController', ($scope, $http, chrome, activeSpace, sp
 
   $scope.$parent.$watch('isVisible', function (isVisible) {
     if (isVisible && !mounted) {
-      render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
+      render(<NavControlPopover spacesManager={spacesManager} activeSpace={activeSpace} userProfile={userProfile} />, domNode);
       mounted = true;
     }
   });

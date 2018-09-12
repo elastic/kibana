@@ -19,6 +19,7 @@ import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { registerUserProfileCapabilityFactory } from '../xpack_main/server/lib/user_profile_registry';
 import { SpacesClient } from './server/lib/spaces_client';
 import { SpacesAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -123,6 +124,14 @@ export const spaces = (kibana) => new kibana.Plugin({
     initPublicSpacesApi(server);
 
     initSpacesRequestInterceptors(server);
+
+    registerUserProfileCapabilityFactory(async (request) => {
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+
+      return {
+        manageSpaces: await spacesClient.canEnumerateSpaces(),
+      };
+    });
 
     // Register a function with server to manage the collection of usage stats
     server.usage.collectorSet.register(getSpacesUsageCollector(server));

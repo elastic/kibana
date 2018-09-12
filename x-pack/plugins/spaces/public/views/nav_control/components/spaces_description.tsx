@@ -6,11 +6,16 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
+import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { ManageSpacesButton } from '../../../components';
 import { SPACES_FEATURE_DESCRIPTION } from '../../../lib/constants';
 import './spaces_description.less';
 
-export const SpacesDescription: SFC = () => {
+interface Props {
+  userProfile: UserProfile;
+}
+
+export const SpacesDescription: SFC<Props> = (props: Props) => {
   const panelProps = {
     className: 'spacesDescription',
     title: 'Spaces',
@@ -22,7 +27,7 @@ export const SpacesDescription: SFC = () => {
         <p>{SPACES_FEATURE_DESCRIPTION}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spacesDescription__manageButtonWrapper">
-        <ManageSpacesButton size="s" style={{ width: `100%` }} />
+        <ManageSpacesButton size="s" style={{ width: `100%` }} userProfile={props.userProfile} />
       </div>
     </EuiContextMenuPanel>
   );
