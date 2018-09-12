@@ -9,8 +9,6 @@ import {
   ApmMetric,
   ApmCpuUtilizationMetric,
   ApmEventsRateClusterMetric,
-  ApmSuccessResponseMetric,
-  ApmFailureResponseMetric
 } from './classes';
 
 export const metrics = {
@@ -90,18 +88,6 @@ export const metrics = {
     field: 'beats_stats.metrics.apm-server.server.response.count',
     title: 'Response Count',
     label: 'Total',
-    description: 'PLZ FILL ME IN'
-  }),
-  apm_responses_success: new ApmSuccessResponseMetric({
-    field: 'beats_stats.metrics.apm-server.server.response.count',
-    title: 'Success',
-    label: 'Success',
-    description: 'PLZ FILL ME IN'
-  }),
-  apm_responses_failure: new ApmFailureResponseMetric({
-    field: 'beats_stats.metrics.apm-server.server.response.count',
-    title: 'Success Rate',
-    label: 'Failure',
     description: 'PLZ FILL ME IN'
   }),
   apm_responses_valid_ok: new ApmEventsRateClusterMetric({

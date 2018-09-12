@@ -290,53 +290,6 @@
         [1535723940000, 0]
       ]
     }],
-    "apm_responses_success_failure": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.count",
-        "metricAgg": "max",
-        "label": "Failure",
-        "title": "Success Rate",
-        "description": "PLZ FILL ME IN",
-        "units": "%",
-        "format": "0.[00]",
-        "hasCalculation": true,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.count",
-        "metricAgg": "max",
-        "label": "Success",
-        "title": "Success",
-        "description": "PLZ FILL ME IN",
-        "units": "%",
-        "format": "0.[00]",
-        "hasCalculation": true,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 100],
-        [1535723940000, 104.76190476190477]
-      ]
-    }],
     "apm_responses_valid": [{
       "bucket_size": "30 seconds",
       "timeRange": {

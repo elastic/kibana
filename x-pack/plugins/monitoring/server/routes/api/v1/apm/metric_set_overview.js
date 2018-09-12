@@ -39,10 +39,6 @@ export const metricSet = [
     name: 'apm_output_events_rate_failure'
   },
   {
-    keys: ['apm_responses_failure', 'apm_responses_success'],
-    name: 'apm_responses_success_failure'
-  },
-  {
     keys: [
       'apm_responses_count',
       'apm_responses_valid_ok',
