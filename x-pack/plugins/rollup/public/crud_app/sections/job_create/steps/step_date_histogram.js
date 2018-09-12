@@ -54,7 +54,6 @@ export class StepDateHistogramUi extends Component {
     super(props);
 
     this.state = {
-      isLoadingTimeFields: true,
       dateHistogramFieldOptions: [],
     };
   }

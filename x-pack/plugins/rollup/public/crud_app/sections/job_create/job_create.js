@@ -32,8 +32,10 @@ import {
 } from '../../services';
 
 import { Navigation } from './navigation';
-import { StepLogistics } from './step_logistics';
-import { StepDateHistogram } from './step_date_histogram';
+import {
+  StepLogistics,
+  StepDateHistogram,
+} from './steps';
 import {
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
