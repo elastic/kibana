@@ -11,14 +11,19 @@ import { logTextviewActions, logTextviewSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
-export const withTextScale = connect(
+const availableTextScales = ['large', 'medium', 'small'] as TextScale[];
+
+export const withLogTextview = connect(
   (state: State) => ({
-    availableTextScales: ['large', 'medium', 'small'] as TextScale[],
+    availableTextScales,
     textScale: logTextviewSelectors.selectTextviewScale(state),
+    wrap: logTextviewSelectors.selectTextviewWrap(state),
   }),
   bindPlainActionCreators({
     setTextScale: logTextviewActions.setTextviewScale,
+    setTextWrap: logTextviewActions.setTextviewWrap,
   })
 );
 
-export const WithTextScale = asChildFunctionRenderer(withTextScale);
+export const WithLogTextview = asChildFunctionRenderer(withLogTextview);
+
