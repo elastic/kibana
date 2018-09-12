@@ -60,11 +60,14 @@ export const plot = () => ({
     const font = args.font ? getFontSpec(args.font) : {};
 
     const data = map(groupBy(sortedRows, 'color'), (series, label) => {
-      const seriesStyle = seriesStyles[label] || args.defaultStyle;
-      const result = seriesStyle ? seriesStyleToFlot(seriesStyle) : {};
+      const seriesStyle = {
+        ...args.defaultStyle,
+        ...seriesStyles[label],
+      };
+      const flotStyle = seriesStyle ? seriesStyleToFlot(seriesStyle) : {};
 
       return {
-        ...result,
+        ...flotStyle,
         label: label,
         data: series.map(point => {
           const attrs = {};
@@ -75,7 +78,7 @@ export const plot = () => ({
             attrs.size = point.size;
           } else if (get(seriesStyle, 'points')) {
             attrs.size = seriesStyle.points;
-            set(result, 'bubbles.size.min', seriesStyle.points);
+            set(flotStyle, 'bubbles.size.min', seriesStyle.points);
           }
 
           if (point.text != null) attrs.text = point.text;

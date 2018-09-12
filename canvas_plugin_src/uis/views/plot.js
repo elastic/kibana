@@ -54,7 +54,6 @@ export const plot = () => ({
     {
       name: 'seriesStyle',
       argType: 'seriesStyle',
-      default: '{seriesStyle points=5}',
       options: {
         include: styleProps,
       },

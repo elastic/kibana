@@ -8,6 +8,6 @@ export const lineChart = () => ({
   expression: `filters
 | demodata
 | pointseries x="time" y="mean(price)"
-| plot defaultStyle={seriesStyle bars=0 lines=3 points=0}
+| plot defaultStyle={seriesStyle lines=3}
 | render`,
 });

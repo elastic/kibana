@@ -7,7 +7,7 @@ export const areaChart = () => {
     expression: `filters
   | demodata
   | pointseries x="time" y="mean(price)"
-  | plot defaultStyle={seriesStyle bars=0 lines=1 points=0 fill=1}
+  | plot defaultStyle={seriesStyle lines=1 fill=1}
   | render`,
   };
 };

@@ -60,7 +60,6 @@ export const pie = () => ({
     {
       name: 'seriesStyle',
       argType: 'seriesStyle',
-      default: '{seriesStyle}',
       multi: true,
     },
     {

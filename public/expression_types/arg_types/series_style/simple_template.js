@@ -60,7 +60,7 @@ export const SimpleTemplate = props => {
         </Fragment>
       )}
       {name !== 'defaultStyle' &&
-        (labels || labels.length === 0) && (
+        (!labels || labels.length === 0) && (
           <EuiFlexItem grow={false}>
             <TooltipIcon
               position="left"

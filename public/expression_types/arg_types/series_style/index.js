@@ -34,4 +34,5 @@ export const seriesStyle = () => ({
   help: 'Set the style for a selected named series',
   template: templateFromReactComponent(EnhancedExtendedTemplate),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
+  default: '{seriesStyle}',
 });

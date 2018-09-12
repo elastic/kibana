@@ -30,11 +30,6 @@ describe('seriesStyle', () => {
         const result = fn(null, { lines: 1 });
         expect(result).to.have.property('lines', 1);
       });
-
-      it("defaults to '0'", () => {
-        const result = fn(null);
-        expect(result).to.have.property('lines', 0);
-      });
     });
 
     describe('bars', () => {
@@ -42,22 +37,12 @@ describe('seriesStyle', () => {
         const result = fn(null, { bars: 3 });
         expect(result).to.have.property('bars', 3);
       });
-
-      it("defaults to '0'", () => {
-        const result = fn(null);
-        expect(result).to.have.property('bars', 0);
-      });
     });
 
     describe('points', () => {
       it('sets point size', () => {
         const result = fn(null, { points: 2 });
         expect(result).to.have.property('points', 2);
-      });
-
-      it("defaults to '5'", () => {
-        const result = fn(null);
-        expect(result).to.have.property('points', 5);
       });
     });
 
@@ -85,11 +70,6 @@ describe('seriesStyle', () => {
       });
       it('sets orientation of the series to vertical', () => {
         const result = fn(null, { horizontalBars: false });
-        expect(result).to.have.property('horizontalBars', false);
-      });
-
-      it('defaults to false', () => {
-        const result = fn(null);
         expect(result).to.have.property('horizontalBars', false);
       });
     });

@@ -8,6 +8,6 @@ export const horizontalBarChart = () => ({
   expression: `filters
 | demodata
 | pointseries x="size(cost)" y="project" color="project"
-| plot defaultStyle={seriesStyle lines=0 bars="0.75" points=0 horizontalBars=true} legend=false
+| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true} legend=false
 | render`,
 });

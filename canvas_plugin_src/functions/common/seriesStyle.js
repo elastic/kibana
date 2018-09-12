@@ -24,25 +24,21 @@ export const seriesStyle = () => ({
       types: ['number'],
       displayName: 'Line width',
       help: 'Width of the line',
-      default: 0,
     },
     bars: {
       types: ['number'],
       displayName: 'Bar Width',
       help: 'Width of bars',
-      default: 0,
     },
     points: {
       types: ['number'],
       displayName: 'Show Points',
       help: 'Size of points on line',
-      default: 5,
     },
     fill: {
       types: ['number', 'boolean'],
       displayName: 'Fill points',
       help: 'Should we fill points?',
-      default: false,
     },
     stack: {
       types: ['number', 'null'],
@@ -54,7 +50,6 @@ export const seriesStyle = () => ({
       types: ['boolean'],
       displayName: 'Horizontal Bars Orientation',
       help: 'Sets the orientation of bars in the chart to horizontal',
-      default: false,
     },
   },
   fn: (context, args) => ({ type: name, ...args }),

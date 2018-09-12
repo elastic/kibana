@@ -8,6 +8,6 @@ export const verticalBarChart = () => ({
   expression: `filters
 | demodata
 | pointseries x="project" y="size(cost)" color="project"
-| plot defaultStyle={seriesStyle lines=0 bars="0.75" points=0} legend=false
+| plot defaultStyle={seriesStyle bars=0.75} legend=false
 | render`,
 });
