@@ -188,6 +188,11 @@ export function numTicksForDateFormat(axisWidth, dateFormat) {
   return axisWidth / (1.75 * tickWidth);
 }
 
+const TICK_DIRECTION = {
+  NEXT: 'next',
+  PREVIOUS: 'previous'
+};
+
 // Based on a fixed starting timestamp and an interval, get tick values within
 // the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
 // to align axis ticks with the gray area resembling the swimlane cell selection.
@@ -199,11 +204,11 @@ export function getTickValues(startTs, tickInterval, earliest, latest) {
     let addAnotherTick;
 
     switch (operator) {
-      case 'previous':
+      case TICK_DIRECTION.PREVIOUS:
         newTick = ts - tickInterval;
         addAnotherTick = newTick >= earliest;
         break;
-      case 'next':
+      case TICK_DIRECTION.NEXT:
         newTick = ts + tickInterval;
         addAnotherTick = newTick <= latest;
         break;
@@ -215,18 +220,13 @@ export function getTickValues(startTs, tickInterval, earliest, latest) {
     }
   }
 
-  addTicks(startTs, 'previous');
-  addTicks(startTs, 'next');
+  addTicks(startTs, TICK_DIRECTION.PREVIOUS);
+  addTicks(startTs, TICK_DIRECTION.NEXT);
 
   tickValues.sort();
 
   return tickValues;
 }
-
-const TICK_DIRECTION = {
-  NEXT: 'next',
-  PREVIOUS: 'previous'
-};
 
 // This removes overlapping x-axis labels by starting off from a specific label
 // that is required/wanted to show up. The code then traverses to both sides along the axis
@@ -295,9 +295,7 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
     const getNeighourTick = getNeighourTickFactory(operator);
     const newTickData = getTickData(getNeighourTick(ts));
 
-    if (
-      newTickData !== false
-    ) {
+    if (newTickData !== false) {
       if (
         newTickData.xMinOffset < 0 ||
         newTickData.xMaxOffset > width ||
