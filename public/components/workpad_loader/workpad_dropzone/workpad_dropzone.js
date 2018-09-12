@@ -2,13 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 
-export const WorkpadUpload = ({
-  isDropping,
-  setDropping,
-  onDropAccepted,
-  onDropRejected,
-  children,
-}) => (
+export const WorkpadDropzone = ({ setDropping, onDropAccepted, onDropRejected, children }) => (
   <Dropzone
     accept="application/json"
     onDropAccepted={onDropAccepted}
@@ -16,13 +10,14 @@ export const WorkpadUpload = ({
     onDragEnter={() => setDropping(true)}
     onDragLeave={() => setDropping(false)}
     disableClick
-    style={{ border: isDropping ? '2px dashed' : '2px solid transparent' }}
+    className="canvasWorkpad__dropzone"
+    activeClassName="canvasWorkpad__dropzone--active"
   >
     {children}
   </Dropzone>
 );
 
-WorkpadUpload.propTypes = {
+WorkpadDropzone.propTypes = {
   isDropping: PropTypes.bool.isRequired,
   setDropping: PropTypes.func.isRequired,
   onDropAccepted: PropTypes.func.isRequired,

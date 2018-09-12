@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import { compose, withState, withHandlers } from 'recompose';
 import { getId } from '../../../lib/get_id';
 import { notify } from '../../../lib/notify';
-import { WorkpadUpload as Component } from './workpad_upload';
+import { WorkpadDropzone as Component } from './workpad_dropzone';
 
-export const WorkpadUpload = compose(
+export const WorkpadDropzone = compose(
   withState('isDropping', 'setDropping', false),
   withHandlers({
     onDropAccepted: ({ onUpload, setDropping }) => ([file]) => {
@@ -35,6 +35,6 @@ export const WorkpadUpload = compose(
   })
 )(Component);
 
-WorkpadUpload.propTypes = {
+WorkpadDropzone.propTypes = {
   onUpload: PropTypes.func.isRequired,
 };
