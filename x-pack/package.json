@@ -27,7 +27,6 @@
     "@kbn/test": "link:../packages/kbn-test",
     "@types/jest": "^23.3.1",
     "@types/pngjs": "^3.3.1",
-    "@types/react-virtualized": "^9.18.7",
     "abab": "^1.0.4",
     "ansi-colors": "^3.0.5",
     "ansicolors": "0.3.2",
