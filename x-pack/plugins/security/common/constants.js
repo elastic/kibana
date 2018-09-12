@@ -5,3 +5,4 @@
  */
 
 export const GLOBAL_RESOURCE = '*';
+export const IGNORED_TYPES = ['space'];

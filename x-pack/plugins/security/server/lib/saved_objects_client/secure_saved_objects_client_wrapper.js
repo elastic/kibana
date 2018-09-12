@@ -5,6 +5,7 @@
  */
 
 import { get, uniq } from 'lodash';
+import { IGNORED_TYPES } from '../../../common/constants';
 
 export class SecureSavedObjectsClientWrapper {
   constructor(options) {
@@ -139,7 +140,7 @@ export class SecureSavedObjectsClientWrapper {
     const action = 'find';
 
     // we have to filter for only their authorized types
-    const types = this._savedObjectTypes;
+    const types = this._savedObjectTypes.filter(type => !IGNORED_TYPES.includes(type));
     const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
     const { username, privileges } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
 

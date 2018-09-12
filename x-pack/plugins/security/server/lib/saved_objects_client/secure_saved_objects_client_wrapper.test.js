@@ -710,6 +710,7 @@ describe(`spaces disabled`, () => {
 
       test(`returns result of baseClient.find when authorized`, async () => {
         const type = 'foo';
+        const spaceType = 'space';
         const username = Symbol();
         const returnValue = Symbol();
         const mockActions = createMockActions();
@@ -735,7 +736,7 @@ describe(`spaces disabled`, () => {
           checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
           errors: null,
           request: mockRequest,
-          savedObjectTypes: [type],
+          savedObjectTypes: [type, spaceType],
           spaces: null,
         });
         const options = {
@@ -760,6 +761,7 @@ describe(`spaces disabled`, () => {
       test(`specifies authorized types when calling repository.find()`, async () => {
         const type1 = 'foo';
         const type2 = 'bar';
+        const spaceType = 'space';
         const username = Symbol();
         const mockActions = createMockActions();
         const mockBaseClient = {
@@ -785,7 +787,7 @@ describe(`spaces disabled`, () => {
           checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
           errors: null,
           request: mockRequest,
-          savedObjectTypes: [type1, type2],
+          savedObjectTypes: [type1, type2, spaceType],
           spaces: null,
         });
 

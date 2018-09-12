@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const IGNORED_TYPES = ['space'];
+import { IGNORED_TYPES } from '../../../common/constants';
 
 export function buildPrivilegeMap(savedObjectTypes, actions) {
   const buildSavedObjectsActions = (savedObjectActions) => {
