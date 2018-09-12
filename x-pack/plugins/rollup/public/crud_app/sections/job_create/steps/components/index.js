@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StepLogistics } from './step_logistics';
-export { StepDateHistogram } from './step_date_histogram';
-export { StepGroups } from './step_groups';
+export { FieldChooser } from './field_chooser';
+export { FieldList } from './field_list';

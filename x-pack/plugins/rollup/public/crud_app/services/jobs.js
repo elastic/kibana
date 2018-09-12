@@ -46,7 +46,7 @@ export function serializeJob(jobConfig) {
         field: dateHistogramField,
       }),
       terms: {
-        fields: terms,
+        fields: terms.map(({ name }) => name),
       },
       histogram: {
         interval: histogramInterval,

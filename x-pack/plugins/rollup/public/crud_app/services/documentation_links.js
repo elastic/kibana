@@ -10,5 +10,6 @@ const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LIN
 
 export const logisticalDetailsUrl = `${esBase}/rollup-job-config.html#_logistical_details`;
 export const dateHistogramDetailsUrl = `${esBase}/rollup-job-config.html#_date_histogram_2`;
+export const groupsDetailsUrl = `${esBase}/rollup-job-config.html#_terms_2`;
 
 export const dateHistogramAggregationUrl = `${esBase}/search-aggregations-bucket-datehistogram-aggregation.html`;

@@ -81,7 +81,7 @@ export const stepIdToStepConfigMap = {
   },
   [STEP_GROUPS]: {
     defaultFields: {
-      terms: ['index.keyword'],
+      terms: [],
       histogram: ['memory'],
       histogramInterval: 5,
     },

@@ -29,12 +29,14 @@ import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   getRouterLinkProps,
   validateIndexPattern,
+  formatFields,
 } from '../../services';
 
 import { Navigation } from './navigation';
 import {
   StepLogistics,
   StepDateHistogram,
+  StepGroups,
 } from './steps';
 import {
   STEP_LOGISTICS,
@@ -77,7 +79,9 @@ export class JobCreateUi extends Component {
       stepsFields,
       isValidatingIndexPattern: false,
       indexPatternAsyncErrors: undefined,
-      indexPatternTimeFields: [],
+      indexPatternDateFields: [],
+      indexPatternTermsFields: [],
+      indexPatternHistogramFields: [],
     };
 
     this.lastIndexPatternValidationTime = 0;
@@ -91,7 +95,7 @@ export class JobCreateUi extends Component {
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
           indexPatternAsyncErrors: undefined,
-          indexPatternTimeFields: [],
+          indexPatternDateFields: [],
           isValidatingIndexPattern: false,
         });
 
@@ -126,7 +130,9 @@ export class JobCreateUi extends Component {
       const {
         doesMatchIndices: doesIndexPatternMatchIndices,
         doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
-        timeFields: indexPatternTimeFields,
+        dateFields: indexPatternDateFields,
+        numericFields,
+        keywordFields,
       } = response.data;
 
       let indexPatternAsyncErrors;
@@ -145,7 +151,7 @@ export class JobCreateUi extends Component {
             defaultMessage="Index pattern must match at least one non-rollup index"
           />
         )];
-      } else if (!indexPatternTimeFields.length) {
+      } else if (!indexPatternDateFields.length) {
         indexPatternAsyncErrors = [(
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
@@ -154,15 +160,42 @@ export class JobCreateUi extends Component {
         )];
       }
 
+      const formattedNumericFields = formatFields(numericFields, 'numeric');
+      const formattedKeywordFields = formatFields(keywordFields, 'keyword');
+
+      function sortFields(a, b) {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+
+        if (nameA < nameB) {
+          return -1;
+        }
+
+        if (nameA > nameB) {
+          return 1;
+        }
+
+        return 0;
+      }
+
+      const indexPatternTermsFields = [
+        ...formattedNumericFields,
+        ...formattedKeywordFields,
+      ].sort(sortFields);
+
+      const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
+
       this.setState({
         indexPatternAsyncErrors,
-        indexPatternTimeFields,
+        indexPatternDateFields,
+        indexPatternTermsFields,
+        indexPatternHistogramFields,
         isValidatingIndexPattern: false,
       });
 
       // Select first time field by default.
       this.onFieldsChange({
-        dateHistogramField: indexPatternTimeFields.length ? indexPatternTimeFields[0] : null,
+        dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
       }, STEP_DATE_HISTOGRAM);
     }).catch(() => {
       // Ignore all responses except that to the most recent request.
@@ -421,8 +454,10 @@ export class JobCreateUi extends Component {
       stepsFieldErrors,
       areStepErrorsVisible,
       isValidatingIndexPattern,
-      indexPatternTimeFields,
+      indexPatternDateFields,
       indexPatternAsyncErrors,
+      indexPatternTermsFields,
+      indexPatternHistogramFields,
     } = this.state;
 
     const currentStepFields = stepsFields[currentStepId];
@@ -449,7 +484,17 @@ export class JobCreateUi extends Component {
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}
-            timeFields={indexPatternTimeFields}
+            dateFields={indexPatternDateFields}
+          />
+        );
+
+      case STEP_GROUPS:
+        return (
+          <StepGroups
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
+            termsFields={indexPatternTermsFields}
+            histogramFields={indexPatternHistogramFields}
           />
         );
 

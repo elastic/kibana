@@ -36,15 +36,15 @@ export class StepDateHistogramUi extends Component {
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    timeFields: PropTypes.array.isRequired,
+    dateFields: PropTypes.array.isRequired,
   }
 
   static getDerivedStateFromProps(props) {
-    const { timeFields } = props;
+    const { dateFields } = props;
 
-    const dateHistogramFieldOptions = timeFields.map(timeField => ({
-      value: timeField,
-      text: timeField,
+    const dateHistogramFieldOptions = dateFields.map(dateField => ({
+      value: dateField,
+      text: dateField,
     }));
 
     return { dateHistogramFieldOptions };
