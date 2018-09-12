@@ -1,6 +1,11 @@
 <div ng-show="!exportConfig.isDirty()">
   <div class="kuiLocalDropdownSection">
-    <h2 class="kuiLocalDropdownTitle" i18n-id="xpack.reporting.exportConfig.reportingTitle" i18n-default-message="Reporting"></h2>
+    <h2
+      class="kuiLocalDropdownTitle"
+      i18n-id="xpack.reporting.exportConfig.reportingTitle"
+      i18n-default-message="Reporting"
+    >
+    </h2>
 
     <div class="input-group generate-controls">
       <div class="options"></div>
@@ -9,9 +14,12 @@
         data-test-subj="generateReportButton"
         ng-click="exportConfig.export()"
       >
-        <span i18n-id="xpack.reporting.exportConfig.generateButtonLabel"
-        i18n-default-message="Generate {name}"
-        i18n-values="{ name: exportConfig.exportType.name }"></span>
+        <span
+          i18n-id="xpack.reporting.exportConfig.generateButtonLabel"
+          i18n-default-message="Generate {name}"
+          i18n-values="{ name: exportConfig.exportType.name }"
+        >
+        </span>
       </button>
     </div>
   </div>
@@ -52,7 +60,10 @@
   </div>
 </div>
 
-<div ng-show="exportConfig.isDirty()" data-test-subj="unsavedChangesReportingWarning"
+<div
+  ng-show="exportConfig.isDirty()"
+  data-test-subj="unsavedChangesReportingWarning"
   i18n-id="xpack.reporting.exportConfig.saveWorkDescription"
-  i18n-default-message="Please save your work before generating a report.">
+  i18n-default-message="Please save your work before generating a report."
+>
 </div>
