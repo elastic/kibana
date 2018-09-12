@@ -37,12 +37,17 @@ jest.mock('ui/timefilter/lib/parse_querystring',
     },
   }), { virtual: true });
 
+import d3 from 'd3';
 import moment from 'moment';
+import { mount } from 'enzyme';
+import React from 'react';
+
 import { timefilter } from 'ui/timefilter';
 
 import {
   getExploreSeriesLink,
-  getTickValues
+  getTickValues,
+  removeLabelOverlap
 } from './chart_utils';
 
 timefilter.enableTimeRangeSelector();
@@ -125,5 +130,114 @@ describe('getTickValues', () => {
       1518652800000,
       1519257600000
     ]);
+  });
+});
+
+describe('removeLabelOverlap', () => {
+  const originalGetBBox = SVGElement.prototype.getBBox;
+
+  // This resembles how ExplorerChart renders its x axis.
+  // We set up this boilerplate so we can then run removeLabelOverlap()
+  // on some "real" structure.
+  function axisSetup({
+    interval,
+    plotEarliest,
+    plotLatest,
+    startTs,
+    xAxisTickFormat
+  }) {
+    const wrapper = mount(<div className="content-wrapper" />);
+    const node = wrapper.getDOMNode();
+
+    const chartHeight = 170;
+    const margin = { top: 10, right: 0, bottom: 30, left: 60 };
+    const svgWidth = 500;
+    const svgHeight = chartHeight + margin.top + margin.bottom;
+    const vizWidth = 500;
+
+    const chartElement = d3.select(node);
+
+    const lineChartXScale = d3.time.scale()
+      .range([0, vizWidth])
+      .domain([plotEarliest, plotLatest]);
+
+    const xAxis = d3.svg.axis().scale(lineChartXScale)
+      .orient('bottom')
+      .innerTickSize(-chartHeight)
+      .outerTickSize(0)
+      .tickPadding(10)
+      .tickFormat(d => moment(d).format(xAxisTickFormat));
+
+    const tickValues = getTickValues(startTs, interval, plotEarliest, plotLatest);
+    xAxis.tickValues(tickValues);
+
+    const svg = chartElement.append('svg')
+      .attr('width', svgWidth)
+      .attr('height', svgHeight);
+
+    const axes = svg.append('g');
+
+    const gAxis = axes.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', 'translate(0,' + chartHeight + ')')
+      .call(xAxis);
+
+    return {
+      gAxis,
+      node,
+      vizWidth
+    };
+  }
+
+  test('farequote sample data', () => {
+    const mockedGetBBox = { width: 27.21875 };
+    SVGElement.prototype.getBBox = () => mockedGetBBox;
+
+    const startTs = 1486656000000;
+    const interval = 14400000;
+
+    const { gAxis, node, vizWidth } = axisSetup({
+      interval,
+      plotEarliest: 1486606500000,
+      plotLatest: 1486719900000,
+      startTs,
+      xAxisTickFormat: 'HH:mm'
+    });
+
+    expect(node.getElementsByTagName('text')).toHaveLength(8);
+
+    removeLabelOverlap(gAxis, startTs, interval, vizWidth);
+
+    // at the vizWidth of 500, the most left and right tick label
+    // will get removed because it overflows the chart area
+    expect(node.getElementsByTagName('text')).toHaveLength(6);
+
+    SVGElement.prototype.getBBox = originalGetBBox;
+  });
+
+  test('filebeat sample data', () => {
+    const mockedGetBBox = { width: 85.640625 };
+    SVGElement.prototype.getBBox = () => mockedGetBBox;
+
+    const startTs = 1486080000000;
+    const interval = 14400000;
+
+    const { gAxis, node, vizWidth } = axisSetup({
+      interval,
+      plotEarliest: 1485860400000,
+      plotLatest: 1486314000000,
+      startTs,
+      xAxisTickFormat: 'YYYY-MM-DD HH:mm'
+    });
+
+    expect(node.getElementsByTagName('text')).toHaveLength(32);
+
+    removeLabelOverlap(gAxis, startTs, interval, vizWidth);
+
+    // In this case labels get reduced significantly because of the wider
+    // labels (full dates + time) and the narrow interval.
+    expect(node.getElementsByTagName('text')).toHaveLength(3);
+
+    SVGElement.prototype.getBBox = originalGetBBox;
   });
 });
