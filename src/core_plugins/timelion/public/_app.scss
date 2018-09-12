@@ -14,12 +14,6 @@
   }
 }
 
-.timelionHelpKeyboardTipsSection {
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
 /**
  * 1. Anchor suggestions beneath input.
  * 2. Allow for option of positioning suggestions absolutely.
@@ -99,47 +93,8 @@ timelion-interval {
   display: flex;
 }
 
-.timelionFunctionsDropdownContent {
-  height: 310px;
-  overflow-y: auto;
-}
 
-.timelionFunctionsTable {
-  background-color: white;
-}
 
-.timelionFunctionsTableRow {
-  &:hover {
-    background-color: #f9f9f9;
-  }
-}
-
-/**
- * 1. Override bootstrap .table styles.
- */
-.timelionFunctionDetailsTable {
-  background-color: #f9f9f9 !important; // 1
-}
-
-.doc-container-content {
-  position: relative;
-}
-
-.doc-container-buttons {
-  position: relative;
-  text-align: center;
-  height: 40px;
-
-  .btn-doc-prev {
-    position: absolute;
-    left: 0px;
-  }
-
-  .btn-doc-next {
-    position: absolute;
-    right: 0px;
-  }
-}
 
 .cell-actions {
   position: absolute;

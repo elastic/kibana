@@ -1,18 +1,18 @@
-.timelion-interval-custom {
-  width: 60px;
+.timInterval__input {
+  width: $euiSizeXL * 2;
 }
 
-.timelion-interval-custom-compact {
+.timInterval__input--compact {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.timelion-interval-presets {
-  width: 90px;
+.timInterval__presets {
+  width: $euiSizeXL * 3;
 }
 
-.timelion-interval-presets-compact {
-  width: 10px;
+.timInterval__presets--compact {
+  width: $euiSizeXL * 1;
   padding-left: 0;
   border-left: none;
   border-top-left-radius: 0;
