@@ -18,15 +18,15 @@ import { Status } from './status';
 const filterFields = [ 'beat.name' ];
 const columns = [
 ];
-const instanceRowFactory = (goToInstance) => {
+const instanceRowFactory = () => {
   return function KibanaRow(props) {
     return (
       <KuiTableRow>
         <KuiTableRowCell>
           <div className="monitoringTableCell__name">
             <EuiLink
-              onClick={goToInstance.bind(null, get(props, 'beat.uuid'))}
-              data-test-subj={`apmLink-${props.beat.name}`}
+              href={`/apm/instances/${get(props, 'beat.uuid')}`}
+              data-test-subj={`apmLink-${get(props, 'beat.name')}`}
             >
               { props.beat.name }
             </EuiLink>
@@ -37,7 +37,7 @@ const instanceRowFactory = (goToInstance) => {
   };
 };
 
-export function ApmServerInstances({ apms, goToInstance }) {
+export function ApmServerInstances({ apms }) {
   const {
     pageIndex,
     filterText,
@@ -60,7 +60,7 @@ export function ApmServerInstances({ apms, goToInstance }) {
         placeholder="Filter Instances..."
         filterFields={filterFields}
         columns={columns}
-        rowComponent={instanceRowFactory(goToInstance)}
+        rowComponent={instanceRowFactory()}
       />
     </div>
   );
