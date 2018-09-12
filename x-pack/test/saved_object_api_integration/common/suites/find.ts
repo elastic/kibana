@@ -39,8 +39,8 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      beforeEach(() => esArchiver.load('saved_objects/spaces'));
+      afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
       it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
         tests.spaceAwareType.description

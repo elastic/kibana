@@ -13,7 +13,7 @@ export default function({ getService, loadTestFile }: TestInvoker) {
   const supertest = getService('supertest');
 
   describe('saved objects security and spaces enabled', () => {
-    before(async () => {
+    beforeEach(async () => {
       await createUsersAndRoles(es, supertest);
     });
 

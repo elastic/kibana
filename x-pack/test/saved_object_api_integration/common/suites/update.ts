@@ -35,8 +35,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      beforeEach(() => esArchiver.load('saved_objects/spaces'));
+      afterEach(() => esArchiver.unload('saved_objects/spaces'));
       it(`should return ${tests.spaceAware.statusCode} for a space-aware doc`, async () => {
         await supertest
           .put(
