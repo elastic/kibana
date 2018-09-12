@@ -187,3 +187,130 @@ export function numTicksForDateFormat(axisWidth, dateFormat) {
   const tickWidth = calculateTextWidth(moment().format(dateFormat), false);
   return axisWidth / (1.75 * tickWidth);
 }
+
+const TICK_DIRECTION = {
+  NEXT: 'next',
+  PREVIOUS: 'previous'
+};
+
+// Based on a fixed starting timestamp and an interval, get tick values within
+// the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
+// to align axis ticks with the gray area resembling the swimlane cell selection.
+export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
+  const tickValues = [startTimeMs];
+
+  function addTicks(ts, operator) {
+    let newTick;
+    let addAnotherTick;
+
+    switch (operator) {
+      case TICK_DIRECTION.PREVIOUS:
+        newTick = ts - tickInterval;
+        addAnotherTick = newTick >= earliest;
+        break;
+      case TICK_DIRECTION.NEXT:
+        newTick = ts + tickInterval;
+        addAnotherTick = newTick <= latest;
+        break;
+    }
+
+    if (addAnotherTick) {
+      tickValues.push(newTick);
+      addTicks(newTick, operator);
+    }
+  }
+
+  addTicks(startTimeMs, TICK_DIRECTION.PREVIOUS);
+  addTicks(startTimeMs, TICK_DIRECTION.NEXT);
+
+  tickValues.sort();
+
+  return tickValues;
+}
+
+// This removes overlapping x-axis labels by starting off from a specific label
+// that is required/wanted to show up. The code then traverses to both sides along the axis
+// and decides which labels to keep or remove. All vertical tick lines will be kept visible,
+// but those which still have their text label will be emphasized using the ml-tick-emphasis class.
+export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
+  // Put emphasis on all tick lines, will again de-emphasize the
+  // ones where we remove the label in the next steps.
+  axis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
+
+  function getNeighborTickFactory(operator) {
+    return function (ts) {
+      switch (operator) {
+        case TICK_DIRECTION.PREVIOUS:
+          return ts - tickInterval;
+        case TICK_DIRECTION.NEXT:
+          return ts + tickInterval;
+      }
+    };
+  }
+
+  function getTickDataFactory(operator) {
+    const getNeighborTick = getNeighborTickFactory(operator);
+    const fn = function (ts) {
+      const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
+
+      if (filteredTicks[0].length === 0) {
+        return false;
+      }
+
+      const tick = d3.selectAll(filteredTicks[0]);
+      const textNode = tick.select('text').node();
+
+      if (textNode === null) {
+        return fn(getNeighborTick(ts));
+      }
+
+      const tickWidth = textNode.getBBox().width;
+      const padding = 15;
+      // To get xTransform it would be nicer to use d3.transform, but that doesn't play well with JSDOM.
+      // So this uses a regex variant because we definitely want test coverage for the label removal.
+      // Once JSDOM supports SVGAnimatedTransformList we can use the simpler version.
+      // const xTransform = d3.transform(tick.attr('transform')).translate[0];
+      const xTransform = +(/translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)\)/.exec(tick.attr('transform'))[1]);
+      const xMinOffset = xTransform - (tickWidth / 2 + padding);
+      const xMaxOffset = xTransform + (tickWidth / 2 + padding);
+
+      return {
+        tick,
+        ts,
+        xMinOffset,
+        xMaxOffset
+      };
+    };
+    return fn;
+  }
+
+  function checkTicks(ts, operator) {
+    const getTickData = getTickDataFactory(operator);
+    const currentTickData = getTickData(ts);
+
+    if (currentTickData === false) {
+      return;
+    }
+
+    const getNeighborTick = getNeighborTickFactory(operator);
+    const newTickData = getTickData(getNeighborTick(ts));
+
+    if (newTickData !== false) {
+      if (
+        newTickData.xMinOffset < 0 ||
+        newTickData.xMaxOffset > width ||
+        (newTickData.xMaxOffset > currentTickData.xMinOffset && operator === TICK_DIRECTION.PREVIOUS) ||
+        (newTickData.xMinOffset < currentTickData.xMaxOffset && operator === TICK_DIRECTION.NEXT)
+      ) {
+        newTickData.tick.select('text').remove();
+        newTickData.tick.select('line').classed('ml-tick-emphasis', false);
+        checkTicks(currentTickData.ts, operator);
+      } else {
+        checkTicks(newTickData.ts, operator);
+      }
+    }
+  }
+
+  checkTicks(startTimeMs, TICK_DIRECTION.PREVIOUS);
+  checkTicks(startTimeMs, TICK_DIRECTION.NEXT);
+}
