@@ -416,7 +416,9 @@ module.controller('MlExplorerController', function (
           $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
         }
 
-        loadDataForCharts(jobIds, influencers, timerange.earliestMs, timerange.latestMs);
+        // pass influencers on to loadDataForCharts(),
+        // it will take care of calling loadTopInfluencers() in this case.
+        loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs, influencers);
         loadAnomaliesTableData();
       } else {
         // Multiple cells are selected, all with a score of 0 - clear all anomalies.
@@ -503,7 +505,7 @@ module.controller('MlExplorerController', function (
   // track the request to be able to ignore out of date requests
   // and avoid race conditions ending up with the wrong charts.
   let requestCount = 0;
-  function loadDataForCharts(jobIds, influencers, earliestMs, latestMs) {
+  function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = []) {
     // Just skip doing the request when this function is called without
     // the minimum required data.
     if ($scope.cellData === undefined && influencers.length === 0) {
@@ -512,11 +514,6 @@ module.controller('MlExplorerController', function (
 
     const newRequestCount = ++requestCount;
     requestCount = newRequestCount;
-
-    // Loads the data used to populate the anomaly charts and the Top Influencers List.
-    if (influencers.length === 0) {
-      getTopInfluencers(jobIds, earliestMs, latestMs);
-    }
 
     // Load the top anomalies (by record_score) which will be displayed in the charts.
     mlResultsService.getRecordsForInfluencer(
@@ -591,7 +588,7 @@ module.controller('MlExplorerController', function (
             }
           });
 
-          getTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
+          loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
       });
   }
@@ -758,7 +755,7 @@ module.controller('MlExplorerController', function (
 
   }
 
-  function getTopInfluencers(selectedJobIds, earliestMs, latestMs, influencers = []) {
+  function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, influencers = []) {
     if ($scope.noInfluencersConfigured !== true) {
       mlResultsService.getTopInfluencers(
         selectedJobIds,
@@ -954,7 +951,10 @@ module.controller('MlExplorerController', function (
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
     mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, earliestMs, latestMs);
-    loadDataForCharts(jobIds, [], earliestMs, latestMs);
+    // Load all top influencers right away because the filtering
+    // done in loadDataForCharts() isn't neccessary here.
+    loadTopInfluencers(jobIds, earliestMs, latestMs);
+    loadDataForCharts(jobIds, earliestMs, latestMs);
     loadAnomaliesTableData();
   }
 
