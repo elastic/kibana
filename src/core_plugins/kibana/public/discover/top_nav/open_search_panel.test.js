@@ -18,31 +18,16 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
 import { shallow } from 'enzyme';
 
 import {
-  DashboardAddPanel,
-} from './add_panel';
-
-jest.mock('ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
-    }
-  }), { virtual: true });
-
-let onClose;
-beforeEach(() => {
-  onClose = sinon.spy();
-});
+  OpenSearchPanel,
+} from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<DashboardAddPanel
-    onClose={onClose}
-    visTypes={{}}
-    addNewPanel={() => {}}
-    addNewVis={() => {}}
+  const component = shallow(<OpenSearchPanel
+    onClose={() => {}}
+    makeUrl={() => {}}
   />);
   expect(component).toMatchSnapshot();
 });

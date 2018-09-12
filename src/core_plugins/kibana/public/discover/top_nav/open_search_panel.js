@@ -23,8 +23,7 @@ import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_find
 import rison from 'rison-node';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiSpacer,
   EuiFlyout,
   EuiFlyoutBody,
   EuiTitle,
@@ -55,13 +54,11 @@ export class OpenSearchPanel extends React.Component {
       >
         <EuiFlyoutBody>
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2>Open Search</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h1>Open Search</h1>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
 
           <SavedObjectFinder
             noItemsMessage="No matching searches found."

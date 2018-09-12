@@ -23,8 +23,6 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
@@ -132,13 +130,9 @@ export class DashboardAddPanel extends React.Component {
       >
         <EuiFlyoutBody>
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2>Add Panels</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h1>Add Panels</h1>
+          </EuiTitle>
 
           <EuiTabs>
             {this.renderTabs()}
