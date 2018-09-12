@@ -40,6 +40,11 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         },
       ]
     }
+    userProfile={
+      Object {
+        "hasCapability": [Function],
+      }
+    }
     validator={
       RoleValidator {
         "inProgressSpacePrivileges": Array [],
