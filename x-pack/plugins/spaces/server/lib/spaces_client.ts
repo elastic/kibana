@@ -131,14 +131,15 @@ export class SpacesClient {
       );
     }
 
-    const existingSpace = await this.get(id);
-    if (isReservedSpace(existingSpace)) {
-      throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
-    }
-
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
       : this.callWithRequestSavedObjectRepository;
+
+    const existingSavedObject = await repository.get('space', id);
+    if (isReservedSpace(this.transformSavedObjectToSpace(existingSavedObject))) {
+      throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
+    }
+
     await repository.delete('space', id);
   }
 

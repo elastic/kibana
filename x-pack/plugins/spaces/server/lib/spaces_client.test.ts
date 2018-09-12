@@ -678,3 +678,229 @@ describe('#update', () => {
     });
   });
 });
+
+describe('#delete', () => {
+  const id = 'foo';
+
+  const reservedSavedObject = {
+    id,
+    attributes: {
+      name: 'foo-name',
+      description: 'foo-description',
+      bar: 'foo-bar',
+      _reserved: true,
+    },
+  };
+
+  const notReservedSavedObject = {
+    id,
+    attributes: {
+      name: 'foo-name',
+      description: 'foo-description',
+      bar: 'foo-bar',
+    },
+  };
+
+  describe(`authorization is null`, () => {
+    test(`throws Boom.badRequest when the space is reserved`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const authorization = null;
+      const mockCallWithRequestRepository = {
+        get: jest.fn().mockReturnValue(reservedSavedObject),
+      };
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        authorization,
+        mockCallWithRequestRepository,
+        null,
+        request
+      );
+
+      await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const authorization = null;
+      const mockCallWithRequestRepository = {
+        get: jest.fn().mockReturnValue(notReservedSavedObject),
+        delete: jest.fn(),
+      };
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        authorization,
+        mockCallWithRequestRepository,
+        null,
+        request
+      );
+
+      await client.delete(id);
+
+      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe(`authorization.mode.useRbacForRequest returns false`, () => {
+    test(`throws Boom.badRequest when the space is reserved`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      const mockCallWithRequestRepository = {
+        get: jest.fn().mockReturnValue(reservedSavedObject),
+      };
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        mockCallWithRequestRepository,
+        null,
+        request
+      );
+
+      await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      const mockCallWithRequestRepository = {
+        get: jest.fn().mockReturnValue(notReservedSavedObject),
+        delete: jest.fn(),
+      };
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        mockCallWithRequestRepository,
+        null,
+        request
+      );
+
+      await client.delete(id);
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('authorization.mode.useRbacForRequest returns true', () => {
+    test(`throws Boom.forbidden if the user isn't authorized`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        username,
+        hasAllRequested: false,
+      });
+      const request = Symbol();
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        null,
+        request
+      );
+
+      await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'delete');
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`throws Boom.badRequest if the user is authorized but the space is reserved`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        username,
+        hasAllRequested: true,
+      });
+      const mockInternalRepository = {
+        get: jest.fn().mockReturnValue(reservedSavedObject),
+      };
+      const request = Symbol();
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        mockInternalRepository,
+        request
+      );
+
+      await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+      expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
+    });
+
+    test(`deletes space using internalRepository if the user is authorized and the space isn't reserved`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        username,
+        hasAllRequested: true,
+      });
+      const mockInternalRepository = {
+        get: jest.fn().mockReturnValue(notReservedSavedObject),
+        delete: jest.fn(),
+      };
+      const request = Symbol();
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        mockInternalRepository,
+        request
+      );
+
+      await client.delete(id);
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+      expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
+    });
+  });
+});

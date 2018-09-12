@@ -2,6 +2,14 @@
 
 exports[`#create useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to create spaces"`;
 
+exports[`#delete authorization is null throws Boom.badRequest when the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns false throws Boom.badRequest when the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns true throws Boom.badRequest if the user is authorized but the space is reserved 1`] = `"This Space cannot be deleted because it is reserved."`;
+
+exports[`#delete authorization.mode.useRbacForRequest returns true throws Boom.forbidden if the user isn't authorized 1`] = `"Unauthorized to delete spaces"`;
+
 exports[`#get useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to get foo-space space"`;
 
 exports[`#getAll useRbacForRequest is true throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
