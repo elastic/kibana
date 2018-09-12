@@ -8,23 +8,20 @@ import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { LspRequest } from '../../model';
 import { Log } from '../log';
+import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { JavaLauncher } from './java_launcher';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { ILanguageServerHandler } from './proxy';
 import { TypescriptServerLauncher } from './ts_launcher';
 
-interface ILanguageServerHandlerWithTime extends ILanguageServerHandler {
-  lastAccess?: number;
-}
-
 interface WorkspaceHandlerMap {
-  [workspaceUri: string]: ILanguageServerHandlerWithTime;
+  [workspaceUri: string]: ILanguageServerLauncher;
 }
 
 interface LanguageServer {
   builtinWorkspaceFolders: boolean;
-  maxWorkspace?: number;
+  maxWorkspace: number;
   languages: string[];
   launcher: ILanguageServerLauncher;
   workspaceHandlers?: ILanguageServerHandler | WorkspaceHandlerMap;
@@ -39,26 +36,27 @@ export class LanguageServerController implements ILanguageServerHandler {
   private readonly languageServers: LanguageServer[];
   // a { lang -> server } map from above list
   private readonly languageServerMap: { [lang: string]: LanguageServer };
-  private readonly targetHost: string;
   private log: Log;
   private readonly detach: boolean = process.env.LSP_DETACH === 'true';
-  private readonly server: Hapi.Server;
 
-  constructor(targetHost: string, server: Hapi.Server) {
-    this.targetHost = targetHost;
+  constructor(
+    readonly options: ServerOptions,
+    readonly targetHost: string,
+    readonly server: Hapi.Server
+  ) {
     this.log = new Log(server);
-    this.server = server;
     this.languageServers = [
       {
         builtinWorkspaceFolders: false,
         languages: ['typescript', 'javascript', 'html'],
-        maxWorkspace: 5,
+        maxWorkspace: options.maxWorkspace,
         workspaceHandlers: {},
         launcher: new TypescriptServerLauncher(this.targetHost, this.detach, this.server),
       },
       {
         builtinWorkspaceFolders: true,
         languages: ['java'],
+        maxWorkspace: options.maxWorkspace,
         launcher: new JavaLauncher(this.targetHost, this.detach, this.server),
       },
     ];
@@ -117,9 +115,10 @@ export class LanguageServerController implements ILanguageServerHandler {
 
   public async launchServers() {
     for (const ls of this.languageServers) {
+      // for those language server has builtin workspace support, we can launch them during kibana startup
       if (ls.builtinWorkspaceFolders) {
         try {
-          ls.workspaceHandlers = await ls.launcher.launch(true);
+          ls.workspaceHandlers = await ls.launcher.launch(true, ls.maxWorkspace);
         } catch (e) {
           this.log.error(e);
         }
@@ -136,10 +135,13 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (handler) {
       return handler;
     } else {
-      const maxWorkspace = languageServer.maxWorkspace || 5;
+      const maxWorkspace = languageServer.maxWorkspace;
       const handlerArray = Object.entries(handlers);
       if (handlerArray.length < maxWorkspace) {
-        handler = await languageServer.launcher.launch(languageServer.builtinWorkspaceFolders);
+        handler = await languageServer.launcher.launch(
+          languageServer.builtinWorkspaceFolders,
+          maxWorkspace
+        );
         handlers[request.workspacePath!] = handler;
         return handler;
       } else {

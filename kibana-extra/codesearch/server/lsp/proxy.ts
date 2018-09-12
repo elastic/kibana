@@ -31,6 +31,7 @@ import { HttpRequestEmitter } from './http_request_emitter';
 import { createRepliesMap } from './replies_map';
 
 export interface ILanguageServerHandler {
+  lastAccess?: number;
   handleRequest(request: LspRequest): Promise<ResponseMessage>;
   exit(): Promise<any>;
 }
@@ -65,9 +66,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     );
   }
   public handleRequest(request: LspRequest): Promise<ResponseMessage> {
-    return this.receiveRequest(request.method, request.params);
+    return this.receiveRequest(request.method, request.params, request.isNotification);
   }
-  public receiveRequest(method: string, params: any) {
+
+  public receiveRequest(method: string, params: any, isNotification: boolean = false) {
     const message: RequestMessage = {
       jsonrpc: '2.0',
       id: this.sequenceNumber++,
@@ -78,9 +80,14 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       if (this.logger) {
         this.logger.log(`emit message ${JSON.stringify(message)}`);
       }
-
-      this.replies.set(message.id as number, [resolve, reject]);
-      this.httpEmitter.emit('message', message);
+      if (isNotification) {
+        // for language server as jdt, notification won't have a response message.
+        this.httpEmitter.emit('message', message);
+        resolve();
+      } else {
+        this.replies.set(message.id as number, [resolve, reject]);
+        this.httpEmitter.emit('message', message);
+      }
     });
   }
   public async initialize(
@@ -113,7 +120,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
       return this.connect().then(clientConn => {
         if (this.logger) {
-          this.logger.log(`proxy method:${method} to client `);
+          this.logger.log(`proxy method:${method} to Language Server `);
         }
 
         return clientConn.sendRequest(method, ...params);

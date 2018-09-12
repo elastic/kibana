@@ -25,7 +25,7 @@ export class LspService {
       objectsClient,
       new Log(server, ['LSP', 'workspace'])
     );
-    this.controller = new LanguageServerController(targetHost, server);
+    this.controller = new LanguageServerController(serverOptions, targetHost, server);
   }
 
   public async sendRequest(method: string, params: any): Promise<ResponseMessage> {

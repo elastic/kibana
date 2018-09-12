@@ -54,6 +54,7 @@ export default (kibana: any) =>
         updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
         repos: Joi.array().default([]),
+        maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
       }).default();
     },
 

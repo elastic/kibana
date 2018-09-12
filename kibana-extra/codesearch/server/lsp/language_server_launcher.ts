@@ -7,5 +7,5 @@
 import { ILanguageServerHandler } from './proxy';
 
 export interface ILanguageServerLauncher {
-  launch(builtinWorkspace: boolean): Promise<ILanguageServerHandler>;
+  launch(builtinWorkspace: boolean, maxWorkspace: number): Promise<ILanguageServerHandler>;
 }

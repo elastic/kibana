@@ -18,15 +18,20 @@ interface Job {
 export class RequestExpander implements ILanguageServerHandler {
   private proxy: LanguageServerProxy;
   private jobQueue: Job[] = [];
-  private workspaces: string[] = [];
+  // a map for workspacePath -> lastAccess
+  private workspaces: Map<string, number> = new Map();
   private initialized: boolean = false;
 
-  constructor(proxy: LanguageServerProxy, readonly builtinWorkspace: boolean) {
+  constructor(
+    proxy: LanguageServerProxy,
+    readonly builtinWorkspace: boolean,
+    readonly maxWorkspace: number
+  ) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
     proxy.onDisconnected(() => {
       this.initialized = false;
-      this.workspaces = [];
+      this.workspaces.clear();
     });
   }
 
@@ -39,10 +44,6 @@ export class RequestExpander implements ILanguageServerHandler {
       });
       this.handleNext();
     });
-  }
-
-  public workspaceChanged(request: LspRequest) {
-    return !this.workspaces.includes(request.workspacePath!);
   }
 
   public async exit() {
@@ -78,63 +79,81 @@ export class RequestExpander implements ILanguageServerHandler {
 
   private async expand(request: LspRequest): Promise<ResponseMessage> {
     if (request.workspacePath) {
-      if (!this.initialized) {
-        this.workspaces = [request.workspacePath];
-        await this.proxy.initialize({}, [
-          {
-            name: request.workspacePath,
-            uri: `file://${request.workspacePath}`,
-          },
-        ]);
-        this.initialized = true;
-      } else {
-        if (this.workspaceChanged(request)) {
-          await this.changeWorkspaceFolders(request.workspacePath);
+      if (this.initialized) {
+        // already opened this workspace
+        if (this.workspaces.has(request.workspacePath)) {
+          // update last access timestamp
+          this.workspaces.set(request.workspacePath, Date.now());
+        } else {
+          if (this.builtinWorkspace) {
+            await this.changeWorkspaceFolders(request.workspacePath, this.maxWorkspace);
+          } else {
+            await this.proxy.shutdown();
+            this.workspaces.clear();
+            await this.initialize(request.workspacePath);
+          }
         }
+      } else {
+        await this.initialize(request.workspacePath);
       }
     }
-
     return await this.proxy.handleRequest(request);
   }
 
-  private async changeWorkspaceFolders(workspacePath: string) {
+  private async initialize(workspacePath: string) {
+    this.workspaces.set(workspacePath, Date.now());
+    await this.proxy.initialize({}, [
+      {
+        name: workspacePath,
+        uri: `file://${workspacePath}`,
+      },
+    ]);
+    this.initialized = true;
+  }
+
+  /**
+   * use DidChangeWorkspaceFolders notification add a new workspace fold
+   * replace the oldest one if count > maxWorkspace
+   * builtinWorkspace = false is equal to maxWorkspace =1
+   * @param workspacePath
+   * @param maxWorkspace
+   */
+  private async changeWorkspaceFolders(workspacePath: string, maxWorkspace: number) {
     let params: DidChangeWorkspaceFoldersParams;
-    // support multiple workspaces;
-    if (this.builtinWorkspace) {
-      this.workspaces.push(workspacePath);
-      params = {
-        event: {
-          added: [
-            {
-              name: workspacePath!,
-              uri: `file://${workspacePath}`,
-            },
-          ],
-          removed: [],
-        },
-      };
-    } else {
-      params = {
-        event: {
-          added: [
-            {
-              name: workspacePath!,
-              uri: `file://${workspacePath}`,
-            },
-          ],
-          removed: [
-            {
-              name: this.workspaces[0],
-              uri: `file://${this.workspaces[0]}`,
-            },
-          ],
-        },
-      };
-      this.workspaces = [workspacePath];
+    this.workspaces.set(workspacePath, Date.now());
+    params = {
+      event: {
+        added: [
+          {
+            name: workspacePath!,
+            uri: `file://${workspacePath}`,
+          },
+        ],
+        removed: [],
+      },
+    };
+
+    if (this.workspaces.size >= this.maxWorkspace) {
+      let oldestWorkspace;
+      let oldestAccess = Number.MAX_VALUE;
+      for (const [workspace, lastAccess] of this.workspaces) {
+        if (lastAccess < oldestAccess) {
+          oldestAccess = lastAccess;
+          oldestWorkspace = workspace;
+        }
+      }
+      if (oldestWorkspace) {
+        params.event.removed.push({
+          name: oldestWorkspace,
+          uri: `file://${oldestWorkspace}`,
+        });
+        this.workspaces.delete(oldestWorkspace);
+      }
     }
     return await this.proxy.handleRequest({
       method: 'workspace/didChangeWorkspaceFolders',
       params,
+      isNotification: true,
     });
   }
 }

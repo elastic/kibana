@@ -21,7 +21,7 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     readonly server: Hapi.Server
   ) {}
 
-  public async launch(builtinWorkspace = false) {
+  public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
     let port = 2090;
 
     if (!this.detach) {
@@ -83,6 +83,6 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     }
     proxy.listen();
     await proxy.connect();
-    return new RequestExpander(proxy, builtinWorkspace);
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace);
   }
 }
