@@ -50,6 +50,8 @@ export function createJestConfig({
         reportName: 'X-Pack Jest Tests',
         rootDirectory: xPackKibanaDirectory,
       }]
-    ]
+    ],
+    // TODO: prevent tests from making web requests that rely on this setting, see https://github.com/facebook/jest/pull/6792
+    testURL: 'about:blank',
   };
 }

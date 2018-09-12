@@ -575,7 +575,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              1515578797
+              1337 minutes ago (mocking 1515578797)
             </div>
           </td>
         </tr>
@@ -656,7 +656,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              1515578797
+              1337 minutes ago (mocking 1515578797)
             </div>
           </td>
         </tr>
@@ -737,7 +737,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              1515578796
+              1337 minutes ago (mocking 1515578796)
             </div>
           </td>
         </tr>
@@ -818,7 +818,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              1515578773
+              1337 minutes ago (mocking 1515578773)
             </div>
           </td>
         </tr>
