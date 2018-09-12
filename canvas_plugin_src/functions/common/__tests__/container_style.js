@@ -116,5 +116,14 @@ describe('containerStyle', () => {
         expect(result).to.have.property('opacity', 0.5);
       });
     });
+
+    describe('overflow', () => {
+      it('sets overflow', () => {
+        let result = fn(null, { overflow: 'visible' });
+        expect(result).to.have.property('overflow', 'visible');
+        result = fn(null, { overflow: 'hidden' });
+        expect(result).to.have.property('overflow', 'hidden');
+      });
+    });
   });
 });

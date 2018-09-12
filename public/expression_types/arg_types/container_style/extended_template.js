@@ -15,6 +15,7 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
       padding={getArgValue('padding')}
       backgroundColor={getArgValue('backgroundColor')}
       opacity={getArgValue('opacity')}
+      overflow={getArgValue('overflow')}
       onChange={setArgValue}
     />
 

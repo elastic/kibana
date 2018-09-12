@@ -45,6 +45,10 @@ export const containerStyle = () => ({
       types: ['number', 'null'],
       help: 'A number between 0 and 1 representing the degree of transparency of the element',
     },
+    overflow: {
+      types: ['string'],
+      help: `Sets overflow of the container`,
+    },
   },
   fn: (context, args) => {
     const { backgroundImage, backgroundSize, backgroundRepeat, ...remainingArgs } = args;

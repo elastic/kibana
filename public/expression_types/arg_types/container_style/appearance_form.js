@@ -11,7 +11,9 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-export const AppearanceForm = ({ padding, opacity, onChange }) => {
+const overflows = [{ value: 'hidden', text: 'Hidden' }, { value: 'visible', text: 'Visible' }];
+
+export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
   const paddingVal = padding ? padding.replace('px', '') : '';
 
   const namedChange = name => ev => {
@@ -21,15 +23,24 @@ export const AppearanceForm = ({ padding, opacity, onChange }) => {
   };
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
+      <EuiFlexItem grow={2}>
         <EuiFormRow label="Padding" compressed>
           <EuiFieldNumber value={Number(paddingVal)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={3}>
         <EuiFormRow label="Opacity" compressed>
           <EuiSelect defaultValue={opacity} options={opacities} onChange={namedChange('opacity')} />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={3}>
+        <EuiFormRow label="Overflow" compressed>
+          <EuiSelect
+            defaultValue={overflow}
+            options={overflows}
+            onChange={namedChange('overflow')}
+          />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -39,5 +50,6 @@ export const AppearanceForm = ({ padding, opacity, onChange }) => {
 AppearanceForm.propTypes = {
   padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  overflow: PropTypes.oneOf(['hidden', 'visible']),
   onChange: PropTypes.func.isRequired,
 };

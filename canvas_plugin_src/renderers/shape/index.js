@@ -21,6 +21,7 @@ export const shape = () => ({
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
     shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYMid meet' : 'none');
+    shapeSvg.setAttribute('overflow', 'visible');
 
     const initialViewBox = shapeSvg
       .getAttribute('viewBox')

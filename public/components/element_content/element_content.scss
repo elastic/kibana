@@ -1,7 +1,7 @@
-// It is up to the element to handle its overflow.
 .canvasElement {
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 
 .canvasElement__content {
