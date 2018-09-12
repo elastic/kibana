@@ -198,7 +198,7 @@ export class ExplorerChart extends React.Component {
 
       // With tooManyBuckets the chart would end up with no x-axis labels
       // because the ticks are based on the span of the emphasis section,
-      // but that one spans the whole chart width with tooManyBuckets.
+      // and the highlighted area spans the whole chart.
       if (tooManyBuckets === false) {
         xAxis.tickValues(tickValues);
       } else {
