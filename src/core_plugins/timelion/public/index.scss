@@ -11,12 +11,8 @@
 //   timChart__legend-isLoading
 
 @import './chart';
-@import './suggestions';
 @import './app';
 
 
-@import './directives/cells/index';
-@import './directives/timelion_expression_suggestions/index';
-@import './directives/timelion_help/index';
-@import './directives/timelion_interval/index';
+@import './directives/index';
 @import './vis/index'
