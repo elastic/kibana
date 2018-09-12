@@ -36,6 +36,8 @@ export const IGNORE_FILE_GLOBS = [
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/apm/**/*',
+  'x-pack/plugins/canvas/tasks/**/*',
+  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
