@@ -351,7 +351,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           });
 
           if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
-            legendCaption = $('<caption class="timelionLegendCaption"></caption>');
+            legendCaption = $('<caption class="timChart__legendCaption"></caption>');
             legendCaption.html(emptyCaption);
             canvasElem.find('div.legend table').append(legendCaption);
 

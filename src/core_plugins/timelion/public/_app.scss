@@ -1,83 +1,17 @@
 
 
-.timelion {
+.timApp {
   position: relative;
 
-  .config .list-group-item .container-fluid {
-    background-color: transparent;
-    padding: 0;
+  [ng-click] {
+    cursor: pointer;
   }
 }
 
-
-
-.timelion-container {
-  margin: 20px;
+.timApp__container {
+  margin: $euiSizeM;
 }
 
-.timelion-container-drawer {
-  position: fixed;
-  bottom: 0px;
-}
-
-.timelion-container-drawer-tab {
-  width: 100%;
-  background-color: $euiColorLightShade;
-}
-
-.timelion-subnav {
-  background-color: $euiColorLightShade;
-  margin: 0px
-}
-
-.timelion-stats {
-  font-weight: normal;
-}
-
-.timelion-buttons {
-  position: absolute;
-  right: 0px;
-  display: inline-block;
-  padding: 5px 20px;
-  background-color: $euiColorLightestShade;
-  border-bottom-left-radius: $euiBorderRadius;
-
-  a {
-    margin: 5px;
-    color: #000;
-  }
-}
-
-[ng-click] {
-  cursor: pointer;
-}
-
-
-
-
-
-
-
-
-.legendLabel {
-  //max-width: 210px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-x: hidden;
-  line-height: normal;
-}
-
-.legendColorBox {
-  vertical-align: middle;
-}
-
-.ngLegendValue:focus,
-.ngLegendValue:hover {
-  text-decoration: underline;
-}
-
-.ngLegendValueNumber {
-  margin-left: 5px;
-  margin-right: 5px;
-  font-weight: bold;
+.timApp__stats {
+  font-weight: $euiFontWeightRegular;
 }
