@@ -47,12 +47,12 @@ export class SecureSavedObjectsClient {
     );
   }
 
-  async delete(type, id) {
+  async delete(type, id, options = {}) {
     return await this._execute(
       type,
       'delete',
-      { type, id },
-      repository => repository.delete(type, id),
+      { type, id, options },
+      repository => repository.delete(type, id, options),
     );
   }
 
@@ -64,22 +64,22 @@ export class SecureSavedObjectsClient {
     return await this._findAcrossAllTypes(options);
   }
 
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     const types = uniq(objects.map(o => o.type));
     return await this._execute(
       types,
       'bulk_get',
-      { objects },
-      repository => repository.bulkGet(objects)
+      { objects, options },
+      repository => repository.bulkGet(objects, options)
     );
   }
 
-  async get(type, id) {
+  async get(type, id, options = {}) {
     return await this._execute(
       type,
       'get',
-      { type, id },
-      repository => repository.get(type, id)
+      { type, id, options },
+      repository => repository.get(type, id, options)
     );
   }
 
