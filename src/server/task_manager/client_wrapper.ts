@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { TaskInstance } from './task';
+import { TaskManagerLogger } from './logger';
+import { SanitizedTaskDefinition, TaskDictionary, TaskInstance } from './task';
 import { TaskManager } from './task_manager';
-import { FetchOpts, FetchResult } from './task_pool/task_store';
+import { FetchOpts } from './task_store';
 
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;

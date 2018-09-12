@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { TaskDictionary, TaskManager, TaskManagerLogger, TaskPool, TaskStore } from './task_pool';
-import { fillPool } from './task_pool/fill_pool';
-import { ConcreteTaskInstance, SanitizedTaskDefinition } from './task_pool/task';
-import { TaskPoller } from './task_pool/task_poller';
-import { TaskManagerRunner } from './task_pool/task_runner';
+import { fillPool } from './fill_pool';
+import { TaskManagerLogger } from './logger';
+import { ConcreteTaskInstance, SanitizedTaskDefinition, TaskDictionary } from './task';
+import { TaskManager } from './task_manager';
+import { TaskPoller } from './task_poller';
+import { TaskPool } from './task_pool';
+import { TaskManagerRunner } from './task_runner';
+import { TaskStore } from './task_store';
 
 export async function getDefaultClient(
   kbnServer: any,

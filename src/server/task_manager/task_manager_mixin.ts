@@ -19,21 +19,14 @@
 
 import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
-import { fillPool } from './fill_pool';
-import { TaskManagerLogger } from './logger';
 import { getDefaultClient } from './default_client';
+import { TaskManagerLogger } from './logger';
 import {
-  ConcreteTaskInstance,
   SanitizedTaskDefinition,
   TaskDefinition,
   TaskDictionary,
   validateTaskDefinition,
 } from './task';
-import { TaskManager } from './task_manager';
-import { TaskPoller } from './task_poller';
-import { TaskPool } from './task_pool';
-import { TaskManagerRunner } from './task_runner';
-import { TaskStore } from './task_store';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
   const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
