@@ -284,6 +284,17 @@ export default function ({ getService, getPageObjects }) {
         expect(legendEntries).to.eql(expectedEntries);
       });
 
+      it('should show an error if last bucket aggregation is terms', async () => {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+
+        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
+        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
+      });
+
     });
   });
 }

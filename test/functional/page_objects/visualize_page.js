@@ -1133,6 +1133,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
     }
 
+    async getBucketErrorMessage() {
+      const error = await find.byCssSelector('.vis-editor-agg-error');
+      const errorMessage = await error.getProperty('innerText');
+      log.debug(errorMessage);
+      return errorMessage;
+    }
+
     async selectSortMetric(agg, metric) {
       const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
       return await sortMetric.click();
