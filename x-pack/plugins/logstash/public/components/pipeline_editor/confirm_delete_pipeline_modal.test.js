@@ -14,8 +14,8 @@ describe('ConfirmDeletePipelineModal component', () => {
   beforeEach(() => {
     props = {
       id: 'the id',
-      onCancel: jest.fn(),
-      onConfirm: jest.fn(),
+      cancelDeleteModal: jest.fn(),
+      confirmDeletePipeline: jest.fn(),
     };
   });
 

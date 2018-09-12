@@ -7,6 +7,8 @@ exports[`ConfirmDeletePipelineModal component renders as expected 1`] = `
     cancelButtonText="Cancel"
     confirmButtonText="Delete pipeline"
     defaultFocusedButton="cancel"
+    onCancel={[MockFunction]}
+    onConfirm={[MockFunction]}
     title="Delete pipeline the id"
   >
     <p>

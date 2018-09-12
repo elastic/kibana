@@ -5,6 +5,7 @@
  */
 
 export const PIPELINE_EDITOR = {
+  DELETE_PIPELINE_MODAL_MESSAGE: `You cannot recover a deleted pipeline.`,
   ID_REQUIRED_ERR_MSG: 'Pipeline ID is required',
   ID_FORMAT_ERR_MSG:
     'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers',

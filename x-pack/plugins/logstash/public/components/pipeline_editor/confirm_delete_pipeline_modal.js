@@ -6,17 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiConfirmModal,
-  EUI_MODAL_CANCEL_BUTTON,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, EuiOverlayMask } from '@elastic/eui';
+import { PIPELINE_EDITOR } from '../../../common/constants';
 
-export function ConfirmDeletePipelineModal({
-  id,
-  cancelDeleteModal,
-  confirmDeletePipeline,
-}) {
+export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDeletePipeline }) {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
@@ -28,7 +21,7 @@ export function ConfirmDeletePipelineModal({
         onConfirm={confirmDeletePipeline}
         title={`Delete pipeline ${id}`}
       >
-        <p>You cannot recover a deleted pipeline.</p>
+        <p>{PIPELINE_EDITOR.DELETE_PIPELINE_MODAL_MESSAGE}</p>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
