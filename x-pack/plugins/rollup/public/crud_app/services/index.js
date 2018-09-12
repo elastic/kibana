@@ -17,7 +17,8 @@ export {
   logisticalDetailsUrl,
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,
-  groupsDetailsUrl,
+  termsDetailsUrl,
+  histogramDetailsUrl,
 } from './documentation_links';
 
 export {

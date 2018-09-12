@@ -36,12 +36,14 @@ import { Navigation } from './navigation';
 import {
   StepLogistics,
   StepDateHistogram,
-  StepGroups,
+  StepTerms,
+  StepHistogram,
 } from './steps';
 import {
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
-  STEP_GROUPS,
+  STEP_TERMS,
+  STEP_HISTOGRAM,
   STEP_METRICS,
   STEP_REVIEW,
   stepIds,
@@ -51,7 +53,8 @@ import {
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: 'Logistics',
   [STEP_DATE_HISTOGRAM]: 'Date histogram',
-  [STEP_GROUPS]: 'Groups',
+  [STEP_TERMS]: 'Terms',
+  [STEP_HISTOGRAM]: 'Histogram',
   [STEP_METRICS]: 'Metrics',
   [STEP_REVIEW]: 'Review and save',
 };
@@ -320,8 +323,10 @@ export class JobCreateUi extends Component {
           dateHistogramTimeZone,
           dateHistogramField,
         },
-        [STEP_GROUPS]: {
+        [STEP_TERMS]: {
           terms,
+        },
+        [STEP_HISTOGRAM]: {
           histogram,
           histogramInterval,
         },
@@ -488,12 +493,20 @@ export class JobCreateUi extends Component {
           />
         );
 
-      case STEP_GROUPS:
+      case STEP_TERMS:
         return (
-          <StepGroups
+          <StepTerms
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             termsFields={indexPatternTermsFields}
+          />
+        );
+
+      case STEP_HISTOGRAM:
+        return (
+          <StepHistogram
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
             histogramFields={indexPatternHistogramFields}
           />
         );

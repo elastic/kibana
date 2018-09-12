@@ -15,14 +15,16 @@ import { validateDateHistogramDelay } from './validate_date_histogram_delay';
 
 export const STEP_LOGISTICS = 'STEP_LOGISTICS';
 export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
-export const STEP_GROUPS = 'STEP_GROUPS';
+export const STEP_TERMS = 'STEP_TERMS';
+export const STEP_HISTOGRAM = 'STEP_HISTOGRAM';
 export const STEP_METRICS = 'STEP_METRICS';
 export const STEP_REVIEW = 'STEP_REVIEW';
 
 export const stepIds = [
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
-  STEP_GROUPS,
+  STEP_TERMS,
+  STEP_HISTOGRAM,
   STEP_METRICS,
   STEP_REVIEW,
 ];
@@ -79,10 +81,14 @@ export const stepIdToStepConfigMap = {
       return errors;
     },
   },
-  [STEP_GROUPS]: {
+  [STEP_TERMS]: {
     defaultFields: {
       terms: [],
-      histogram: ['memory'],
+    },
+  },
+  [STEP_HISTOGRAM]: {
+    defaultFields: {
+      histogram: [],
       histogramInterval: 5,
     },
   },

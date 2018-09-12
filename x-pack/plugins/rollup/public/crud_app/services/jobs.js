@@ -50,7 +50,7 @@ export function serializeJob(jobConfig) {
       },
       histogram: {
         interval: histogramInterval,
-        fields: histogram,
+        fields: histogram.map(({ name }) => name),
       },
     },
   };
