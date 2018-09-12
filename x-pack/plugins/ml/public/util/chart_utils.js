@@ -270,7 +270,7 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
       // So this uses a regex variant because we definitely want test coverage for the label removal.
       // Once JSDOM supports SVGAnimatedTransformList we can use the simpler version.
       // const xTransform = d3.transform(tick.attr('transform')).translate[0];
-      const xTransform = +(/translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(tick.attr('transform'))[1]);
+      const xTransform = +(/translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)\)/.exec(tick.attr('transform'))[1]);
       const xMinOffset = xTransform - (tickWidth / 2 + padding);
       const xMaxOffset = xTransform + (tickWidth / 2 + padding);
 
