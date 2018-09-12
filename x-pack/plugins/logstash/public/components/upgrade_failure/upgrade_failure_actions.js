@@ -6,12 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function UpgradeFailureActions({ onClose, onRetry, upgradeButtonText }) {
   return (

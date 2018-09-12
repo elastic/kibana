@@ -26,9 +26,12 @@ app.directive('pipelineList', function ($injector) {
   return {
     restrict: 'E',
     link: (scope, el) => {
-      const openPipeline = id => scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit`));
-      const createPipeline = () => scope.$evalAsync(kbnUrl.change('management/logstash/pipelines/new-pipeline'));
-      const clonePipeline = id => scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
+      const openPipeline = id =>
+        scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit`));
+      const createPipeline = () =>
+        scope.$evalAsync(kbnUrl.change('management/logstash/pipelines/new-pipeline'));
+      const clonePipeline = id =>
+        scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
       render(
         <PipelineList
           clonePipeline={clonePipeline}
@@ -42,7 +45,9 @@ app.directive('pipelineList', function ($injector) {
           createPipeline={createPipeline}
           pipelinesService={pipelinesService}
           toastNotifications={toastNotifications}
-        />, el[0]);
+        />,
+        el[0]
+      );
     },
     scope: {},
     controllerAs: 'pipelineList',

@@ -28,7 +28,8 @@ app.directive('pipelineEdit', function ($injector) {
     restrict: 'E',
     link: async (scope, el) => {
       const close = () => scope.$evalAsync(kbnUrl.change('/management/logstash/pipelines', {}));
-      const open = id => scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
+      const open = id =>
+        scope.$evalAsync(kbnUrl.change(`/management/logstash/pipelines/${id}/edit`));
 
       const userResource = securityService.isSecurityEnabled
         ? await shieldUser.getCurrent().$promise
@@ -40,11 +41,7 @@ app.directive('pipelineEdit', function ($injector) {
           close={close}
           open={open}
           isNewPipeline={isEmpty(scope.pipeline.id)}
-          username={
-            userResource
-              ? userResource.username
-              : null
-          }
+          username={userResource ? userResource.username : null}
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
           toastNotifications={toastNotifications}
@@ -52,7 +49,9 @@ app.directive('pipelineEdit', function ($injector) {
           licenseMessage={licenseService.message}
           licenseService={licenseService}
           notifier={new Notifier({ location: 'Logstash' })}
-        />, el[0]);
+        />,
+        el[0]
+      );
     },
     scope: {
       pipeline: '=',

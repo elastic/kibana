@@ -11,10 +11,7 @@ import { InfoAlerts } from './info_alerts';
 describe('InfoAlerts component', () => {
   it('renders null if both alert flags are false', () => {
     const wrapper = shallow(
-      <InfoAlerts
-        showAddRoleAlert={false}
-        showEnableMonitoringAlert={false}
-      />
+      <InfoAlerts showAddRoleAlert={false} showEnableMonitoringAlert={false} />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -23,10 +20,7 @@ describe('InfoAlerts component', () => {
 
   it('renders AddRoleAlert if flag is true', () => {
     const wrapper = shallow(
-      <InfoAlerts
-        showAddRoleAlert={true}
-        showEnableMonitoringAlert={false}
-      />
+      <InfoAlerts showAddRoleAlert={true} showEnableMonitoringAlert={false} />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -34,10 +28,7 @@ describe('InfoAlerts component', () => {
 
   it('renders EnableMonitoringAlert if flag is true', () => {
     const wrapper = shallow(
-      <InfoAlerts
-        showAddRoleAlert={false}
-        showEnableMonitoringAlert={true}
-      />
+      <InfoAlerts showAddRoleAlert={false} showEnableMonitoringAlert={true} />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -45,10 +36,7 @@ describe('InfoAlerts component', () => {
 
   it('renders AddRoleAlert and EnableMonitoringAlert if both flags are true', () => {
     const wrapper = shallow(
-      <InfoAlerts
-        showAddRoleAlert={true}
-        showEnableMonitoringAlert={true}
-      />
+      <InfoAlerts showAddRoleAlert={true} showEnableMonitoringAlert={true} />
     );
 
     expect(wrapper).toMatchSnapshot();

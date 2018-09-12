@@ -32,9 +32,7 @@ describe('PipelinesTable component', () => {
       onDeleteSelectedPipelines,
       onSelectionChange,
       openPipeline,
-      pipelines: [
-        { id: 'testPipeline' }
-      ],
+      pipelines: [{ id: 'testPipeline' }],
       selection: [],
     };
   });

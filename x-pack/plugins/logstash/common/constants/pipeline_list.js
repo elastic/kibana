@@ -11,5 +11,5 @@ export const PIPELINE_LIST = {
     `This pipeline wasn't created using Centralized Configuration Management. It can't be managed or edited here.`,
   INFO_ALERTS: {
     CALL_OUT_TITLE: 'Only pipelines created in Kibana Management appear here',
-  }
+  },
 };

@@ -10,7 +10,11 @@ import { AlertCallOut } from './alert_call_out';
 
 describe('AlertCallOut component', () => {
   it('renders expected component', () => {
-    const wrapper = shallow(<AlertCallOut><div>Some text</div></AlertCallOut>);
+    const wrapper = shallow(
+      <AlertCallOut>
+        <div>Some text</div>
+      </AlertCallOut>
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

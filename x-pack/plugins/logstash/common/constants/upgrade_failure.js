@@ -16,5 +16,5 @@ export const UPGRADE_FAILURE = {
   UPGRADE_BUTTON_TEXT: {
     IS_MANUAL_UPGRADE: 'Try again',
     NOT_MANUAL_UPGRADE: 'Upgrade',
-  }
+  },
 };

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow, } from 'enzyme';
+import { shallow } from 'enzyme';
 import { PipelineList } from './pipeline_list';
 
 describe('PipelineList component', () => {
@@ -17,22 +17,15 @@ describe('PipelineList component', () => {
   let pipelines;
 
   const getGetPipelineList = (isSuccess, result) =>
-    isSuccess
-      ? () => Promise.resolve(result)
-      : () => Promise.reject(result);
+    isSuccess ? () => Promise.resolve(result) : () => Promise.reject(result);
 
-  const getIsClusterInfoAvailable = isAvailable =>
-    () => Promise.resolve(isAvailable);
+  const getIsClusterInfoAvailable = isAvailable => () => Promise.resolve(isAvailable);
 
   const getDeleteSelectedPipelines = isSuccess =>
-    isSuccess
-      ? () => Promise.resolve({})
-      : () => Promise.reject({});
+    isSuccess ? () => Promise.resolve({}) : () => Promise.reject({});
 
   beforeEach(() => {
-    pipelines = [
-      { id: 'test', description: 'test description' },
-    ];
+    pipelines = [{ id: 'test', description: 'test description' }];
     addDanger = jest.fn();
     addSuccess = jest.fn();
     addWarning = jest.fn();

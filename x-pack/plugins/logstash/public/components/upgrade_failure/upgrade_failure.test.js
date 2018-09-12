@@ -46,19 +46,23 @@ describe('UpgradeFailure component', () => {
 
   it('passes expected text for manual upgrade', () => {
     const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText)
-      .toEqual(UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.IS_MANUAL_UPGRADE);
-    expect(wrapper.find('UpgradeFailureTitle').props().titleText)
-      .toEqual(UPGRADE_FAILURE.TITLE.IS_MANUAL_UPGRADE);
+    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText).toEqual(
+      UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.IS_MANUAL_UPGRADE
+    );
+    expect(wrapper.find('UpgradeFailureTitle').props().titleText).toEqual(
+      UPGRADE_FAILURE.TITLE.IS_MANUAL_UPGRADE
+    );
   });
 
   it('passes expected text for not manual upgrade', () => {
     props.isManualUpgrade = false;
     const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText)
-      .toEqual(UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.NOT_MANUAL_UPGRADE);
-    expect(wrapper.find('UpgradeFailureTitle').props().titleText)
-      .toEqual(UPGRADE_FAILURE.TITLE.NOT_MANUAL_UPGRADE);
+    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText).toEqual(
+      UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.NOT_MANUAL_UPGRADE
+    );
+    expect(wrapper.find('UpgradeFailureTitle').props().titleText).toEqual(
+      UPGRADE_FAILURE.TITLE.NOT_MANUAL_UPGRADE
+    );
   });
 
   it('propogates onClose and onRetry functions to child', () => {

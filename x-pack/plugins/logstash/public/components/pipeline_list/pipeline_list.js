@@ -37,21 +37,16 @@ export class PipelineList extends React.Component {
   }
 
   componentDidMount = () => {
-    const {
-      isReadOnly,
-      licenseService,
-      toastNotifications,
-    } = this.props;
+    const { isReadOnly, licenseService, toastNotifications } = this.props;
 
-    this.loadPipelines()
-      .then(() => {
-        if (isReadOnly) {
-          toastNotifications.addWarning(licenseService.message);
-        }
-      });
+    this.loadPipelines().then(() => {
+      if (isReadOnly) {
+        toastNotifications.addWarning(licenseService.message);
+      }
+    });
 
     this.checkMonitoringAccess();
-  }
+  };
 
   getEmptyPrompt = () => (
     <EuiEmptyPrompt
@@ -59,7 +54,7 @@ export class PipelineList extends React.Component {
       titleSize="xs"
       body="There are no pipelines defined."
     />
-  )
+  );
 
   getErrorPrompt = () => (
     <EuiEmptyPrompt
@@ -67,15 +62,10 @@ export class PipelineList extends React.Component {
       titleSize="xs"
       body="Error encountered while loading pipelines."
     />
-  )
+  );
 
   loadPipelines = () => {
-    const {
-      isReadOnly,
-      licenseService,
-      pipelinesService,
-      toastNotifications,
-    } = this.props;
+    const { isReadOnly, licenseService, pipelinesService, toastNotifications } = this.props;
 
     this.setState({
       message: (
@@ -86,7 +76,8 @@ export class PipelineList extends React.Component {
       ),
     });
 
-    return pipelinesService.getPipelineList()
+    return pipelinesService
+      .getPipelineList()
       .then(pipelines => {
         this.setState({
           isLoading: false,
@@ -108,90 +99,75 @@ export class PipelineList extends React.Component {
           isLoading: false,
           message: this.getErrorPrompt(),
         });
-        return licenseService.checkValidity()
-          .then(() => {
-            if (err.status === 403) {
-              this.setState({ isLoading: false });
+        return licenseService.checkValidity().then(() => {
+          if (err.status === 403) {
+            this.setState({ isLoading: false });
 
-              if (isReadOnly) {
-                this.setState({ isForbidden: false });
-              } else {
-                this.setState({ isForbidden: true });
-              }
-            } else {
+            if (isReadOnly) {
               this.setState({ isForbidden: false });
-              toastNotifications.addDanger(`Couldn't load pipeline. Error: "${err.statusText}".`);
+            } else {
+              this.setState({ isForbidden: true });
             }
-          });
-      });
-  }
-
-  checkMonitoringAccess = () => {
-    const {
-      clusterService,
-      monitoringService,
-    } = this.props;
-
-    clusterService.isClusterInfoAvailable()
-      .then(isAvailable => {
-        this.setState({
-          showAddRoleAlert: !isAvailable,
-          showEnableMonitoringAlert: !monitoringService.isMonitoringEnabled(),
+          } else {
+            this.setState({ isForbidden: false });
+            toastNotifications.addDanger(`Couldn't load pipeline. Error: "${err.statusText}".`);
+          }
         });
       });
-  }
+  };
+
+  checkMonitoringAccess = () => {
+    const { clusterService, monitoringService } = this.props;
+
+    clusterService.isClusterInfoAvailable().then(isAvailable => {
+      this.setState({
+        showAddRoleAlert: !isAvailable,
+        showEnableMonitoringAlert: !monitoringService.isMonitoringEnabled(),
+      });
+    });
+  };
 
   renderNoPermissionCallOut = () => {
-    const { isForbidden, isLoading, } = this.state;
-    return (isForbidden && !isLoading)
-      ? (
-        <EuiCallOut
-          color="danger"
-          iconType="cross"
-          title="You do not have permission to manage Logstash pipelines."
-        >
-          <p>
-            Please contact your administrator.
-          </p>
-        </EuiCallOut>
-      )
-      : null;
-  }
+    const { isForbidden, isLoading } = this.state;
+    return isForbidden && !isLoading ? (
+      <EuiCallOut
+        color="danger"
+        iconType="cross"
+        title="You do not have permission to manage Logstash pipelines."
+      >
+        <p>Please contact your administrator.</p>
+      </EuiCallOut>
+    ) : null;
+  };
 
   hideDeletePipelinesModal = () => {
     this.setState({
       showConfirmDeleteModal: false,
     });
-  }
+  };
 
   showDeletePipelinesModal = () => {
     this.setState({
       showConfirmDeleteModal: true,
     });
-  }
+  };
 
   cancelDeletePipelines = () => {
     this.hideDeletePipelinesModal();
-  }
+  };
 
   deleteSelectedPipelines = () => {
     this.hideDeletePipelinesModal();
-    const {
-      licenseService,
-      pipelinesService,
-      toastNotifications,
-    } = this.props;
+    const { licenseService, pipelinesService, toastNotifications } = this.props;
     const { selection } = this.state;
     const numPipelinesSelected = selection.length;
     const totalPluralized = pluralize('Pipeline', numPipelinesSelected);
 
     const pipelineIds = selection.map(({ id }) => id);
-    return pipelinesService.deletePipelines(pipelineIds)
+    return pipelinesService
+      .deletePipelines(pipelineIds)
       .then(results => {
-        const {
-          numSuccesses,
-          numErrors,
-        } = results;
+        const { numSuccesses, numErrors } = results;
         const errorPluralized = pluralize('Pipeline', numErrors);
 
         if (numSuccesses === 1 && numErrors === 0) {
@@ -213,39 +189,23 @@ export class PipelineList extends React.Component {
         this.loadPipelines();
       })
       .catch(err => {
-        return licenseService.checkValidity()
-          .then(() => toastNotifications.addDanger(err));
+        return licenseService.checkValidity().then(() => toastNotifications.addDanger(err));
       });
-  }
+  };
 
   onDeleteSelectedPipelines = () => {
     this.showDeletePipelinesModal();
-  }
+  };
 
   onSelectionChange = selection => this.setState({ selection });
 
   render() {
-    const {
-      clonePipeline,
-      createPipeline,
-      isReadOnly,
-      openPipeline
-    } = this.props;
-    const {
-      isSelectable,
-      message,
-      pipelines,
-      selection,
-      showConfirmDeleteModal,
-    } = this.state;
+    const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
+    const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
       <EuiPage style={{ minHeight: '100vh' }} data-test-subj="pipelineList">
-        <EuiPageContent
-          horizontalPosition="center"
-        >
-          {
-            this.renderNoPermissionCallOut()
-          }
+        <EuiPageContent horizontalPosition="center">
+          {this.renderNoPermissionCallOut()}
           <PipelinesTable
             clonePipeline={clonePipeline}
             createPipeline={createPipeline}

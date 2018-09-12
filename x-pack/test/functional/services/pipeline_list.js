@@ -54,7 +54,9 @@ export function PipelineListProvider({ getService }) {
      */
     async getRowCounts() {
       const ids = await this.getRowIds();
-      const isSelecteds = await Promise.all(ids.map(id => testSubjects.isSelected(getSelectCheckbox(id))));
+      const isSelecteds = await Promise.all(
+        ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))
+      );
       const total = isSelecteds.length;
       const isSelected = isSelecteds.filter(Boolean).length;
       const isUnselected = total - isSelected;
@@ -73,9 +75,11 @@ export function PipelineListProvider({ getService }) {
         id: await this.getRowIds(),
         description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
         lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
-        username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME)
+        username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME),
       });
-      valuesByKey.selected = await Promise.all(valuesByKey.id.map(id => testSubjects.isSelected(getSelectCheckbox(id))));
+      valuesByKey.selected = await Promise.all(
+        valuesByKey.id.map(id => testSubjects.isSelected(getSelectCheckbox(id)))
+      );
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows
@@ -199,7 +203,7 @@ export function PipelineListProvider({ getService }) {
      */
     async assertExists() {
       await retry.try(async () => {
-        if (!await testSubjects.exists(SUBJ_CONTAINER)) {
+        if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
           throw new Error('Expected to find the pipeline list');
         }
       });
@@ -245,5 +249,5 @@ export function PipelineListProvider({ getService }) {
         throw new Error(`Expected next page button to be ${enabled ? 'enabled' : 'disabled'}`);
       }
     }
-  };
+  }();
 }

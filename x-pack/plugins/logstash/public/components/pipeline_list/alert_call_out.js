@@ -10,11 +10,7 @@ import { PIPELINE_LIST } from '../../../common/constants';
 
 export function AlertCallOut(props) {
   return (
-    <EuiCallOut
-      title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE}
-      color="warning"
-      iconType="help"
-    >
+    <EuiCallOut title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE} color="warning" iconType="help">
       <p>How can I see additional pipelines?</p>
       {props.children}
     </EuiCallOut>

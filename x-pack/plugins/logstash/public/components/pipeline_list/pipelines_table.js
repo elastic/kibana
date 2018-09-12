@@ -58,7 +58,12 @@ function getColumns(openPipeline, clonePipeline) {
           clonePipeline(id);
         };
         return isCentrallyManaged ? (
-          <EuiButtonEmpty data-test-subj={`lnkPipelineClone-${id}`} iconType="copy" onClick={cloneClicked} size="xs">
+          <EuiButtonEmpty
+            data-test-subj={`lnkPipelineClone-${id}`}
+            iconType="copy"
+            onClick={cloneClicked}
+            size="xs"
+          >
             Clone
           </EuiButtonEmpty>
         ) : null;

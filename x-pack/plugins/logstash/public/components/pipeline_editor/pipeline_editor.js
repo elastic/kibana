@@ -160,14 +160,14 @@ export class PipelineEditor extends React.Component {
   };
 
   handleMaxByteNumberChange = value => {
-    this.setState({ maxBytesNumber: parseInt(value, 10), });
+    this.setState({ maxBytesNumber: parseInt(value, 10) });
     this.handleSettingChange('queue.max_bytes', value + this.state.maxBytesUnit);
-  }
+  };
 
   handleMaxByteUnitChange = value => {
     this.setState({ maxBytesUnit: value });
     this.handleSettingChange('queue.max_bytes', this.state.maxBytesNumber + value);
-  }
+  };
 
   handleSettingChange = (settingName, value) => {
     const settings = { ...this.state.pipeline.settings };
@@ -232,7 +232,11 @@ export class PipelineEditor extends React.Component {
             </EuiFlexItem>
             {!this.props.isNewPipeline && (
               <EuiFlexItem grow={false}>
-                <EuiButton color="danger" data-test-subj="btnDeletePipeline" onClick={this.showConfirmDeleteModal}>
+                <EuiButton
+                  color="danger"
+                  data-test-subj="btnDeletePipeline"
+                  onClick={this.showConfirmDeleteModal}
+                >
                   Delete pipeline
                 </EuiButton>
               </EuiFlexItem>

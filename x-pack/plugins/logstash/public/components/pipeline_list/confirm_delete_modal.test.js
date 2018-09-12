@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount, shallow, } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 describe('ConfirmDeleteModal component', () => {
@@ -14,9 +14,11 @@ describe('ConfirmDeleteModal component', () => {
     props = {
       cancelDeletePipelines: jest.fn(),
       deleteSelectedPipelines: jest.fn(),
-      selection: [{
-        id: 'testId',
-      }],
+      selection: [
+        {
+          id: 'testId',
+        },
+      ],
       showConfirmDeleteModal: jest.fn(),
     };
   });
@@ -27,23 +29,26 @@ describe('ConfirmDeleteModal component', () => {
   });
 
   it('confirms delete for multiple pipelines', () => {
-    props.selection = [
-      { id: 'testId' },
-      { id: 'testId2' },
-    ];
+    props.selection = [{ id: 'testId' }, { id: 'testId2' }];
     const wrapper = shallow(<ConfirmDeleteModal {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls cancel delete', () => {
     const wrapper = mount(<ConfirmDeleteModal {...props} />);
-    wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
+    wrapper
+      .find('[data-test-subj="confirmModalCancelButton"]')
+      .first()
+      .simulate('click');
     expect(props.cancelDeletePipelines).toHaveBeenCalled();
   });
 
   it('calls deleteSelectedPipelines', () => {
     const wrapper = mount(<ConfirmDeleteModal {...props} />);
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper
+      .find('[data-test-subj="confirmModalConfirmButton"]')
+      .first()
+      .simulate('click');
     expect(props.deleteSelectedPipelines).toHaveBeenCalled();
   });
 

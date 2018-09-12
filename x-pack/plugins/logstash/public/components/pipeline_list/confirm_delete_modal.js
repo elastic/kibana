@@ -5,11 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiConfirmModal,
-  EUI_MODAL_CANCEL_BUTTON,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, EuiOverlayMask } from '@elastic/eui';
 
 export function ConfirmDeleteModal({
   cancelDeletePipelines,
@@ -22,17 +18,18 @@ export function ConfirmDeleteModal({
   }
   const numPipelinesSelected = selection.length;
 
-  const confirmText = numPipelinesSelected === 1
-    ? {
-      message: 'You cannot recover a deleted pipeline',
-      button: `Delete pipeline`,
-      title: `Delete pipeline "${selection[0].id}"`,
-    }
-    : {
-      message: `You cannot recover deleted pipelines.`,
-      button: `Delete ${numPipelinesSelected} pipelines`,
-      title: `Delete ${numPipelinesSelected} pipelines`,
-    };
+  const confirmText =
+    numPipelinesSelected === 1
+      ? {
+        message: 'You cannot recover a deleted pipeline',
+        button: `Delete pipeline`,
+        title: `Delete pipeline "${selection[0].id}"`,
+      }
+      : {
+        message: `You cannot recover deleted pipelines.`,
+        button: `Delete ${numPipelinesSelected} pipelines`,
+        title: `Delete ${numPipelinesSelected} pipelines`,
+      };
 
   return (
     <EuiOverlayMask>

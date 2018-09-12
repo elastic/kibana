@@ -19,7 +19,7 @@ describe('UpgradeFailureActions component', () => {
     props = {
       onClose,
       onRetry,
-      upgradeButtonText: 'upgrade button text'
+      upgradeButtonText: 'upgrade button text',
     };
   });
 
