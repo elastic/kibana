@@ -196,11 +196,6 @@ function discoverController(
     template: require('plugins/kibana/discover/partials/save_search.html'),
     testId: 'discoverSaveButton',
   }, {
-    key: 'old open',
-    description: 'Open Saved Search',
-    template: require('plugins/kibana/discover/partials/load_search.html'),
-    testId: 'discoverOldOpenButton',
-  }, {
     key: 'open',
     description: 'Open Saved Search',
     testId: 'discoverOpenButton',
