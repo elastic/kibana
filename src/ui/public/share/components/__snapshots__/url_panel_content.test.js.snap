@@ -2,7 +2,7 @@
 
 exports[`render 1`] = `
 <EuiForm
-  className="shareUrlContentForm"
+  className="sharePanelContent"
   data-test-subj="shareUrlForm"
 >
   <EuiFormRow
@@ -128,14 +128,15 @@ exports[`render 1`] = `
   </EuiFormRow>
   <EuiCopy
     afterMessage="Copied"
-    textToCopy="about:blank"
+    anchorClassName="sharePanel__copyAnchor"
+    textToCopy="http://localhost/"
   />
 </EuiForm>
 `;
 
 exports[`should enable saved object export option when objectId is provided 1`] = `
 <EuiForm
-  className="shareUrlContentForm"
+  className="sharePanelContent"
   data-test-subj="shareUrlForm"
 >
   <EuiFormRow
@@ -260,7 +261,8 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   </EuiFormRow>
   <EuiCopy
     afterMessage="Copied"
-    textToCopy="about:blank"
+    anchorClassName="sharePanel__copyAnchor"
+    textToCopy="http://localhost/"
   />
 </EuiForm>
 `;

@@ -114,8 +114,8 @@ describe('ExplorerChart', () => {
 
     const selectedInterval = rects[1];
     expect(selectedInterval.getAttribute('class')).toBe('selected-interval');
-    expect(+selectedInterval.getAttribute('y')).toBe(1);
-    expect(+selectedInterval.getAttribute('height')).toBe(169);
+    expect(+selectedInterval.getAttribute('y')).toBe(2);
+    expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(0);
