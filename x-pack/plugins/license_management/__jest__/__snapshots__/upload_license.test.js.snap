@@ -94,6 +94,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               >
                 <EuiModal
                   className="euiModal--confirmation"
+                  maxWidth={true}
                   onClose={[Function]}
                 >
                   <Component
@@ -105,7 +106,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                   >
                     <div>
                       <div
-                        className="euiModal euiModal--confirmation"
+                        className="euiModal euiModal--maxWidth-default euiModal--confirmation"
                         onKeyDown={[Function]}
                         tabIndex={0}
                       >
