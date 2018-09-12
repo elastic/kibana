@@ -36,7 +36,6 @@ export default function ({ getService }) {
 
       const expected = {
         stats: {
-          bytesSent: 31112,
           totalEvents: 18,
           apms: {
             total: 2
@@ -52,7 +51,8 @@ export default function ({ getService }) {
           bytes_sent_rate: 2.9105555555555553,
           errors: 0,
           memory: 3087640,
-          version: '7.0.0-alpha1'
+          version: '7.0.0-alpha1',
+          time_of_last_event: '2018-08-31T13:59:21.165Z'
         }, {
           uuid: '55f1089b-43b1-472a-919a-344667bae595',
           name: 'd06490170f2b',
@@ -62,7 +62,8 @@ export default function ({ getService }) {
           bytes_sent_rate: 5.7316666666666665,
           errors: 0,
           memory: 3445920,
-          version: '7.0.0-alpha1'
+          version: '7.0.0-alpha1',
+          time_of_last_event: '2018-08-31T13:59:21.201Z'
         }]
       };
 

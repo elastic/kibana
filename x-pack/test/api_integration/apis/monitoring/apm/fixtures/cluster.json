@@ -1,7 +1,8 @@
 {
   "stats": {
     "totalEvents": 18,
-    "bytesSent": 31112,
+    "memRss": 3821568,
+    "memTotal": 2404475016,
     "apms": {
       "total": 2
     },
@@ -103,29 +104,6 @@
       ]
     }],
     "apm_memory": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.beat.memstats.memory_total",
-        "metricAgg": "max",
-        "label": "Total Memory",
-        "title": "Memory",
-        "description": "Total memory",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": [
-        [1535723880000, 1200055128],
-        [1535723910000, 1201191312],
-        [1535723940000, 1202483496]
-      ]
-    }, {
       "bucket_size": "30 seconds",
       "timeRange": {
         "min": 1535720389104,
@@ -684,76 +662,6 @@
         [1535723940000, 84]
       ]
     }],
-    "apm_incoming_requests_size": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.decoder.deflate.content-length",
-        "metricAgg": "max",
-        "label": "Deflater",
-        "title": "Incoming Requests Size",
-        "description": "PLZ FILL ME IN",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": [
-        [1535723880000, 0],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.decoder.gzip.content-length",
-        "metricAgg": "max",
-        "label": "Gzip",
-        "title": "Gzip",
-        "description": "PLZ FILL ME IN",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": [
-        [1535723880000, 689626],
-        [1535723910000, 690563],
-        [1535723940000, 690563]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.decoder.uncompressed.content-length",
-        "metricAgg": "max",
-        "label": "Uncompressed",
-        "title": "Uncompressed",
-        "description": "PLZ FILL ME IN",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
-      },
-      "data": [
-        [1535723880000, 0],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }],
     "apm_transformations": [{
       "bucket_size": "30 seconds",
       "timeRange": {
@@ -765,7 +673,7 @@
         "field": "beats_stats.metrics.apm-server.processor.transaction.transformations",
         "metricAgg": "max",
         "label": "Transaction",
-        "title": "Transformations",
+        "title": "Processed Events",
         "description": "PLZ FILL ME IN",
         "units": "/m",
         "format": "0,0.[00]",
