@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { DashboardAddPanel } from './add_panel';
 
 let isOpen = false;
 
-export function showAddPanel(addNewPanel, addNewVis, visTypes) {
+export function showAddPanel(
+  savedObjectsClient,
+  addNewPanel,
+  addNewVis,
+  listingLimit,
+  isLabsEnabled,
+  visTypes
+) {
   if (isOpen) {
     return;
   }
@@ -35,6 +42,26 @@ export function showAddPanel(addNewPanel, addNewVis, visTypes) {
     document.body.removeChild(container);
     isOpen = false;
   };
+  const find = async (type, search) => {
+    const resp = await savedObjectsClient.find({
+      type,
+      fields: ['title', 'visState'],
+      search: search ? `${search}*` : undefined,
+      page: 1,
+      perPage: listingLimit,
+      searchFields: ['title^3', 'description'],
+    });
+
+    if (type === 'visualization' && !isLabsEnabled) {
+      resp.savedObjects = resp.savedObjects.filter(savedObject => {
+        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const visType = visTypes.byName[typeName];
+        return visType.stage !== 'lab';
+      });
+    }
+
+    return resp;
+  };
 
   const addNewVisWithCleanup = () => {
     onClose();
@@ -45,7 +72,7 @@ export function showAddPanel(addNewPanel, addNewVis, visTypes) {
   const element = (
     <DashboardAddPanel
       onClose={onClose}
-      visTypes={visTypes}
+      find={find}
       addNewPanel={addNewPanel}
       addNewVis={addNewVisWithCleanup}
     />

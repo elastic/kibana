@@ -60,7 +60,7 @@ export class DashboardAddPanel extends React.Component {
           key="visSavedObjectFinder"
           callToActionButton={addNewVisBtn}
           onChoose={this.onAddPanel}
-          find={this.props.find}
+          visTypes={this.props.visTypes}
           noItemsMessage="No matching visualizations found."
           savedObjectType="visualization"
         />
@@ -74,7 +74,6 @@ export class DashboardAddPanel extends React.Component {
         <SavedObjectFinder
           key="searchSavedObjectFinder"
           onChoose={this.onAddPanel}
-          find={this.props.find}
           noItemsMessage="No matching saved searches found."
           savedObjectType="search"
         />
@@ -157,7 +156,7 @@ export class DashboardAddPanel extends React.Component {
 
 DashboardAddPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
+  visTypes: PropTypes.array.isRequired,
   addNewPanel: PropTypes.func.isRequired,
   addNewVis: PropTypes.func.isRequired,
 };

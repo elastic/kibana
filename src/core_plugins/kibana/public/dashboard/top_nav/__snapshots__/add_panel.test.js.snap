@@ -72,11 +72,11 @@ exports[`render 1`] = `
           Add new Visualization
         </EuiButton>
       }
-      find={[Function]}
       key="visSavedObjectFinder"
       noItemsMessage="No matching visualizations found."
       onChoose={[Function]}
       savedObjectType="visualization"
+      visTypes={Array []}
     />
   </EuiFlyoutBody>
 </EuiFlyout>
