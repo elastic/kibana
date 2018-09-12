@@ -305,6 +305,16 @@ module.controller('MlExplorerController', function (
 
     mlExplorerDashboardService.swimlaneDataChange.changed('overall');
     mlExplorerDashboardService.swimlaneDataChange.changed('viewBy');
+
+    if (
+      mlCheckboxShowChartsService.state.get('showCharts') &&
+      $scope.anomalyChartRecords.length > 0
+    ) {
+      const timerange = getSelectionTimeRange($scope.cellData);
+      mlExplorerDashboardService.anomalyDataChange.changed(
+        $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+      );
+    }
   }
 
   // Refresh the data when the dashboard filters are updated.
