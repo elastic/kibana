@@ -21,6 +21,7 @@ const createMockAuthorization = () => {
   const mockAuthorization = {
     actions: {
       login: 'action:login',
+      manageSpaces: 'action:manageSpaces',
     },
     checkPrivilegesWithRequest: jest.fn(() => ({
       atSpaces: mockCheckPrivilegesAtSpaces,
@@ -35,6 +36,7 @@ const createMockAuthorization = () => {
   return {
     mockCheckPrivilegesAtSpaces,
     mockCheckPrivilegesAtSpace,
+    mockCheckPrivilegesGlobally,
     mockAuthorization,
   };
 };
@@ -252,7 +254,7 @@ describe('#get', () => {
     bar: 'foo-bar',
   };
 
-  test(`returns result of callWithRequestRepository.find when authorization is null`, async () => {
+  test(`returns result of callWithRequestRepository.get when authorization is null`, async () => {
     const mockAuditLogger = createMockAuditLogger();
     const authorization = null;
     const mockCallWithRequestRepository = {
@@ -276,7 +278,7 @@ describe('#get', () => {
     expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
   });
 
-  test(`returns result of callWithRequestRepository.find when authorization.mode.useRbacForRequest returns false`, async () => {
+  test(`returns result of callWithRequestRepository.get when authorization.mode.useRbacForRequest returns false`, async () => {
     const mockAuditLogger = createMockAuditLogger();
     const { mockAuthorization } = createMockAuthorization();
     mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
@@ -327,11 +329,9 @@ describe('#get', () => {
 
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, mockAuthorization.actions.login);
-      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        mockAuthorization.actions.login,
-        [id]
-      );
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'get', [
+        id,
+      ]);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
 
@@ -365,11 +365,166 @@ describe('#get', () => {
       expect(mockCheckPrivilegesAtSpace).toHaveBeenCalledWith(id, mockAuthorization.actions.login);
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
-      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [
+        id,
+      ]);
+    });
+  });
+});
+
+describe('#update', () => {
+  const spaceToUpdate = {
+    id: 'foo',
+    name: 'foo-name',
+    description: 'foo-description',
+    bar: 'foo-bar',
+    _reserved: false,
+  };
+
+  const attributes = {
+    name: 'foo-name',
+    description: 'foo-description',
+    bar: 'foo-bar',
+  };
+
+  const savedObject = {
+    id: 'foo',
+    attributes: {
+      name: 'foo-name',
+      description: 'foo-description',
+      bar: 'foo-bar',
+      _reserved: true,
+    },
+  };
+
+  const expectedReturnedSpace = {
+    id: 'foo',
+    name: 'foo-name',
+    description: 'foo-description',
+    bar: 'foo-bar',
+    _reserved: true,
+  };
+
+  test(`returns result of callWithRequestRepository.update when authorization is null`, async () => {
+    const mockAuditLogger = createMockAuditLogger();
+    const authorization = null;
+    const mockCallWithRequestRepository = {
+      update: jest.fn(),
+      get: jest.fn().mockReturnValue(savedObject),
+    };
+    const request = Symbol();
+
+    const client = new SpacesClient(
+      mockAuditLogger as any,
+      authorization,
+      mockCallWithRequestRepository,
+      null,
+      request
+    );
+    const id = savedObject.id;
+    const actualSpace = await client.update(id, spaceToUpdate);
+
+    expect(actualSpace).toEqual(expectedReturnedSpace);
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+    expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+    expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+  });
+
+  test(`returns result of callWithRequestRepository.update when authorization.mode.useRbacForRequest returns false`, async () => {
+    const mockAuditLogger = createMockAuditLogger();
+    const { mockAuthorization } = createMockAuthorization();
+    mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+    const mockCallWithRequestRepository = {
+      update: jest.fn(),
+      get: jest.fn().mockReturnValue(savedObject),
+    };
+    const request = Symbol();
+
+    const client = new SpacesClient(
+      mockAuditLogger as any,
+      mockAuthorization,
+      mockCallWithRequestRepository,
+      null,
+      request
+    );
+    const id = savedObject.id;
+    const actualSpace = await client.update(id, spaceToUpdate);
+
+    expect(actualSpace).toEqual(expectedReturnedSpace);
+    expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+    expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+    expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+  });
+
+  describe('useRbacForRequest is true', () => {
+    test(`throws Boom.forbidden when user isn't authorized at space`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        hasAllRequested: false,
         username,
-        mockAuthorization.actions.login,
-        [id]
+      });
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        null,
+        request
       );
+      const id = savedObject.id;
+      await expect(client.update(id, spaceToUpdate)).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'update');
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`updates the space`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        hasAllRequested: true,
+        username,
+      });
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      const mockInternalRepository = {
+        update: jest.fn(),
+        get: jest.fn().mockReturnValue(savedObject),
+      };
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        mockInternalRepository,
+        request
+      );
+      const id = savedObject.id;
+      const actualSpace = await client.update(id, spaceToUpdate);
+
+      expect(actualSpace).toEqual(expectedReturnedSpace);
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+      expect(mockInternalRepository.update).toHaveBeenCalledWith('space', id, attributes);
+      expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'update');
     });
   });
 });

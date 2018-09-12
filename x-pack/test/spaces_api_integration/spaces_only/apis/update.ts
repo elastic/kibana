@@ -13,12 +13,14 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { updateTest, expectAlreadyExistsResult, expectNewSpaceNotFound } = updateTestSuiteFactory(
-    esArchiver,
-    supertestWithoutAuth
-  );
+  const {
+    updateTest,
+    expectAlreadyExistsResult,
+    expectDefaultSpaceResult,
+    expectNewSpaceNotFound,
+  } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe('update', () => {
+  describe.only('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -27,27 +29,18 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         spaceId: SPACES.SPACE_1.spaceId,
       },
     ].forEach(scenario => {
-      updateTest(`can update space_1 from the ${scenario.spaceId} space`, {
+      updateTest(`can update from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         tests: {
           alreadyExists: {
-            space: {
-              name: 'space 1',
-              id: 'space_1',
-              description: 'a description',
-              color: '#5c5959',
-              _reserved: true,
-            },
             statusCode: 200,
             response: expectAlreadyExistsResult,
           },
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
+          },
           newSpace: {
-            space: {
-              name: 'marketing',
-              id: 'marketing',
-              description: 'a description',
-              color: '#5c5959',
-            },
             statusCode: 404,
             response: expectNewSpaceNotFound,
           },

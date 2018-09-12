@@ -18,11 +18,12 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     updateTest,
     expectNewSpaceNotFound,
     expectAlreadyExistsResult,
+    expectDefaultSpaceResult,
     expectRbacForbidden,
     createExpectLegacyForbidden,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe('update', () => {
+  describe.only('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -65,6 +66,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
             },
+            defaultSpace: {
+              statusCode: 403,
+              response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            },
             newSpace: {
               statusCode: 403,
               response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
@@ -86,6 +91,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             alreadyExists: {
               statusCode: 200,
               response: expectAlreadyExistsResult,
+            },
+            defaultSpace: {
+              statusCode: 200,
+              response: expectDefaultSpaceResult,
             },
             newSpace: {
               statusCode: 404,
@@ -109,6 +118,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               statusCode: 200,
               response: expectAlreadyExistsResult,
             },
+            defaultSpace: {
+              statusCode: 200,
+              response: expectDefaultSpaceResult,
+            },
             newSpace: {
               statusCode: 404,
               response: expectNewSpaceNotFound,
@@ -130,6 +143,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             alreadyExists: {
               statusCode: 200,
               response: expectAlreadyExistsResult,
+            },
+            defaultSpace: {
+              statusCode: 200,
+              response: expectDefaultSpaceResult,
             },
             newSpace: {
               statusCode: 404,
@@ -153,6 +170,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               statusCode: 200,
               response: expectAlreadyExistsResult,
             },
+            defaultSpace: {
+              statusCode: 200,
+              response: expectDefaultSpaceResult,
+            },
             newSpace: {
               statusCode: 404,
               response: expectNewSpaceNotFound,
@@ -172,6 +193,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
           },
           tests: {
             alreadyExists: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+            defaultSpace: {
               statusCode: 403,
               response: expectRbacForbidden,
             },
@@ -197,6 +222,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: expectRbacForbidden,
             },
+            defaultSpace: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
             newSpace: {
               statusCode: 403,
               response: expectRbacForbidden,
@@ -219,6 +248,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
               statusCode: 403,
               response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
             },
+            defaultSpace: {
+              statusCode: 403,
+              response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
+            },
             newSpace: {
               statusCode: 403,
               response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
@@ -238,6 +271,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacForbidden,
           },
+          defaultSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
           newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
@@ -253,6 +290,10 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         },
         tests: {
           alreadyExists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },

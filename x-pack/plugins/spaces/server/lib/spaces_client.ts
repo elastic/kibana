@@ -74,6 +74,7 @@ export class SpacesClient {
       await this.ensureAuthorizedAtSpace(
         id,
         this.authorization.actions.login,
+        'get',
         `Unauthorized to get ${id} space`
       );
     }
@@ -89,6 +90,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.manageSpaces,
+        'create',
         'Unauthorized to create spaces'
       );
     }
@@ -96,7 +98,7 @@ export class SpacesClient {
       ? this.internalSavedObjectRepository
       : this.callWithRequestSavedObjectRepository;
 
-    const attributes = omit(space, ['id', '_reserved']);
+    const attributes = omit(space, ['id', '_reserved']) as any;
     const id = space.id;
     const createdSavedObject = await repository.create('space', attributes, { id });
     return this.transformSavedObjectToSpace(createdSavedObject);
@@ -106,6 +108,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.manageSpaces,
+        'update',
         'Unauthorized to update spaces'
       );
     }
@@ -114,7 +117,8 @@ export class SpacesClient {
       : this.callWithRequestSavedObjectRepository;
 
     const attributes = omit(space, 'id', '_reserved');
-    const updatedSavedObject = await repository.update('space', id, attributes);
+    await repository.update('space', id, attributes);
+    const updatedSavedObject = await repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
   }
 
@@ -122,6 +126,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
         this.authorization.actions.manageSpaces,
+        'delete',
         'Unauthorized to delete spaces'
       );
     }
@@ -141,28 +146,33 @@ export class SpacesClient {
     return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
   }
 
-  private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {
+  private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.globally(action);
 
     if (hasAllRequested) {
-      this.auditLogger.spacesAuthorizationSuccess(username, action);
+      this.auditLogger.spacesAuthorizationSuccess(username, method);
       return;
     } else {
-      this.auditLogger.spacesAuthorizationFailure(username, action);
+      this.auditLogger.spacesAuthorizationFailure(username, method);
       throw Boom.forbidden(forbiddenMessage);
     }
   }
 
-  private async ensureAuthorizedAtSpace(spaceId: string, action: string, forbiddenMessage: string) {
+  private async ensureAuthorizedAtSpace(
+    spaceId: string,
+    action: string,
+    method: string,
+    forbiddenMessage: string
+  ) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, action);
 
     if (hasAllRequested) {
-      this.auditLogger.spacesAuthorizationSuccess(username, action, [spaceId]);
+      this.auditLogger.spacesAuthorizationSuccess(username, method, [spaceId]);
       return;
     } else {
-      this.auditLogger.spacesAuthorizationFailure(username, action, [spaceId]);
+      this.auditLogger.spacesAuthorizationFailure(username, method, [spaceId]);
       throw Boom.forbidden(forbiddenMessage);
     }
   }

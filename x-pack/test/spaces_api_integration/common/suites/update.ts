@@ -5,18 +5,17 @@
  */
 import expect from 'expect.js';
 import { SuperTest } from 'supertest';
-import { Space } from '../../../../plugins/spaces/common/model/space';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;
   response: (resp: any) => void;
-  space?: Space;
 }
 
 interface UpdateTests {
   alreadyExists: UpdateTest;
+  defaultSpace: UpdateTest;
   newSpace: UpdateTest;
 }
 
@@ -48,6 +47,23 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           })
           .expect(tests.alreadyExists.statusCode)
           .then(tests.alreadyExists.response);
+      });
+
+      describe(`default space`, () => {
+        it(`should return ${tests.defaultSpace.statusCode}`, async () => {
+          return supertest
+            .put(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
+            .auth(auth.username, auth.password)
+            .send({
+              name: 'the new default',
+              id: 'default',
+              description: 'a description',
+              color: '#ffffff',
+              _reserved: false,
+            })
+            .expect(tests.defaultSpace.statusCode)
+            .then(tests.defaultSpace.response);
+        });
       });
 
       describe(`when space doesn't exist`, () => {
@@ -95,6 +111,16 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const expectNewSpaceNotFound = createExpectNotFoundResult('marketing');
 
+  const expectDefaultSpaceResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      name: 'the new default',
+      id: 'default',
+      description: 'a description',
+      color: '#ffffff',
+      _reserved: true,
+    });
+  };
+
   const expectAlreadyExistsResult = (resp: any) => {
     expect(resp.body).to.eql({
       name: 'space 1',
@@ -110,5 +136,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectRbacForbidden,
     createExpectLegacyForbidden,
     expectAlreadyExistsResult,
+    expectDefaultSpaceResult,
   };
 }
