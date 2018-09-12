@@ -19,19 +19,20 @@
 
 import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
+import { fillPool } from './fill_pool';
+import { TaskManagerLogger } from './logger';
 import {
+  ConcreteTaskInstance,
+  SanitizedTaskDefinition,
   TaskDefinition,
   TaskDictionary,
-  TaskManager,
-  TaskManagerLogger,
-  TaskPool,
-  TaskStore,
   validateTaskDefinition,
-} from './task_pool';
-import { fillPool } from './task_pool/fill_pool';
-import { ConcreteTaskInstance, SanitizedTaskDefinition } from './task_pool/task';
-import { TaskPoller } from './task_pool/task_poller';
-import { TaskManagerRunner } from './task_pool/task_runner';
+} from './task';
+import { TaskManager } from './task_manager';
+import { TaskPoller } from './task_poller';
+import { TaskPool } from './task_pool';
+import { TaskManagerRunner } from './task_runner';
+import { TaskStore } from './task_store';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
   const logger = new TaskManagerLogger((...args) => server.log(...args));
@@ -98,11 +99,11 @@ function extractTaskDefinitions(
       const rawDefinition = taskDefinitions[type];
       rawDefinition.type = type;
       const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      const workersOccupied = Math.min(numWorkers, definition.workersOccupied || 1);
+      const workersOccupied = Math.min(numWorkers, definition.numWorkers || 1);
 
       acc[type] = {
         ...definition,
-        workersOccupied,
+        numWorkers: workersOccupied,
       };
 
       return acc;

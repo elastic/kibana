@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TaskManager } from './task_pool';
-import { TaskInstance } from './task_pool/task';
+import { TaskInstance } from './task';
+import { TaskManager } from './task_manager';
 
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;
