@@ -20,13 +20,13 @@
 import Joi from 'joi';
 import { TaskManagerClientWrapper } from './client_wrapper';
 import { getDefaultClient } from './default_client';
+import { TaskManagerLogger } from './logger';
 import {
+  SanitizedTaskDefinition,
   TaskDefinition,
   TaskDictionary,
-  TaskManagerLogger,
   validateTaskDefinition,
-} from './task_pool';
-import { SanitizedTaskDefinition } from './task_pool/task';
+} from './task';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
   const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
