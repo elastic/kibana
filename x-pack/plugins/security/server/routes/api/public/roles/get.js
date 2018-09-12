@@ -5,8 +5,9 @@
  */
 import _ from 'lodash';
 import Boom from 'boom';
+import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
-import { ALL_RESOURCE } from '../../../../../common/constants';
+import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
@@ -19,19 +20,17 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     );
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
-      if (resource === ALL_RESOURCE) {
+      if (resource === GLOBAL_RESOURCE) {
         result.global = _.uniq([...result.global, ...privileges]);
         return result;
       }
 
-      const spacePrefix = 'space:';
-      if (resource.startsWith(spacePrefix)) {
-        const spaceId = resource.slice(spacePrefix.length);
-        result.space[spaceId] = _.uniq([...result.space[spaceId] || [], ...privileges]);
-        return result;
-      }
-
-      throw new Error(`Unknown application privilege resource: ${resource}`);
+      const spaceId = spaceApplicationPrivilegesSerializer.resource.deserialize(resource);
+      result.space[spaceId] = _.uniq([
+        ...result.space[spaceId] || [],
+        ...privileges.map(privilege => spaceApplicationPrivilegesSerializer.privilege.deserialize(privilege))
+      ]);
+      return result;
     }, {
       global: [],
       space: {},

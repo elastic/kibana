@@ -7,9 +7,9 @@
 
 
 /*
- * Angular controller for the container for the anomaly charts in the
+ * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
- * The controller processes the data required to draw each of the charts
+ * The service processes the data required to draw each of the charts
  * and manages the layout of the charts in the containing div.
  */
 

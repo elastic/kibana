@@ -10,6 +10,7 @@
  * AngularJS directive for rendering Explorer dashboard swimlanes.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -33,11 +34,21 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
 
     element.on('$destroy', () => {
       mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
+      // unmountComponentAtNode() needs to be called so dragSelectListener within
+      // the ExplorerSwimlane component gets unwatched properly.
+      ReactDOM.unmountComponentAtNode(element[0]);
       scope.$destroy();
     });
 
     const MlTimeBuckets = Private(IntervalHelperProvider);
 
+    // This triggers the render function quite aggressively, but we want to make sure we don't miss
+    // any updates to related scopes of directives and/or controllers. However, we do a deep comparison
+    // of current and future props to filter redundant render triggers.
+    scope.$watch(function () {
+      render();
+    });
+    let previousProps = null;
     function render() {
       if (scope.swimlaneData === undefined) {
         return;
@@ -57,10 +68,14 @@ module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDa
         appState: scope.appState
       };
 
-      ReactDOM.render(
-        React.createElement(ExplorerSwimlane, props),
-        element[0]
-      );
+      if (_.isEqual(props, previousProps) === false) {
+        ReactDOM.render(
+          React.createElement(ExplorerSwimlane, props),
+          element[0]
+        );
+        previousProps = props;
+      }
+
     }
   }
 

@@ -6,7 +6,8 @@
 
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { KibanaApplicationPrivilege } from '../../../../../../../common/model/kibana_application_privilege';
+import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
+import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
@@ -17,8 +18,9 @@ interface Props {
   role: Role;
   spacesEnabled: boolean;
   spaces?: Space[];
+  userProfile: UserProfile;
   editable: boolean;
-  kibanaAppPrivileges: KibanaApplicationPrivilege[];
+  kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
   validator: RoleValidator;
 }
@@ -38,6 +40,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
       role,
       spacesEnabled,
       spaces = [],
+      userProfile,
       onChange,
       editable,
       validator,
@@ -49,6 +52,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           kibanaAppPrivileges={kibanaAppPrivileges}
           role={role}
           spaces={spaces}
+          userProfile={userProfile}
           onChange={onChange}
           editable={editable}
           validator={validator}

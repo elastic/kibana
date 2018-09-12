@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Space } from '../../../common/model/space';
+import { SpacesClient } from '../../lib/spaces_client';
 import { convertSavedObjectToSpace } from './convert_saved_object_to_space';
 
-export async function getSpaceById(client: any, spaceId: string): Promise<Space | null> {
+export async function getSpaceById(
+  client: SpacesClient,
+  spaceId: string,
+  errors: any
+): Promise<Space | null> {
   try {
-    const existingSpace = await client.get('space', spaceId);
+    const existingSpace = await client.get(spaceId);
     return convertSavedObjectToSpace(existingSpace);
   } catch (error) {
-    if (client.errors.isNotFoundError(error)) {
+    if (errors.isNotFoundError(error)) {
       return null;
     }
     throw error;

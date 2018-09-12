@@ -23,7 +23,12 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
-import { drawLineChartDots, numTicksForDateFormat } from '../../util/chart_utils';
+import {
+  drawLineChartDots,
+  getTickValues,
+  numTicksForDateFormat,
+  removeLabelOverlap
+} from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlEscape } from '../../util/string_utils';
@@ -34,6 +39,7 @@ const CONTENT_WRAPPER_HEIGHT = 215;
 
 export class ExplorerChart extends React.Component {
   static propTypes = {
+    tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
     mlSelectSeverityService: PropTypes.object.isRequired
   }
@@ -48,6 +54,7 @@ export class ExplorerChart extends React.Component {
 
   renderChart() {
     const {
+      tooManyBuckets,
       mlSelectSeverityService
     } = this.props;
 
@@ -176,13 +183,27 @@ export class ExplorerChart extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
+      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
+      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      // +1 ms to account for the ms that was substracted for query aggregations.
+      const interval = emphasisEnd - emphasisStart + 1;
+      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat))
         .tickFormat(d => moment(d).format(xAxisTickFormat));
+
+      // With tooManyBuckets the chart would end up with no x-axis labels
+      // because the ticks are based on the span of the emphasis section,
+      // and the highlighted area spans the whole chart.
+      if (tooManyBuckets === false) {
+        xAxis.tickValues(tickValues);
+      } else {
+        xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
+      }
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
         .orient('left')
@@ -196,7 +217,7 @@ export class ExplorerChart extends React.Component {
 
       const axes = lineChartGroup.append('g');
 
-      axes.append('g')
+      const gAxis = axes.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
@@ -204,6 +225,10 @@ export class ExplorerChart extends React.Component {
       axes.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+      if (tooManyBuckets === false) {
+        removeLabelOverlap(gAxis, emphasisStart, interval, vizWidth);
+      }
     }
 
     function drawLineChartHighlightedSpan() {
@@ -216,10 +241,12 @@ export class ExplorerChart extends React.Component {
 
       lineChartGroup.append('rect')
         .attr('class', 'selected-interval')
-        .attr('x', lineChartXScale(new Date(rectStart)))
-        .attr('y', 1)
-        .attr('width', rectWidth)
-        .attr('height', chartHeight - 1);
+        .attr('x', lineChartXScale(new Date(rectStart)) + 2)
+        .attr('y', 2)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', rectWidth - 4)
+        .attr('height', chartHeight - 4);
     }
 
     function drawLineChartPaths(data) {

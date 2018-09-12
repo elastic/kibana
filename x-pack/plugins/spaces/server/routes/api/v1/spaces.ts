@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
+import { SpacesClient } from '../../../lib/spaces_client';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
 
@@ -15,12 +16,19 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObjects;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
       const id = request.params.id;
 
       try {
-        const existingSpace: Space | null = await getSpaceById(client, id);
+        const existingSpace: Space | null = await getSpaceById(
+          spacesClient,
+          id,
+          SavedObjectsClient.errors
+        );
         if (!existingSpace) {
           return reply(Boom.notFound());
         }

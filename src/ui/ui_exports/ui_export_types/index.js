@@ -55,6 +55,7 @@ export {
   visualize,
   search,
   autocompleteProviders,
+  shareContextMenuExtensions,
 } from './ui_app_extensions';
 
 export {

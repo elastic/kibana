@@ -19,6 +19,10 @@ import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { registerUserProfileCapabilityFactory } from '../xpack_main/server/lib/user_profile_registry';
+import { SpacesClient } from './server/lib/spaces_client';
+import { SpacesAuditLogger } from './server/lib/audit_logger';
+import { AuditLogger } from '../../server/lib/audit_logger';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -58,10 +62,11 @@ export const spaces = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (vars, request, server) {
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
       try {
         vars.activeSpace = {
           valid: true,
-          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath(), server.config().get('server.basePath'))
+          space: await getActiveSpace(spacesClient, request.getBasePath(), server.config().get('server.basePath'))
         };
       } catch (e) {
         vars.activeSpace = {
@@ -89,11 +94,26 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     const spacesService = createSpacesService(server);
-    server.decorate('server', 'spaces', spacesService);
+    server.expose('getSpaceId', (request) => spacesService.getSpaceId(request));
 
-    const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
-    addScopedSavedObjectsClientWrapperFactory(
-      spacesSavedObjectsClientWrapperFactory(spacesService)
+    const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+
+    server.expose('spacesClient', {
+      getScopedClient: (request) => {
+        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+        const { callWithRequest, callWithInternalUser } = adminCluster;
+        const callCluster = (...args) => callWithRequest(request, ...args);
+        const { savedObjects } = server;
+        const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
+        const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+        const authorization = server.plugins.security ? server.plugins.security.authorization : null;
+        return new SpacesClient(spacesAuditLogger, authorization, callWithRequestRepository, internalRepository, request);
+      }
+    });
+
+    const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
+    addScopedSavedObjectsClientWrapperFactory(Number.MAX_VALUE,
+      spacesSavedObjectsClientWrapperFactory(spacesService, types)
     );
 
     server.addScopedTutorialContextFactory(
@@ -104,6 +124,14 @@ export const spaces = (kibana) => new kibana.Plugin({
     initPublicSpacesApi(server);
 
     initSpacesRequestInterceptors(server);
+
+    registerUserProfileCapabilityFactory(async (request) => {
+      const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+
+      return {
+        manageSpaces: await spacesClient.canEnumerateSpaces(),
+      };
+    });
 
     // Register a function with server to manage the collection of usage stats
     server.usage.collectorSet.register(getSpacesUsageCollector(server));

@@ -65,6 +65,7 @@ export function ExplorerChartsContainer({
                 </a>
               </div>
               <ExplorerChart
+                tooManyBuckets={tooManyBuckets}
                 seriesConfig={series}
                 mlSelectSeverityService={mlSelectSeverityService}
               />

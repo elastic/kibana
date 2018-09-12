@@ -5,39 +5,35 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { convertSavedObjectToSpace, getSpaceById } from '../../lib';
+import { SpacesClient } from '../../../lib/spaces_client';
 
 export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObjects;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
-      const space: Space = omit(request.payload, ['id']);
+      const space: Space = request.payload;
       const id = request.params.id;
 
-      const existingSpace = await getSpaceById(client, id);
-
-      if (existingSpace) {
-        space._reserved = existingSpace._reserved;
-      } else {
-        return reply(Boom.notFound(`Unable to find space with ID ${id}`));
-      }
-
-      let result;
+      let result: Space;
       try {
-        result = await client.update('space', id, { ...space });
+        result = await spacesClient.update(id, { ...space });
       } catch (error) {
+        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+          return reply(Boom.notFound());
+        }
         return reply(wrapError(error));
       }
 
-      const updatedSpace = convertSavedObjectToSpace(result);
-      return reply(updatedSpace);
+      return reply(result);
     },
     config: {
       validate: {

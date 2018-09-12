@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaApplicationPrivilege } from '../../../../../../../common/model/kibana_application_privilege';
+import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeForm } from './simple_privilege_form';
@@ -38,8 +38,9 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
+    userProfile: { hasCapability: () => true },
     editable: true,
-    kibanaAppPrivileges: [{ name: 'all' } as KibanaApplicationPrivilege],
+    kibanaAppPrivileges: ['all' as KibanaPrivilege],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     ...customProps,

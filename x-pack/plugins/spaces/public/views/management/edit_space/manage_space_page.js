@@ -34,6 +34,7 @@ import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { isReservedSpace } from '../../../../common';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 import { SpaceValidator } from '../lib/validate_space';
+import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 
 export class ManageSpacePage extends Component {
   state = {
@@ -99,6 +100,14 @@ export class ManageSpacePage extends Component {
   }
 
   getForm = () => {
+    const {
+      userProfile
+    } = this.props;
+
+    if (!userProfile.hasCapability('manageSpaces')) {
+      return <UnauthorizedPrompt />;
+    }
+
     const {
       name = '',
       description = '',
@@ -336,4 +345,5 @@ ManageSpacePage.propTypes = {
   space: PropTypes.string,
   spacesManager: PropTypes.object,
   spacesNavState: PropTypes.object.isRequired,
+  userProfile: PropTypes.object.isRequired,
 };

@@ -57,7 +57,21 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.get(null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(client.get('foo', null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.get('space', null)).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -94,7 +108,21 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.bulkGet(null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(client.bulkGet([{ type: 'foo' }], { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if objects type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.bulkGet([{ type: 'foo' }, { type: 'space' }], { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -110,7 +138,7 @@ const createMockClient = () => {
           spacesService,
         });
 
-        const objects = Symbol();
+        const objects = [{ type: 'foo' }];
         const options = Object.freeze({ foo: 'bar' });
         const actualReturnValue = await client.bulkGet(objects, options);
 
@@ -134,6 +162,76 @@ const createMockClient = () => {
         await expect(client.find({ namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
       });
 
+      test(`throws error if options.type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.find.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.find({ type: 'space' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`passes options.type to baseClient if valid singular type specified`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.find.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+        const options = Object.freeze({ type: 'foo' });
+
+        const actualReturnValue = await client.find(options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo'], namespace: currentSpace.expectedNamespace });
+      });
+
+      test(`throws error if options.type is array containing space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.find.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.find({ type: ['space', 'foo'] })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`if options.type isn't provided specifies options.type based on the types excluding the space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.find.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+        const types = ['foo', 'bar', 'space'];
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(client.find({ type: ['space', 'foo'] })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
       test(`supplements options with undefined namespace`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
         const baseClient = createMockClient();
@@ -147,11 +245,11 @@ const createMockClient = () => {
           spacesService,
         });
 
-        const options = Object.freeze({ foo: 'bar' });
+        const options = Object.freeze({ type: ['foo', 'bar'] });
         const actualReturnValue = await client.find(options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.find).toHaveBeenCalledWith({ foo: 'bar', namespace: currentSpace.expectedNamespace });
+        expect(baseClient.find).toHaveBeenCalledWith({ type: ['foo', 'bar'], namespace: currentSpace.expectedNamespace });
       });
     });
 
@@ -169,6 +267,20 @@ const createMockClient = () => {
         });
 
         await expect(client.create('foo', {}, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.create('space', {})).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -206,7 +318,21 @@ const createMockClient = () => {
           spacesService,
         });
 
-        await expect(client.bulkCreate(null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(client.bulkCreate([{ type: 'foo' }], { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if objects type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.bulkCreate([{ type: 'foo' }, { type: 'space' }])).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -222,7 +348,7 @@ const createMockClient = () => {
           spacesService,
         });
 
-        const objects = Symbol();
+        const objects = [{ type: 'foo' }];
         const options = Object.freeze({ foo: 'bar' });
         const actualReturnValue = await client.bulkCreate(objects, options);
 
@@ -244,6 +370,20 @@ const createMockClient = () => {
         });
 
         await expect(client.update(null, null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.update('space', null)).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
@@ -283,6 +423,20 @@ const createMockClient = () => {
         });
 
         await expect(client.delete(null, null, { namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test(`throws error if type is space`, async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+        });
+
+        await expect(client.delete('space', 'foo')).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`supplements options with undefined namespace`, async () => {
