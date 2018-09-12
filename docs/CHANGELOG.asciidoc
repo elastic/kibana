@@ -127,8 +127,6 @@ Sharing::
 * Adds `aria-label` to search input on dashboard listing view {pull}22467[#22467]
 * In the Controls visualization, safely handles case where value can not be 
 extracted from Kibana filter {pull}22885[#22885]
-* In the Controls visualization, safely handles case where value can't be 
-extracted from Kibana filter {pull}22885[#22885]
 
 Visualization::
 * Fixes broken visualize CSS {pull}22713[#22713]
