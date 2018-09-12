@@ -192,7 +192,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
       updateVisualizationConfig(state.params, this.params);
 
-      this.aggs = new AggConfigs(this, state.aggs);
+      this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
     }
 
     setState(state, updateCurrentState = true) {
@@ -237,7 +237,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     copyCurrentState(includeDisabled = false) {
       const state = this.getCurrentState(includeDisabled);
-      state.aggs = new AggConfigs(this, state.aggs);
+      state.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
       return state;
     }
 
@@ -256,7 +256,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     getAggConfig() {
-      return new AggConfigs(this, this.aggs.raw.filter(agg => agg.enabled));
+      return this.aggs.clone({ enabledOnly: true });
     }
 
     getState() {

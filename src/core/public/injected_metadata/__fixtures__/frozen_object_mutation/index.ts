@@ -17,18 +17,34 @@
  * under the License.
  */
 
-/**
- *
- * @param {string} url - a relative or root relative url.  If a relative path is given then the
- * absolute url returned will depend on the current page where this function is called from. For example
- * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
- * back "http://www.mysite.com/shopping/adults".  If you passed this function a root relative path, or one that
- * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
- * @return {string} the relative url transformed into an absolute url
- */
-export function relativeToAbsolute(url) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
+import { deepFreeze } from '../../deep_freeze';
+
+deepFreeze(
+  {
+    foo: {
+      bar: {
+        baz: 1,
+      },
+    },
+  }
+).foo.bar.baz = 2;
+
+deepFreeze(
+  {
+    foo: [
+      {
+        bar: 1,
+      },
+    ],
+  }
+).foo[0].bar = 2;
+
+deepFreeze(
+  {
+    foo: [1],
+  }
+).foo[0] = 2;
+
+deepFreeze({
+  foo: [1],
+}).foo.push(2);

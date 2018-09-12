@@ -27,6 +27,7 @@ export async function createDefaultSpace(server) {
   await savedObjectsRepository.create('space', {
     name: 'Default',
     description: 'This is your default space!',
+    color: '#00bfb3',
     _reserved: true
   }, options);
 }
