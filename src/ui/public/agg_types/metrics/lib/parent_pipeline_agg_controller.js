@@ -28,7 +28,7 @@ const parentPipelineAggController = function ($scope) {
   $scope.$watch('agg.params.metricAgg', updateOrderAgg);
 
   $scope.$on('$destroy', function () {
-    const lastBucket = _.findLast($scope.vis.getAggConfig(), agg => agg.type.type === 'buckets');
+    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type.type === 'buckets');
     if ($scope.aggForm && $scope.aggForm.agg) {
       $scope.aggForm.agg.$setValidity('bucket', true);
     }
@@ -43,13 +43,13 @@ const parentPipelineAggController = function ($scope) {
   };
 
   function checkBuckets() {
-    const lastBucket = _.findLast($scope.vis.getAggConfig(), agg => agg.type.type === 'buckets');
+    const lastBucket = _.findLast($scope.state.aggs, agg => agg.type.type === 'buckets');
     const bucketHasType = lastBucket && lastBucket.type;
     const bucketIsHistogram = bucketHasType && ['date_histogram', 'histogram'].includes(lastBucket.type.name);
     const canUseAggregation = lastBucket && bucketIsHistogram;
 
     // remove errors on all buckets
-    _.each($scope.vis.aggs, agg => { if (agg.error) delete agg.error; });
+    _.each($scope.state.aggs, agg => { if (agg.error) delete agg.error; });
 
     if ($scope.aggForm.agg) {
       $scope.aggForm.agg.$setValidity('bucket', canUseAggregation);
@@ -75,7 +75,7 @@ const parentPipelineAggController = function ($scope) {
 
     // we aren't creating a custom aggConfig
     if (metricAgg !== 'custom') {
-      if (!$scope.vis.getAggConfig().find(agg => agg.id === metricAgg)) {
+      if (!$scope.state.aggs.find(agg => agg.id === metricAgg)) {
         params.metricAgg = null;
       }
       params.customMetric = null;
