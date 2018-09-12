@@ -6,7 +6,8 @@ export const ESFieldsSelect = compose(
   withState('fields', 'setFields', []),
   lifecycle({
     componentDidMount() {
-      getFields(this.props.index).then((fields = []) => this.props.setFields(fields));
+      if (this.props.index)
+        getFields(this.props.index).then((fields = []) => this.props.setFields(fields));
     },
     componentDidUpdate({ index }) {
       const { setFields, onChange, selected } = this.props;

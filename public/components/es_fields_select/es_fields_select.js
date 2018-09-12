@@ -33,4 +33,5 @@ ESFieldsSelect.propTypes = {
 
 ESFieldsSelect.defaultProps = {
   selected: [],
+  fields: [],
 };

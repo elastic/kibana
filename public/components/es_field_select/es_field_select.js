@@ -31,3 +31,7 @@ ESFieldSelect.propTypes = {
   value: PropTypes.string,
   fields: PropTypes.array,
 };
+
+ESFieldSelect.defaultProps = {
+  fields: [],
+};
