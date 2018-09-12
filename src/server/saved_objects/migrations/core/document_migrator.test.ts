@@ -18,10 +18,20 @@
  */
 
 import _ from 'lodash';
+import sinon from 'sinon';
 import { DocumentMigrator } from './document_migrator';
 import { SavedObjectDoc } from './saved_object_conversion';
 
 describe('DocumentMigrator', () => {
+  function testOpts() {
+    return {
+      kibanaVersion: '25.2.3',
+      migrations: {},
+      validateDoc: _.noop,
+      log: sinon.spy(),
+    };
+  }
+
   it('validates the migration definition', () => {
     const invalidDefinition: any = {
       kibanaVersion: '3.2.3',
@@ -77,15 +87,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('migrates type and attributes', () => {
-    const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         user: {
           '1.2.3': setAttr('attributes.name', 'Chris'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -102,15 +110,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('migrates meta properties', () => {
-    const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         acl: {
           '2.3.5': setAttr('acl', 'admins-only,sucka!'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -129,15 +135,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('does not apply migrations to unrelated docs', () => {
-    const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         aaa: { '1.0.0': setAttr('aaa', 'A') },
         bbb: { '1.0.0': setAttr('bbb', 'B') },
         ccc: { '1.0.0': setAttr('ccc', 'C') },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -153,15 +157,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('assumes documents w/ undefined migrationVersion are up to date', () => {
-    const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         user: { '1.0.0': setAttr('aaa', 'A') },
         bbb: { '2.3.4': setAttr('bbb', 'B') },
         ccc: { '1.0.0': setAttr('ccc', 'C') },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -182,9 +184,8 @@ describe('DocumentMigrator', () => {
   });
 
   it('only applies migrations that are more recent than the doc', () => {
-    const kibanaVersion = '8.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         dog: {
           '1.2.3': setAttr('attributes.a', 'A'),
@@ -192,7 +193,6 @@ describe('DocumentMigrator', () => {
           '2.0.1': setAttr('attributes.c', 'C'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -209,9 +209,10 @@ describe('DocumentMigrator', () => {
   });
 
   it('rejects docs that belong to a newer Kibana instance', () => {
-    const kibanaVersion = '8.9.1';
-    const migrations = {};
-    const migrator = new DocumentMigrator({ kibanaVersion, migrations, validateDoc: _.noop });
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      kibanaVersion: '8.0.1',
+    });
     expect(() =>
       migrator.migrate({
         id: 'smelly',
@@ -223,10 +224,9 @@ describe('DocumentMigrator', () => {
   });
 
   it('applies migrations in order', () => {
-    const kibanaVersion = '18.9.1';
     let count = 0;
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         dog: {
           '2.2.4': setAttr('attributes.b', () => ++count),
@@ -234,7 +234,6 @@ describe('DocumentMigrator', () => {
           '1.2.3': setAttr('attributes.a', () => ++count),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -251,9 +250,8 @@ describe('DocumentMigrator', () => {
   });
 
   it('allows props to be added', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         animal: {
           '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
@@ -262,7 +260,6 @@ describe('DocumentMigrator', () => {
           '2.2.4': setAttr('animal', 'Doggie'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -280,9 +277,8 @@ describe('DocumentMigrator', () => {
   });
 
   it('allows props to be renamed', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         animal: {
           '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
@@ -293,7 +289,6 @@ describe('DocumentMigrator', () => {
           '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -312,9 +307,8 @@ describe('DocumentMigrator', () => {
   });
 
   it('allows changing type', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         cat: {
           '1.0.0': setAttr('attributes.name', (name: string) => `Kitty ${name}`),
@@ -323,7 +317,6 @@ describe('DocumentMigrator', () => {
           '2.2.4': setAttr('type', 'cat'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -340,15 +333,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('disallows updating a migrationVersion prop to a lower version', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         cat: {
           '1.0.0': setAttr('migrationVersion.foo', '3.2.1'),
         },
       },
-      validateDoc: _.noop,
     });
 
     expect(() =>
@@ -364,15 +355,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('disallows removing a migrationVersion prop', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         cat: {
           '1.0.0': setAttr('migrationVersion', {}),
         },
       },
-      validateDoc: _.noop,
     });
     expect(() =>
       migrator.migrate({
@@ -387,9 +376,8 @@ describe('DocumentMigrator', () => {
   });
 
   it('allows updating a migrationVersion prop to a later version', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         cat: {
           '1.0.0': setAttr('migrationVersion.cat', '2.9.1'),
@@ -402,7 +390,6 @@ describe('DocumentMigrator', () => {
           '3.0.0': setAttr('attributes.name', 'Shiny'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -419,15 +406,13 @@ describe('DocumentMigrator', () => {
   });
 
   it('allows adding props to migrationVersion', () => {
-    const kibanaVersion = '18.9.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         cat: {
           '1.0.0': setAttr('migrationVersion.foo', '5.6.7'),
         },
       },
-      validateDoc: _.noop,
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -443,10 +428,10 @@ describe('DocumentMigrator', () => {
     });
   });
 
-  it('decorates transform errors with details about what doc and transform failed', () => {
-    const kibanaVersion = '8.9.1';
+  it('logs the document and transform that failed', () => {
+    const log = sinon.spy();
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         dog: {
           '1.2.3': () => {
@@ -454,29 +439,28 @@ describe('DocumentMigrator', () => {
           },
         },
       },
-      validateDoc: _.noop,
+      log,
     });
+    const failedDoc = {
+      id: 'smelly',
+      type: 'dog',
+      attributes: {},
+      migrationVersion: {},
+    };
     try {
-      migrator.migrate({
-        id: 'smelly',
-        type: 'dog',
-        attributes: {},
-        migrationVersion: {},
-      });
+      migrator.migrate(_.cloneDeep(failedDoc));
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      expect(error.detail).toEqual({
-        failedDoc: 'dog:smelly',
-        failedTransform: 'dog:1.2.3',
-      });
+      const warning = log.args.filter(([[level]]) => level === 'warning')[0][1];
+      expect(warning).toContain(JSON.stringify(failedDoc));
+      expect(warning).toContain('dog:1.2.3');
     }
   });
 
   test('extracts the latest migration version info', () => {
-    const kibanaVersion = '9.3.1';
     const { migrationVersion } = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         aaa: {
           '1.2.3': (doc: SavedObjectDoc) => doc,
@@ -488,7 +472,6 @@ describe('DocumentMigrator', () => {
           '2.0.0': (doc: SavedObjectDoc) => doc,
         },
       },
-      validateDoc: _.noop,
     });
 
     expect(migrationVersion).toEqual({
@@ -498,9 +481,8 @@ describe('DocumentMigrator', () => {
   });
 
   test('fails if the validate doc throws', () => {
-    const kibanaVersion = '9.3.1';
     const migrator = new DocumentMigrator({
-      kibanaVersion,
+      ...testOpts(),
       migrations: {
         aaa: {
           '2.3.4': d => _.set(d, 'attributes.counter', 42),

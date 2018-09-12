@@ -62,6 +62,7 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
+import { LogFn, Logger, MigrationLogger } from './migration_logger';
 import { MigrationVersion, SavedObjectDoc } from './saved_object_conversion';
 
 export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
@@ -76,6 +77,7 @@ interface Opts {
   kibanaVersion: string;
   migrations: MigrationDefinition;
   validateDoc: ValidateDoc;
+  log: LogFn;
 }
 
 interface ActiveMigrations {
@@ -111,12 +113,13 @@ export class DocumentMigrator implements VersionedTransformer {
    * @prop {MigrationDefinition} migrations - The migrations that will be used to migrate documents
    * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
    *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
+   * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
   constructor(opts: Opts) {
     validateMigrationDefinition(opts.migrations);
 
-    this.migrations = buildActiveMigrations(opts.migrations);
+    this.migrations = buildActiveMigrations(opts.migrations, new MigrationLogger(opts.log));
     this.transformDoc = buildDocumentTransform({
       kibanaVersion: opts.kibanaVersion,
       migrations: this.migrations,
@@ -194,12 +197,12 @@ function validateMigrationDefinition(migrations: MigrationDefinition) {
  * From: { type: { version: fn } }
  * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
  */
-function buildActiveMigrations(migrations: MigrationDefinition): ActiveMigrations {
+function buildActiveMigrations(migrations: MigrationDefinition, log: Logger): ActiveMigrations {
   return _.mapValues(migrations, (versions, prop) => {
     const transforms = Object.entries(versions)
       .map(([version, transform]) => ({
         version,
-        transform: wrapWithTry(version, prop!, transform),
+        transform: wrapWithTry(version, prop!, transform, log),
       }))
       .sort((a, b) => Semver.compare(a.version, b.version));
     return {
@@ -285,7 +288,7 @@ function markAsUpToDate(doc: SavedObjectDoc, migrations: ActiveMigrations) {
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-function wrapWithTry(version: string, prop: string, transform: TransformFn) {
+function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
   return function tryTransformDoc(doc: SavedObjectDoc) {
     try {
       const result = transform(doc);
@@ -298,11 +301,11 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn) {
 
       return result;
     } catch (error) {
-      error.detail = {
-        failedDoc: `${doc.type}:${doc.id}`,
-        failedTransform: `${prop}:${version}`,
-      };
-
+      const failedTransform = `${prop}:${version}`;
+      const failedDoc = JSON.stringify(doc);
+      log.warning(
+        `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
+      );
       throw error;
     }
   };

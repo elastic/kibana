@@ -69,6 +69,7 @@ export class KibanaMigrator {
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
+  private log: LogFn;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -80,10 +81,12 @@ export class KibanaMigrator {
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
+    this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: kbnServer.version,
       migrations: kbnServer.uiExports.savedObjectMigrations || {},
       validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations || {}),
+      log: this.log,
     });
   }
 
@@ -132,7 +135,7 @@ export class KibanaMigrator {
       callCluster: createCallCluster(server),
       documentMigrator: this.documentMigrator,
       index: config.get('kibana.index'),
-      log: (meta: string[], message: string) => server.log(meta, message),
+      log: this.log,
       mappingProperties: this.mappingProperties,
       pollInterval: config.get('migrations.pollInterval'),
       scrollDuration: config.get('migrations.scrollDuration'),
