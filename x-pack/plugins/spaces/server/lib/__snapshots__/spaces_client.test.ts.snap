@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#create useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to create spaces"`;
+
 exports[`#get useRbacForRequest is true throws Boom.forbidden if the user isn't authorized at space 1`] = `"Unauthorized to get foo-space space"`;
 
 exports[`#getAll useRbacForRequest is true throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;

@@ -98,7 +98,7 @@ export class SpacesClient {
       ? this.internalSavedObjectRepository
       : this.callWithRequestSavedObjectRepository;
 
-    const attributes = omit(space, ['id', '_reserved']) as any;
+    const attributes = omit(space, ['id', '_reserved']);
     const id = space.id;
     const createdSavedObject = await repository.create('space', attributes, { id });
     return this.transformSavedObjectToSpace(createdSavedObject);
