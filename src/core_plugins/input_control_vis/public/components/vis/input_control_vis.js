@@ -28,6 +28,8 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class InputControlVis extends Component {
   constructor(props) {
     super(props);
@@ -104,7 +106,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasValues()}
               data-test-subj="inputControlClearBtn"
             >
-              Clear form
+              <FormattedMessage id="inputControl.vis.inputControlVis.clearFormButtonLabel" defaultMessage="Clear form"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -115,7 +117,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasChanges()}
               data-test-subj="inputControlCancelBtn"
             >
-              Cancel changes
+              <FormattedMessage id="inputControl.vis.inputControlVis.cancelChangesButtonLabel" defaultMessage="Cancel changes"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -127,7 +129,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasChanges()}
               data-test-subj="inputControlSubmitBtn"
             >
-              Apply changes
+              <FormattedMessage id="inputControl.vis.inputControlVis.applyChangesButtonLabel" defaultMessage="Apply changes"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
