@@ -241,6 +241,109 @@ describe('#getAll', () => {
   });
 });
 
+describe('#canEnumerateSpaces', () => {
+  describe(`authorization is null`, () => {
+    test(`returns true`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const authorization = null;
+      const request = Symbol();
+
+      const client = new SpacesClient(mockAuditLogger as any, authorization, null, null, request);
+
+      const canEnumerateSpaces = await client.canEnumerateSpaces();
+      expect(canEnumerateSpaces).toEqual(true);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe(`authorization.mode.useRbacForRequest is false`, () => {
+    test(`returns true`, async () => {
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        null,
+        request
+      );
+      const canEnumerateSpaces = await client.canEnumerateSpaces();
+
+      expect(canEnumerateSpaces).toEqual(true);
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('useRbacForRequest is true', () => {
+    test(`returns false if user is not authorized to enumerate spaces`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        username,
+        hasAllRequested: false,
+      });
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        null,
+        request
+      );
+
+      const canEnumerateSpaces = await client.canEnumerateSpaces();
+      expect(canEnumerateSpaces).toEqual(false);
+
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+
+    test(`returns true if user is authorized to enumerate spaces`, async () => {
+      const username = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+      mockCheckPrivilegesGlobally.mockReturnValue({
+        username,
+        hasAllRequested: true,
+      });
+      const request = Symbol();
+
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        mockAuthorization,
+        null,
+        null,
+        request
+      );
+
+      const canEnumerateSpaces = await client.canEnumerateSpaces();
+      expect(canEnumerateSpaces).toEqual(true);
+
+      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(mockCheckPrivilegesGlobally).toHaveBeenCalledWith(
+        mockAuthorization.actions.manageSpaces
+      );
+
+      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+    });
+  });
+});
+
 describe('#get', () => {
   const savedObject = {
     id: 'foo',

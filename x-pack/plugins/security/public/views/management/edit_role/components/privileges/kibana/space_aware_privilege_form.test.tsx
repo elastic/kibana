@@ -230,4 +230,22 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       expect(addPrivilegeButton).toHaveLength(1);
     });
   });
+
+  describe('with user profile disabling "manageSpaces"', () => {
+    it('renders a warning message instead of the privilege form', () => {
+      const props = buildProps({
+        userProfile: {
+          hasCapability: (capability: string) => {
+            if (capability === 'manageSpaces') {
+              return false;
+            }
+            throw new Error(`unexpected call to hasCapability: ${capability}`);
+          },
+        },
+      });
+
+      const wrapper = shallow(<SpaceAwarePrivilegeForm {...props} />);
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
 });
