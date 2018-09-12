@@ -17,37 +17,33 @@
  * under the License.
  */
 
-import { SavedObjectsRepository } from './repository';
+import { SavedObjectsSchema } from './schema';
 
-/**
- * Provider for the Saved Object Repository.
- */
-export class SavedObjectsRepositoryProvider {
+describe('#isNamespaceAgnostic', () => {
+  it(`returns false for unknown types`, () => {
+    const schema = new SavedObjectsSchema({});
+    const result = schema.isNamespaceAgnostic('bar');
+    expect(result).toBe(false);
+  });
 
-  constructor({
-    index,
-    mappings,
-    schema,
-    onBeforeWrite
-  }) {
-    this._index = index;
-    this._mappings = mappings;
-    this._schema = schema;
-    this._onBeforeWrite = onBeforeWrite;
-  }
-
-  getRepository(callCluster) {
-
-    if (typeof callCluster !== 'function') {
-      throw new TypeError('Repository requires a "callCluster" function to be provided.');
-    }
-
-    return new SavedObjectsRepository({
-      index: this._index,
-      mappings: this._mappings,
-      schema: this._schema,
-      onBeforeWrite: this._onBeforeWrite,
-      callCluster
+  it(`returns true for explicitly namespace agnostic type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: true,
+      }
     });
-  }
-}
+    const result = schema.isNamespaceAgnostic('foo');
+    expect(result).toBe(true);
+  });
+
+  it(`returns false for explicitly namespaced type`, () => {
+    const schema = new SavedObjectsSchema({
+      foo: {
+        isNamespaceAgnostic: false,
+      }
+    });
+    const result = schema.isNamespaceAgnostic('foo');
+    expect(result).toBe(false);
+  });
+});
+

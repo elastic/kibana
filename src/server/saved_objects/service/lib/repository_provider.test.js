@@ -41,20 +41,24 @@ test('creates a valid Repository', async () => {
         }
       }
     },
+    schema: {
+      isNamespaceAgnostic: jest.fn(),
+    },
     onBeforeWrite: jest.fn()
   };
 
   const provider = new SavedObjectsRepositoryProvider(properties);
 
   const callCluster = jest.fn().mockReturnValue({
-    _id: 'new'
+    _id: 'ns:foo:new'
   });
 
   const repository = provider.getRepository(callCluster);
 
-  await repository.create('foo', {});
+  await repository.create('foo', {}, { namespace: 'ns' });
 
   expect(callCluster).toHaveBeenCalledTimes(1);
+  expect(properties.schema.isNamespaceAgnostic).toHaveBeenCalled();
   expect(properties.onBeforeWrite).toHaveBeenCalledTimes(1);
   expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
     index: properties.index

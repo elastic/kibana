@@ -22,13 +22,14 @@ import Boom from 'boom';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, options = {}) {
+export function getSearchDsl(mappings, schema, options = {}) {
   const {
+    namespace,
     type,
     search,
     searchFields,
     sortField,
-    sortOrder
+    sortOrder,
   } = options;
 
   if (!type && sortField) {
@@ -40,7 +41,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields),
+    ...getQueryParams(mappings, schema, namespace, type, search, searchFields),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

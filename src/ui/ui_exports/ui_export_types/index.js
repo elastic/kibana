@@ -24,7 +24,8 @@ export {
 
 export {
   mappings,
-} from './saved_object_mappings';
+  savedObjectsSchema,
+} from './saved_objects';
 
 export {
   app,
