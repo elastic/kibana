@@ -60,6 +60,8 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
     };
 
     return {
+      // TODO: checkPrivileges.atResources isn't necessary once we have the ES API to list all privileges
+      // this should be removed when we switch to this API, and is not covered by unit tests currently
       atResources: checkPrivilegesAtResources,
       async atSpace(spaceId, privilegeOrPrivileges) {
         const spaceResource = spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);

@@ -29,10 +29,6 @@ const createMockXpackInfoFeature = (allowRbac) => {
 };
 
 describe(`#initialize`, () => {
-  test(`actually initializes the authorization mode`, () => {
-    expect(false).toBe(true);
-  });
-
   test(`can't be initialized twice for the same request`, async () => {
     const mockConfig = createMockConfig();
     const mockXpackInfoFeature = createMockXpackInfoFeature();

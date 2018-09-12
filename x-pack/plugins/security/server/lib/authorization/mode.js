@@ -24,6 +24,8 @@ export function authorizationModeFactory(
 ) {
   const useRbacForRequestCache = new WeakMap();
 
+  // TODO: This logic will change once we have the ES API to list all privileges
+  // and is not covered by unit tests currently
   const shouldUseRbacForRequest = async (request) => {
     if (!config.get('xpack.security.authorization.legacyFallback.enabled')) {
       return true;
