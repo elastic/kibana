@@ -23,7 +23,7 @@ import { ColumnarPage, PageContent } from '../../components/page';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
 import { WithLogMinimap, WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPosition, WithLogPositionUrlState } from '../../containers/logs/with_log_position';
-import { WithLogTextview } from '../../containers/logs/with_log_textview';
+import { WithLogTextview, WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
@@ -35,6 +35,7 @@ export class LogsPage extends React.Component {
         <WithLogFilterUrlState />
         <WithLogPositionUrlState />
         <WithLogMinimapUrlState />
+        <WithLogTextviewUrlState />
         <Header breadcrumbs={[{ text: 'Logs' }]} />
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
