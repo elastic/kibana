@@ -136,6 +136,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       spacesClient: {
         getScopedClient: jest.fn((req: any) => {
           return new SpacesClient(
+            null as any,
             null,
             mockSavedObjectsRepository,
             mockSavedObjectsRepository,

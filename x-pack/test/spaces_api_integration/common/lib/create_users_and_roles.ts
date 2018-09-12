@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SuperTest } from 'supertest';
 import { AUTHENTICATION } from './authentication';
 
-export const createUsersAndRoles = async (es, supertest) => {
+export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) => {
   await supertest.put('/api/security/role/kibana_legacy_user').send({
     elasticsearch: {
       indices: [
