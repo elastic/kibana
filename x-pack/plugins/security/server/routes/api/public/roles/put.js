@@ -18,7 +18,7 @@ export function initPutRolesApi(
   application
 ) {
 
-  const transformKibanaPrivilegesToEs = (application, kibanaPrivileges) => {
+  const transformKibanaPrivilegesToEs = (kibanaPrivileges) => {
     const kibanaApplicationPrivileges = [];
     if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
       kibanaApplicationPrivileges.push({
@@ -42,7 +42,6 @@ export function initPutRolesApi(
   };
 
   const transformRolesToEs = (
-    application,
     payload,
     existingApplications = []
   ) => {
@@ -57,7 +56,7 @@ export function initPutRolesApi(
       indices: elasticsearch.indices || [],
       run_as: elasticsearch.run_as || [],
       applications: [
-        ...transformKibanaPrivilegesToEs(application, kibana),
+        ...transformKibanaPrivilegesToEs(kibana),
         ...otherApplications,
       ],
     }, identity);
@@ -96,7 +95,6 @@ export function initPutRolesApi(
         });
 
         const body = transformRolesToEs(
-          application,
           request.payload,
           existingRoleResponse[name] ? existingRoleResponse[name].applications : []
         );
