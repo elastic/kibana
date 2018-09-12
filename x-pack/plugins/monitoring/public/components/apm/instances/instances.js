@@ -40,7 +40,7 @@ const instanceRowFactory = () => {
         <KuiTableRowCell>
           <div className="monTableCell__name">
             <EuiLink
-              href={`/apm/instances/${props.uuid}`}
+              href={`#/apm/instances/${props.uuid}`}
               data-test-subj={`apmLink-${props.name}`}
             >
               {props.name}
