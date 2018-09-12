@@ -274,7 +274,18 @@ export class JobCreateUi extends Component {
   }
 
   hasStepErrors(stepId) {
-    const stepFieldErrors = this.state.stepsFieldErrors[stepId];
+    const {
+      indexPatternAsyncErrors,
+      stepsFieldErrors,
+    } = this.state;
+
+    if (stepId === STEP_LOGISTICS) {
+      if (Boolean(indexPatternAsyncErrors)) {
+        return true;
+      }
+    }
+
+    const stepFieldErrors = stepsFieldErrors[stepId];
     return Object.values(stepFieldErrors).some(error => error != null);
   }
 
