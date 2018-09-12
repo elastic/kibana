@@ -1,9 +1,4 @@
-[chart] {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .timelion {
   position: relative;
@@ -70,71 +65,12 @@
   cursor: pointer;
 }
 
-.chart-container {
-  display: inline-block;
-  cursor: pointer;
-  position: relative;
-  box-sizing: border-box;
-  border: 2px dashed transparent;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-  margin-bottom: 10px;
-
-  &.active {
-    border-color: #ccc;
-  }
-}
-
-.chart-container.running {
-  opacity: 0.50;
-}
-
-timelion-interval {
-  display: flex;
-}
 
 
 
 
-.cell-actions {
-  position: absolute;
-  bottom:5px;
-  left:5px;
-  line-height: 10px;
 
-  > .cell-action,
-  > .cell-id {
-    display: inline-block;
-    font-size: 10px;
-    text-align: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    border: 1px solid #666;
-    padding: 3px;
-    font-weight: bold;
-    background-color: #ccc;
-    opacity: 0.50;
-    z-index: 10;
-  }
 
-  .cell-action {
-    opacity: 0;
-
-    &:focus {
-      opacity: 1;
-    }
-  }
-}
-
-.chart-container:hover {
-  .cell-action {
-    opacity: 0.50;
-    &:hover {
-      opacity: 1;
-    }
-  }
-}
 
 .legendLabel {
   //max-width: 210px;
