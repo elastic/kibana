@@ -26,6 +26,7 @@ uiRoutes.when('/apm/instances/:uuid', {
       return routeInit();
     },
   },
+
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');

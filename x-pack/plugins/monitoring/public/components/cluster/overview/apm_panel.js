@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
 
 import {
   EuiFlexGrid,
@@ -20,9 +21,10 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { formatTimestampToDuration } from '../../../../common';
 
 export function ApmPanel(props) {
-  if (!get(props, 'beats.total', 0) > 0) {
+  if (!get(props, 'apms.total', 0) > 0) {
     return null;
   }
 
@@ -47,13 +49,13 @@ export function ApmPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Total Events</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="beatsTotalEvents">
+              <EuiDescriptionListTitle>Processed Events</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Bytes Sent</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="beatsBytesSent">
-                {formatMetric(props.bytesSent, 'byte')}
+              <EuiDescriptionListTitle>Last Event</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
+                {formatTimestampToDuration(+moment(props.timeOfLastEvent), 'since') + ' ago'}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -64,13 +66,20 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={`Apm Instances: ${props.beats.total}`}
+                  aria-label={`Apm Instances: ${props.apms.total}`}
                   data-test-subj="apmListing"
                 >
-                  APM Servers: <span data-test-subj="beatsTotal">{props.beats.total}</span>
+                  APM Servers: <span data-test-subj="apmsTotal">{props.apms.total}</span>
                 </EuiLink>
               </h3>
             </EuiTitle>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle>Memory Usage</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
+                <BytesPercentageUsage usedBytes={props.memRss} maxBytes={props.memTotal} />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGrid>

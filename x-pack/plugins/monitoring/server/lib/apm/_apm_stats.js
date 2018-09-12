@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { get } from 'lodash';
 
 export const getDiffCalculation = (max, min) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
@@ -26,8 +26,9 @@ export const apmAggFilterPath = [
   'aggregations.types.buckets.uuids.buckets.doc_count',
   'aggregations.min_events_total.value',
   'aggregations.max_events_total.value',
-  'aggregations.min_bytes_sent_total.value',
-  'aggregations.max_bytes_sent_total.value',
+  'aggregations.min_mem_rss_total.value',
+  'aggregations.max_mem_rss_total.value',
+  'aggregations.max_mem_total_total.value',
 ];
 
 export const apmUuidsAgg = maxBucketSize => ({
@@ -67,16 +68,21 @@ export const apmUuidsAgg = maxBucketSize => ({
           field: 'beats_stats.metrics.libbeat.pipeline.events.total'
         }
       },
-      min_bytes_sent: {
+      min_mem_rss: {
         min: {
-          field: 'beats_stats.metrics.libbeat.output.write.bytes'
+          field: 'beats_stats.metrics.beat.memstats.rss'
         }
       },
-      max_bytes_sent: {
+      max_mem_rss: {
         max: {
-          field: 'beats_stats.metrics.libbeat.output.write.bytes'
+          field: 'beats_stats.metrics.beat.memstats.rss'
         }
       },
+      max_mem_total: {
+        max: {
+          field: 'beats_stats.metrics.beat.memstats.memory_total'
+        }
+      }
     },
   },
   min_events_total: {
@@ -89,40 +95,36 @@ export const apmUuidsAgg = maxBucketSize => ({
       buckets_path: 'ephemeral_ids>max_events'
     }
   },
-  min_bytes_sent_total: {
+  min_mem_rss_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>min_bytes_sent'
+      buckets_path: 'ephemeral_ids>min_mem_rss'
     }
   },
-  max_bytes_sent_total: {
+  max_mem_rss_total: {
     sum_bucket: {
-      buckets_path: 'ephemeral_ids>max_bytes_sent'
+      buckets_path: 'ephemeral_ids>max_mem_rss'
     }
   },
+  max_mem_total_total: {
+    sum_bucket: {
+      buckets_path: 'ephemeral_ids>max_mem_total'
+    }
+  }
 });
 
 export const apmAggResponseHandler = response => {
-  const buckets = get(response, 'aggregations.types.buckets', []);
-  const beatTotal = get(response, 'aggregations.total.value', null);
-  const beatTypes = buckets.reduce((types, typeBucket) => {
-    return [
-      ...types,
-      {
-        type: capitalize(typeBucket.key),
-        count: get(typeBucket, 'uuids.buckets.length'),
-      }
-    ];
-  }, []);
+  const apmTotal = get(response, 'aggregations.total.value', null);
 
   const eventsTotalMax = get(response, 'aggregations.max_events_total.value', null);
   const eventsTotalMin = get(response, 'aggregations.min_events_total.value', null);
-  const bytesSentMax = get(response, 'aggregations.max_bytes_sent_total.value', null);
-  const bytesSentMin = get(response, 'aggregations.min_bytes_sent_total.value', null);
+  const memRssMax = get(response, 'aggregations.max_mem_rss_total.value', null);
+  const memRssMin = get(response, 'aggregations.min_mem_rss_total.value', null);
+  const memTotal = get(response, 'aggregations.max_mem_total_total.value', null);
 
   return {
-    beatTotal,
-    beatTypes,
+    apmTotal,
     totalEvents: getDiffCalculation(eventsTotalMax, eventsTotalMin),
-    bytesSent: getDiffCalculation(bytesSentMax, bytesSentMin),
+    memRss: getDiffCalculation(memRssMax, memRssMin),
+    memTotal
   };
 };

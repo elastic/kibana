@@ -18,9 +18,24 @@ import { Status } from '../instances/status';
 
 export function ApmOverview({
   stats,
+  metrics,
   ...props
 }) {
   const seriesToShow = [
+    metrics.apm_responses_valid,
+    metrics.apm_responses_errors,
+
+    metrics.apm_output_events_rate_success,
+    metrics.apm_output_events_rate_failure,
+
+    metrics.apm_requests,
+    metrics.apm_transformations,
+
+
+    metrics.apm_cpu,
+    metrics.apm_memory,
+
+    metrics.apm_os_load,
   ];
 
   const charts = seriesToShow.map((data, index) => (
