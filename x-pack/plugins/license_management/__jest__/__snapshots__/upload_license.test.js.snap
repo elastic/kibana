@@ -415,6 +415,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     </EuiFilePicker>
                   </div>
                 </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
                 <TelemetryOptIn />
                 <EuiSpacer
                   size="m"
@@ -740,6 +747,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     </EuiFilePicker>
                   </div>
                 </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
                 <TelemetryOptIn />
                 <EuiSpacer
                   size="m"
@@ -1065,6 +1079,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     </EuiFilePicker>
                   </div>
                 </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
                 <TelemetryOptIn />
                 <EuiSpacer
                   size="m"
@@ -1390,6 +1411,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     </EuiFilePicker>
                   </div>
                 </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
                 <TelemetryOptIn />
                 <EuiSpacer
                   size="m"
@@ -1715,6 +1743,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     </EuiFilePicker>
                   </div>
                 </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
                 <TelemetryOptIn />
                 <EuiSpacer
                   size="m"
