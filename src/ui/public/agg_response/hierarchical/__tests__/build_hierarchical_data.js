@@ -189,10 +189,11 @@ describe('buildHierarchicalData', function () {
     beforeEach(async function () {
       const aggs = [{
         id: 'agg_2',
-        type: 'date_histogram',
+        type: 'histogram',
         schema: 'group',
         params: {
-          field: 'time',
+          field: 'bytes',
+          interval: 8192
         }
       }];
       results = await buildHierarchicalData(aggs, fixtures.oneHistogramBucket);
