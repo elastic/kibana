@@ -48,29 +48,27 @@ export function initSpacesRequestInterceptors(server) {
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
-        const client = request.getSavedObjectsClient();
-        const { total, saved_objects: spaceObjects } = await client.find({
-          type: 'space'
-        });
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        const spaces = await spacesClient.getAll();
 
         const config = server.config();
         const basePath = config.get('server.basePath');
         const defaultRoute = config.get('server.defaultRoute');
 
-        if (total === 1) {
+        if (spaces.length === 1) {
           // If only one space is available, then send user there directly.
           // No need for an interstitial screen where there is only one possible outcome.
-          const space = spaceObjects[0];
+          const space = spaces[0];
 
           const destination = addSpaceIdToPath(basePath, space.id, defaultRoute);
           return reply.redirect(destination);
         }
 
-        if (total > 0) {
+        if (spaces.length > 0) {
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
           return reply.renderApp(app, {
-            spaces: spaceObjects.map(so => ({ ...so.attributes, id: so.id }))
+            spaces
           });
         }
 

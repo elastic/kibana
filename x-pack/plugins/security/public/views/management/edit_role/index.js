@@ -27,6 +27,7 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -67,11 +68,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       return role.then(res => res.toJSON());
     },
-    kibanaApplicationPrivilege(ApplicationPrivileges, kbnUrl, Promise, Private) {
-      return ApplicationPrivileges.query().$promise
-        .then(privileges => privileges.map(p => p.toJSON()))
-        .catch(checkLicenseError(kbnUrl, Promise, Private));
-    },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
       return ShieldUser.query().$promise
@@ -93,7 +89,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     const Notifier = $injector.get('Notifier');
 
-    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
@@ -132,7 +127,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       render(<EditRolePage
         runAsUsers={users}
         role={role}
-        kibanaAppPrivileges={kibanaApplicationPrivilege}
+        kibanaAppPrivileges={KibanaAppPrivileges}
         indexPatterns={indexPatterns}
         rbacEnabled={true}
         rbacApplication={rbacApplication}

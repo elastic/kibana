@@ -56,6 +56,7 @@ describe('GET spaces', () => {
     const { response } = await request('GET', '/api/spaces/space', {
       preCheckLicenseImpl: (req: any, reply: any) =>
         reply(Boom.forbidden('test forbidden message')),
+      expectSpacesClientCall: false,
     });
 
     const { statusCode, payload } = response;

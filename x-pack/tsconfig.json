@@ -1,8 +1,17 @@
 {
-  "extends": "../tsconfig.json",
-  "include": [
-    "common/**/*",
-    "server/**/*",
-    "plugins/**/*"
-  ]
+    "extends": "../tsconfig.json",
+    "include": [
+        "common/**/*",
+        "server/**/*",
+        "plugins/**/*",
+    ],
+    "exclude": [
+      "test/**/*"
+    ],
+    "compilerOptions": {
+      "types": [
+        "node",
+        "jest"
+      ]
+    }
 }
