@@ -4,7 +4,14 @@
         "common/**/*",
         "server/**/*",
         "plugins/**/*",
-        "test/**/*",
-        "typings/**/*",
-    ]
+    ],
+    "exclude": [
+      "test/**/*"
+    ],
+    "compilerOptions": {
+      "types": [
+        "node",
+        "jest"
+      ]
+    }
 }
