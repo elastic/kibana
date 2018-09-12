@@ -10,8 +10,8 @@
   "scripts": {
     "build": "yarn build:web && yarn build:node && yarn build:types",
     "build:types": "tsc --emitDeclarationOnly",
-    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web --extensions \".ts,.js,.tsx\"",
-    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node --extensions \".ts,.js,.tsx\"",
+    "build:web": "cross-env BABEL_ENV=web babel src --config-file ./babel_config.js --out-dir target/web --extensions \".ts,.js,.tsx\"",
+    "build:node": "cross-env BABEL_ENV=node babel src --config-file ./babel_config.js --out-dir target/node --extensions \".ts,.js,.tsx\"",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
