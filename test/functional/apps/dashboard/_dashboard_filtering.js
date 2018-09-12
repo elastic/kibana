@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb top n', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['6,308.13', '6,308.13']);
+        await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
       });
 
       it('tsvb markdown', async () => {
