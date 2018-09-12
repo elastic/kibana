@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb markdown', async () => {
-        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.29']);
+        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
       it('saved searches', async () => {
