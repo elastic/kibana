@@ -30,8 +30,6 @@ include::security/securing-kibana.asciidoc[]
 
 include::settings/settings-xkb.asciidoc[]
 
-include::migration.asciidoc[]
-
 include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
@@ -73,5 +71,7 @@ include::development.asciidoc[]
 include::limitations.asciidoc[]
 
 include::release-notes/highlights.asciidoc[]
+
+include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
