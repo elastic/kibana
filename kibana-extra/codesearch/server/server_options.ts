@@ -8,8 +8,6 @@ import { resolve } from 'path';
 import { RepoConfig, RepoConfigs } from '../model/workspace';
 
 export class ServerOptions {
-  public static DEFAULT_MAX_WORKSPACE = 5;
-
   public readonly workspacePath = resolve(this.config.get('path.data'), 'codesearch/workspace');
 
   public readonly repoPath = resolve(this.config.get('path.data'), 'codesearch/repos');
@@ -18,8 +16,7 @@ export class ServerOptions {
 
   public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
 
-  public readonly maxWorkspace: number =
-    this.options.maxWorkspace || ServerOptions.DEFAULT_MAX_WORKSPACE;
+  public readonly maxWorkspace: number = this.options.maxWorkspace;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {

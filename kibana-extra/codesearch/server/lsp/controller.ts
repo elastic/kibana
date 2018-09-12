@@ -16,7 +16,7 @@ import { ILanguageServerHandler } from './proxy';
 import { TypescriptServerLauncher } from './ts_launcher';
 
 interface WorkspaceHandlerMap {
-  [workspaceUri: string]: ILanguageServerLauncher;
+  [workspaceUri: string]: ILanguageServerHandler;
 }
 
 interface LanguageServer {
@@ -126,7 +126,10 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
   }
 
-  private async findOrCreateHandler(languageServer: LanguageServer, request: LspRequest) {
+  private async findOrCreateHandler(
+    languageServer: LanguageServer,
+    request: LspRequest
+  ): Promise<ILanguageServerHandler> {
     const handlers = languageServer.workspaceHandlers as WorkspaceHandlerMap;
     if (!request.workspacePath) {
       throw new ResponseError(ErrorCodes.UnknownErrorCode, `no workspace in request?`);

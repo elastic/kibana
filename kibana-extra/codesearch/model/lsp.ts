@@ -11,5 +11,5 @@ export interface LspRequest {
   resolvedFilePath?: string;
   workspacePath?: string;
   workspaceRevision?: string;
-  isNotification?: boolean;
+  isNotification?: boolean; // if this is a notification request that doesn't need response
 }
