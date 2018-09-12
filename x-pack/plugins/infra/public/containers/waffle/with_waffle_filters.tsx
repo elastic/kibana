@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 
 import { sharedSelectors, State, waffleFilterActions, waffleFilterSelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
+import { UrlStateContainer } from '../../utils/url_state';
 
 export const withWaffleFilter = connect(
   (state: State) => ({
@@ -34,3 +36,39 @@ export const withWaffleFilter = connect(
 );
 
 export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter);
+
+/**
+ * Url State
+ */
+
+type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffleFilterQuery>;
+
+export const WithWaffleFilterUrlState = () => (
+  <WithWaffleFilter>
+    {({ applyFilterQuery, filterQuery }) => (
+      <UrlStateContainer<WaffleFilterUrlState>
+        urlState={filterQuery}
+        urlStateKey="waffleFilter"
+        mapToUrlState={mapToUrlState}
+        onChange={urlState => {
+          if (urlState) {
+            applyFilterQuery(urlState);
+          }
+        }}
+        onInitialize={urlState => {
+          if (urlState) {
+            applyFilterQuery(urlState);
+          }
+        }}
+      />
+    )}
+  </WithWaffleFilter>
+);
+
+const mapToUrlState = (value: any) =>
+  value && value.kind === 'kuery' && typeof value.expression === 'string'
+    ? {
+        kind: value.kind,
+        expression: value.expression,
+      }
+    : undefined;

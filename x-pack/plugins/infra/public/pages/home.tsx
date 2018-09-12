@@ -14,9 +14,12 @@ import { ColumnarPage, PageContent } from '../components/page';
 import { Waffle } from '../components/waffle';
 import { WaffleTimeControls } from '../components/waffle/waffle_time_controls';
 
-import { WithWaffleFilter } from '../containers/waffle/with_waffle_filters';
+import {
+  WithWaffleFilter,
+  WithWaffleFilterUrlState,
+} from '../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../containers/waffle/with_waffle_nodes';
-import { WithWaffleTime } from '../containers/waffle/with_waffle_time';
+import { WithWaffleTime, WithWaffleTimeUrlState } from '../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../containers/with_kuery_autocompletion';
 import { WithOptions } from '../containers/with_options';
 
@@ -24,6 +27,8 @@ export class HomePage extends React.PureComponent {
   public render() {
     return (
       <ColumnarPage>
+        <WithWaffleTimeUrlState />
+        <WithWaffleFilterUrlState />
         <Header />
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
