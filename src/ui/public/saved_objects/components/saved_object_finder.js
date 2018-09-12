@@ -110,11 +110,13 @@ export class SavedObjectFinder extends React.Component {
       fields: ['title', 'visState'],
       search: filter ? `${filter}*` : undefined,
       page: 1,
-      perPage: chrome.getUiSettingsClient().listingLimit,
+      perPage: chrome.getUiSettingsClient().get('savedObjects:listingLimit'),
       searchFields: ['title^3', 'description']
     });
 
-    if (this.props.savedObjectType === 'visualization' && !chrome.getUiSettingsClient().isLabsEnabled && this.props.visTypes) {
+    if (this.props.savedObjectType === 'visualization'
+    && !chrome.getUiSettingsClient().get('visualize:enableLabs')
+    && this.props.visTypes) {
       resp.savedObjects = resp.savedObjects.filter(savedObject => {
         const typeName = JSON.parse(savedObject.attributes.visState).type;
         const visType = this.props.visTypes.byName[typeName];
