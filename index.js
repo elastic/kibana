@@ -12,6 +12,7 @@ export default function(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         main: 'plugins/canvas/app',
+        styleSheetPath: `${__dirname}/public/style/index.scss`,
       },
       hacks: [
         // window.onerror override

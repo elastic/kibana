@@ -4,8 +4,6 @@ import './angular/config';
 import './angular/services';
 import { CanvasRootController } from './angular/controllers';
 
-import './style/index.css';
-
 // Import the uiExports that the application uses
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
