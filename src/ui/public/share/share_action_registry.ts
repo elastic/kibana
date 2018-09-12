@@ -16,17 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint no-undef: 0 */
-jest.mock('../../src/sense_editor/mode/worker', () => { return { workerModule: { id: 'sense_editor/mode/worker', src: '' } }; });
-window.Worker = function () { this.postMessage = () => {}; this.terminate = () => {}; };
-window.URL = {
-  createObjectURL: () => { return ''; }
-};
-jest.mock('../../src/storage');
 
-document.queryCommandSupported = () => true;
+// @ts-ignore: implicit any for JS file
+import { uiRegistry } from 'ui/registry/_registry';
 
-import jQuery from 'jquery';
-jest.spyOn(jQuery, 'ajax').mockImplementation(() => new Promise(() => {
-  // never resolve
-}));
+export const ShareContextMenuExtensionsRegistryProvider = uiRegistry({
+  name: 'shareContextMenuExtensions',
+  index: ['id'],
+});

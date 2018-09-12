@@ -53,7 +53,7 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
@@ -162,6 +162,7 @@ function discoverController(
     location: 'Discover'
   });
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
     requests: new RequestAdapter()
   };
@@ -178,6 +179,10 @@ function discoverController(
   // the saved savedSearch
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', savedSearch.destroy);
+
+  const $appStatus = $scope.appStatus = this.appStatus = {
+    dirty: !savedSearch.id
+  };
 
   $scope.topNavMenu = [{
     key: 'new',
@@ -198,13 +203,20 @@ function discoverController(
     key: 'share',
     description: 'Share Search',
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: async (menuItem, navController, anchorElement) => {
+      const sharingData = await this.getSharingData();
       showShareContextMenu({
         anchorElement,
         allowEmbed: false,
         getUnhashableStates,
         objectId: savedSearch.id,
         objectType: 'search',
+        shareContextMenuExtensions,
+        sharingData: {
+          ...sharingData,
+          title: savedSearch.title,
+        },
+        isDirty: $appStatus.dirty,
       });
     }
   }, {
@@ -239,9 +251,6 @@ function discoverController(
   docTitle.change(`Discover${pageTitleSuffix}`);
 
   let stateMonitor;
-  const $appStatus = $scope.appStatus = this.appStatus = {
-    dirty: !savedSearch.id
-  };
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
@@ -304,14 +313,6 @@ function discoverController(
       conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
       indexPatternId: searchSource.getField('index').id
     };
-  };
-
-  this.getSharingType = () => {
-    return 'search';
-  };
-
-  this.getSharingTitle = () => {
-    return savedSearch.title;
   };
 
   $scope.uiState = $state.makeStateful('uiState');

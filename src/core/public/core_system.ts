@@ -122,6 +122,7 @@ export class CoreSystem {
   public stop() {
     this.legacyPlatform.stop();
     this.notifications.stop();
+    this.loadingCount.stop();
     this.rootDomElement.textContent = '';
   }
 }
