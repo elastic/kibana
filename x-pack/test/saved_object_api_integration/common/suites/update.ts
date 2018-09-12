@@ -89,6 +89,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const updateTest = makeUpdateTest(describe);
+  // @ts-ignore
   updateTest.only = makeUpdateTest(describe.only);
 
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {

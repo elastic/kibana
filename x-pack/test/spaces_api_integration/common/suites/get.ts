@@ -46,6 +46,8 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
   };
 
   const getTest = makeGetTest(describe);
+  // @ts-ignore
+  getTest.only = makeGetTest(describe);
 
   const createExpectResults = (spaceId: string) => (resp: any) => {
     const allSpaces = [

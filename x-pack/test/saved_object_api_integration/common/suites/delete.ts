@@ -76,6 +76,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const deleteTest = makeDeleteTest(describe);
+  // @ts-ignore
   deleteTest.only = makeDeleteTest(describe.only);
 
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {

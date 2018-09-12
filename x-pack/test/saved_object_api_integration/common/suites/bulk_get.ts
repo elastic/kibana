@@ -152,6 +152,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
   };
 
   const bulkGetTest = makeBulkGetTest(describe);
+  // @ts-ignore
   bulkGetTest.only = makeBulkGetTest(describe.only);
 
   return {

@@ -66,6 +66,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   };
 
   const createTest = makeCreateTest(describe);
+  // @ts-ignore
   createTest.only = makeCreateTest(describe.only);
 
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {

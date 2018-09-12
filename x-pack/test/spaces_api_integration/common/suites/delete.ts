@@ -65,6 +65,8 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const deleteTest = makeDeleteTest(describe);
+  // @ts-ignore
+  deleteTest.only = makeDeleteTest(describe.only);
 
   const createExpectResult = (expectedResult: any) => (resp: any) => {
     expect(resp.body).to.eql(expectedResult);

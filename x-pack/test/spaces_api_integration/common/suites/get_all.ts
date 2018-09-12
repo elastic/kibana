@@ -43,6 +43,8 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const getAllTest = makeGetAllTest(describe);
+  // @ts-ignore
+  getAllTest.only = makeGetAllTest(describe.only);
 
   const createExpectResults = (...spaceIds: string[]) => (resp: any) => {
     const expectedBody = [

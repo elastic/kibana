@@ -85,6 +85,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const updateTest = makeUpdateTest(describe);
+  // @ts-ignore
+  updateTest.only = makeUpdateTest(describe.only);
 
   const createExpectNotFoundResult = (spaceId: string) => (resp: any) => {
     expect(resp.body).to.eql({

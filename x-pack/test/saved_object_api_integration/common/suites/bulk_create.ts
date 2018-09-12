@@ -159,6 +159,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
   };
 
   const bulkCreateTest = makeBulkCreateTest(describe);
+  // @ts-ignore
   bulkCreateTest.only = makeBulkCreateTest(describe.only);
 
   return {

@@ -85,6 +85,8 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const createTest = makeCreateTest(describe);
+  // @ts-ignore
+  createTest.only = makeCreateTest(describe.only);
 
   const expectConflictResponse = (resp: any) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);

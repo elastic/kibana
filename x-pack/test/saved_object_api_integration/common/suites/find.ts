@@ -109,6 +109,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   };
 
   const findTest = makeFindTest(describe);
+  // @ts-ignore
   findTest.only = makeFindTest(describe.only);
 
   const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: any) => {
