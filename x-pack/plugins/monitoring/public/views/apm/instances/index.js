@@ -4,39 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { find } from 'lodash';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
-import { getPageData } from './get_page_data';
 import template from './index.html';
+import { ApmServerInstances } from '../../../components/apm/instances';
+import { MonitoringViewBaseTableController } from '../../base_table_controller';
 
 uiRoutes.when('/apm/instances', {
   template,
   resolve: {
-    clusters(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit();
     },
-    pageData: getPageData,
   },
-  controllerAs: 'apms',
-  controller: class ApmInstancesList extends MonitoringViewBaseTableController {
-
+  controller: class extends MonitoringViewBaseTableController {
     constructor($injector, $scope) {
+      const $route = $injector.get('$route');
+      const globalState = $injector.get('globalState');
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid
+      });
+
       super({
-        title: 'Apm Instances',
+        title: 'Apm - Instances',
         storageKey: 'apm.instances',
-        getPageData,
+        api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
+        defaultData: {},
+        reactNodeId: 'apmInstancesReact',
         $scope,
         $injector
       });
 
-      const $route = $injector.get('$route');
-      this.data = $route.current.locals.pageData;
-      const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-      $scope.pageData = $route.current.locals.pageData;
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(data);
+      });
+    }
+
+    renderReact(data) {
+      const {
+        pageIndex,
+        filterText,
+        sortKey,
+        sortOrder,
+        onNewState,
+      } = this;
+
+      const component = (
+        <ApmServerInstances
+          apms={{
+            pageIndex,
+            filterText,
+            sortKey,
+            sortOrder,
+            onNewState,
+            data,
+          }}
+        />
+      );
+      super.renderReact(component);
     }
   }
 });

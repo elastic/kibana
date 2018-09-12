@@ -5,66 +5,60 @@
  */
 
 /*
- * Kibana Instance
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
-import { get, find } from 'lodash';
+
+import React from 'react';
+import { find, get } from 'lodash';
 import uiRoutes from'ui/routes';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
-
-function getPageData($injector) {
-  const $http = $injector.get('$http');
-  const globalState = $injector.get('globalState');
-  const $route = $injector.get('$route');
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`;
-  const timeBounds = timefilter.getBounds();
-
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
-    .then(response => response.data)
-    .catch((err) => {
-      const Private = $injector.get('Private');
-      const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-      return ajaxErrorHandlers(err);
-    });
-}
+import { MonitoringViewBaseController } from '../../base_controller';
+import { ApmServerInstance } from '../../../components/apm/instance';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
   resolve: {
-    clusters(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit();
     },
-    pageData: getPageData
   },
-  controller($injector, $scope) {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
 
-    const $route = $injector.get('$route');
-    const globalState = $injector.get('globalState');
-    $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
-    $scope.pageData = $route.current.locals.pageData;
+  controller: class extends MonitoringViewBaseController {
+    constructor($injector, $scope) {
+      const $route = $injector.get('$route');
+      const title = $injector.get('title');
+      const globalState = $injector.get('globalState');
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid
+      });
 
-    const title = $injector.get('title');
-    title($scope.cluster, `Apm - ${get($scope.pageData, 'apmSummary.name')}`);
+      super({
+        title: `Apm - Instance`,
+        api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
+        defaultData: {},
+        reactNodeId: 'apmInstanceReact',
+        $scope,
+        $injector
+      });
 
-    const $executor = $injector.get('$executor');
-    $executor.register({
-      execute: () => getPageData($injector),
-      handleResponse: (response) => $scope.pageData = response
-    });
+      $scope.$watch(() => this.data, data => {
+        title($scope.cluster, `Apm - ${get(data, 'apmSummary.name')}`);
+        this.renderReact(data);
+      });
+    }
 
-    $executor.start($scope);
-
-    $scope.$on('$destroy', $executor.destroy);
+    renderReact(data) {
+      const component = (
+        <ApmServerInstance
+          summary={data.apmSummary || {}}
+          metrics={data.metrics || {}}
+        />
+      );
+      super.renderReact(component);
+    }
   }
 });

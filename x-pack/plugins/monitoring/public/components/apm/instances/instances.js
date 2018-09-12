@@ -29,7 +29,7 @@ const columns = [
   { title: 'Allocated Memory', sortKey: 'memory' },
   { title: 'Version', sortKey: 'version' },
 ];
-const instanceRowFactory = (goToInstance) => {
+const instanceRowFactory = () => {
   return function KibanaRow(props) {
     const applyFiltering = filterText => () => {
       props.dispatchTableAction(TABLE_ACTION_UPDATE_FILTER, filterText);
@@ -40,7 +40,7 @@ const instanceRowFactory = (goToInstance) => {
         <KuiTableRowCell>
           <div className="monTableCell__name">
             <EuiLink
-              onClick={() => goToInstance(props.uuid)}
+              href={`/apm/instances/${props.uuid}`}
               data-test-subj={`apmLink-${props.name}`}
             >
               {props.name}
@@ -77,7 +77,7 @@ const instanceRowFactory = (goToInstance) => {
   };
 };
 
-export function ApmServerInstances({ apms, goToInstance }) {
+export function ApmServerInstances({ apms }) {
   const {
     pageIndex,
     filterText,
@@ -100,7 +100,7 @@ export function ApmServerInstances({ apms, goToInstance }) {
         placeholder="Filter Instances..."
         filterFields={filterFields}
         columns={columns}
-        rowComponent={instanceRowFactory(goToInstance)}
+        rowComponent={instanceRowFactory()}
       />
     </div>
   );

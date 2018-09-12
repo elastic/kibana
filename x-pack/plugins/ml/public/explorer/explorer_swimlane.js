@@ -10,6 +10,7 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import _ from 'lodash';
@@ -23,9 +24,13 @@ import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { DRAG_SELECT_ACTION } from './explorer_constants';
 
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
+    appState: PropTypes.object.isRequired,
+    lanes: PropTypes.array.isRequired,
+    mlExplorerDashboardService: PropTypes.object.isRequired
   }
 
   constructor(props) {
@@ -37,196 +42,24 @@ export class ExplorerSwimlane extends React.Component {
 
   componentWillUnmount() {
     const { mlExplorerDashboardService } = this.props;
-    mlExplorerDashboardService.dragSelect.unwatch(this.dragSelectListener);
-
+    mlExplorerDashboardService.dragSelect.unwatch(this.boundDragSelectListener);
+    const element = $(this.rootNode);
+    element.empty();
   }
   componentDidMount() {
     const element = $(this.rootNode).parent();
-
-    const {
-      appState,
-      mlExplorerDashboardService,
-      swimlaneData,
-      swimlaneType
-    } = this.props;
+    const { mlExplorerDashboardService } = this.props;
 
     // Consider the setting to support to select a range of cells
     if (!mlExplorerDashboardService.allowCellRangeSelection) {
       element.addClass('ml-hide-range-selection');
     }
 
-    // Listen for dragSelect events
-    const that = this;
-    this.dragSelectListener = function ({ action, elements = [] }) {
-      if (action === 'newSelection' && elements.length > 0) {
-        const firstCellData = $(elements[0]).data('click');
-        if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
-          const selectedData = elements.reduce((d, e) => {
-            const cellData = $(e).data('click');
-            d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
-            d.laneLabels.push(cellData.laneLabel);
-            d.times.push(cellData.time);
-            return d;
-          }, {
-            bucketScore: 0,
-            laneLabels: [],
-            times: []
-          });
-
-          selectedData.laneLabels = _.uniq(selectedData.laneLabels);
-          selectedData.times = _.uniq(selectedData.times);
-          cellClick(elements, selectedData);
-        }
-
-        that.setState({ cellMouseoverActive: true });
-      } else if (action === 'elementSelect') {
-        element.addClass('ml-dragselect-dragging');
-        return;
-      } else if (action === 'dragStart') {
-        that.setState({ cellMouseoverActive: false });
-        return;
-      }
-
-      element.removeClass('ml-dragselect-dragging');
-      elements.map(e => $(e).removeClass('ds-selected'));
-    };
-
-    mlExplorerDashboardService.dragSelect.watch(this.dragSelectListener);
-
-    function cellClick(cellsToSelect, { laneLabels, bucketScore, times }) {
-      if (cellsToSelect.length > 1 || bucketScore > 0) {
-        selectCell(cellsToSelect, laneLabels, times, bucketScore, true);
-      } else {
-        that.clearSelection();
-      }
-    }
-
-    this.checkForSelection = function () {
-      // Check for selection in the AppState and reselect the corresponding swimlane cell
-      // if the time range and lane label are still in view.
-      const selectionState = appState.mlExplorerSwimlane;
-      const selectedType = _.get(selectionState, 'selectedType', undefined);
-      const viewBy = _.get(selectionState, 'viewBy', '');
-      if (swimlaneType !== selectedType && selectedType !== undefined) {
-        $('.lane-label', element).addClass('lane-label-masked');
-        $('.sl-cell-inner', element).addClass('sl-cell-inner-masked');
-      }
-
-      if ((swimlaneType !== selectedType) ||
-        (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
-        // Not this swimlane which was selected.
-        return;
-      }
-
-      const cellsToSelect = [];
-      const selectedLanes = _.get(selectionState, 'selectedLanes', []);
-      const selectedTimes = _.get(selectionState, 'selectedTimes', []);
-      const selectedTimeExtent = d3.extent(selectedTimes);
-
-      const lanes = swimlaneData.laneLabels;
-      const startTime = swimlaneData.earliest;
-      const endTime = swimlaneData.latest;
-
-      selectedLanes.forEach((selectedLane) => {
-        if (lanes.indexOf(selectedLane) > -1 && selectedTimeExtent[0] >= startTime && selectedTimeExtent[1] <= endTime) {
-          // Locate matching cell - look for exact time, otherwise closest before.
-          const $swimlanes = element.find('.ml-swimlanes').first();
-          const laneCells = $('div[data-lane-label="' + mlEscape(selectedLane) + '"]', $swimlanes);
-          if (laneCells.length === 0) {
-            return;
-          }
-
-          for (let i = 0; i < laneCells.length; i++) {
-            const cell = laneCells[i];
-            const cellTime = $(cell).attr('data-time');
-            if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
-              cellsToSelect.push(cell);
-            }
-          }
-        }
-      });
-      const selectedMaxBucketScore = cellsToSelect.reduce((maxBucketScore, cell) => {
-        return Math.max(maxBucketScore, +$(cell).attr('data-score') || 0);
-      }, 0);
-      if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
-        selectCell(cellsToSelect, selectedLanes, selectedTimes, selectedMaxBucketScore);
-      } else {
-        // Clear selection from state as previous selection is no longer applicable.
-        that.clearSelection();
-      }
-    };
-
-    function selectCell(cellsToSelect, laneLabels, times, bucketScore, checkEqualSelection = false) {
-      $('.lane-label', '.ml-explorer-swimlane').addClass('lane-label-masked');
-      $('.sl-cell-inner,.sl-cell-inner-dragselect', '.ml-explorer-swimlane').addClass('sl-cell-inner-masked');
-      $('.sl-cell-inner.sl-cell-inner-selected,.sl-cell-inner-dragselect.sl-cell-inner-selected',
-        '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
-
-      $(cellsToSelect).find('.sl-cell-inner,.sl-cell-inner-dragselect')
-        .removeClass('sl-cell-inner-masked')
-        .addClass('sl-cell-inner-selected');
-
-      $('.lane-label').filter(function () {
-        return laneLabels.indexOf($(this).text()) > -1;
-      }).removeClass('lane-label-masked');
-
-      if (swimlaneType === 'viewBy') {
-        // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
-        const overallSwimlane = $('ml-explorer-swimlane[swimlane-type="overall"]');
-        times.forEach(time => {
-          const overallCell = $('div[data-time="' + time + '"]', overallSwimlane).find('.sl-cell-inner,.sl-cell-inner-dragselect');
-          overallCell.addClass('sl-cell-inner-selected');
-        });
-      }
-
-      // Check if the same cells were selected again, if so clear the selection,
-      // otherwise activate the new selection. The two objects are built for
-      // comparison because we cannot simply compare to "scope.appState.mlExplorerSwimlane"
-      // since it also includes the "viewBy" attribute which might differ depending
-      // on whether the overall or viewby swimlane was selected.
-      if (checkEqualSelection && _.isEqual(
-        {
-          selectedType: appState.mlExplorerSwimlane.selectedType,
-          selectedLanes: appState.mlExplorerSwimlane.selectedLanes,
-          selectedTimes: appState.mlExplorerSwimlane.selectedTimes
-        },
-        {
-          selectedType: swimlaneType,
-          selectedLanes: laneLabels,
-          selectedTimes: times
-        }
-      )) {
-        that.clearSelection();
-      } else {
-        appState.mlExplorerSwimlane.selectedType = swimlaneType;
-        appState.mlExplorerSwimlane.selectedLanes = laneLabels;
-        appState.mlExplorerSwimlane.selectedTimes = times;
-        appState.save();
-
-        mlExplorerDashboardService.swimlaneCellClick.changed({
-          fieldName: swimlaneData.fieldName,
-          laneLabels,
-          time: d3.extent(times),
-          interval: swimlaneData.interval,
-          score: bucketScore
-        });
-      }
-    }
-
-    this.clearSelection = function () {
-      $('.lane-label', '.ml-explorer-swimlane').removeClass('lane-label-masked');
-      $('.sl-cell-inner', '.ml-explorer-swimlane').removeClass('sl-cell-inner-masked');
-      $('.sl-cell-inner.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
-      $('.sl-cell-inner-dragselect.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
-      $('.ds-selected', '.ml-explorer-swimlane').removeClass('ds-selected');
-
-      delete appState.mlExplorerSwimlane.selectedType;
-      delete appState.mlExplorerSwimlane.selectedLanes;
-      delete appState.mlExplorerSwimlane.selectedTimes;
-      appState.save();
-
-      mlExplorerDashboardService.swimlaneCellClick.changed({});
-    };
+    // save the bound dragSelectListener to this property so it can be accessed again
+    // in componentWillUnmount(), otherwise mlExplorerDashboardService.dragSelect.unwatch
+    // is not able to check properly if it's still the same listener
+    this.boundDragSelectListener = this.dragSelectListener.bind(this);
+    mlExplorerDashboardService.dragSelect.watch(this.boundDragSelectListener);
 
     this.renderSwimlane();
   }
@@ -234,6 +67,207 @@ export class ExplorerSwimlane extends React.Component {
 
   componentDidUpdate() {
     this.renderSwimlane();
+  }
+
+  // property to remember the bound dragSelectListener
+  boundDragSelectListener = null;
+
+  // property for cellClick data comparison to be able to filter
+  // consecutive click events with the same data.
+  previousSelectedData = null;
+
+  // Listen for dragSelect events
+  dragSelectListener({ action, elements = [] }) {
+    const element = $(this.rootNode).parent();
+    const { swimlaneType } = this.props;
+
+    if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
+      const firstCellData = $(elements[0]).data('click');
+      if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
+        const selectedData = elements.reduce((d, e) => {
+          const cellData = $(e).data('click');
+          d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
+          d.laneLabels.push(cellData.laneLabel);
+          d.times.push(cellData.time);
+          return d;
+        }, {
+          bucketScore: 0,
+          laneLabels: [],
+          times: []
+        });
+
+        selectedData.laneLabels = _.uniq(selectedData.laneLabels);
+        selectedData.times = _.uniq(selectedData.times);
+        if (_.isEqual(selectedData, this.previousSelectedData) === false) {
+          this.cellClick(elements, selectedData);
+          this.previousSelectedData = selectedData;
+        }
+      }
+
+      this.setState({ cellMouseoverActive: true });
+    } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
+      element.addClass('ml-dragselect-dragging');
+      return;
+    } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
+      this.setState({ cellMouseoverActive: false });
+      return;
+    }
+
+    this.previousSelectedData = null;
+    element.removeClass('ml-dragselect-dragging');
+    elements.map(e => $(e).removeClass('ds-selected'));
+  }
+
+  cellClick(cellsToSelect, { laneLabels, bucketScore, times }) {
+    if (cellsToSelect.length > 1 || bucketScore > 0) {
+      this.selectCell(cellsToSelect, laneLabels, times, bucketScore, true);
+    } else {
+      this.clearSelection();
+    }
+  }
+
+  checkForSelection() {
+    const element = $(this.rootNode).parent();
+
+    const {
+      appState,
+      swimlaneData,
+      swimlaneType
+    } = this.props;
+
+    // Check for selection in the AppState and reselect the corresponding swimlane cell
+    // if the time range and lane label are still in view.
+    const selectionState = appState.mlExplorerSwimlane;
+    const selectedType = _.get(selectionState, 'selectedType', undefined);
+    const viewBy = _.get(selectionState, 'viewBy', '');
+    if (swimlaneType !== selectedType && selectedType !== undefined) {
+      $('.lane-label', element).addClass('lane-label-masked');
+      $('.sl-cell-inner', element).addClass('sl-cell-inner-masked');
+    }
+
+    if ((swimlaneType !== selectedType) ||
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
+      // Not this swimlane which was selected.
+      return;
+    }
+
+    const cellsToSelect = [];
+    const selectedLanes = _.get(selectionState, 'selectedLanes', []);
+    const selectedTimes = _.get(selectionState, 'selectedTimes', []);
+    const selectedTimeExtent = d3.extent(selectedTimes);
+
+    const lanes = swimlaneData.laneLabels;
+    const startTime = swimlaneData.earliest;
+    const endTime = swimlaneData.latest;
+
+    selectedLanes.forEach((selectedLane) => {
+      if (lanes.indexOf(selectedLane) > -1 && selectedTimeExtent[0] >= startTime && selectedTimeExtent[1] <= endTime) {
+        // Locate matching cell - look for exact time, otherwise closest before.
+        const $swimlanes = element.find('.ml-swimlanes').first();
+        const laneCells = $('div[data-lane-label="' + mlEscape(selectedLane) + '"]', $swimlanes);
+        if (laneCells.length === 0) {
+          return;
+        }
+
+        for (let i = 0; i < laneCells.length; i++) {
+          const cell = laneCells[i];
+          const cellTime = $(cell).attr('data-time');
+          if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
+            cellsToSelect.push(cell);
+          }
+        }
+      }
+    });
+    const selectedMaxBucketScore = cellsToSelect.reduce((maxBucketScore, cell) => {
+      return Math.max(maxBucketScore, +$(cell).attr('data-score') || 0);
+    }, 0);
+    if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
+      this.selectCell(cellsToSelect, selectedLanes, selectedTimes, selectedMaxBucketScore);
+    } else {
+      // Clear selection from state as previous selection is no longer applicable.
+      this.clearSelection();
+    }
+  }
+
+  selectCell(cellsToSelect, laneLabels, times, bucketScore, checkEqualSelection = false) {
+    const {
+      appState,
+      mlExplorerDashboardService,
+      swimlaneData,
+      swimlaneType
+    } = this.props;
+
+    $('.lane-label', '.ml-explorer-swimlane').addClass('lane-label-masked');
+    $('.sl-cell-inner,.sl-cell-inner-dragselect', '.ml-explorer-swimlane').addClass('sl-cell-inner-masked');
+    $('.sl-cell-inner.sl-cell-inner-selected,.sl-cell-inner-dragselect.sl-cell-inner-selected',
+      '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
+
+    $(cellsToSelect).find('.sl-cell-inner,.sl-cell-inner-dragselect')
+      .removeClass('sl-cell-inner-masked')
+      .addClass('sl-cell-inner-selected');
+
+    $('.lane-label').filter(function () {
+      return laneLabels.indexOf($(this).text()) > -1;
+    }).removeClass('lane-label-masked');
+
+    if (swimlaneType === 'viewBy') {
+      // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
+      const overallSwimlane = $('ml-explorer-swimlane[swimlane-type="overall"]');
+      times.forEach(time => {
+        const overallCell = $('div[data-time="' + time + '"]', overallSwimlane).find('.sl-cell-inner,.sl-cell-inner-dragselect');
+        overallCell.addClass('sl-cell-inner-selected');
+      });
+    }
+
+    // Check if the same cells were selected again, if so clear the selection,
+    // otherwise activate the new selection. The two objects are built for
+    // comparison because we cannot simply compare to "appState.mlExplorerSwimlane"
+    // since it also includes the "viewBy" attribute which might differ depending
+    // on whether the overall or viewby swimlane was selected.
+    if (checkEqualSelection && _.isEqual(
+      {
+        selectedType: appState.mlExplorerSwimlane.selectedType,
+        selectedLanes: appState.mlExplorerSwimlane.selectedLanes,
+        selectedTimes: appState.mlExplorerSwimlane.selectedTimes
+      },
+      {
+        selectedType: swimlaneType,
+        selectedLanes: laneLabels,
+        selectedTimes: times
+      }
+    )) {
+      this.clearSelection();
+    } else {
+      appState.mlExplorerSwimlane.selectedType = swimlaneType;
+      appState.mlExplorerSwimlane.selectedLanes = laneLabels;
+      appState.mlExplorerSwimlane.selectedTimes = times;
+      appState.save();
+
+      mlExplorerDashboardService.swimlaneCellClick.changed({
+        fieldName: swimlaneData.fieldName,
+        laneLabels,
+        time: d3.extent(times),
+        interval: swimlaneData.interval,
+        score: bucketScore
+      });
+    }
+  }
+
+
+  clearSelection() {
+    const { appState, mlExplorerDashboardService } = this.props;
+    $('.lane-label', '.ml-explorer-swimlane').removeClass('lane-label-masked');
+    $('.sl-cell-inner', '.ml-explorer-swimlane').removeClass('sl-cell-inner-masked');
+    $('.sl-cell-inner.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
+    $('.sl-cell-inner-dragselect.sl-cell-inner-selected', '.ml-explorer-swimlane').removeClass('sl-cell-inner-selected');
+    $('.ds-selected', '.ml-explorer-swimlane').removeClass('ds-selected');
+
+    delete appState.mlExplorerSwimlane.selectedType;
+    delete appState.mlExplorerSwimlane.selectedLanes;
+    delete appState.mlExplorerSwimlane.selectedTimes;
+    appState.save();
+
+    mlExplorerDashboardService.swimlaneCellClick.changed({});
   }
 
   renderSwimlane() {
