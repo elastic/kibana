@@ -23,8 +23,8 @@
  */
 
 import _ from 'lodash';
+import { MigrationVersion, ROOT_TYPE } from '../../serialization';
 import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
-import { MigrationVersion, ROOT_TYPE } from './saved_object_conversion';
 
 // Require rather than import gets us around the lack of TypeScript definitions
 // for "getTypes"

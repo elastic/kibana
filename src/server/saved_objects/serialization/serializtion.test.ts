@@ -24,7 +24,7 @@ import {
   rawToSavedObject,
   ROOT_TYPE,
   savedObjectToRaw,
-} from './saved_object_conversion';
+} from './index';
 
 describe('saved object conversion', () => {
   describe('rawToSavedObject', () => {

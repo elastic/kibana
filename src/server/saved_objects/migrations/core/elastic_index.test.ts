@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { ROOT_TYPE } from '../../serialization';
 import * as Index from './elastic_index';
-import { ROOT_TYPE } from './saved_object_conversion';
 
 describe('ElasticIndex', () => {
   describe('fetchInfo', () => {

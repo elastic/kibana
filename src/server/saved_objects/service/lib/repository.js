@@ -21,7 +21,7 @@ import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
-import { savedObjectToRaw, rawToSavedObject, generateRawId } from '../../migrations';
+import { savedObjectToRaw, rawToSavedObject, generateRawId } from '../../serialization';
 import * as errors from './errors';
 
 

@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { ROOT_TYPE, SavedObjectDoc } from '../../serialization';
 import { CallCluster } from './call_cluster';
 import { IndexMigrator } from './index_migrator';
-import { ROOT_TYPE, SavedObjectDoc } from './saved_object_conversion';
 
 describe('IndexMigrator', () => {
   test('patches the index mappings if the index is already migrated', async () => {

@@ -62,8 +62,8 @@
 
 import _ from 'lodash';
 import Semver from 'semver';
+import { MigrationVersion, SavedObjectDoc } from '../../serialization';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
-import { MigrationVersion, SavedObjectDoc } from './saved_object_conversion';
 
 export type TransformFn = (doc: SavedObjectDoc) => SavedObjectDoc;
 

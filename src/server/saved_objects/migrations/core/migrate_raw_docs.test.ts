@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { ROOT_TYPE } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { ROOT_TYPE } from './saved_object_conversion';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {

@@ -18,4 +18,3 @@
  */
 
 export { KibanaMigrator } from './kibana';
-export { SavedObjectDoc, RawDoc, generateRawId, rawToSavedObject, savedObjectToRaw } from './core';

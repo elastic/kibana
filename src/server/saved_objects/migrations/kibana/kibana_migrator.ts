@@ -22,15 +22,9 @@
  * (the shape of the mappings and documents in the index).
  */
 
+import { SavedObjectDoc } from '../../serialization';
 import { docValidator } from '../../validation';
-import {
-  buildActiveMappings,
-  CallCluster,
-  IndexMigrator,
-  LogFn,
-  MappingProperties,
-  SavedObjectDoc,
-} from '../core';
+import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 
 export interface KbnServer {

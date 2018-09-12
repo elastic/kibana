@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { SavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
-import { SavedObjectDoc } from './saved_object_conversion';
 
 describe('DocumentMigrator', () => {
   function testOpts() {

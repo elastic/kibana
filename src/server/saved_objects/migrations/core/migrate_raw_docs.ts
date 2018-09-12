@@ -21,13 +21,8 @@
  * This file provides logic for migrating raw documents.
  */
 
+import { isRawSavedObject, RawDoc, rawToSavedObject, savedObjectToRaw } from '../../serialization';
 import { TransformFn } from './document_migrator';
-import {
-  isRawSavedObject,
-  RawDoc,
-  rawToSavedObject,
-  savedObjectToRaw,
-} from './saved_object_conversion';
 
 /**
  * Applies the specified migration function to every saved object document in the list
