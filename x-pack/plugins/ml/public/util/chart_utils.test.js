@@ -143,7 +143,7 @@ describe('removeLabelOverlap', () => {
     interval,
     plotEarliest,
     plotLatest,
-    startTs,
+    startTimeMs,
     xAxisTickFormat
   }) {
     const wrapper = mount(<div className="content-wrapper" />);
@@ -168,7 +168,7 @@ describe('removeLabelOverlap', () => {
       .tickPadding(10)
       .tickFormat(d => moment(d).format(xAxisTickFormat));
 
-    const tickValues = getTickValues(startTs, interval, plotEarliest, plotLatest);
+    const tickValues = getTickValues(startTimeMs, interval, plotEarliest, plotLatest);
     xAxis.tickValues(tickValues);
 
     const svg = chartElement.append('svg')
@@ -193,20 +193,20 @@ describe('removeLabelOverlap', () => {
     const mockedGetBBox = { width: 27.21875 };
     SVGElement.prototype.getBBox = () => mockedGetBBox;
 
-    const startTs = 1486656000000;
+    const startTimeMs = 1486656000000;
     const interval = 14400000;
 
     const { gAxis, node, vizWidth } = axisSetup({
       interval,
       plotEarliest: 1486606500000,
       plotLatest: 1486719900000,
-      startTs,
+      startTimeMs,
       xAxisTickFormat: 'HH:mm'
     });
 
     expect(node.getElementsByTagName('text')).toHaveLength(8);
 
-    removeLabelOverlap(gAxis, startTs, interval, vizWidth);
+    removeLabelOverlap(gAxis, startTimeMs, interval, vizWidth);
 
     // at the vizWidth of 500, the most left and right tick label
     // will get removed because it overflows the chart area
@@ -219,20 +219,20 @@ describe('removeLabelOverlap', () => {
     const mockedGetBBox = { width: 85.640625 };
     SVGElement.prototype.getBBox = () => mockedGetBBox;
 
-    const startTs = 1486080000000;
+    const startTimeMs = 1486080000000;
     const interval = 14400000;
 
     const { gAxis, node, vizWidth } = axisSetup({
       interval,
       plotEarliest: 1485860400000,
       plotLatest: 1486314000000,
-      startTs,
+      startTimeMs,
       xAxisTickFormat: 'YYYY-MM-DD HH:mm'
     });
 
     expect(node.getElementsByTagName('text')).toHaveLength(32);
 
-    removeLabelOverlap(gAxis, startTs, interval, vizWidth);
+    removeLabelOverlap(gAxis, startTimeMs, interval, vizWidth);
 
     // In this case labels get reduced significantly because of the wider
     // labels (full dates + time) and the narrow interval.

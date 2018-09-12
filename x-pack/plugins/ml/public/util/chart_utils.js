@@ -196,8 +196,8 @@ const TICK_DIRECTION = {
 // Based on a fixed starting timestamp and an interval, get tick values within
 // the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
 // to align axis ticks with the gray area resembling the swimlane cell selection.
-export function getTickValues(startTs, tickInterval, earliest, latest) {
-  const tickValues = [startTs];
+export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
+  const tickValues = [startTimeMs];
 
   function addTicks(ts, operator) {
     let newTick;
@@ -220,8 +220,8 @@ export function getTickValues(startTs, tickInterval, earliest, latest) {
     }
   }
 
-  addTicks(startTs, TICK_DIRECTION.PREVIOUS);
-  addTicks(startTs, TICK_DIRECTION.NEXT);
+  addTicks(startTimeMs, TICK_DIRECTION.PREVIOUS);
+  addTicks(startTimeMs, TICK_DIRECTION.NEXT);
 
   tickValues.sort();
 
@@ -232,12 +232,12 @@ export function getTickValues(startTs, tickInterval, earliest, latest) {
 // that is required/wanted to show up. The code then traverses to both sides along the axis
 // and decides which labels to keep or remove. All vertical tick lines will be kept visible,
 // but those which still have their text label will be emphasized using the ml-tick-emphasis class.
-export function removeLabelOverlap(axis, startTs, tickInterval, width) {
+export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
   // Put emphasis on all tick lines, will again de-emphasize the
   // ones where we remove the label in the next steps.
   axis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
 
-  function getNeighourTickFactory(operator) {
+  function getNeighborTickFactory(operator) {
     return function (ts) {
       switch (operator) {
         case TICK_DIRECTION.PREVIOUS:
@@ -249,7 +249,7 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
   }
 
   function getTickDataFactory(operator) {
-    const getNeighourTick = getNeighourTickFactory(operator);
+    const getNeighborTick = getNeighborTickFactory(operator);
     const fn = function (ts) {
       const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
 
@@ -261,7 +261,7 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
       const textNode = tick.select('text').node();
 
       if (textNode === null) {
-        return fn(getNeighourTick(ts));
+        return fn(getNeighborTick(ts));
       }
 
       const tickWidth = textNode.getBBox().width;
@@ -292,8 +292,8 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
       return;
     }
 
-    const getNeighourTick = getNeighourTickFactory(operator);
-    const newTickData = getTickData(getNeighourTick(ts));
+    const getNeighborTick = getNeighborTickFactory(operator);
+    const newTickData = getTickData(getNeighborTick(ts));
 
     if (newTickData !== false) {
       if (
@@ -311,6 +311,6 @@ export function removeLabelOverlap(axis, startTs, tickInterval, width) {
     }
   }
 
-  checkTicks(startTs, TICK_DIRECTION.PREVIOUS);
-  checkTicks(startTs, TICK_DIRECTION.NEXT);
+  checkTicks(startTimeMs, TICK_DIRECTION.PREVIOUS);
+  checkTicks(startTimeMs, TICK_DIRECTION.NEXT);
 }
