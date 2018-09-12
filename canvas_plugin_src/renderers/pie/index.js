@@ -1,7 +1,7 @@
 // This bit of hackiness is required because this isn't part of the main kibana bundle
 import 'jquery';
 import '../../lib/flot-charts';
-import inlineStyle from 'inline-style';
+
 import { debounce, includes } from 'lodash';
 import { pie as piePlugin } from './plugins/pie';
 
@@ -19,15 +19,26 @@ export const pie = () => ({
       const labelFormatter = (label, slice) => {
         // font color defaults to slice color if not specified
         const fontSpec = { ...config.font.spec, color: config.font.spec.color || slice.color };
-        return `<div style="${inlineStyle(fontSpec)}"
-        >
-        ${label}
-        <br/>
-        ${Math.round(slice.percent)}%
-        </div>`;
-      };
+        const labelDiv = document.createElement('div');
+        Object.assign(labelDiv.style, fontSpec);
+        const labelSpan = new DOMParser().parseFromString(label, 'text/html').body.firstChild;
+        const lineBreak = document.createElement('br');
+        const percentText = document.createTextNode(`${Math.round(slice.percent)}%`);
 
+        labelDiv.appendChild(labelSpan);
+        labelDiv.appendChild(lineBreak);
+        labelDiv.appendChild(percentText);
+        return labelDiv.outerHTML;
+      };
       config.options.series.pie.label.formatter = labelFormatter;
+
+      const legendFormatter = label => {
+        const labelSpan = document.createElement('span');
+        Object.assign(labelSpan.style, config.font.spec);
+        labelSpan.textContent = label;
+        return labelSpan.outerHTML;
+      };
+      config.options.legend.labelFormatter = legendFormatter;
     }
 
     let plot;

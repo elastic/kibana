@@ -105,6 +105,7 @@ export const plot = () => ({
       type: 'render',
       as: 'plot',
       value: {
+        font: args.font,
         data: sortBy(data, 'label'),
         options: {
           canvas: false,

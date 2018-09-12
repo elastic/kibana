@@ -16,6 +16,16 @@ const render = (domNode, config, handlers) => {
   function draw() {
     if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
 
+    if (config.font) {
+      const legendFormatter = label => {
+        const labelSpan = document.createElement('span');
+        Object.assign(labelSpan.style, config.font.spec);
+        labelSpan.textContent = label;
+        return labelSpan.outerHTML;
+      };
+      config.options.legend.labelFormatter = legendFormatter;
+    }
+
     try {
       if (!plot) {
         plot = $.plot($(domNode), config.data, config.options);
