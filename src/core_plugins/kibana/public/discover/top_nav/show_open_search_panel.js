@@ -19,18 +19,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DashboardAddPanel } from './add_panel';
+import { OpenSearchPanel } from './open_search_panel';
 
 let isOpen = false;
 
-export function showAddPanel(
-  savedObjectsClient,
-  addNewPanel,
-  addNewVis,
-  listingLimit,
-  isLabsEnabled,
-  visTypes
-) {
+export function showOpenSearchPanel({ makeUrl }) {
   if (isOpen) {
     return;
   }
@@ -42,39 +35,12 @@ export function showAddPanel(
     document.body.removeChild(container);
     isOpen = false;
   };
-  const find = async (type, search) => {
-    const resp = await savedObjectsClient.find({
-      type,
-      fields: ['title', 'visState'],
-      search: search ? `${search}*` : undefined,
-      page: 1,
-      perPage: listingLimit,
-      searchFields: ['title^3', 'description'],
-    });
-
-    if (type === 'visualization' && !isLabsEnabled) {
-      resp.savedObjects = resp.savedObjects.filter(savedObject => {
-        const typeName = JSON.parse(savedObject.attributes.visState).type;
-        const visType = visTypes.byName[typeName];
-        return visType.stage !== 'lab';
-      });
-    }
-
-    return resp;
-  };
-
-  const addNewVisWithCleanup = () => {
-    onClose();
-    addNewVis();
-  };
 
   document.body.appendChild(container);
   const element = (
-    <DashboardAddPanel
+    <OpenSearchPanel
       onClose={onClose}
-      find={find}
-      addNewPanel={addNewPanel}
-      addNewVis={addNewVisWithCleanup}
+      makeUrl={makeUrl}
     />
   );
   ReactDOM.render(element, container);

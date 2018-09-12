@@ -156,7 +156,7 @@ export class DashboardAddPanel extends React.Component {
 
 DashboardAddPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
-  visTypes: PropTypes.array.isRequired,
+  visTypes: PropTypes.object.isRequired,
   addNewPanel: PropTypes.func.isRequired,
   addNewVis: PropTypes.func.isRequired,
 };

@@ -199,16 +199,26 @@ export class SavedObjectFinder extends React.Component {
         field: 'title',
         name: 'Title',
         sortable: true,
-        render: (field, record) => (
-          <EuiLink
-            onClick={() => {
-              this.props.onChoose(record.id, record.type);
-            }}
-            data-test-subj={`addPanel${field.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
-        )
+        render: (title, record) => {
+          const {
+            onChoose,
+            makeUrl
+          } = this.props;
+
+          if (!onChoose && !makeUrl) {
+            return <span>{title}</span>;
+          }
+
+          return (
+            <EuiLink
+              onClick={onChoose ? () => { onChoose(record.id, record.type); } : undefined}
+              href={makeUrl ? makeUrl(record.id) : undefined}
+              data-test-subj={`savedObjectTitle${title.split(' ').join('-')}`}
+            >
+              {title}
+            </EuiLink>
+          );
+        }
       }
     ];
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
@@ -237,8 +247,9 @@ export class SavedObjectFinder extends React.Component {
 
 SavedObjectFinder.propTypes = {
   callToActionButton: PropTypes.node,
-  onChoose: PropTypes.func.isRequired,
+  onChoose: PropTypes.func,
+  makeUrl: PropTypes.func,
   noItemsMessage: PropTypes.node,
   savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
-  visTypes: PropTypes.array,
+  visTypes: PropTypes.object,
 };
