@@ -167,12 +167,14 @@ export class StepDateHistogramUi extends Component {
               )}
               error={errorDateHistogramField}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
+              fullWidth
             >
               <EuiSelect
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
                 options={dateHistogramFieldOptions}
                 value={dateHistogramField}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
+                fullWidth
               />
             </EuiFormRow>
 
@@ -195,11 +197,13 @@ export class StepDateHistogramUi extends Component {
                   </p>
                 </Fragment>
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramInterval || ''}
                 onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -246,11 +250,13 @@ export class StepDateHistogramUi extends Component {
                   </p>
                 </Fragment>
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramDelay || ''}
                 onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
+                fullWidth
               />
             </EuiFormRow>
 
@@ -279,11 +285,13 @@ export class StepDateHistogramUi extends Component {
                   }}
                 />
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramTimeZone || ''}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
