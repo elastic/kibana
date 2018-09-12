@@ -7,7 +7,7 @@
 import { TestInvoker } from '../../common/lib/types';
 
 // tslint:disable:no-default-export
-export default function({ getService, loadTestFile }: TestInvoker) {
+export default function({ loadTestFile }: TestInvoker) {
   describe('saved objects spaces only enabled', () => {
     loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./bulk_get'));

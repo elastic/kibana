@@ -34,8 +34,8 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     { auth = {}, currentSpaceId, spaceId, tests }: SelectTestDefinition
   ) => {
     describeFn(description, () => {
-      beforeEach(() => esArchiver.load('saved_objects/spaces'));
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
 
       it(`should return ${tests.default.statusCode}`, async () => {
         return supertest
