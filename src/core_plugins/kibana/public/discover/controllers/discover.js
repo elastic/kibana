@@ -58,6 +58,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { showSaveModal } from '../top_nav/show_save_modal';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -190,10 +191,39 @@ function discoverController(
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: 'save',
+    key: 'oldSave',
     description: 'Save Search',
     template: require('plugins/kibana/discover/partials/save_search.html'),
+    testId: 'discoverOldSaveButton',
+  }, {
+    key: 'save',
+    description: 'Save Search',
     testId: 'discoverSaveButton',
+    run: async () => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+        const currentTitle = savedSearch.title;
+        savedSearch.title = newTitle;
+        savedSearch.copyOnSave = newCopyOnSave;
+        const saveOptions = {
+          confirmOverwrite: false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        };
+        return $scope.opts.saveDataSource(saveOptions).then(({ id, error }) => {
+          // If the save wasn't successful, put the original values back.
+          if (!id || error) {
+            savedSearch.title = currentTitle;
+          }
+          return { id, error };
+        });
+      };
+
+      showSaveModal({
+        onSave,
+        title: savedSearch.title,
+        showCopyOnSave: savedSearch.id ? true : false,
+      });
+    }
   }, {
     key: 'open',
     description: 'Open Saved Search',
@@ -471,13 +501,13 @@ function discoverController(
       });
   });
 
-  $scope.opts.saveDataSource = function () {
+  $scope.opts.saveDataSource = function (saveOptions) {
     return $scope.updateDataSource()
       .then(function () {
         savedSearch.columns = $scope.state.columns;
         savedSearch.sort = $scope.state.sort;
 
-        return savedSearch.save()
+        return savedSearch.save(saveOptions)
           .then(function (id) {
             stateMonitor.setInitialState($state.toJSON());
             $scope.kbnTopNav.close('save');
