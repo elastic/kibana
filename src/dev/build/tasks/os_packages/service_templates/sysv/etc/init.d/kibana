@@ -15,6 +15,13 @@
 # Description:       Kibana
 ### END INIT INFO
 
+#
+# Source function library if present.
+#
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+fi
+
 name=kibana
 program=/usr/share/kibana/bin/kibana
 args=-c\\\ /etc/kibana/kibana.yml
