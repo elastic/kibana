@@ -33,7 +33,7 @@ export async function getDefaultClient(
   logger: TaskManagerLogger,
   totalCapacity: number,
   definitions: TaskDictionary<SanitizedTaskDefinition>
-) {
+): Promise<TaskManager> {
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const store = new TaskStore({
     index: config.get('taskManager.index'),

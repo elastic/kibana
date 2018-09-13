@@ -33,20 +33,18 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
   const totalCapacity = config.get('taskManager.num_workers');
   const definitions = extractTaskDefinitions(totalCapacity, kbnServer.uiExports.taskDefinitions);
 
-  server.decorate(
-    'server',
-    'taskManager',
-    new TaskManagerClientWrapper(logger, totalCapacity, definitions)
-  );
+  server.decorate('server', 'taskManager', new TaskManagerClientWrapper());
 
   kbnServer.afterPluginsInit(async () => {
-    server.taskManager.setClient(
-      (
-        cLogger: TaskManagerLogger,
-        cTotalCapacity: number,
-        cDefinitions: TaskDictionary<SanitizedTaskDefinition>
-      ) => getDefaultClient(kbnServer, server, config, cLogger, cTotalCapacity, cDefinitions)
+    const client = await getDefaultClient(
+      kbnServer,
+      server,
+      config,
+      logger,
+      totalCapacity,
+      definitions
     );
+    server.taskManager.setClient(client);
   });
 }
 

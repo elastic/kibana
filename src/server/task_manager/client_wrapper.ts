@@ -17,30 +17,19 @@
  * under the License.
  */
 
-import { TaskManagerLogger } from './logger';
-import { SanitizedTaskDefinition, TaskDictionary, TaskInstance } from './task';
+import { TaskInstance } from './task';
 import { TaskManager } from './task_manager';
 import { FetchOpts } from './task_store';
 
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;
 
-  constructor(
-    private logger: TaskManagerLogger,
-    private totalCapacity: number,
-    private definitions: TaskDictionary<SanitizedTaskDefinition>
-  ) {
+  constructor() {
     this.client = null;
   }
 
-  public async setClient(
-    cb: (
-      logger: TaskManagerLogger,
-      totalCapacity: number,
-      definitions: TaskDictionary<SanitizedTaskDefinition>
-    ) => Promise<TaskManager>
-  ) {
-    this.client = await cb(this.logger, this.totalCapacity, this.definitions);
+  public async setClient(client: TaskManager) {
+    this.client = client;
   }
 
   public schedule(task: TaskInstance) {
