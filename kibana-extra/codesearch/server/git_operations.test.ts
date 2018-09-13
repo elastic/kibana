@@ -32,4 +32,5 @@ it('get default branch from a non master repo', async () => {
   const defaultBranch = await getDefaultBranch(path);
   expect(defaultBranch).toEqual('trunk');
   rmDir(path);
+  return '';
 });

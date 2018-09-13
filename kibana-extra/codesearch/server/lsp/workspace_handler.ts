@@ -17,7 +17,7 @@ import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 import { parseLspUrl } from '../../common/uri_util';
 import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, LspRequest } from '../../model';
-import { GitOperations } from '../git_operations';
+import { getDefaultBranch, GitOperations } from '../git_operations';
 import { Log } from '../log';
 
 export class WorkspaceHandler {
@@ -51,9 +51,10 @@ export class WorkspaceHandler {
 
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
-    if (revision !== 'master') {
+    const defaultBranch = await getDefaultBranch(bareRepo.workdir());
+    if (revision !== defaultBranch) {
       await this.checkCommit(bareRepo, targetCommit);
-      revision = 'master';
+      revision = defaultBranch;
     }
     let workspaceRepo: Repository;
     if (this.workspaceExists(repositoryUri, revision)) {
@@ -237,9 +238,9 @@ export class WorkspaceHandler {
   }
 
   private async checkCommit(repository: Repository, commit: Commit) {
-    // we only support master now.
-    const master = await repository.getMasterCommit();
-    if (master.sha() !== commit.sha()) {
+    // we only support headCommit now.
+    const headCommit = await repository.getHeadCommit();
+    if (headCommit.sha() !== commit.sha()) {
       throw Boom.badRequest(`revision must be master.`);
     }
   }
