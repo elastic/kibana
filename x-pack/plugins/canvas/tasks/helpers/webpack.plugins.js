@@ -87,6 +87,24 @@ module.exports = {
       {
         test: /\.js$/,
         loaders: 'babel-loader',
+        options: {
+          plugins: [
+            'transform-object-rest-spread',
+            'transform-async-to-generator',
+            'transform-class-properties',
+          ],
+          presets: [
+            'react',
+            [
+              'env',
+              {
+                targets: {
+                  node: 'current',
+                },
+              },
+            ],
+          ],
+        },
         exclude: [/node_modules/],
       },
       {
