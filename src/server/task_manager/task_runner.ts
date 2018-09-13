@@ -146,7 +146,8 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       this.logger.debug(`Running task ${this}`);
       const context = await this.contextProvider(this.instance);
-      this.promise = this.definition.run(context);
+      const taskRunner = this.definition.createTaskRunner(context);
+      this.promise = taskRunner.run();
       return this.processResult(this.validateResult(await this.promise));
     } catch (error) {
       this.logger.warning(`Task ${this} failed ${error.stack}`);
