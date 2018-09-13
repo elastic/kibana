@@ -20,6 +20,8 @@
 import Joi from 'joi';
 import { Logger } from './logger';
 import {
+  CancelFunction,
+  CancellableTask,
   ConcreteTaskInstance,
   RunContext,
   RunResult,
@@ -31,7 +33,7 @@ import { intervalFromNow, minutesFromNow } from './task_intervals';
 export interface TaskRunner {
   numWorkers: number;
   isExpired: boolean;
-  cancel: () => Promise<void>;
+  cancel: CancelFunction;
   claimOwnership: () => Promise<boolean>;
   run: () => Promise<RunResult>;
   toString?: () => string;
@@ -61,7 +63,7 @@ interface Opts {
  * @implements {TaskRunner}
  */
 export class TaskManagerRunner implements TaskRunner {
-  private promise?: PromiseLike<RunResult | undefined>;
+  private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
   private definition: TaskDefinition;
   private logger: Logger;
@@ -146,9 +148,8 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       this.logger.debug(`Running task ${this}`);
       const context = await this.contextProvider(this.instance);
-      const taskRunner = this.definition.createTaskRunner(context);
-      this.promise = taskRunner.run();
-      return this.processResult(this.validateResult(await this.promise));
+      this.task = this.definition.createTaskRunner(context);
+      return this.processResult(this.validateResult(await this.task.run()));
     } catch (error) {
       this.logger.warning(`Task ${this} failed ${error.stack}`);
       this.logger.debug(`Task ${JSON.stringify(this.instance)} failed ${error.stack}`);
@@ -191,17 +192,16 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   public async cancel() {
-    const promise: any = this.promise; // needs to be the stored taskrunner from `const taskRunner = this.definition.createTaskRunner(context)`
-
-    if (promise && promise.cancel) {
-      this.promise = undefined;
-      return promise.cancel();
+    const { task } = this;
+    if (task && task.cancel) {
+      this.task = undefined;
+      return task.cancel();
     }
 
     this.logger.warning(`The task ${this} is not cancellable.`);
   }
 
-  private validateResult(result?: RunResult): RunResult {
+  private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {

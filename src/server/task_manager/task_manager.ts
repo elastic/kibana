@@ -19,7 +19,7 @@
 
 import { TaskInstance } from './task';
 import { TaskPoller } from './task_poller';
-import { FetchOpts, FetchResult, RawTaskDoc, TaskStore } from './task_store';
+import { FetchOpts, FetchResult, RawTaskDoc, RemoveResult, TaskStore } from './task_store';
 
 interface Opts {
   poller: TaskPoller;
@@ -45,7 +45,7 @@ export class TaskManager {
     return this.store.fetch(opts);
   }
 
-  public remove(id: string): Promise<RawTaskDoc> {
+  public remove(id: string): Promise<RemoveResult> {
     return this.store.remove(id);
   }
 }

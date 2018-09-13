@@ -464,18 +464,32 @@ describe('TaskStore', () => {
 
   describe('remove', () => {
     test('removes the task with the specified id', async () => {
-      const callCluster = sinon.spy();
+      const id = `id-${_.random(1, 20)}`;
+      const callCluster = sinon.spy(() =>
+        Promise.resolve({
+          _index: 'myindex',
+          _id: id,
+          _version: 32,
+          result: 'deleted',
+        })
+      );
       const store = new TaskStore({
         callCluster,
         index: 'myindex',
         maxAttempts: 2,
         supportedTypes: ['a'],
       });
-      const id = `id-${_.random(1, 20)}`;
-      await store.remove(id);
+      const result = await store.remove(id);
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWith(callCluster, 'delete');
+
+      expect(result).toEqual({
+        id,
+        index: 'myindex',
+        version: 32,
+        result: 'deleted',
+      });
 
       expect(callCluster.args[0][1]).toMatchObject({
         id,

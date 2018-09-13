@@ -39,6 +39,13 @@ export interface FetchResult {
   docs: ConcreteTaskInstance[];
 }
 
+export interface RemoveResult {
+  index: string;
+  id: string;
+  version: string;
+  result: string;
+}
+
 // Internal, the raw document, as stored in the Kibana index.
 export interface RawTaskDoc {
   _id: string;
@@ -230,8 +237,8 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async remove(id: string): Promise<RawTaskDoc> {
-    return this.callCluster('delete', {
+  public async remove(id: string): Promise<RemoveResult> {
+    const result = await this.callCluster('delete', {
       id,
       index: this.index,
       type: DOC_TYPE,
@@ -239,6 +246,13 @@ export class TaskStore {
       // we don't pick up this task.
       refresh: true,
     });
+
+    return {
+      index: result._index,
+      id: result._id,
+      version: result._version,
+      result: result.result,
+    };
   }
 
   private async search(opts: any = {}): Promise<FetchResult> {

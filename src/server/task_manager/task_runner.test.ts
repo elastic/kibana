@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { Cancellable } from '../../../utils/cancellable/cancellable';
 import { ConcreteTaskInstance, TaskDefinition } from './task';
 import { minutesFromNow } from './task_intervals';
 import { TaskManagerRunner } from './task_runner';
@@ -67,9 +66,11 @@ describe('TaskManagerRunner', () => {
         state: { hey: 'there' },
       },
       definition: {
-        run: async () => {
-          throw new Error('Dangit!');
-        },
+        createTaskRunner: () => ({
+          async run() {
+            throw new Error('Dangit!');
+          },
+        }),
       },
     });
 
@@ -105,9 +106,11 @@ describe('TaskManagerRunner', () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({
       definition: {
-        run: async () => {
-          return { runAt };
-        },
+        createTaskRunner: () => ({
+          async run() {
+            return { runAt };
+          },
+        }),
       },
     });
 
@@ -124,9 +127,11 @@ describe('TaskManagerRunner', () => {
         interval: '20m',
       },
       definition: {
-        run: async () => {
-          return { runAt };
-        },
+        createTaskRunner: () => ({
+          async run() {
+            return { runAt };
+          },
+        }),
       },
     });
 
@@ -144,7 +149,11 @@ describe('TaskManagerRunner', () => {
         interval: undefined,
       },
       definition: {
-        run: async () => undefined,
+        createTaskRunner: () => ({
+          async run() {
+            return undefined;
+          },
+        }),
       },
     });
 
@@ -154,27 +163,18 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWith(store.remove, id);
   });
 
-  test('cancel cancels the promise, if it is cancellable', async () => {
+  test('cancel cancels the task runner, if it is cancellable', async () => {
     let wasCancelled = false;
     const { runner, logger } = testOpts({
       definition: {
-        run: () => {
-          let timeout: any;
-          let resolve: any;
-
-          return new Cancellable<undefined>()
-            .then(() => {
-              return new Promise(r => {
-                resolve = r;
-                timeout = setTimeout(r, 1000);
-              });
-            })
-            .cancelled(() => {
-              clearTimeout(timeout);
-              resolve();
-              wasCancelled = true;
-            });
-        },
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise(r => setTimeout(r, 1000));
+          },
+          async cancel() {
+            wasCancelled = true;
+          },
+        }),
       },
     });
 
@@ -187,10 +187,12 @@ describe('TaskManagerRunner', () => {
     sinon.assert.neverCalledWithMatch(logger.warning, /not cancellable/);
   });
 
-  test('warns if cancel is called on a non-cancellable promise', async () => {
+  test('warns if cancel is called on a non-cancellable task', async () => {
     const { runner, logger } = testOpts({
       definition: {
-        run: async () => undefined,
+        createTaskRunner: () => ({
+          run: async () => undefined,
+        }),
       },
     });
 
@@ -208,7 +210,7 @@ describe('TaskManagerRunner', () => {
 
   function testOpts(opts: TestOpts) {
     const callCluster = sinon.stub();
-    const run = sinon.stub();
+    const createTaskRunner = sinon.stub();
     const logger = {
       error: sinon.stub(),
       debug: sinon.stub(),
@@ -246,7 +248,7 @@ describe('TaskManagerRunner', () => {
         {
           type: 'bar',
           title: 'Bar!',
-          run,
+          createTaskRunner,
         },
         opts.definition || {}
       ),
@@ -254,7 +256,7 @@ describe('TaskManagerRunner', () => {
 
     return {
       callCluster,
-      run,
+      createTaskRunner,
       runner,
       logger,
       store,
@@ -264,7 +266,9 @@ describe('TaskManagerRunner', () => {
   async function testReturn(result: any, shouldBeValid: boolean) {
     const { runner, logger } = testOpts({
       definition: {
-        run: async () => result,
+        createTaskRunner: () => ({
+          run: async () => result,
+        }),
       },
     });
 
