@@ -55,7 +55,7 @@ export const WithLogPositionUrlState = () => (
       stopLiveStreaming,
       urlState,
     }) => (
-      <UrlStateContainer<LogPositionUrlState>
+      <UrlStateContainer
         urlState={urlState}
         urlStateKey="logPosition"
         mapToUrlState={mapToUrlState}
@@ -97,7 +97,7 @@ const selectPositionUrlState = createSelector(
   })
 );
 
-const mapToUrlState = (value: any) =>
+const mapToUrlState = (value: any): LogPositionUrlState | undefined =>
   value
     ? {
         position: mapToPositionUrlState(value.position),

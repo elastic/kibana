@@ -45,7 +45,7 @@ type LogFilterUrlState = ReturnType<typeof logFilterSelectors.selectLogFilterQue
 export const WithLogFilterUrlState = () => (
   <WithLogFilter>
     {({ applyFilterQuery, filterQuery }) => (
-      <UrlStateContainer<LogFilterUrlState>
+      <UrlStateContainer
         urlState={filterQuery}
         urlStateKey="logFilter"
         mapToUrlState={mapToFilterQuery}
@@ -64,7 +64,7 @@ export const WithLogFilterUrlState = () => (
   </WithLogFilter>
 );
 
-const mapToFilterQuery = (value: any) =>
+const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
   value && value.kind === 'kuery' && typeof value.expression === 'string'
     ? {
         kind: value.kind,

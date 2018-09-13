@@ -43,7 +43,7 @@ interface LogTextviewUrlState {
 export const WithLogTextviewUrlState = () => (
   <WithLogTextview>
     {({ urlState, setTextScale, setTextWrap }) => (
-      <UrlStateContainer<LogTextviewUrlState>
+      <UrlStateContainer
         urlState={urlState}
         urlStateKey="logTextview"
         mapToUrlState={mapToUrlState}
@@ -68,7 +68,7 @@ export const WithLogTextviewUrlState = () => (
   </WithLogTextview>
 );
 
-const mapToUrlState = (value: any) =>
+const mapToUrlState = (value: any): LogTextviewUrlState | undefined =>
   value
     ? {
         textScale: mapToTextScaleUrlState(value.textScale),

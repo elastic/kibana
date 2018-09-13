@@ -46,7 +46,7 @@ type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffle
 export const WithWaffleFilterUrlState = () => (
   <WithWaffleFilter>
     {({ applyFilterQuery, filterQuery }) => (
-      <UrlStateContainer<WaffleFilterUrlState>
+      <UrlStateContainer
         urlState={filterQuery}
         urlStateKey="waffleFilter"
         mapToUrlState={mapToUrlState}
@@ -65,7 +65,7 @@ export const WithWaffleFilterUrlState = () => (
   </WithWaffleFilter>
 );
 
-const mapToUrlState = (value: any) =>
+const mapToUrlState = (value: any): WaffleFilterUrlState | undefined =>
   value && value.kind === 'kuery' && typeof value.expression === 'string'
     ? {
         kind: value.kind,

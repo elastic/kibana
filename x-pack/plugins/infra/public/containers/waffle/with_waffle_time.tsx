@@ -41,7 +41,7 @@ interface WaffleTimeUrlState {
 export const WithWaffleTimeUrlState = () => (
   <WithWaffleTime>
     {({ jumpToTime, startAutoReload, stopAutoReload, urlState }) => (
-      <UrlStateContainer<WaffleTimeUrlState>
+      <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleTime"
         mapToUrlState={mapToUrlState}
@@ -81,7 +81,7 @@ const selectTimeUrlState = createSelector(
   })
 );
 
-const mapToUrlState = (value: any) =>
+const mapToUrlState = (value: any): WaffleTimeUrlState | undefined =>
   value
     ? {
         time: mapToTimeUrlState(value.time),

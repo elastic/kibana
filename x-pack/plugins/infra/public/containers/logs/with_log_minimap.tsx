@@ -64,7 +64,7 @@ interface LogMinimapUrlState {
 export const WithLogMinimapUrlState = () => (
   <WithLogMinimap>
     {({ urlState, setIntervalSize }) => (
-      <UrlStateContainer<LogMinimapUrlState>
+      <UrlStateContainer
         urlState={urlState}
         urlStateKey="logMinimap"
         mapToUrlState={mapToUrlState}
@@ -83,7 +83,7 @@ export const WithLogMinimapUrlState = () => (
   </WithLogMinimap>
 );
 
-const mapToUrlState = (value: any) =>
+const mapToUrlState = (value: any): LogMinimapUrlState | undefined =>
   value
     ? {
         intervalSize: mapToIntervalSizeUrlState(value.intervalSize),
