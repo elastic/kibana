@@ -41,7 +41,11 @@ describe('NavControlPopover', () => {
 
     const spacesManager = new SpacesManager(createMockHttpAgent(), mockChrome);
 
-    const wrapper = shallow(<NavControlPopover activeSpace={activeSpace} spacesManager={spacesManager} />);
+    const wrapper = shallow(<NavControlPopover
+      activeSpace={activeSpace}
+      spacesManager={spacesManager}
+      userProfile={{ hasCapability: () => true }}
+    />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -55,7 +59,11 @@ describe('NavControlPopover', () => {
 
     const spacesManager = new SpacesManager(mockAgent, mockChrome);
 
-    const wrapper = mount(<NavControlPopover activeSpace={activeSpace} spacesManager={spacesManager} />);
+    const wrapper = mount(<NavControlPopover
+      activeSpace={activeSpace}
+      spacesManager={spacesManager}
+      userProfile={{ hasCapability: () => true }}
+    />);
 
     return new Promise((resolve) => {
       setTimeout(() => {

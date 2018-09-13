@@ -6,8 +6,12 @@
 
 import { resolve } from 'path';
 // @ts-ignore
+import { AuditLogger } from '../../server/lib/audit_logger';
+// @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { registerUserProfileCapabilityFactory } from '../xpack_main/server/lib/user_profile_registry';
 import mappings from './mappings.json';
+import { SpacesAuditLogger } from './server/lib/audit_logger';
 import { checkLicense } from './server/lib/check_license';
 import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
@@ -16,6 +20,7 @@ import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
+import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
@@ -61,11 +66,12 @@ export const spaces = (kibana: any) =>
         };
       },
       async replaceInjectedVars(vars: any, request: any, server: any) {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
         try {
           vars.activeSpace = {
             valid: true,
             space: await getActiveSpace(
-              request.getSavedObjectsClient(),
+              spacesClient,
               request.getBasePath(),
               server.config().get('server.basePath')
             ),
@@ -95,11 +101,37 @@ export const spaces = (kibana: any) =>
         .registerLicenseCheckResultsGenerator(checkLicense);
 
       const spacesService = createSpacesService(server);
-      server.decorate('server', 'spaces', spacesService);
+      server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
 
-      const { addScopedSavedObjectsClientWrapperFactory } = server.savedObjects;
+      const config = server.config();
+
+      const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+
+      server.expose('spacesClient', {
+        getScopedClient: (request: any) => {
+          const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+          const { callWithRequest, callWithInternalUser } = adminCluster;
+          const callCluster = (...args: any[]) => callWithRequest(request, ...args);
+          const { savedObjects } = server;
+          const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
+          const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+          const authorization = server.plugins.security
+            ? server.plugins.security.authorization
+            : null;
+          return new SpacesClient(
+            spacesAuditLogger,
+            authorization,
+            callWithRequestRepository,
+            internalRepository,
+            request
+          );
+        },
+      });
+
+      const { addScopedSavedObjectsClientWrapperFactory, types } = server.savedObjects;
       addScopedSavedObjectsClientWrapperFactory(
-        spacesSavedObjectsClientWrapperFactory(spacesService)
+        Number.MAX_VALUE,
+        spacesSavedObjectsClientWrapperFactory(spacesService, types)
       );
 
       server.addScopedTutorialContextFactory(createSpacesTutorialContextFactory(spacesService));
@@ -108,6 +140,14 @@ export const spaces = (kibana: any) =>
       initPublicSpacesApi(server);
 
       initSpacesRequestInterceptors(server);
+
+      registerUserProfileCapabilityFactory(async request => {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+
+        return {
+          manageSpaces: await spacesClient.canEnumerateSpaces(),
+        };
+      });
 
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));

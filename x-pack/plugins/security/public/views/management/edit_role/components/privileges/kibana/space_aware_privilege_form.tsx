@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   // @ts-ignore
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { KibanaApplicationPrivilege } from '../../../../../../../common/model/kibana_application_privilege';
+import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -32,12 +33,13 @@ import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
-  kibanaAppPrivileges: KibanaApplicationPrivilege[];
+  kibanaAppPrivileges: KibanaPrivilege[];
   role: Role;
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
+  userProfile: UserProfile;
 }
 
 interface PrivilegeForm {
@@ -71,10 +73,21 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaAppPrivileges, role } = this.props;
+    const { kibanaAppPrivileges, role, userProfile } = this.props;
+
+    if (!userProfile.hasCapability('manageSpaces')) {
+      return (
+        <EuiCallOut title={<p>Insufficient Privileges</p>} iconType="alert" color="danger">
+          <p>You are not authorized to view all available spaces.</p>
+          <p>
+            Please ensure your account has all privileges granted by the{' '}
+            <strong>kibana_user</strong> role, and try again.
+          </p>
+        </EuiCallOut>
+      );
+    }
 
     const assignedPrivileges = role.kibana;
-    const availablePrivileges = kibanaAppPrivileges.map(privilege => privilege.name);
 
     const basePrivilege =
       assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
@@ -99,7 +112,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
             <PrivilegeSelector
               data-test-subj={'kibanaMinimumPrivilege'}
-              availablePrivileges={availablePrivileges}
+              availablePrivileges={kibanaAppPrivileges}
               value={basePrivilege}
               disabled={isReservedRole(role)}
               allowNone={true}
@@ -110,7 +123,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
         <EuiSpacer />
 
-        {this.renderSpacePrivileges(basePrivilege, availablePrivileges)}
+        {this.renderSpacePrivileges(basePrivilege, kibanaAppPrivileges)}
       </Fragment>
     );
   }
@@ -192,7 +205,11 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ImpactedSpacesFlyout role={role} spaces={spaces} />
+            <ImpactedSpacesFlyout
+              role={role}
+              spaces={spaces}
+              userProfile={this.props.userProfile}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

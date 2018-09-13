@@ -22,6 +22,7 @@ import {
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
 import { settingsRoute } from './server/routes/api/v1/settings';
+import mappings from './mappings.json';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 
@@ -65,11 +66,13 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
+      managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
           name: 'Telemetry opt-in',
           description: CONFIG_TELEMETRY_DESC,
-          value: false
+          value: false,
+          readonly: true,
         },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
           name: 'Admin email',
@@ -84,6 +87,8 @@ export const xpackMain = (kibana) => {
         return {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
+          telemetryOptedIn: null,
+          userProfile: {},
         };
       },
       hacks: [
@@ -101,6 +106,7 @@ export const xpackMain = (kibana) => {
           raw: true,
         });
       },
+      mappings,
     },
 
     init(server) {

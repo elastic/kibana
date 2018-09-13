@@ -42,7 +42,11 @@
     "forceConsistentCasingInFileNames": true,
 
     // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
-    "keyofStringsOnly": true
+    "keyofStringsOnly": true,
+
+    // Forbid unused local variables as the rule was deprecated by ts-lint
+    "noUnusedLocals": true,
+
   },
   "include": [
     "src/**/*"

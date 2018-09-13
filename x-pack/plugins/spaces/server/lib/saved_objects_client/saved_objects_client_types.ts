@@ -30,6 +30,7 @@ export interface FindOptions extends BaseOptions {
   sortField?: string;
   sortOrder?: string;
   fields?: string[];
+  type?: string | string[];
 }
 
 export interface FindResponse {
@@ -43,7 +44,10 @@ export interface UpdateOptions extends BaseOptions {
   version?: number;
 }
 
-export type BulkGetObject = string | { id: string; type: string };
+export interface BulkGetObject {
+  id: string;
+  type: string;
+}
 export type BulkGetObjects = BulkGetObject[];
 
 export interface BulkGetResponse {

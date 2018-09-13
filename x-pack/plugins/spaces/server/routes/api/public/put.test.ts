@@ -46,15 +46,19 @@ describe('Spaces Public API', () => {
       description: 'with a description',
     };
 
-    const { mockSavedObjectsClient, response } = await request('PUT', '/api/spaces/space/a-space', {
-      payload,
-    });
+    const { mockSavedObjectsRepository, response } = await request(
+      'PUT',
+      '/api/spaces/space/a-space',
+      {
+        payload,
+      }
+    );
 
     const { statusCode } = response;
 
     expect(statusCode).toEqual(200);
-    expect(mockSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith('space', 'a-space', {
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith('space', 'a-space', {
       name: 'my updated space',
       description: 'with a description',
     });
@@ -70,6 +74,7 @@ describe('Spaces Public API', () => {
     const { response } = await request('PUT', '/api/spaces/space/a-space', {
       preCheckLicenseImpl: (req: any, reply: any) =>
         reply(Boom.forbidden('test forbidden message')),
+      expectSpacesClientCall: false,
       payload,
     });
 

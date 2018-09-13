@@ -5,3 +5,5 @@
  */
 
 export type KibanaPrivilege = 'none' | 'read' | 'all';
+
+export const KibanaAppPrivileges: KibanaPrivilege[] = ['read', 'all'];

@@ -6,24 +6,28 @@
 // @ts-ignore
 import { Server } from 'hapi';
 import sinon from 'sinon';
-import { createSpacesService } from './create_spaces_service';
+import { SavedObject } from './saved_objects_client/saved_objects_client_types';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {
   const sandbox = sinon.sandbox.create();
   const teardowns: Array<() => void> = [];
+  const headers = {
+    authorization: 'foo',
+  };
+  let server: any;
   let request: any;
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
     request = async (
       path: string,
-      setupFn: (ser?: any) => void = () => {
+      setupFn: (ser: any) => void = () => {
         return;
       },
       testConfig = {}
     ) => {
-      const server = new Server();
+      server = new Server();
 
       server.connection({ port: 0 });
 
@@ -47,8 +51,13 @@ describe('interceptors', () => {
         })
       );
 
-      const spacesService = createSpacesService(server);
-      server.decorate('server', 'spaces', spacesService);
+      server.plugins = {
+        spaces: {
+          spacesClient: {
+            getScopedClient: jest.fn(),
+          },
+        },
+      };
 
       initSpacesRequestInterceptors(server);
 
@@ -70,6 +79,7 @@ describe('interceptors', () => {
       return await server.inject({
         method: 'GET',
         url: path,
+        headers,
       });
     };
   });
@@ -85,8 +95,8 @@ describe('interceptors', () => {
         return reply.continue();
       });
 
-      await request('/', (server: any) => {
-        server.ext('onRequest', testHandler);
+      await request('/', (hapiServer: any) => {
+        hapiServer.ext('onRequest', testHandler);
       });
 
       expect(testHandler).toHaveBeenCalledTimes(1);
@@ -98,8 +108,8 @@ describe('interceptors', () => {
         return reply.continue();
       });
 
-      await request('/s/foo', (server: any) => {
-        server.ext('onRequest', testHandler);
+      await request('/s/foo', (hapiServer: any) => {
+        hapiServer.ext('onRequest', testHandler);
       });
 
       expect(testHandler).toHaveBeenCalledTimes(1);
@@ -111,8 +121,8 @@ describe('interceptors', () => {
         return reply.continue();
       });
 
-      await request('/some/path/s/foo/bar', (server: any) => {
-        server.ext('onRequest', testHandler);
+      await request('/some/path/s/foo/bar', (hapiServer: any) => {
+        hapiServer.ext('onRequest', testHandler);
       });
 
       expect(testHandler).toHaveBeenCalledTimes(1);
@@ -127,8 +137,8 @@ describe('interceptors', () => {
         return reply.continue();
       });
 
-      await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (server: any) => {
-        server.ext('onRequest', testHandler);
+      await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (hapiServer: any) => {
+        hapiServer.ext('onRequest', testHandler);
       });
 
       expect(testHandler).toHaveBeenCalledTimes(1);
@@ -144,21 +154,15 @@ describe('interceptors', () => {
       'server.defaultRoute': defaultRoute,
     };
 
-    const setupTest = (server: any, spaces: any[], testHandler: any) => {
-      // Mock server.getSavedObjectsClient()
-      server.decorate('request', 'getSavedObjectsClient', () => {
-        return {
-          find: jest.fn(() => {
-            return {
-              total: spaces.length,
-              saved_objects: spaces,
-            };
-          }),
-        };
+    const setupTest = (hapiServer: any, spaces: SavedObject[], testHandler: any) => {
+      hapiServer.plugins.spaces.spacesClient.getScopedClient.mockReturnValue({
+        getAll() {
+          return spaces;
+        },
       });
 
       // Register test inspector
-      server.ext('onPreResponse', testHandler);
+      hapiServer.ext('onPreResponse', testHandler);
     };
 
     describe('with a single available space', () => {
@@ -179,6 +183,7 @@ describe('interceptors', () => {
         const spaces = [
           {
             id: 'a-space',
+            type: 'space',
             attributes: {
               name: 'a space',
             },
@@ -187,13 +192,20 @@ describe('interceptors', () => {
 
         await request(
           '/',
-          (server: any) => {
+          (hapiServer: any) => {
             setupTest(server, spaces, testHandler);
           },
           config
         );
 
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: headers.authorization,
+            }),
+          })
+        );
       });
 
       test('it redirects to the defaultRoute within the context of the Default Space when navigating to Kibana root', async () => {
@@ -217,6 +229,7 @@ describe('interceptors', () => {
         const spaces = [
           {
             id: 'default',
+            type: 'space',
             attributes: {
               name: 'Default Space',
             },
@@ -225,13 +238,20 @@ describe('interceptors', () => {
 
         await request(
           '/',
-          (server: any) => {
-            setupTest(server, spaces, testHandler);
+          (hapiServer: any) => {
+            setupTest(hapiServer, spaces, testHandler);
           },
           config
         );
 
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: headers.authorization,
+            }),
+          })
+        );
       });
     });
 
@@ -269,14 +289,14 @@ describe('interceptors', () => {
 
         await request(
           '/',
-          (server: any) => {
+          (hapiServer: any) => {
             server.decorate('server', 'getHiddenUiAppById', getHiddenUiAppHandler);
             server.decorate('reply', 'renderApp', function renderAppHandler(app: any) {
               // @ts-ignore
               this({ renderApp: true, app });
             });
 
-            setupTest(server, spaces, testHandler);
+            setupTest(server, hapiServer, testHandler);
           },
           config
         );
@@ -284,6 +304,13 @@ describe('interceptors', () => {
         expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
         expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');
         expect(testHandler).toHaveBeenCalledTimes(1);
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: headers.authorization,
+            }),
+          })
+        );
       });
     });
   });

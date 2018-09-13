@@ -79,7 +79,12 @@ test(`it creates the default space when one does not exist`, async () => {
   expect(repository.create).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledWith(
     'space',
-    { _reserved: true, description: 'This is your default space!', name: 'Default' },
+    {
+      _reserved: true,
+      description: 'This is your default space!',
+      name: 'Default',
+      color: '#00bfb3',
+    },
     { id: 'default' }
   );
 });

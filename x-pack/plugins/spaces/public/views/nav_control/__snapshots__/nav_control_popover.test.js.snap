@@ -43,6 +43,12 @@ exports[`NavControlPopover renders without crashing 1`] = `
   ownFocus={true}
   panelPaddingSize="none"
 >
-  <Component />
+  <Component
+    userProfile={
+      Object {
+        "hasCapability": [Function],
+      }
+    }
+  />
 </EuiPopover>
 `;
