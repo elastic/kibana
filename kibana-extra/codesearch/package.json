@@ -80,6 +80,7 @@
   "dependencies": {
     "@codesearch/esqueue": "link:packages/codesearch-esqueue",
     "@codesearch/lsp-extension": "link:../../lsp/javascript-typescript-langserver/packages/lsp-extension",
+    "@types/js-yaml": "^3.11.2",
     "boom": "^7.2.0",
     "elasticsearch": "^15.1.1",
     "file-type": "^8.1.0",

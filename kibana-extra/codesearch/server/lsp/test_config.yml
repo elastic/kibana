@@ -1,0 +1,9 @@
+repos:
+  - repo:
+      url: 'https://github.com/eclipse/jgit.git'
+      path: '/tmp/jgit'
+      language: 'java'
+  - repo:
+      url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git'
+      path: '/tmp/TypeScript-Node-Starter'
+      language: 'ts'
