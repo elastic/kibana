@@ -79,10 +79,10 @@ export class TaskPool {
    */
   public run = (tasks: TaskRunner[]) => {
     this.cancelExpiredTasks();
-    return this.checkForWork(tasks);
+    return this.attemptToRun(tasks);
   };
 
-  private async checkForWork(tasks: TaskRunner[]) {
+  private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
       if (this.availableWorkers < task.numWorkers) {
         return false;
