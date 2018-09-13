@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { StepLogistics } from './step_logistics';
+export function formatFields(fieldNames, type) {
+  return fieldNames.map(fieldName => ({
+    name: fieldName,
+    type,
+  }));
+}

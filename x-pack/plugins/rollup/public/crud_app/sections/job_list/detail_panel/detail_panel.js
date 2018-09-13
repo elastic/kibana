@@ -26,29 +26,35 @@ import {
 } from '@elastic/eui';
 
 import {
-  TabSummary,
-  TabTerms,
-  TabMetrics,
-  TabJson,
-  TabHistogram,
-} from './tabs';
+  JobActionMenu,
+  JobDetails,
+  JOB_DETAILS_TAB_SUMMARY,
+  JOB_DETAILS_TAB_TERMS,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
+} from '../../components';
 
-import { JobActionMenu } from '../../components';
-
-const tabs = ['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON'];
+const JOB_DETAILS_TABS = [
+  JOB_DETAILS_TAB_SUMMARY,
+  JOB_DETAILS_TAB_TERMS,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
+];
 
 export class DetailPanelUi extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool.isRequired,
     job: PropTypes.object,
-    panelType: PropTypes.oneOf(tabs),
+    panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
   }
 
   static defaultProps = {
-    panelType: tabs[0],
+    panelType: JOB_DETAILS_TABS[0],
   }
 
   constructor(props) {
@@ -62,23 +68,32 @@ export class DetailPanelUi extends Component {
       return;
     }
 
-    const renderedTabs = tabs.map((tab, index) => {
-      if (tab === 'Terms' && !job.terms.fields.length) {
+    const {
+      id,
+      terms,
+      histogram,
+      metrics,
+    } = job;
+
+    const renderedTabs = [];
+
+    JOB_DETAILS_TABS.map((tab, index) => {
+      if (tab === JOB_DETAILS_TAB_TERMS && !terms.length) {
         return;
       }
 
-      if (tab === 'Histogram' && !job.histogram.fields.length) {
+      if (tab === JOB_DETAILS_TAB_HISTOGRAM && !histogram.length) {
         return;
       }
 
-      if (tab === 'Metrics' && !job.metrics.length) {
+      if (tab === JOB_DETAILS_TAB_METRICS && !metrics.length) {
         return;
       }
 
       const isSelected = tab === panelType;
-      return (
+      renderedTabs.push(
         <EuiTab
-          onClick={() => openDetailPanel({ panelType: tab, jobId: job.id })}
+          onClick={() => openDetailPanel({ panelType: tab, jobId: id })}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}
@@ -86,7 +101,7 @@ export class DetailPanelUi extends Component {
           {tab}
         </EuiTab>
       );
-    }).filter(tab => tab);
+    });
 
     return (
       <Fragment>
@@ -102,17 +117,6 @@ export class DetailPanelUi extends Component {
     const { panelType, job, intl } = this.props;
 
     const {
-      id,
-      indexPattern,
-      rollupIndex,
-      rollupCron,
-      dateHistogramInterval,
-      dateHistogramDelay,
-      dateHistogramTimeZone,
-      dateHistogramField,
-      metrics,
-      terms,
-      histogram,
       status,
       documentsProcessed,
       pagesProcessed,
@@ -121,44 +125,23 @@ export class DetailPanelUi extends Component {
       json,
     } = job;
 
-    const tabToContentMap = {
-      Summary: (
-        <TabSummary
-          id={id}
-          indexPattern={indexPattern}
-          rollupIndex={rollupIndex}
-          rollupCron={rollupCron}
-          dateHistogramInterval={dateHistogramInterval}
-          dateHistogramDelay={dateHistogramDelay}
-          dateHistogramTimeZone={dateHistogramTimeZone}
-          dateHistogramField={dateHistogramField}
-          documentsProcessed={documentsProcessed}
-          pagesProcessed={pagesProcessed}
-          rollupsIndexed={rollupsIndexed}
-          triggerCount={triggerCount}
-          status={status}
-        />
-      ),
-      Terms: (
-        <TabTerms terms={terms} />
-      ),
-      Histogram: (
-        <TabHistogram histogram={histogram} />
-      ),
-      Metrics: (
-        <TabMetrics metrics={metrics} />
-      ),
-      JSON: (
-        <TabJson json={json} />
-      ),
+    const stats = {
+      status,
+      documentsProcessed,
+      pagesProcessed,
+      rollupsIndexed,
+      triggerCount,
     };
-
-    const tabContent = tabToContentMap[panelType];
 
     return (
       <Fragment>
         <EuiFlyoutBody>
-          {tabContent}
+          <JobDetails
+            tab={panelType}
+            job={job}
+            stats={stats}
+            json={json}
+          />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

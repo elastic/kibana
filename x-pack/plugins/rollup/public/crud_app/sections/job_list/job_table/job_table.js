@@ -28,9 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { JobActionMenu } from '../../components';
-
-import { JobStatus } from '../job_status';
+import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.nameHeader', {
@@ -81,11 +79,11 @@ const COLUMNS = [{
     const { histogram, terms } = job;
     const humanizedGroupNames = [];
 
-    if (histogram) {
+    if (histogram.length) {
       humanizedGroupNames.push('histogram');
     }
 
-    if (terms.fields.length) {
+    if (terms.length) {
       humanizedGroupNames.push('terms');
     }
 
@@ -94,7 +92,7 @@ const COLUMNS = [{
       return humanizedGroupNames.join(', ');
     }
 
-    return 'None';
+    return '';
   },
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.metricsHeader', {
@@ -103,7 +101,12 @@ const COLUMNS = [{
   truncateText: true,
   render: job => {
     const { metrics } = job;
-    return metrics.map(metric => metric.field).join(', ');
+
+    if (metrics.length) {
+      return metrics.map(metric => metric.name).join(', ');
+    }
+
+    return '';
   },
 }];
 

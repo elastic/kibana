@@ -14,13 +14,30 @@ export {
 } from './api';
 
 export {
+  logisticalDetailsUrl,
+  dateHistogramDetailsUrl,
+  dateHistogramAggregationUrl,
+  termsDetailsUrl,
+  histogramDetailsUrl,
+  metricsDetailsUrl,
+} from './documentation_links';
+
+export {
+  filterItems,
+} from './filter_items';
+
+export {
+  flattenPanelTree,
+} from './flatten_panel_tree';
+
+export {
+  formatFields,
+} from './format_fields';
+
+export {
   setHttp,
   getHttp,
 } from './http_provider';
-
-export { sortTable } from './sort_table';
-export { filterItems } from './filter_items';
-export { flattenPanelTree } from './flatten_panel_tree';
 
 export {
   serializeJob,
@@ -29,17 +46,15 @@ export {
 } from './jobs';
 
 export {
+  extractQueryParams,
+} from './query_params';
+
+export {
   registerRouter,
   getRouter,
   getRouterLinkProps,
 } from './routing';
 
 export {
-  logisticalDetailsUrl,
-  dateHistogramDetailsUrl,
-  dateHistogramAggregationUrl,
-} from './documentation_links';
-
-export {
-  extractQueryParams,
-} from './query_params';
+  sortTable,
+} from './sort_table';

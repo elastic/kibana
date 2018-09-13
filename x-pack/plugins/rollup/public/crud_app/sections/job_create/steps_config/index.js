@@ -12,17 +12,20 @@ import { validateRollupPageSize } from './validate_rollup_page_size';
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
 import { validateDateHistogramDelay } from './validate_date_histogram_delay';
+import { validateHistogramInterval } from './validate_histogram_interval';
 
 export const STEP_LOGISTICS = 'STEP_LOGISTICS';
 export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
-export const STEP_GROUPS = 'STEP_GROUPS';
+export const STEP_TERMS = 'STEP_TERMS';
+export const STEP_HISTOGRAM = 'STEP_HISTOGRAM';
 export const STEP_METRICS = 'STEP_METRICS';
 export const STEP_REVIEW = 'STEP_REVIEW';
 
 export const stepIds = [
   STEP_LOGISTICS,
   STEP_DATE_HISTOGRAM,
-  STEP_GROUPS,
+  STEP_TERMS,
+  STEP_HISTOGRAM,
   STEP_METRICS,
   STEP_REVIEW,
 ];
@@ -79,24 +82,33 @@ export const stepIdToStepConfigMap = {
       return errors;
     },
   },
-  [STEP_GROUPS]: {
+  [STEP_TERMS]: {
     defaultFields: {
-      terms: ['index.keyword'],
-      histogram: ['memory'],
-      histogramInterval: 5,
+      terms: [],
+    },
+  },
+  [STEP_HISTOGRAM]: {
+    defaultFields: {
+      histogram: [],
+      histogramInterval: undefined,
+    },
+    fieldsValidator: fields => {
+      const {
+        histogram,
+        histogramInterval,
+      } = fields;
+
+      const errors = {
+        histogramInterval: validateHistogramInterval(histogram, histogramInterval),
+      };
+
+      return errors;
     },
   },
   [STEP_METRICS]: {
     defaultFields: {
-      metrics: [{
-        'field': 'bytes',
-        'metrics': ['min', 'max', 'avg']
-      }, {
-        'field': 'memory',
-        'metrics': ['min', 'max', 'avg']
-      }],
+      metrics: [],
     },
   },
-  [STEP_REVIEW]: {
-  },
+  [STEP_REVIEW]: {},
 };
