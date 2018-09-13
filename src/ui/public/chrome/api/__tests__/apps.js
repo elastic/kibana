@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 
 import setup from '../apps';
-import StubBrowserStorage from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
 describe('Chrome API :: apps', function () {
   describe('#get/setShowAppsLink()', function () {

@@ -48,7 +48,8 @@
     "noUnusedLocals": true,
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "types/**/*"
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",

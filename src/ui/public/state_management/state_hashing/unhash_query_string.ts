@@ -17,9 +17,14 @@
  * under the License.
  */
 
-export { HashedItemStoreSingleton } from './hashed_item_store_singleton';
+import { mapValues } from 'lodash';
 
-export {
-  createStateHash,
-  isStateHash,
-} from './state_hash';
+export function unhashQueryString(
+  parsedQueryString: string,
+  states: Array<{ getQueryParamName: () => string; translateHashToRison: (hash: string) => string }>
+) {
+  return mapValues(parsedQueryString, (val, key) => {
+    const state = states.find(s => key === s.getQueryParamName());
+    return state ? state.translateHashToRison(val) : val;
+  });
+}

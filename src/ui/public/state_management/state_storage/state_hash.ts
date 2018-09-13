@@ -22,7 +22,7 @@ import { Sha256 } from '../../crypto';
 // This prefix is used to identify hash strings that have been encoded in the URL.
 const HASH_PREFIX = 'h@';
 
-export function createStateHash(json, existingJsonProvider) {
+export function createStateHash(json: string, existingJsonProvider: (hash: string) => string) {
   if (typeof json !== 'string') {
     throw new Error('createHash only accepts strings (JSON).');
   }
@@ -37,12 +37,14 @@ export function createStateHash(json, existingJsonProvider) {
   for (let i = 7; i < hash.length; i++) {
     shortenedHash = hash.slice(0, i);
     const existingJson = existingJsonProvider(shortenedHash);
-    if (existingJson === null || existingJson === json) break;
+    if (existingJson === null || existingJson === json) {
+      break;
+    }
   }
 
   return `${HASH_PREFIX}${shortenedHash}`;
 }
 
-export function isStateHash(str) {
+export function isStateHash(str: string) {
   return String(str).indexOf(HASH_PREFIX) === 0;
 }
