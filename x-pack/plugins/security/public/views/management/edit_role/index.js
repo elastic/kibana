@@ -19,8 +19,8 @@ import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { SpacesManager } from '../../../../../spaces/public/lib';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
-import { SpacesManager } from 'plugins/spaces/lib';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 
@@ -79,8 +79,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       const indexPatterns = Private(IndexPatternsProvider);
       return indexPatterns.getTitles();
     },
-    spaces($http, chrome) {
-      return new SpacesManager($http, chrome).getSpaces();
+    spaces($http, chrome, spacesEnabled) {
+      if (spacesEnabled) {
+        return new SpacesManager($http, chrome).getSpaces();
+      }
+      return [];
     }
   },
   controllerAs: 'editRole',
