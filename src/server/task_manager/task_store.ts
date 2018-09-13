@@ -119,7 +119,7 @@ export class TaskStore {
         index: this.index,
         body: {
           mappings: {
-            doc: {
+            _doc: {
               dynamic: 'strict',
               properties,
             },
