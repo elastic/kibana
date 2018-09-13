@@ -23,6 +23,9 @@
 
 import sinon from 'sinon';
 
+// Caching this here to avoid setTimeout mocking affecting our tests.
+const nativeTimeout = setTimeout;
+
 /**
  * Creates a mock task manager Logger.
  */
@@ -47,7 +50,7 @@ export function resolvable(): PromiseLike<void> & Resolvable {
   let resolve: () => void;
   const result = new Promise<void>(r => (resolve = r)) as any;
 
-  result.resolve = () => setTimeout(resolve, 0);
+  result.resolve = () => nativeTimeout(resolve, 0);
 
   return result;
 }
@@ -58,5 +61,5 @@ export function resolvable(): PromiseLike<void> & Resolvable {
  * @param {number} ms
  */
 export async function sleep(ms: number) {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise(r => nativeTimeout(r, ms));
 }

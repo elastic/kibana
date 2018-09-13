@@ -51,9 +51,6 @@ export class TaskPool {
 
   /**
    * Gets how many workers are currently in use.
-   *
-   * @readonly
-   * @memberof TaskPool
    */
   get occupiedWorkers() {
     let total = 0;
@@ -65,9 +62,6 @@ export class TaskPool {
 
   /**
    * Gets how many workers are currently available.
-   *
-   * @readonly
-   * @memberof TaskPool
    */
   get availableWorkers() {
     return this.totalCapacity - this.occupiedWorkers;

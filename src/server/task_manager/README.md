@@ -241,3 +241,7 @@ There is only a rudimentary mechanism for coordinating tasks and handling expire
 There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
 
 The task manager's public API is create / delete / list. Updates aren't directly supported, and listing is scoped so that users only see their own tasks.
+
+## Testing
+
+- `node scripts/jest --testPathPattern=task_manager --watch`
