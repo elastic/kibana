@@ -260,12 +260,14 @@ describe('interceptors', () => {
         const spaces = [
           {
             id: 'a-space',
+            type: 'space',
             attributes: {
               name: 'a space',
             },
           },
           {
             id: 'b-space',
+            type: 'space',
             attributes: {
               name: 'b space',
             },
@@ -296,7 +298,7 @@ describe('interceptors', () => {
               this({ renderApp: true, app });
             });
 
-            setupTest(server, hapiServer, testHandler);
+            setupTest(hapiServer, spaces, testHandler);
           },
           config
         );

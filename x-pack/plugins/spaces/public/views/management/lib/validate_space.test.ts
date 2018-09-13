@@ -6,7 +6,7 @@
 
 import { SpaceValidator } from './validate_space';
 
-let validator;
+let validator: SpaceValidator;
 
 describe('validateSpaceName', () => {
   beforeEach(() => {
@@ -15,7 +15,8 @@ describe('validateSpaceName', () => {
 
   test('it allows a name with special characters', () => {
     const space = {
-      name: 'This is the name of my Space! @#$%^&*()_+-='
+      id: '',
+      name: 'This is the name of my Space! @#$%^&*()_+-=',
     };
 
     expect(validator.validateSpaceName(space)).toEqual({ isInvalid: false });
@@ -23,24 +24,34 @@ describe('validateSpaceName', () => {
 
   test('it requires a non-empty value', () => {
     const space = {
-      name: ''
+      id: '',
+      name: '',
     };
 
-    expect(validator.validateSpaceName(space)).toEqual({ isInvalid: true, error: `Name is required` });
+    expect(validator.validateSpaceName(space)).toEqual({
+      isInvalid: true,
+      error: `Name is required`,
+    });
   });
 
   test('it cannot exceed 1024 characters', () => {
     const space = {
-      name: new Array(1026).join('A')
+      id: '',
+      name: new Array(1026).join('A'),
     };
 
-    expect(validator.validateSpaceName(space)).toEqual({ isInvalid: true, error: `Name must not exceed 1024 characters` });
+    expect(validator.validateSpaceName(space)).toEqual({
+      isInvalid: true,
+      error: `Name must not exceed 1024 characters`,
+    });
   });
 });
 
 describe('validateSpaceDescription', () => {
   test('is optional', () => {
     const space = {
+      id: '',
+      name: '',
     };
 
     expect(validator.validateSpaceDescription(space)).toEqual({ isInvalid: false });
@@ -48,17 +59,24 @@ describe('validateSpaceDescription', () => {
 
   test('it cannot exceed 2000 characters', () => {
     const space = {
-      description: new Array(2002).join('A')
+      id: '',
+      name: '',
+      description: new Array(2002).join('A'),
     };
 
-    expect(validator.validateSpaceDescription(space)).toEqual({ isInvalid: true, error: `Description must not exceed 2000 characters` });
+    expect(validator.validateSpaceDescription(space)).toEqual({
+      isInvalid: true,
+      error: `Description must not exceed 2000 characters`,
+    });
   });
 });
 
 describe('validateURLIdentifier', () => {
   test('it does not validate reserved spaces', () => {
     const space = {
-      _reserved: true
+      id: '',
+      name: '',
+      _reserved: true,
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
@@ -66,24 +84,32 @@ describe('validateURLIdentifier', () => {
 
   test('it requires a non-empty value', () => {
     const space = {
-      id: ''
+      id: '',
+      name: '',
     };
 
-    expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: true, error: `URL identifier is required` });
+    expect(validator.validateURLIdentifier(space)).toEqual({
+      isInvalid: true,
+      error: `URL identifier is required`,
+    });
   });
 
   test('it requires a valid Space Identifier', () => {
     const space = {
-      id: 'invalid identifier'
+      id: 'invalid identifier',
+      name: '',
     };
 
-    expect(validator.validateURLIdentifier(space))
-      .toEqual({ isInvalid: true, error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"' });
+    expect(validator.validateURLIdentifier(space)).toEqual({
+      isInvalid: true,
+      error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',
+    });
   });
 
   test('it allows a valid Space Identifier', () => {
     const space = {
-      id: '01-valid-context-01'
+      id: '01-valid-context-01',
+      name: '',
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });

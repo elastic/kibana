@@ -3,12 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export {
-  toSpaceIdentifier,
-  isValidSpaceIdentifier,
-} from './space_identifier_utils';
-
-export {
-  SpaceValidator
-} from './validate_space';
+// @ts-ignore
+export { ManageSpacePage } from './manage_space_page';

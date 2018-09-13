@@ -3,24 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isValidSpaceIdentifier } from './space_identifier_utils';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
+import { Space } from '../../../../common/model/space';
+import { isValidSpaceIdentifier } from './space_identifier_utils';
+
+interface SpaceValidatorOptions {
+  shouldValidate?: boolean;
+}
 
 export class SpaceValidator {
-  constructor(options = {}) {
-    this._shouldValidate = options.shouldValidate;
+  private shouldValidate: boolean;
+
+  constructor(options: SpaceValidatorOptions = {}) {
+    this.shouldValidate = options.shouldValidate || false;
   }
 
-  enableValidation() {
-    this._shouldValidate = true;
+  public enableValidation() {
+    this.shouldValidate = true;
   }
 
-  disableValidation() {
-    this._shouldValidate = false;
+  public disableValidation() {
+    this.shouldValidate = false;
   }
 
-  validateSpaceName(space) {
-    if (!this._shouldValidate) return valid();
+  public validateSpaceName(space: Space) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
 
     if (!space.name) {
       return invalid(`Name is required`);
@@ -33,8 +42,10 @@ export class SpaceValidator {
     return valid();
   }
 
-  validateSpaceDescription(space) {
-    if (!this._shouldValidate) return valid();
+  public validateSpaceDescription(space: Space) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
 
     if (space.description && space.description.length > 2000) {
       return invalid(`Description must not exceed 2000 characters`);
@@ -43,10 +54,14 @@ export class SpaceValidator {
     return valid();
   }
 
-  validateURLIdentifier(space) {
-    if (!this._shouldValidate) return valid();
+  public validateURLIdentifier(space: Space) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
 
-    if (isReservedSpace(space)) return valid();
+    if (isReservedSpace(space)) {
+      return valid();
+    }
 
     if (!space.id) {
       return invalid(`URL identifier is required`);
@@ -59,7 +74,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  validateForSave(space) {
+  public validateForSave(space: Space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
@@ -72,15 +87,15 @@ export class SpaceValidator {
   }
 }
 
-function invalid(error) {
+function invalid(error: string = '') {
   return {
     isInvalid: true,
-    error
+    error,
   };
 }
 
 function valid() {
   return {
-    isInvalid: false
+    isInvalid: false,
   };
 }

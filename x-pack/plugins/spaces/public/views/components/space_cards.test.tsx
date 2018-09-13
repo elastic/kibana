@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { SpaceCards } from './space_cards';
 
 test('it renders without crashing', () => {
   const space = {
     id: 'space-id',
     name: 'space name',
-    description: 'space description'
+    description: 'space description',
   };
 
   shallow(<SpaceCards spaces={[space]} onSpaceSelect={jest.fn()} />);

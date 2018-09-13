@@ -16,7 +16,7 @@ test('it converts everything to lowercase', () => {
 });
 
 test('it converts non-alphanumeric characters except for "_" to dashes', () => {
-  const input = `~!@#$%^&*()+-=[]{}\|';:"/.,<>?` + "`";
+  const input = `~!@#$%^&*()+-=[]{}\|';:"/.,<>?` + '`';
 
   const expectedResult = new Array(input.length + 1).join('-');
 

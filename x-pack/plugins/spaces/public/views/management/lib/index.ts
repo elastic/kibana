@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ManageSpacePage } from './manage_space_page';
+export { toSpaceIdentifier, isValidSpaceIdentifier } from './space_identifier_utils';
+
+export { SpaceValidator } from './validate_space';
