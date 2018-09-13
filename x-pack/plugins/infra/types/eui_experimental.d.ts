@@ -5,7 +5,6 @@
  */
 
 declare module '@elastic/eui/lib/experimental' {
-  import { ReactText, ReactElement } from 'react';
   import { CommonProps } from '@elastic/eui';
   export type EuiSeriesChartProps = CommonProps & {
     xType?: string;
@@ -14,17 +13,16 @@ declare module '@elastic/eui/lib/experimental' {
     yDomain?: number[];
     showCrosshair?: boolean;
     showDefaultAxis?: boolean;
-  }
+  };
   export const EuiSeriesChart: React.SFC<EuiSeriesChartProps>;
 
   type EuiSeriesProps = CommonProps & {
-    key: string;
-    data: { x: number; y: number, y0: number }[];
-    lineSize: number;
+    data: Array<{ x: number; y: number; y0?: number }>;
+    lineSize?: number;
     name: string;
     color?: string;
     marginLeft?: number;
-  }
+  };
   export const EuiLineSeries: React.SFC<EuiSeriesProps>;
   export const EuiAreaSeries: React.SFC<EuiSeriesProps>;
   export const EuiBarSeries: React.SFC<EuiSeriesProps>;
@@ -32,13 +30,13 @@ declare module '@elastic/eui/lib/experimental' {
   type EuiYAxisProps = CommonProps & {
     tickFormat: (value: number) => string;
     marginLeft?: number;
-  }
+  };
   export const EuiYAxis: React.SFC<EuiYAxisProps>;
 
   type EuiXAxisProps = CommonProps & {
     tickFormat?: (value: number) => string;
     marginLeft?: number;
-  }
+  };
   export const EuiXAxis: React.SFC<EuiXAxisProps>;
 
   export interface EuiDataPoint {
@@ -49,7 +47,7 @@ declare module '@elastic/eui/lib/experimental' {
       x: number;
       y: number;
       x0?: number;
-    }
+    };
   }
 
   export interface EuiFormatedValue {
@@ -60,7 +58,6 @@ declare module '@elastic/eui/lib/experimental' {
     seriesNames: string[];
     titleFormat?: (dataPoints: EuiDataPoint[]) => EuiFormatedValue | undefined;
     itemsFormat?: (dataPoints: EuiDataPoint[]) => EuiFormatedValue[];
-  }
+  };
   export const EuiCrosshairX: React.SFC<EuiCrosshairXProps>;
-
 }

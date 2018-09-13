@@ -161,14 +161,19 @@ export class ChartSection extends React.PureComponent<Props> {
                   data,
                   name,
                   lineSize: 2,
-                  key: `${section.id}-${series.id}`,
                 };
                 const color = getChartColor(section, series.id);
                 if (color) {
                   seriesProps.color = color;
                 }
                 const EuiChartComponent = chartComponentsByType[chartType];
-                return <EuiChartComponent {...seriesProps} marginLeft={MARGIN_LEFT} />;
+                return (
+                  <EuiChartComponent
+                    key={`${section.id}-${series.id}`}
+                    {...seriesProps}
+                    marginLeft={MARGIN_LEFT}
+                  />
+                );
               })}
           </EuiSeriesChart>
         </div>

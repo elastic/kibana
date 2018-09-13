@@ -19,6 +19,41 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     requires: 'system',
     sections: [
       {
+        id: InfraMetric.hostSystemOverview,
+        label: 'System Overview',
+        requires: 'system',
+        type: InfraMetricLayoutSectionType.gauges,
+        visConfig: {
+          seriesOverrides: {
+            cpu: {
+              name: 'CPU Usage',
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            load: { name: 'Load (5m)', color: theme.eui.euiColorFullShade },
+            memory: {
+              name: 'Memory Usage',
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            rx: {
+              name: 'Inbound (RX)',
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.bits,
+              formatterTemplate: '{{value}}/s',
+            },
+            tx: {
+              name: 'Outbound (RX)',
+              color: theme.eui.euiColorFullShade,
+              formatter: InfraFormatterType.bits,
+              formatterTemplate: '{{value}}/s',
+            },
+          },
+        },
+      },
+      {
         id: InfraMetric.hostCpuUsage,
         label: 'CPU Usage',
         requires: 'system.cpu',
@@ -90,6 +125,41 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
     label: 'Kubernetes Overview',
     requires: 'kubernetes',
     sections: [
+      {
+        id: InfraMetric.hostK8sOverview,
+        label: 'Kuberntes Overview',
+        requires: 'kubernetes',
+        type: InfraMetricLayoutSectionType.gauges,
+        visConfig: {
+          seriesOverrides: {
+            cpucap: {
+              name: 'CPU Capacity',
+              color: 'secondary',
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            load: { name: 'Load (5m)', color: 'secondary' },
+            memorycap: {
+              name: 'Memory Capacity',
+              color: 'secondary',
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            podcap: {
+              name: 'Pod Capacity',
+              color: 'secondary',
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+            diskcap: {
+              name: 'Disk Capacity',
+              color: 'secondary',
+              formatter: InfraFormatterType.percent,
+              gaugeMax: 1,
+            },
+          },
+        },
+      },
       {
         id: InfraMetric.hostK8sCpuCap,
         label: 'Node CPU Capacity',

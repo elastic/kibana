@@ -1635,6 +1635,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "hostSystemOverview",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hostCpuUsage",
             "description": "",
             "isDeprecated": false,
@@ -1642,6 +1648,12 @@
           },
           {
             "name": "hostFilesystem",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hostK8sOverview",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

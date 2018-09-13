@@ -560,8 +560,10 @@ export enum InfraNodeType {
 }
 
 export enum InfraMetric {
+  hostSystemOverview = 'hostSystemOverview',
   hostCpuUsage = 'hostCpuUsage',
   hostFilesystem = 'hostFilesystem',
+  hostK8sOverview = 'hostK8sOverview',
   hostK8sCpuCapGauge = 'hostK8sCpuCapGauge',
   hostK8sCpuCap = 'hostK8sCpuCap',
   hostK8sDiskCapGauge = 'hostK8sDiskCapGauge',

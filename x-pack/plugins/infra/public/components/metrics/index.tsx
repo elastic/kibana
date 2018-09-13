@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import { EuiLoadingChart, EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 import { InfraMetricData } from '../../../common/graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { Section } from './section';
@@ -17,6 +18,13 @@ interface Props {
 
 export class Metrics extends React.PureComponent<Props> {
   public render() {
+    if (this.props.metrics.length === 0) {
+      return (
+        <LoadingContainer>
+          <EuiLoadingChart />
+        </LoadingContainer>
+      );
+    }
     return <React.Fragment>{this.props.layout.map(this.renderLayout)}</React.Fragment>;
   }
 
@@ -39,3 +47,16 @@ export class Metrics extends React.PureComponent<Props> {
     );
   };
 }
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+`;

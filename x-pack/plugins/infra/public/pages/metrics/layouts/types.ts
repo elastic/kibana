@@ -15,12 +15,15 @@ export enum InfraMetricLayoutVisualizationType {
 
 export enum InfraMetricLayoutSectionType {
   chart = 'chart',
+  gauges = 'gauges',
 }
 
 interface SeriesOverrides {
   type?: InfraMetricLayoutVisualizationType;
   color: string;
   name?: string;
+  formatter?: InfraFormatterType;
+  formatterTemplate?: string;
 }
 
 interface SeriesOverrideObject {

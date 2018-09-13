@@ -18,10 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled, { withTheme } from 'styled-components';
-import { InfraMetric, InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType } from '../../../common/graphql/types';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
-import { sections } from '../../components/metrics/sections';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import { WithOptions } from '../../containers/with_options';
@@ -31,6 +30,10 @@ import { InfraMetricLayoutSection } from './layouts/types';
 const DetailPageContent = styled(PageContent)`
   overflow: auto;
   background-color: ${props => props.theme.eui.euiColorLightestShade};
+`;
+
+const EuiPageContentWithRelative = styled(EuiPageContent)`
+  position: relative;
 `;
 
 interface Props {
@@ -119,9 +122,9 @@ class MetricDetailPage extends React.PureComponent<Props> {
                           </EuiTitle>
                         </EuiPageHeaderSection>
                       </EuiPageHeader>
-                      <EuiPageContent>
+                      <EuiPageContentWithRelative>
                         <Metrics layout={layout} metrics={metrics} />
-                      </EuiPageContent>
+                      </EuiPageContentWithRelative>
                     </EuiPageBody>
                   </EuiPage>
                 )}

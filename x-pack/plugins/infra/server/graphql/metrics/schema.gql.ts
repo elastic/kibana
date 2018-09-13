@@ -8,8 +8,10 @@ import gql from 'graphql-tag';
 
 export const metricsSchema: any = gql`
   enum InfraMetric {
+    hostSystemOverview
     hostCpuUsage
     hostFilesystem
+    hostK8sOverview
     hostK8sCpuCapGauge
     hostK8sCpuCap
     hostK8sDiskCapGauge
