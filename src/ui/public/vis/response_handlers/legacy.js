@@ -40,6 +40,10 @@ const LegacyResponseHandlerProvider = function () {
         const asAggConfigResults = _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false);
 
         const splitColumn = table.columns.find(column => column.aggConfig.schema.name === 'split');
+        const numberOfMetrics = table.columns.filter(column => column.aggConfig.type.type === 'metrics').length;
+        const numberOfBuckets = table.columns.filter(column => column.aggConfig.type.type === 'buckets').length;
+        const metricsPerBucket = numberOfMetrics / numberOfBuckets;
+
         if (splitColumn) {
           const splitAgg = splitColumn.aggConfig;
           const splitMap = {};
@@ -60,7 +64,11 @@ const LegacyResponseHandlerProvider = function () {
               };
               tableGroup.tables.push({
                 $parent: tableGroup,
-                columns: table.columns.filter((column, i) => i !== splitColumnIndex).map(column => ({ title: column.name, ...column })),
+                columns: table.columns.filter((column, i) => {
+                  const isSplitColumn = i === splitColumnIndex;
+                  const isSplitMetric = metricsAtAllLevels && i > splitColumnIndex && i <= splitColumnIndex + metricsPerBucket;
+                  return !isSplitColumn && !isSplitMetric;
+                }).map(column => ({ title: column.name, ...column })),
                 rows: []
               });
 
