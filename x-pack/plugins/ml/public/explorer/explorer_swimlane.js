@@ -81,11 +81,11 @@ export class ExplorerSwimlane extends React.Component {
     const { swimlaneType } = this.props;
 
     if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
-      const firstCellData = JSON.parse(d3.select(elements[0]).attr('data-click'));
+      const firstCellData = d3.select(elements[0]).node().__clickData__;
 
       if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
         const selectedData = elements.reduce((d, e) => {
-          const cellData = JSON.parse(d3.select(e).attr('data-click'));
+          const cellData = d3.select(e).node().__clickData__;
           d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
           d.laneLabels.push(cellData.laneLabel);
           d.times.push(cellData.time);
@@ -356,13 +356,18 @@ export class ExplorerSwimlane extends React.Component {
     d3LanesEnter.append('div')
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
-      .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
-      .attr('tooltip-placement', 'right')
-      .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
       .html(label => mlEscape(label))
       .on('click', () => {
         if (typeof appState.mlExplorerSwimlane.selectedLanes !== 'undefined') {
           that.clearSelection();
+        }
+      })
+      .each(function () {
+        if (swimlaneData.fieldName !== undefined) {
+          d3.select(this)
+            .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
+            .attr('tooltip-placement', 'right')
+            .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });
 
@@ -399,20 +404,21 @@ export class ExplorerSwimlane extends React.Component {
         .style('width', `${cellWidth}px`)
         .attr('data-lane-label', label => mlEscape(label))
         .attr('data-time', time)
-        .attr('data-swimlane-type', swimlaneType)
         .attr('data-bucket-score', (lane) => {
           return getBucketScore(lane, time);
         })
-        .attr('data-click', (laneLabel) => JSON.stringify({
-          bucketScore: getBucketScore(laneLabel, time),
-          laneLabel,
-          swimlaneType,
-          time
-        }))
         // use a factory here to bind the `time` and `i` values
         // of this iteration to the event.
         .on('mouseover', cellMouseOverFactory(time, i))
-        .on('mouseleave', cellMouseleave);
+        .on('mouseleave', cellMouseleave)
+        .each(function (laneLabel) {
+          this.__clickData__ = {
+            bucketScore: getBucketScore(laneLabel, time),
+            laneLabel,
+            swimlaneType,
+            time
+          };
+        });
 
       // calls itself with each() to get access to lane (= d3 data)
       cell.append('div').each(function (lane) {
@@ -429,8 +435,7 @@ export class ExplorerSwimlane extends React.Component {
           bucketScore = point.value;
           color = colorScore(bucketScore);
           el.classed('sl-cell-inner', true)
-            .style('background-color', color)
-            .attr('data-score', bucketScore);
+            .style('background-color', color);
         } else {
           el.classed('sl-cell-inner-dragselect', true);
         }
