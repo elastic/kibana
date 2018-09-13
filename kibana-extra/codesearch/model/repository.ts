@@ -13,6 +13,7 @@ export interface Repository {
   url: string;
   name?: string;
   org?: string;
+  defaultBranch?: string;
 }
 
 export interface FileTree {

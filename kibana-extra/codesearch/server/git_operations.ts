@@ -10,6 +10,9 @@ import * as Path from 'path';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 
+const HEAD = 'HEAD';
+const REFS_HEADS = 'refs/heads/';
+
 /**
  * do a nodegit operation and check the results. If it throws a not found error or returns null,
  * rethrow a Boom.notFound error.
@@ -52,6 +55,7 @@ export class GitOperations {
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
   }
+
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
@@ -92,7 +96,7 @@ export class GitOperations {
   public async fileTree(
     uri: RepositoryUri,
     path: string,
-    revision: string = 'HEAD',
+    revision: string = HEAD,
     depth: number = Number.MAX_SAFE_INTEGER
   ): Promise<FileTree> {
     const repo = await this.openRepo(uri);
@@ -180,4 +184,14 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo> {
     commit: commitInfo(commit),
     type,
   };
+}
+
+export async function getDefaultBranch(path: string): Promise<string> {
+  const repo = await Repository.open(path);
+  const ref = await repo.getReference(HEAD);
+  const name = ref.name();
+  if (name.startsWith(REFS_HEADS)) {
+    return name.substr(REFS_HEADS.length);
+  }
+  return name;
 }

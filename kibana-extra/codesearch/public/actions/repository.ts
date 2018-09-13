@@ -30,3 +30,5 @@ export const fetchRepoConfigSuccess = createAction<RepoConfigs>('FETCH REPO CONF
 export const fetchRepoConfigFailed = createAction<Error>('FETCH REPO CONFIGS FAILED');
 
 export const initRepoCommand = createAction<string>('INIT REPO CMD');
+
+export const gotoRepo = createAction<string>('GOTO REPO');

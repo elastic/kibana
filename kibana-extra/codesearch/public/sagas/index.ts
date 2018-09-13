@@ -13,6 +13,7 @@ import {
   watchDeleteRepo,
   watchFetchRepoConfigs,
   watchFetchRepos,
+  watchGotoRepo,
   watchImportRepo,
   watchIndexRepo,
   watchInitRepoCmd,
@@ -36,4 +37,5 @@ export function* rootSaga() {
   yield fork(watchCloseReference);
   yield fork(watchFetchRepoConfigs);
   yield fork(watchInitRepoCmd);
+  yield fork(watchGotoRepo);
 }

@@ -16,6 +16,7 @@ import {
   fetchRepos,
   fetchRepoTree,
   findReferences,
+  gotoRepo,
   loadStructure,
   revealPosition,
 } from '../actions';
@@ -65,10 +66,11 @@ function* handleLocationChange(action: any) {
   // reducer.
   const { pathname, search } = action.payload.location;
   const queryParams = queryString.parse(search);
-
   if (ROUTES.adminRegex.test(pathname)) {
     yield put(fetchRepos());
     yield put(fetchRepoConfigs());
+  } else if (ROUTES.repoRegex.test(pathname)) {
+    yield put(gotoRepo(pathname));
   } else if (ROUTES.mainRegex.test(pathname)) {
     const { file, pathType, repoUri, revision, position } = parseLspUrl(pathname);
     if (file && pathType === ROUTES.PathTypes.blob) {

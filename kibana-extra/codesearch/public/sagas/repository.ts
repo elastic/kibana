@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { call, put, takeEvery } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
@@ -17,6 +17,7 @@ import {
   fetchRepos,
   fetchReposFailed,
   fetchReposSuccess,
+  gotoRepo,
   importRepo,
   importRepoFailed,
   importRepoSuccess,
@@ -25,6 +26,7 @@ import {
   indexRepoSuccess,
   initRepoCommand,
 } from '../actions';
+import { history } from '../utils/url';
 
 function requestRepos(): any {
   return kfetch({ pathname: '../api/cs/repos' });
@@ -102,6 +104,15 @@ function requestRepoInitCmd(repoUri: string) {
     method: 'post',
   });
 }
+function* handleGotoRepo(action: Action<string>) {
+  const repoUri = action.payload as string;
+  const repo = yield call(requestRepo, repoUri);
+  history.push(`${repoUri}/tree/${repo.defaultBranch}`);
+}
+
+function requestRepo(uri: string) {
+  return kfetch({ pathname: `../api/cs/repo${uri}`, method: 'get' });
+}
 
 export function* watchImportRepo() {
   yield takeEvery(String(importRepo), handleImportRepo);
@@ -125,4 +136,8 @@ export function* watchFetchRepoConfigs() {
 
 export function* watchInitRepoCmd() {
   yield takeEvery(String(initRepoCommand), handleInitCmd);
+}
+
+export function* watchGotoRepo() {
+  yield takeLatest(String(gotoRepo), handleGotoRepo);
 }
