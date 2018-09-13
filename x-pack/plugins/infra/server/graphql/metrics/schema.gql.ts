@@ -12,29 +12,19 @@ export const metricsSchema: any = gql`
     hostCpuUsage
     hostFilesystem
     hostK8sOverview
-    hostK8sCpuCapGauge
     hostK8sCpuCap
-    hostK8sDiskCapGauge
     hostK8sDiskCap
     hostK8sMemoryCap
-    hostK8sMemoryCapGauge
     hostK8sPodCap
-    hostK8sPodCapGauge
     hostLoad
     hostMemoryUsage
     hostNetworkTraffic
-    hostCpuUsageGauge
-    hostLoadGauge
-    hostMemoryGauge
-    hostNetworkInGauge
-    hostNetworkOutGauge
+    podOverview
     podCpuUsage
     podDiskUsage
     podLogUsage
     podNetworkTraffic
-    podMemoryGauge
-    podNetInGauge
-    podNetOutGauge
+    containerOverview
     containerCpuKernel
     containerCpuUsage
     containerDiskIOReadsOps
