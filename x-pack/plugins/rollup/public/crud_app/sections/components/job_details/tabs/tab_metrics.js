@@ -14,15 +14,10 @@ import {
 
 export const TabMetrics = ({ metrics }) => {
   // TODO: Render a table if there are more than 20 metrics.
-  const listMetrics = metrics.map(metric => {
-    const {
-      field,
-      metrics: aggTypes,
-    } = metric;
-
+  const listMetrics = metrics.map(({ name, types }) => {
     return {
-      title: field,
-      description: aggTypes.join(', '),
+      title: name,
+      description: types.join(', '),
     };
   });
 
