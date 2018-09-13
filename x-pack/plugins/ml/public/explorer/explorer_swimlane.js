@@ -43,7 +43,7 @@ export class ExplorerSwimlane extends React.Component {
     const { mlExplorerDashboardService } = this.props;
     mlExplorerDashboardService.dragSelect.unwatch(this.boundDragSelectListener);
     const element = d3.select(this.rootNode);
-    element.empty();
+    element.html('');
   }
   componentDidMount() {
     const element = d3.select(this.rootNode.parentNode);
@@ -194,7 +194,8 @@ export class ExplorerSwimlane extends React.Component {
       swimlaneType
     } = this.props;
 
-    const wrapper = d3.select(this.rootNode.parentNode);
+    // This select both overall and viewby swimlane
+    const wrapper = d3.selectAll('.ml-explorer-swimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', true);
     wrapper.selectAll('.sl-cell-inner,.sl-cell-inner-dragselect').classed('sl-cell-inner-masked', true);
@@ -205,7 +206,8 @@ export class ExplorerSwimlane extends React.Component {
       .classed('sl-cell-inner-masked', false)
       .classed('sl-cell-inner-selected', true);
 
-    wrapper.selectAll('.lane-label')
+    const rootParent = d3.select(this.rootNode.parentNode);
+    rootParent.selectAll('.lane-label')
       .classed('lane-label-masked', function () {
         return (laneLabels.indexOf(d3.select(this).text()) > -1);
       });
@@ -257,7 +259,8 @@ export class ExplorerSwimlane extends React.Component {
   clearSelection() {
     const { appState, mlExplorerDashboardService } = this.props;
 
-    const wrapper = d3.select(this.rootNode.parentNode);
+    // This select both overall and viewby swimlane
+    const wrapper = d3.selectAll('.ml-explorer-swimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', false);
     wrapper.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', false);
@@ -305,7 +308,7 @@ export class ExplorerSwimlane extends React.Component {
 
     element.style('height', `${(height + 20)}px`);
     const swimlanes = element.select('.ml-swimlanes');
-    swimlanes.empty();
+    swimlanes.html('');
 
     const cellWidth = Math.floor(chartWidth / numBuckets);
 
