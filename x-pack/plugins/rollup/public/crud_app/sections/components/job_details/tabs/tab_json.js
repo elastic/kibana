@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiTitle,
@@ -12,7 +13,7 @@ import {
   EuiCodeEditor,
 } from '@elastic/eui';
 
-export const TabJson = ({
+export const TabJsonUi = ({
   json,
 }) => {
   const jsonString = JSON.stringify(json, null, 2);
@@ -20,7 +21,12 @@ export const TabJson = ({
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>JSON</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.rollupJobs.jobDetails.tabJson.sectionJson.title"
+            defaultMessage="JSON"
+          />
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="s" />
@@ -38,3 +44,5 @@ export const TabJson = ({
     </Fragment>
   );
 };
+
+export const TabJson = injectI18n(TabJsonUi);

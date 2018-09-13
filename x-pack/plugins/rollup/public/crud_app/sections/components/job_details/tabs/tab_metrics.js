@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiDescriptionList,
@@ -12,7 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export const TabMetrics = ({ metrics }) => {
+export const TabMetricsUi = ({ metrics }) => {
   // TODO: Render a table if there are more than 20 metrics.
   const listMetrics = metrics.map(({ name, types }) => {
     return {
@@ -24,7 +25,12 @@ export const TabMetrics = ({ metrics }) => {
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Metrics</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.rollupJobs.jobDetails.tabMetrics.sectionMetrics.title"
+            defaultMessage="Metrics"
+          />
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="s" />
@@ -33,3 +39,5 @@ export const TabMetrics = ({ metrics }) => {
     </Fragment>
   );
 };
+
+export const TabMetrics = injectI18n(TabMetricsUi);
