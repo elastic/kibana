@@ -181,6 +181,7 @@
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
+    "tslib": "^1.9.3",
     "type-detect": "^4.0.8",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "ui-select": "0.19.6",
