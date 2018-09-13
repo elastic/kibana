@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import {
-  EuiBasicTable, EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiPageContentBody
+  EuiBasicTable, EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiPageContentBody, EuiIcon
 } from '@elastic/eui';
 
 export class Ccr extends Component {
@@ -85,7 +85,7 @@ export class Ccr extends Component {
                 <EuiLink onClick={() => this.toggleShard(index)}>
                   {index}
                   &nbsp;
-                  { expanded ? '-' : '+' }
+                  { expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" /> }
                 </EuiLink>
               );
             }
