@@ -19,6 +19,7 @@
 
 import { TaskInstance } from './task';
 import { TaskManager } from './task_manager';
+import { FetchOpts } from './task_store';
 
 export class TaskManagerClientWrapper {
   private client: TaskManager | null;
@@ -27,14 +28,19 @@ export class TaskManagerClientWrapper {
     this.client = null;
   }
 
-  public setClient(client: TaskManager) {
+  public async setClient(client: TaskManager) {
     this.client = client;
   }
 
   public schedule(task: TaskInstance) {
-    if (this.client == null) {
-      throw new Error('Task Manager Client has not been set properly!');
-    }
-    this.client.schedule(task);
+    return this.client ? this.client.schedule(task) : null;
+  }
+
+  public remove(id: string) {
+    return this.client ? this.client.remove(id) : null;
+  }
+
+  public fetch(opts: FetchOpts = {}) {
+    return this.client ? this.client.fetch(opts) : null;
   }
 }

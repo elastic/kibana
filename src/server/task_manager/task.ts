@@ -84,10 +84,13 @@ export const validateRunResult = Joi.object({
   state: Joi.object().optional(),
 }).optional();
 
-/**
- * The type signature of the function that performs a task.
- */
-export type RunFunction = (context: RunContext) => PromiseLike<RunResult | undefined>;
+export type RunFunction = () => PromiseLike<RunResult | undefined>;
+
+export type CancelFunction = () => PromiseLike<RunResult | undefined>;
+
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => { run: RunFunction; cancel?: CancelFunction };
 
 /**
  * Defines a task which can be scheduled and run by the Kibana
@@ -123,14 +126,7 @@ export interface TaskDefinition {
    */
   numWorkers?: number;
 
-  /**
-   * A function which, does the work this task is built to do. Note,
-   * this is a *function* and is not guaranteed to be called with
-   * the *this* context of the task.
-   *
-   * @memberof TaskDefinition
-   */
-  run: RunFunction;
+  createTaskRunner: TaskRunCreatorFunction;
 }
 
 /**
@@ -146,7 +142,7 @@ export const validateTaskDefinition = Joi.object({
   description: Joi.string().optional(),
   timeOut: Joi.string().default('5m'),
   numWorkers: Joi.number().default(1),
-  run: Joi.func().required(),
+  createTaskRunner: Joi.func().required(),
 }).default();
 
 /**
