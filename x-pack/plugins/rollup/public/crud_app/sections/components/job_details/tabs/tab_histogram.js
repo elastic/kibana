@@ -14,15 +14,13 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-export const TabHistogram = ({ histogram }) => {
-  const { interval, fields } = histogram;
-
+export const TabHistogram = ({ histogram, histogramInterval }) => {
   // TODO: Render a table if there are more than 20 fields.
 
-  const renderedTerms = fields.map(field => {
+  const renderedTerms = histogram.map(({ name }) => {
     return (
-      <li key={field}>
-        {field}
+      <li key={name}>
+        {name}
       </li>
     );
   });
@@ -38,7 +36,7 @@ export const TabHistogram = ({ histogram }) => {
 
         <EuiFlexItem grow={false}>
           <EuiText>
-            <p>Interval: {interval}</p>
+            <p>Interval: {histogramInterval}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
