@@ -89,10 +89,10 @@
     },
     "apm": {
       "totalEvents": null,
-      "bytesSent": null,
-      "beats": {
-        "total": null,
-        "types": []
+      "memRss": null,
+      "memTotal": null,
+      "apms": {
+        "total": null
       }
     },
     "beats": {
