@@ -1,10 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { withHandlers } from 'recompose';
 
 const ancestorElement = (element, className) => {
   if (!element) return element;
-  do {
-    if (element.classList.contains(className)) return element;
-  } while ((element = element.parentElement));
+  do if (element.classList.contains(className)) return element;
+  while ((element = element.parentElement));
 };
 
 const localMousePosition = (box, clientX, clientY) => {
@@ -104,11 +109,12 @@ const handleKeyDown = (commit, e, isEditable, remove) => {
 };
 
 const handleKeyUp = (commit, { key }, isEditable) => {
-  if (isEditable)
+  if (isEditable) {
     commit('keyboardEvent', {
       event: 'keyUp',
       code: keyCode(key), // convert to standard event code
     });
+  }
 };
 
 export const withEventHandlers = withHandlers({

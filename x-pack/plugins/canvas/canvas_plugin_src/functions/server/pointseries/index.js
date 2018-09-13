@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
@@ -141,9 +147,9 @@ export const pointseries = () => ({
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
-          if (Array.isArray(ev)) {
+          if (Array.isArray(ev))
             throw new Error('Expressions must be wrapped in a function such as sum()');
-          }
+
           return ev;
         } catch (e) {
           // TODO: don't catch if eval to Array

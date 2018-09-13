@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -6,9 +12,7 @@ import { AutoRefreshControls } from './auto_refresh_controls';
 
 const getRefreshInterval = (val = '') => {
   // if it's a number, just use it directly
-  if (!isNaN(Number(val))) {
-    return val;
-  }
+  if (!isNaN(Number(val))) return val;
 
   // if it's a string, try to parse out the shorthand duration value
   const match = String(val).match(/^([0-9]{1,})([hmsd])$/);

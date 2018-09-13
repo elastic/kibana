@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { findExpressionType } from '../../lib/find_expression_type';
@@ -96,7 +102,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const FunctionForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+export const FunctionForm = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(Component);
 
 FunctionForm.propTypes = {
   expressionIndex: PropTypes.number,

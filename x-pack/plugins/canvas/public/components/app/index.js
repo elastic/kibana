@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady } from '../../state/selectors/app';
@@ -20,7 +26,10 @@ const mapDispatchToProps = {
 };
 
 export const App = compose(
-  connect(mapStateToProps, mapDispatchToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   withProps(() => ({
     onRouteChange: trackRouteChange,
   }))

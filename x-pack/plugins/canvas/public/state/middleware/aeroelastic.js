@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { shallowEqual } from 'recompose';
 import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
@@ -44,7 +50,7 @@ const elementToShape = (element, i) => {
   const cy = position.top + b;
   const z = i; // painter's algo: latest item goes to top
   // multiplying the angle with -1 as `transform: matrix3d` uses a left-handed coordinate system
-  const angleRadians = -position.angle / 180 * Math.PI;
+  const angleRadians = (-position.angle / 180) * Math.PI;
   const transformMatrix = aero.matrix.multiply(
     aero.matrix.translate(cx, cy, z),
     aero.matrix.rotateZ(angleRadians)
@@ -81,9 +87,7 @@ const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
         angle: Math.round(matrixToAngle(shape.transformMatrix)),
       };
 
-      if (!shallowEqual(oldProps, newProps)) {
-        setPosition(shape.id, newProps);
-      }
+      if (!shallowEqual(oldProps, newProps)) setPosition(shape.id, newProps);
     }
   });
 };
@@ -113,9 +117,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
     // set the selected element on the global store, if one element is selected
     const selectedShape = nextScene.selectedPrimaryShapes[0];
     if (nextScene.selectedShapes.length === 1) {
-      if (selectedShape && selectedShape !== selectedElement) {
+      if (selectedShape && selectedShape !== selectedElement)
         dispatch(selectElement(selectedShape));
-      }
     } else {
       // otherwise, clear the selected element state
       dispatch(selectElement(null));
@@ -167,9 +170,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
     let lastPageRemoved = false;
     if (action.type === removePage.toString()) {
       const preRemoveState = getState();
-      if (getPages(preRemoveState).length <= 1) {
-        lastPageRemoved = true;
-      }
+      if (getPages(preRemoveState).length <= 1) lastPageRemoved = true;
+
       aero.removeStore(action.payload);
     }
 
@@ -189,9 +191,8 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case duplicatePage.toString():
         const newPage = getSelectedPage(getState());
         createStore(newPage);
-        if (action.type === duplicatePage.toString()) {
-          dispatch(fetchAllRenderables());
-        }
+        if (action.type === duplicatePage.toString()) dispatch(fetchAllRenderables());
+
         populateWithElements(newPage);
         break;
 
@@ -206,11 +207,9 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case selectElement.toString():
         // without this condition, a mouse release anywhere will trigger it, leading to selection of whatever is
         // underneath the pointer (maybe nothing) when the mouse is released
-        if (action.payload) {
-          selectShape(prevPage, action.payload);
-        } else {
-          unselectShape(prevPage);
-        }
+        if (action.payload) selectShape(prevPage, action.payload);
+        else unselectShape(prevPage);
+
         break;
 
       case removeElement.toString():
@@ -224,12 +223,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
         // TODO: add a better check for elements changing, including their position, ids, etc.
         const shouldResetState =
           prevPage !== page || !shallowEqual(prevElements.map(id), elements.map(id));
-        if (shouldResetState) {
-          populateWithElements(page);
-        }
-        if (action.type !== setPosition.toString()) {
-          unselectShape(prevPage);
-        }
+        if (shouldResetState) populateWithElements(page);
+
+        if (action.type !== setPosition.toString()) unselectShape(prevPage);
+
         break;
     }
   };

@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import $ from 'jquery';
 import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
@@ -34,9 +40,7 @@ export const repeatImage = () => ({
       times(settings.count, () => container.append(img.cloneNode(true)));
 
       if (isValid(settings.emptyImage)) {
-        if (settings.max == null) {
-          throw new Error('max must be set if using an emptyImage');
-        }
+        if (settings.max == null) throw new Error('max must be set if using an emptyImage');
 
         const emptyImage = new Image();
         emptyImage.onload = function() {

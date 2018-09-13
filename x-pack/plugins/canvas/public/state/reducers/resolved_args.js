@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
@@ -106,9 +112,9 @@ export const resolvedArgsReducer = handleActions(
 
       return Object.keys(expressionContext).reduce((state, indexKey) => {
         const indexAsNum = parseInt(indexKey, 10);
-        if (indexAsNum >= index) {
+        if (indexAsNum >= index)
           return del(state, getFullPath([elementId, 'expressionContext', indexKey]));
-        }
+
         return state;
       }, transientState);
     },

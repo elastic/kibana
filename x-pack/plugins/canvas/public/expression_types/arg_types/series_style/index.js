@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import PropTypes from 'prop-types';
 import { lifecycle } from 'recompose';
 import { get } from 'lodash';
@@ -16,9 +22,8 @@ const EnhancedExtendedTemplate = lifecycle({
   },
   componentWillReceiveProps(newProps) {
     const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0', '');
-    if (newLabel && this.props.label !== this.formatLabel(newLabel)) {
+    if (newLabel && this.props.label !== this.formatLabel(newLabel))
       this.props.setLabel(this.formatLabel(newLabel));
-    }
   },
 })(ExtendedTemplate);
 

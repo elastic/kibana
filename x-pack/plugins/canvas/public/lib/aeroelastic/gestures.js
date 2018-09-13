@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 const { select, selectReduce } = require('./state');
 
 /**
@@ -52,18 +58,12 @@ const deadKey2 = 'Key†';
 const updateKeyLookupFromMouseEvent = (lookup, keyInfoFromMouseEvent) => {
   Object.entries(keyInfoFromMouseEvent).forEach(([key, value]) => {
     if (metaTest(key)) {
-      if (value) {
-        lookup.meta = true;
-      } else {
-        delete lookup.meta;
-      }
+      if (value) lookup.meta = true;
+      else delete lookup.meta;
     }
     if (altTest(key)) {
-      if (value) {
-        lookup.alt = true;
-      } else {
-        delete lookup.alt;
-      }
+      if (value) lookup.alt = true;
+      else delete lookup.alt;
     }
   });
   return lookup;
@@ -76,16 +76,13 @@ const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
   // these weird things get in when we alt-tab (or similar) etc. away and get back later:
   delete lookup[deadKey1];
   delete lookup[deadKey2];
-  if (!next) {
-    return { ...lookup };
-  }
+  if (!next) return { ...lookup };
+
   let code = next.code;
-  if (altTest(next.code)) {
-    code = 'alt';
-  }
-  if (metaTest(next.code)) {
-    code = 'meta';
-  }
+  if (altTest(next.code)) code = 'alt';
+
+  if (metaTest(next.code)) code = 'meta';
+
   if (next.event === 'keyDown') {
     return { ...lookup, [code]: true };
   } else {
@@ -108,11 +105,8 @@ const mouseButton = selectReduce(
   (prev, next) => {
     if (!next) return prev;
     const { event, uid } = next;
-    if (event === 'mouseDown') {
-      return { down: true, uid };
-    } else {
-      return event === 'mouseUp' ? { down: false, uid } : prev;
-    }
+    if (event === 'mouseDown') return { down: true, uid };
+    else return event === 'mouseUp' ? { down: false, uid } : prev;
   },
   { down: false, uid: null }
 )(mouseButtonEvent);
@@ -160,11 +154,9 @@ const mouseButtonStateTransitions = (state, mouseIsDown, movedAlready) => {
     case 'up':
       return mouseIsDown ? 'downed' : 'up';
     case 'downed':
-      if (mouseIsDown) {
-        return movedAlready ? 'dragging' : 'downed';
-      } else {
-        return 'up';
-      }
+      if (mouseIsDown) return movedAlready ? 'dragging' : 'downed';
+      else return 'up';
+
     case 'dragging':
       return mouseIsDown ? 'dragging' : 'up';
   }

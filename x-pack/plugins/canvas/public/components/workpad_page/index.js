@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, withProps } from 'recompose';
@@ -22,15 +28,17 @@ const mapDispatchToProps = dispatch => {
 };
 
 const getRootElementId = (lookup, id) => {
-  if (!lookup.has(id)) {
-    return null;
-  }
+  if (!lookup.has(id)) return null;
+
   const element = lookup.get(id);
   return element.parent ? getRootElementId(lookup, element.parent) : element.id;
 };
 
 export const WorkpadPage = compose(
-  connect(mapStateToProps, mapDispatchToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   withProps(({ isSelected, animation }) => {
     function getClassName() {
       if (animation) return animation.name;
@@ -75,9 +83,7 @@ export const WorkpadPage = compose(
       },
       remove: () => {
         // currently, handle the removal of one element, exploiting multiselect subsequently
-        if (selectedElements[0]) {
-          removeElement(page.id)(selectedElements[0]);
-        }
+        if (selectedElements[0]) removeElement(page.id)(selectedElements[0]);
       },
     };
   }), // Updates states; needs to have both local and global

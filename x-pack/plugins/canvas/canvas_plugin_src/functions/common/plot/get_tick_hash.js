@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { get, sortBy } from 'lodash';
 
 export const getTickHash = (columns, rows) => {
@@ -14,9 +20,7 @@ export const getTickHash = (columns, rows) => {
 
   if (get(columns, 'x.type') === 'string') {
     sortBy(rows, ['x']).forEach(row => {
-      if (!ticks.x.hash[row.x]) {
-        ticks.x.hash[row.x] = ticks.x.counter++;
-      }
+      if (!ticks.x.hash[row.x]) ticks.x.hash[row.x] = ticks.x.counter++;
     });
   }
 
@@ -24,9 +28,7 @@ export const getTickHash = (columns, rows) => {
     sortBy(rows, ['y'])
       .reverse()
       .forEach(row => {
-        if (!ticks.y.hash[row.y]) {
-          ticks.y.hash[row.y] = ticks.y.counter++;
-        }
+        if (!ticks.y.hash[row.y]) ticks.y.hash[row.y] = ticks.y.counter++;
       });
   }
 

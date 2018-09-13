@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { map, zipObject } from 'lodash';
 import { normalizeType } from '../../../../server/lib/normalize_type';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
@@ -49,12 +55,13 @@ export const essql = () => ({
         };
       })
       .catch(e => {
-        if (e.message.indexOf('parsing_exception') > -1)
+        if (e.message.indexOf('parsing_exception') > -1) {
           throw new Error(
             `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${
               e.message
             }`
           );
+        }
         throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
       });
   },

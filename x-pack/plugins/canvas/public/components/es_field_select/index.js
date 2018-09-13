@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { compose, withState, lifecycle } from 'recompose';
 import { getFields } from '../../lib/es_service';
 import { ESFieldSelect as Component } from './es_field_select';
@@ -16,9 +22,7 @@ export const ESFieldSelect = compose(
         });
       }
 
-      if (value && !this.props.fields.includes(value)) {
-        onChange(null);
-      }
+      if (value && !this.props.fields.includes(value)) onChange(null);
     },
   })
 )(Component);

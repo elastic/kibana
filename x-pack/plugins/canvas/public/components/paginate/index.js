@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import PropTypes from 'prop-types';
 import { compose, withState, withProps, withHandlers, lifecycle } from 'recompose';
 import { Paginate as Component } from './paginate';
@@ -30,9 +36,7 @@ export const Paginate = compose(
   }),
   lifecycle({
     componentDidUpdate(prevProps) {
-      if (prevProps.perPage !== this.props.perPage) {
-        this.props.setPage(0);
-      }
+      if (prevProps.perPage !== this.props.perPage) this.props.setPage(0);
     },
   })
 )(Component);

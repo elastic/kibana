@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React, { Component } from 'react';
 import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
@@ -53,14 +59,10 @@ class DatacolumnArgInput extends Component {
       }
 
       // this.inputRefs.column is the column selection, if there is no value, do nothing
-      if (valueNotSet(this.inputRefs.column.value)) {
-        return setMathFunction(this.inputRefs.fn.value);
-      }
+      if (valueNotSet(this.inputRefs.column.value)) return setMathFunction(this.inputRefs.fn.value);
 
       // this.inputRefs.fn is the math function to use, if it's not set, just use the value input
-      if (valueNotSet(this.inputRefs.fn.value)) {
-        return onValueChange(this.inputRefs.column.value);
-      }
+      if (valueNotSet(this.inputRefs.fn.value)) return onValueChange(this.inputRefs.column.value);
 
       // this.inputRefs.fn has a value, so use it as a math.js expression
       onValueChange(`${this.inputRefs.fn.value}(${maybeQuoteValue(this.inputRefs.column.value)})`);

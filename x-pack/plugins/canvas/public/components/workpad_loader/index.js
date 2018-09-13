@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers } from 'recompose';
@@ -109,9 +115,7 @@ export const WorkpadLoader = compose(
 
         setWorkpads(workpadState);
 
-        if (redirectHome) {
-          props.router.navigateTo('home');
-        }
+        if (redirectHome) props.router.navigateTo('home');
 
         return errors.map(({ id }) => id);
       });

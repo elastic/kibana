@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { isPlainObject, uniq, last, compact } from 'lodash';
@@ -68,9 +74,7 @@ export class FunctionForm extends BaseForm {
     // Don't instaniate these until render time, to give the registries a chance to populate.
     const argInstances = this.args.map(argSpec => new Arg(argSpec));
 
-    if (!isPlainObject(args)) {
-      throw new Error(`Form "${this.name}" expects "args" object`);
-    }
+    if (!isPlainObject(args)) throw new Error(`Form "${this.name}" expects "args" object`);
 
     // get a mapping of arg values from the expression and from the renderable's schema
     const argNames = uniq(argInstances.map(arg => arg.name).concat(Object.keys(args)));

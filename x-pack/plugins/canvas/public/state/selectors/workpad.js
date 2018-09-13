@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { get, omit } from 'lodash';
 import { safeElementFromExpression } from '../../../common/lib/ast';
 import { append } from '../../lib/modify_path';

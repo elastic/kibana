@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
 import { withState, withHandlers, compose } from 'recompose';
@@ -72,7 +78,11 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const Datasource = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps
+  ),
   withState('stateArgs', 'updateArgs', ({ args }) => args),
   withState('selecting', 'setSelecting', false),
   withState('previewing', 'setPreviewing', false),

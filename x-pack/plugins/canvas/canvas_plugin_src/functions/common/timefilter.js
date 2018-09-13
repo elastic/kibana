@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import dateMath from '@elastic/datemath';
 
 export const timefilter = () => ({
@@ -43,13 +49,9 @@ export const timefilter = () => ({
       return moment.toISOString();
     }
 
-    if (to != null) {
-      filter.to = parseAndValidate(to);
-    }
+    if (to != null) filter.to = parseAndValidate(to);
 
-    if (from != null) {
-      filter.from = parseAndValidate(from);
-    }
+    if (from != null) filter.from = parseAndValidate(from);
 
     return { ...context, and: [...context.and, filter] };
   },
