@@ -4,12 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamsProvider } from './job_params_provider';
-import { metadata } from '../metadata';
-
-export function register(registry) {
-  registry.register({
-    ...metadata,
-    JobParamsProvider
-  });
-}
+export const PHANTOM = 'phantom';
+export const CHROMIUM = 'chromium';

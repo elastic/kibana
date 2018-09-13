@@ -41,6 +41,7 @@ export const dateRangeBucketAgg = new BucketAggType({
   },
   params: [{
     name: 'field',
+    type: 'field',
     filterFieldTypes: 'date',
     default: function (agg) {
       return agg.getIndexPattern().timeFieldName;

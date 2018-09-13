@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutTypes } from '../../common/constants';
+/*
+ * Contains values for ML anomaly explorer.
+ */
 
-export const print = {
-  getJobParams() {
-    return {
-      id: LayoutTypes.PRINT
-    };
-  }
+export const DRAG_SELECT_ACTION = {
+  NEW_SELECTION: 'newSelection',
+  ELEMENT_SELECT: 'elementSelect',
+  DRAG_START: 'dragStart'
 };
