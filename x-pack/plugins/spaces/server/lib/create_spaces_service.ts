@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
 export interface SpacesService {
+  getIsDefaultSpaceId: (req: any) => boolean;
   getSpaceId: (req: any) => string;
 }
 
@@ -24,15 +26,25 @@ export function createSpacesService(server: any): SpacesService {
     return spaceId;
   }
 
+  function getIsDefaultSpaceId(request: any) {
+    return isDefaultSpaceId(getSpaceId(request));
+  }
+
+  function isDefaultSpaceId(spaceId: string) {
+    return spaceId === DEFAULT_SPACE_ID;
+  }
+
   function populateCache(request: any) {
     const spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
 
     contextCache.set(request, {
       spaceId,
+      isDefaultSpaceId: isDefaultSpaceId(spaceId),
     });
   }
 
   return {
     getSpaceId,
+    getIsDefaultSpaceId,
   };
 }

@@ -24,7 +24,8 @@
  * @param {object} context - Context object generated from tutorial factory (see #22760)
  */
 export function getSpaceIdForBeatsTutorial(context) {
-  if (!context || !context.spaceId || context.spaceId === 'default') {
+  console.log('getSpaceIdForBeatsTutorial()', context);
+  if (!context || !context.spaceId || context.isDefaultSpaceId) {
     return '';
   }
 
