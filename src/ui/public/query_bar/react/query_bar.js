@@ -20,6 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { toUser, fromUser } from '../../parse_query/index.js';
 
 import {
   EuiFlexGroup,
@@ -43,7 +44,7 @@ export class QueryBar extends Component {
   */
   state = {
     query: {
-      query: this.props.query.query,
+      query: toUser(this.props.query.query),
       language: this.props.query.language,
     },
   };
@@ -61,7 +62,7 @@ export class QueryBar extends Component {
     if (nextProps.query.query !== this.props.query.query) {
       this.setState({
         query: {
-          query: nextProps.query.query,
+          query: toUser(nextProps.query.query),
           language: nextProps.query.language,
         },
       });
@@ -84,7 +85,7 @@ export class QueryBar extends Component {
         onSubmit={(e) => {
           e.preventDefault();
           this.props.onSubmit({
-            query: this.state.query.query,
+            query: fromUser(this.state.query.query),
             language: this.state.query.language,
           });
         }
@@ -97,7 +98,6 @@ export class QueryBar extends Component {
           <div className="kuiLocalSearchAssistedInput">
             <EuiFlexGroup>
               <EuiFlexItem>
-                {/*Need an onChange to update state, but should this be a stateful component or should it call a callback */}
                 <EuiFieldText
                   placeholder="Search..."
                   value={this.state.query.query}
@@ -110,7 +110,7 @@ export class QueryBar extends Component {
                     language={this.state.query.language}
                     onSelectLanguage={(language) => {
                       this.props.onSubmit({
-                        query: this.state.query.query,
+                        query: '',
                         language: language,
                       });
                     }}

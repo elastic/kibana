@@ -18,3 +18,6 @@
  */
 
 import './parse_query';
+
+export * from './lib/from_user';
+export * from './lib/to_user';
