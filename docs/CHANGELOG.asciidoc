@@ -90,6 +90,9 @@ APM::
 * Fixes links that were missing the base path {pull}22592[#22592]
 * Fixes links to machine learning jobs {pull}22820[#22820]
 
+Design::
+* Resolves a problem that caused tooltips to generate an error in Internet Explorer 11 {pull}23006[#23006]
+
 Discover::
 * Fixes regression in `CallClient` that caused request errors, 
 such as timeouts, to result in fatal errors {pull}22558[#22558]
@@ -119,6 +122,18 @@ Monitoring::
 Platform::
 * Calculates the content length for the export API {pull}22847[#22847]
 * Relies on RFC1123 when validating `server.host` {pull}22469[#22469]
+* Fixes a problem with force `del()` when `bundleDir` is outside the current 
+working directory {pull}22981[#22981]
++
+Trying to run a {kib} optimization (usually after installing or disabling a plugin) 
+from a directory that is not a parent of the `optimize.bundleDir` configuration or 
+the {kib} installation no longer fails with "Cannot delete files/folders outside 
+the current working directory."
+
+Reporting::
+* Removes the `shouldComponentUpdate` function from `MarkdownVisComponent` 
+because it caused reporting failures {pull}21501[#21501]
+
 
 Sharing::
 * Displays warning state when status check has no data {pull}22178[#22178]
