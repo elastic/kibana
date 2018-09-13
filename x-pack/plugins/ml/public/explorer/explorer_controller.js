@@ -912,9 +912,8 @@ module.controller('MlExplorerController', function (
           anomaly.source.function_description);
 
         // For detectors with rules, add a property with the rule count.
-        const customRules = detector.custom_rules;
-        if (customRules !== undefined) {
-          anomaly.rulesLength = customRules.length;
+        if (detector !== undefined && detector.custom_rules !== undefined) {
+          anomaly.rulesLength = detector.custom_rules.length;
         }
 
         // Add properties used for building the links menu.
