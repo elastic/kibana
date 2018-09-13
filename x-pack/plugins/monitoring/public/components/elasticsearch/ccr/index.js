@@ -52,7 +52,7 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagTime',
-              name: 'Sync Lag (time)'
+              name: 'Last fetch time'
             },
             {
               field: 'syncLagOps',
@@ -100,7 +100,7 @@ export class Ccr extends Component {
           },
           {
             field: 'syncLagTime',
-            name: 'Sync Lag (time)'
+            name: 'Last fetch time'
           },
           {
             field: 'syncLagOps',
