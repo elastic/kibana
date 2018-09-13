@@ -42,7 +42,13 @@
     "forceConsistentCasingInFileNames": true,
 
     // Disable the breaking keyof behaviour introduced in TS 2.9.2 until EUI is updated to support that too
-    "keyofStringsOnly": true
+    "keyofStringsOnly": true,
+
+    // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.
+    "downlevelIteration": true,
+
+    // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
+    "importHelpers": true
   },
   "include": [
     "src/**/*"
