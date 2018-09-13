@@ -32,14 +32,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('should display registered sample data sets', async ()=> {
+    it('should display registered sample data sets', async () => {
       await retry.try(async () => {
         const exists = await PageObjects.home.doesSampleDataSetExist('flights');
         expect(exists).to.be(true);
       });
     });
 
-    it('should install sample data set', async ()=> {
+    it('should install sample data set', async () => {
       await PageObjects.home.addSampleDataSet('flights');
       await retry.try(async () => {
         const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulInstallToastExist();
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should launch sample data set dashboard', async ()=> {
+      it('should launch sample data set dashboard', async () => {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const today = new Date();
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
 
     // needs to be in describe block so it is run after 'dashboard describe block'
     describe('uninstall', () => {
-      it('should uninstall sample data set', async ()=> {
+      it('should uninstall sample data set', async () => {
         await PageObjects.home.removeSampleDataSet('flights');
         await retry.try(async () => {
           const successToastExists = await PageObjects.home.doesSampleDataSetSuccessfulUninstallToastExist();

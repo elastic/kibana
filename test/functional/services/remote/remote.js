@@ -22,6 +22,7 @@ import { By, Key } from 'selenium-webdriver';
 const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
+const until = require('selenium-webdriver/lib/until');
 import { modifyUrl } from '../../../../src/utils';
 
 export async function RemoteProvider({ getService }) {
@@ -217,6 +218,30 @@ export async function RemoteProvider({ getService }) {
 
       async takeScreenshot(scroll = false) {
         return await driver.takeScreenshot(scroll);
+      },
+
+      async waitForCondition(conditionFunc) {
+        await driver.wait(conditionFunc);
+      },
+
+      async waitForElementPresent(selector) {
+        await driver.wait(until.elementLocated(By.css(selector)));
+      },
+
+      async waitForElementEnabled(selector) {
+        await driver.wait(until.elementIsEnabled(By.css(selector)));
+      },
+
+      async waitForElementToContainText(selector, substring) {
+        await driver.wait(until.elementTextContains(By.css(selector), substring));
+      },
+
+      async waitForElementTextEquals(selector, text) {
+        await driver.wait(until.elementTextIs(By.css(selector), text));
+      },
+
+      async waitForElementVisible(selector) {
+        await driver.wait(until.elementIsVisible(By.css(selector)));
       }
     };
   }

@@ -23,6 +23,7 @@ import { retryForSuccess } from './retry_for_success';
 export function RetryProvider({ getService }) {
   const config = getService('config');
   const log = getService('log');
+  const remote = getService('remote');
 
   return new class Retry {
     async tryForTime(timeout, block) {
@@ -60,13 +61,28 @@ export function RetryProvider({ getService }) {
       });
     }
 
-    async waitFor(description, block) {
-      await retryForTruthy(log, {
-        timeout: config.get('timeouts.waitFor'),
-        methodName: 'retry.waitFor',
-        description,
-        block
-      });
+    async waitForCondition(conditionFunc) {
+      await remote.waitForCondition(conditionFunc);
+    }
+
+    async waitForElementPresent(selector) {
+      await remote.waitForElementPresent(selector);
+    }
+
+    async waitForElementEnabled(selector) {
+      await remote.waitForElementEnabled(selector);
+    }
+
+    async waitForElementToContainText(selector, substring) {
+      await remote.waitForElementToContainText(selector, substring);
+    }
+
+    async waitForElementTextEquals(selector, text) {
+      await remote.waitForElementTextEquals(selector, text);
+    }
+
+    async waitForElementVisible(selector) {
+      await remote.waitForElementVisible(selector);
     }
   };
 }
