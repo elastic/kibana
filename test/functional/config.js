@@ -53,7 +53,7 @@ import {
   ComboBoxProvider,
   EmbeddingProvider,
   RenderableProvider,
-  TableProvider,
+  TableProvider
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -113,6 +113,7 @@ export default async function ({ readConfigFile }) {
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
       table: TableProvider,
+      wait: commonConfig.get('services.wait')
     },
     servers: commonConfig.get('servers'),
 

@@ -45,7 +45,7 @@ export async function RemoteProvider({ getService }) {
   // chromeOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
-  const chromeService = new chrome.ServiceBuilder()
+  const chromeService = new chrome.ServiceBuilder(chrome.path)
     // .loggingTo(process.stdout)
     .enableVerboseLogging();
 
@@ -53,7 +53,7 @@ export async function RemoteProvider({ getService }) {
   // firefoxOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
-  const firefoxService = new firefox.ServiceBuilder()
+  const firefoxService = new firefox.ServiceBuilder(firefox.path)
     // .loggingTo(process.stdout)
     .enableVerboseLogging();
 
@@ -242,6 +242,10 @@ export async function RemoteProvider({ getService }) {
 
       async waitForElementVisible(selector) {
         await driver.wait(until.elementIsVisible(By.css(selector)));
+      },
+
+      async getLogsFor(logType) {
+        return await driver.manage().logs().get(logType);
       }
     };
   }

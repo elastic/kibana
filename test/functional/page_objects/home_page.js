@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const wait = getService('wait');
 
   class HomePage {
 
@@ -63,11 +64,14 @@ export function HomePageProvider({ getService }) {
 
     // loading action is either uninstall and install
     async _waitForSampleDataLoadingAction(id) {
-      const sampleDataCard = await testSubjects.find(`sampleDataSetCard${id}`);
       await retry.try(async () => {
         // waitForDeletedByClassName needs to be inside retry because it will timeout at least once
         // before action is complete
-        await sampleDataCard.waitForDeletedByClassName('euiLoadingSpinner');
+        //await sampleDataCard.waitForDeletedByClassName('euiLoadingSpinner');
+        await wait.forCondition(async () => {
+          const spinner = await find.allByCssSelector(`[data-test-subj="sampleDataSetCard${id}"] > .euiLoadingSpinner`);
+          return spinner.length === 0;
+        });
       });
     }
 

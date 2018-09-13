@@ -28,6 +28,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const wait = getService('wait');
   const PageObjects = getPageObjects(['common']);
 
   //const globalTimePickerSelector = By.css('[data-test-subj="globalTimepickerButton"]');
@@ -95,8 +96,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickTimepicker() {
       const timePicker = await testSubjects.find('globalTimepickerButton');
       timePicker.click();
-      await retry.waitForElementPresent(quickButtonSelector);
-      await retry.waitForElementVisible(quickButtonSelector);
+      await wait.forElementPresent(quickButtonSelector);
+      await wait.forElementVisible(quickButtonSelector);
     }
 
     async clickQuickButton() {
@@ -119,8 +120,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async showAbsoluteSection() {
       log.debug('showAbsoluteSection');
       await testSubjects.click('timepicker-absolute-button');
-      await retry.waitForElementPresent(absoluteFromInputSelector);
-      await retry.waitForElementVisible(absoluteFromInputSelector);
+      await wait.forElementPresent(absoluteFromInputSelector);
+      await wait.forElementVisible(absoluteFromInputSelector);
     }
 
     async getFromTime() {
@@ -272,7 +273,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async awaitGlobalLoadingIndicatorHidden() {
       log.debug('awaitGlobalLoadingIndicatorHidden');
-      retry.waitForCondition(async () => {
+      wait.forCondition(async () => {
         return await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10) !== null;
       });
     }
