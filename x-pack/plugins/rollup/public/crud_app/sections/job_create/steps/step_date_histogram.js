@@ -36,15 +36,15 @@ export class StepDateHistogramUi extends Component {
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
-    timeFields: PropTypes.array.isRequired,
+    dateFields: PropTypes.array.isRequired,
   }
 
   static getDerivedStateFromProps(props) {
-    const { timeFields } = props;
+    const { dateFields } = props;
 
-    const dateHistogramFieldOptions = timeFields.map(timeField => ({
-      value: timeField,
-      text: timeField,
+    const dateHistogramFieldOptions = dateFields.map(dateField => ({
+      value: dateField,
+      text: dateField,
     }));
 
     return { dateHistogramFieldOptions };
@@ -54,7 +54,6 @@ export class StepDateHistogramUi extends Component {
     super(props);
 
     this.state = {
-      isLoadingTimeFields: true,
       dateHistogramFieldOptions: [],
     };
   }
@@ -168,12 +167,14 @@ export class StepDateHistogramUi extends Component {
               )}
               error={errorDateHistogramField}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
+              fullWidth
             >
               <EuiSelect
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramField)}
                 options={dateHistogramFieldOptions}
                 value={dateHistogramField}
                 onChange={e => onFieldsChange({ dateHistogramField: e.target.value })}
+                fullWidth
               />
             </EuiFormRow>
 
@@ -196,11 +197,13 @@ export class StepDateHistogramUi extends Component {
                   </p>
                 </Fragment>
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramInterval || ''}
                 onChange={e => onFieldsChange({ dateHistogramInterval: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -247,11 +250,13 @@ export class StepDateHistogramUi extends Component {
                   </p>
                 </Fragment>
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramDelay || ''}
                 onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
+                fullWidth
               />
             </EuiFormRow>
 
@@ -280,11 +285,13 @@ export class StepDateHistogramUi extends Component {
                   }}
                 />
               )}
+              fullWidth
             >
               <EuiFieldText
                 value={dateHistogramTimeZone || ''}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
