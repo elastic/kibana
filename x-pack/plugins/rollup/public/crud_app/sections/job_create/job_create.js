@@ -39,6 +39,7 @@ import {
   StepTerms,
   StepHistogram,
   StepMetrics,
+  StepReview,
 } from './steps';
 import {
   STEP_LOGISTICS,
@@ -535,6 +536,13 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             metricsFields={indexPatternMetricsFields}
+          />
+        );
+
+      case STEP_REVIEW:
+        return (
+          <StepReview
+            job={this.getAllFields()}
           />
         );
 

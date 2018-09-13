@@ -9,3 +9,4 @@ export { StepDateHistogram } from './step_date_histogram';
 export { StepTerms } from './step_terms';
 export { StepHistogram } from './step_histogram';
 export { StepMetrics } from './step_metrics';
+export { StepReview } from './step_review';

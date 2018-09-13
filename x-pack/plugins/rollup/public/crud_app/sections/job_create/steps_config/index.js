@@ -110,6 +110,5 @@ export const stepIdToStepConfigMap = {
       metrics: [],
     },
   },
-  [STEP_REVIEW]: {
-  },
+  [STEP_REVIEW]: {},
 };

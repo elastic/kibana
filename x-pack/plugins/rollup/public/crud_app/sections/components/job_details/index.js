@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobActionMenu } from './job_action_menu';
-
 export {
   JobDetails,
   JOB_DETAILS_TAB_SUMMARY,
@@ -14,5 +12,3 @@ export {
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
 } from './job_details';
-
-export { JobStatus } from './job_status';

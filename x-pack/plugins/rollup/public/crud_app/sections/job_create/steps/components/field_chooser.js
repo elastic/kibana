@@ -101,6 +101,7 @@ export class FieldChooser extends Component {
           value={searchValue}
           onChange={this.onSearch}
           aria-label="Search fields"
+          fullWidth
         />
 
         <EuiSpacer size="s" />
