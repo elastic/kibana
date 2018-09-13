@@ -90,6 +90,9 @@ export const schema = Joi.object().keys({
 
   updateBaselines: Joi.boolean().default(false),
 
+  inclfile: Joi.string().default(),
+  exclfile: Joi.string().default(),
+
   junit: Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),

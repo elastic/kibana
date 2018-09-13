@@ -22,6 +22,9 @@ import { isAbsolute } from 'path';
 import { loadTracer } from '../load_tracer';
 import { decorateMochaUi } from './decorate_mocha_ui';
 
+const fs = require('fs');
+const filepath = require('path');
+
 /**
  *  Load an array of test files into a mocha instance
  *
@@ -31,7 +34,7 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBaselines) => {
+export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBaselines, filterTestFiles, filterType) => {
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
@@ -45,11 +48,11 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBas
         ? testModule.default
         : testModule;
 
-      runTestProvider(testProvider, path); // eslint-disable-line
+      runTestProvider(testProvider, path, filterTestFiles, filterType); // eslint-disable-line
     });
   };
 
-  const runTestProvider = (provider, path) => {
+  const runTestProvider = (provider, path, filterTestFiles, filterType) => {
     if (typeof provider !== 'function') {
       throw new Error(`Default export of test files must be a function, got ${provider}`);
     }
@@ -60,20 +63,53 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBas
       const context = decorateMochaUi(lifecycle, global);
       mocha.suite.emit('pre-require', context, path, mocha);
 
-      const returnVal = provider({
-        loadTestFile: innerLoadTestFile,
-        getService: providers.getService,
-        getPageObject: providers.getPageObject,
-        getPageObjects: providers.getPageObjects,
-        updateBaselines,
-      });
-
-      if (returnVal && typeof returnVal.then === 'function') {
-        throw new TypeError('Default export of test files must not be an async function');
+      // Filter test files
+      let skipMe = false;
+      if (filterTestFiles) {
+        const parsePath = filepath.parse(path);
+        const basedir = filepath.basename(parsePath.dir);
+        const chkFile = basedir + '/' + parsePath.base;
+        const indexFile = basedir + '/' + 'index.js';
+        if (filterType === 'exclude' && (filterTestFiles.has(indexFile) || filterTestFiles.has(chkFile))) {
+          skipMe = true;
+        } else if (filterType === 'exclude' && parsePath.base === 'index.js' && filterTestFiles.has(basedir)) {
+          const dirSet = new Set();
+          fs.readdir(parsePath.dir, (err, dirfiles) => {
+            dirfiles.forEach(function (item) {
+              if (item !== 'index.js') {
+                dirSet.add(basedir + '/' + item);
+              }
+            });
+          });
+          const diff = new Set([...dirSet].filter(x => !filterTestFiles.has(x)));
+          if (diff.size === 0) {
+            skipMe = true;
+          }
+        } else if (filterType === 'include' && !filterTestFiles.has(basedir) && parsePath.base === 'index.js') {
+          skipMe = true;
+        } else if (filterType === 'include' && !filterTestFiles.has(chkFile) &&
+                   parsePath.base !== 'index.js' && !filterTestFiles.has(indexFile)) {
+          skipMe = true;
+        }
       }
 
-      mocha.suite.emit('require', returnVal, path, mocha);
-      mocha.suite.emit('post-require', global, path, mocha);
+      if (!skipMe) {
+        const returnVal = provider({
+          loadTestFile: innerLoadTestFile,
+          getService: providers.getService,
+          getPageObject: providers.getPageObject,
+          getPageObjects: providers.getPageObjects,
+          updateBaselines,
+        });
+
+        if (returnVal && typeof returnVal.then === 'function') {
+          throw new TypeError('Default export of test files must not be an async function');
+        }
+
+        mocha.suite.emit('require', returnVal, path, mocha);
+        mocha.suite.emit('post-require', global, path, mocha);
+      }
+
       context.revertProxiedAssignments();
     });
   };
