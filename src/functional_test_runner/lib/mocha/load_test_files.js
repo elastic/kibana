@@ -32,12 +32,16 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @return {undefined} - mutates mocha, no return value
  */
 export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, excludePaths, updateBaselines }) => {
+  const pendingExcludes = new Set(excludePaths.slice(0));
+
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
     }
 
-    if (excludePaths.includes(path)) {
+    if (pendingExcludes.has(path)) {
+      pendingExcludes.delete(path);
+      log.warning('Skipping test file %s', path);
       return;
     }
 
@@ -84,4 +88,8 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
   };
 
   paths.forEach(innerLoadTestFile);
+
+  if (pendingExcludes.size) {
+    throw new Error('After loading all test files some exclude paths were not consumed');
+  }
 };
