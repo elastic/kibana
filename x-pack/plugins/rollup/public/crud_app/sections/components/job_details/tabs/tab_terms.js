@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiTitle,
@@ -12,9 +13,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export const TabTerms = ({ terms }) => {
+export const TabTermsUi = ({ terms }) => {
   // TODO: Render a table if there are more than 20 fields.
-
   const renderedTerms = terms.map(({ name }) => {
     return (
       <li key={name}>
@@ -26,7 +26,12 @@ export const TabTerms = ({ terms }) => {
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>Terms</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.rollupJobs.jobDetails.tabTerms.sectionTerms.title"
+            defaultMessage="Terms"
+          />
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="s" />
@@ -39,3 +44,5 @@ export const TabTerms = ({ terms }) => {
     </Fragment>
   );
 };
+
+export const TabTerms = injectI18n(TabTermsUi);
