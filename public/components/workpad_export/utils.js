@@ -1,7 +1,6 @@
 /* eslint import/no-unresolved: 1 */
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
 import rison from 'rison-node';
-import { exportTypesRegistry } from 'plugins/reporting/services/export_types';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
 import { fetch } from '../../../common/lib/fetch';
@@ -12,7 +11,6 @@ const PDF_LAYOUT_TYPE = 'preserve_layout';
 export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
   const reportingEntry = chrome.addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
-  const exportType = exportTypesRegistry.getById('printablePdf');
 
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
   // we need a viewport that will include all of the pages in the workpad. The viewport
@@ -41,7 +39,7 @@ export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
     title,
   };
 
-  return `${reportingEntry}/${exportType.id}?${QueryString.param(
+  return `${reportingEntry}/printablePdf?${QueryString.param(
     'jobParams',
     rison.encode(jobParams)
   )}`;
