@@ -13,5 +13,5 @@ export const metrics = {
   ...elasticsearchMetrics,
   ...kibanaMetrics,
   ...logstashMetrics,
-  ...beatsMetrics
+  ...beatsMetrics,
 };

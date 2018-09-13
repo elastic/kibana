@@ -180,6 +180,7 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
   const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
   let data = [];
 
+
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {
     // map buckets to values for charts
     const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
@@ -212,12 +213,18 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize }) {
+export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize, metricOpts }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
+  }
+  if (metricOpts) {
+    Object.assign(metric, metricOpts);
+    // for (const optName in metricOpts) {
+    //   metric[optName] = metricOpts[optName];
+    // }
   }
   const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
 

@@ -15,7 +15,7 @@ import {
   ThreadPoolQueueMetric,
   ThreadPoolRejectedMetric,
   WriteThreadPoolQueueMetric,
-  WriteThreadPoolRejectedMetric
+  WriteThreadPoolRejectedMetric,
 } from './classes';
 import {
   LARGE_FLOAT,
@@ -944,5 +944,14 @@ export const metrics = {
     units: '',
     type: 'index',
     derivative: true
-  })
+  }),
+
+  // CCR
+  ccr_sync_lag_time: new RequestRateMetric({
+    title: 'Sync Lag Over Time', // title to use for the chart
+    field: '__dynamic',
+    type: 'ccr',
+    label: 'Sync Lag', // label to use for this line in the chart
+    description: 'FILL ME OUT',
+  }),
 };
