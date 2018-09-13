@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
+import { getSpaceIdForBeatsTutorial } from '../lib/get_space_id_for_beats_tutorial';
 
 export const createFilebeatInstructions = context => ({
   INSTALL: {
@@ -181,7 +182,7 @@ export const createFilebeatInstructions = context => ({
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        `  space.id: "${context ? context.spaceId : '<space_id>' }"`
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.osxTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -210,7 +211,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        `  space.id: "${context ? context.spaceId : '<space_id>' }"`
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.debTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -239,7 +240,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        `  space.id: "${context ? context.spaceId : '<space_id>' }"`
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.rpmTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -268,7 +269,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        `  space.id: "${context ? context.spaceId : '<space_id>' }"`
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.filebeatInstructions.config.windowsTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
