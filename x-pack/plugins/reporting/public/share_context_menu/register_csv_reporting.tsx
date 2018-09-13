@@ -11,7 +11,7 @@ import { ShareActionProps } from 'ui/share/share_action';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
-function reportingProvider(Private: any) {
+function reportingProvider(Private: any, i18n) {
   const xpackInfo = Private(XPackInfoProvider);
   const getShareActions = ({
     objectType,
@@ -33,7 +33,9 @@ function reportingProvider(Private: any) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
-      const panelTitle = 'CSV Reports';
+      const panelTitle = i18n('xpack.reporting.shareContextMenu.register.csvReportsButtonLabel', {
+        defaultMessage: 'CSV Reports',
+      });
 
       shareActions.push({
         shareMenuItem: {

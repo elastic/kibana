@@ -11,6 +11,7 @@ declare module '@elastic/eui' {
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
@@ -32,7 +33,7 @@ interface State {
   absoluteUrl: string;
 }
 
-export class ReportingPanelContent extends Component<Props, State> {
+class ReportingPanelContentUi extends Component<Props, State> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -63,16 +64,30 @@ export class ReportingPanelContent extends Component<Props, State> {
     if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
         <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
-          <EuiFormRow helpText={'Please save your work before generating a report.'}>
+          <EuiFormRow
+            helpText={
+              <FormattedMessage
+                id="xpack.reporting.components.reportingPanelContent.saveWorkDescription"
+                defaultMessage="Please save your work before generating a report."
+              />
+            }
+          >
             {this.renderGenerateReportButton(true)}
           </EuiFormRow>
         </EuiForm>
       );
     }
 
-    const reportMsg = `${this.prettyPrintReportingType()}s can take a minute or two to generate based upon the size of your ${
-      this.props.objectType
-    }.`;
+    const reportMsg = (
+      <FormattedMessage
+        id="xpack.reporting.components.reportingPanelContent.generationTimeDescription"
+        defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
+        values={{
+          reportingType: this.prettyPrintReportingType(),
+          objectType: this.props.objectType,
+        }}
+      />
+    );
 
     return (
       <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
@@ -88,8 +103,10 @@ export class ReportingPanelContent extends Component<Props, State> {
 
         <EuiText size="s">
           <p>
-            Alternatively, copy this POST URL to call generation from outside Kibana or from
-            Watcher.
+            <FormattedMessage
+              id="xpack.reporting.components.reportingPanelContent.generationWayDescription"
+              defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
+            />
           </p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -97,7 +114,10 @@ export class ReportingPanelContent extends Component<Props, State> {
         <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="sharePanel__copyAnchor">
           {(copy: () => void) => (
             <EuiButton className="sharePanel__button" onClick={copy} size="s">
-              Copy POST URL
+              <FormattedMessage
+                id="xpack.reporting.components.reportingPanelContent.copyUrlButtonLabel"
+                defaultMessage="Copy POST URL"
+              />
             </EuiButton>
           )}
         </EuiCopy>
@@ -115,7 +135,11 @@ export class ReportingPanelContent extends Component<Props, State> {
         data-test-subj="generateReportButton"
         size="s"
       >
-        Generate {this.prettyPrintReportingType()}
+        <FormattedMessage
+          id="xpack.reporting.components.reportingPanelContent.generateButtonLabel"
+          defaultMessage="Generate {reportingType}"
+          values={{ reportingType: this.prettyPrintReportingType() }}
+        />
       </EuiButton>
     );
   };
@@ -157,12 +181,23 @@ export class ReportingPanelContent extends Component<Props, State> {
   };
 
   private createReportingJob = () => {
+    const { intl } = this.props;
+
     return reportingClient
       .createReportingJob(this.props.reportType, this.props.getJobParams())
       .then(() => {
         toastNotifications.addSuccess({
-          title: `Queued report for ${this.props.objectType}`,
-          text: 'Track its progress in Management',
+          title: intl.formatMessage(
+            {
+              id: 'xpack.reporting.components.reportingPanelContent.notification.successTitle',
+              defaultMessage: 'Queued report for {objectType}',
+            },
+            { objectType: this.props.objectType }
+          ),
+          text: intl.formatMessage({
+            id: 'xpack.reporting.components.reportingPanelContent.notification.successDescription',
+            defaultMessage: 'Track its progress in Management',
+          }),
           'data-test-subj': 'queueReportSuccess',
         });
         this.props.onClose();
@@ -170,21 +205,45 @@ export class ReportingPanelContent extends Component<Props, State> {
       .catch((kfetchError: KFetchError) => {
         if (kfetchError.message === 'not exportable') {
           return toastNotifications.addWarning({
-            title: `Only saved ${this.props.objectType} can be exported`,
-            text: 'Please save your work first',
+            title: intl.formatMessage(
+              {
+                id:
+                  'xpack.reporting.components.reportingPanelContent.notification.notExportableTitle',
+                defaultMessage: 'Only saved {objectType} can be exported',
+              },
+              { objectType: this.props.objectType }
+            ),
+            text: intl.formatMessage({
+              id:
+                'xpack.reporting.components.reportingPanelContent.notification.notExportableDescription',
+              defaultMessage: 'Please save your work first',
+            }),
           });
         }
 
         const defaultMessage =
           kfetchError.res.status === 403
-            ? `You don't have permission to generate this report.`
-            : `Can't reach the server. Please try again.`;
+            ? intl.formatMessage({
+                id:
+                  'xpack.reporting.components.reportingPanelContent.notification.noPermissionDescription',
+                defaultMessage: "You don't have permission to generate this report.",
+              })
+            : intl.formatMessage({
+                id:
+                  'xpack.reporting.components.reportingPanelContent.notification.cantReachServerDescription',
+                defaultMessage: "Can't reach the server. Please try again.",
+              });
 
         toastNotifications.addDanger({
-          title: 'Reporting error',
+          title: intl.formatMessage({
+            id: 'xpack.reporting.components.reportingPanelContent.notification.reportingErrorTitle',
+            defaultMessage: 'Reporting error',
+          }),
           text: kfetchError.message || defaultMessage,
           'data-test-subj': 'queueReportError',
         });
       });
   };
 }
+
+export const ReportingPanelContent = injectI18n(ReportingPanelContentUi);

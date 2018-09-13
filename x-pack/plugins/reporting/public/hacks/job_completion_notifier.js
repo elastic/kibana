@@ -48,7 +48,7 @@ uiModules.get('kibana')
         const errorDoc = await reportingJobQueue.getContent(job._id);
         const text = errorDoc.content;
         return toastNotifications.addDanger({
-          title: i18n.translate('xpack.reporting.jobComplitionNotifier.error.couldnotCreateReportTitle', {
+          title: i18n.translate('xpack.reporting.jobCompletionNotifier.error.couldnotCreateReportTitle', {
             defaultMessage: 'Couldn\'t create report for {reportObjectType} \'{reportObjectTitle}\'',
             values: { reportObjectType, reportObjectTitle }
           }),
@@ -65,12 +65,12 @@ uiModules.get('kibana')
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>
-            {i18n.translate('xpack.reporting.jobComplitionNotifier.reportLink.pickItUpFromDescription', {
+            {i18n.translate('xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromDescription', {
               defaultMessage: 'Pick it up from'
             })}
             &nbsp;
             <a href={reportingSectionUrl}>
-              {i18n.translate('xpack.reporting.jobComplitionNotifier.reportLink.reportingSectionUrlLinkLabel', {
+              {i18n.translate('xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel', {
                 defaultMessage: 'Management > Kibana > Reporting.'
               })}
             </a>
@@ -84,7 +84,7 @@ uiModules.get('kibana')
           data-test-subj="downloadCompletedReportButton"
           onClick={() => { downloadReport(job._id); }}
         >
-          {i18n.translate('xpack.reporting.jobComplitionNotifier.dowloadReportButtonLabel', {
+          {i18n.translate('xpack.reporting.jobCompletionNotifier.downloadReportButtonLabel', {
             defaultMessage: 'Download report'
           })}
         </EuiButton>
@@ -94,14 +94,14 @@ uiModules.get('kibana')
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({
-          title: i18n.translate('xpack.reporting.jobComplitionNotifier.maxSizeReached.partialReportTitle', {
+          title: i18n.translate('xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportTitle', {
             defaultMessage: 'Created partial report for {reportObjectType} \'{reportObjectTitle}\'',
             values: { reportObjectType, reportObjectTitle }
           }),
           text: (
             <div>
               <p>
-                {i18n.translate('xpack.reporting.jobComplitionNotifier.maxSizeReached.partialReportDescription', {
+                {i18n.translate('xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription', {
                   defaultMessage: 'The report reached the max size and contains partial data.'
                 })}
               </p>
@@ -114,7 +114,7 @@ uiModules.get('kibana')
       }
 
       toastNotifications.addSuccess({
-        title: i18n.translate('xpack.reporting.jobComplitionNotifier.createdReportTitle', {
+        title: i18n.translate('xpack.reporting.jobCompletionNotifier.createdReportTitle', {
           defaultMessage: 'Created report for {reportObjectType} \'{reportObjectTitle}\'',
           values: { reportObjectType, reportObjectTitle }
         }),

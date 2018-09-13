@@ -14,7 +14,7 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_actio
 import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 
-function reportingProvider(Private: any, dashboardConfig: any) {
+function reportingProvider(Private: any, dashboardConfig: any, i18n) {
   const xpackInfo = Private(XPackInfoProvider);
   const getShareActions = ({
     objectType,
@@ -53,7 +53,9 @@ function reportingProvider(Private: any, dashboardConfig: any) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
-      const panelTitle = 'PDF Reports';
+      const panelTitle = i18n('xpack.reporting.shareContextMenu.register.pdfReportsButtonLabel', {
+        defaultMessage: 'PDF Reports',
+      });
 
       shareActions.push({
         shareMenuItem: {
