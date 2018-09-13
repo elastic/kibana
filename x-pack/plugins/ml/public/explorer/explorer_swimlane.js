@@ -398,7 +398,7 @@ export class ExplorerSwimlane extends React.Component {
 
     // TODO - mark if zoomed in to bucket width?
     let time = startTime;
-    Array(numBuckets).fill(null).forEach((v, i) => {
+    Array(numBuckets || 0).fill(null).forEach((v, i) => {
       const cell = cellsContainer.append('div')
         .classed('sl-cell', true)
         .style('width', `${cellWidth}px`)
