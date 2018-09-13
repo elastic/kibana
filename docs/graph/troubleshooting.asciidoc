@@ -30,7 +30,7 @@ of any statistical correlation with the sample.
 required to assert a relationship.
 
 [float]
-=== What can I do to to improve performance?
+=== What can I do to improve performance?
 
 With the default setting of `use_significance` set to `true`, the Graph API
 performs a background frequency check of the terms it discovers as part of
