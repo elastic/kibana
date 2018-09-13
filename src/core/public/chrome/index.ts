@@ -17,33 +17,4 @@
  * under the License.
  */
 
-import { distinctUntilChanged } from 'rxjs/operators';
-import { uiModules } from '../../modules';
-
-let newPlatformChrome;
-export function __newPlatformInit__(instance) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/global_nav_state is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
-
-uiModules.get('kibana')
-  .service('globalNavState', ($rootScope) => {
-    let isOpen = false;
-    newPlatformChrome.getIsCollapsed$().pipe(distinctUntilChanged()).subscribe(isCollapsed => {
-      $rootScope.$evalAsync(() => {
-        isOpen = !isCollapsed;
-        $rootScope.$broadcast('globalNavState:change');
-      });
-    });
-
-    return {
-      isOpen: () => isOpen,
-
-      setOpen: newValue => {
-        newPlatformChrome.setIsCollapsed(!newValue);
-      }
-    };
-  });
+export { ChromeService, ChromeStartContract, Brand } from './chrome_service';

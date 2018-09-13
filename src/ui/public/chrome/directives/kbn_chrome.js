@@ -57,13 +57,8 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, $location, $http, Private) {
+        controller($scope, $rootScope, Private) {
           const getUnhashableStates = Private(getUnhashableStatesProvider);
-
-          // are we showing the embedded version of the chrome?
-          if (Boolean($location.search().embed)) {
-            internals.permanentlyHideChrome();
-          }
 
           const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 

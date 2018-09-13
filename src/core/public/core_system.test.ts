@@ -18,6 +18,7 @@
  */
 
 import { BasePathService } from './base_path';
+import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
@@ -97,6 +98,15 @@ jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
 }));
 
+const mockChromeStartContract = {};
+const MockChromeService = jest.fn<ChromeService>(function _MockNotificationsService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockChromeStartContract);
+  this.stop = jest.fn();
+});
+jest.mock('./chrome', () => ({
+  ChromeService: MockChromeService,
+}));
+
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -124,6 +134,7 @@ describe('constructor', () => {
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
     expect(MockBasePathService).toHaveBeenCalledTimes(1);
     expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
+    expect(MockChromeService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -231,6 +242,17 @@ describe('#stop', () => {
     expect(loadingCountService.stop).toHaveBeenCalled();
   });
 
+  it('calls chrome.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [chromeService] = MockChromeService.mock.instances;
+    expect(chromeService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(chromeService.stop).toHaveBeenCalled();
+  });
+
   it('clears the rootDomElement', () => {
     const rootDomElement = document.createElement('div');
     const coreSystem = new CoreSystem({
@@ -309,6 +331,13 @@ describe('#start()', () => {
   it('calls notifications#start()', () => {
     startCore();
     const [mockInstance] = MockNotificationsService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('calls chrome#start()', () => {
+    startCore();
+    const [mockInstance] = MockChromeService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
   });
