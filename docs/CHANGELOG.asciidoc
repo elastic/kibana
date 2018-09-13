@@ -103,8 +103,8 @@ Machine Learning::
 * Fixes links to results for jobs with no results {pull}22650[#22650]
 * Adds milliseconds to watch start and end times {pull}22659[#22659]
 * Removes calendars from job when cloning {pull}22667[#22667]
-* Fixes issue with incorrect timezones in jobs list {pull}22714[#22714]
-* Disables single metric viewer links for non-applicable jobs {pull}22809[#22809]
+* Fixes issue with incorrect timezones in Jobs list {pull}22714[#22714]
+* Disables links on the Jobs list to Single Metric Viewer for non-applicable jobs {pull}22809[#22809]
 
 Management::
 * Fixes issue with importing a visualization with a missing saved search {pull}22029[#22029]
