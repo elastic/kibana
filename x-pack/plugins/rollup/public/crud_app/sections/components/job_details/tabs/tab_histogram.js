@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiTitle,
@@ -14,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-export const TabHistogram = ({ histogram, histogramInterval }) => {
+export const TabHistogramUi = ({ histogram, histogramInterval }) => {
   // TODO: Render a table if there are more than 20 fields.
 
   const renderedTerms = histogram.map(({ name }) => {
@@ -30,13 +31,24 @@ export const TabHistogram = ({ histogram, histogramInterval }) => {
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h3>Histogram</h3>
+            <h3>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabHistogram.sectionHistogram.title"
+                defaultMessage="Histogram"
+              />
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiText>
-            <p>Interval: {histogramInterval}</p>
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabHistogram.interval.label"
+                defaultMessage="Interval: {histogramInterval}"
+                values={{ histogramInterval }}
+              />
+            </p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -51,3 +63,5 @@ export const TabHistogram = ({ histogram, histogramInterval }) => {
     </Fragment>
   );
 };
+
+export const TabHistogram = injectI18n(TabHistogramUi);
