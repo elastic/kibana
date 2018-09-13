@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { parse } from 'tinymath';
 import { getFieldType } from '../../../../../common/lib/get_field_type';
 import { isColumnReference } from './is_column_reference';
@@ -16,9 +22,8 @@ export function getExpressionType(columns, mathExpression) {
     if (fieldNames.length > 0) {
       const fieldTypes = fieldNames.reduce((types, name) => {
         const type = getFieldType(columns, name);
-        if (type !== 'null' && types.indexOf(type) === -1) {
-          return types.concat(type);
-        }
+        if (type !== 'null' && types.indexOf(type) === -1) return types.concat(type);
+
         return types;
       }, []);
 

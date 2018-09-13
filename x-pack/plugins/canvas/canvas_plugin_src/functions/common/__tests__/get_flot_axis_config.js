@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import expect from 'expect.js';
 import { getFlotAxisConfig } from '../plot/get_flot_axis_config';
 import { xAxisConfig, yAxisConfig, hideAxis } from './fixtures/test_styles';

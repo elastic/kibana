@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import moment from 'moment';
 export const axisConfig = () => ({
   name: 'axisConfig',
@@ -40,18 +46,20 @@ export const axisConfig = () => ({
     const min = typeof args.min === 'string' ? moment.utc(args.min).valueOf() : args.min;
     const max = typeof args.max === 'string' ? moment.utc(args.max).valueOf() : args.max;
 
-    if (min != null && isNaN(min))
+    if (min != null && isNaN(min)) {
       throw new Error(
         `Invalid date string '${
           args.min
         }' found. 'min' must be a number, date in ms, or ISO8601 date string`
       );
-    if (max != null && isNaN(max))
+    }
+    if (max != null && isNaN(max)) {
       throw new Error(
         `Invalid date string '${
           args.max
         }' found. 'max' must be a number, date in ms, or ISO8601 date string`
       );
+    }
 
     return {
       type: 'axisConfig',

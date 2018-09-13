@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { quickRanges } from './quick_ranges';
@@ -37,9 +43,8 @@ export function formatDuration(from, to) {
       if (to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
         const rounded = fromParts[1].split('/');
         text = 'Last ' + rounded[0];
-        if (rounded[1]) {
-          text = text + ' rounded to the ' + timeUnits[rounded[1]];
-        }
+        if (rounded[1]) text = text + ' rounded to the ' + timeUnits[rounded[1]];
+
         return text;
       } else {
         return cantLookup(from, to);

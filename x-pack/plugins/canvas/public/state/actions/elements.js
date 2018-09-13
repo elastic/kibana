@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
@@ -55,9 +61,7 @@ export const fetchContext = createThunk(
     const chain = get(element, ['ast', 'chain']);
     const invalidIndex = chain ? index >= chain.length : true;
 
-    if (!element || !chain || invalidIndex) {
-      throw new Error(`Invalid argument index: ${index}`);
-    }
+    if (!element || !chain || invalidIndex) throw new Error(`Invalid argument index: ${index}`);
 
     // cache context as the previous index
     const contextIndex = index - 1;

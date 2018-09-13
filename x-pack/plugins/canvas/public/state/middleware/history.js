@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { isEqual } from 'lodash';
 import { routes } from '../../apps';
 import { historyProvider } from '../../lib/history_provider';
@@ -49,9 +55,7 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     if (isBrowserNav) return dispatch(restoreHistory(historyState));
 
     // execute route action on pushState and popState events
-    if (isUrlChange) {
-      return await router.parse(pathname);
-    }
+    if (isUrlChange) return await router.parse(pathname);
   };
 
   history.onChange(async (...args) => {

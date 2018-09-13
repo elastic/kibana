@@ -1,12 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { groupBy, flatten, pick, map } from 'lodash';
 
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
-    if (columns)
+    if (columns) {
       columns.forEach(column => {
         if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) return;
         else resultingColumns.push(column);
       });
+    }
 
     return resultingColumns;
   }, []);
@@ -96,11 +103,10 @@ export const ply = () => ({
     const datatablePromises = originalDatatables.map(originalDatatable => {
       let expressionResultPromises = [];
 
-      if (args.expression) {
+      if (args.expression)
         expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
-      } else {
-        expressionResultPromises.push(Promise.resolve(originalDatatable));
-      }
+      else expressionResultPromises.push(Promise.resolve(originalDatatable));
+
       return Promise.all(expressionResultPromises).then(combineAcross);
     });
 

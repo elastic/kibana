@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
@@ -53,9 +59,8 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // no page provided, append current page to url
-          if (isNaN(pageNumber)) {
+          if (isNaN(pageNumber))
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
-          }
 
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;

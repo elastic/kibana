@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib/format_msg';
 import { get } from 'lodash';
@@ -8,9 +14,8 @@ const getToast = (err, opts = {}) => {
   const { title, ...rest } = opts;
   let text = null;
 
-  if (title) {
-    text = errMsg;
-  }
+  if (title) text = errMsg;
+
   return {
     ...rest,
     title: title || errMsg,

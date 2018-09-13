@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { pure, compose, branch, renderComponent } from 'recompose';
@@ -34,36 +40,37 @@ const branches = [
   }, renderComponent(InvalidExpression)),
 ];
 
-export const ElementContent = compose(pure, ...branches)(
-  ({ renderable, renderFunction, size, handlers }) => {
-    const { getFilter, setFilter, done, onComplete } = handlers;
+export const ElementContent = compose(
+  pure,
+  ...branches
+)(({ renderable, renderFunction, size, handlers }) => {
+  const { getFilter, setFilter, done, onComplete } = handlers;
 
-    return Style.it(
-      renderable.css,
-      <div
-        // TODO: 'canvas__element' was added for BWC, It can be removed after a while
-        className={'canvas__element canvasElement'}
-        style={{ ...renderable.containerStyle, ...size }}
+  return Style.it(
+    renderable.css,
+    <div
+      // TODO: 'canvas__element' was added for BWC, It can be removed after a while
+      className={'canvas__element canvasElement'}
+      style={{ ...renderable.containerStyle, ...size }}
+    >
+      <ElementShareContainer
+        className="canvasElement__content"
+        onComplete={onComplete}
+        functionName={renderFunction.name}
       >
-        <ElementShareContainer
-          className="canvasElement__content"
-          onComplete={onComplete}
-          functionName={renderFunction.name}
-        >
-          <RenderWithFn
-            name={renderFunction.name}
-            renderFn={renderFunction.render}
-            reuseNode={renderFunction.reuseDomNode}
-            config={renderable.value}
-            css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-            size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-            handlers={{ getFilter, setFilter, done }}
-          />
-        </ElementShareContainer>
-      </div>
-    );
-  }
-);
+        <RenderWithFn
+          name={renderFunction.name}
+          renderFn={renderFunction.render}
+          reuseNode={renderFunction.reuseDomNode}
+          config={renderable.value}
+          css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
+          size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
+          handlers={{ getFilter, setFilter, done }}
+        />
+      </ElementShareContainer>
+    </div>
+  );
+});
 
 ElementContent.propTypes = {
   renderable: PropTypes.shape({

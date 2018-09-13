@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 const { select, selectReduce } = require('./state');
 
 const {
@@ -266,7 +272,7 @@ const rotationManipulation = ({
   );
   const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
   const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
-  const closest45deg = Math.round(newAngle / (Math.PI / 4)) * Math.PI / 4;
+  const closest45deg = (Math.round(newAngle / (Math.PI / 4)) * Math.PI) / 4;
   const radius = Math.sqrt(Math.pow(centerPosition[0] - x, 2) + Math.pow(centerPosition[1] - y, 2));
   const closest45degPosition = [Math.cos(closest45deg) * radius, Math.sin(closest45deg) * radius];
   const pixelDifference = Math.sqrt(
@@ -587,9 +593,8 @@ const shapeCascadeTransforms = shapes => shape => {
 const cascadeTransforms = shapes => shapes.map(shapeCascadeTransforms(shapes));
 
 const nextShapes = select((preexistingShapes, restated) => {
-  if (restated && restated.newShapes) {
-    return restated.newShapes;
-  }
+  if (restated && restated.newShapes) return restated.newShapes;
+
   // this is the per-shape model update at the current PoC level
   return preexistingShapes;
 })(shapes, restateShapesEvent);
@@ -743,9 +748,8 @@ const hoverAnnotations = select((hoveredShape, selectedPrimaryShapeIds, draggedS
 
 const rotationAnnotation = (shapes, selectedShapes, shape, i) => {
   const foundShape = shapes.find(s => shape.id === s.id);
-  if (!foundShape) {
-    return false;
-  }
+  if (!foundShape) return false;
+
   if (foundShape.type === 'annotation') {
     return rotationAnnotation(
       shapes,
@@ -828,9 +832,8 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
     (foundShape.subtype === config.resizeHandleName
       ? shapes.find(s => shape.parent === s.id)
       : foundShape);
-  if (!foundShape) {
-    return [];
-  }
+  if (!foundShape) return [];
+
   if (foundShape.subtype === config.resizeHandleName) {
     // preserve any interactive annotation when handling
     const result = foundShape.interactive
@@ -838,9 +841,9 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
       : [];
     return result;
   }
-  if (foundShape.type === 'annotation') {
+  if (foundShape.type === 'annotation')
     return resizeAnnotation(shapes, selectedShapes, shapes.find(s => foundShape.parent === s.id));
-  }
+
   // fixme left active: snap wobble. right active: opposite side wobble.
   const a = snappedA(properShape); // properShape.width / 2;;
   const b = snappedB(properShape); // properShape.height / 2;
@@ -904,7 +907,7 @@ const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedEle
   if (constrainedX || constrainedY) {
     const snapOffset = matrix.translateComponent(
       matrix.multiply(
-        matrix.rotateZ(matrix.matrixToAngle(draggedElement.localTransformMatrix) / 180 * Math.PI),
+        matrix.rotateZ((matrix.matrixToAngle(draggedElement.localTransformMatrix) / 180) * Math.PI),
         matrix.translate(snapOffsetX, snapOffsetY, 0)
       )
     );
@@ -937,7 +940,7 @@ const resizeShapeSnap = (
   const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
   if (constrainedX || constrainedY) {
     const multiplier = symmetric ? 1 : 0.5;
-    const angle = matrix.matrixToAngle(draggedElement.localTransformMatrix) / 180 * Math.PI;
+    const angle = (matrix.matrixToAngle(draggedElement.localTransformMatrix) / 180) * Math.PI;
     const horizontalSign = -resizeMultiplierHorizontal[horizontalPosition]; // fixme unify sign
     const verticalSign = resizeMultiplierVertical[verticalPosition];
     // todo turn it into matrix algebra via matrix2d.js

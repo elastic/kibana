@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import chrome from 'ui/chrome';
 import lzString from 'lz-string';
 import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
@@ -125,17 +131,13 @@ const instances = new WeakMap();
 
 const getHistoryInstance = win => {
   // if no window object, use memory module
-  if (typeof win === 'undefined' || !win.history) {
-    return createMemoryHistory();
-  }
+  if (typeof win === 'undefined' || !win.history) return createMemoryHistory();
 
   const basePath = chrome.getBasePath();
   const basename = `${basePath}${APP_ROUTE}#/`;
 
   // hacky fix for initial page load so basename matches with the hash
-  if (win.location.hash === '') {
-    win.history.replaceState({}, '', `${basename}`);
-  }
+  if (win.location.hash === '') win.history.replaceState({}, '', `${basename}`);
 
   // if window object, create browser instance
   return createBrowserHistory({
@@ -150,9 +152,8 @@ export const historyProvider = (win = getWindow()) => {
 
   // temporary fix for search params before the hash; remove them via location redirect
   // they can't be preserved given this upstream issue https://github.com/ReactTraining/history/issues/564
-  if (get(win, 'location.search', '').length > 0) {
+  if (get(win, 'location.search', '').length > 0)
     win.location = `${chrome.getBasePath()}${APP_ROUTE}${win.location.hash}`;
-  }
 
   // create and cache wrapped history instance
   const historyInstance = getHistoryInstance(win);

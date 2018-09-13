@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 const matrix = require('./matrix');
 
 /**
@@ -41,7 +47,7 @@ const shapesAtPoint = (shapes, x, y) =>
     const y0 = rightPoint[1] - centerPoint[1];
     const x1 = upPoint[0] - centerPoint[0];
     const y1 = upPoint[1] - centerPoint[1];
-    const A = (x - centerPoint[0] - (y - centerPoint[1]) / y1 * x1) / (x0 - y0 / y1 * x1);
+    const A = (x - centerPoint[0] - ((y - centerPoint[1]) / y1) * x1) / (x0 - (y0 / y1) * x1);
     const B = (y - centerPoint[1] - A * y0) / y1;
     const rightSlope = rightPoint[2] - centerPoint[2];
     const upSlope = upPoint[2] - centerPoint[2];

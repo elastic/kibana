@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { getType } from '../lib/get_type';
 import { parse } from './grammar';
 
@@ -42,14 +48,11 @@ function getExpressionArgs(block, level = 0) {
       const lineLength = acc.split('\n').pop().length;
 
       // if arg values are too long, move it to the next line
-      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH) {
+      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH)
         return `${acc}\n  ${argString}`;
-      }
 
       // append arg values to existing arg values
-      if (lineLength > 0) {
-        return `${acc} ${argString}`;
-      }
+      if (lineLength > 0) return `${acc} ${argString}`;
 
       // start the accumulator with the first arg value
       return argString;
@@ -114,14 +117,11 @@ export function toExpression(astObj, type = 'expression') {
   if (type === 'argument') return getArgumentString(astObj);
 
   const validType = ['expression', 'function'].includes(getType(astObj));
-  if (!validType) {
-    throw new Error('Expression must be an expression or argument function');
-  }
+  if (!validType) throw new Error('Expression must be an expression or argument function');
 
   if (getType(astObj) === 'expression') {
-    if (!Array.isArray(astObj.chain)) {
-      throw new Error('Expressions must contain a chain');
-    }
+    if (!Array.isArray(astObj.chain)) throw new Error('Expressions must contain a chain');
+
     return getExpression(astObj.chain);
   }
 
