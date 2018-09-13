@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-const module = uiModules.get('kibana');
-
 /**
- * This directively automatically handles matching pairs.
+ * This helper automatically handles matching pairs.
  * Specifically, it does the following:
  *
  * 1. If the key is a closer, and the character in front of the cursor is the
@@ -37,37 +34,34 @@ const pairs = ['()', '[]', '{}', `''`, '""'];
 const openers = pairs.map(pair => pair[0]);
 const closers = pairs.map(pair => pair[1]);
 
-module.directive('matchPairs', () => ({
-  restrict: 'A',
-  require: 'ngModel',
-  link: function (scope, elem, attrs, ngModel) {
-    elem.on('keydown', (e) => {
-      const { target, key, metaKey } = e;
-      const { value, selectionStart, selectionEnd } = target;
-
-      if (shouldMoveCursorForward(key, value, selectionStart, selectionEnd)) {
-        e.preventDefault();
-        target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
-      } else if (shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd)) {
-        e.preventDefault();
-        const newValue = value.substr(0, selectionStart) + key +
-          value.substring(selectionStart, selectionEnd) + closers[openers.indexOf(key)] +
-          value.substr(selectionEnd);
-        target.value = newValue;
-        target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
-        ngModel.$setViewValue(newValue);
-        ngModel.$render();
-      } else if (shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd)) {
-        e.preventDefault();
-        const newValue = value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1);
-        target.value = newValue;
-        target.setSelectionRange(selectionStart - 1, selectionEnd - 1);
-        ngModel.$setViewValue(newValue);
-        ngModel.$render();
-      }
-    });
+export function matchPairs({
+  value,
+  selectionStart,
+  selectionEnd,
+  key,
+  metaKey,
+  updateQuery,
+  preventDefault,
+}) {
+  if (shouldMoveCursorForward(key, value, selectionStart, selectionEnd)) {
+    preventDefault();
+    updateQuery(value, selectionStart + 1, selectionEnd + 1);
+  } else if (shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd)) {
+    preventDefault();
+    const newValue =
+      value.substr(0, selectionStart) +
+      key +
+      value.substring(selectionStart, selectionEnd) +
+      closers[openers.indexOf(key)] +
+      value.substr(selectionEnd);
+    updateQuery(newValue, selectionStart + 1, selectionEnd + 1);
+  } else if (shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd)) {
+    preventDefault();
+    const newValue = value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1);
+    updateQuery(newValue, selectionStart - 1, selectionEnd - 1);
   }
-}));
+}
+
 
 function shouldMoveCursorForward(key, value, selectionStart, selectionEnd) {
   if (!closers.includes(key)) return false;

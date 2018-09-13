@@ -21,6 +21,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { toUser, fromUser } from '../../parse_query/index.js';
+import { matchPairs } from '../lib/match_pairs';
 
 import {
   EuiFlexGroup,
@@ -58,6 +59,43 @@ export class QueryBar extends Component {
     });
   };
 
+  onKeyDown = (event) => {
+    const preventDefault = event.preventDefault.bind(event);
+    const { target, key, metaKey } = event;
+    const { value, selectionStart, selectionEnd } = target;
+    const updateQuery = (query, selectionStart, selectionEnd) => {
+      this.setState(
+        {
+          query: {
+            ...this.state.query,
+            query,
+          },
+        },
+        () => {
+          target.setSelectionRange(selectionStart, selectionEnd);
+        }
+      );
+    };
+
+    matchPairs({
+      value,
+      selectionStart,
+      selectionEnd,
+      key,
+      metaKey,
+      updateQuery,
+      preventDefault,
+    });
+  };
+
+  onSubmit = (event) => {
+    event.preventDefault();
+    this.props.onSubmit({
+      query: fromUser(this.state.query.query),
+      language: this.state.query.language,
+    });
+  };
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.query.query !== this.props.query.query) {
       this.setState({
@@ -82,14 +120,8 @@ export class QueryBar extends Component {
       <form
         role="form"
         name="queryBarForm"
-        onSubmit={(e) => {
-          e.preventDefault();
-          this.props.onSubmit({
-            query: fromUser(this.state.query.query),
-            language: this.state.query.language,
-          });
-        }
-        }
+        onSubmit={this.onSubmit}
+        onKeyDown={this.onKeyDown}
       >
         <div
           className="kuiLocalSearch"
