@@ -111,7 +111,7 @@ export class TelemetryForm extends Component {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>This setting applies to all of Kibana, not just the <strong>{this.props.activeSpace.name}</strong> space.</p>
+          <p>This setting applies to <strong>all of Kibana.</strong></p>
         }
       />
     );

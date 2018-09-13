@@ -20,8 +20,8 @@ export const AdvancedSettingsSubtitle = (props: Props) => (
       iconType="spacesApp"
       title={
         <p>
-          Unless otherwise specified, settings on this page apply only to the{' '}
-          <strong>{props.space.name}</strong> space.
+          The settings on this page apply to the <strong>{props.space.name}</strong> space, unless
+          otherwise specified.
         </p>
       }
     />
