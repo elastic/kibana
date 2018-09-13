@@ -19,7 +19,7 @@
 
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
-const DOC_TYPE = 'doc';
+const DOC_TYPE = '_doc';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
