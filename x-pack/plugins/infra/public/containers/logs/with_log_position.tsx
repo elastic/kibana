@@ -35,7 +35,9 @@ export const withLogPosition = connect(
   })
 );
 
-export const WithLogPosition = asChildFunctionRenderer(withLogPosition);
+export const WithLogPosition = asChildFunctionRenderer(withLogPosition, {
+  onCleanup: ({ stopLiveStreaming }) => stopLiveStreaming(),
+});
 
 /**
  * Url State
