@@ -5,3 +5,14 @@
  */
 
 export { JobActionMenu } from './job_action_menu';
+
+export {
+  JobDetails,
+  JOB_DETAILS_TAB_SUMMARY,
+  JOB_DETAILS_TAB_TERMS,
+  JOB_DETAILS_TAB_HISTOGRAM,
+  JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
+} from './job_details';
+
+export { JobStatus } from './job_status';
