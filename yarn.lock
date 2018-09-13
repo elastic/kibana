@@ -81,9 +81,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@3.7.0":
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.7.0.tgz#276d2a8e724778d15192b3847247d3731c7ff738"
+"@elastic/eui@3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.11.0.tgz#272c4a4d59149421b968a670fa84fa704260d345"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -490,6 +490,12 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/podium/-/podium-1.0.0.tgz#bfaa2151be2b1d6109cc69f7faa9dac2cba3bb20"
 
+"@types/prop-types@*":
+  version "15.5.5"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.5.tgz#17038dd322c2325f5da650a94d5f9974943625e3"
+  dependencies:
+    "@types/react" "*"
+
 "@types/prop-types@^15.5.3":
   version "15.5.3"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.3.tgz#bef071852dca2a2dbb65fecdb7bfb30cedae2de2"
@@ -514,6 +520,13 @@
   dependencies:
     "@types/react" "*"
     redux "^4.0.0"
+
+"@types/react-virtualized@^9.18.7":
+  version "9.18.7"
+  resolved "https://registry.yarnpkg.com/@types/react-virtualized/-/react-virtualized-9.18.7.tgz#8703d8904236819facff90b8b320f29233160c90"
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/react" "*"
 
 "@types/react@*", "@types/react@^16.3.14":
   version "16.3.14"
