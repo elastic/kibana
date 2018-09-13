@@ -3,18 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import 'plugins/spaces/views/management/page_routes';
-// @ts-ignore
-import { management } from 'ui/management';
+import React from 'react';
+import {
+  management,
+  PAGE_SUBTITLE_COMPONENT,
+  PAGE_TITLE_COMPONENT,
+  registerSettingsComponent,
+  // @ts-ignore
+} from 'ui/management';
 // @ts-ignore
 import routes from 'ui/routes';
+import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
+import { AdvancedSettingsTitle } from './components/advanced_settings_title';
 
 const MANAGE_SPACES_KEY = 'manage_spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection() {
+    spacesManagementSection(activeSpace: any) {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -34,6 +41,12 @@ routes.defaults(/\/management/, {
             url: `#/management/spaces/list`,
           });
         }
+
+        const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
+        registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
+
+        const SubTitle = () => <AdvancedSettingsSubtitle space={activeSpace.space} />;
+        registerSettingsComponent(PAGE_SUBTITLE_COMPONENT, SubTitle, true);
       }
 
       deregisterSpaces();
