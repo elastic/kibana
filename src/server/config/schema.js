@@ -253,7 +253,7 @@ export default () => Joi.object({
     index: Joi.string()
       .description('The name of the index used to store task information.')
       .default('.kibana_task_manager'),
-    num_workers: Joi.number()
+    max_workers: Joi.number()
       .description('The maximum number of tasks that this Kibana instance will run simultaneously.')
       .default(10),
   }).default(),

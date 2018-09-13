@@ -23,29 +23,38 @@ import { TaskPoller } from './task_poller';
 import { mockLogger, resolvable, sleep } from './test_utils';
 
 describe('TaskPoller', () => {
-  test('runs the work function on an interval', async () => {
-    const pollInterval = _.random(10, 20);
-    const times: number[] = [];
-    const doneWorking = resolvable();
-    const poller = new TaskPoller({
-      pollInterval,
-      logger: mockLogger(),
-      work: async () => {
-        times.push(Date.now());
-        if (times.length > 1) {
-          poller.stop();
-          doneWorking.resolve();
-        }
-      },
+  describe('interval tests', () => {
+    let clock: sinon.SinonFakeTimers;
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers();
     });
 
-    poller.start();
-    await doneWorking;
+    afterEach(() => clock.restore());
 
-    expect(times[1] - times[0]).toBeGreaterThanOrEqual(pollInterval);
+    test('runs the work function on an interval', async () => {
+      const pollInterval = _.random(10, 20);
+      const done = resolvable();
+      const work = sinon.spy(() => {
+        done.resolve();
+        return Promise.resolve();
+      });
+      const poller = new TaskPoller({
+        pollInterval,
+        work,
+        logger: mockLogger(),
+      });
 
-    // Timing is not precise, so we give it a buffer (* 10)
-    expect(times[1] - times[0]).toBeLessThan(pollInterval * 10);
+      poller.start();
+
+      sinon.assert.calledOnce(work);
+      await done;
+
+      clock.tick(pollInterval - 1);
+      sinon.assert.calledOnce(work);
+      clock.tick(1);
+      sinon.assert.calledTwice(work);
+    });
   });
 
   test('logs, but does not crash if the work function fails', async () => {
@@ -68,6 +77,7 @@ describe('TaskPoller', () => {
     });
 
     poller.start();
+
     await doneWorking;
 
     expect(count).toEqual(2);

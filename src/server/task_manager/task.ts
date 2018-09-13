@@ -168,23 +168,12 @@ export interface TaskInstance {
    * The date and time that this task is scheduled to be run. It is not guaranteed
    * to run at this time, but it is guaranteed not to run earlier than this.
    */
-  runAt: Date;
+  runAt?: Date;
 
   /**
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    */
   interval?: string;
-
-  /**
-   * The number of unsuccessful attempts since the last successful run. This
-   * will be zeroed out after a successful run.
-   */
-  attempts: number;
-
-  /**
-   * Indicates whether or not the task is currently running.
-   */
-  status: TaskStatus;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor
@@ -197,18 +186,18 @@ export interface TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  state: object;
+  state?: object;
 
   /**
    * The id of the user who scheduled this task.
    */
-  user: string;
+  user?: string;
 
   /**
    * Used to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',
    * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
    */
-  scope: string | string[];
+  scope?: string | string[];
 }
 
 /**
@@ -224,4 +213,28 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The version of the Elaticsearch document.
    */
   version: number;
+
+  /**
+   * The number of unsuccessful attempts since the last successful run. This
+   * will be zeroed out after a successful run.
+   */
+  attempts: number;
+
+  /**
+   * Indicates whether or not the task is currently running.
+   */
+  status: TaskStatus;
+
+  /**
+   * The date and time that this task is scheduled to be run. It is not guaranteed
+   * to run at this time, but it is guaranteed not to run earlier than this.
+   */
+  runAt: Date;
+
+  /**
+   * The state passed into the task's run function, and returned by the previous
+   * run. If there was no previous run, or if the previous run did not return
+   * any state, this will be the empy object: {}
+   */
+  state: object;
 }

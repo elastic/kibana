@@ -24,7 +24,7 @@ import { mockLogger, resolvable, sleep } from './test_utils';
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of worker costs', async () => {
     const pool = new TaskPool({
-      totalCapacity: 200,
+      maxWorkers: 200,
       logger: mockLogger(),
     });
 
@@ -40,7 +40,7 @@ describe('TaskPool', () => {
 
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
-      totalCapacity: 100,
+      maxWorkers: 100,
       logger: mockLogger(),
     });
 
@@ -56,7 +56,7 @@ describe('TaskPool', () => {
 
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      totalCapacity: 10,
+      maxWorkers: 10,
       logger: mockLogger(),
     });
 
@@ -76,7 +76,7 @@ describe('TaskPool', () => {
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      totalCapacity: 10,
+      maxWorkers: 10,
       logger: mockLogger(),
     });
 
@@ -118,7 +118,7 @@ describe('TaskPool', () => {
 
   test('run cancels expired tasks prior to running new tasks', async () => {
     const pool = new TaskPool({
-      totalCapacity: 10,
+      maxWorkers: 10,
       logger: mockLogger(),
     });
 
@@ -166,7 +166,7 @@ describe('TaskPool', () => {
     const logger = mockLogger();
     const pool = new TaskPool({
       logger,
-      totalCapacity: 20,
+      maxWorkers: 20,
     });
 
     const cancelled = resolvable();

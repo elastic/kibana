@@ -31,7 +31,7 @@ export async function getDefaultClient(
   server: any,
   config: any,
   logger: TaskManagerLogger,
-  totalCapacity: number,
+  maxWorkers: number,
   definitions: TaskDictionary<SanitizedTaskDefinition>
 ): Promise<TaskManager> {
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
@@ -47,7 +47,7 @@ export async function getDefaultClient(
 
   const pool = new TaskPool({
     logger,
-    totalCapacity,
+    maxWorkers,
   });
 
   const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({

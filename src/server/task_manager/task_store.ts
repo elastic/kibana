@@ -31,6 +31,7 @@ export interface StoreOpts {
 export interface FetchOpts {
   searchAfter?: any[];
   sort?: object[];
+  query?: object;
 }
 
 export interface FetchResult {
@@ -54,8 +55,8 @@ export interface RawTaskDoc {
       status: TaskStatus;
       params: string;
       state: string;
-      user: string;
-      scope: string | string[];
+      user?: string;
+      scope?: string | string[];
     };
   };
 }
@@ -85,6 +86,9 @@ export class TaskStore {
     this.supportedTypes = opts.supportedTypes;
   }
 
+  /**
+   * Initializes the store, ensuring the task manager index is created and up to date.
+   */
   public async init() {
     const properties = {
       type: { type: 'keyword' },
@@ -133,6 +137,11 @@ export class TaskStore {
     }
   }
 
+  /**
+   * Schedules a task.
+   *
+   * @param task - The task being scheduled.
+   */
   public schedule(task: TaskInstance): Promise<RawTaskDoc> {
     return this.callCluster('index', {
       index: this.index,
@@ -142,17 +151,18 @@ export class TaskStore {
     });
   }
 
+  /**
+   * Fetches a paginatable list of scheduled tasks.
+   *
+   * @param opts - The query options used to filter tasks
+   */
   public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
     const sort = paginatableSort(opts.sort);
-    const docs = await this.search({
-      body: {
-        sort,
-        search_after: opts.searchAfter,
-      },
+    return this.search({
+      sort,
+      search_after: opts.searchAfter,
+      query: opts.query,
     });
-    const searchAfter = nextSearchAfter(docs.length && docs[docs.length - 1], sort);
-
-    return { docs, searchAfter };
   }
 
   /**
@@ -166,23 +176,23 @@ export class TaskStore {
    * @prop {number} size - The number of task instances to retrieve
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
-  public fetchAvailableTasks = () => {
-    return this.search({
-      body: {
-        query: {
-          bool: {
-            must: [
-              { terms: { 'task.taskType': this.supportedTypes } },
-              { range: { 'task.attempts': { lte: this.maxAttempts } } },
-              { range: { 'task.runAt': { lte: 'now' } } },
-            ],
-          },
+  public fetchAvailableTasks = async () => {
+    const { docs } = await this.search({
+      query: {
+        bool: {
+          must: [
+            { terms: { 'task.taskType': this.supportedTypes } },
+            { range: { 'task.attempts': { lte: this.maxAttempts } } },
+            { range: { 'task.runAt': { lte: 'now' } } },
+          ],
         },
-        size: 10,
-        sort: { 'task.runAt': { order: 'asc' } },
-        version: true,
       },
+      size: 10,
+      sort: { 'task.runAt': { order: 'asc' } },
+      version: true,
     });
+
+    return docs;
   };
 
   /**
@@ -203,6 +213,8 @@ export class TaskStore {
       index: this.index,
       type: DOC_TYPE,
       version: doc.version,
+      // The refresh is important so that if we immediately look for work,
+      // we don't pick up this task.
       refresh: true,
     });
 
@@ -213,7 +225,7 @@ export class TaskStore {
   }
 
   /**
-   * removes the specified task from the index.
+   * Removes the specified task from the index.
    *
    * @param {string} id
    * @returns {Promise<void>}
@@ -223,49 +235,59 @@ export class TaskStore {
       id,
       index: this.index,
       type: DOC_TYPE,
+      // The refresh is important so that if we immediately look for work,
+      // we don't pick up this task.
       refresh: true,
     });
   }
 
-  private async search(opts: object = {}): Promise<ConcreteTaskInstance[]> {
+  private async search(opts: any = {}): Promise<FetchResult> {
+    const originalQuery = opts.query;
+    const queryOnlyTasks = { term: { type: 'task' } };
+    const query = originalQuery
+      ? { bool: { must: [queryOnlyTasks, originalQuery] } }
+      : queryOnlyTasks;
+
     const result = await this.callCluster('search', {
       type: DOC_TYPE,
       index: this.index,
-      ...opts,
+      body: {
+        ...opts,
+        query,
+      },
     });
 
-    return (result.hits.hits as RawTaskDoc[]).map(rawToTaskDoc);
+    const rawDocs = result.hits.hits;
+
+    return {
+      docs: (rawDocs as RawTaskDoc[]).map(rawToTaskDoc),
+      searchAfter: (rawDocs.length && rawDocs[rawDocs.length - 1].sort) || [],
+    };
   }
 }
 
 function paginatableSort(sort: any[] = []) {
+  const sortById = { _id: 'desc' };
+
   if (!sort.length) {
-    return [{ 'task.runAt': 'asc' }, { _id: 'desc' }];
+    return [{ 'task.runAt': 'asc' }, sortById];
   }
 
   if (sort.find(({ _id }) => !!_id)) {
     return sort;
   }
 
-  return [...sort, { _id: 'desc' }];
+  return [...sort, sortById];
 }
 
-function nextSearchAfter(doc?: any, sort?: object[]): any[] {
-  if (!doc || !sort) {
-    return [];
-  }
-
-  return sort.map(opt => {
-    const [field] = Object.keys(opt);
-    return doc[field.startsWith('_') ? field.slice(1) : field];
-  });
-}
-
-function rawSource(doc: TaskInstance) {
+function rawSource(doc: ConcreteTaskInstance | TaskInstance) {
   const source = {
     ...doc,
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
+    attempts: (doc as ConcreteTaskInstance).attempts || 0,
+    runAt: doc.runAt || new Date(),
+    status: (doc as ConcreteTaskInstance).status || 'idle',
   };
 
   delete (source as any).id;

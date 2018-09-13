@@ -21,7 +21,7 @@ import { Logger } from './logger';
 import { TaskRunner } from './task_runner';
 
 interface Opts {
-  totalCapacity: number;
+  maxWorkers: number;
   logger: Logger;
 }
 
@@ -32,7 +32,7 @@ interface Opts {
  * @class TaskPool
  */
 export class TaskPool {
-  private totalCapacity: number;
+  private maxWorkers: number;
   private running = new Set<TaskRunner>();
   private logger: Logger;
 
@@ -40,20 +40,18 @@ export class TaskPool {
    * Creates an instance of TaskPool.
    *
    * @param {Opts} opts
-   * @prop {number} totalCapacity - The total number of workers / work slots available
+   * @prop {number} maxWorkers - The total number of workers / work slots available
+   *    (e.g. maxWorkers is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
    * @prop {Logger} logger - The task manager logger.
    * @memberof TaskPool
    */
   constructor(opts: Opts) {
-    this.totalCapacity = opts.totalCapacity;
+    this.maxWorkers = opts.maxWorkers;
     this.logger = opts.logger;
   }
 
   /**
    * Gets how many workers are currently in use.
-   *
-   * @readonly
-   * @memberof TaskPool
    */
   get occupiedWorkers() {
     let total = 0;
@@ -65,12 +63,9 @@ export class TaskPool {
 
   /**
    * Gets how many workers are currently available.
-   *
-   * @readonly
-   * @memberof TaskPool
    */
   get availableWorkers() {
-    return this.totalCapacity - this.occupiedWorkers;
+    return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**
@@ -84,10 +79,10 @@ export class TaskPool {
    */
   public run = (tasks: TaskRunner[]) => {
     this.cancelExpiredTasks();
-    return this.checkForWork(tasks);
+    return this.attemptToRun(tasks);
   };
 
-  private async checkForWork(tasks: TaskRunner[]) {
+  private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
       if (this.availableWorkers < task.numWorkers) {
         return false;

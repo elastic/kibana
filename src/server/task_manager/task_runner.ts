@@ -191,7 +191,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   public async cancel() {
-    const promise: any = this.promise;
+    const promise: any = this.promise; // needs to be the stored taskrunner from `const taskRunner = this.definition.createTaskRunner(context)`
 
     if (promise && promise.cancel) {
       this.promise = undefined;
