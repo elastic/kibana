@@ -8,7 +8,7 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 
 export interface SpacesService {
-  getIsDefaultSpaceId: (req: any) => boolean;
+  isInDefaultSpace: (req: any) => boolean;
   getSpaceId: (req: any) => string;
 }
 
@@ -26,12 +26,12 @@ export function createSpacesService(server: any): SpacesService {
     return spaceId;
   }
 
-  function getIsDefaultSpaceId(request: any) {
-    return isDefaultSpaceId(getSpaceId(request));
-  }
+  function isInDefaultSpace(request: any) {
+    if (!contextCache.has(request)) {
+      populateCache(request);
+    }
 
-  function isDefaultSpaceId(spaceId: string) {
-    return spaceId === DEFAULT_SPACE_ID;
+    return contextCache.get(request).isInDefaultSpace;
   }
 
   function populateCache(request: any) {
@@ -39,12 +39,12 @@ export function createSpacesService(server: any): SpacesService {
 
     contextCache.set(request, {
       spaceId,
-      isDefaultSpaceId: isDefaultSpaceId(spaceId),
+      isInDefaultSpace: spaceId === DEFAULT_SPACE_ID,
     });
   }
 
   return {
     getSpaceId,
-    getIsDefaultSpaceId,
+    isInDefaultSpace,
   };
 }
