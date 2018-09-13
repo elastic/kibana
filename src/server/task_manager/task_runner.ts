@@ -29,6 +29,7 @@ import {
   validateRunResult,
 } from './task';
 import { intervalFromNow, minutesFromNow } from './task_intervals';
+import { RemoveResult } from './task_store';
 
 export interface TaskRunner {
   numWorkers: number;
@@ -41,7 +42,7 @@ export interface TaskRunner {
 
 interface Updatable {
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<void>;
+  remove(id: string): Promise<RemoveResult>;
 }
 
 type ContextProvider = (instance: ConcreteTaskInstance) => Promise<RunContext>;
