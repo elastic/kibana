@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
 import angular from 'angular';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
@@ -58,7 +59,8 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { showSaveModal } from '../top_nav/show_save_modal';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -218,11 +220,15 @@ function discoverController(
         });
       };
 
-      showSaveModal({
-        onSave,
-        title: savedSearch.title,
-        showCopyOnSave: savedSearch.id ? true : false,
-      });
+      const saveModal = (
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => {}}
+          title={savedSearch.title}
+          showCopyOnSave={savedSearch.id ? true : false}
+          objectType="search"
+        />);
+      showSaveModal(saveModal);
     }
   }, {
     key: 'open',

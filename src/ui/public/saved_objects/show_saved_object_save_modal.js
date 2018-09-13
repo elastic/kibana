@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showSaveModal({ onSave, title, showCopyOnSave }) {
+export function showSaveModal(saveModal) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
+
+  const onSave = saveModal.props.onSave;
 
   const onSaveConfirmed = (...args) => {
     onSave(...args).then(({ id, error }) => {
@@ -36,14 +37,12 @@ export function showSaveModal({ onSave, title, showCopyOnSave }) {
     });
   };
   document.body.appendChild(container);
-  const element = (
-    <SavedObjectSaveModal
-      onSave={onSaveConfirmed}
-      onClose={closeModal}
-      title={title}
-      showCopyOnSave={showCopyOnSave}
-      objectType="search"
-    />
+  const element = React.cloneElement(
+    saveModal,
+    {
+      onSave: onSaveConfirmed,
+      onClose: closeModal
+    }
   );
   ReactDOM.render(element, container);
 }
