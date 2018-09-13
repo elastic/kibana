@@ -31,13 +31,18 @@ function handleNow(callback) {
       'vs/editor/common/modes/textToHtmlTokenizer',
       'vs/base/browser/ui/scrollbar/scrollableElement',
       'vs/editor/standalone/browser/standaloneCodeServiceImpl',
-      'vs/editor/common/modes'], (ts, renderer, tokenizer, scrollable, standaloneCodeServiceImpl, modes) => {
+      'vs/editor/common/modes',
+      'vs/base/common/async',
+      'vs/editor/contrib/wordHighlighter/wordHighlighter'],
+      (ts, renderer, tokenizer, scrollable, standaloneCodeServiceImpl, modes, async, wordHighlighter) => {
       monaco.renderer = renderer;
       monaco.tokenizer = tokenizer;
       monaco.scrollable = scrollable;
       monaco.modes = modes;
       monaco.typescript = ts;
       monaco.StandaloneCodeEditorServiceImpl = standaloneCodeServiceImpl.StandaloneCodeEditorServiceImpl;
+      monaco.async= async;
+      monaco.wordHighlighter= wordHighlighter;
       callback(monaco)
     });
   });

@@ -6,16 +6,17 @@
 
 'use strict';
 
-import { editor as Editor, IRange } from 'monaco-editor';
+import { editor as Editor, IRange, languages } from 'monaco-editor';
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
+import DocumentHighlight = languages.DocumentHighlight;
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
   private static readonly DECORATION_OPTIONS = {
-    className: 'hoverHighlight',
+    className: 'wordHighlightStrong', //  hoverHighlight wordHighlightStrong
   };
   private hoverOperation: Operation<Hover>;
   private computer: HoverComputer;
@@ -130,12 +131,7 @@ export class ContentHoverWidget extends ContentWidget {
     );
     if (result.range) {
       this.lastRange = this.toMonacoRange(result.range);
-      this.highlightDecorations = this.editor.deltaDecorations(this.highlightDecorations, [
-        {
-          range: this.lastRange,
-          options: ContentHoverWidget.DECORATION_OPTIONS,
-        },
-      ]);
+      this.highlightOccurrences(this.lastRange);
     }
     this.updateContents(fragment);
   }
@@ -184,6 +180,7 @@ export class ContentHoverWidget extends ContentWidget {
       action.run().then(() => this.hide());
     }
   }
+
   private findReferences() {
     if (this.lastRange) {
       this.editor.setPosition({
@@ -213,5 +210,35 @@ export class ContentHoverWidget extends ContentWidget {
       this.bindButton('btnReferences', this.findReferences.bind(this));
       this.eventsBound = true;
     }
+  }
+
+  private highlightOccurrences(range: IRange) {
+    const pos = new window.monaco.Position(range.startLineNumber, range.startColumn);
+    return window.monaco.async.createCancelablePromise(token =>
+      window.monaco.wordHighlighter
+        .getOccurrencesAtPosition(this.editor.getModel(), pos, token)
+        .then((data: DocumentHighlight[]) => {
+          if (data) {
+            if (this.isVisible) {
+              const decorations = data.map(h => ({
+                range: h.range,
+                options: ContentHoverWidget.DECORATION_OPTIONS,
+              }));
+
+              this.highlightDecorations = this.editor.deltaDecorations(
+                this.highlightDecorations,
+                decorations
+              );
+            }
+          } else {
+            this.highlightDecorations = this.editor.deltaDecorations(this.highlightDecorations, [
+              {
+                range,
+                options: ContentHoverWidget.DECORATION_OPTIONS,
+              },
+            ]);
+          }
+        })
+    );
   }
 }

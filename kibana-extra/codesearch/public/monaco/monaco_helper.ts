@@ -55,6 +55,9 @@ export class MonacoHelper {
             hover: {
               enabled: false, // disable default hover;
             },
+            occurrencesHighlight: false,
+            selectionHighlight: false,
+            renderLineHighlight: 'none',
             contextmenu: false,
             folding: false,
           },
