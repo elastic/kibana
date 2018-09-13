@@ -90,6 +90,6 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
   paths.forEach(innerLoadTestFile);
 
   if (pendingExcludes.size) {
-    throw new Error('After loading all test files some exclude paths were not consumed');
+    throw new Error(`After loading all test files some exclude paths were not consumed:${['', ...pendingExcludes].join('\n  -')}`);
   }
 };
