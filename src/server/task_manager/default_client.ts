@@ -36,9 +36,9 @@ export async function getDefaultClient(
 ): Promise<TaskManager> {
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const store = new TaskStore({
-    index: config.get('taskManager.index'),
+    index: config.get('task_manager.index'),
     callCluster,
-    maxAttempts: config.get('taskManager.max_attempts'),
+    maxAttempts: config.get('task_manager.max_attempts'),
     supportedTypes: Object.keys(definitions),
   });
 
@@ -58,7 +58,7 @@ export async function getDefaultClient(
 
   const poller = new TaskPoller({
     logger,
-    pollInterval: config.get('taskManager.poll_interval'),
+    pollInterval: config.get('task_manager.poll_interval'),
     work: () =>
       fillPool(
         pool.run,

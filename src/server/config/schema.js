@@ -243,7 +243,7 @@ export default () => Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
 
-  taskManager: Joi.object({
+  task_manager: Joi.object({
     max_attempts: Joi.number()
       .description('The maximum number of times a task will be attempted before being abandoned as failed')
       .default(3),
@@ -256,6 +256,10 @@ export default () => Joi.object({
     max_workers: Joi.number()
       .description('The maximum number of tasks that this Kibana instance will run simultaneously.')
       .default(10),
+    override_num_workers: Joi.object()
+      .pattern(/.*/, Joi.number().greater(0))
+      .description('Customize the number of workers occupied by specific tasks (e.g. override_num_workers.reporting: 2)')
+      .default({})
   }).default(),
 
   map: Joi.object({

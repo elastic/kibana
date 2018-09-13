@@ -43,6 +43,10 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `index` - The name of the index that the task_manager
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
+- `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
+  - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by task of type `reporting`
+  - This allows sysadmins to tweak the operational performance of Kibana, allowing more or fewer tasks of a specific type to run simultaneously
+
 
 ## Task definitions
 
@@ -65,8 +69,9 @@ Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`
       timeOut: '5m',
 
       // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-      // 5 clusterMonitoring tasks could run concurrently per Kibana instance.
-      maxWorkers: 2,
+      // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
+      // overridden by the `override_num_workers` config value, if specified.
+      numWorkers: 2,
 
       // The method that actually runs this task. It is passed a task
       // context: { params, state, callCluster }, documented below.
