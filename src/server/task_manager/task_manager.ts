@@ -20,6 +20,12 @@
 import { fillPool } from './fill_pool';
 import { TaskManagerLogger } from './logger';
 import {
+  addMiddlewareToChain,
+  BeforeRunMiddlewareParams,
+  BeforeSaveMiddlewareParams,
+  Middleware,
+} from './middleware';
+import {
   ConcreteTaskInstance,
   SanitizedTaskDefinition,
   TaskDictionary,
@@ -40,6 +46,7 @@ export class TaskManager {
   private logger: TaskManagerLogger;
   private maxWorkers: number;
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private middleware: Middleware;
   private poller: TaskPoller | null;
   private store: TaskStore | null;
 
@@ -48,6 +55,11 @@ export class TaskManager {
     this.logger = logger;
     this.maxWorkers = maxWorkers;
     this.definitions = definitions;
+
+    this.middleware = {
+      beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
+      beforeRun: async (runOpts: BeforeRunMiddlewareParams) => runOpts,
+    };
 
     this.poller = null;
     this.store = null;
@@ -99,8 +111,14 @@ export class TaskManager {
     poller.start();
   }
 
+  public addMiddleware(middleware: Middleware) {
+    const prevMiddleWare = this.middleware;
+    this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
+  }
+
   public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
-    const result = await this.store.schedule(task);
+    const { task: modifiedTask } = await this.middleware.beforeSave({ task });
+    const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
   }
