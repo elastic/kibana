@@ -31,7 +31,7 @@ export function serializeJob(jobConfig) {
     histogramInterval,
   } = jobConfig;
 
-  return {
+  const serializedJob = {
     id,
     index_pattern: indexPattern,
     rollup_index: rollupIndex,
@@ -45,15 +45,36 @@ export function serializeJob(jobConfig) {
         time_zone: dateHistogramTimeZone,
         field: dateHistogramField,
       }),
-      terms: {
-        fields: terms,
-      },
-      histogram: {
-        interval: histogramInterval,
-        fields: histogram,
-      },
     },
   };
+
+  if (terms.length) {
+    serializedJob.terms = {
+      fields: terms.map(({ name }) => name),
+    };
+  }
+
+  if (histogram.length) {
+    serializedJob.histogram = {
+      interval: histogramInterval,
+      fields: histogram.map(({ name }) => name),
+    };
+  }
+
+  if (metrics.length) {
+    serializedJob.metrics = [];
+    metrics.forEach(({ name, types }) => {
+      // Exclude any metrics which have been selected but not configured with any types.
+      if (types.length) {
+        serializedJob.metrics.push({
+          field: name,
+          metrics: types,
+        });
+      }
+    });
+  }
+
+  return serializedJob;
 }
 
 export function deserializeJob(job) {
@@ -63,7 +84,7 @@ export function deserializeJob(job) {
       index_pattern: indexPattern,
       rollup_index: rollupIndex,
       cron: rollupCron,
-      metrics = [],
+      metrics,
       groups: {
         date_histogram: {
           interval: dateHistogramInterval,
@@ -71,12 +92,8 @@ export function deserializeJob(job) {
           time_zone: dateHistogramTimeZone,
           field: dateHistogramField,
         },
-        terms = {
-          fields: [],
-        },
-        histogram = {
-          fields: [],
-        },
+        terms,
+        histogram,
       },
     },
     status: {
@@ -92,7 +109,7 @@ export function deserializeJob(job) {
 
   const json = job;
 
-  return {
+  const deserializedJob = {
     id,
     indexPattern,
     rollupIndex,
@@ -101,16 +118,36 @@ export function deserializeJob(job) {
     dateHistogramDelay,
     dateHistogramTimeZone,
     dateHistogramField,
-    metrics,
-    terms,
-    histogram,
     status,
+    metrics: [],
+    terms: [],
+    histogram: [],
     documentsProcessed,
     pagesProcessed,
     rollupsIndexed,
     triggerCount,
     json,
   };
+
+  if (metrics) {
+    metrics.forEach(({ field, metrics }) => {
+      deserializedJob.metrics.push({
+        name: field,
+        types: metrics,
+      });
+    });
+  }
+
+  if (terms) {
+    deserializedJob.terms = terms.fields.map(name => ({ name }));
+  }
+
+  if (histogram) {
+    deserializedJob.histogram = histogram.fields.map(name => ({ name }));
+    deserializedJob.histogramInterval = histogram.interval;
+  }
+
+  return deserializedJob;
 }
 
 export function deserializeJobs(jobs) {

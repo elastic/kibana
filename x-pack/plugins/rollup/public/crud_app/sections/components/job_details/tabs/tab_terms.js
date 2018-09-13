@@ -15,10 +15,10 @@ import {
 export const TabTerms = ({ terms }) => {
   // TODO: Render a table if there are more than 20 fields.
 
-  const renderedTerms = terms.fields.map(field => {
+  const renderedTerms = terms.map(({ name }) => {
     return (
-      <li key={field}>
-        {field}
+      <li key={name}>
+        {name}
       </li>
     );
   });

@@ -9,6 +9,11 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 
+function isNumericField(fieldCapability) {
+  const numericTypes = ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'];
+  return numericTypes.some(numericType => fieldCapability[numericType] != null);
+}
+
 export function registerIndicesRoute(server) {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -42,7 +47,7 @@ export function registerIndicesRoute(server) {
    * Returns information on validiity of an index pattern for creating a rollup job:
    *  - Does the index pattern match any indices?
    *  - Does the index pattern match rollup indices?
-   *  - Which time fields are available in the matching indices?
+   *  - Which date fields, numeric fields, and keyword fields are available in the matching indices?
    */
   server.route({
     path: '/api/rollup/index_pattern_validity/{indexPattern}',
@@ -63,18 +68,33 @@ export function registerIndicesRoute(server) {
         const doesMatchIndices = Object.entries(fieldCapabilities.fields).length !== 0;
         const doesMatchRollupIndices = Object.entries(rollupIndexCapabilities).length !== 0;
 
+        const dateFields = [];
+        const numericFields = [];
+        const keywordFields = [];
+
         const fieldCapabilitiesEntries = Object.entries(fieldCapabilities.fields);
-        const timeFields = fieldCapabilitiesEntries.reduce((accumulatedTimeFields, [ fieldName, fieldCapability ]) => {
+        fieldCapabilitiesEntries.forEach(([ fieldName, fieldCapability ]) => {
           if (fieldCapability.date) {
-            accumulatedTimeFields.push(fieldName);
+            dateFields.push(fieldName);
+            return;
           }
-          return accumulatedTimeFields;
-        }, []);
+
+          if (isNumericField(fieldCapability)) {
+            numericFields.push(fieldName);
+            return;
+          }
+
+          if (fieldCapability.keyword) {
+            keywordFields.push(fieldName);
+          }
+        });
 
         reply({
           doesMatchIndices,
           doesMatchRollupIndices,
-          timeFields,
+          dateFields,
+          numericFields,
+          keywordFields,
         });
       } catch(err) {
         // 404s are still valid results.
@@ -82,7 +102,9 @@ export function registerIndicesRoute(server) {
           return reply({
             doesMatchIndices: false,
             doesMatchRollupIndices: false,
-            timeFields: [],
+            dateFields: [],
+            numericFields: [],
+            keywordFields: [],
           });
         }
 
