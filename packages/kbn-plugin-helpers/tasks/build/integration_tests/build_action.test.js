@@ -23,11 +23,11 @@ const del = require('del');
 
 const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/build_action_test_plugin');
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
-const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
+const PLUGIN = require('../../../lib/plugin_config')(PLUGIN_FIXTURE);
 const noop = () => {};
 
 describe('creating build zip', () => {
-  const buildAction = require('./build_action');
+  const buildAction = require('../build_action');
 
   beforeEach(() => del(PLUGIN_BUILD_DIR));
   afterEach(() => del(PLUGIN_BUILD_DIR));
@@ -58,8 +58,16 @@ describe('calling create_build', () => {
   beforeEach(() => {
     jest.resetModules();
     mockBuild = jest.fn(() => Promise.resolve());
-    jest.mock('./create_build', () => mockBuild);
-    buildAction = require('./build_action');
+    jest.mock('../create_build', () => mockBuild);
+    buildAction = require('../build_action');
+  });
+
+  const nameArgs = ([plugin, buildTarget, buildVersion, kibanaVersion, files]) => ({
+    plugin,
+    buildTarget,
+    buildVersion,
+    kibanaVersion,
+    files,
   });
 
   it('takes optional build version', async () => {
@@ -72,13 +80,7 @@ describe('calling create_build', () => {
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
-    const [
-      plugin, // eslint-disable-line no-unused-vars
-      buildTarget, // eslint-disable-line no-unused-vars
-      buildVersion,
-      kibanaVersion,
-      files, // eslint-disable-line no-unused-vars
-    ] = mockBuild.mock.calls[0];
+    const { buildVersion, kibanaVersion } = nameArgs(mockBuild.mock.calls[0]);
     expect(buildVersion).toBe('1.2.3');
     expect(kibanaVersion).toBe('4.5.6');
   });
@@ -88,13 +90,7 @@ describe('calling create_build', () => {
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
-    const [
-      plugin, // eslint-disable-line no-unused-vars
-      buildTarget, // eslint-disable-line no-unused-vars
-      buildVersion, // eslint-disable-line no-unused-vars
-      kibanaVersion, // eslint-disable-line no-unused-vars
-      files,
-    ] = mockBuild.mock.calls[0];
+    const { files } = nameArgs(mockBuild.mock.calls[0]);
     PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
   });
 
@@ -107,13 +103,7 @@ describe('calling create_build', () => {
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
-    const [
-      plugin, // eslint-disable-line no-unused-vars
-      buildTarget, // eslint-disable-line no-unused-vars
-      buildVersion, // eslint-disable-line no-unused-vars
-      kibanaVersion, // eslint-disable-line no-unused-vars
-      files,
-    ] = mockBuild.mock.calls[0];
+    const { files } = nameArgs(mockBuild.mock.calls[0]);
     options.files.forEach(file => expect(files).toContain(file));
   });
 

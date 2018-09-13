@@ -10,9 +10,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@elastic/eui@3.7.0":
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.7.0.tgz#276d2a8e724778d15192b3847247d3731c7ff738"
+"@elastic/eui@3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.11.0.tgz#272c4a4d59149421b968a670fa84fa704260d345"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -7832,9 +7832,9 @@ trim-right@^1.0.1:
   dependencies:
     glob "^6.0.4"
 
-tslib@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
+tslib@^1.9.0, tslib@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
 
 tunnel-agent@^0.6.0:
   version "0.6.0"
