@@ -17,22 +17,86 @@
  * under the License.
  */
 
-import { TaskInstance } from './task';
+import { fillPool } from './fill_pool';
+import { TaskManagerLogger } from './logger';
+import {
+  ConcreteTaskInstance,
+  SanitizedTaskDefinition,
+  TaskDictionary,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
+import { TaskPool } from './task_pool';
+import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, RawTaskDoc, RemoveResult, TaskStore } from './task_store';
 
-interface Opts {
-  poller: TaskPoller;
-  store: TaskStore;
+interface ConstructOpts {
+  logger: TaskManagerLogger;
+  maxWorkers: number;
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
 }
 
 export class TaskManager {
-  private poller: TaskPoller;
-  private store: TaskStore;
+  private logger: TaskManagerLogger;
+  private maxWorkers: number;
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private poller: TaskPoller | null;
+  private store: TaskStore | null;
 
-  constructor(opts: Opts) {
-    this.poller = opts.poller;
-    this.store = opts.store;
+  constructor(opts: ConstructOpts) {
+    const { logger, maxWorkers, definitions } = opts;
+    this.logger = logger;
+    this.maxWorkers = maxWorkers;
+    this.definitions = definitions;
+
+    this.poller = null;
+    this.store = null;
+  }
+
+  public async afterPluginsInit(kbnServer: any, server: any, config: any) {
+    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+    const store = new TaskStore({
+      index: config.get('taskManager.index'),
+      callCluster,
+      maxAttempts: config.get('taskManager.max_attempts'),
+      supportedTypes: Object.keys(this.definitions),
+    });
+    this.store = store;
+
+    this.logger.debug('Initializing the task manager index');
+    await store.init();
+
+    const pool = new TaskPool({
+      logger: this.logger,
+      maxWorkers: this.maxWorkers,
+    });
+
+    const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({
+      callCluster,
+      kbnServer,
+      taskInstance,
+    });
+
+    const poller = new TaskPoller({
+      logger: this.logger,
+      pollInterval: config.get('taskManager.poll_interval'),
+      work: () =>
+        fillPool(
+          pool.run,
+          store.fetchAvailableTasks,
+          (instance: ConcreteTaskInstance) =>
+            new TaskManagerRunner({
+              logger: this.logger,
+              definition: this.definitions[instance.taskType],
+              instance,
+              store,
+              contextProvider,
+            })
+        ),
+    });
+    this.poller = poller;
+
+    poller.start();
   }
 
   public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
