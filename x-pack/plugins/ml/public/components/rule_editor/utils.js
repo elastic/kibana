@@ -160,7 +160,7 @@ export function updateJobRules(job, detectorIndex, rules) {
 
 // Updates an ML filter used in the scope part of a rule,
 // adding an item to the filter with the specified ID.
-export function updateFilterAddItem(item, filterId) {
+export function addItemToFilter(item, filterId) {
   return new Promise((resolve, reject) => {
     ml.filters.updateFilter(
       filterId,

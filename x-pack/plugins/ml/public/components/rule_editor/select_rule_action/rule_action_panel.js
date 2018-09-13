@@ -41,7 +41,7 @@ export class RuleActionPanel extends Component {
 
     const detector = job.analysis_config.detectors[anomaly.detectorIndex];
     const rules = detector.custom_rules;
-    if (rules !== undefined && ruleIndex <= rules.length) {
+    if (rules !== undefined && ruleIndex < rules.length) {
       this.rule = rules[ruleIndex];
     }
 
@@ -58,12 +58,13 @@ export class RuleActionPanel extends Component {
     if (scope !== undefined && Object.keys(scope).length === 1) {
       const partitionFieldName = Object.keys(scope)[0];
       const partitionFieldValue = this.props.anomaly.source[partitionFieldName];
-      const filterId = scope[partitionFieldName].filter_id;
 
-      if (partitionFieldValue !== undefined &&
+      if (scope[partitionFieldName] !== undefined &&
+          partitionFieldValue !== undefined &&
           partitionFieldValue.length === 1 &&
           partitionFieldValue[0].length > 0) {
 
+        const filterId = scope[partitionFieldName].filter_id;
         ml.filters.filters({ filterId })
           .then((filter) => {
             const filterItems = filter.items;

@@ -44,7 +44,7 @@ import {
   isValidRule,
   saveJobRule,
   deleteJobRule,
-  updateFilterAddItem,
+  addItemToFilter,
 } from './utils';
 
 import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/constants/detector_rule';
@@ -372,12 +372,12 @@ export class RuleEditorFlyout extends Component {
   }
 
   addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
-    updateFilterAddItem(item, filterId)
+    addItemToFilter(item, filterId)
       .then(() => {
         if (closeFlyoutOnAdd === true) {
           toastNotifications.add(
             {
-              title: `Addedd ${item} to ${filterId}`,
+              title: `Added ${item} to ${filterId}`,
               color: 'success',
               iconType: 'check',
               text: 'Note that changes will take effect for new results only.'
