@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
@@ -177,6 +177,20 @@ export default function ({ getService, getPageObjects }) {
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
       ]);
+    });
+
+    it('should show correct data for a data table with top hits', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
+      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data);
+      expect(data.length).to.be.greaterThan(0);
     });
   });
 }

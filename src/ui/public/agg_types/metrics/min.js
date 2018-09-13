@@ -28,6 +28,7 @@ export const minMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number,date'
     }
   ]

@@ -19,7 +19,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
-    async login(username, password) {
+    async login(username, password, expectSuccess = true) {
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
       username = username || superUsername;
@@ -29,6 +29,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
+      // wait for either kibanaChrome or loginErrorMessage
+      if (expectSuccess) {
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        log.debug(`Finished login process currentUrl = ${await remote.getCurrentUrl()}`);
+      }
     }
 
     async getErrorMessage() {
@@ -187,13 +192,15 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async user => {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
+        const emailElement = await user.findByCssSelector('[data-header="Email Address"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
         const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
         return {
-          username: await usernameElement.getText(),
-          fullname: await fullnameElement.getText(),
-          roles: (await rolesElement.getText()).split(',').map(role => role.trim()),
+          username: await usernameElement.getVisibleText(),
+          fullname: await fullnameElement.getVisibleText(),
+          email: await emailElement.getVisibleText(),
+          roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
       });
@@ -228,7 +235,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await testSubjects.setValue('userFormEmailInput', userObj.email);
       log.debug('Add roles: ', userObj.roles);
       const rolesToAdd = userObj.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {

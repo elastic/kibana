@@ -60,6 +60,14 @@ export function RetryProvider({ getService }) {
         block
       });
     }
+    async waitFor(description, block) {
+      await retryForTruthy(log, {
+        timeout: config.get('timeouts.waitFor'),
+        methodName: 'retry.waitFor',
+        description,
+        block
+      });
+    }
 
     async waitForCondition(conditionFunc) {
       await remote.waitForCondition(conditionFunc);

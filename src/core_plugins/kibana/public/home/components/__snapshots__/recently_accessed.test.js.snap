@@ -14,7 +14,11 @@ exports[`render 1`] = `
         color="subdued"
         component="span"
       >
-        Recently viewed
+        <FormattedMessage
+          defaultMessage="Recently viewed"
+          id="kbn.home.recentlyAccessed.recentlyViewedTitle"
+          values={Object {}}
+        />
       </EuiTextColor>
     </h3>
   </EuiTitle>

@@ -23,7 +23,7 @@ const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const until = require('selenium-webdriver/lib/until');
-import { modifyUrl } from '../../../../src/utils';
+import { modifyUrl } from '../../../../src/core/utils';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
@@ -78,7 +78,7 @@ export async function RemoteProvider({ getService }) {
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `remote.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect(1600, 1000);
+    await driver.manage().window().setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack = [];
@@ -88,7 +88,7 @@ export async function RemoteProvider({ getService }) {
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift();
-    await driver.manage().window().setRect(width, height);
+    await driver.manage().window().setRect({ width: width, height: height });
   });
   function createRemoteApi(findTimeout = defaultFindTimeout) {
 
@@ -128,7 +128,7 @@ export async function RemoteProvider({ getService }) {
       },
 
       async setWindowSize(x, y) {
-        await driver.manage().window().setRect(x, y);
+        await driver.manage().window().setRect({ width: x, height: y });
       },
 
       async exists(selector) {

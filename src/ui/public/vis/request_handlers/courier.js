@@ -35,10 +35,8 @@ const CourierRequestHandlerProvider = function () {
    */
   async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
     const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
-      canSplit: false,
-      asAggConfigResults: false,
       partialRows: true,
-      isHierarchical: vis.isHierarchical(),
+      metricsAtAllLevels: vis.isHierarchical(),
     });
     const columns = table.columns.map((col, index) => {
       const field = col.aggConfig.getField();
@@ -46,7 +44,7 @@ const CourierRequestHandlerProvider = function () {
         col.aggConfig.isFilterable()
         && (!field || field.filterable);
       return ({
-        name: col.title,
+        name: col.name,
         field: `col${index}`,
         filter: isCellContentFilterable && ((value) => {
           const filter = col.aggConfig.createFilter(value.raw);
@@ -61,9 +59,10 @@ const CourierRequestHandlerProvider = function () {
       });
     });
     const rows = table.rows.map(row => {
-      return row.reduce((prev, cur, index) => {
-        const fieldFormatter = table.columns[index].aggConfig.fieldFormatter('text');
-        prev[`col${index}`] = new FormattedData(cur, fieldFormatter(cur));
+      return table.columns.reduce((prev, cur, index) => {
+        const value = row[cur.id];
+        const fieldFormatter = cur.aggConfig.fieldFormatter('text');
+        prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
         return prev;
       }, {});
     });
@@ -84,6 +83,8 @@ const CourierRequestHandlerProvider = function () {
       // search source.
       const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
       const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
+
+      aggs.setTimeRange(timeRange);
 
       // For now we need to mirror the history of the passed search source, since
       // the spy panel wouldn't work otherwise.
@@ -123,7 +124,7 @@ const CourierRequestHandlerProvider = function () {
         return requestSearchSource.getSearchRequestBody().then(q => {
           const queryHash = calculateObjectHash(q);
           if (shouldQuery(queryHash)) {
-            const lastAggConfig = vis.getAggConfig();
+            const lastAggConfig = aggs;
             vis.API.inspectorAdapters.requests.reset();
             const request = vis.API.inspectorAdapters.requests.start('Data', {
               description: `This request queries Elasticsearch to fetch the data for the visualization.`,

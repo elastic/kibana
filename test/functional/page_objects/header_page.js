@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { is } from 'bluebird';
+//import { is } from 'bluebird';
 import { By } from 'selenium-webdriver';
 
 
@@ -30,10 +30,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  const globalTimePickerSelector = By.css('[data-test-subj="globalTimepickerButton"]');
+  //const globalTimePickerSelector = By.css('[data-test-subj="globalTimepickerButton"]');
   const quickButtonSelector = By.css('[data-test-subj="timepicker-quick-button"');
   const absoluteFromInputSelector = By.css('[data-test-subj="absolute-datetime-input-from"]');
-  const absoluteToInputSelector = By.css('[data-test-subj="absolute-datetime-input-to"]');
+  //const absoluteToInputSelector = By.css('[data-test-subj="absolute-datetime-input-to"]');
 
   const defaultFindTimeout = config.get('timeouts.find');
 

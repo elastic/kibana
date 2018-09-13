@@ -29,11 +29,11 @@ exports[`Inspector Data View component should render empty state 1`] = `
       >
         <EuiEmptyPrompt
           body={
-            <UNDEFINED>
+            <React.Fragment>
               <p>
                 The element did not provide any data.
               </p>
-            </UNDEFINED>
+            </React.Fragment>
           }
           iconColor="subdued"
           title={
