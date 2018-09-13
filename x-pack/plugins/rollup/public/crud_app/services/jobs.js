@@ -31,7 +31,7 @@ export function serializeJob(jobConfig) {
     histogramInterval,
   } = jobConfig;
 
-  return {
+  const serializedJob = {
     id,
     index_pattern: indexPattern,
     rollup_index: rollupIndex,
@@ -45,15 +45,23 @@ export function serializeJob(jobConfig) {
         time_zone: dateHistogramTimeZone,
         field: dateHistogramField,
       }),
-      terms: {
-        fields: terms.map(({ name }) => name),
-      },
-      histogram: {
-        interval: histogramInterval,
-        fields: histogram.map(({ name }) => name),
-      },
     },
   };
+
+  if (terms.length) {
+    serializedJob.terms = {
+      fields: terms.map(({ name }) => name),
+    };
+  }
+
+  if (histogram.length) {
+    serializedJob.histogram = {
+      interval: histogramInterval,
+      fields: histogram.map(({ name }) => name),
+    };
+  }
+
+  return serializedJob;
 }
 
 export function deserializeJob(job) {

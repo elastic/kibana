@@ -518,6 +518,8 @@ export class JobCreateUi extends Component {
           <StepHistogram
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
+            fieldErrors={currentStepFieldErrors}
+            areStepErrorsVisible={areStepErrorsVisible}
             histogramFields={indexPatternHistogramFields}
           />
         );
