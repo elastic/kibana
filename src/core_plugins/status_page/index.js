@@ -20,12 +20,12 @@
 export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
+      styleSheetPath: `${__dirname}/public/index.scss`,
       app: {
         title: 'Server Status',
         main: 'plugins/status_page/status_page',
         hidden: true,
         url: '/status',
-        styleSheetPath: `${__dirname}/public/index.scss`
       }
     }
   });

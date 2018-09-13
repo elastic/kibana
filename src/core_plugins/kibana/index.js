@@ -66,9 +66,8 @@ export default function (kibana) {
         listed: false,
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
-        styleSheetPath: `${__dirname}/public/index.scss`,
       },
-
+      styleSheetPath: `${__dirname}/public/index.scss`,
       links: [
         {
           id: 'kibana:discover',

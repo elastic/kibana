@@ -25,6 +25,7 @@ export function dashboardMode(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
+      styleSheetPath: `${__dirname}/public/index.scss`,
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
           name: 'Dashboards only roles',
@@ -40,7 +41,6 @@ export function dashboardMode(kibana) {
         hidden: true,
         description: 'view dashboards',
         main: 'plugins/dashboard_mode/dashboard_viewer',
-        styleSheetPath: `${__dirname}/public/index.scss`,
         links: [
           {
             id: 'kibana:dashboard',

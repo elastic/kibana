@@ -15,9 +15,9 @@ window.onload = function () {
     createAnchor('{{bundlePath}}/{{appId}}.bundle.js')
   ];
 
-  if ('{{styleSheetPath}}' !== '') {
-    files.push(createAnchor('{{styleSheetPath}}'));
-  }
+  {{#each styleSheetPaths}}
+    files.push(createAnchor('{{this}}'));
+  {{/each}}
 
   (function next() {
     var file = files.shift();
