@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiDescriptionList,
@@ -18,7 +19,7 @@ import {
 
 import { JobStatus } from '../../job_status';
 
-export class TabSummary extends Component {
+export class TabSummaryUi extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
     stats: PropTypes.object,
@@ -44,24 +45,37 @@ export class TabSummary extends Component {
         <EuiSpacer size="s" />
 
         <EuiTitle size="s">
-          <h3>Stats</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionStats.title"
+              defaultMessage="Stats"
+            />
+          </h3>
         </EuiTitle>
 
         <EuiSpacer size="s" />
 
         <EuiDescriptionList type="column" align="center">
-          <Fragment>
-            <EuiDescriptionListTitle>
-              <strong>Status</strong>
-            </EuiDescriptionListTitle>
+          <EuiDescriptionListTitle>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemStatus.label"
+                defaultMessage="Status"
+              />
+            </strong>
+          </EuiDescriptionListTitle>
 
-            <EuiDescriptionListDescription>
-              <JobStatus status={status} />
-            </EuiDescriptionListDescription>
-          </Fragment>
+          <EuiDescriptionListDescription>
+            <JobStatus status={status} />
+          </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Documents processed</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessed.label"
+                defaultMessage="Documents processed"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
@@ -69,7 +83,12 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Pages processed</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessed.label"
+                defaultMessage="Pages processed"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
@@ -77,7 +96,12 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Rollups indexed</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupsIndexed.label"
+                defaultMessage="Rollups indexed"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
@@ -85,7 +109,12 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Trigger count</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemTriggerCount.label"
+                defaultMessage="Trigger count"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
@@ -112,14 +141,24 @@ export class TabSummary extends Component {
     return (
       <Fragment>
         <EuiTitle size="s">
-          <h3>Logistics</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionLogistics.label"
+              defaultMessage="Logistics"
+            />
+          </h3>
         </EuiTitle>
 
         <EuiSpacer size="s" />
 
         <EuiDescriptionList type="column" align="center">
           <EuiDescriptionListTitle>
-            <strong>Index pattern</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemIndexPattern.label"
+                defaultMessage="Index pattern"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord">
@@ -127,7 +166,12 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Rollup index</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupIndex.label"
+                defaultMessage="Rollup index"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord">
@@ -135,9 +179,19 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Cron</strong>{' '}
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemCron.label"
+                defaultMessage="Cron"
+              />
+            </strong>{' '}
             <EuiIconTip
-              content="Interval at which data is rolled up"
+              content={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemCron.tip"
+                  defaultMessage="Interval at which data is rolled up"
+                />
+              )}
             />
           </EuiDescriptionListTitle>
 
@@ -149,14 +203,24 @@ export class TabSummary extends Component {
         <EuiSpacer size="s" />
 
         <EuiTitle size="s">
-          <h3>Date histogram</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionDateHistogram.label"
+              defaultMessage="Date histogram"
+            />
+          </h3>
         </EuiTitle>
 
         <EuiSpacer size="s" />
 
         <EuiDescriptionList type="column" align="center">
           <EuiDescriptionListTitle>
-            <strong>Time field</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemTimeField.label"
+                defaultMessage="Time field"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord">
@@ -164,7 +228,12 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Timezone</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemTimezone.label"
+                defaultMessage="Timezone"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
@@ -172,17 +241,37 @@ export class TabSummary extends Component {
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Delay</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.label"
+                defaultMessage="Delay"
+              />
+            </strong>
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription>
-            {dateHistogramDelay || 'None'}
+            {dateHistogramDelay || (
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.none"
+                defaultMessage="None"
+              />
+            )}
           </EuiDescriptionListDescription>
 
           <EuiDescriptionListTitle>
-            <strong>Interval</strong>{' '}
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobDetails.tabSummary.itemInterval.label"
+                defaultMessage="Interval"
+              />
+            </strong>{' '}
             <EuiIconTip
-              content="Time bucket interval generated at roll-up time"
+              content={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemInterval.tip"
+                  defaultMessage="Time bucket interval generated at roll-up time"
+                />
+              )}
             />
           </EuiDescriptionListTitle>
 
@@ -196,3 +285,5 @@ export class TabSummary extends Component {
     );
   }
 }
+
+export const TabSummary = injectI18n(TabSummaryUi);
