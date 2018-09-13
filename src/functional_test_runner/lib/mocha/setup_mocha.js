@@ -22,8 +22,6 @@ import Mocha from 'mocha';
 import { loadTestFiles } from './load_test_files';
 import { MochaReporterProvider } from './reporter';
 
-const fs = require('fs');
-
 /**
  *  Instantiate mocha and load testfiles into it
  *
@@ -48,35 +46,14 @@ export async function setupMocha(lifecycle, log, config, providers) {
     await lifecycle.trigger('beforeEachTest');
   });
 
-
-  // filter test files
-  const filterFiles = new Set();
-  let filterType = '';
-  const inclfile = config.get('inclfile');
-  const exclfile = config.get('exclfile');
-  if (exclfile !== undefined && inclfile !== undefined) {
-    throw new Error('Please use inclfile or exclfile, not both');
-  } else if (exclfile !== undefined || inclfile !== undefined) {
-    let filterFile;
-    if (exclfile) {
-      filterType = 'exclude';
-      filterFile = exclfile;
-    } else {
-      filterType = 'include';
-      filterFile = inclfile;
-    }
-    if (!fs.existsSync(filterFile)) {
-      throw new Error('Filter file does not exist');
-    } else {
-      const data = fs.readFileSync(filterFile).toString('utf-8');
-      const files = data.split('\n');
-      files.forEach(function (item) {
-        filterFiles.add(item);
-        filterFiles.add(item.split('/')[0]);
-      });
-    }
-  }
-
-  loadTestFiles(mocha, log, lifecycle, providers, config.get('testFiles'), config.get('updateBaselines'), filterFiles, filterType);
+  loadTestFiles({
+    mocha,
+    log,
+    lifecycle,
+    providers,
+    paths: config.get('testFiles'),
+    excludePaths: config.get('excludeTestFiles'),
+    updateBaselines: config.get('updateBaselines'),
+  });
   return mocha;
 }

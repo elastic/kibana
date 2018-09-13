@@ -28,13 +28,20 @@ const cmd = new Command('node scripts/functional_test_runner');
 const resolveConfigPath = v => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
+const collectExcludePaths = () => {
+  const paths = [];
+  return (arg) => {
+    paths.push(resolve(arg));
+    return paths;
+  };
+};
+
 cmd
   .option('--config [path]', 'Path to a config file', resolveConfigPath, defaultConfigPath)
   .option('--bail', 'stop tests after the first failure', false)
   .option('--grep <pattern>', 'pattern used to select which tests to run')
   .option('--invert', 'invert grep to exclude tests', false)
-  .option('--inclfile <file>')
-  .option('--exclfile <file>')
+  .option('--exclude [file]', 'Path to a test file that should not be loaded', collectExcludePaths(), [])
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -63,8 +70,7 @@ const functionalTestRunner = createFunctionalTestRunner({
       invert: cmd.invert,
     },
     updateBaselines: cmd.updateBaselines,
-    inclfile: cmd.inclfile,
-    exclfile: cmd.exclfile
+    excludeTestFiles: cmd.exclude
   }
 });
 

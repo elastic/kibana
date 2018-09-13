@@ -60,6 +60,8 @@ export const schema = Joi.object().keys({
     otherwise: Joi.default([]),
   }),
 
+  excludeTestFiles: Joi.array().items(Joi.string()).default([]),
+
   services: Joi.object().pattern(
     ID_PATTERN,
     Joi.func().required()
@@ -89,9 +91,6 @@ export const schema = Joi.object().keys({
   }).default(),
 
   updateBaselines: Joi.boolean().default(false),
-
-  inclfile: Joi.string().default(),
-  exclfile: Joi.string().default(),
 
   junit: Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
