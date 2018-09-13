@@ -30,9 +30,9 @@ At a high-level, the task manager works like this:
 
 Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `workersOccupied` to limit how many tasks of a given type can be run at once.
 
-For example, we may have a system with a `num_workers` of 10, but a super expensive task (such as reporting) which specifies a `workersOccupied` of 10.
+For example, we may have a system with a `max_workers` of 10, but a super expensive task (such as reporting) which specifies a `workersOccupied` of 10.
 
-If a task specifies a higher `workersOccupied` than the system supports, the system's `num_workers` setting will be substituted for it.
+If a task specifies a higher `workersOccupied` than the system supports, the system's `max_workers` setting will be substituted for it.
 
 ## Config options
 
@@ -41,7 +41,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `max_attempts` - How many times a failing task instance will be retried before it is never run again
 - `poll_interval` - How often the background worker should check the task_manager index for more work
 - `index` - The name of the index that the task_manager
-- `num_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
+- `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 
 ## Task definitions
@@ -66,7 +66,7 @@ Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`
 
       // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
       // 5 clusterMonitoring tasks could run concurrently per Kibana instance.
-      numWorkers: 2,
+      maxWorkers: 2,
 
       // The method that actually runs this task. It is passed a task
       // context: { params, state, callCluster }, documented below.
