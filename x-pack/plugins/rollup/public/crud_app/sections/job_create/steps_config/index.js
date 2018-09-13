@@ -107,13 +107,7 @@ export const stepIdToStepConfigMap = {
   },
   [STEP_METRICS]: {
     defaultFields: {
-      metrics: [{
-        'field': 'bytes',
-        'metrics': ['min', 'max', 'avg']
-      }, {
-        'field': 'memory',
-        'metrics': ['min', 'max', 'avg']
-      }],
+      metrics: [],
     },
   },
   [STEP_REVIEW]: {

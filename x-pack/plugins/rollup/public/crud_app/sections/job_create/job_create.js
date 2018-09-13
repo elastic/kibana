@@ -38,6 +38,7 @@ import {
   StepDateHistogram,
   StepTerms,
   StepHistogram,
+  StepMetrics,
 } from './steps';
 import {
   STEP_LOGISTICS,
@@ -85,6 +86,7 @@ export class JobCreateUi extends Component {
       indexPatternDateFields: [],
       indexPatternTermsFields: [],
       indexPatternHistogramFields: [],
+      indexPatternMetricsFields: [],
     };
 
     this.lastIndexPatternValidationTime = 0;
@@ -187,12 +189,14 @@ export class JobCreateUi extends Component {
       ].sort(sortFields);
 
       const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
+      const indexPatternMetricsFields = [ ...formattedNumericFields ].sort(sortFields);
 
       this.setState({
         indexPatternAsyncErrors,
         indexPatternDateFields,
         indexPatternTermsFields,
         indexPatternHistogramFields,
+        indexPatternMetricsFields,
         isValidatingIndexPattern: false,
       });
 
@@ -474,6 +478,7 @@ export class JobCreateUi extends Component {
       indexPatternAsyncErrors,
       indexPatternTermsFields,
       indexPatternHistogramFields,
+      indexPatternMetricsFields,
     } = this.state;
 
     const currentStepFields = stepsFields[currentStepId];
@@ -521,6 +526,15 @@ export class JobCreateUi extends Component {
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}
             histogramFields={indexPatternHistogramFields}
+          />
+        );
+
+      case STEP_METRICS:
+        return (
+          <StepMetrics
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
+            metricsFields={indexPatternMetricsFields}
           />
         );
 

@@ -19,6 +19,7 @@ export {
   dateHistogramAggregationUrl,
   termsDetailsUrl,
   histogramDetailsUrl,
+  metricsDetailsUrl,
 } from './documentation_links';
 
 export {

@@ -61,6 +61,19 @@ export function serializeJob(jobConfig) {
     };
   }
 
+  if (metrics.length) {
+    serializedJob.metrics = [];
+    metrics.forEach(({ name, types }) => {
+      // Exclude any metrics which have been selected but not configured with any types.
+      if (types.length) {
+        serializedJob.metrics.push({
+          field: name,
+          metrics: types,
+        });
+      }
+    });
+  }
+
   return serializedJob;
 }
 

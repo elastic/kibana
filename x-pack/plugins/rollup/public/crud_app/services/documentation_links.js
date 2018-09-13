@@ -12,5 +12,6 @@ export const logisticalDetailsUrl = `${esBase}/rollup-job-config.html#_logistica
 export const dateHistogramDetailsUrl = `${esBase}/rollup-job-config.html#_date_histogram_2`;
 export const termsDetailsUrl = `${esBase}/rollup-job-config.html#_terms_2`;
 export const histogramDetailsUrl = `${esBase}/rollup-job-config.html#_histogram_2`;
+export const metricsDetailsUrl = `${esBase}/rollup-job-config.html#rollup-metrics-config`;
 
 export const dateHistogramAggregationUrl = `${esBase}/search-aggregations-bucket-datehistogram-aggregation.html`;
