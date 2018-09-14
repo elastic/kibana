@@ -7,7 +7,7 @@ import { TestInvoker } from './lib/types';
 
 // tslint:disable:no-default-export
 export default function spacesApp({ loadTestFile }: TestInvoker) {
-  describe('security app', function spacesAppTestSuite() {
+  describe.skip('Spaces app', function spacesAppTestSuite() {
     loadTestFile(require.resolve('./spaces_selection'));
   });
 }
