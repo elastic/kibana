@@ -26,7 +26,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       password = password || superPassword;
 
       const expectSpaceSelector = options.expectSpaceSelector || false;
-      const expectSuccess = options.expectSuccess || true;
+      const expectSuccess = options.expectSuccess;
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -70,7 +70,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       remote.setWindowSize(1600, 1000);
     }
 
-    async login(username, password, options) {
+    async login(username, password, options = {}) {
       await this.loginPage.login(username, password, options);
 
       if (options.expectSpaceSelector) {
