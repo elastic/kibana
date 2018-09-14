@@ -22,6 +22,8 @@ import { By, Key } from 'selenium-webdriver';
 const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
+const geckoDriver = require('geckodriver');
+const chromeDriver = require('chromedriver');
 const until = require('selenium-webdriver/lib/until');
 import { modifyUrl } from '../../../../src/core/utils';
 
@@ -45,13 +47,7 @@ export async function RemoteProvider({ getService }) {
   // chromeOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
-  const chromeDriverPath = process.platform === 'win32' ? './node_modules/chromedriver/lib/chromedriver/chromedriver.exe' :
-    './node_modules/chromedriver/lib/chromedriver/chromedriver';
-
-  const geckoDriverPath = process.platform === 'win32' ? './node_modules/geckodriver/lib/geckodriver/geckodriver.exe' :
-    './node_modules/geckodriver/lib/geckodriver/geckodriver';
-
-  const chromeService = new chrome.ServiceBuilder(chromeDriverPath)
+  const chromeService = new chrome.ServiceBuilder(chromeDriver.path)
     // .loggingTo(process.stdout)
     .enableVerboseLogging();
 
@@ -59,7 +55,7 @@ export async function RemoteProvider({ getService }) {
   // firefoxOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
-  const firefoxService = new firefox.ServiceBuilder(geckoDriverPath)
+  const firefoxService = new firefox.ServiceBuilder(geckoDriver.path)
     // .loggingTo(process.stdout)
     .enableVerboseLogging();
 
