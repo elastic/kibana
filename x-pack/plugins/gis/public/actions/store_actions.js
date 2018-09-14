@@ -117,10 +117,11 @@ export function endDataLoad(layerId, data, requestToken) {
 
 export function addLayerFromSource(source, layerOptions = {}, position) {
   return async (dispatch, getState) => {
-    const layer = source.createDefaultLayer(layerOptions, getState().config.meta.data_sources);
+    const state = getState();
+    const layer = source.createDefaultLayer(layerOptions);
     const layerDescriptor = layer.toLayerDescriptor();
     await dispatch(addLayer(layerDescriptor, position));
-    const mapState = getMapState(getState());
+    const mapState = getMapState(state);
     layer.syncDataToMapState(mapState, Symbol('data_request'), dispatch);
   };
 }
@@ -169,7 +170,8 @@ export async function loadMapResources(dispatch) {
       },
       {
         "id": "hqoqo",
-        "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE" },
+        "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE",
+          "format": "geojson" },
         "visible": true,
         "temporary": false,
         "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },

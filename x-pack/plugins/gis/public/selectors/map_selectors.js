@@ -80,9 +80,14 @@ const getLayerListRaw = createSelector(({ map }) => {
   return map.layerList ?  map.layerList : [];
 }, x => x);
 
-export function getDataSources({ config }) {
-  return (config && config.meta) ? config.meta.data_sources : {};
+export function getMetadata({ config }) {
+  return config && config.meta || {};
 }
+
+export const getDataSources = createSelector(
+  getMetadata,
+  metadata => metadata.data_sources || {}
+);
 
 export const getSelectedLayer = createSelector(getSelectedLayerId, getLayerListRaw, (selectedLayerId, layerList) => {
   const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
