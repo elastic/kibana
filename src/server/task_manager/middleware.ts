@@ -43,9 +43,17 @@ export interface Middleware {
 }
 
 export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Middleware) {
+  const beforeSave = middleware.beforeSave
+    ? (params: BeforeSaveMiddlewareParams) =>
+        middleware.beforeSave(params).then(prevMiddleware.beforeSave)
+    : prevMiddleware.beforeSave;
+
+  const beforeRun = middleware.beforeRun
+    ? (params: RunContext) => middleware.beforeRun(params).then(prevMiddleware.beforeRun)
+    : prevMiddleware.beforeRun;
+
   return {
-    beforeSave: (params: BeforeSaveMiddlewareParams) =>
-      middleware.beforeSave(params).then(prevMiddleware.beforeSave),
-    beforeRun: (params: RunContext) => middleware.beforeRun(params).then(prevMiddleware.beforeRun),
+    beforeSave,
+    beforeRun,
   };
 }
