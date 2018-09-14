@@ -6,9 +6,13 @@
 
 import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
+import turf from 'turf';
+import turfBooleanContains from '@turf/boolean-contains';
 
+
+window._turf = turf;
+window._turfBooleanContains = turf;
 
 const ZOOM_TO_PRECISION = {
   "0": 1,
@@ -114,7 +118,10 @@ export class GeohashGridLayer extends ALayer {
   async syncDataToMapState(mapState, requestToken, dispatch) {
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
-      const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
+      const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
+      const mapStateExtent = turf.bboxPolygon(mapState.extent);
+      const isContained = turfBooleanContains(dataExtent, mapStateExtent);
+      // const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
       const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
       if (samePrecision && isContained) {
         return;
