@@ -42,7 +42,6 @@ export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Mid
   return {
     beforeSave: (params: BeforeSaveMiddlewareParams) =>
       middleware.beforeSave(params).then(prevMiddleware.beforeSave),
-    beforeRun: (params: RunContext) =>
-      middleware.beforeRun(params).then(prevMiddleware.beforeRun),
+    beforeRun: (params: RunContext) => middleware.beforeRun(params).then(prevMiddleware.beforeRun),
   };
 }
