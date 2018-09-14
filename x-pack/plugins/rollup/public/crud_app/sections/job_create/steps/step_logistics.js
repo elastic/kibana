@@ -115,10 +115,16 @@ export class StepLogisticsUi extends Component {
                 <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.sectionId.title"
-                    defaultMessage="ID"
+                    defaultMessage="Name"
                   />
                 </h4>
               </EuiTitle>
+            )}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionId.description"
+                defaultMessage="This name will be used as a unique identifier for this rollup job."
+              />
             )}
             fullWidth
           >
@@ -126,7 +132,7 @@ export class StepLogisticsUi extends Component {
               label={(
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepLogistics.fieldId.label"
-                  defaultMessage="Rollup job ID"
+                  defaultMessage="Name"
                 />
               )}
               error={errorId}
