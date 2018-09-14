@@ -19,14 +19,10 @@
 
 import { fillPool } from './fill_pool';
 import { TaskManagerLogger } from './logger';
-import {
-  addMiddlewareToChain,
-  BeforeRunMiddlewareParams,
-  BeforeSaveMiddlewareParams,
-  Middleware,
-} from './middleware';
+import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './middleware';
 import {
   ConcreteTaskInstance,
+  RunContext,
   SanitizedTaskDefinition,
   TaskDictionary,
   TaskInstance,
@@ -61,7 +57,7 @@ export class TaskManager {
 
     this.middleware = {
       beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
-      beforeRun: async (runOpts: BeforeRunMiddlewareParams) => runOpts,
+      beforeRun: async (runOpts: RunContext) => runOpts,
     };
 
     this.poller = null;
@@ -119,11 +115,14 @@ export class TaskManager {
    * Saves a task
    * @param {TaskInstance} taskInstance
    */
-  public async schedule(taskInstance: TaskInstance, options): Promise<RawTaskDoc> {
+  public async schedule(taskInstance: TaskInstance, options?: any): Promise<RawTaskDoc> {
     if (!this.initialized || !this.poller || !this.store) {
       throw new Error('Task Manager service is not ready for tasks to be scheduled');
     }
-    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({ ...options, taskInstance });
+    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      ...options,
+      taskInstance,
+    });
     const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
