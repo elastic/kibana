@@ -38,6 +38,7 @@ export interface RequestHandlerParams {
   inspectorAdapters?: Adapters;
   isHierarchical?: boolean;
   visParams?: any;
+  indexPattern?: any;
 }
 
 export type RequestHandler = <T>(params: RequestHandlerParams) => T;

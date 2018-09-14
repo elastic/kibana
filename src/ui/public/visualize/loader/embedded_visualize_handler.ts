@@ -91,7 +91,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const { appState, uiState, queryFilter, timeRange, filters, query } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -124,7 +124,7 @@ export class EmbeddedVisualizeHandler {
     this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new VisualizeDataLoader(vis);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -352,7 +352,17 @@ export class EmbeddedVisualizeHandler {
     });
   };
 
-  private render = (visData: any = null) => {
+  private render = (pipelineResponse: any = null) => {
+    let visData;
+    if (pipelineResponse) {
+      if (!pipelineResponse.value) {
+        console.log(pipelineResponse.error);
+        console.log(pipelineResponse.error.stack);
+        throw new Error('error executing pipeline');
+        return;
+      }
+      visData = pipelineResponse.value.visData || pipelineResponse.value;
+    }
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {
         listenOnChange: false,

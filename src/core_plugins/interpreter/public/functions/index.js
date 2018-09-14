@@ -17,34 +17,16 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
-import { datatable } from './datatable';
-import { error } from './error';
-import { filter } from './filter';
-import { image } from './image';
-import { nullType } from './null';
-import { number } from './number';
-import { pointseries } from './pointseries';
-import { render } from './render';
-import { shape } from './shape';
-import { string } from './string';
-import { style } from './style';
-import { kibanaTable } from './kibana_table';
-import { kibanaContext } from './kibana_context';
+import visualization from './visualization';
+import esaggs from './esaggs';
+import kibana from './kibana';
+import kibanaContext from './kibana_context';
+import vega from './vega';
+import timelion from './timelion_vis';
+import tsvb from './tsvb';
+import markdown from './markdown';
+import input_control from './input_control';
 
-export const typeSpecs = [
-  boolean,
-  datatable,
-  error,
-  filter,
-  image,
-  number,
-  nullType,
-  pointseries,
-  render,
-  shape,
-  string,
-  style,
-  kibanaTable,
-  kibanaContext,
+export const functions = [
+  visualization, esaggs, kibana, kibanaContext, vega, timelion, tsvb, markdown, input_control
 ];

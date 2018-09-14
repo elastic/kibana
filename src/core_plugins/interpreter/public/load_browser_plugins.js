@@ -20,11 +20,18 @@
 import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { functions } from './functions';
 
 const types = {
   commonFunctions: functionsRegistry,
   browserFunctions: functionsRegistry,
   types: typesRegistry
 };
+
+function addFunction(fnDef) {
+  functionsRegistry.register(fnDef);
+}
+
+functions.forEach(addFunction);
 
 populateBrowserRegistries(types);

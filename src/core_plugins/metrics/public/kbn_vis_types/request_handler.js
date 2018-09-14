@@ -28,7 +28,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
 
   return {
     name: 'metrics',
-    handler: function ({ aggs, uiState, timeRange, filters, query, visParams }) {
+    handler: function ({ indexPattern, uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
         const panel = visParams;
@@ -39,7 +39,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(aggs.indexPattern, [query], filters)],
+            filters: [buildEsQuery(indexPattern, [query], filters)],
             panels: [panel],
             state: uiStateObj
           };

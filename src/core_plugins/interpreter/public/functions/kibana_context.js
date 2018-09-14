@@ -1,0 +1,72 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+export default () => ({
+  name: 'kibana_context',
+  type: 'kibana_context',
+  context: {
+    types: [
+      'kibana_context',
+      'null',
+    ],
+  },
+  help: 'Gets kibana global context.',
+  args: {
+    q: {
+      types: ['string', 'null'],
+      aliases: ['query'],
+      help: 'A Lucene query string',
+      default: null,
+    },
+    filters: {
+      types: ['string', 'null'],
+      help: 'Filters object',
+      default: '"[]"',
+    },
+    timeRange: {
+      types: ['string', 'null'],
+      help: 'Sets date range to query',
+      default: null,
+    },
+  },
+  fn(context, args) {
+    const queryArg = args.q ? JSON.parse(args.q) : [];
+    let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
+
+    if (context.query) {
+      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
+      queries = queries.concat(contextQueries);
+    }
+
+    let filters = args.filters ? JSON.parse(args.filters) : [];
+    if (context.filters) {
+      // merge filters
+      filters = context.filters.concat(JSON.parse(args.filters));
+    }
+
+    const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
+
+    return {
+      type: 'kibana_context',
+      query: queries,
+      filters: filters,
+      timeRange: timeRange,
+    };
+  },
+});
