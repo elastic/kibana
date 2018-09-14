@@ -37,7 +37,7 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
   kbnServer.afterPluginsInit(() => client.afterPluginsInit(kbnServer, server, config));
 }
 
-// TODO, move this to a file and properly test it, validate the taskDefinition via Joi or something
+// TODO, move this to a file and properly test it
 function extractTaskDefinitions(
   maxWorkers: number,
   taskDefinitions: TaskDictionary<TaskDefinition> = {}
