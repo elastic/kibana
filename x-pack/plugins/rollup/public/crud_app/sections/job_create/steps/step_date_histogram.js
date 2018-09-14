@@ -13,7 +13,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescribedFormGroup,
-  EuiCode,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -198,7 +197,7 @@ export class StepDateHistogramUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
-                      defaultMessage="Example intervals: 30s, 20m, 5h, 1d, 1M."
+                      defaultMessage="Example intervals: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
                     />
                   </p>
                 </Fragment>
@@ -231,7 +230,7 @@ export class StepDateHistogramUi extends Component {
                 defaultMessage={`
                   How long should we wait before rolling up new documents? By default, the indexer
                   attempts to roll up all data that is available. You can also customize the time
-                  zone stored with the rolled-up documents.
+                  zone stored with the rolled-up documents. The default time zone is UTC.
                 `}
               />
             )}
@@ -251,7 +250,7 @@ export class StepDateHistogramUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
-                      defaultMessage="Example delay values: 30s, 20m, 1h, 2d, 5M."
+                      defaultMessage="Example delay values: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
                     />
                   </p>
                 </Fragment>
@@ -275,22 +274,6 @@ export class StepDateHistogramUi extends Component {
               )}
               error={errorDateHistogramTimeZone || ''}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
-              helpText={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.helpDefault.label"
-                  defaultMessage="Defaults to {timeZone}."
-                  values={{
-                    timeZone: (
-                      <EuiCode>
-                        <FormattedMessage
-                          id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.helpDefault.timeZone.label"
-                          defaultMessage="UTC"
-                        />
-                      </EuiCode>
-                    ),
-                  }}
-                />
-              )}
               fullWidth
             >
               <EuiSelect
