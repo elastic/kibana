@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
-import mapboxgl from 'mapbox-gl';
+import { getMbMap } from './global_mb_map';
 import _ from 'lodash';
 
 function removeOrphanedSourcesAndLayers(mbMap, layerList) {
@@ -52,27 +52,15 @@ function syncLayerOrder(mbMap, layerList) {
 
 }
 
-const container = document.createElement('div');
-const MB_MAP = new mapboxgl.Map({
-  container: container,
-  style: {
-    version: 8,
-    sources: {},
-    layers: [],
-  },
-});
-MB_MAP.dragRotate.disable();
-MB_MAP.touchZoomRotate.disableRotation();
-
-const getMBImplementation = createSelector(() => {
-  return MB_MAP;
-});
-
 // Selectors
-const syncMBMapWithMapState = createSelector(
-  getMBImplementation,
+const getMbMapAndSyncWithMapState = createSelector(
   getMapState,
-  (mbMap, mapState) => {
+  (mapState) => {
+
+    const mbMap = getMbMap();
+    if (!mbMap) {
+      return;
+    }
     const center = mbMap.getCenter();
     const zoom = mbMap.getZoom();
     if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
@@ -81,21 +69,23 @@ const syncMBMapWithMapState = createSelector(
     if (mapState.center && !_.isEqual(mapState.center, [center.lng, center.lat])) {
       mbMap.setCenter(mapState.center);
     }
+
     return mbMap;
   }
 );
 
 export const syncMBState = createSelector(
-  syncMBMapWithMapState,
+  getMbMapAndSyncWithMapState,
   getLayerList,
   getDataSources,
   (mbMap, layerList, dataSources) => {
-
+    if (!mbMap) {
+      return;
+    }
     removeOrphanedSourcesAndLayers(mbMap, layerList);
     layerList.forEach((layer) => {
       layer.syncLayerWithMB(mbMap, dataSources);
     });
     syncLayerOrder(mbMap, layerList);
-    return mbMap;
   }
 );

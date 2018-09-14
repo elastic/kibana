@@ -5,34 +5,37 @@
  */
 
 import React from 'react';
+import { createGlobalMbMapInstance } from './global_mb_map';
 
 export class MBMapContainer extends React.Component {
 
+  constructor() {
+    super();
+    this._mbMap = null;
+  }
+
   _getMapState() {
-    const zoom = this.props.mbMap.getZoom();
-    const center = this.props.mbMap.getCenter();
-    const bounds = this.props.mbMap.getBounds();
-    const mapState =  {
+    const zoom = this._mbMap.getZoom();
+    const center = this._mbMap.getCenter();
+    const bounds = this._mbMap.getBounds();
+    return {
       zoom: zoom,
       center: [center.lng, center.lat],
       extent: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
     };
-    return mapState;
+  }
+
+  componentWillUnmount() {
+    console.warn('Should tear down all resources of this component, including this._mbMap');
   }
 
   componentDidMount() {
-    const container = this.props.mbMap.getContainer();
-    container.style.width = '100%';
-    container.style.height = '100%';
-    this.refs.mapContainer.appendChild(container);
-    this.props.mbMap.resize();
-
-
-    this.props.mbMap.on('moveend', () => {
+    this._mbMap = createGlobalMbMapInstance(this.refs.mapContainer);
+    this._mbMap.resize();
+    this._mbMap.on('moveend', () => {
       const newMapState = this._getMapState();
       this.props.extentChanged(newMapState);
     });
-
     const newMapState = this._getMapState();
     this.props.initialize(newMapState);
   }
@@ -40,7 +43,7 @@ export class MBMapContainer extends React.Component {
   render() {
     return (
       <div>
-        <div className="mapContainer" ref="mapContainer"/>
+        <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
       </div>
     );
   }
