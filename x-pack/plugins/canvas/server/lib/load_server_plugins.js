@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { typesRegistry } from '../../common/lib/types_registry';
 import { functionsRegistry as serverFunctions } from '../../common/lib/functions_registry';
 import { getPluginPaths } from './get_plugin_paths';

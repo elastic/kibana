@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import clone from 'lodash.clone';
 
 export class Registry {
@@ -12,14 +18,13 @@ export class Registry {
   }
 
   register(fn) {
-    if (typeof fn !== 'function') {
-      throw new Error(`Register requires an function`);
-    }
+    if (typeof fn !== 'function') throw new Error(`Register requires an function`);
+
     const obj = fn();
 
-    if (typeof obj !== 'object' || !obj[this._prop]) {
+    if (typeof obj !== 'object' || !obj[this._prop])
       throw new Error(`Registered functions must return an object with a ${this._prop} property`);
-    }
+
     this._indexed[obj[this._prop].toLowerCase()] = this.wrapper(obj);
   }
 

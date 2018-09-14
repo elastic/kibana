@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import createRouter from '@scant/router';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
@@ -42,9 +48,8 @@ export function routerProvider(routes) {
       history.replace(currentState, this.create(name, params));
     },
     onPathChange(fn) {
-      if (componentListener != null) {
+      if (componentListener != null)
         throw new Error('Only one route component listener is allowed');
-      }
 
       const execOnMatch = location => {
         const { pathname } = location;
@@ -61,9 +66,7 @@ export function routerProvider(routes) {
 
       // on path changes, fire the path change handler
       componentListener = history.onChange((locationObj, prevLocationObj) => {
-        if (locationObj.pathname !== prevLocationObj.pathname) {
-          execOnMatch(locationObj);
-        }
+        if (locationObj.pathname !== prevLocationObj.pathname) execOnMatch(locationObj);
       });
 
       // initially fire the path change handler

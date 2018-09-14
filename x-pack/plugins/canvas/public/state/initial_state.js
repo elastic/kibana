@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { get } from 'lodash';
 import { getDefaultWorkpad } from './defaults';
 
@@ -24,9 +30,7 @@ export const getInitialState = path => {
     },
   };
 
-  if (!path) {
-    return state;
-  }
+  if (!path) return state;
 
   return get(state, path);
 };

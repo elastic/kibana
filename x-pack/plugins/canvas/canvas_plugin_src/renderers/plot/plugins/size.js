@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { min, max, map, flatten } from 'lodash';
 
 /*
@@ -55,20 +61,15 @@ function drawbubbleDefault(ctx, series, x, y, radius, c) {
 
   ctx.arc(x, y, radius, 0, Math.PI * 2, true);
   ctx.closePath();
-  if (series.bubbles.fill) {
-    ctx.fill();
-  } else {
-    ctx.stroke();
-  }
+  if (series.bubbles.fill) ctx.fill();
+  else ctx.stroke();
 }
 
 function init(plot) {
   plot.hooks.processOptions.push(processOptions);
 
   function processOptions(plot, options) {
-    if (options.series.bubbles.active) {
-      plot.hooks.drawSeries.push(drawSeries);
-    }
+    if (options.series.bubbles.active) plot.hooks.drawSeries.push(drawSeries);
   }
 
   function drawSeries(plot, ctx, series) {
@@ -92,7 +93,7 @@ function init(plot) {
 
           // Otherwise draw something between the min and max acceptable radius.
           return (
-            (series.bubbles.size.max - series.bubbles.size.min) / delta * (size - minPoint) +
+            ((series.bubbles.size.max - series.bubbles.size.min) / delta) * (size - minPoint) +
             series.bubbles.size.min
           );
         })();

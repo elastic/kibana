@@ -1,5 +1,11 @@
-import { handleActions } from 'redux-actions';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { recentlyAccessed } from 'ui/persisted_log';
+import { handleActions } from 'redux-actions';
 import { setWorkpad, sizeWorkpad, setColors, setName } from '../actions/workpad';
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 

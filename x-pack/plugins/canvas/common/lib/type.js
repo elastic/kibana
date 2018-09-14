@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 // All types must be universal and be castable on the client or on the server
 import { get } from 'lodash';
 import { getType } from '../lib/get_type';
@@ -29,19 +35,18 @@ export function Type(config) {
 
   this.to = (node, toTypeName, types) => {
     const typeName = getType(node);
-    if (typeName !== this.name) {
+    if (typeName !== this.name)
       throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
-    } else if (!this.castsTo(toTypeName)) {
+    else if (!this.castsTo(toTypeName))
       throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
-    }
+
     return getToFn(toTypeName)(node, types);
   };
 
   this.from = (node, types) => {
     const typeName = getType(node);
-    if (!this.castsFrom(typeName)) {
-      throw new Error(`Can not cast '${this.name}' from ${typeName}`);
-    }
+    if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
+
     return getFromFn(typeName)(node, types);
   };
 }

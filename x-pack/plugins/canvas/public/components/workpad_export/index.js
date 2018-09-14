@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 /* eslint import/no-unresolved: 1 */
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
 import { jobCompletionNotifications } from 'plugins/reporting/services/job_completion_notifications';
@@ -28,16 +34,13 @@ export const WorkpadExport = compose(
   connect(mapStateToProps),
   withProps(({ workpad, pageCount }) => ({
     getExportUrl: type => {
-      if (type === 'pdf') {
-        return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
-      }
+      if (type === 'pdf') return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
 
       throw new Error(`Unknown export type: ${type}`);
     },
     onCopy: type => {
-      if (type === 'pdf') {
+      if (type === 'pdf')
         return notify.info('The PDF generation URL was copied to your clipboard.');
-      }
 
       throw new Error(`Unknown export type: ${type}`);
     },

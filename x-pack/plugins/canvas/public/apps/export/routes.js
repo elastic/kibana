@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import * as workpadService from '../../lib/workpad_service';
 import { setWorkpad } from '../../state/actions/workpad';
 import { fetchAllRenderables } from '../../state/actions/elements';
@@ -18,9 +24,7 @@ export const routes = [
           const pageNumber = parseInt(params.page, 10);
 
           // redirect to home app on invalid workpad id or page number
-          if (fetchedWorkpad == null && isNaN(pageNumber)) {
-            return router.redirectTo('home');
-          }
+          if (fetchedWorkpad == null && isNaN(pageNumber)) return router.redirectTo('home');
 
           const { assets, ...workpad } = fetchedWorkpad;
           dispatch(setAssets(assets));

@@ -1,16 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { map, zipObject } from 'lodash';
 
 export const datatable = () => ({
   name: 'datatable',
   validate: datatable => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!datatable.columns) {
+    if (!datatable.columns)
       throw new Error('datatable must have a columns array, even if it is empty');
-    }
 
-    if (!datatable.rows) {
-      throw new Error('datatable must have a rows array, even if it is empty');
-    }
+    if (!datatable.rows) throw new Error('datatable must have a rows array, even if it is empty');
   },
   serialize: datatable => {
     const { columns, rows } = datatable;

@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import squel from 'squel';
 import { map, zipObject } from 'lodash';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';

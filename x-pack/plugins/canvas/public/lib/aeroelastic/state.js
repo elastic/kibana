@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 const { shallowEqual } = require('./functional');
 
 /**
@@ -17,9 +23,9 @@ const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs
     if (
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
       value === prevValue
-    ) {
+    )
       return mappedValue;
-    }
+
     prevValue = value;
     value = fun(prevValue, ...argumentValues);
     if (logFun) logFun(value, argumentValues);
@@ -39,9 +45,9 @@ const select = (fun, logFun) => (...inputs) => {
     if (
       actionId === lastActionId ||
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
-    ) {
+    )
       return value;
-    }
+
     value = fun(...argumentValues);
     actionId = lastActionId;
     if (logFun) logFun(value, argumentValues);

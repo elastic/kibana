@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import clone from 'lodash.clone';
 import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { getType } from '../lib/get_type';
@@ -115,9 +121,9 @@ export function interpretProvider(config) {
       (argAsts, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
-        if (!argDef) {
+        if (!argDef)
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
-        }
+
         argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
         return argAsts;
       },
@@ -145,9 +151,9 @@ export function interpretProvider(config) {
     const argAstsWithDefaults = reduce(
       argDefs,
       (argAsts, argDef, argName) => {
-        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
+        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')
           argAsts[argName] = [fromExpression(argDef.default, 'argument')];
-        }
+
         return argAsts;
       },
       dealiasedArgAsts

@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { evaluate } from 'tinymath';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 
@@ -19,9 +25,8 @@ export const math = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.expression || args.expression.trim() === '') {
-      throw new Error('Empty expression');
-    }
+    if (!args.expression || args.expression.trim() === '') throw new Error('Empty expression');
+
     const isDatatable = context && context.type === 'datatable';
     const mathContext = isDatatable
       ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
@@ -38,11 +43,8 @@ export const math = () => ({
         throw new Error('Failed to execute math expression. Check your column names');
       return result;
     } catch (e) {
-      if (context.rows.length === 0) {
-        throw new Error('Empty datatable');
-      } else {
-        throw e;
-      }
+      if (context.rows.length === 0) throw new Error('Empty datatable');
+      else throw e;
     }
   },
 });

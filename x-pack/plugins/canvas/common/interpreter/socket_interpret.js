@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import uuid from 'uuid/v4';
 import { getByAlias } from '../lib/get_by_alias';
 import { serializeProvider } from '../lib/serialize';
@@ -34,9 +40,8 @@ export function socketInterpreterProvider({
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!getByAlias(referableFunctionMap, functionName)) {
+        if (!getByAlias(referableFunctionMap, functionName))
           throw new Error(`Function not found: ${functionName}`);
-        }
 
         // set a unique message ID so the code knows what response to process
         const id = uuid();

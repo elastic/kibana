@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { duplicatePage } from '../actions/pages';
 import { fetchRenderable } from '../actions/elements';
 import { getPages } from '../selectors/workpad';

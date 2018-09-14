@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
@@ -7,11 +13,8 @@ import { templateFromReactComponent } from '../../../public/lib/template_from_re
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
     const query = this.getQuery();
-    if (typeof query !== 'string') {
-      this.setArg(this.getArgName(), this.defaultQuery);
-    } else {
-      this.props.setInvalid(!query.trim());
-    }
+    if (typeof query !== 'string') this.setArg(this.getArgName(), this.defaultQuery);
+    else this.props.setInvalid(!query.trim());
   }
 
   defaultQuery = 'SELECT * FROM logstash*';

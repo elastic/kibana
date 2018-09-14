@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { fetchAllRenderables } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 import { inFlightComplete } from '../actions/resolved_args';
@@ -32,9 +38,7 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     next(action);
 
     // when in-flight requests are finished, update the workpad after a given delay
-    if (action.type === inFlightComplete.toString() && refreshInterval > 0) {
-      startDelayedUpdate(); // create new update request
-    }
+    if (action.type === inFlightComplete.toString() && refreshInterval > 0) startDelayedUpdate(); // create new update request
 
     // This middleware creates or destroys an interval that will cause workpad elements to update
     if (action.type === setRefreshInterval.toString()) {

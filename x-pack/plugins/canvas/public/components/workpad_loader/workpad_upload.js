@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
@@ -10,10 +16,11 @@ export const WorkpadUpload = ({ onUpload }) => (
     compressed
     initialPromptText="Import workpad JSON file"
     onChange={([file]) => {
-      if (get(file, 'type') !== 'application/json')
+      if (get(file, 'type') !== 'application/json') {
         return notify.warning('Only JSON files are accepted', {
           title: `Couldn't upload '${file.name || 'file'}'`,
         });
+      }
       // TODO: Clean up this file, this loading stuff can, and should be, abstracted
       const reader = new FileReader();
 

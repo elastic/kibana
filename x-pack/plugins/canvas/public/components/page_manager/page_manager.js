@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
@@ -51,11 +57,12 @@ export class PageManager extends React.PureComponent {
         width: listWidth,
       } = this.pageListRef.getBoundingClientRect();
 
-      if (pageLeft < listLeft)
+      if (pageLeft < listLeft) {
         this.pageListRef.scrollTo({
           left: pageOffset,
           behavior: 'smooth',
         });
+      }
       if (pageRight > listRight) {
         this.pageListRef.scrollTo({
           left: pageOffset - listWidth + pageWidth,
@@ -80,9 +87,7 @@ export class PageManager extends React.PureComponent {
 
   onDragEnd = ({ draggableId: pageId, source, destination }) => {
     // dropped outside the list
-    if (!destination) {
-      return;
-    }
+    if (!destination) return;
 
     const position = destination.index - source.index;
 

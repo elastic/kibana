@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
@@ -60,7 +66,9 @@ export class ExpressionInput extends React.Component {
   // TODO: Use a hidden div and measure it rather than using hardcoded values
   getContextMenuItemsStyle = () => {
     const { value } = this.props;
-    const { selection: { end } } = this.state;
+    const {
+      selection: { end },
+    } = this.state;
     const numberOfNewlines = value.substr(0, end).split('\n').length;
     const padding = 12;
     const lineHeight = 22;
