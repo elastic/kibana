@@ -22,12 +22,41 @@ import PropTypes from 'prop-types';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { toUser, fromUser } from '../../parse_query/index.js';
 import { matchPairs } from '../lib/match_pairs';
+import { Suggestions } from './typeahead/suggestions';
+import { ClickOutside } from './typeahead/click_outside';
+import { getAutocompleteProvider } from '../../autocomplete_providers';
+import { getFromLegacyIndexPattern } from '../../index_patterns/static_utils';
+import { PersistedLog } from '../../persisted_log';
+import { chrome } from '../../chrome/chrome';
+import { debounce } from 'lodash';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
 } from '@elastic/eui';
+
+/*
+TODO: recent search suggestions don't seem to be working
+TODO: query disappears when I hit enter and language reverts to lucene
+TODO: styling
+TODO: refactoring
+ */
+
+
+const KEY_CODES = {
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40,
+  ENTER: 13,
+  ESC: 27,
+  TAB: 9,
+  HOME: 36,
+  END: 35,
+};
+
+const config = chrome.getUiSettingsClient();
 
 export class QueryBar extends Component {
 
@@ -48,18 +77,134 @@ export class QueryBar extends Component {
       query: toUser(this.props.query.query),
       language: this.props.query.language,
     },
+    inputIsPristine: true,
+    isSuggestionsVisible: false,
+    index: null,
+    suggestions: [],
   };
 
-  onChange = (event) => {
-    this.setState({
-      query: {
-        query: event.target.value,
-        language: this.state.query.language,
-      },
+  incrementIndex = (currentIndex) => {
+    let nextIndex = currentIndex + 1;
+    if (currentIndex === null || nextIndex >= this.state.suggestions.length) {
+      nextIndex = 0;
+    }
+    this.setState({ index: nextIndex });
+  };
+
+  decrementIndex = (currentIndex) => {
+    let previousIndex = currentIndex - 1;
+    if (previousIndex < 0) {
+      previousIndex = null;
+    }
+    this.setState({ index: previousIndex });
+  };
+
+  updateSuggestions = debounce(async () => {
+    const suggestions = await this.getSuggestions();
+    this.setState({ suggestions });
+  }, 100);
+
+  getSuggestions = async () => {
+    const { query: { query, language } } = this.state;
+    const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
+
+    const autocompleteProvider = getAutocompleteProvider(language);
+    if (!autocompleteProvider) return recentSearchSuggestions;
+
+    const indexPatterns = getFromLegacyIndexPattern(this.props.indexPatterns);
+    const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
+
+    const { selectionStart, selectionEnd } = this.inputRef;
+    const suggestions = await getAutocompleteSuggestions({ query, selectionStart, selectionEnd });
+    return [...suggestions, ...recentSearchSuggestions];
+  };
+
+  // TODO do I need this since I took the selectSuggestion method from APM?
+  //
+  // onSuggestionSelect = ({ type, text, start, end }) => {
+  //   const { query } = this.localQuery;
+  //   const inputEl = this.inputRef;
+  //   const { selectionStart, selectionEnd } = inputEl;
+  //   const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
+  //
+  //   this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
+  //   inputEl.setSelectionRange(start + text.length, start + text.length);
+  //
+  //   if (type === 'recentSearch') {
+  //     this.submit();
+  //   } else {
+  //     this.updateSuggestions();
+  //   }
+  // };
+
+  getRecentSearchSuggestions = (query) => {
+    if (!this.persistedLog) return [];
+    const recentSearches = this.persistedLog.get();
+    const matchingRecentSearches = recentSearches.filter((recentQuery) => {
+      const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
+      return recentQueryString.includes(query);
+    });
+    return matchingRecentSearches.map(recentSearch => {
+      const text = recentSearch;
+      const start = 0;
+      const end = query.length;
+      return { type: 'recentSearch', text, start, end };
     });
   };
 
+  selectSuggestion = (suggestion) => {
+    const nextInputValue =
+      this.state.query.query.substr(0, suggestion.start) +
+      suggestion.text +
+      this.state.query.query.substr(suggestion.end);
+
+    this.setState({ query: { ...this.state.query, query: nextInputValue }, index: null });
+    this.updateSuggestions();
+  };
+
+  onClickOutside = () => {
+    this.setState({ isSuggestionsVisible: false });
+  };
+
+  onClickInput = (event) => {
+    this.onInputChange(event);
+  };
+
+  onClickSuggestion = (suggestion) => {
+    this.selectSuggestion(suggestion);
+    this.inputRef.focus();
+  };
+
+  onMouseEnterSuggestion = (index) => {
+    this.setState({ index });
+  };
+
+  onInputChange = (event) => {
+    this.updateSuggestions();
+
+    const { value } = event.target;
+    const hasValue = Boolean(value.trim());
+
+    this.setState({
+      query: {
+        query: value,
+        language: this.state.query.language,
+      },
+      inputIsPristine: false,
+      isSuggestionsVisible: hasValue,
+      index: null,
+    });
+  };
+
+  onKeyUp = (event) => {
+    if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
+      this.setState({ isSuggestionsVisible: true });
+      this.onInputChange(event);
+    }
+  };
+
   onKeyDown = (event) => {
+    const { isSuggestionsVisible, index } = this.state;
     const preventDefault = event.preventDefault.bind(event);
     const { target, key, metaKey } = event;
     const { value, selectionStart, selectionEnd } = target;
@@ -73,19 +218,53 @@ export class QueryBar extends Component {
         },
         () => {
           target.setSelectionRange(selectionStart, selectionEnd);
-        }
+        },
       );
     };
 
-    matchPairs({
-      value,
-      selectionStart,
-      selectionEnd,
-      key,
-      metaKey,
-      updateQuery,
-      preventDefault,
-    });
+    switch (event.keyCode) {
+      case KEY_CODES.DOWN:
+        event.preventDefault();
+        if (isSuggestionsVisible) {
+          this.incrementIndex(index);
+        } else {
+          this.setState({ isSuggestionsVisible: true, index: 0 });
+        }
+        break;
+      case KEY_CODES.UP:
+        event.preventDefault();
+        if (isSuggestionsVisible) {
+          this.decrementIndex(index);
+        }
+        break;
+      case KEY_CODES.ENTER:
+        event.preventDefault();
+        if (isSuggestionsVisible && this.state.suggestions[index]) {
+          this.selectSuggestion(this.state.suggestions[index]);
+        } else {
+          this.setState({ isSuggestionsVisible: false });
+          this.props.onSubmit(value);
+        }
+        break;
+      case KEY_CODES.ESC:
+        event.preventDefault();
+        this.setState({ isSuggestionsVisible: false });
+        break;
+      case KEY_CODES.TAB:
+        this.setState({ isSuggestionsVisible: false });
+        break;
+      default:
+        matchPairs({
+          value,
+          selectionStart,
+          selectionEnd,
+          key,
+          metaKey,
+          updateQuery,
+          preventDefault,
+        });
+        break;
+    }
   };
 
   onSubmit = (event) => {
@@ -94,65 +273,110 @@ export class QueryBar extends Component {
       query: fromUser(this.state.query.query),
       language: this.state.query.language,
     });
+    this.setState({ isSuggestionsVisible: false });
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.query.query !== this.props.query.query) {
-      this.setState({
+  componentDidMount() {
+    this.persistedLog = new PersistedLog(`typeahead:${this.props.appName}-${this.state.query.language}`, {
+      maxLength: config.get('history:limit'),
+      filterDuplicates: true,
+    });
+    this.updateSuggestions();
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.query.query !== prevState.query.query) {
+      return {
         query: {
           query: toUser(nextProps.query.query),
           language: nextProps.query.language,
         },
-      });
+      };
     }
-    else if (nextProps.query.language !== this.props.query.language) {
-      this.setState({
+    else if (nextProps.query.language !== prevState.query.language) {
+      return {
         query: {
           query: '',
           language: nextProps.query.language,
         },
+      };
+    }
+
+    return null;
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.query.language !== this.props.query.language) {
+      this.persistedLog = new PersistedLog(`typeahead:${this.props.appName}-${this.state.query.language}`, {
+        maxLength: config.get('history:limit'),
+        filterDuplicates: true,
       });
+      this.updateSuggestions();
     }
   }
 
+  // TODO when component unmounts cancel the getSuggestions debounce
+
   render() {
     return (
-      <form
-        role="form"
-        name="queryBarForm"
-        onSubmit={this.onSubmit}
-        onKeyDown={this.onKeyDown}
+      <ClickOutside
+        onClickOutside={this.onClickOutside}
+        style={{ position: 'relative' }}
       >
-        <div
-          className="kuiLocalSearch"
-          role="search"
+        <form
+          role="form"
+          name="queryBarForm"
+          onSubmit={this.onSubmit}
+          onKeyDown={this.onKeyDown}
+          onKeyUp={this.onKeyUp}
         >
-          <div className="kuiLocalSearchAssistedInput">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFieldText
-                  placeholder="Search..."
-                  value={this.state.query.query}
-                  onChange={this.onChange}
-                  fullWidth
-                  autoFocus={!this.props.disableAutoFocus}
-                />
-                <div className="kuiLocalSearchAssistedInput__assistance">
-                  <QueryLanguageSwitcher
-                    language={this.state.query.language}
-                    onSelectLanguage={(language) => {
-                      this.props.onSubmit({
-                        query: '',
-                        language: language,
-                      });
+          <div
+            className="kuiLocalSearch"
+            role="search"
+          >
+            <div className="kuiLocalSearchAssistedInput">
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFieldText
+                    placeholder="Search..."
+                    value={this.state.query.query}
+                    onChange={this.onInputChange}
+                    onClick={this.onClickInput}
+                    fullWidth
+                    autoFocus={!this.props.disableAutoFocus}
+                    inputRef={node => {
+                      if (node) {
+                        this.inputRef = node;
+                      }
                     }}
+                    autoComplete="off"
+                    spellCheck={false}
                   />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                  <div className="kuiLocalSearchAssistedInput__assistance">
+                    <QueryLanguageSwitcher
+                      language={this.state.query.language}
+                      onSelectLanguage={(language) => {
+                        this.props.onSubmit({
+                          query: '',
+                          language: language,
+                        });
+                      }}
+                    />
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+
+        <Suggestions
+          show={this.state.isSuggestionsVisible}
+          suggestions={this.state.suggestions}
+          index={this.state.index}
+          onClick={this.onClickSuggestion}
+          onMouseEnter={this.onMouseEnterSuggestion}
+        />
+      </ClickOutside>
     );
   }
 }
@@ -165,4 +389,6 @@ QueryBar.propTypes = {
   }),
   onSubmit: PropTypes.func,
   disableAutoFocus: PropTypes.bool,
+  appName: PropTypes.string,
+  indexPatterns: PropTypes.array,
 };
