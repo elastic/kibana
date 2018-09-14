@@ -211,7 +211,7 @@ function discoverController(
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return $scope.opts.saveDataSource(saveOptions).then(({ id, error }) => {
+        return saveDataSource(saveOptions).then(({ id, error }) => {
           // If the save wasn't successful, put the original values back.
           if (!id || error) {
             savedSearch.title = currentTitle;
@@ -507,35 +507,40 @@ function discoverController(
       });
   });
 
-  $scope.opts.saveDataSource = function (saveOptions) {
-    return $scope.updateDataSource()
-      .then(function () {
-        savedSearch.columns = $scope.state.columns;
-        savedSearch.sort = $scope.state.sort;
+  async function saveDataSource(saveOptions) {
+    await $scope.updateDataSource();
 
-        return savedSearch.save(saveOptions)
-          .then(function (id) {
-            stateMonitor.setInitialState($state.toJSON());
-            $scope.kbnTopNav.close('save');
+    savedSearch.columns = $scope.state.columns;
+    savedSearch.sort = $scope.state.sort;
 
-            if (id) {
-              toastNotifications.addSuccess({
-                title: `Search '${savedSearch.title}' was saved`,
-                'data-test-subj': 'saveSearchSuccess',
-              });
-
-              if (savedSearch.id !== $route.current.params.id) {
-                kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
-              } else {
-                // Update defaults so that "reload saved query" functions correctly
-                $state.setDefaults(getStateDefaults());
-                docTitle.change(savedSearch.lastSavedTitle);
-              }
-            }
+    try {
+      const id = await savedSearch.save(saveOptions);
+      $scope.$evalAsync(() => {
+        $scope.kbnTopNav.close('save'); // needed to remove selected styling of save top nav button
+        stateMonitor.setInitialState($state.toJSON());
+        if (id) {
+          toastNotifications.addSuccess({
+            title: `Search '${savedSearch.title}' was saved`,
+            'data-test-subj': 'saveSearchSuccess',
           });
-      })
-      .catch(notify.error);
-  };
+
+          if (savedSearch.id !== $route.current.params.id) {
+            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+          } else {
+            // Update defaults so that "reload saved query" functions correctly
+            $state.setDefaults(getStateDefaults());
+            docTitle.change(savedSearch.lastSavedTitle);
+          }
+        }
+      });
+      return { id };
+    } catch(saveError) {
+      toastNotifications.addDanger({
+        title: `Search '${savedSearch.title}' was not saved. Error: ${saveError.message}`,
+      });
+      return { error: saveError };
+    }
+  }
 
   $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits
