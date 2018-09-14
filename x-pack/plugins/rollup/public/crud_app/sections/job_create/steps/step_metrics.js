@@ -218,13 +218,13 @@ export class StepMetricsUi extends Component {
         <EuiSpacer />
 
         <FieldChooser
-          columns={this.chooserColumns}
-          label={(
+          buttonLabel={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
               defaultMessage="Select metrics fields"
             />
           )}
+          columns={this.chooserColumns}
           fields={unselectedMetricsFields}
           onSelectField={this.onSelectField}
         />

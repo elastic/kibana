@@ -12,8 +12,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import './field_chooser.less';
-
 export const FieldList = ({
   columns,
   fields,

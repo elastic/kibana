@@ -125,13 +125,13 @@ export class StepHistogramUi extends Component {
         <EuiSpacer />
 
         <FieldChooser
-          columns={columns}
-          label={(
+          buttonLabel={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepHistogram.fieldsChooser.label"
               defaultMessage="Select histogram fields"
             />
           )}
+          columns={columns}
           fields={unselectedHistogramFields}
           onSelectField={this.onSelectField}
         />

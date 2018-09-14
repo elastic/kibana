@@ -9,18 +9,16 @@ import PropTypes from 'prop-types';
 
 import {
   EuiButton,
-  EuiPopover,
-  EuiBasicTable,
-  EuiFieldSearch,
-  EuiSpacer,
 } from '@elastic/eui';
 
-import './field_chooser.less';
+import {
+  SearchSelect,
+} from 'ui/search_select';
 
 export class FieldChooser extends Component {
   static propTypes = {
+    buttonLabel: PropTypes.node.isRequired,
     columns: PropTypes.array.isRequired,
-    label: PropTypes.node.isRequired,
     fields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
   }
@@ -29,7 +27,6 @@ export class FieldChooser extends Component {
     super(props);
 
     this.state = {
-      searchValue: '',
       isOpen: false,
     };
   }
@@ -46,33 +43,19 @@ export class FieldChooser extends Component {
     });
   };
 
-  onSearch = (e) => {
-    this.setState({
-      searchValue: e.target.value,
-    });
-  };
+  onSelect = (field) => {
+    this.props.onSelectField(field);
+    this.close();
+  }
 
   render() {
     const {
+      buttonLabel,
       columns,
-      label,
       fields,
-      onSelectField,
     } = this.props;
 
-    const {
-      searchValue,
-    } = this.state;
-
-    const getRowProps = (field) => {
-      return {
-        className: 'rollupFieldChooserTableRow',
-        onClick: () => {
-          onSelectField(field);
-          this.close();
-        },
-      };
-    };
+    const { isOpen } = this.state;
 
     const button = (
       <EuiButton
@@ -80,41 +63,21 @@ export class FieldChooser extends Component {
         iconSide="right"
         onClick={this.onButtonClick}
       >
-        {label}
+        {buttonLabel}
       </EuiButton>
     );
 
-    const items = searchValue ? fields.filter(({ name }) => (
-      name.toLowerCase().includes(searchValue.trim().toLowerCase())
-    )) : fields;
-
     return (
-      <EuiPopover
-        ownFocus
+      <SearchSelect
         button={button}
-        isOpen={this.state.isOpen}
-        closePopover={this.close}
-        anchorPosition="rightDown"
-      >
-        <EuiFieldSearch
-          placeholder="Search fields"
-          value={searchValue}
-          onChange={this.onSearch}
-          aria-label="Search fields"
-          fullWidth
-        />
-
-        <EuiSpacer size="s" />
-
-        <div className="rollupFieldChooserContainer">
-          <EuiBasicTable
-            items={items}
-            columns={columns}
-            rowProps={getRowProps}
-            responsive={false}
-          />
-        </div>
-      </EuiPopover>
+        columns={columns}
+        items={fields}
+        isOpen={isOpen}
+        close={this.close}
+        onSelectItem={this.onSelect}
+        searchField="name"
+        prompt="Search fields"
+      />
     );
   }
 }
