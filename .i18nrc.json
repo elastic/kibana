@@ -4,6 +4,7 @@
     "inputControl":"src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
     "statusPage": "src/core_plugins/status_page",
+    "tagCloud": "src/core_plugins/tagcloud",
     "xpack.idxMgmt": "x-pack/plugins/index_management"
   },
   "exclude": [
