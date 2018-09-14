@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -73,7 +74,7 @@ export class StepLogisticsUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.title"
+                  id="xpack.rollupJobs.create.stepLogistics.title"
                   defaultMessage="Logistics"
                 />
               </h3>
@@ -82,7 +83,7 @@ export class StepLogisticsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.description"
+                  id="xpack.rollupJobs.create.stepLogistics.description"
                   defaultMessage="Define the manner in which data will be rolled up."
                 />
               </p>
@@ -98,7 +99,7 @@ export class StepLogisticsUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepLogistics.readDocsButton.label"
                 defaultMessage="Read the docs"
               />
             </EuiButtonEmpty>
@@ -113,7 +114,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistical.sectionId.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionId.title"
                     defaultMessage="ID"
                   />
                 </h4>
@@ -124,7 +125,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldId.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldId.label"
                   defaultMessage="Rollup job ID"
                 />
               )}
@@ -146,7 +147,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionDataFlow.title"
                     defaultMessage="Data flow"
                   />
                 </h4>
@@ -154,7 +155,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.sectionDataFlow.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionDataFlow.description"
                 defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
               />
             )}
@@ -163,7 +164,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.label"
                   defaultMessage="Index pattern"
                 />
               )}
@@ -173,14 +174,14 @@ export class StepLogisticsUi extends Component {
                 <Fragment>
                   <p>
                     <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.helpAllow.label"
+                      id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllow.label"
                       defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
                       values={{ asterisk: <strong>*</strong> }}
                     />
                   </p>
                   <p>
                     <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistical.fieldIndexPattern.helpDisallow.label"
+                      id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallow.label"
                       defaultMessage="You can't use spaces or the characters {characterList}"
                       values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
                     />
@@ -201,7 +202,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.label"
                   defaultMessage="Rollup index name"
                 />
               )}
@@ -209,7 +210,7 @@ export class StepLogisticsUi extends Component {
               isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
               helpText={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldRollupIndex.helpDisallow.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.helpDisallow.label"
                   defaultMessage="You can't use spaces, commas, or the characters {characterList}"
                   values={{ characterList: <strong>{indexIllegalCharacters}</strong> }}
                 />
@@ -230,7 +231,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.title"
                     defaultMessage="Schedule"
                   />
                 </h4>
@@ -238,7 +239,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistical.sectionSchedule.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.description"
                 defaultMessage={`
                   How often should data be rolled up and how many results should be indexed at a time?
                   A larger page size will roll up data more quickly, but will require more memory during processing.
@@ -250,12 +251,37 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldCron.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
                   defaultMessage="Cron pattern"
                 />
               )}
               error={errorRollupCron}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
+              helpText={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpExample.label"
+                      defaultMessage="Example cron: /30 * * * * ?"
+                    />
+                  </p>
+
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
+                      defaultMessage="{link}"
+                      values={{ link: (
+                        <EuiLink href="https://en.wikipedia.org/wiki/Cron" target="_blank">
+                          <FormattedMessage
+                            id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
+                            defaultMessage="Learn more about cron syntax"
+                          />
+                        </EuiLink>
+                      ) }}
+                    />
+                  </p>
+                </Fragment>
+              )}
               fullWidth
             >
               <EuiFieldText
@@ -269,7 +295,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistical.fieldPageSize.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldPageSize.label"
                   defaultMessage="Page size"
                 />
               )}
@@ -305,7 +331,7 @@ export class StepLogisticsUi extends Component {
         <EuiCallOut
           title={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistical.stepError.title"
+              id="xpack.rollupJobs.create.stepLogistics.stepError.title"
               defaultMessage="Fix errors before going to next step"
             />
           )}

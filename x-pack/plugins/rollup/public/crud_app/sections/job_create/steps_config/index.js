@@ -36,8 +36,8 @@ export const stepIdToStepConfigMap = {
       id: '',
       indexPattern: '',
       rollupIndex: '',
-      rollupCron: '/30 * * * * ?',
-      rollupPageSize: 1000,
+      rollupCron: '',
+      rollupPageSize: '',
     },
     fieldsValidator: fields => {
       const {
