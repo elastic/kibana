@@ -35,7 +35,7 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
       // Collect the current leaf and parents into an array of values
       $tooltipScope.rows = collectBranch(datum);
 
-      const metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+      const metricCol = $tooltipScope.metricCol = columns.find(column => column.aggConfig.type.type === 'metrics');
 
       // Map those values to what the tooltipSource.rows format.
       _.forEachRight($tooltipScope.rows, function (row) {

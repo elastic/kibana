@@ -108,23 +108,13 @@
     }
   }
 
-  nesting-indicator {
-    display: flex;
-    flex: 0 0 auto;
-
-    > span {
-      width: @vis-editor-nesting-width;
-      background-color: @vis-editor-nesting-indicator-bg;
-    }
-  }
-
   vis-editor-agg-group {
     .flex-parent(0, 1, auto);
   }
 
   /* Without setting this to 0 you will run into a bug where the filter bar modal is hidden under
 a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
-  > visualize {
+  > .visualize {
     height: 100%;
     flex: 1 1 auto;
     display: flex;
@@ -238,7 +228,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
     flex-basis: 100%;
   }
 
-    // wraps the .vis-editor-agg and nesting-indicator ^^
+    // wraps the .vis-editor-agg
     .vis-editor-agg-wrapper {
       display: flex;
     }
@@ -419,7 +409,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       flex-basis: 100%;
     }
 
-    visualize {
+    .visualize {
       .flex-parent();
       flex: 1 1 100%;
     }
