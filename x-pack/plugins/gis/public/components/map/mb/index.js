@@ -9,10 +9,16 @@ import { MBMapContainer } from './view';
 import { syncMBState } from './mb_map_selector';
 import { mapExtentChanged } from '../../../actions/store_actions';
 
+
 function mapStateToProps(state = {}) {
-  return {
-    mbMap: syncMBState(state)
-  };
+  /**
+   * We're somewhat abusing the reselect framework here.
+   * Instead of using selectors to read out and transform state from the store and bind the return of the selector to a property,
+   * we are instead using this function as an event-handler, and using the selector to create all the necessary side-effects
+   * on the mapbox component.
+   */
+  syncMBState(state);
+  return {};
 }
 
 function mapDispatchToProps(dispatch) {
