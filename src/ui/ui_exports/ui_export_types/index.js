@@ -67,8 +67,8 @@ export {
 } from './ui_nav_links';
 
 export {
-  styleSheetPath
-} from './style_sheet_path';
+  styleSheetPaths
+} from './style_sheet_paths';
 
 export {
   uiSettingDefaults,

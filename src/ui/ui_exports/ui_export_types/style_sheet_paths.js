@@ -19,7 +19,7 @@
 
 import path from 'path';
 import { flatConcatAtType } from './reduce';
-import { alias, mapSpec, wrap } from './modify_reduce';
+import { mapSpec, wrap } from './modify_reduce';
 
 const OK_EXTNAMES = ['.css', '.scss'];
 
@@ -30,19 +30,19 @@ function normalize(localPath, type, pluginSpec) {
 
   if (!OK_EXTNAMES.includes(extname)) {
     throw new Error(
-      `[plugin:${pluginId}] uiExports.styleSheetPath supported extensions [${OK_EXTNAMES.join(', ')}], got "${extname}"`
+      `[plugin:${pluginId}] uiExports.styleSheetPaths supported extensions [${OK_EXTNAMES.join(', ')}], got "${extname}"`
     );
   }
 
   if (!path.isAbsolute(localPath)) {
     throw new Error(
-      `[plugin:${pluginId}] uiExports.styleSheetPath must be an absolute path, got "${localPath}"`
+      `[plugin:${pluginId}] uiExports.styleSheetPaths must be an absolute path, got "${localPath}"`
     );
   }
 
   if (!localPath.startsWith(publicDir)) {
     throw new Error(
-      `[plugin:${pluginId}] uiExports.styleSheetPath must be child of publicDir [${publicDir}]`
+      `[plugin:${pluginId}] uiExports.styleSheetPaths must be child of publicDir [${publicDir}]`
     );
   }
 
@@ -64,4 +64,4 @@ function normalize(localPath, type, pluginSpec) {
   };
 }
 
-export const styleSheetPath = wrap(alias('styleSheetPaths'), mapSpec(normalize), flatConcatAtType);
+export const styleSheetPaths = wrap(mapSpec(normalize), flatConcatAtType);

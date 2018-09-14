@@ -27,5 +27,5 @@ export const uiExports = {
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
   home: [ 'plugins/monitoring/register_feature' ],
-  styleSheetPath: `${__dirname}/public/index.scss`,
+  styleSheetPaths: `${__dirname}/public/index.scss`,
 };

@@ -20,7 +20,7 @@ export default function (kibana) {
       ]
       <%_ } -%>
       <%_ if (generateScss) { -%>
-      styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
+      styleSheetPaths: require('path').resolve(__dirname, 'public/app.scss'),
       <%_ } -%>
     },
 
