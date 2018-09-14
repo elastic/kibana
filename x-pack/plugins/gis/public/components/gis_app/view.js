@@ -7,13 +7,34 @@
 import React from 'react';
 import { MBMapContainer } from '../map/mb';
 import { LayerControl } from '../layer_control/index';
+import { LayerPanel } from '../layer_panel/index';
+import { AddLayerPanel } from '../layer_addpanel/index';
 
 
-export function GISApp() {
+export function GISApp(props) {
+  const {
+    layerDetailsVisible,
+    addLayerVisible,
+    noFlyoutVisible
+  } = props;
+
+  let currentPanel;
+  if (noFlyoutVisible) {
+    currentPanel = null;
+  } else if (addLayerVisible) {
+    currentPanel = <AddLayerPanel/>;
+  } else if (layerDetailsVisible) {
+    currentPanel = (
+      <LayerPanel
+        removeLayer={() => console.warn('removeLayer not implemented.')}
+      />
+    );
+  }
   return (
     <div className="wrapper">
       <MBMapContainer/>
       <LayerControl/>
+      {currentPanel}
     </div>
   );
 }

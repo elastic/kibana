@@ -6,6 +6,16 @@
 
 import { connect } from 'react-redux';
 import { GISApp } from './view';
+import { getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
 
-const connectedGISApp = connect(null)(GISApp);
+function mapStateToProps(state = {}) {
+  const flyoutDisplay = getFlyoutDisplay(state);
+  return {
+    layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
+    addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
+    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE
+  };
+}
+
+const connectedGISApp = connect(mapStateToProps)(GISApp);
 export { connectedGISApp as GISApp };

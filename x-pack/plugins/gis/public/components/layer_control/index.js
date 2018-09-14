@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
-import { updateFlyout, getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
+import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -16,14 +16,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-function mapStateToProps(state = {}) {
-  const flyoutDisplay = getFlyoutDisplay(state);
-  return {
-    layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
-    addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
-    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE
-  };
-}
-
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
+const connectedLayerControl = connect(null, mapDispatchToProps)(LayerControl);
 export { connectedLayerControl as LayerControl };
