@@ -408,9 +408,15 @@ export const ml = {
     });
   },
 
-  analyzeFile(obj) {
+  analyzeFile(obj, params) {
+    let paramString = '?';
+    for (const p in params) {
+      if (params.hasOwnProperty(p)) {
+        paramString += `&${p}=${params[p]}`;
+      }
+    }
     return http({
-      url: `${basePath}/file_data_visualizer/analyze_file`,
+      url: `${basePath}/file_data_visualizer/analyze_file${paramString}`,
       method: 'POST',
       data: obj
     });

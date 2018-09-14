@@ -14,16 +14,20 @@ const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
 
 export function fileDataVisualizerProvider(callWithRequest) {
-  async function analyzeFile(data) {
+  async function analyzeFile(data, overrides) {
     let cached = false;
     let results = [];
+    const hasOverrides = false;
+
     try {
-      results = await callWithRequest('ml.fileStructure', { body: data });
+      results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
       cached = await cacheData(data);
     } catch (error) {
-      throw Boom.badRequest(error);
+      const err = (error.message !== undefined) ? error.message : error;
+      throw Boom.badRequest(err);
     }
     return {
+      hasOverrides,
       cached,
       results,
     };
@@ -51,25 +55,9 @@ export function fileDataVisualizerProvider(callWithRequest) {
   }
 
   async function deleteOutputFiles(outputPath) {
-    const files = await listDirs(outputPath);
+    const files = await readdir(outputPath);
     files.forEach((f) => {
       fs.unlinkSync(`${outputPath}/${f}`);
-    });
-  }
-
-  async function listDirs(dirName) {
-    const dirs = [];
-    return new Promise((resolve, reject) => {
-      readdir(dirName)
-        .then((fileNames) => {
-          fileNames.forEach((fileName) => {
-            dirs.push(fileName);
-          });
-          resolve(dirs);
-        })
-        .catch((error) => {
-          reject(error);
-        });
     });
   }
 

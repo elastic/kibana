@@ -5,65 +5,59 @@
  */
 
 
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
 
 import {
   EuiHorizontalRule,
   EuiTabbedContent,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
 import { Summary } from '../summary';
 import { FieldsStats } from '../fields_stats';
 
-export class ResultsView extends Component {
-  constructor(props) {
-    super(props);
+export function ResultsView({ data, results, showEditFlyout }) {
 
-    this.state = {};
-  }
+  console.log(results);
 
-  render() {
-    const {
-      data,
-      results
-    } = this.props;
+  const tabs = [
+    {
+      id: 'file-stats',
+      name: 'File stats',
+      content: <FieldsStats results={results} />,
+    }
+  ];
 
-    console.log(results);
+  return (
+    <div className="results">
+      <FileContents
+        data={data}
+        format={results.format}
+        numberOfLines={results.num_lines_analyzed}
+      />
 
-    const tabs = [
-      {
-        id: 'file-stats',
-        name: 'File stats',
-        content: <FieldsStats results={results} />,
-      }
-    ];
+      <EuiHorizontalRule margin="l" />
 
-    return (
-      <div className="results">
-        <FileContents
-          data={data}
-          format={results.format}
-          numberOfLines={results.num_lines_analyzed}
-        />
+      <Summary
+        results={results}
+      />
 
-        <EuiHorizontalRule margin="l" />
+      <EuiSpacer size="m" />
 
-        <Summary
-          results={results}
-        />
+      <EuiButton onClick={() => showEditFlyout()}>
+        Override settings
+      </EuiButton>
 
-        <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="l" />
 
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[0]}
-          onTabClick={() => { }}
-        />
+      <EuiTabbedContent
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        onTabClick={() => { }}
+      />
 
-      </div>
-    );
-  }
+    </div>
+  );
 }

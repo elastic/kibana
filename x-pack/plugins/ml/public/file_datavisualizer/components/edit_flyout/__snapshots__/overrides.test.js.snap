@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overrides render overrides 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Time stamp field"
+  >
+    <EuiFieldText
+      compressed={false}
+      fullWidth={false}
+      isLoading={false}
+      name="timestampField"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

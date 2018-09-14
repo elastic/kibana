@@ -61,6 +61,13 @@ function createDisplayItems(results) {
     }
   }
 
+  if (results.grok_pattern !== undefined) {
+    items.push({
+      title: 'Grok pattern',
+      description: results.grok_pattern,
+    });
+  }
+
   if (results.timestamp_field !== undefined) {
     items.push({
       title: 'Time field',

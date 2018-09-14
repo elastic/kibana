@@ -37,6 +37,7 @@ export function FileContents({ data, format, numberOfLines }) {
         readOnly={true}
         value={formattedData}
         height="200px"
+        syntaxChecking={false}
       />
     </React.Fragment>
   );
