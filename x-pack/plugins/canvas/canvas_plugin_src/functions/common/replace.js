@@ -29,7 +29,7 @@ export const replace = () => ({
       types: ['string'],
       help:
         'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg $1',
-      default: '""',
+      default: '',
     },
   },
   fn: (context, args) => context.replace(new RegExp(args.pattern, args.flags), args.replacement),

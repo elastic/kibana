@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, mapValues, set } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
+import { fromExpression } from '../../../common/lib/ast';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { TextStylePicker } from '../../components/text_style_picker';
 
@@ -56,5 +57,8 @@ export const font = () => ({
   displayName: 'Text Settings',
   help: 'Set the font, size and color',
   template: templateFromReactComponent(FontArgInput),
-  default: `{font size=14 family="${openSans.value}" color="#000000" align=left}`,
+  default: fromExpression(
+    `{font size=14 family="${openSans.value}" color="#000000" align=left}`,
+    'argument'
+  ),
 });

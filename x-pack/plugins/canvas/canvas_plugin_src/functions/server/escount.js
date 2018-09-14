@@ -23,7 +23,7 @@ export const escount = () => ({
       types: ['string'],
       aliases: ['_', 'q'],
       help: 'A Lucene query string',
-      default: '"-_index:.kibana"',
+      default: '-_index:.kibana',
     },
   },
   fn: (context, args, handlers) => {

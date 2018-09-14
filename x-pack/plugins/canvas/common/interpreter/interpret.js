@@ -7,7 +7,6 @@
 import clone from 'lodash.clone';
 import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { getType } from '../lib/get_type';
-import { fromExpression } from '../lib/ast';
 import { getByAlias } from '../lib/get_by_alias';
 import { typesRegistry } from '../lib/types_registry';
 import { castProvider } from './cast';
@@ -152,7 +151,7 @@ export function interpretProvider(config) {
       argDefs,
       (argAsts, argDef, argName) => {
         if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')
-          argAsts[argName] = [fromExpression(argDef.default, 'argument')];
+          argAsts[argName] = [argDef.default];
 
         return argAsts;
       },

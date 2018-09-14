@@ -7,7 +7,6 @@
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
@@ -58,7 +57,7 @@ export class FunctionForm extends BaseForm {
     if (!arg || arg.required || skipRender) return null;
     if (argValues && !arg.multi) return null;
 
-    const value = arg.default == null ? null : fromExpression(arg.default, 'argument');
+    const value = arg.default == null ? null : arg.default;
 
     return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }

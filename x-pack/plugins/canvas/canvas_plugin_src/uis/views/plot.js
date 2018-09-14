@@ -5,6 +5,7 @@
  */
 
 import { map, uniq } from 'lodash';
+import { fromExpression } from '../../../common/lib/ast';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
 
@@ -52,7 +53,7 @@ export const plot = () => ({
       displayName: 'Default style',
       help: 'Set the style to be used by default by every series, unless overridden.',
       argType: 'seriesStyle',
-      default: '{seriesStyle points=5}',
+      default: fromExpression('{seriesStyle points=5}', 'argument'),
       options: {
         include: styleProps,
       },

@@ -5,6 +5,8 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
+import { fromExpression } from '../../../common/lib/ast';
+
 export const metric = () => ({
   name: 'metric',
   aliases: [],
@@ -16,19 +18,25 @@ export const metric = () => ({
   args: {
     label: {
       types: ['string'],
-      alias: ['_', 'text', 'description'],
+      aliases: ['_', 'text', 'description'],
       help: 'Text describing the metric',
-      default: '""',
+      default: '',
     },
     metricFont: {
       types: ['style'],
       help: 'Font settings for the metric. Technically you can stick other styles in here too!',
-      default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+      default: fromExpression(
+        `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+        'argument'
+      ),
     },
     labelFont: {
       types: ['style'],
       help: 'Font settings for the label. Technically you can stick other styles in here too!',
-      default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
+      default: fromExpression(
+        `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
+        'argument'
+      ),
     },
   },
   fn: (context, { label, metricFont, labelFont }) => {

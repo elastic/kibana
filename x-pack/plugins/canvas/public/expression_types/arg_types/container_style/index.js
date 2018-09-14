@@ -7,6 +7,7 @@
 import { withHandlers } from 'recompose';
 import { set } from 'object-path-immutable';
 import { get } from 'lodash';
+import { fromExpression } from '../../../../common/lib/ast';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
@@ -28,7 +29,7 @@ export const containerStyle = () => ({
   name: 'containerStyle',
   displayName: 'Container Style',
   help: 'Tweak the appearance of the element container',
-  default: '{containerStyle}',
+  default: fromExpression('{containerStyle}', 'argument'),
   simpleTemplate: templateFromReactComponent(wrap(SimpleTemplate)),
   template: templateFromReactComponent(wrap(ExtendedTemplate)),
 });

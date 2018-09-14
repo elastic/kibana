@@ -29,5 +29,5 @@ export const shape = () => ({
   displayName: 'Shape',
   help: 'Shape picker',
   simpleTemplate: templateFromReactComponent(ShapeArgInput),
-  default: '"square"',
+  default: 'square',
 });

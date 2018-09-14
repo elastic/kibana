@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromExpression } from '../../../common/lib/ast';
+
 export const table = () => ({
   name: 'table',
   aliases: [],
@@ -15,7 +17,7 @@ export const table = () => ({
   args: {
     font: {
       types: ['style'],
-      default: '{font}',
+      default: fromExpression('{font}', 'argument'),
       help: 'Font style',
     },
     paginate: {

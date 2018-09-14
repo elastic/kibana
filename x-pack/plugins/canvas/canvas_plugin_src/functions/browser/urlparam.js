@@ -24,7 +24,7 @@ export const urlparam = () => ({
     },
     default: {
       types: ['string'],
-      default: '""',
+      default: '',
       help: 'Return this string if the url parameter is not defined',
     },
   },

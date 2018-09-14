@@ -8,6 +8,7 @@ import keyBy from 'lodash.keyby';
 import { get, map, groupBy, sortBy } from 'lodash';
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
+import { fromExpression } from '../../../common/lib/ast';
 
 export const pie = () => ({
   name: 'pie',
@@ -21,7 +22,7 @@ export const pie = () => ({
     palette: {
       types: ['palette', 'null'],
       help: 'A palette object for describing the colors to use on this pie',
-      default: '{palette}',
+      default: fromExpression('{palette}', 'argument'),
     },
     seriesStyle: {
       multi: true,
@@ -51,7 +52,7 @@ export const pie = () => ({
     font: {
       types: ['style'],
       help: 'Label font',
-      default: '{font}',
+      default: fromExpression('{font}', 'argument'),
     },
     legend: {
       types: ['string', 'boolean'],
