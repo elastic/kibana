@@ -130,13 +130,13 @@ export class StepTermsUi extends Component {
         <EuiSpacer />
 
         <FieldChooser
-          columns={columns}
-          label={(
+          buttonLabel={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
               defaultMessage="Select terms fields"
             />
           )}
+          columns={columns}
           fields={unselectedTermsFields}
           onSelectField={this.onSelectField}
         />
