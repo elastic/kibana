@@ -4,4 +4,4 @@
 	ignore = untracked
 [submodule "lsp/eclipse.jdt.ls"]
 	path = lsp/eclipse.jdt.ls
-	url = ../eclipse.jdt.ls.git
+	url = ../eclipse.jdt.ls
