@@ -165,7 +165,7 @@ export class SavedObjectSaveModal extends React.Component {
                   data-test-subj="savedObjectTitle"
                   value={this.state.title}
                   onChange={this.onTitleChange}
-                  isInvalid={this.state.hasTitleDuplicate}
+                  isInvalid={this.state.hasTitleDuplicate || this.state.title.length === 0}
                 />
               </EuiFormRow>
 
