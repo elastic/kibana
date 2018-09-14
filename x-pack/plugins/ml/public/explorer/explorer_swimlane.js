@@ -377,9 +377,7 @@ export class ExplorerSwimlane extends React.Component {
       return function (lane) {
         const bucketScore = getBucketScore(lane, time);
         if (bucketScore === 0) { return; }
-
-        const safeLaneTxt = lane.replace(/(['\\])/g, '\\$1');
-        cellMouseover(this, safeLaneTxt, bucketScore, i, time);
+        cellMouseover(this, lane, bucketScore, i, time);
       };
     }
 
