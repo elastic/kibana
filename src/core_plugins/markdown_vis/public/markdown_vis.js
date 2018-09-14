@@ -32,17 +32,17 @@ import { DefaultEditorSize } from 'ui/vis/editor_size';
 // register the provider with the visTypes registry so that other know it exists
 VisTypesRegistryProvider.register(MarkdownVisProvider);
 
-function MarkdownVisProvider(Private) {
+function MarkdownVisProvider(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'markdown',
-    title: 'Markdown',
+    title: i18n('markdownVis.public.markdownVis.markdownTitle', { defaultMessage: 'Markdown' }),
     isAccessible: true,
     image,
-    description: 'Create a document using markdown syntax',
+    description: i18n('markdownVis.public.markdownVis.markdownDescription', { defaultMessage: 'Create a document using markdown syntax' }),
     category: CATEGORY.OTHER,
     visConfig: {
       component: MarkdownVisWrapper,
