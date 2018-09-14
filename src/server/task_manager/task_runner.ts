@@ -141,10 +141,10 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
-   * Runs the task, handling the task result, errors, etc, rescheduling if need be.
-   * NOTE: applying the middleware's beforeRun is incorporated into the timeout
-   * time the task in configured with. We may want to start the timer after
-   * beforeRun
+   * Runs the task, handling the task result, errors, etc, rescheduling if need
+   * be. NOTE: the time of applying the middleware's beforeRun is incorporated
+   * into the total timeout time the task in configured with. We may decide to
+   * start the timer after beforeRun resolves
    *
    * @returns {Promise<RunResult>}
    * @memberof TaskManagerRunner

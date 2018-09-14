@@ -35,8 +35,7 @@ export type ElasticJs = (action: string, args: any) => Promise<any>;
 export interface RunContext {
   /**
    * The Kibana server object. This gives tasks full-access to the server object,
-   * but if the task needs to query ES in the context of the user who scheduled
-   * the task
+   * including the various ES options client functions
    */
   kbnServer: object;
 
