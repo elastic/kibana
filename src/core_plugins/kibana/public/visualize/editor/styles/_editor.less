@@ -108,16 +108,6 @@
     }
   }
 
-  nesting-indicator {
-    display: flex;
-    flex: 0 0 auto;
-
-    > span {
-      width: @vis-editor-nesting-width;
-      background-color: @vis-editor-nesting-indicator-bg;
-    }
-  }
-
   vis-editor-agg-group {
     .flex-parent(0, 1, auto);
   }
@@ -238,7 +228,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
     flex-basis: 100%;
   }
 
-    // wraps the .vis-editor-agg and nesting-indicator ^^
+    // wraps the .vis-editor-agg
     .vis-editor-agg-wrapper {
       display: flex;
     }
