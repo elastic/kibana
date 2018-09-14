@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { IndexPatternsProvider } from './index_patterns';
+export { IndexPatternsProvider, getIndexPatterns } from './index_patterns';
 
 export {
   IndexPatternsApiClientProvider,

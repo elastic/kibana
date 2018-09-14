@@ -20,8 +20,10 @@
 import _ from 'lodash';
 
 import { SearchSourceProvider } from 'ui/courier';
+import { getIndexPatterns } from 'ui/index_patterns';
 
-export function fetchAnchorProvider(indexPatterns, Private) {
+export function fetchAnchorProvider(Private) {
+  const indexPatterns = getIndexPatterns();
   const SearchSource = Private(SearchSourceProvider);
 
   return async function fetchAnchor(
