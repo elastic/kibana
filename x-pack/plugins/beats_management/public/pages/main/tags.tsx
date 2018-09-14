@@ -155,7 +155,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
           this.setState({
             assignmentOptions: {
               ...this.state.assignmentOptions,
-              searchFailureMessage: 'Beat not found.',
+              searchResults: [],
             },
           });
           this.notifyBeatNotFound(beatId);
