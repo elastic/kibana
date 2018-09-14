@@ -48,8 +48,8 @@ export async function RemoteProvider({ getService }) {
   const chromeDriverPath = process.platform === 'win32' ? './node_modules/chromedriver/lib/chromedriver/chromedriver.exe' :
     './node_modules/chromedriver/lib/chromedriver/chromedriver';
 
-  const geckoDriverPath = process.platform === 'win32' ? './node_modules/chromedriver/lib/geckodriver/geckodriver.exe' :
-    './node_modules/geckodriver/lib/chromedriver/geckodriver';
+  const geckoDriverPath = process.platform === 'win32' ? './node_modules/geckodriver/lib/geckodriver/geckodriver.exe' :
+    './node_modules/geckodriver/lib/geckodriver/geckodriver';
 
   const chromeService = new chrome.ServiceBuilder(chromeDriverPath)
     // .loggingTo(process.stdout)
