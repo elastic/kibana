@@ -530,7 +530,8 @@ function discoverController(
       return { id };
     } catch(saveError) {
       toastNotifications.addDanger({
-        title: `Search '${savedSearch.title}' was not saved. Error: ${saveError.message}`,
+        title: `Search '${savedSearch.title}' was not saved.`,
+        text: saveError.message
       });
       return { error: saveError };
     }
