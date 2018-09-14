@@ -194,7 +194,7 @@ export class ExplorerSwimlane extends React.Component {
       swimlaneType
     } = this.props;
 
-    // This select both overall and viewby swimlane
+    // This selects both overall and viewby swimlane
     const wrapper = d3.selectAll('.ml-explorer-swimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', true);
@@ -259,7 +259,7 @@ export class ExplorerSwimlane extends React.Component {
   clearSelection() {
     const { appState, mlExplorerDashboardService } = this.props;
 
-    // This select both overall and viewby swimlane
+    // This selects both overall and viewby swimlane
     const wrapper = d3.selectAll('.ml-explorer-swimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', false);
