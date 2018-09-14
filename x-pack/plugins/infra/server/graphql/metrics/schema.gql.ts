@@ -27,7 +27,6 @@ export const metricsSchema: any = gql`
     containerOverview
     containerCpuKernel
     containerCpuUsage
-    containerDiskIOReadsOps
     containerDiskIOOps
     containerDiskIOBytes
     containerHealth

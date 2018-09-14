@@ -20,27 +20,27 @@ export const podDiskUsage: InfraMetricModelCreator = (timeField, indexPattern, i
       metrics: [
         {
           field: 'kubernetes.container.rootfs.used.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-rootfs-used',
           type: InfraMetricModelMetricType.avg,
         },
         {
           field: 'kubernetes.container.rootfs.capacity.bytes',
-          id: 'f4758d10-0b94-11e8-80a8-fddde751524a',
+          id: 'max-rootfs-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
-          id: '064c81b0-0b95-11e8-80a8-fddde751524a',
+          id: 'calc-used-limit',
           script: 'params.used / params.limit',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: '08d46510-0b95-11e8-80a8-fddde751524a',
+              field: 'avg-rootfs-used',
+              id: 'var-used',
               name: 'used',
             },
             {
-              field: 'f4758d10-0b94-11e8-80a8-fddde751524a',
-              id: '0d108820-0b95-11e8-80a8-fddde751524a',
+              field: 'max-rootfs-cap',
+              id: 'var-limit',
               name: 'limit',
             },
           ],

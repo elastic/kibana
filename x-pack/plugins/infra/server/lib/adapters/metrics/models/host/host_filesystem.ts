@@ -20,7 +20,7 @@ export const hostFilesystem: InfraMetricModelCreator = (timeField, indexPattern,
       metrics: [
         {
           field: 'system.filesystem.used.pct',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-filesystem-used',
           type: InfraMetricModelMetricType.avg,
         },
       ],

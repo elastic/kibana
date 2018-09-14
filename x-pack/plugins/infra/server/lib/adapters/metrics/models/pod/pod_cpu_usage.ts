@@ -20,27 +20,27 @@ export const podCpuUsage: InfraMetricModelCreator = (timeField, indexPattern, in
       metrics: [
         {
           field: 'kubernetes.container.cpu.usage.nanocores',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-cpu-usage',
           type: InfraMetricModelMetricType.avg,
         },
         {
           field: 'kubernetes.container.cpu.limit.nanocores',
-          id: 'ac8e11d0-0b93-11e8-8331-63375da80574',
+          id: 'max-cpu-limit',
           type: InfraMetricModelMetricType.max,
         },
         {
-          id: 'b3e00060-0b93-11e8-8331-63375da80574',
+          id: 'calc-usage-limit',
           script: 'params.usage / params.limit',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: 'b5dc93b0-0b93-11e8-8331-63375da80574',
+              field: 'avg-cpu-usage',
+              id: 'var-usage',
               name: 'usage',
             },
             {
-              field: 'ac8e11d0-0b93-11e8-8331-63375da80574',
-              id: 'baac1d20-0b93-11e8-8331-63375da80574',
+              field: 'max-cpu-limit',
+              id: 'var-limit',
               name: 'limit',
             },
           ],

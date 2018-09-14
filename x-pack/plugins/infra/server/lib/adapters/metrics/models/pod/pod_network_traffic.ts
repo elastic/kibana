@@ -20,18 +20,18 @@ export const podNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatte
       metrics: [
         {
           field: 'kubernetes.pod.network.tx.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-network-tx',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: '61ca57f2-469d-11e7-af02-69e470af7417',
-          id: 'f3795d50-0b95-11e8-80a8-fddde751524a',
+          field: 'max-network-tx',
+          id: 'deriv-max-network-tx',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: 'f3795d50-0b95-11e8-80a8-fddde751524a',
-          id: 'f76bf440-0b95-11e8-80a8-fddde751524a',
+          field: 'deriv-max-network-tx',
+          id: 'posonly-deriv-max-network-tx',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
@@ -43,29 +43,29 @@ export const podNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatte
       metrics: [
         {
           field: 'kubernetes.pod.network.rx.bytes',
-          id: '12786481-0b96-11e8-80a8-fddde751524a',
+          id: 'max-network-rx',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: '12786481-0b96-11e8-80a8-fddde751524a',
-          id: '12786482-0b96-11e8-80a8-fddde751524a',
+          field: 'max-network-rx',
+          id: 'deriv-max-network-rx',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: '12786482-0b96-11e8-80a8-fddde751524a',
-          id: '12786483-0b96-11e8-80a8-fddde751524a',
+          field: 'deriv-max-network-rx',
+          id: 'posonly-deriv-max-network-rx',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
         {
-          id: '1ca75b50-0b96-11e8-80a8-fddde751524a',
+          id: 'invert-posonly-deriv-max-network-rx',
           script: 'params.rate * -1',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '12786483-0b96-11e8-80a8-fddde751524a',
-              id: '1e019420-0b96-11e8-80a8-fddde751524a',
+              field: 'posonly-deriv-max-network-rx',
+              id: 'var-rate',
               name: 'rate',
             },
           ],

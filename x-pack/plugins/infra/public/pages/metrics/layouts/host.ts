@@ -166,8 +166,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: 'kubernetes.node',
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
+          formatter: InfraFormatterType.abvNumber,
           seriesOverrides: {
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
@@ -180,8 +179,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: 'kubernetes.node',
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
+          formatter: InfraFormatterType.bytes,
           seriesOverrides: {
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
@@ -194,8 +192,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: 'kubernetes.node',
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
+          formatter: InfraFormatterType.bytes,
           seriesOverrides: {
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
@@ -208,8 +205,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: 'kubernetes.node',
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
+          formatter: InfraFormatterType.number,
           seriesOverrides: {
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },

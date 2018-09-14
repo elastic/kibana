@@ -20,7 +20,7 @@ export const hostK8sMemoryCap: InfraMetricModelCreator = (timeField, indexPatter
       metrics: [
         {
           field: 'kubernetes.node.memory.allocatable.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-memory-cap',
           type: InfraMetricModelMetricType.max,
         },
       ],
@@ -31,7 +31,7 @@ export const hostK8sMemoryCap: InfraMetricModelCreator = (timeField, indexPatter
       metrics: [
         {
           field: 'kubernetes.node.memory.usage.bytes',
-          id: '1a1a9021-10df-11e8-935b-53cd349a4008',
+          id: 'avg-memory-usage',
           type: InfraMetricModelMetricType.avg,
         },
       ],

@@ -20,27 +20,27 @@ export const podLogUsage: InfraMetricModelCreator = (timeField, indexPattern, in
       metrics: [
         {
           field: 'kubernetes.container.logs.used.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-log-used',
           type: InfraMetricModelMetricType.avg,
         },
         {
           field: 'kubernetes.container.logs.capacity.bytes',
-          id: '716139f0-0b95-11e8-80a8-fddde751524a',
+          id: 'max-log-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
-          id: '7cc9e940-0b95-11e8-80a8-fddde751524a',
+          id: 'calc-usage-limit',
           script: 'params.usage / params.limit',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: '7ed5bed0-0b95-11e8-80a8-fddde751524a',
+              field: 'avg-log-userd',
+              id: 'var-usage',
               name: 'usage',
             },
             {
-              field: '716139f0-0b95-11e8-80a8-fddde751524a',
-              id: '8e267dc0-0b95-11e8-80a8-fddde751524a',
+              field: 'max-log-cap',
+              id: 'var-limit',
               name: 'limit',
             },
           ],

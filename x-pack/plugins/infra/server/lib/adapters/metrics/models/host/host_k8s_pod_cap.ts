@@ -21,7 +21,7 @@ export const hostK8sPodCap: InfraMetricModelCreator = (timeField, indexPattern, 
       metrics: [
         {
           field: 'kubernetes.node.pod.allocatable.total',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-pod-cap',
           type: InfraMetricModelMetricType.max,
         },
       ],
@@ -32,7 +32,7 @@ export const hostK8sPodCap: InfraMetricModelCreator = (timeField, indexPattern, 
       metrics: [
         {
           field: 'kubernetes.pod.name',
-          id: '1a1a9021-10df-11e8-935b-53cd349a4008',
+          id: 'avg-pod',
           type: InfraMetricModelMetricType.cardinality,
         },
       ],

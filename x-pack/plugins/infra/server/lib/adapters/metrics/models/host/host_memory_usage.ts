@@ -19,7 +19,7 @@ export const hostMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern
       metrics: [
         {
           field: 'system.memory.free',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-memory-free',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -29,7 +29,7 @@ export const hostMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern
       id: 'used',
       metrics: [
         {
-          field: 'system.memory.actual.used.bytes',
+          field: 'avg-memory-used',
           id: '0b5ad9f1-0b76-11e8-84d7-1d34a708be9c',
           type: InfraMetricModelMetricType.avg,
         },
@@ -41,27 +41,27 @@ export const hostMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern
       metrics: [
         {
           field: 'system.memory.actual.used.bytes',
-          id: '36aa0a41-0b76-11e8-84d7-1d34a708be9c',
+          id: 'avg-memory-actual-used',
           type: InfraMetricModelMetricType.avg,
         },
         {
           field: 'system.memory.used.bytes',
-          id: '3c1adcc0-0b76-11e8-84d7-1d34a708be9c',
+          id: 'avg-memory-used',
           type: InfraMetricModelMetricType.avg,
         },
         {
-          id: '434c9920-0b76-11e8-84d7-1d34a708be9c',
+          id: 'calc-used-actual',
           script: 'params.used - params.actual',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '36aa0a41-0b76-11e8-84d7-1d34a708be9c',
-              id: '474f83c0-0b76-11e8-84d7-1d34a708be9c',
+              field: 'avg-memory-actual-used',
+              id: 'var-actual',
               name: 'actual',
             },
             {
-              field: '3c1adcc0-0b76-11e8-84d7-1d34a708be9c',
-              id: '4e709e50-0b76-11e8-84d7-1d34a708be9c',
+              field: 'avg-memory-used',
+              id: 'var-used',
               name: 'used',
             },
           ],

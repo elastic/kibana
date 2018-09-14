@@ -19,28 +19,28 @@ export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern
       split_mode: 'everything',
       metrics: [
         {
-          field: 'kubernetes.node.cpu.allocatable.nanocores',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          field: 'kubernetes.node.cpu.allocatable.cores',
+          id: 'max-cpu-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
           field: 'kubernetes.node.cpu.usage.nanocores',
-          id: '93132a60-125f-11e8-8022-539b3f6b1a83',
+          id: 'avg-cpu-usage',
           type: InfraMetricModelMetricType.avg,
         },
         {
-          id: '9ed2ac40-125f-11e8-8022-539b3f6b1a83',
-          script: 'params.used / params.cap',
+          id: 'calc-used-cap',
+          script: 'params.used / (params.cap * 1000000000)',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: 'a31a19f0-125f-11e8-8022-539b3f6b1a83',
+              field: 'max-cpu-cap',
+              id: 'var-cap',
               name: 'cap',
             },
             {
-              field: '93132a60-125f-11e8-8022-539b3f6b1a83',
-              id: 'a98d6850-125f-11e8-8022-539b3f6b1a83',
+              field: 'avg-cpu-usage',
+              id: 'var-used',
               name: 'used',
             },
           ],
@@ -52,27 +52,27 @@ export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern
       metrics: [
         {
           field: 'kubernetes.node.fs.capacity.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-fs-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
           field: 'kubernetes.node.fs.used.bytes',
-          id: '93132a60-125f-11e8-8022-539b3f6b1a83',
+          id: 'avg-fs-used',
           type: InfraMetricModelMetricType.avg,
         },
         {
-          id: '9ed2ac40-125f-11e8-8022-539b3f6b1a83',
+          id: 'calc-used-cap',
           script: 'params.used / params.cap',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: 'a31a19f0-125f-11e8-8022-539b3f6b1a83',
+              field: 'max-fs-cap',
+              id: 'var-cap',
               name: 'cap',
             },
             {
-              field: '93132a60-125f-11e8-8022-539b3f6b1a83',
-              id: 'a98d6850-125f-11e8-8022-539b3f6b1a83',
+              field: 'avg-fs-used',
+              id: 'var-used',
               name: 'used',
             },
           ],
@@ -85,27 +85,27 @@ export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern
       metrics: [
         {
           field: 'kubernetes.node.memory.allocatable.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-memory-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
           field: 'kubernetes.node.memory.usage.bytes',
-          id: '93132a60-125f-11e8-8022-539b3f6b1a83',
+          id: 'avg-memory-usage',
           type: InfraMetricModelMetricType.avg,
         },
         {
-          id: '9ed2ac40-125f-11e8-8022-539b3f6b1a83',
+          id: 'calc-used-cap',
           script: 'params.used / params.cap',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: 'a31a19f0-125f-11e8-8022-539b3f6b1a83',
+              field: 'max-memory-cap',
+              id: 'var-cap',
               name: 'cap',
             },
             {
-              field: '93132a60-125f-11e8-8022-539b3f6b1a83',
-              id: 'a98d6850-125f-11e8-8022-539b3f6b1a83',
+              field: 'avg-memory-usage',
+              id: 'var-used',
               name: 'used',
             },
           ],
@@ -118,27 +118,27 @@ export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern
       metrics: [
         {
           field: 'kubernetes.node.pod.capacity.total',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-pod-cap',
           type: InfraMetricModelMetricType.max,
         },
         {
           field: 'kubernetes.pod.name',
-          id: '93132a60-125f-11e8-8022-539b3f6b1a83',
+          id: 'card-pod-name',
           type: InfraMetricModelMetricType.cardinality,
         },
         {
-          id: '9ed2ac40-125f-11e8-8022-539b3f6b1a83',
+          id: 'calc-used-cap',
           script: 'params.used / params.cap',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: 'a31a19f0-125f-11e8-8022-539b3f6b1a83',
+              field: 'max-pod-cap',
+              id: 'var-cap',
               name: 'cap',
             },
             {
-              field: '93132a60-125f-11e8-8022-539b3f6b1a83',
-              id: 'a98d6850-125f-11e8-8022-539b3f6b1a83',
+              field: 'card-pod-name',
+              id: 'var-used',
               name: 'used',
             },
           ],

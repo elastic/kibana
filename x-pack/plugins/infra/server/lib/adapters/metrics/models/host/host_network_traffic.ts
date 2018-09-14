@@ -19,24 +19,24 @@ export const hostNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.network.out.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-net-out',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: '61ca57f2-469d-11e7-af02-69e470af7417',
-          id: 'be823190-0b76-11e8-84d7-1d34a708be9c',
+          field: 'max-net-out',
+          id: 'deriv-max-net-out',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: 'be823190-0b76-11e8-84d7-1d34a708be9c',
-          id: 'c2c8dbf0-0b76-11e8-84d7-1d34a708be9c',
+          field: 'deriv-max-net-out',
+          id: 'posonly-deriv-max-net-out',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
         {
           function: 'sum',
-          id: 'c7ff2100-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'seriesagg-sum',
           type: InfraMetricModelMetricType.series_agg,
         },
       ],
@@ -49,36 +49,36 @@ export const hostNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.network.in.bytes',
-          id: 'cafa2e01-0b76-11e8-84d7-1d34a708be9c',
+          id: 'max-net-in',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: 'cafa2e01-0b76-11e8-84d7-1d34a708be9c',
-          id: 'cafa2e02-0b76-11e8-84d7-1d34a708be9c',
+          field: 'max-net-in',
+          id: 'deriv-max-net-in',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: 'cafa2e02-0b76-11e8-84d7-1d34a708be9c',
-          id: 'cafa2e03-0b76-11e8-84d7-1d34a708be9c',
+          field: 'deriv-max-net-in',
+          id: 'posonly-deriv-max-net-in',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
         {
-          id: 'd80060b0-0b76-11e8-84d7-1d34a708be9c',
+          id: 'calc-invert-rate',
           script: 'params.rate * -1',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: 'cafa2e03-0b76-11e8-84d7-1d34a708be9c',
-              id: 'dbbbe210-0b76-11e8-84d7-1d34a708be9c',
+              field: 'posonly-deriv-max-net-in',
+              id: 'var-rate',
               name: 'rate',
             },
           ],
         },
         {
           function: 'sum',
-          id: 'd53f4f70-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'seriesagg-sum',
           type: InfraMetricModelMetricType.series_agg,
         },
       ],

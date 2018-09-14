@@ -19,7 +19,7 @@ export const hostLoad: InfraMetricModelCreator = (timeField, indexPattern, inter
       metrics: [
         {
           field: 'system.load.1',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-load-1m',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -30,7 +30,7 @@ export const hostLoad: InfraMetricModelCreator = (timeField, indexPattern, inter
       metrics: [
         {
           field: 'system.load.5',
-          id: '78bee3f0-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'avg-load-5m',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -41,7 +41,7 @@ export const hostLoad: InfraMetricModelCreator = (timeField, indexPattern, inter
       metrics: [
         {
           field: 'system.load.15',
-          id: '8798ec40-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'avg-load-15m',
           type: InfraMetricModelMetricType.avg,
         },
       ],

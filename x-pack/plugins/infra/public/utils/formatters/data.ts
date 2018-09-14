@@ -49,6 +49,7 @@ const LABELS = {
     'Yibit',
   ],
   [InfraWaffleMapDataFormat.bitsBinaryJEDEC]: ['bit', 'Kbit', 'Mbit', 'Gbit'],
+  [InfraWaffleMapDataFormat.abbreviatedNumber]: ['', 'K', 'M', 'B', 'T'],
 };
 
 const BASES = {
@@ -58,6 +59,7 @@ const BASES = {
   [InfraWaffleMapDataFormat.bitsDecimal]: 1000,
   [InfraWaffleMapDataFormat.bitsBinaryIEC]: 1024,
   [InfraWaffleMapDataFormat.bitsBinaryJEDEC]: 1024,
+  [InfraWaffleMapDataFormat.abbreviatedNumber]: 1000,
 };
 
 export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (val: number) => {

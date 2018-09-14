@@ -20,37 +20,37 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.cpu.user.pct',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-cpu-user',
           type: InfraMetricModelMetricType.avg,
         },
         {
           field: 'system.cpu.cores',
-          id: '61ca57f2-469d-11e7-af02-69e470af7412',
+          id: 'max-cpu-cores',
           type: InfraMetricModelMetricType.max,
         },
         {
           field: 'system.cpu.system.pct',
-          id: '753313e0-11b3-11e8-aa1e-011950aa2162',
+          id: 'avg-cpu-system',
           type: InfraMetricModelMetricType.avg,
         },
         {
-          id: '85ba4c70-11b2-11e8-bb55-05a1612ce1b6',
+          id: 'calc-user-system-cores',
           script: '(params.users + params.system) / params.cores',
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7417',
-              id: '877fca30-11b2-11e8-bb55-05a1612ce1b6',
+              field: 'avg-cpu-user',
+              id: 'var-users',
               name: 'users',
             },
             {
-              field: '753313e0-11b3-11e8-aa1e-011950aa2162',
-              id: '82b41be0-11b3-11e8-aa1e-011950aa2162',
+              field: 'avg-cpu-system',
+              id: 'var-system',
               name: 'system',
             },
             {
-              field: '61ca57f2-469d-11e7-af02-69e470af7412',
-              id: '82b41be0-11b3-11e8-aa1e-011950aa2163',
+              field: 'max-cpu-cores',
+              id: 'var-cores',
               name: 'cores',
             },
           ],
@@ -63,7 +63,7 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.load.5',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'avg-load-5m',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -74,7 +74,7 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.memory.actual.used.pct',
-          id: '753313e0-11b3-11e8-aa1e-011950aa2162',
+          id: 'avg-memory-actual-used',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -86,24 +86,24 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.network.in.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-net-in',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: '61ca57f2-469d-11e7-af02-69e470af7417',
-          id: 'be823190-0b76-11e8-84d7-1d34a708be9c',
+          field: 'max-net-in',
+          id: 'deriv-max-net-in',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: 'be823190-0b76-11e8-84d7-1d34a708be9c',
-          id: 'c2c8dbf0-0b76-11e8-84d7-1d34a708be9c',
+          field: 'deriv-max-net-in',
+          id: 'posonly-deriv-max-net-in',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
         {
           function: 'sum',
-          id: 'c7ff2100-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'seriesagg-sum',
           type: InfraMetricModelMetricType.series_agg,
         },
       ],
@@ -115,24 +115,24 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'system.network.out.bytes',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          id: 'max-net-out',
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: '61ca57f2-469d-11e7-af02-69e470af7417',
-          id: 'be823190-0b76-11e8-84d7-1d34a708be9c',
+          field: 'max-net-out',
+          id: 'deriv-max-net-out',
           type: InfraMetricModelMetricType.derivative,
           unit: '1s',
         },
         {
-          field: 'be823190-0b76-11e8-84d7-1d34a708be9c',
-          id: 'c2c8dbf0-0b76-11e8-84d7-1d34a708be9c',
+          field: 'deriv-max-net-out',
+          id: 'posonly-deriv-max-net-out',
           type: InfraMetricModelMetricType.positive_only,
           unit: '',
         },
         {
           function: 'sum',
-          id: 'c7ff2100-0b77-11e8-a6ba-c96b1f1b873f',
+          id: 'seriesagg-sum',
           type: InfraMetricModelMetricType.series_agg,
         },
       ],

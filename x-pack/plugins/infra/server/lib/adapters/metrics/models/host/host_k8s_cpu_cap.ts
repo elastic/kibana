@@ -19,9 +19,21 @@ export const hostK8sCpuCap: InfraMetricModelCreator = (timeField, indexPattern, 
       id: 'capacity',
       metrics: [
         {
-          field: 'kubernetes.node.cpu.allocatable.nanocores',
-          id: '61ca57f2-469d-11e7-af02-69e470af7417',
+          field: 'kubernetes.node.cpu.allocatable.cores',
+          id: 'max-cpu-cap',
           type: InfraMetricModelMetricType.max,
+        },
+        {
+          id: 'calc-nanocores',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [
+            {
+              id: 'var-cores',
+              field: 'max-cpu-cap',
+              name: 'cores',
+            },
+          ],
+          script: 'params.cores * 1000000000',
         },
       ],
       split_mode: 'everything',
@@ -31,7 +43,7 @@ export const hostK8sCpuCap: InfraMetricModelCreator = (timeField, indexPattern, 
       metrics: [
         {
           field: 'kubernetes.node.cpu.usage.nanocores',
-          id: '1a1a9021-10df-11e8-935b-53cd349a4008',
+          id: 'avg-cpu-usage',
           type: InfraMetricModelMetricType.avg,
         },
       ],
