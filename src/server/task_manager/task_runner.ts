@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import { Logger } from './logger';
+import { BeforeRunFunction } from './middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -53,6 +54,7 @@ interface Opts {
   instance: ConcreteTaskInstance;
   store: Updatable;
   contextProvider: ContextProvider;
+  beforeRun: BeforeRunFunction;
 }
 
 /**
@@ -70,6 +72,7 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private store: Updatable;
   private contextProvider: ContextProvider;
+  private beforeRun: BeforeRunFunction;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -87,6 +90,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = opts.logger;
     this.store = opts.store;
     this.contextProvider = opts.contextProvider;
+    this.beforeRun = opts.beforeRun;
   }
 
   /**
@@ -149,7 +153,12 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       this.logger.debug(`Running task ${this}`);
       const context = await this.contextProvider(this.instance);
-      this.task = this.definition.createTaskRunner(context);
+      const task = this.definition.createTaskRunner(context);
+      const { task: modifiedTask, context: modifiedContext } = await this.beforeRun({
+        task,
+        context,
+      });
+      this.task = modifiedTask;
       return this.processResult(this.validateResult(await this.task.run()));
     } catch (error) {
       this.logger.warning(`Task ${this} failed ${error.stack}`);
@@ -199,7 +208,7 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warning(`The task ${task} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {

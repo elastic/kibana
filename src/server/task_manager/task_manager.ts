@@ -49,8 +49,11 @@ export class TaskManager {
   private middleware: Middleware;
   private poller: TaskPoller | null;
   private store: TaskStore | null;
+  private initialized: boolean;
 
   constructor(opts: ConstructOpts) {
+    this.initialized = false;
+
     const { logger, maxWorkers, definitions } = opts;
     this.logger = logger;
     this.maxWorkers = maxWorkers;
@@ -103,12 +106,14 @@ export class TaskManager {
               instance,
               store,
               contextProvider,
+              beforeRun: this.middleware.beforeRun,
             })
         ),
     });
     this.poller = poller;
+    await this.poller.start();
 
-    poller.start();
+    this.initialized = true;
   }
 
   public addMiddleware(middleware: Middleware) {
@@ -117,17 +122,26 @@ export class TaskManager {
   }
 
   public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
+    if (!this.initialized || !this.poller || !this.store) {
+      throw new Error('Task Manager service is not ready for tasks to be scheduled');
+    }
     const { task: modifiedTask } = await this.middleware.beforeSave({ task });
     const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
   }
 
-  public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public fetch(opts: FetchOpts = {}): Promise<FetchResult> | null {
+    if (!this.initialized || !this.store) {
+      throw new Error('Task Manager service is not ready to fetch tasks');
+    }
     return this.store.fetch(opts);
   }
 
-  public remove(id: string): Promise<RemoveResult> {
+  public remove(id: string): Promise<RemoveResult> | null {
+    if (!this.initialized || !this.store) {
+      throw new Error('Task Manager service is not ready to remove a task');
+    }
     return this.store.remove(id);
   }
 }
