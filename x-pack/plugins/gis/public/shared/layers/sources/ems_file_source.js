@@ -20,10 +20,12 @@ export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
 
-  static createDescriptor(name) {
+  static createDescriptor(name, { format, meta = null }) {
     return {
+      format,
       type: EMSFileSource.type,
-      name: name
+      name: name,
+      featureCollectionPath: meta && `objects.${meta.feature_collection_path}` || ''
     };
   }
 
@@ -37,7 +39,9 @@ export class EMSFileSource extends VectorSource {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].text;
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
+      const emsVectorDetails = emsVectorOptionsRaw.find(({ name }) => name === selectedId);
+      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(
+        selectedId, emsVectorDetails);
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
     };
@@ -58,19 +62,19 @@ export class EMSFileSource extends VectorSource {
 
   async getGeoJson() {
     let jsonFeatures;
+    const { name, format, featureCollectionPath } = this._descriptor;
     try {
-      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`);
+      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(name)}`);
       const fetchedJson = await vectorFetch.json();
-      const { type } = fetchedJson;
 
-      if (type === 'FeatureCollection') {
+      if (format === 'geojson') {
         jsonFeatures = fetchedJson;
-      } else if (type === 'Topology') {
-        const features = _.get(fetchedJson, 'objects.data'); // + meta.feature_collection_path);
-        jsonFeatures = topojson.feature(fetchedJson, features);//conversion to geojson
+      } else if (format === 'topojson') {
+        const features = _.get(fetchedJson, featureCollectionPath || 'objects.data');
+        jsonFeatures = topojson.feature(fetchedJson, features);
       } else {
         //should never happen
-        throw new Error('Unrecognized format ' + type);
+        throw new Error(`Unrecognized format: ${format}`);
       }
     } catch (e) {
       console.error(e);
