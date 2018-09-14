@@ -118,6 +118,8 @@ Management::
 Monitoring::
 * Uses 0 as the default for shard count if the node is not found {pull}21000[#21000]
 * Fixes logging when Monitoring reinitializes with a HUP signal (#22464) {pull}22513[#22513]
+* Fixes the problem where the *Shard Legend* panel in *Monitoring > Indices* 
+only shows one replica per shard {pull}23183[#23183]
 
 Platform::
 * Calculates the content length for the export API {pull}22847[#22847]
