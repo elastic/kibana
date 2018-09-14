@@ -7,13 +7,13 @@
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { getTemporaryLayers } from "../../selectors/map_selectors";
+import { getTemporaryLayers, getDataSources } from "../../selectors/map_selectors";
 import { addLayerFromSource, removeLayer, clearTemporaryLayers, promoteTemporaryLayers } from "../../actions/store_actions";
 import _ from 'lodash';
 
 function mapStateToProps(state = {}) {
 
-  const dataSourceMeta = (state.config.meta && state.config.meta.data_sources) ? state.config.meta.data_sources : null;
+  const dataSourceMeta = getDataSources(state);
   function isLoading() {
     const tmp = getTemporaryLayers(state);
     return tmp.some((layer) => layer.isLayerLoading());
