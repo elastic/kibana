@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescribedFormGroup,
@@ -58,9 +59,107 @@ export class StepDateHistogramUi extends Component {
   constructor(props) {
     super(props);
 
+    const {
+      dateHistogramDelay,
+      dateHistogramTimeZone,
+    } = props.fields;
+
     this.state = {
       dateHistogramFieldOptions: [],
+      isCustomizingDataStorage: dateHistogramDelay || dateHistogramTimeZone !== 'UTC',
     };
+  }
+
+  onClickCustomizeDataStorage = () => {
+    this.setState({
+      isCustomizingDataStorage: true,
+    });
+  }
+
+  renderDataStorage() {
+    const {
+      fields,
+      onFieldsChange,
+      areStepErrorsVisible,
+      fieldErrors,
+    } = this.props;
+
+    const {
+      dateHistogramDelay,
+      dateHistogramTimeZone,
+    } = fields;
+
+    const {
+      dateHistogramDelay: errorDateHistogramDelay,
+      dateHistogramTimeZone: errorDateHistogramTimeZone,
+    } = fieldErrors;
+
+    const {
+      isCustomizingDataStorage,
+    } = this.state;
+
+    if (isCustomizingDataStorage) {
+      return (
+        <Fragment>
+          <EuiFormRow
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
+                defaultMessage="Delay (optional)"
+              />
+            )}
+            error={errorDateHistogramDelay}
+            isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
+            helpText={(
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
+                    defaultMessage="Example delay values: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
+                  />
+                </p>
+              </Fragment>
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              value={dateHistogramDelay || ''}
+              onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
+              fullWidth
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
+                defaultMessage="Time zone (optional)"
+              />
+            )}
+            error={errorDateHistogramTimeZone || ''}
+            isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
+            fullWidth
+          >
+            <EuiSelect
+              options={timeZoneOptions}
+              value={dateHistogramTimeZone}
+              onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
+              fullWidth
+            />
+          </EuiFormRow>
+        </Fragment>
+      );
+    }
+
+    // Return a div because the parent element has display: flex, which will resize the child.
+    return (
+      <div>
+        <EuiButton onClick={this.onClickCustomizeDataStorage}>
+          Customize data storage
+        </EuiButton>
+      </div>
+    );
   }
 
   render() {
@@ -73,15 +172,11 @@ export class StepDateHistogramUi extends Component {
 
     const {
       dateHistogramInterval,
-      dateHistogramDelay,
-      dateHistogramTimeZone,
       dateHistogramField,
     } = fields;
 
     const {
       dateHistogramInterval: errorDateHistogramInterval,
-      dateHistogramDelay: errorDateHistogramDelay,
-      dateHistogramTimeZone: errorDateHistogramTimeZone,
       dateHistogramField: errorDateHistogramField,
     } = fieldErrors;
 
@@ -219,7 +314,7 @@ export class StepDateHistogramUi extends Component {
                 <h4>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.title"
-                    defaultMessage="Data storage"
+                    defaultMessage="Data storage (optional)"
                   />
                 </h4>
               </EuiTitle>
@@ -236,53 +331,7 @@ export class StepDateHistogramUi extends Component {
             )}
             fullWidth
           >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
-                  defaultMessage="Delay (optional)"
-                />
-              )}
-              error={errorDateHistogramDelay}
-              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
-              helpText={(
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
-                      defaultMessage="Example delay values: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
-                    />
-                  </p>
-                </Fragment>
-              )}
-              fullWidth
-            >
-              <EuiFieldText
-                value={dateHistogramDelay || ''}
-                onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
-                fullWidth
-              />
-            </EuiFormRow>
-
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
-                  defaultMessage="Time zone (optional)"
-                />
-              )}
-              error={errorDateHistogramTimeZone || ''}
-              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
-              fullWidth
-            >
-              <EuiSelect
-                options={timeZoneOptions}
-                value={dateHistogramTimeZone}
-                onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
-                fullWidth
-              />
-            </EuiFormRow>
+            {this.renderDataStorage()}
           </EuiDescribedFormGroup>
         </EuiForm>
 
