@@ -86,12 +86,6 @@ export class TaskManager {
       maxWorkers: this.maxWorkers,
     });
 
-    const contextProvider = async (taskInstance: ConcreteTaskInstance) => ({
-      callCluster,
-      kbnServer,
-      taskInstance,
-    });
-
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: config.get('task_manager.poll_interval'),
@@ -103,9 +97,9 @@ export class TaskManager {
             new TaskManagerRunner({
               logger: this.logger,
               definition: this.definitions[instance.taskType],
+              kbnServer,
               instance,
               store,
-              contextProvider,
               beforeRun: this.middleware.beforeRun,
             })
         ),
@@ -121,11 +115,15 @@ export class TaskManager {
     this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
   }
 
-  public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
+  /*
+   * Saves a task
+   * @param {TaskInstance} taskInstance
+   */
+  public async schedule(taskInstance: TaskInstance, options): Promise<RawTaskDoc> {
     if (!this.initialized || !this.poller || !this.store) {
       throw new Error('Task Manager service is not ready for tasks to be scheduled');
     }
-    const { task: modifiedTask } = await this.middleware.beforeSave({ task });
+    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({ ...options, taskInstance });
     const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;

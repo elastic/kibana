@@ -19,22 +19,19 @@
 
 import { RunContext, TaskInstance } from './task';
 
+/*
+ * BeforeSaveMiddlewareParams is nearly identical to RunContext, but
+ * taskInstance is before save (no _id property)
+ */
 export interface BeforeSaveMiddlewareParams {
-  task: TaskInstance;
-}
-
-export interface BeforeRunMiddlewareParams {
-  task: TaskInstance;
-  context: RunContext;
+  taskInstance: TaskInstance;
 }
 
 export type BeforeSaveFunction = (
-  opts: BeforeSaveMiddlewareParams
+  params: BeforeSaveMiddlewareParams
 ) => Promise<BeforeSaveMiddlewareParams>;
 
-export type BeforeRunFunction = (
-  opts: BeforeRunMiddlewareParams
-) => Promise<BeforeRunMiddlewareParams>;
+export type BeforeRunFunction = (params: RunContext) => Promise<RunContext>;
 
 export interface Middleware {
   beforeSave: BeforeSaveFunction;
@@ -45,7 +42,7 @@ export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Mid
   return {
     beforeSave: (params: BeforeSaveMiddlewareParams) =>
       middleware.beforeSave(params).then(prevMiddleware.beforeSave),
-    beforeRun: (params: BeforeRunMiddlewareParams) =>
+    beforeRun: (params: RunContext) =>
       middleware.beforeRun(params).then(prevMiddleware.beforeRun),
   };
 }
