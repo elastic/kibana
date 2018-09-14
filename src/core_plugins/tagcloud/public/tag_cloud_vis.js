@@ -48,7 +48,6 @@ VisTypesRegistryProvider.register(function (Private) {
     },
     requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
     visualization: TagCloudVisualization,
-    responseHandler: 'tabify',
     editorConfig: {
       collections: {
         scales: ['linear', 'log', 'square root'],
