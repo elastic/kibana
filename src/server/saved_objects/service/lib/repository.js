@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = () => {},
+      onBeforeWrite = () => { },
     } = options;
 
     this._index = index;
@@ -234,6 +234,10 @@ export class SavedObjectsRepository {
       sortOrder,
       fields,
     } = options;
+
+    if (!type) {
+      throw new TypeError(`options.type must be a string or an array of strings`);
+    }
 
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');

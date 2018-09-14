@@ -27,13 +27,13 @@ describe('getSearchDsl', () => {
   afterEach(() => sandbox.restore());
 
   describe('validation', () => {
-    it('throws when sortField is passed without type', () => {
+    it('throws when type is not specified', () => {
       expect(() => {
         getSearchDsl({}, {
           type: undefined,
           sortField: 'title'
         });
-      }).toThrowError(/sort without .+ type/);
+      }).toThrowError(/type must be specified/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
@@ -89,7 +89,7 @@ describe('getSearchDsl', () => {
     it('returns combination of getQueryParams and getSortingParams', () => {
       sandbox.stub(queryParamsNS, 'getQueryParams').returns({ a: 'a' });
       sandbox.stub(sortParamsNS, 'getSortingParams').returns({ b: 'b' });
-      expect(getSearchDsl({})).toEqual({ a: 'a', b: 'b' });
+      expect(getSearchDsl(null, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
   });
 });

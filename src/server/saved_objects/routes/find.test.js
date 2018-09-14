@@ -47,7 +47,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find'
+      url: '/api/saved_objects/_find?type=index-pattern'
     };
 
     const clientResponse = {
@@ -81,7 +81,7 @@ describe('GET /api/saved_objects/_find', () => {
   it('calls upon savedObjectClient.find with defaults', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find'
+      url: '/api/saved_objects/_find?type=foo&type=bar'
     };
 
     await server.inject(request);
@@ -89,13 +89,13 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1 });
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['foo', 'bar'] });
   });
 
   it('accepts the query parameter page/per_page', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?per_page=10&page=50'
+      url: '/api/saved_objects/_find?type=foo&per_page=10&page=50'
     };
 
     await server.inject(request);
@@ -103,13 +103,13 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 10, page: 50 });
+    expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'] });
   });
 
   it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?search_fields=title'
+      url: '/api/saved_objects/_find?type=foo&search_fields=title'
     };
 
     await server.inject(request);
@@ -117,13 +117,13 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'] });
+    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'], type: ['foo'] });
   });
 
   it('accepts the query parameter fields as a string', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?fields=title'
+      url: '/api/saved_objects/_find?type=foo&fields=title'
     };
 
     await server.inject(request);
@@ -131,13 +131,13 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'] });
+    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'], type: ['foo'] });
   });
 
   it('accepts the query parameter fields as an array', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects/_find?fields=title&fields=description'
+      url: '/api/saved_objects/_find?type=foo&fields=title&fields=description'
     };
 
     await server.inject(request);
@@ -146,7 +146,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     const options = savedObjectsClient.find.getCall(0).args[0];
     expect(options).toEqual({
-      perPage: 20, page: 1, fields: ['title', 'description']
+      perPage: 20, page: 1, fields: ['title', 'description'], type: ['foo']
     });
   });
 
@@ -161,7 +161,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: [ 'index-pattern' ] });
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern'] });
   });
 
   it('accepts the query parameter type as an array', async () => {
