@@ -31,7 +31,7 @@ function getSpacesManager(spaces: Space[] = []) {
 
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
-  const component = shallow(<SpaceSelector spaces={[]} spacesManager={spacesManager} />);
+  const component = shallow(<SpaceSelector spaces={[]} spacesManager={spacesManager as any} />);
   expect(component).toMatchSnapshot();
 });
 
@@ -46,7 +46,7 @@ test('it uses the spaces on props, when provided', () => {
     },
   ];
 
-  const component = render(<SpaceSelector spaces={spaces} spacesManager={spacesManager} />);
+  const component = render(<SpaceSelector spaces={spaces} spacesManager={spacesManager as any} />);
 
   return Promise.resolve().then(() => {
     expect(component.find('.spaceCard')).toHaveLength(1);
@@ -65,7 +65,7 @@ test('it queries for spaces when not provided on props', () => {
 
   const spacesManager = getSpacesManager(spaces);
 
-  shallow(<SpaceSelector spacesManager={spacesManager} />);
+  shallow(<SpaceSelector spacesManager={spacesManager as any} />);
 
   return Promise.resolve().then(() => {
     expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
