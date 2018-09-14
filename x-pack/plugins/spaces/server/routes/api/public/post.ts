@@ -5,34 +5,28 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { getSpaceById } from '../../lib';
+import { SpacesClient } from '../../../lib/spaces_client';
 
 export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObjects;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
-      const space = omit(request.payload, ['id', '_reserved']);
-
-      const id = request.payload.id;
-
-      const existingSpace = await getSpaceById(client, id);
-      if (existingSpace) {
-        return reply(
-          Boom.conflict(
-            `A space with the identifier ${id} already exists. Please choose a different identifier`
-          )
-        );
-      }
+      const space = request.payload;
 
       try {
-        return reply(await client.create('space', { ...space }, { id, overwrite: false }));
+        return reply(await spacesClient.create(space));
       } catch (error) {
+        if (SavedObjectsClient.errors.isConflictError(error)) {
+          return reply(Boom.conflict(`A space with the identifier ${space.id} already exists.`));
+        }
         return reply(wrapError(error));
       }
     },

@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import { Server } from 'hapi';
+import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
 
 export interface TestConfig {
@@ -17,13 +18,14 @@ export interface TestOptions {
   testConfig?: TestConfig;
   payload?: any;
   preCheckLicenseImpl?: (req: any, reply: any) => any;
+  expectSpacesClientCall?: boolean;
 }
 
 export type TeardownFn = () => void;
 
 export interface RequestRunnerResult {
   server: any;
-  mockSavedObjectsClient: any;
+  mockSavedObjectsRepository: any;
   response: any;
 }
 
@@ -56,6 +58,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       testConfig = {},
       payload,
       preCheckLicenseImpl = defaultPreCheckLicenseImpl,
+      expectSpacesClientCall = true,
     } = options;
 
     let pre = jest.fn();
@@ -89,10 +92,13 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
     server.decorate('request', 'getBasePath', jest.fn());
     server.decorate('request', 'setBasePath', jest.fn());
 
-    // Mock server.getSavedObjectsClient()
-    const mockSavedObjectsClient = {
+    const mockSavedObjectsRepository = {
       get: jest.fn((type, id) => {
-        return spaces.filter(s => s.id === id)[0];
+        const result = spaces.filter(s => s.id === id);
+        if (!result.length) {
+          throw new Error(`not found: [${type}:${id}]`);
+        }
+        return result[0];
       }),
       find: jest.fn(() => {
         return {
@@ -100,22 +106,57 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
           saved_objects: spaces,
         };
       }),
-      create: jest.fn(() => ({})),
-      update: jest.fn(() => ({})),
-      delete: jest.fn(),
-      errors: {
-        isNotFoundError: jest.fn(() => true),
+      create: jest.fn((type, attributes, { id }) => {
+        if (spaces.find(s => s.id === id)) {
+          throw new Error('conflict');
+        }
+        return {};
+      }),
+      update: jest.fn((type, id) => {
+        if (!spaces.find(s => s.id === id)) {
+          throw new Error('not found: during update');
+        }
+        return {};
+      }),
+      delete: jest.fn((type: string, id: string) => {
+        return {};
+      }),
+    };
+
+    server.savedObjects = {
+      SavedObjectsClient: {
+        errors: {
+          isNotFoundError: jest.fn((e: any) => e.message.startsWith('not found:')),
+          isConflictError: jest.fn((e: any) => e.message.startsWith('conflict')),
+        },
       },
     };
 
-    server.decorate('request', 'getSavedObjectsClient', () => mockSavedObjectsClient);
+    server.plugins.spaces = {
+      spacesClient: {
+        getScopedClient: jest.fn((req: any) => {
+          return new SpacesClient(
+            null as any,
+            null,
+            mockSavedObjectsRepository,
+            mockSavedObjectsRepository,
+            req
+          );
+        }),
+      },
+    };
 
     teardowns.push(() => server.stop());
+
+    const headers = {
+      authorization: 'foo',
+    };
 
     const testRun = async () => {
       const response = await server.inject({
         method,
         url: path,
+        headers,
         payload,
       });
 
@@ -125,12 +166,25 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
         expect(pre).not.toHaveBeenCalled();
       }
 
+      if (expectSpacesClientCall) {
+        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: headers.authorization,
+            }),
+          })
+        );
+      } else {
+        expect(server.plugins.spaces.spacesClient.getScopedClient).not.toHaveBeenCalled();
+      }
+
       return response;
     };
 
     return {
       server,
-      mockSavedObjectsClient,
+      headers,
+      mockSavedObjectsRepository,
       response: await testRun(),
     };
   };

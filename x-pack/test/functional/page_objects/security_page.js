@@ -19,19 +19,26 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
-    async login(username, password, expectSuccess = true) {
+    async login(username, password, options = {}) {
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
       username = username || superUsername;
       password = password || superPassword;
 
+      const expectSpaceSelector = options.expectSpaceSelector || false;
+      const expectSuccess = options.expectSuccess;
+
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
-      // wait for either kibanaChrome or loginErrorMessage
-      if (expectSuccess) {
-        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+
+      // wait for either space selector, kibanaChrome or loginErrorMessage
+      if (expectSpaceSelector) {
+        await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
+        log.debug(`Finished login process, landed on space selector. currentUrl = ${await remote.getCurrentUrl()}`);
+      } else if (expectSuccess) {
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ');
         log.debug(`Finished login process currentUrl = ${await remote.getCurrentUrl()}`);
       }
     }
@@ -63,8 +70,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       remote.setWindowSize(1600, 1000);
     }
 
-    async login(username, password) {
-      await this.loginPage.login(username, password);
+    async login(username, password, options = {}) {
+      await this.loginPage.login(username, password, options);
+
+      if (options.expectSpaceSelector) {
+        return;
+      }
 
       await retry.try(async () => {
         const logoutLinkExists = await find.existsByLinkText('Logout');

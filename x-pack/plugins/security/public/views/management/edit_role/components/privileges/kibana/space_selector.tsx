@@ -5,8 +5,8 @@
  */
 
 import {
-  // @ts-ignore
   EuiComboBox,
+  EuiComboBoxOptionProps,
   EuiHealth,
   // @ts-ignore
   EuiHighlight,
@@ -17,10 +17,15 @@ import { getSpaceColor } from '../../../../../../../../spaces/common/space_attri
 
 const spaceToOption = (space?: Space) => {
   if (!space) {
-    return;
+    return { label: '', isGroupLabelOption: false };
   }
 
-  return { id: space.id, label: space.name, color: getSpaceColor(space) };
+  return {
+    id: space.id,
+    label: space.name,
+    color: getSpaceColor(space),
+    isGroupLabelOption: false,
+  };
 };
 
 const spaceIdToOption = (spaces: Space[]) => (s: string) =>
@@ -51,13 +56,13 @@ export class SpaceSelector extends Component<Props, {}> {
         options={this.props.spaces.map(spaceToOption)}
         renderOption={renderOption}
         selectedOptions={this.props.selectedSpaceIds.map(spaceIdToOption(this.props.spaces))}
-        disabled={this.props.disabled}
+        isDisabled={this.props.disabled}
         onChange={this.onChange}
       />
     );
   }
 
-  public onChange = (selectedSpaces: Space[]) => {
-    this.props.onChange(selectedSpaces.map(s => s.id));
+  public onChange = (selectedSpaces: EuiComboBoxOptionProps[]) => {
+    this.props.onChange(selectedSpaces.map(s => s.id as string));
   };
 }

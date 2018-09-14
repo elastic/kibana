@@ -6,7 +6,6 @@
 
 import {
   EuiButton,
-  // @ts-ignore
   EuiComboBox,
   // @ts-ignore
   EuiDescribedFormGroup,
@@ -98,8 +97,12 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         >
           <EuiFormRow hasEmptyLabelSpace>
             <EuiComboBox
-              placeholder={this.props.editable ? 'Add a user...' : null}
-              options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
+              placeholder={this.props.editable ? 'Add a user...' : undefined}
+              options={this.props.runAsUsers.map(username => ({
+                id: username,
+                label: username,
+                isGroupLabelOption: false,
+              }))}
               selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
               onChange={this.onRunAsUserChange}
               isDisabled={!this.props.editable}

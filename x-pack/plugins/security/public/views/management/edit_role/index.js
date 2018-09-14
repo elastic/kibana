@@ -19,7 +19,8 @@ import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { SpacesManager } from 'plugins/spaces/lib';
+import { SpacesManager } from '../../../../../spaces/public/lib';
+import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 
@@ -27,6 +28,7 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -67,11 +69,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       return role.then(res => res.toJSON());
     },
-    kibanaApplicationPrivilege(ApplicationPrivileges, kbnUrl, Promise, Private) {
-      return ApplicationPrivileges.query().$promise
-        .then(privileges => privileges.map(p => p.toJSON()))
-        .catch(checkLicenseError(kbnUrl, Promise, Private));
-    },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
       return ShieldUser.query().$promise
@@ -82,8 +79,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       const indexPatterns = Private(IndexPatternsProvider);
       return indexPatterns.getTitles();
     },
-    spaces($http, chrome) {
-      return new SpacesManager($http, chrome).getSpaces();
+    spaces($http, chrome, spacesEnabled) {
+      if (spacesEnabled) {
+        return new SpacesManager($http, chrome).getSpaces();
+      }
+      return [];
     }
   },
   controllerAs: 'editRole',
@@ -93,10 +93,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     const Notifier = $injector.get('Notifier');
 
-    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
+    const userProfile = Private(UserProfileProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');
@@ -132,7 +132,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       render(<EditRolePage
         runAsUsers={users}
         role={role}
-        kibanaAppPrivileges={kibanaApplicationPrivilege}
+        kibanaAppPrivileges={KibanaAppPrivileges}
         indexPatterns={indexPatterns}
         rbacEnabled={true}
         rbacApplication={rbacApplication}
@@ -142,6 +142,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         notifier={Notifier}
         spaces={spaces}
         spacesEnabled={enableSpaceAwarePrivileges}
+        userProfile={userProfile}
       />, domNode);
 
       // unmount react on controller destroy

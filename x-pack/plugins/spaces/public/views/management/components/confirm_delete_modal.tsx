@@ -13,6 +13,7 @@ import {
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { ChangeEvent, Component } from 'react';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
@@ -20,7 +21,7 @@ import { SpacesManager } from '../../../lib';
 interface Props {
   space: Space;
   spacesManager: SpacesManager;
-  spacesNavState: any;
+  spacesNavState: SpacesNavState;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -116,6 +117,6 @@ export class ConfirmDeleteModal extends Component<Props, State> {
   };
 }
 
-function isDeletingCurrentSpace(space: Space, spacesNavState: any) {
+function isDeletingCurrentSpace(space: Space, spacesNavState: SpacesNavState) {
   return space.id === spacesNavState.getActiveSpace().id;
 }

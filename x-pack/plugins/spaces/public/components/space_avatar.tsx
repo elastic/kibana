@@ -10,7 +10,7 @@ import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../commo
 import { Space } from '../../common/model/space';
 
 interface Props {
-  space: Space;
+  space: Partial<Space>;
   size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
 }
@@ -21,6 +21,7 @@ export const SpaceAvatar = (props: Props) => {
   return (
     <EuiAvatar
       type="space"
+      data-test-subj={`space-avatar-${space.id}`}
       name={space.name || ''}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}

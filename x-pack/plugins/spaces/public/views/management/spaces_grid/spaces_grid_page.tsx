@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
@@ -19,18 +19,22 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
+// @ts-ignore
 import { toastNotifications } from 'ui/notify';
 
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
+import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
+import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 
 interface Props {
   spacesManager: SpacesManager;
-  spacesNavState: any;
+  spacesNavState: SpacesNavState;
+  userProfile: UserProfile;
 }
 
 interface State {
@@ -61,35 +65,45 @@ export class SpacesGridPage extends Component<Props, State> {
     return (
       <EuiPage restrictWidth className="spacesGridPage">
         <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">
-            <EuiFlexGroup justifyContent={'spaceBetween'}>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h1>Spaces</h1>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size={'xl'} />
-
-            <EuiInMemoryTable
-              itemId={'id'}
-              items={this.state.spaces}
-              columns={this.getColumnConfig()}
-              hasActions
-              pagination={true}
-              search={{
-                box: {
-                  placeholder: 'Search',
-                },
-              }}
-              loading={this.state.loading}
-              message={this.state.loading ? 'loading...' : undefined}
-            />
-          </EuiPageContent>
+          <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
         </EuiPageBody>
         {this.getConfirmDeleteModal()}
       </EuiPage>
+    );
+  }
+
+  public getPageContent() {
+    if (!this.props.userProfile.hasCapability('manageSpaces')) {
+      return <UnauthorizedPrompt />;
+    }
+
+    return (
+      <Fragment>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h1>Spaces</h1>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size={'xl'} />
+
+        <EuiInMemoryTable
+          itemId={'id'}
+          items={this.state.spaces}
+          columns={this.getColumnConfig()}
+          hasActions
+          pagination={true}
+          search={{
+            box: {
+              placeholder: 'Search',
+            },
+          }}
+          loading={this.state.loading}
+          message={this.state.loading ? 'loading...' : undefined}
+        />
+      </Fragment>
     );
   }
 

@@ -78,6 +78,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       <EuiButtonIcon
         aria-label="Delete space privilege"
         color="danger"
+        iconSize="m"
         iconType="trash"
         onClick={[MockFunction]}
         type="button"

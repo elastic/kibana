@@ -5,7 +5,9 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
+// @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib/spaces_manager';
@@ -15,7 +17,7 @@ interface Props {
   style?: 'button' | 'icon';
   space: Space;
   spacesManager: SpacesManager;
-  spacesNavState: any;
+  spacesNavState: SpacesNavState;
   onDelete: () => void;
 }
 

@@ -5,31 +5,29 @@
  */
 
 import Boom from 'boom';
-import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { wrapError } from '../../../lib/errors';
-import { getSpaceById } from '../../lib';
+import { SpacesClient } from '../../../lib/spaces_client';
 
 export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
     async handler(request: any, reply: any) {
-      const client = request.getSavedObjectsClient();
+      const { SavedObjectsClient } = server.savedObjects;
+      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+        request
+      );
 
       const id = request.params.id;
 
       let result;
 
       try {
-        const existingSpace = await getSpaceById(client, id);
-        if (isReservedSpace(existingSpace)) {
-          return reply(
-            wrapError(Boom.badRequest('This Space cannot be deleted because it is reserved.'))
-          );
-        }
-
-        result = await client.delete('space', id);
+        result = await spacesClient.delete(id);
       } catch (error) {
+        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+          return reply(Boom.notFound());
+        }
         return reply(wrapError(error));
       }
 

@@ -1,0 +1,9 @@
+@import '../../../../lib/eui.scss';
+
+.canvasTimePicker {
+  display: flex;
+
+  > div:not(:last-child) {
+    margin-right: $euiSizeS;
+  }
+}

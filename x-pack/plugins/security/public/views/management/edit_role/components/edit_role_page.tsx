@@ -23,8 +23,9 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
+import { UserProfile } from '../../../../../../xpack_main/public/services/user_profile';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaApplicationPrivilege } from '../../../../../common/model/kibana_application_privilege';
+import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
@@ -42,10 +43,11 @@ interface Props {
   rbacEnabled: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  kibanaAppPrivileges: KibanaApplicationPrivilege[];
+  kibanaAppPrivileges: KibanaPrivilege[];
   notifier: any;
   spaces?: Space[];
   spacesEnabled: boolean;
+  userProfile: UserProfile;
 }
 
 interface State {
@@ -212,6 +214,7 @@ export class EditRolePage extends Component<Props, State> {
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
+          userProfile={this.props.userProfile}
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}

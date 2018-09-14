@@ -16,6 +16,7 @@ import {
   GrokDebuggerPageProvider,
   WatcherPageProvider,
   ReportingPageProvider,
+  SpaceSelectorPageProvider,
 } from './page_objects';
 
 import {
@@ -66,6 +67,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
+      resolve(__dirname, './apps/spaces'),
     ],
 
     // define the name and providers for services that should be
@@ -113,6 +115,7 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
       reporting: ReportingPageProvider,
+      spaceSelector: SpaceSelectorPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -159,6 +162,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger'
       },
+      spaceSelector: {
+        pathname: '/',
+      }
     },
 
     // choose where esArchiver should load archives from

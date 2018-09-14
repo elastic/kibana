@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  // @ts-ignore
   EuiButtonIcon,
-  // @ts-ignore
   EuiComboBox,
+  EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,7 +22,7 @@ import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
 
 const fromOption = (option: any) => option.label;
-const toOption = (value: string) => ({ label: value });
+const toOption = (value: string) => ({ label: value, isGroupLabelOption: false });
 
 interface Props {
   formIndex: number;
@@ -234,14 +233,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onIndexPatternsChange = (newPatterns: string[]) => {
+  public onIndexPatternsChange = (newPatterns: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       names: newPatterns.map(fromOption),
     });
   };
 
-  public onPrivilegeChange = (newPrivileges: string[]) => {
+  public onPrivilegeChange = (newPrivileges: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
@@ -274,7 +273,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  public onGrantedFieldsChange = (grantedFields: string[]) => {
+  public onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionProps[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {

@@ -60,7 +60,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "3.7.0",
+    "@elastic/eui": "4.0.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -181,6 +181,7 @@
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
+    "tslib": "^1.9.3",
     "type-detect": "^4.0.8",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "ui-select": "0.19.6",
@@ -237,6 +238,7 @@
     "@types/react": "^16.3.14",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
+    "@types/react-virtualized": "^9.18.7",
     "@types/redux-actions": "^2.2.1",
     "@types/sinon": "^5.0.0",
     "@types/strip-ansi": "^3.0.0",
