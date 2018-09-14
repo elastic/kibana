@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon } from '@elastic/eui';
+import { shallow } from 'enzyme';
 import React from 'react';
-import {
-  EuiIcon
-} from '@elastic/eui';
 import { ReservedSpaceBadge } from './reserved_space_badge';
-import {
-  shallow
-} from 'enzyme';
 
 const reservedSpace = {
-  _reserved: true
+  id: '',
+  name: '',
+  _reserved: true,
 };
 
-const unreservedSpace = {};
+const unreservedSpace = {
+  id: '',
+  name: '',
+};
 
 test('it renders without crashing', () => {
   const wrapper = shallow(<ReservedSpaceBadge space={reservedSpace} />);

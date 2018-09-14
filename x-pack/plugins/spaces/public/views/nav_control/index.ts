@@ -5,3 +5,5 @@
  */
 
 import './nav_control';
+
+export { SpacesNavState } from './nav_control';

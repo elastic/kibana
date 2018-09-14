@@ -3,44 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import {
-  EuiFlexItem,
-  EuiColorPicker,
-  EuiFormRow,
-  EuiFieldText,
-  EuiLink,
-} from '@elastic/eui';
-import { getSpaceInitials, getSpaceColor } from '../../../../common/space_attributes';
+// @ts-ignore
+import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../common/constants';
+import { Space } from '../../../../common/model/space';
+import { getSpaceColor, getSpaceInitials } from '../../../../common/space_attributes';
 
-export class CustomizeSpaceAvatar extends Component {
-  static propTypes = {
-    space: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
+interface Props {
+  space: Partial<Space>;
+  onChange: (space: Partial<Space>) => void;
+}
+
+interface State {
+  expanded: boolean;
+  initialsHasFocus: boolean;
+  pendingInitials?: string | null;
+}
+
+export class CustomizeSpaceAvatar extends Component<Props, State> {
+  private initialsRef: HTMLInputElement | null = null;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      expanded: false,
+      initialsHasFocus: false,
+    };
   }
 
-  state = {
-    expanded: false,
-    initialsHasFocus: false,
-    pendingInitials: null
-  }
-
-  render() {
+  public render() {
     return this.state.expanded ? this.getCustomizeFields() : this.getCustomizeLink();
   }
 
-  getCustomizeFields = () => {
-    const {
-      space
-    } = this.props;
+  public getCustomizeFields = () => {
+    const { space } = this.props;
 
-    const {
-      initialsHasFocus,
-      pendingInitials,
-    } = this.state;
+    const { initialsHasFocus, pendingInitials } = this.state;
 
     return (
       <Fragment>
@@ -51,7 +50,7 @@ export class CustomizeSpaceAvatar extends Component {
               name="spaceInitials"
               // allows input to be cleared or otherwise invalidated while user is editing the initials,
               // without defaulting to the derived initials provided by `getSpaceInitials`
-              value={initialsHasFocus ? pendingInitials : getSpaceInitials(space)}
+              value={initialsHasFocus ? pendingInitials || '' : getSpaceInitials(space)}
               onChange={this.onInitialsChange}
             />
           </EuiFormRow>
@@ -63,9 +62,9 @@ export class CustomizeSpaceAvatar extends Component {
         </EuiFlexItem>
       </Fragment>
     );
-  }
+  };
 
-  initialsInputRef = (ref) => {
+  public initialsInputRef = (ref: HTMLInputElement) => {
     if (ref) {
       this.initialsRef = ref;
       this.initialsRef.addEventListener('focus', this.onInitialsFocus);
@@ -77,39 +76,41 @@ export class CustomizeSpaceAvatar extends Component {
         this.initialsRef = null;
       }
     }
-  }
+  };
 
-  onInitialsFocus = () => {
+  public onInitialsFocus = () => {
     this.setState({
       initialsHasFocus: true,
-      pendingInitials: getSpaceInitials(this.props.space)
+      pendingInitials: getSpaceInitials(this.props.space),
     });
-  }
+  };
 
-  onInitialsBlur = () => {
+  public onInitialsBlur = () => {
     this.setState({
       initialsHasFocus: false,
       pendingInitials: null,
     });
-  }
+  };
 
-  getCustomizeLink = () => {
+  public getCustomizeLink = () => {
     return (
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiLink name="customize_space_link" onClick={this.showFields}>Customize</EuiLink>
+          <EuiLink name="customize_space_link" onClick={this.showFields}>
+            Customize
+          </EuiLink>
         </EuiFormRow>
       </EuiFlexItem>
     );
-  }
+  };
 
-  showFields = () => {
+  public showFields = () => {
     this.setState({
-      expanded: true
+      expanded: true,
     });
-  }
+  };
 
-  onInitialsChange = (e) => {
+  public onInitialsChange = (e: ChangeEvent<HTMLInputElement>) => {
     const initials = (e.target.value || '').substring(0, MAX_SPACE_INITIALS);
 
     this.setState({
@@ -118,14 +119,14 @@ export class CustomizeSpaceAvatar extends Component {
 
     this.props.onChange({
       ...this.props.space,
-      initials
+      initials,
     });
   };
 
-  onColorChange = (color) => {
+  public onColorChange = (color: string) => {
     this.props.onChange({
       ...this.props.space,
-      color
+      color,
     });
-  }
+  };
 }

@@ -4,22 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import {
+  EuiFieldText,
   EuiFormRow,
   EuiLink,
-  EuiFieldText,
 } from '@elastic/eui';
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import { Space } from '../../../../common/model/space';
+import { SpaceValidator } from '../lib';
 
-export class SpaceIdentifier extends Component {
-  textFieldRef = null;
+interface Props {
+  space: Partial<Space>;
+  editable: boolean;
+  validator: SpaceValidator;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
 
-  state = {
-    editing: false
-  };
+interface State {
+  editing: boolean;
+}
 
-  render() {
+export class SpaceIdentifier extends Component<Props, State> {
+
+  private textFieldRef: HTMLInputElement | null = null;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      editing: false,
+    };
+  }
+
+  public render() {
     const {
       id = ''
     } = this.props.space;
@@ -35,7 +51,7 @@ export class SpaceIdentifier extends Component {
             readOnly={!this.state.editing}
             placeholder={
               this.state.editing || !this.props.editable
-                ? null
+                ? undefined
                 : 'The URL identifier is generated from the space name.'
             }
             value={id}
@@ -47,7 +63,7 @@ export class SpaceIdentifier extends Component {
     );
   }
 
-  getLabel = () => {
+  public getLabel = () => {
     if (!this.props.editable) {
       return (<p>URL identifier</p>);
     }
@@ -56,11 +72,11 @@ export class SpaceIdentifier extends Component {
     return (<p>URL identifier <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink></p>);
   };
 
-  getHelpText = () => {
+  public getHelpText = () => {
     return (<p>If the identifier is <strong>engineering</strong>, the Kibana URL is <br /> https://my-kibana.example<strong>/s/engineering/</strong>app/kibana.</p>);
   };
 
-  onEditClick = () => {
+  public onEditClick = () => {
     this.setState({
       editing: !this.state.editing
     }, () => {
@@ -70,15 +86,8 @@ export class SpaceIdentifier extends Component {
     });
   };
 
-  onChange = (e) => {
-    if (!this.state.editing) return;
+  public onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!this.state.editing) { return; }
     this.props.onChange(e);
   };
 }
-
-SpaceIdentifier.propTypes = {
-  space: PropTypes.object.isRequired,
-  editable: PropTypes.bool.isRequired,
-  onChange: PropTypes.func,
-  validator: PropTypes.object.isRequired,
-};

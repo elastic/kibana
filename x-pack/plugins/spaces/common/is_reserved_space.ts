@@ -13,6 +13,6 @@ import { Space } from './model/space';
  * @param space the space
  * @returns boolean
  */
-export function isReservedSpace(space: Space | null): boolean {
+export function isReservedSpace(space?: Partial<Space> | null): boolean {
   return get(space, '_reserved', false);
 }

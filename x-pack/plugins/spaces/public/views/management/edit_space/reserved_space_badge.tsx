@@ -5,30 +5,24 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isReservedSpace } from '../../../../common';
-import {
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { Space } from '../../../../common/model/space';
 
+interface Props {
+  space?: Space;
+}
 
-export const ReservedSpaceBadge = (props) => {
-  const {
-    space
-  } = props;
+export const ReservedSpaceBadge = (props: Props) => {
+  const { space } = props;
 
-  if (isReservedSpace(space)) {
+  if (space && isReservedSpace(space)) {
     return (
       <EuiToolTip content={'Reserved spaces are built-in and can only be partially modified.'}>
-        <EuiIcon style={{ verticalAlign: "super" }} type={'lock'} />
+        <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
       </EuiToolTip>
     );
   }
   return null;
-};
-
-ReservedSpaceBadge.propTypes = {
-  space: PropTypes.object.isRequired
 };

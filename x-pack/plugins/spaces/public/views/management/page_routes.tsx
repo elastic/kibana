@@ -11,6 +11,7 @@ import template from 'plugins/spaces/views/management/template.html';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import 'ui/autoload/styles';
 
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
@@ -28,7 +29,7 @@ routes.when('/management/spaces/list', {
     $http: any,
     chrome: any,
     Private: any,
-    spacesNavState: any,
+    spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
     const userProfile = Private(UserProfileProvider);
@@ -64,7 +65,7 @@ routes.when('/management/spaces/create', {
     $http: any,
     chrome: any,
     Private: any,
-    spacesNavState: any,
+    spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
     const userProfile = Private(UserProfileProvider);
@@ -97,7 +98,7 @@ routes.when('/management/spaces/edit', {
   redirectTo: '/management/spaces/list',
 });
 
-routes.when('/management/spaces/edit/:space', {
+routes.when('/management/spaces/edit/:spaceId', {
   template,
   controller(
     $scope: any,
@@ -105,7 +106,7 @@ routes.when('/management/spaces/edit/:space', {
     $route: any,
     chrome: any,
     Private: any,
-    spacesNavState: any,
+    spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
     const userProfile = Private(UserProfileProvider);
@@ -113,15 +114,13 @@ routes.when('/management/spaces/edit/:space', {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const { space } = $route.current.params;
+      const { spaceId } = $route.current.params;
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
         <ManageSpacePage
-          httpAgent={$http}
-          space={space}
-          chrome={chrome}
+          spaceId={spaceId}
           spacesManager={spacesManager}
           spacesNavState={spacesNavState}
           userProfile={userProfile}

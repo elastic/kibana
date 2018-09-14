@@ -26,7 +26,7 @@ export class SpaceValidator {
     this.shouldValidate = false;
   }
 
-  public validateSpaceName(space: Space) {
+  public validateSpaceName(space: Partial<Space>) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -42,7 +42,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateSpaceDescription(space: Space) {
+  public validateSpaceDescription(space: Partial<Space>) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -54,7 +54,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateURLIdentifier(space: Space) {
+  public validateURLIdentifier(space: Partial<Space>) {
     if (!this.shouldValidate) {
       return valid();
     }

@@ -20,6 +20,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
             size="s"
             space={
               Object {
+                "id": "",
                 "name": "foo",
               }
             }

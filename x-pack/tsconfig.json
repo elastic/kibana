@@ -1,17 +1,28 @@
 {
-    "extends": "../tsconfig.json",
-    "include": [
-        "common/**/*",
-        "server/**/*",
-        "plugins/**/*",
-    ],
-    "exclude": [
-      "test/**/*"
-    ],
-    "compilerOptions": {
-      "types": [
-        "node",
-        "jest"
+  "extends": "../tsconfig.json",
+  "include": [
+    "common/**/*",
+    "server/**/*",
+    "plugins/**/*",
+  ],
+  "exclude": [
+    "test/**/*"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "ui/*": [
+        "src/ui/public/*"
+      ],
+      "plugins/xpack_main/*": [
+        "x-pack/plugins/xpack_main/public/*"
+      ],
+      "plugins/spaces/*": [
+        "x-pack/plugins/spaces/public/*"
       ]
-    }
+    },
+    "types": [
+      "node",
+      "jest"
+    ]
+  }
 }

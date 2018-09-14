@@ -17,7 +17,7 @@ interface Props {
   spacesManager: SpacesManager;
   activeSpace: {
     valid: boolean;
-    error: string;
+    error?: string;
     space: Space;
   };
   userProfile: UserProfile;
