@@ -47,7 +47,7 @@ export {
   inspectorViews,
   chromeNavControls,
   navbarExtensions,
-  dashboardPanelActions,
+  contextMenuActions,
   managementSections,
   devTools,
   docViews,
@@ -58,6 +58,7 @@ export {
   visualize,
   search,
   autocompleteProviders,
+  shareContextMenuExtensions,
 } from './ui_app_extensions';
 
 export {

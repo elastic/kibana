@@ -20,13 +20,14 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
 
-export class IndexPatternSelect extends Component {
+class IndexPatternSelectUi extends Component {
   constructor(props) {
     super(props);
 
@@ -122,16 +123,24 @@ export class IndexPatternSelect extends Component {
   render() {
     const selectId = `indexPatternSelect-${this.props.controlIndex}`;
     const selectedOptions = [];
+    const { intl } = this.props;
     if (this.state.selectedIndexPattern) {
       selectedOptions.push(this.state.selectedIndexPattern);
     }
+
     return (
       <EuiFormRow
         id={selectId}
-        label="Index Pattern"
+        label={intl.formatMessage({
+          id: 'inputControl.editor.indexPatternSelect.patternLabel',
+          defaultMessage: 'Index Pattern'
+        })}
       >
         <EuiComboBox
-          placeholder="Select index pattern..."
+          placeholder={intl.formatMessage({
+            id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
+            defaultMessage: 'Select index pattern...'
+          })}
           singleSelection={true}
           isLoading={this.state.isLoading}
           onSearchChange={this.fetchOptions}
@@ -145,10 +154,12 @@ export class IndexPatternSelect extends Component {
   }
 }
 
-IndexPatternSelect.propTypes = {
+IndexPatternSelectUi.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   controlIndex: PropTypes.number.isRequired,
 };
+
+export const IndexPatternSelect = injectI18n(IndexPatternSelectUi);

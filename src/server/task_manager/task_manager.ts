@@ -71,9 +71,9 @@ export class TaskManager {
   public async afterPluginsInit(kbnServer: any, server: any, config: any) {
     const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
     const store = new TaskStore({
-      index: config.get('taskManager.index'),
+      index: config.get('task_manager.index'),
       callCluster,
-      maxAttempts: config.get('taskManager.max_attempts'),
+      maxAttempts: config.get('task_manager.max_attempts'),
       supportedTypes: Object.keys(this.definitions),
     });
     this.store = store;
@@ -94,7 +94,7 @@ export class TaskManager {
 
     const poller = new TaskPoller({
       logger: this.logger,
-      pollInterval: config.get('taskManager.poll_interval'),
+      pollInterval: config.get('task_manager.poll_interval'),
       work: () =>
         fillPool(
           pool.run,

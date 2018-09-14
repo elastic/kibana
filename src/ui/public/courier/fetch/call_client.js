@@ -24,7 +24,7 @@ import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 
-export function CallClientProvider(Private, Promise, es) {
+export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -34,6 +34,8 @@ export function CallClientProvider(Private, Promise, es) {
   const DUPLICATE = RequestStatus.DUPLICATE;
 
   function callClient(searchRequests) {
+    const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+
     // merging docs can change status to DUPLICATE, capture new statuses
     const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
 
@@ -136,7 +138,7 @@ export function CallClientProvider(Private, Promise, es) {
           searching,
           abort,
           failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {

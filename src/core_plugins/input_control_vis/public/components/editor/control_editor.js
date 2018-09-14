@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle } from '../../editor_utils';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiAccordion,
@@ -34,7 +35,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export class ControlEditor extends Component {
+class ControlEditorUi extends Component {
 
   changeLabel = (evt) => {
     this.props.handleLabelChange(this.props.controlIndex, evt);
@@ -101,7 +102,7 @@ export class ControlEditor extends Component {
       <EuiForm>
         <EuiFormRow
           id={labelId}
-          label="Control Label"
+          label={<FormattedMessage id="inputControl.editor.controlEditor.controlLabel" defaultMessage="Control Label"/>}
         >
           <EuiFieldText
             value={this.props.controlParams.label}
@@ -118,21 +119,30 @@ export class ControlEditor extends Component {
     return (
       <div>
         <EuiButtonIcon
-          aria-label="Move control up"
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.controlEditor.moveControlUpAriaLabel',
+            defaultMessage: 'Move control up'
+          })}
           color="primary"
           onClick={this.moveUpControl}
           iconType="sortUp"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
-          aria-label="Move control down"
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.controlEditor.moveControlDownAriaLabel',
+            defaultMessage: 'Move control down'
+          })}
           color="primary"
           onClick={this.moveDownControl}
           iconType="sortDown"
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
-          aria-label="Remove control"
+          aria-label={this.props.intl.formatMessage({
+            id: 'inputControl.editor.controlEditor.removeControlAriaLabel',
+            defaultMessage: 'Remove control'
+          })}
           color="danger"
           onClick={this.removeControl}
           iconType="cross"
@@ -161,7 +171,7 @@ export class ControlEditor extends Component {
   }
 }
 
-ControlEditor.propTypes = {
+ControlEditorUi.propTypes = {
   controlIndex: PropTypes.number.isRequired,
   controlParams: PropTypes.object.isRequired,
   handleLabelChange: PropTypes.func.isRequired,
@@ -179,3 +189,5 @@ ControlEditor.propTypes = {
   })).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };
+
+export const ControlEditor = injectI18n(ControlEditorUi);

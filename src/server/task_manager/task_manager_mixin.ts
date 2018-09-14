@@ -29,8 +29,12 @@ import { TaskManager } from './task_manager';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
   const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
-  const maxWorkers = config.get('taskManager.max_workers');
-  const definitions = extractTaskDefinitions(maxWorkers, kbnServer.uiExports.taskDefinitions);
+  const maxWorkers = config.get('task_manager.max_workers');
+  const definitions = extractTaskDefinitions(
+    maxWorkers,
+    kbnServer.uiExports.taskDefinitions,
+    config.get('task_manager.override_num_workers')
+  );
 
   const client = new TaskManager({ logger, maxWorkers, definitions });
   server.decorate('server', 'taskManager', client);
@@ -40,14 +44,18 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
 // TODO, move this to a file and properly test it
 function extractTaskDefinitions(
   maxWorkers: number,
-  taskDefinitions: TaskDictionary<TaskDefinition> = {}
+  taskDefinitions: TaskDictionary<TaskDefinition> = {},
+  overrideNumWorkers: { [taskType: string]: number }
 ): TaskDictionary<SanitizedTaskDefinition> {
   return Object.keys(taskDefinitions).reduce(
     (acc, type) => {
       const rawDefinition = taskDefinitions[type];
       rawDefinition.type = type;
       const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      const numWorkers = Math.min(maxWorkers, definition.numWorkers || 1);
+      const numWorkers = Math.min(
+        maxWorkers,
+        overrideNumWorkers[definition.type] || definition.numWorkers || 1
+      );
 
       acc[type] = {
         ...definition,
