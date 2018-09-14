@@ -64,7 +64,7 @@ export const stepIdToStepConfigMap = {
       dateHistogramField: null,
       dateHistogramInterval: null,
       dateHistogramDelay: null,
-      dateHistogramTimeZone: null,
+      dateHistogramTimeZone: 'UTC',
     },
     fieldsValidator: fields => {
       const {

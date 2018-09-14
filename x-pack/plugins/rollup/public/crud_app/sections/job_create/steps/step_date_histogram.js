@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment-timezone';
 
 import {
   EuiButtonEmpty,
@@ -29,6 +30,11 @@ import {
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,
 } from '../../../services';
+
+const timeZoneOptions = moment.tz.names().map(name => ({
+  value: name,
+  text: name,
+}));
 
 export class StepDateHistogramUi extends Component {
   static propTypes = {
@@ -287,10 +293,10 @@ export class StepDateHistogramUi extends Component {
               )}
               fullWidth
             >
-              <EuiFieldText
-                value={dateHistogramTimeZone || ''}
+              <EuiSelect
+                options={timeZoneOptions}
+                value={dateHistogramTimeZone}
                 onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
                 fullWidth
               />
             </EuiFormRow>
