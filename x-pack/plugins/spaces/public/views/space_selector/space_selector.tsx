@@ -83,7 +83,7 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <EuiPage className="spaceSelector__page">
+      <EuiPage className="spaceSelector__page" data-test-subj="kibanaSpaceSelector">
         <EuiPageBody>
           <EuiPageHeader className="spaceSelector__heading">
             <EuiPageHeaderSection className="spaceSelector__logoHeader">

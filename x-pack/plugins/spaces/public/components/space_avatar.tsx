@@ -21,6 +21,7 @@ export const SpaceAvatar = (props: Props) => {
   return (
     <EuiAvatar
       type="space"
+      data-test-subj={`space-avatar-${space.id}`}
       name={space.name || ''}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}

@@ -3,6 +3,7 @@
 exports[`renders without crashing 1`] = `
 <EuiAvatar
   color="#BFA180"
+  data-test-subj="space-avatar-"
   initials=""
   initialsLength={2}
   name=""

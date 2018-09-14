@@ -38,6 +38,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
     </div>
   }
   closePopover={[Function]}
+  data-test-subj="spacesNavSelector"
   hasArrow={true}
   id="spacesMenuPopover"
   isOpen={false}

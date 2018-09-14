@@ -25,6 +25,7 @@ export const SpaceCard = (props: Props) => {
   return (
     <EuiCard
       className="spaceCard"
+      data-test-subj={`space-card-${space.id}`}
       icon={renderSpaceAvatar(space)}
       title={space.name}
       description={renderSpaceDescription(space)}

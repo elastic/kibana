@@ -3,6 +3,7 @@
 exports[`it renders without crashing 1`] = `
 <EuiPage
   className="spaceSelector__page"
+  data-test-subj="kibanaSpaceSelector"
   restrictWidth={false}
 >
   <EuiPageBody
