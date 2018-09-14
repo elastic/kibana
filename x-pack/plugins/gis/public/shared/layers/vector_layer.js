@@ -6,7 +6,6 @@
 
 import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
-import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
 export class VectorLayer extends ALayer {
@@ -99,30 +98,5 @@ export class VectorLayer extends ALayer {
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
-
-  _createCorrespondingOLLayer() {
-    const vectorLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: []
-      }),
-      renderMode: 'image'
-    });
-    vectorLayer.setVisible(this.isVisible());
-    const style = this.getCurrentStyle();
-    const olStyle = style.getOLLayerStyle(this.isTemporary());
-    vectorLayer.setStyle(olStyle);
-    return vectorLayer;
-  }
-
-  _syncOLStyle(olLayer) {
-    const style = this.getCurrentStyle();
-    const appliedStyle = style.getOLLayerStyle(this.isTemporary());
-    olLayer.setStyle(appliedStyle);
-  }
-
-  _syncOLData(olLayer) {
-    return this._syncOLWithCurrentDataAsVectors(olLayer);
-  }
-
 
 }

@@ -6,10 +6,13 @@
 
 import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import * as ol from 'openlayers';
 import { endDataLoad, startDataLoad } from '../../actions/store_actions';
-import { OL_GEOJSON_FORMAT } from '../ol_layer_defaults';
+import turf from 'turf';
+import turfBooleanContains from '@turf/boolean-contains';
 
+
+window._turf = turf;
+window._turfBooleanContains = turf;
 
 const ZOOM_TO_PRECISION = {
   "0": 1,
@@ -115,7 +118,10 @@ export class GeohashGridLayer extends ALayer {
   async syncDataToMapState(mapState, requestToken, dispatch) {
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
-      const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
+      const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
+      const mapStateExtent = turf.bboxPolygon(mapState.extent);
+      const isContained = turfBooleanContains(dataExtent, mapStateExtent);
+      // const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
       const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
       if (samePrecision && isContained) {
         return;
@@ -124,50 +130,6 @@ export class GeohashGridLayer extends ALayer {
     return this._fetchNewData(mapState, requestToken, targetPrecision, dispatch);
   }
 
-  _createCorrespondingOLLayer() {
-    const vectorModel = new ol.source.Vector({});
-    const placeHolderLayer = new ol.layer.Heatmap({
-      source: vectorModel,
-      weight: '__kbn_heatmap_weight__',
-      radius: 16
-    });
-    placeHolderLayer.setVisible(this.isVisible());
-    return placeHolderLayer;
-  }
-
-  _syncOLWithCurrentDataAsVectors(olLayer) {
-
-    if (!this._descriptor.data) {
-      return;
-    }
-    //ugly, but it's what we have now
-    //think about stateful-shim that mirrors OL (or Mb) that can keep these links
-    //but for now, the OpenLayers object model remains our source of truth
-    if (this._descriptor.data === olLayer.__kbn_data__) {
-      return;
-    } else {
-      olLayer.__kbn_data__ = this._descriptor.data;
-    }
-
-    //add a tmp field with the weights
-    //todo: there's a lot of assumptions baked in here. Needs to be configurable
-    let max = 0;
-    for (let i = 0; i < olLayer.__kbn_data__.features.length; i++) {
-      max = Math.max(olLayer.__kbn_data__.features[i].properties.doc_count, max);
-    }
-    for (let i = 0; i < olLayer.__kbn_data__.features.length; i++) {
-      olLayer.__kbn_data__.features[i].properties.__kbn_heatmap_weight__ = olLayer.__kbn_data__.features[i].properties.doc_count / max;
-    }
-
-    const olSource = olLayer.getSource();
-    olSource.clear();
-    const olFeatures = OL_GEOJSON_FORMAT.readFeatures(this._descriptor.data);
-    olSource.addFeatures(olFeatures);
-  }
-
-  _syncOLData(olLayer) {
-    return this._syncOLWithCurrentDataAsVectors(olLayer);
-  }
 
   async _fetchNewData(mapState, requestToken, precision, dispatch) {
     const scaleFactor = 0.5;
