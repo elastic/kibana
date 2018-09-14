@@ -155,10 +155,12 @@ const CourierRequestHandlerProvider = function () {
 
               searchSource.finalResponse = resp;
 
+              const parsedTimeRange = getTime(aggs.indexPattern, timeRange);
+
               searchSource.tabifiedResponse = tabifyAggResponse(aggs, resp, {
                 metricsAtAllLevels: vis.isHierarchical(),
                 partialRows,
-                timeRange,
+                timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
               });
 
               vis.API.inspectorAdapters.data.setTabularLoader(
