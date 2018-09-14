@@ -101,14 +101,21 @@ export class FilterManager {
     addItems,
     removeItems) {
     try {
+      const body = {};
+      if (description !== undefined) {
+        body.description = description;
+      }
+      if (addItems !== undefined) {
+        body.add_items = addItems;
+      }
+      if (removeItems !== undefined) {
+        body.remove_items = removeItems;
+      }
+
       // Returns the newly updated filter.
       return await this.callWithRequest('ml.updateFilter', {
         filterId,
-        body: {
-          description,
-          add_items: addItems,
-          remove_items: removeItems
-        }
+        body
       });
     } catch (error) {
       return Boom.badRequest(error);

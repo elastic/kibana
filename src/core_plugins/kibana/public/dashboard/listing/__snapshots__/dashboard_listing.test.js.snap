@@ -212,7 +212,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             </EuiButton>
           }
           body={
-            <UNDEFINED>
+            <React.Fragment>
               <p>
                 You can combine data views from any Kibana app into one dashboard and see everything in one place.
               </p>
@@ -227,7 +227,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                 </EuiLink>
                  to take a test drive.
               </p>
-            </UNDEFINED>
+            </React.Fragment>
           }
           iconColor="subdued"
           iconType="dashboardApp"

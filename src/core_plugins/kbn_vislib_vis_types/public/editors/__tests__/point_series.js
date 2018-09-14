@@ -87,7 +87,7 @@ describe('point series editor', function () {
   });
 
   it('should update series when new agg is added', function () {
-    const aggConfig = new AggConfig($parentScope.vis, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
+    const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
     $parentScope.vis.aggs.push(aggConfig);
     $parentScope.$digest();
     expect($parentScope.editorState.params.seriesParams.length).to.be(2);
