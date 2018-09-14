@@ -60,7 +60,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
             },
             render: (domNode) => {
               const template = $(labDisabledTemplate);
-              template.find('.disabledLabVisualization__title').text(savedObject.title);
+              template.find('.visDisabledLabVisualization__title').text(savedObject.title);
               $(domNode).html(template);
             }
           });
