@@ -1,18 +1,13 @@
 [role="xpack"]
 [[xpack-spaces]]
-= Kibana Spaces
+== Spaces
 
-[partintro]
---
-{xpack} enables you to organize your dashboards and other saved objects into meaningful categories.
+With spaces, you can organize your dashboards and other saved objects into meaningful categories.
 After creating your own spaces, you will be asked to choose a space when you enter {kib}. Once inside a space,
-you will only see the dashboards and other saved objects that belong to that space. You can change your space at any time.
---
+you will only see the dashboards and other saved objects that belong to that space. You can change your active space at any time.
+
+With {xpack} security, you can control which users have access to individual spaces.
 
 include::getting-started.asciidoc[]
-include::automating-report-generation.asciidoc[]
-include::pdf-layout-modes.asciidoc[]
-include::configuring-reporting.asciidoc[]
-include::chromium-sandbox.asciidoc[]
-include::reporting-troubleshooting.asciidoc[]
-include::development/index.asciidoc[]
+include::managing-spaces.asciidoc[]
+include::securing-spaces.asciidoc[]
