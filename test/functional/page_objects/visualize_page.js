@@ -712,7 +712,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
-      await testSubjects.setValue('visTitleInput', vizName);
+      await testSubjects.setValue('savedObjectTitle', vizName);
       if (saveAsNew) {
         log.debug('Check save as new visualization');
         await testSubjects.click('saveAsNewCheckbox');
