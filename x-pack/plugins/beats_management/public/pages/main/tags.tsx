@@ -6,17 +6,18 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  // @ts-ignore EuiToolTip has no typings in current version
-  EuiToolTip,
+  EuiGlobalToastList,
+  EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
+import { sortBy } from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import { BeatTag, CMBeat } from '../../../common/domain_types';
+import { BeatTag, CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
-import { Table, TagsTableType } from '../../components/table';
+import { AssignmentOptionSearch, Table, TagsTableType } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
 
 interface TagsPageProps {
@@ -25,6 +26,8 @@ interface TagsPageProps {
 
 interface TagsPageState {
   beats: any;
+  assignmentOptions: AssignmentOptionSearch;
+  notifications: any[];
   tags: BeatTag[];
 }
 
@@ -46,7 +49,61 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     super(props);
 
     this.state = {
+      assignmentOptions: {
+        actionHandler: this.handleTagsAction,
+        columnDefinitions: [
+          {
+            field: 'id',
+            name: 'Beat',
+          },
+          {
+            field: 'full_tags',
+            name: 'Tags',
+            render: (tags: BeatTag[]) => (
+              <EuiFlexGroup gutterSize="xs">
+                {sortBy(tags, 'id').map(({ color, id }) => (
+                  <EuiFlexItem key={id} grow={false}>
+                    <EuiIconTip
+                      size="s"
+                      color={color}
+                      // @ts-ignore content prop is not defined on EuiIconTip type
+                      content={id}
+                      aria-label={id}
+                      type="stopFilled"
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+          {
+            field: 'id',
+            name: 'Assign',
+            render: (id: string, beat: CMPopulatedBeat) => (
+              <EuiLink
+                onClick={async () => {
+                  await this.handleTagAssignment(beat);
+                  const updatedBeat = await this.props.libs.beats.get(id);
+                  this.setState({
+                    assignmentOptions: {
+                      ...this.state.assignmentOptions,
+                      searchResults: [updatedBeat],
+                    },
+                  });
+                }}
+              >
+                Assign
+              </EuiLink>
+            ),
+          },
+        ],
+        searchBox: { placeholder: 'Search for beat', incremental: false },
+        searchResults: [],
+        title: 'Assign Beat To Tags',
+        type: 'search',
+      },
       beats: [],
+      notifications: [],
       tags: [],
     };
 
@@ -55,23 +112,54 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
 
   public render() {
     return (
-      <Table
-        actionHandler={this.handleTagsAction}
-        assignmentOptions={this.state.beats}
-        assignmentTitle={'Assign Beats'}
-        items={this.state.tags}
-        renderAssignmentOptions={item => item}
-        ref={this.tableRef}
-        showAssignmentOptions={true}
-        type={TagsTableType}
-      />
+      <div>
+        <Table
+          assignmentOptions={this.state.assignmentOptions}
+          items={this.state.tags}
+          ref={this.tableRef}
+          type={TagsTableType}
+        />
+        <EuiGlobalToastList
+          dismissToast={() => this.setState({ notifications: [] })}
+          toasts={this.state.notifications}
+          toastLifeTimeMs={5000}
+        />
+      </div>
     );
   }
 
+  private handleTagAssignment = async (beat: CMBeat) => {
+    const tagsToRemove: BeatTag[] = [];
+    const tagsToAdd: BeatTag[] = [];
+    const tags = beat.tags || [];
+    this.getSelectedTags().forEach((tag: BeatTag) => {
+      tags.some((tagId: string) => tagId === tag.id) ? tagsToRemove.push(tag) : tagsToAdd.push(tag);
+    });
+    const assign = this.assignTagsToBeats(beat, tagsToAdd);
+    const remove = this.removeTagsFromBeats(beat, tagsToRemove);
+    await assign;
+    await remove;
+    this.notifyBeatAssigned(beat.id);
+  };
+
   private handleTagsAction = async (action: string, payload: any) => {
     switch (action) {
-      case 'loadAssignmentOptions':
-        this.loadBeats();
+      case 'assignmentSearch':
+        const beatId = payload.query.queryText;
+        try {
+          const beat = await this.props.libs.beats.get(beatId);
+          this.setState({
+            assignmentOptions: { ...this.state.assignmentOptions, searchResults: [beat] },
+          });
+        } catch (e) {
+          this.setState({
+            assignmentOptions: {
+              ...this.state.assignmentOptions,
+              searchFailureMessage: 'Beat not found.',
+            },
+          });
+          this.notifyBeatNotFound(beatId);
+        }
         break;
       case 'delete':
         const tags = this.getSelectedTags().map(tag => tag.id);
@@ -92,6 +180,36 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     this.loadTags();
   };
 
+  private async notifyBeatAssigned(beatId: string) {
+    this.setState({
+      notifications: [
+        ...this.state.notifications,
+        {
+          color: 'success',
+          iconType: 'check',
+          id: `${beatId}_${moment.now()}`,
+          text: `"${beatId}" assignment successful.`,
+          title: 'Assignment Complete',
+        },
+      ],
+    });
+  }
+
+  private async notifyBeatNotFound(failedBeatId: string) {
+    this.setState({
+      notifications: [
+        ...this.state.notifications,
+        {
+          color: 'warning',
+          iconType: 'alert',
+          id: `${failedBeatId}_${moment.now()}`,
+          text: `Could not locate beat with ID "${failedBeatId}".`,
+          title: 'Beat Not Found',
+        },
+      ],
+    });
+  }
+
   private async loadTags() {
     const tags = await this.props.libs.tags.getAll();
     this.setState({
@@ -99,74 +217,21 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     });
   }
 
-  private async loadBeats() {
-    const beats = await this.props.libs.beats.getAll();
-    const selectedTags = this.getSelectedTags();
-    const renderedBeats = beats.map((beat: CMBeat) => {
-      const tagsToRemove: BeatTag[] = [];
-      const tagsToAdd: BeatTag[] = [];
-      const tags = beat.tags || [];
-      selectedTags.forEach((tag: BeatTag) => {
-        tags.some((tagId: string) => tagId === tag.id)
-          ? tagsToRemove.push(tag)
-          : tagsToAdd.push(tag);
-      });
-
-      const tagIcons = tags.map((tagId: string) => {
-        const associatedTag = this.state.tags.find(tag => tag.id === tagId);
-        return (
-          <EuiToolTip
-            content={<p>Last updated: {associatedTag ? associatedTag.last_updated : null}</p>}
-            title={tagId}
-          >
-            <EuiIcon
-              key={tagId}
-              type="stopFilled"
-              // @ts-ignore color typing does not allow for any string
-              color={associatedTag.color || 'primary'}
-            />
-          </EuiToolTip>
-        );
-      });
-
-      return (
-        <EuiFlexItem key={beat.id}>
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            {tagIcons.map((icon, index) => (
-              <EuiFlexItem component="span" grow={false} key={icon.key || index}>
-                {icon}
-              </EuiFlexItem>
-            ))}
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={() => {
-                  this.assignTagsToBeats(beat, tagsToAdd);
-                  this.removeTagsFromBeats(beat, tagsToRemove);
-                  this.loadBeats();
-                }}
-              >
-                {beat.id}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      );
-    });
-
-    this.setState({
-      beats: renderedBeats,
-    });
-  }
-
   private createBeatTagAssignments = (beat: CMBeat, tags: BeatTag[]): BeatsTagAssignment[] =>
     tags.map(({ id }) => ({ tag: id, beatId: beat.id }));
 
-  private removeTagsFromBeats = async (beat: CMBeat, tags: BeatTag[]) => {
+  private removeTagsFromBeats = async (beat: CMBeat, tags: BeatTag[]): Promise<void> => {
+    if (!tags.length) {
+      return;
+    }
     const assignments = this.createBeatTagAssignments(beat, tags);
     await this.props.libs.beats.removeTagsFromBeats(assignments);
   };
 
-  private assignTagsToBeats = async (beat: CMBeat, tags: BeatTag[]) => {
+  private assignTagsToBeats = async (beat: CMBeat, tags: BeatTag[]): Promise<void> => {
+    if (!tags.length) {
+      return;
+    }
     const assignments = this.createBeatTagAssignments(beat, tags);
     await this.props.libs.beats.assignTagsToBeats(assignments);
   };

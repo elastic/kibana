@@ -8,6 +8,7 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import { get } from 'lodash';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { AssignmentPrimaryOptions } from '../../components/table';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
 
@@ -18,6 +19,8 @@ interface BeatTagsPageProps {
 }
 
 interface BeatTagsPageState {
+  assignmentOptions: AssignmentPrimaryOptions;
+  mounted: boolean;
   notifications: any[];
   tags: BeatTag[];
 }
@@ -28,6 +31,12 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     super(props);
 
     this.state = {
+      assignmentOptions: {
+        actionHandler: this.handleTableAction,
+        title: 'Manage Tags',
+        type: 'primary',
+      },
+      mounted: false,
       notifications: [],
       tags: [],
     };
@@ -35,16 +44,21 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     this.getTags();
   }
 
+  public componentDidMount() {
+    this.setState({ mounted: true });
+  }
+
+  public componentWillUnmount() {
+    this.setState({ mounted: false });
+  }
+
   public render() {
     return (
       <div>
         <Table
-          actionHandler={this.handleTableAction}
-          assignmentOptions={null}
-          assignmentTitle={null}
+          assignmentOptions={this.state.assignmentOptions}
           items={this.state.tags}
           ref={this.tableRef}
-          showAssignmentOptions={false}
           type={BeatDetailTagsTable}
         />
         <EuiGlobalToastList
@@ -140,7 +154,10 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
 
   private getTags = async () => {
     try {
-      this.setState({ tags: await this.props.libs.tags.getAll() });
+      const tags = await this.props.libs.tags.getAll();
+      if (this.state.mounted) {
+        this.setState({ tags });
+      }
     } catch (e) {
       throw new Error(e);
     }

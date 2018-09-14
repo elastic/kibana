@@ -5,48 +5,44 @@
  */
 
 import React from 'react';
+import {
+  AssignmentOptionList,
+  AssignmentOptionSearch,
+  AssignmentPrimaryOptions,
+  isPrimaryOptions,
+} from './assignment_option_types';
 import { AssignmentOptions } from './assignment_options';
 import { PrimaryOptions } from './primary_options';
 import { ControlDefinitions } from './table_type_configs';
 
 interface ControlBarProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
-  renderAssignmentOptions?: (item: any, key: string) => any;
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | AssignmentPrimaryOptions;
 
-  showAssignmentOptions: boolean;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
-  actionHandler(actionType: string, payload?: any): void;
 }
 
 export function ControlBar(props: ControlBarProps) {
   const {
-    actionHandler,
     assignmentOptions,
-    renderAssignmentOptions,
-    assignmentTitle,
+    assignmentOptions: { actionHandler },
     controlDefinitions,
+    controlDefinitions: { filters, primaryActions },
     selectionCount,
-    showAssignmentOptions,
   } = props;
 
-  const filters = controlDefinitions.filters.length === 0 ? null : controlDefinitions.filters;
-  return selectionCount !== 0 && showAssignmentOptions ? (
-    <AssignmentOptions
+  return isPrimaryOptions(assignmentOptions) ? (
+    <PrimaryOptions
       actionHandler={actionHandler}
+      filters={filters.length ? filters : null}
+      onSearchQueryChange={(query: any) => actionHandler('search', query)}
+      primaryActions={primaryActions || []}
+    />
+  ) : selectionCount !== 0 ? (
+    <AssignmentOptions
       assignmentOptions={assignmentOptions}
-      renderAssignmentOptions={renderAssignmentOptions}
-      assignmentTitle={assignmentTitle}
       controlDefinitions={controlDefinitions}
       selectionCount={selectionCount}
     />
-  ) : (
-    <PrimaryOptions
-      actionHandler={actionHandler}
-      filters={filters}
-      onSearchQueryChange={(query: any) => actionHandler('search', query)}
-      primaryActions={controlDefinitions.primaryActions || []}
-    />
-  );
+  ) : null;
 }
