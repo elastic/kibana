@@ -6,7 +6,6 @@
 
 import { Esqueue, events as esqueueEvents } from '@codesearch/esqueue';
 import { Job as JobInternal } from '@codesearch/esqueue/job';
-import { Worker as WorkerInternal } from '@codesearch/esqueue/worker';
 
 import { WorkerResult } from 'model/repository';
 import { Log } from '../log';
@@ -64,11 +63,12 @@ export abstract class AbstractWorker implements Worker {
       intervalErrorMultiplier: 1,
     };
 
-    const queueWorker: WorkerInternal = this.queue.registerWorker(this.id, workerFn, workerOptions);
+    const queueWorker = this.queue.registerWorker(this.id, workerFn, workerOptions);
 
     queueWorker.on(esqueueEvents.EVENT_WORKER_COMPLETE, async (res: any) => {
-      const result = res.output.content;
-      await this.onJobCompleted(result);
+      const result: WorkerResult = res.output.content;
+      const job: Job = res.job;
+      await this.onJobCompleted(job, result);
     });
     queueWorker.on(esqueueEvents.EVENT_WORKER_JOB_EXECUTION_ERROR, async (res: any) => {
       await this.onJobExecutionError(res);
@@ -85,7 +85,7 @@ export abstract class AbstractWorker implements Worker {
     return await this.updateProgress(job.payload.uri, 0);
   }
 
-  public async onJobCompleted(res: WorkerResult) {
+  public async onJobCompleted(job: Job, res: WorkerResult) {
     this.log.info(`${this.id} job completed with result ${JSON.stringify(res)}`);
     return await this.updateProgress(res.uri, 100);
   }

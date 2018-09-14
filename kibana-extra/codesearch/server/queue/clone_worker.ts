@@ -4,25 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Esqueue } from '@codesearch/esqueue';
+import { EsClient, Esqueue } from '@codesearch/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
-import { CloneProgress, CloneWorkerProgress } from '../../model/repository';
+import { CloneProgress, CloneWorkerProgress } from '../../model';
+import {
+  RepositoryIndexName,
+  RepositoryReserviedField,
+  RepositoryTypeName,
+} from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
-import { AbstractWorker } from './abstract_worker';
+import { AbstractGitWorker } from './abstract_git_worker';
 import { Job } from './job';
 
-export class CloneWorker extends AbstractWorker {
+export class CloneWorker extends AbstractGitWorker {
   public id: string = 'clone';
 
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    private readonly objectsClient: any
+    protected readonly objectsClient: any,
+    protected readonly client: EsClient
   ) {
-    super(queue, log);
+    super(queue, log, objectsClient, client);
   }
 
   public async executeJob(job: Job) {
@@ -45,19 +51,5 @@ export class CloneWorker extends AbstractWorker {
     return await this.objectsClient.create(REPOSITORY_CLONE_STATUS_INDEX_TYPE, progress, {
       id: repo.uri,
     });
-  }
-
-  public async updateProgress(uri: string, progress: number, cloneProgress?: CloneProgress) {
-    const p: CloneWorkerProgress = {
-      uri,
-      progress,
-      timestamp: new Date(),
-      cloneProgress,
-    };
-    try {
-      return await this.objectsClient.update(REPOSITORY_CLONE_STATUS_INDEX_TYPE, p.uri, p);
-    } catch (error) {
-      this.log.debug(`Update clone progress error: ${error}`);
-    }
   }
 }

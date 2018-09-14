@@ -55,6 +55,9 @@ export const DocumentSchema = {
       org: {
         type: 'text',
       },
+      defaultBranch: {
+        type: 'keyword',
+      },
     },
   },
 };

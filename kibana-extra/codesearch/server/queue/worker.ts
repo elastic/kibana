@@ -12,7 +12,7 @@ export interface Worker {
   enqueueJob(payload: any, options: any): void;
 
   onJobEnqueued(res: any): void;
-  onJobCompleted(res: any): void;
+  onJobCompleted(job: Job, res: any): void;
   onJobExecutionError(res: any): void;
   onJobTimeOut(res: any): void;
 

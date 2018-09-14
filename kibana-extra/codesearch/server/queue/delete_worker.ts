@@ -106,7 +106,7 @@ export class DeleteWorker extends AbstractWorker {
     });
   }
 
-  public async onJobCompleted(res: DeleteWorkerResult) {
+  public async onJobCompleted(_: Job, res: DeleteWorkerResult) {
     return await this.objectsClient.delete(REPOSITORY_DELETE_STATUS_INDEX_TYPE, res.uri);
   }
 

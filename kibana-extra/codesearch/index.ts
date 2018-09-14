@@ -89,14 +89,24 @@ export default (kibana: any) =>
         timeout: queueTimeout,
         doctype: 'esqueue',
       });
-      const cloneWorker = new CloneWorker(queue, log, objectsClient).bind();
+      const cloneWorker = new CloneWorker(
+        queue,
+        log,
+        objectsClient,
+        adminCluster.getClient()
+      ).bind();
       const deleteWorker = new DeleteWorker(
         queue,
         log,
         objectsClient,
         adminCluster.getClient()
       ).bind();
-      const updateWorker = new UpdateWorker(queue, log, objectsClient).bind();
+      const updateWorker = new UpdateWorker(
+        queue,
+        log,
+        objectsClient,
+        adminCluster.getClient()
+      ).bind();
       const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
 
       // Initialize scheduler.

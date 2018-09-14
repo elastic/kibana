@@ -10,7 +10,6 @@ import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
-import { getDefaultBranch } from '../git_operations';
 import { RepositoryIndexInitializer } from '../indexer';
 import {
   RepositoryIndexName,
@@ -70,7 +69,7 @@ export function repositoryRoute(
             type: RepositoryTypeName,
             id: repo.uri,
             body: JSON.stringify({
-              repository: repo,
+              [RepositoryReserviedField]: repo,
             }),
           });
 
@@ -137,8 +136,6 @@ export function repositoryRoute(
           id: repoUri,
         });
         const repo: Repository = response._source.repository;
-        const localPath = RepositoryUtils.repositoryLocalPath(options.repoPath, repo.uri);
-        repo.defaultBranch = await getDefaultBranch(localPath);
         reply(repo);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
