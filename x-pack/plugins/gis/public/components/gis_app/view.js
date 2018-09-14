@@ -5,21 +5,14 @@
  */
 
 import React from 'react';
-import { OLMapContainer } from '../map/ol';
 import { MBMapContainer } from '../map/mb';
 import { LayerControl } from '../layer_control/index';
 
 
-//todo: DEBUG PURPOSES ONLY!
-const MAP_LIBS = { "OPEN_LAYERS": "OPEN_LAYERS", "MAPBOX_GL": "MAPBOX_GL" };
-// const SELECTED_MAPLIB = MAP_LIBS.MAPBOX_GL;
-const SELECTED_MAPLIB = MAP_LIBS.OPEN_LAYERS;
-
 export function GISApp() {
-  const MapImplementation = SELECTED_MAPLIB === MAP_LIBS.OPEN_LAYERS ? <OLMapContainer/> : <MBMapContainer/>;
   return (
     <div className="wrapper">
-      {MapImplementation}
+      <MBMapContainer/>
       <LayerControl/>
     </div>
   );
