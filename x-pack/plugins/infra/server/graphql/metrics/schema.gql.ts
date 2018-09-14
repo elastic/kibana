@@ -21,6 +21,7 @@ export const metricsSchema: any = gql`
     hostNetworkTraffic
     podOverview
     podCpuUsage
+    podMemoryUsage
     podDiskUsage
     podLogUsage
     podNetworkTraffic

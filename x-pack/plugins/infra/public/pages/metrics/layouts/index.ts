@@ -5,10 +5,14 @@
  */
 
 import { hostLayoutCreator } from './host';
+import { podLayoutCreator } from './pod';
 import { InfraMetricLayoutCreator } from './types';
+
 interface Layouts {
   [key: string]: InfraMetricLayoutCreator;
 }
+
 export const layoutCreators: Layouts = {
   host: hostLayoutCreator,
+  pod: podLayoutCreator,
 };

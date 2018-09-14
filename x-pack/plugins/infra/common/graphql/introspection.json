@@ -1659,19 +1659,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hostK8sCpuCapGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "hostK8sCpuCap",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostK8sDiskCapGauge",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -1689,19 +1677,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hostK8sMemoryCapGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "hostK8sPodCap",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostK8sPodCapGauge",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -1725,37 +1701,19 @@
             "deprecationReason": null
           },
           {
-            "name": "hostCpuUsageGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostLoadGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostMemoryGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostNetworkInGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostNetworkOutGauge",
+            "name": "podOverview",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "podCpuUsage",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "podMemoryUsage",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -1779,19 +1737,7 @@
             "deprecationReason": null
           },
           {
-            "name": "podMemoryGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "podNetInGauge",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "podNetOutGauge",
+            "name": "containerOverview",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -1804,12 +1750,6 @@
           },
           {
             "name": "containerCpuUsage",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "containerDiskIOReadsOps",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

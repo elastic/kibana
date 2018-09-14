@@ -6,8 +6,8 @@
 
 import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
 
-export const podCpuUsage: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
-  id: 'podCpuUsage',
+export const podMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
+  id: 'podMemoryUsage',
   requires: 'kubernetes.pod',
   index_pattern: indexPattern,
   interval,
@@ -15,12 +15,12 @@ export const podCpuUsage: InfraMetricModelCreator = (timeField, indexPattern, in
   type: 'timeseries',
   series: [
     {
-      id: 'cpu',
+      id: 'memory',
       split_mode: 'everything',
       metrics: [
         {
-          field: 'kubernetes.pod.cpu.usage.node.pct',
-          id: 'avg-cpu-usage',
+          field: 'kubernetes.pod.memory.usage.node.pct',
+          id: 'avg-memory-usage',
           type: InfraMetricModelMetricType.avg,
         },
       ],
