@@ -11,11 +11,14 @@ import { donut } from './donut';
 import { dropdownFilter } from './dropdown_filter';
 import { image } from './image';
 import { horizontalBarChart } from './horiz_bar_chart';
+import { horizontalProgressBar } from './horizontal_progress_bar';
 import { lineChart } from './line_chart';
 import { markdown } from './markdown';
 import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
+import { progressGauge } from './progress_gauge';
+import { progressWheel } from './progress_wheel';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { shape } from './shape';
@@ -23,6 +26,7 @@ import { table } from './table';
 import { tiltedPie } from './tilted_pie';
 import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
+import { verticalProgressBar } from './vertical_progress_bar';
 
 export const elementSpecs = [
   areaChart,
@@ -32,11 +36,14 @@ export const elementSpecs = [
   dropdownFilter,
   image,
   horizontalBarChart,
+  horizontalProgressBar,
   lineChart,
   markdown,
   metric,
   pie,
   plot,
+  progressGauge,
+  progressWheel,
   repeatImage,
   revealImage,
   shape,
@@ -44,4 +51,5 @@ export const elementSpecs = [
   tiltedPie,
   timeFilter,
   verticalBarChart,
+  verticalProgressBar,
 ];
