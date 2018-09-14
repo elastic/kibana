@@ -10,7 +10,7 @@ import { getSpaceColor, getSpaceInitials, MAX_SPACE_INITIALS } from '../../commo
 import { Space } from '../../common/model/space';
 
 interface Props {
-  space: Space;
+  space: Partial<Space>;
   size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
 }

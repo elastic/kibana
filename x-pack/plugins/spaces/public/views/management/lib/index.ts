@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './nav_control';
+export { toSpaceIdentifier, isValidSpaceIdentifier } from './space_identifier_utils';
 
-export { SpacesNavState } from './nav_control';
+export { SpaceValidator } from './validate_space';

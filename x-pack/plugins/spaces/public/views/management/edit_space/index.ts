@@ -3,7 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import './nav_control';
-
-export { SpacesNavState } from './nav_control';
+// @ts-ignore
+export { ManageSpacePage } from './manage_space_page';

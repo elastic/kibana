@@ -19,9 +19,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
+// @ts-ignore
 import { toastNotifications } from 'ui/notify';
 
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
@@ -32,7 +33,7 @@ import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 
 interface Props {
   spacesManager: SpacesManager;
-  spacesNavState: any;
+  spacesNavState: SpacesNavState;
   userProfile: UserProfile;
 }
 
