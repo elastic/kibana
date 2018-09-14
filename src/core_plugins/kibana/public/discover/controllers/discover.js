@@ -193,11 +193,6 @@ function discoverController(
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: 'oldSave',
-    description: 'Save Search',
-    template: require('plugins/kibana/discover/partials/save_search.html'),
-    testId: 'discoverOldSaveButton',
-  }, {
     key: 'save',
     description: 'Save Search',
     testId: 'discoverSaveButton',
@@ -516,7 +511,6 @@ function discoverController(
     try {
       const id = await savedSearch.save(saveOptions);
       $scope.$evalAsync(() => {
-        $scope.kbnTopNav.close('save'); // needed to remove selected styling of save top nav button
         stateMonitor.setInitialState($state.toJSON());
         if (id) {
           toastNotifications.addSuccess({

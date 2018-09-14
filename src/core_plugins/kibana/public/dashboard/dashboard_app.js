@@ -273,7 +273,6 @@ app.directive('dashboardApp', function ($injector) {
       function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
-            $scope.kbnTopNav.close('save'); // needed to remove selected styling of save top nav button
             if (id) {
               toastNotifications.addSuccess({
                 title: `Dashboard '${dash.title}' was saved`,
