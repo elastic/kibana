@@ -188,6 +188,7 @@ export class SavedObjectSaveModal extends React.Component {
               data-test-subj="confirmSaveSavedObjectButton"
               onClick={this.saveSavedObject}
               isLoading={this.state.isLoading}
+              isDisabled={this.state.title.length === 0}
             >
               Confirm Save
             </EuiButton>
