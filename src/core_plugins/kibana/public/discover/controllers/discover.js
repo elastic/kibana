@@ -58,6 +58,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -626,9 +627,10 @@ function discoverController(
       $scope.mergedEsResp = merged;
 
       if ($scope.opts.timefield) {
+        const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler($scope.vis, merged))
+          .resolve(responseHandler(tabifiedData))
           .then(resp => {
             $scope.visData = resp;
             const visEl = $element.find('#discoverHistogram')[0];
