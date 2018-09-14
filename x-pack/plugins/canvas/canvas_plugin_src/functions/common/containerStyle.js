@@ -46,6 +46,7 @@ export const containerStyle = () => ({
       types: ['string'],
       help: 'Valid CSS background repeat string',
       default: 'no-repeat',
+      options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
     },
     opacity: {
       types: ['number', 'null'],

@@ -16,10 +16,22 @@ import {
 } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
-export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
+export const Expression = ({
+  functionDefinitions,
+  formState,
+  updateValue,
+  setExpression,
+  done,
+  error,
+}) => {
   return (
     <EuiPanel>
-      <ExpressionInput error={error} value={formState.expression} onChange={updateValue} />
+      <ExpressionInput
+        functionDefinitions={functionDefinitions}
+        error={error}
+        value={formState.expression}
+        onChange={updateValue}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -43,6 +55,7 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
 };
 
 Expression.propTypes = {
+  functionDefinitions: PropTypes.array,
   formState: PropTypes.object,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,

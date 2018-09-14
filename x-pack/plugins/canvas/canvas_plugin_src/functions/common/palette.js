@@ -24,11 +24,13 @@ export const palette = () => ({
       types: ['boolean'],
       default: false,
       help: 'Prefer to make a gradient where supported and useful?',
+      options: [true, false],
     },
     reverse: {
       type: ['boolean'],
       default: false,
       help: 'Reverse the palette',
+      options: [true, false],
     },
   },
   fn: (context, args) => {

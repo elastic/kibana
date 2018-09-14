@@ -42,7 +42,7 @@ argument_assignment
   }
 
 argument
-  = '$'? '{' space? expression:expression space? '}' { return expression; }
+  = '$'? '{' expression:expression '}' { return expression; }
   / literal
 
 arg_list

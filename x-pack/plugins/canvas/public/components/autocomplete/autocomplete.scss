@@ -1,0 +1,39 @@
+.autocomplete {
+  position: relative;
+}
+
+.autocompletePopup {
+  position: absolute;
+  top: -300px;
+  height: 300px;
+  width: 100%;
+}
+
+.autocompleteItems, .autocompleteReference {
+  height: 298px;
+  overflow: auto;
+  @include euiScrollBar;
+}
+
+.autocompleteReference {
+  padding: $euiSizeS;
+  border-left: $euiBorderThin;
+}
+
+.autocompleteItem {
+  padding: $euiSizeS;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: $euiCodeFontFamily;
+  font-weight: $euiFontWeightRegular;
+}
+
+.autocompleteItem--isActive {
+  color: $euiColorPrimary;
+  background-color: $euiFocusBackgroundColor;
+}
+
+.autocompleteType {
+  padding: $euiSizeS;
+}
