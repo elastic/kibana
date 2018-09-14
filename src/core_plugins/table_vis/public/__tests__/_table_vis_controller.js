@@ -24,7 +24,7 @@ import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
-import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 describe('Table Vis Controller', function () {
   let $rootScope;

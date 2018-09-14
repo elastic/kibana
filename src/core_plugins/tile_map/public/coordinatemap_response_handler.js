@@ -20,9 +20,5 @@
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 export function makeGeoJsonResponseHandler() {
-
-  return function (table) {
-
-    return convertToGeoJson(table);
-  };
+  return convertToGeoJson;
 }
