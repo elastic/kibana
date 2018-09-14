@@ -20,7 +20,6 @@ import 'react-vis/dist/style.css';
 import { initTimepicker } from './timepicker';
 
 import './style/main.less';
-import '../../../node_modules/openlayers/dist/ol.css';
 
 import template from './templates/index.html';
 import { GISApp } from './components/gis_app';
