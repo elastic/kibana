@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -33,6 +28,7 @@ export class ClusterPrivileges extends Component<Props, {}> {
 
     const options = items.map(i => ({
       label: i,
+      isGroupLabelOption: false,
     }));
 
     const selectedOptions = (role.elasticsearch.cluster || []).map(k => ({ label: k }));

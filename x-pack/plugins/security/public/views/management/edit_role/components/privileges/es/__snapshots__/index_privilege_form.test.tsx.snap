@@ -73,39 +73,51 @@ exports[`it renders without crashing 1`] = `
                 options={
                   Array [
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "all",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "manage",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "monitor",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "read",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "index",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "create",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "delete",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "write",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "delete_index",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "create_index",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "view_index_metadata",
                     },
                     Object {
+                      "isGroupLabelOption": false,
                       "label": "read_cross_cluster",
                     },
                   ]
