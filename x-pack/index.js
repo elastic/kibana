@@ -24,6 +24,7 @@ import { consoleExtensions } from './plugins/console_extensions';
 import { spaces } from './plugins/spaces';
 import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
+import { canvas } from './plugins/canvas';
 
 module.exports = function (kibana) {
   return [
@@ -41,6 +42,7 @@ module.exports = function (kibana) {
     dashboardMode(kibana),
     logstash(kibana),
     apm(kibana),
+    canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),
