@@ -21,6 +21,7 @@ import _ from 'lodash';
 import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
+
 const LegacyResponseHandlerProvider = function () {
 
   return {
@@ -28,6 +29,10 @@ const LegacyResponseHandlerProvider = function () {
     handler: function (table) {
       return new Promise((resolve) => {
         const converted = { tables: [] };
+
+        // check if there are buckets after the first metric
+        const metricsAtAllLevels = table.columns.findIndex(column => column.aggConfig.type.type === 'metrics') <
+          _.findLastIndex(table.columns, column => column.aggConfig.type.type === 'buckets');
 
         const splitColumn = table.columns.find(column => column.aggConfig.schema.name === 'split');
         const numberOfMetrics = table.columns.filter(column => column.aggConfig.type.type === 'metrics').length;

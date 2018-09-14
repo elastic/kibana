@@ -49,7 +49,7 @@ function convertTableGroup(tableGroup, convertTable) {
     }
 
     let output;
-    if (output = convertTableGroup(table)) {
+    if (output = convertTableGroup(table, convertTable)) {
       outList.push(output);
     }
   });
