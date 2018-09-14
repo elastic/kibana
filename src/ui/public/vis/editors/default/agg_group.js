@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import './agg';
 import './agg_add';
-import './nesting_indicator';
 
 import { uiModules } from '../../../modules';
 import aggGroupTemplate from './agg_group.html';
