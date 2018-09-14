@@ -20,6 +20,4 @@
 export { extractCodeMessages } from './code';
 export { extractHandlebarsMessages } from './handlebars';
 export { extractHtmlMessages } from './html';
-export { extractI18nCallMessages } from './i18n_call';
 export { extractPugMessages } from './pug';
-export { extractFormattedMessages, extractIntlMessages } from './react';
