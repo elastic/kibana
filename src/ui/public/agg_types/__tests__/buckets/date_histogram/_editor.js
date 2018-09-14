@@ -58,7 +58,10 @@ describe('editor', function () {
         ]
       });
 
-      const $el = $('<vis-editor-agg-params agg="agg" index-pattern="agg._indexPattern" group-name="groupName"></vis-editor-agg-params>');
+      const $el = $('<vis-editor-agg-params agg="agg" ' +
+        'index-pattern="agg.getIndexPattern()" ' +
+        'group-name="groupName">' +
+        '</vis-editor-agg-params>');
       const $parentScope = $injector.get('$rootScope').$new();
 
       agg = $parentScope.agg = vis.aggs.bySchemaName.segment[0];
