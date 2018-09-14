@@ -19,6 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
@@ -106,7 +107,7 @@ function ResponsiveGrid({
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 
-export class DashboardGrid extends React.Component {
+export class DashboardGridUi extends React.Component {
   constructor(props) {
     super(props);
     // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
@@ -120,7 +121,10 @@ export class DashboardGrid extends React.Component {
     } catch (error) {
       isLayoutInvalid = true;
       toastNotifications.addDanger({
-        title: 'Unable to load dashboard.',
+        title: props.intl.formatMessage({
+          id: 'kbn.dashboard.dashboardGrid.toastNotifications.UnableToLoadDashboardDangerMessage',
+          defaultMessage: 'Unable to load dashboard.',
+        }),
         text: error.message,
       });
       window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
@@ -259,7 +263,7 @@ export class DashboardGrid extends React.Component {
   }
 }
 
-DashboardGrid.propTypes = {
+DashboardGridUi.propTypes = {
   panels: PropTypes.object.isRequired,
   getEmbeddableFactory: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
@@ -267,3 +271,5 @@ DashboardGrid.propTypes = {
   maximizedPanelId: PropTypes.string,
   useMargins: PropTypes.bool.isRequired,
 };
+
+export const DashboardGrid = injectI18n(DashboardGridUi);

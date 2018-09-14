@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { ContextMenuAction } from 'ui/embeddable';
@@ -31,7 +32,9 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
 export function getRemovePanelAction(onDeletePanel: () => void) {
   return new ContextMenuAction(
     {
-      displayName: 'Delete from dashboard',
+      displayName: i18n.translate('kbn.dashboard.panel.header.actions.removePanel.displayName', {
+        defaultMessage: 'Delete from dashboard',
+      }),
       id: 'deletePanel',
       parentPanelId: 'mainMenu',
     },

@@ -19,17 +19,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
 
-export class DashboardPanel extends React.Component {
+class DashboardPanelUi extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      error: props.embeddableFactory ? null : `No factory found for embeddable`,
+      error: props.embeddableFactory ? null : props.intl.formatMessage({
+        id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
+        defaultMessage: 'No factory found for embeddable',
+      }),
     };
 
     this.mounted = false;
@@ -96,7 +100,10 @@ export class DashboardPanel extends React.Component {
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
       >
-        {!this.props.initialized && 'loading...'}
+        {!this.props.initialized && <FormattedMessage
+          id="kbn.dashboard.panel.ebmeddableViewport.loadingLabel"
+          defaultMessage="loading..."
+        />}
       </div>
     );
   }
@@ -151,7 +158,7 @@ export class DashboardPanel extends React.Component {
   }
 }
 
-DashboardPanel.propTypes = {
+DashboardPanelUi.propTypes = {
   viewOnlyMode: PropTypes.bool.isRequired,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
@@ -179,3 +186,5 @@ DashboardPanel.propTypes = {
     panelIndex: PropTypes.string,
   }).isRequired,
 };
+
+export const DashboardPanel = injectI18n(DashboardPanelUi);

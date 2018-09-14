@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -34,7 +35,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-export class DashboardCloneModal extends React.Component {
+class DashboardCloneModalUi extends React.Component {
   constructor(props) {
     super(props);
 
@@ -90,13 +91,30 @@ export class DashboardCloneModal extends React.Component {
     return (
       <Fragment>
         <EuiCallOut
-          title={`A Dashboard with the title '${this.state.newDashboardName}' already exists.`}
+          title={this.props.intl.formatMessage({
+            id: 'kbn.dashboard.topNav.cloneModal.dashboardWithTitleExistsTitle',
+            defaultMessage: 'A Dashboard with the title {newDashboardName} already exists.',
+            values: {
+              newDashboardName: this.state.newDashboardName,
+            },
+          })}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
-          <p>
-            Click <strong>Confirm Clone</strong> to clone the dashboard with the duplicate title.
-          </p>
+          <FormattedMessage
+            id="kbn.dashboard.topNav.cloneModal.clickToCloneDashboardWithDuplicateTitleDescription"
+            defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
+            values={{
+              confirmClone: (
+                <FormattedMessage
+                  id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
+                  defaultMessage="Confirm Clone"
+                  tagName="strong"
+                />
+              ),
+            }}
+            tagName="p"
+          />
         </EuiCallOut>
         <EuiSpacer />
       </Fragment>
@@ -113,15 +131,20 @@ export class DashboardCloneModal extends React.Component {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              Clone Dashboard
+              <FormattedMessage
+                id="kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+                defaultMessage="Clone Dashboard"
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
             <EuiText>
-              <p>
-                Please enter a new name for your dashboard.
-              </p>
+              <FormattedMessage
+                id="kbn.dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
+                defaultMessage="Please enter a new name for your dashboard."
+                tagName="p"
+              />
             </EuiText>
 
             <EuiSpacer />
@@ -143,7 +166,10 @@ export class DashboardCloneModal extends React.Component {
               data-test-subj="cloneCancelButton"
               onClick={this.props.onClose}
             >
-              Cancel
+              <FormattedMessage
+                id="kbn.dashboard.topNav.cloneModal.cloneCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButton>
 
             <EuiButton
@@ -152,7 +178,10 @@ export class DashboardCloneModal extends React.Component {
               onClick={this.cloneDashboard}
               isLoading={this.state.isLoading}
             >
-              Confirm Clone
+              <FormattedMessage
+                id="kbn.dashboard.topNav.cloneModal.cloneConfirmButtonLabel"
+                defaultMessage="Confirm Clone"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -161,8 +190,10 @@ export class DashboardCloneModal extends React.Component {
   }
 }
 
-DashboardCloneModal.propTypes = {
+DashboardCloneModalUi.propTypes = {
   onClone: PropTypes.func,
   onClose: PropTypes.func,
   title: PropTypes.string
 };
+
+export const DashboardCloneModal = injectI18n(DashboardCloneModalUi);

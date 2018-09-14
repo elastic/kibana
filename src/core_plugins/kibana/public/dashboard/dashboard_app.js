@@ -79,7 +79,7 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage, i18n) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
@@ -244,14 +244,22 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          `Once you discard your changes, there's no getting them back.`,
+          i18n('kbn.dashboard.app.changeViewModeConfirmModal.description',
+            { defaultMessage: 'Once you discard your changes, there\'s no getting them back.' }
+          ),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Discard changes',
-            cancelButtonText: 'Continue editing',
+            confirmButtonText: i18n('kbn.dashboard.app.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n('kbn.dashboard.app.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: 'Discard changes to dashboard?'
+            title: i18n('kbn.dashboard.app.changeViewModeConfirmModal.title',
+              { defaultMessage: 'Discard changes to dashboard?' }
+            )
           }
         );
       };
@@ -274,7 +282,12 @@ app.directive('dashboardApp', function ($injector) {
             $scope.kbnTopNav.close('save');
             if (id) {
               toastNotifications.addSuccess({
-                title: `Dashboard '${dash.title}' was saved`,
+                title: i18n('kbn.dashboard.app.toastNotifications.dashboardWasSavedSuccessMessage',
+                  {
+                    defaultMessage: 'Dashboard \'{dashTitle}\' was saved',
+                    values: { dashTitle: dash.title },
+                  },
+                ),
                 'data-test-subj': 'saveDashboardSuccess',
               });
 
@@ -288,7 +301,15 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              title: i18n('kbn.dashboard.app.toastNotifications.dashboardWasNotSavedDangerMessage',
+                {
+                  defaultMessage: 'Dashboard \'{dashTitle}\' was not saved. Error: {errorMessage}',
+                  values: {
+                    dashTitle: dash.title,
+                    errorMessage: error.message,
+                  },
+                },
+              ),
               'data-test-subj': 'saveDashboardFailure',
             });
             return { error };

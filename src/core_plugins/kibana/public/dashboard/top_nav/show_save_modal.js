@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { DashboardSaveModal } from './save_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -37,14 +38,16 @@ export function showSaveModal({ onSave, title, description, timeRestore, showCop
   };
   document.body.appendChild(container);
   const element = (
-    <DashboardSaveModal
-      onSave={onSaveConfirmed}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      timeRestore={timeRestore}
-      showCopyOnSave={showCopyOnSave}
-    />
+    <I18nProvider>
+      <DashboardSaveModal
+        onSave={onSaveConfirmed}
+        onClose={closeModal}
+        title={title}
+        description={description}
+        timeRestore={timeRestore}
+        showCopyOnSave={showCopyOnSave}
+      />
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

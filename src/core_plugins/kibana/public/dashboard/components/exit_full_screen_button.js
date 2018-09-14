@@ -20,6 +20,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import chrome from 'ui/chrome';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   KuiButton,
@@ -30,7 +31,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-export class ExitFullScreenButton extends PureComponent {
+class ExitFullScreenButtonUi extends PureComponent {
 
   onKeyDown = (e) => {
     if (e.keyCode === keyCodes.ESCAPE) {
@@ -49,25 +50,36 @@ export class ExitFullScreenButton extends PureComponent {
   }
 
   render() {
+    const { intl } = this.props;
+
     return (
       <div>
         <EuiScreenReaderOnly>
-          <p aria-live="polite">
-            In full screen mode, press ESC to exit.
-          </p>
+          <FormattedMessage
+            id="kbn.dashboard.exitFullScreenButton.fullScreenModeDescription"
+            defaultMessage="In full screen mode, press ESC to exit."
+            tagName="p"
+            aria-live="polite"
+          />
         </EuiScreenReaderOnly>
         <div
           className="dshExitFullScreenButton"
         >
           <KuiButton
             type="hollow"
-            aria-label="Exit full screen mode"
+            aria-label={intl.formatMessage({
+              id: 'kbn.dashboard.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
+              defaultMessage: 'Exit full screen mode',
+            })}
             className="dshExitFullScreenButton__mode"
             onClick={this.props.onExitFullScreenMode}
           >
             <span className="dshExitFullScreenButton__logo" data-test-subj="exitFullScreenModeLogo"/>
             <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
-              Exit full screen <span className="kuiIcon fa fa-angle-left"/>
+              <FormattedMessage
+                id="kbn.dashboard.exitFullScreenButton.fullScreenModeButtonLabel"
+                defaultMessage="Exit full screen."
+              /> <span className="kuiIcon fa fa-angle-left"/>
             </span>
           </KuiButton>
         </div>
@@ -76,6 +88,8 @@ export class ExitFullScreenButton extends PureComponent {
   }
 }
 
-ExitFullScreenButton.propTypes = {
+ExitFullScreenButtonUi.propTypes = {
   onExitFullScreenMode: PropTypes.func.isRequired,
 };
+
+export const ExitFullScreenButton = injectI18n(ExitFullScreenButtonUi);

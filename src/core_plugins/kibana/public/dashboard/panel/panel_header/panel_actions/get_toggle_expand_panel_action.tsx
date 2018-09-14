@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { ContextMenuAction } from 'ui/embeddable';
@@ -37,7 +38,19 @@ export function getToggleExpandPanelAction({
 }) {
   return new ContextMenuAction(
     {
-      displayName: isExpanded ? 'Minimize' : 'Full screen',
+      displayName: isExpanded
+        ? i18n.translate(
+            'kbn.dashboard.panel.header.actions.toggleExpandPanel.expandedDisplayName',
+            {
+              defaultMessage: 'Minimize',
+            }
+          )
+        : i18n.translate(
+            'kbn.dashboard.panel.header.actions.toggleExpandPanel.notExpandedDisplayName',
+            {
+              defaultMessage: 'Full screen',
+            }
+          ),
       id: 'togglePanel',
       parentPanelId: 'mainMenu',
     },

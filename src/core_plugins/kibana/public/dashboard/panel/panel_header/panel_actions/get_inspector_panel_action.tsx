@@ -20,6 +20,7 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ContextMenuAction } from 'ui/embeddable';
 import { Inspector } from 'ui/inspector';
@@ -41,7 +42,9 @@ export function getInspectorPanelAction({
   return new ContextMenuAction(
     {
       id: 'openInspector',
-      displayName: 'Inspect',
+      displayName: i18n.translate('kbn.dashboard.panel.header.actions.inspectorPanel.displayName', {
+        defaultMessage: 'Inspect',
+      }),
       parentPanelId: 'mainMenu',
     },
     {

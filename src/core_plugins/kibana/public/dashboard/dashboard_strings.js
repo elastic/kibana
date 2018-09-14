@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DashboardViewMode } from './dashboard_view_mode';
 
 /**
@@ -29,9 +30,13 @@ import { DashboardViewMode } from './dashboard_view_mode';
 export function getDashboardTitle(title, viewMode, isDirty) {
   const isEditMode = viewMode === DashboardViewMode.EDIT;
   const unsavedSuffix = isEditMode && isDirty
-    ? ' (unsaved)'
+    ? i18n.translate('kbn.dashboard.title.unsavedSuffix', {
+      defaultMessage: ' (unsaved)',
+    })
     : '';
 
   const displayTitle = `${title}${unsavedSuffix}`;
-  return isEditMode ? 'Editing ' + displayTitle : displayTitle;
+  return isEditMode ? i18n.translate('kbn.dashboard.title.editModeText', {
+    defaultMessage: 'Editing ',
+  }) + displayTitle : displayTitle;
 }

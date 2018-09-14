@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -111,7 +112,9 @@ export class DashboardListing extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: `Unable to delete dashboard(s)`,
+        title: i18n.translate('kbn.dashboard.listing.toastNotifications.unableToDeleteDashboardDangerMessage', {
+          defaultMessage: 'Unable to delete dashboard(s)',
+        }),
         text: `${error}`,
       });
     }
@@ -194,14 +197,24 @@ export class DashboardListing extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Delete selected dashboards?"
+          title={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title', {
+            defaultMessage: 'Delete selected dashboards?',
+          })}
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel', {
+            defaultMessage: 'Delete',
+          })}
           defaultFocusedButton="cancel"
         >
-          <p>{`You can't recover deleted dashboards.`}</p>
+          <p>
+            {i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.description', {
+              defaultMessage: 'You can\'t recover deleted dashboards.',
+            })}
+          </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -212,14 +225,35 @@ export class DashboardListing extends React.Component {
       return (
         <React.Fragment>
           <EuiCallOut
-            title="Listing limit exceeded"
+            title={i18n.translate('kbn.dashboard.listing.listingLimitExceeded.title', {
+              defaultMessage: 'Listing limit exceeded',
+            })}
             color="warning"
             iconType="help"
           >
             <p>
-              You have {this.state.totalDashboards} dashboards,
-              but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {this.props.listingLimit}.
-              You can change this setting under <EuiLink href="#/management/kibana/settings">Advanced Settings</EuiLink>.
+              {i18n.translate('kbn.dashboard.listing.listingLimitExceeded.description', {
+                defaultMessage: 'You have {totalDashboards} dashboards, \
+but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. \
+You can change this setting under {advancedSettingsLink}.',
+                values: {
+                  totalDashboards: this.state.totalDashboards,
+                  listingLimitValue: this.props.listingLimit,
+                  listingLimitText: (
+                    <strong>{i18n.translate('kbn.dashboard.listing.listingLimitExceeded.listingLimitText', {
+                      defaultMessage: 'listingLimit',
+                    })}
+                    </strong>
+                  ),
+                  advancedSettingsLink: (
+                    <EuiLink href="#/management/kibana/settings">
+                      {i18n.translate('kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText', {
+                        defaultMessage: 'Advanced Settings',
+                      })}
+                    </EuiLink>
+                  )
+                },
+              })}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -233,7 +267,9 @@ export class DashboardListing extends React.Component {
       return '';
     }
 
-    return 'No dashboards matched your search.';
+    return i18n.translate('kbn.dashboard.listing.noMatchedDashboardsMessage', {
+      defaultMessage: 'No dashboards matched your search.',
+    });
   }
 
   renderNoItemsMessage() {
@@ -243,7 +279,9 @@ export class DashboardListing extends React.Component {
         <EuiText>
           <h2>
             <EuiTextColor color="subdued">
-              {`Looks like you don't have any dashboards.`}
+              {i18n.translate('kbn.dashboard.listing.noDashboardsItemsMessage', {
+                defaultMessage: 'Looks like you don\'t have any dashboards.',
+              })}
             </EuiTextColor>
           </h2>
         </EuiText>
@@ -254,14 +292,33 @@ export class DashboardListing extends React.Component {
       <div>
         <EuiEmptyPrompt
           iconType="dashboardApp"
-          title={<h2>Create your first dashboard</h2>}
+          title={
+            <h2>
+              {i18n.translate('kbn.dashboard.listing.createNewDashboard.title', {
+                defaultMessage: 'Create your first dashboard',
+              })}
+            </h2>
+          }
           body={
             <Fragment>
               <p>
-                You can combine data views from any Kibana app into one dashboard and see everything in one place.
+                {i18n.translate('kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
+                  defaultMessage: 'You can combine data views from any Kibana app into one dashboard and see everything in one place.',
+                })}
               </p>
               <p>
-                New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install some sample data</EuiLink> to take a test drive.
+                {i18n.translate('kbn.dashboard.listing.createNewDashboard.newToKibanaDescription', {
+                  defaultMessage: 'New to Kibana? {sampleDataInstallLink} to take a test drive.',
+                  values: {
+                    sampleDataInstallLink: (
+                      <EuiLink href="#/home/tutorial_directory/sampleData">
+                        {i18n.translate('kbn.dashboard.listing.createNewDashboard.sampleDataInstallLink', {
+                          defaultMessage: 'Install some sample data',
+                        })}
+                      </EuiLink>
+                    ),
+                  },
+                })}
               </p>
             </Fragment>
           }
@@ -272,7 +329,9 @@ export class DashboardListing extends React.Component {
               iconType="plusInCircle"
               data-test-subj="createDashboardPromptButton"
             >
-              Create new dashboard
+              {i18n.translate('kbn.dashboard.listing.createNewDashboard.createButtonLabel', {
+                defaultMessage: 'Create new dashboard',
+              })}
             </EuiButton>
           }
         />
@@ -292,7 +351,9 @@ export class DashboardListing extends React.Component {
             data-test-subj="deleteSelectedDashboards"
             key="delete"
           >
-            Delete selected
+            {i18n.translate('kbn.dashboard.listing.searchBar.deleteSelectedButtonLabel', {
+              defaultMessage: 'Delete selected',
+            })}
           </EuiButton>
         </EuiFlexItem>
       );
@@ -304,7 +365,9 @@ export class DashboardListing extends React.Component {
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
             aria-label="Filter dashboards"
-            placeholder="Search..."
+            placeholder={i18n.translate('kbn.dashboard.listing.searchBar.searchField.placeholder', {
+              defaultMessage: 'Search...',
+            })}
             fullWidth
             value={this.state.filter}
             onChange={(e) => {
@@ -323,7 +386,9 @@ export class DashboardListing extends React.Component {
     const tableColumns = [
       {
         field: 'title',
-        name: 'Title',
+        name: i18n.translate('kbn.dashboard.listing.table.titleColumn.title', {
+          defaultMessage: 'Title',
+        }),
         sortable: true,
         render: (field, record) => (
           <EuiLink
@@ -336,14 +401,18 @@ export class DashboardListing extends React.Component {
       },
       {
         field: 'description',
-        name: 'Description',
+        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumn.title', {
+          defaultMessage: 'Description',
+        }),
         dataType: 'string',
         sortable: true,
       }
     ];
     if (!this.props.hideWriteControls) {
       tableColumns.push({
-        name: 'Actions',
+        name: i18n.translate('kbn.dashboard.listing.table.actionsColumn.title', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             render: (record) => {
@@ -351,7 +420,9 @@ export class DashboardListing extends React.Component {
                 <EuiLink
                   href={`#${createDashboardEditUrl(record.id)}?_a=(viewMode:edit)`}
                 >
-                  Edit
+                  {i18n.translate('kbn.dashboard.listing.table.actionsColumn.editLinkText', {
+                    defaultMessage: 'Edit',
+                  })}
                 </EuiLink>
               );
             }
@@ -413,7 +484,9 @@ export class DashboardListing extends React.Component {
             href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
             data-test-subj="newDashboardLink"
           >
-            Create new dashboard
+            {i18n.translate('kbn.dashboard.listing.createNewDashboardButtonLabel', {
+              defaultMessage: 'Create new dashboard',
+            })}
           </EuiButton>
         </EuiFlexItem>
       );
@@ -426,7 +499,9 @@ export class DashboardListing extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                Dashboards
+                {i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+                  defaultMessage: 'Dashboards',
+                })}
               </h1>
             </EuiTitle>
           </EuiFlexItem>

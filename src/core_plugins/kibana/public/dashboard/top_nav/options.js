@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiForm,
@@ -26,7 +27,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-export class OptionsMenu extends Component {
+class OptionsMenuUi extends Component {
 
   state = {
     darkTheme: this.props.darkTheme,
@@ -60,7 +61,10 @@ export class OptionsMenu extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Use dark theme"
+            label={this.props.intl.formatMessage({
+              id: 'kbn.dashboard.topNav.options.useDarkThemeSwitchLabel',
+              defaultMessage: 'Use dark theme',
+            })}
             checked={this.state.darkTheme}
             onChange={this.handleDarkThemeChange}
             data-test-subj="dashboardDarkThemeCheckbox"
@@ -69,7 +73,10 @@ export class OptionsMenu extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Use margins between panels"
+            label={this.props.intl.formatMessage({
+              id: 'kbn.dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel',
+              defaultMessage: 'Use margins between panels',
+            })}
             checked={this.state.useMargins}
             onChange={this.handleUseMarginsChange}
             data-test-subj="dashboardMarginsCheckbox"
@@ -78,7 +85,10 @@ export class OptionsMenu extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Hide all panel titles"
+            label={this.props.intl.formatMessage({
+              id: 'kbn.dashboard.topNav.options.hideAllPanelTitlesSwitchLabel',
+              defaultMessage: 'Hide all panel titles',
+            })}
             checked={this.state.hidePanelTitles}
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
@@ -90,7 +100,7 @@ export class OptionsMenu extends Component {
   }
 }
 
-OptionsMenu.propTypes = {
+OptionsMenuUi.propTypes = {
   darkTheme: PropTypes.bool.isRequired,
   onDarkThemeChange: PropTypes.func.isRequired,
   useMargins: PropTypes.bool.isRequired,
@@ -98,3 +108,5 @@ OptionsMenu.propTypes = {
   hidePanelTitles: PropTypes.bool.isRequired,
   onHidePanelTitlesChange: PropTypes.func.isRequired,
 };
+
+export const OptionsMenu = injectI18n(OptionsMenuUi);

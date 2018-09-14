@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
@@ -31,7 +32,10 @@ export class PanelUtils {
   static convertPanelDataPre_6_1(panel) { // eslint-disable-line camelcase
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
-        throw new Error(`Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: ${key}`);
+        throw new Error(i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
+          defaultMessage: 'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: {key}',
+          values: { key },
+        }));
       }
     });
 
@@ -59,7 +63,10 @@ export class PanelUtils {
   static convertPanelDataPre_6_3(panel, useMargins) { // eslint-disable-line camelcase
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
-        throw new Error(`Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`);
+        throw new Error(i18n.translate('kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
+          defaultMessage: 'Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: {key}',
+          values: { key },
+        }));
       }
     });
 
@@ -78,7 +85,10 @@ export class PanelUtils {
   static parseVersion(version = '6.0.0') {
     const versionSplit = version.split('.');
     if (versionSplit.length < 3) {
-      throw new Error(`Invalid version, ${version}, expected <major>.<minor>.<patch>`);
+      throw new Error(i18n.translate('kbn.dashboard.panel.invalidVersionErrorMessage', {
+        defaultMessage: 'Invalid version, {version}, expected <major>.<minor>.<patch>',
+        values: { version },
+      }));
     }
     return {
       major: parseInt(versionSplit[0], 10),

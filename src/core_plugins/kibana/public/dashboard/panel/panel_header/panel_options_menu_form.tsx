@@ -20,6 +20,7 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 
 import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export interface PanelOptionsMenuFormProps {
   title?: string;
@@ -28,11 +29,12 @@ export interface PanelOptionsMenuFormProps {
   onClose: () => void;
 }
 
-export function PanelOptionsMenuForm({
+function PanelOptionsMenuFormUi({
   title,
   onReset,
   onUpdatePanelTitle,
   onClose,
+  intl,
 }: PanelOptionsMenuFormProps) {
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
     onUpdatePanelTitle(event.target.value);
@@ -46,7 +48,12 @@ export function PanelOptionsMenuForm({
 
   return (
     <div className="dshPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
-      <EuiFormRow label="Panel title">
+      <EuiFormRow
+        label={intl.formatMessage({
+          id: 'kbn.dashboard.panel.optionsMenuForm.panelTitleFormRowLabel',
+          defaultMessage: 'Panel title',
+        })}
+      >
         <EuiFieldText
           id="panelTitleInput"
           data-test-subj="customDashboardPanelTitleInput"
@@ -55,13 +62,21 @@ export function PanelOptionsMenuForm({
           value={title}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
-          aria-label="Changes to this input are applied immediately. Press enter to exit."
+          aria-label={intl.formatMessage({
+            id: 'kbn.dashboard.panel.optionsMenuForm.titleInput.ariaLabel',
+            defaultMessage: 'Changes to this input are applied immediately. Press enter to exit.',
+          })}
         />
       </EuiFormRow>
 
       <EuiButtonEmpty data-test-subj="resetCustomDashboardPanelTitle" onClick={onReset}>
-        Reset title
+        <FormattedMessage
+          id="kbn.dashboard.panel.optionsMenuForm.resetCustomDashboardButtonLabel"
+          defaultMessage="Reset title"
+        />
       </EuiButtonEmpty>
     </div>
   );
 }
+
+export const PanelOptionsMenuForm = injectI18n(PanelOptionsMenuFormUi);

@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -37,7 +38,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-export class DashboardSaveModal extends React.Component {
+class DashboardSaveModalUi extends React.Component {
   constructor(props) {
     super(props);
 
@@ -121,13 +122,31 @@ export class DashboardSaveModal extends React.Component {
     return (
       <Fragment>
         <EuiCallOut
-          title={`A Dashboard with the title '${this.state.title}' already exists.`}
+          title={this.props.intl.formatMessage({
+            id: 'kbn.dashboard.topNav.saveModal.dashboardWIthTitleExistsCallOurTitle',
+            defaultMessage: 'A Dashboard with the title \'{title}\' already exists.',
+            values: {
+              title: this.state.title,
+            },
+          })}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
-          <p>
-            Click <strong>Confirm Save</strong> to save the dashboard with the duplicate title.
-          </p>
+          <FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.clickConfirmToSaveDashboardWithDuplicateTitleDescription"
+            defaultMessage="Click {confirmSave} to save the dashboard with the duplicate title."
+            values={{
+              confirmSave: (
+                <strong>
+                  <FormattedMessage
+                    id="kbn.dashboard.topNav.saveModal.confirmSaveText"
+                    defaultMessage="Confirm Save"
+                  />
+                </strong>
+              )
+            }}
+            tagName="p"
+          />
         </EuiCallOut>
         <EuiSpacer />
       </Fragment>
@@ -141,7 +160,10 @@ export class DashboardSaveModal extends React.Component {
 
     return (
       <EuiFormRow
-        label="Save as a new dashboard"
+        label={this.props.intl.formatMessage({
+          id: 'kbn.dashboard.topNav.saveModal.saveAsNewDashboardFormRow.label',
+          defaultMessage: 'Save as a new dashboard',
+        })}
       >
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
@@ -162,7 +184,10 @@ export class DashboardSaveModal extends React.Component {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              Save Dashboard
+              <FormattedMessage
+                id="kbn.dashboard.topNav.saveModal.saveDashboardModalHeaderTitle"
+                defaultMessage="Save Dashboard"
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
@@ -175,7 +200,10 @@ export class DashboardSaveModal extends React.Component {
               {this.renderCopyOnSave()}
 
               <EuiFormRow
-                label="Title"
+                label={this.props.intl.formatMessage({
+                  id: 'kbn.dashboard.topNav.saveModal.titleFormRow.label',
+                  defaultMessage: 'Title',
+                })}
               >
                 <EuiFieldText
                   autoFocus
@@ -187,7 +215,10 @@ export class DashboardSaveModal extends React.Component {
               </EuiFormRow>
 
               <EuiFormRow
-                label="Description"
+                label={this.props.intl.formatMessage({
+                  id: 'kbn.dashboard.topNav.saveModal.descriptionFormRow.label',
+                  defaultMessage: 'Description',
+                })}
               >
                 <EuiTextArea
                   data-test-subj="dashboardDescription"
@@ -198,8 +229,14 @@ export class DashboardSaveModal extends React.Component {
               </EuiFormRow>
 
               <EuiFormRow
-                label="Store time with dashboard"
-                helpText="This changes the time filter to the currently selected time each time this dashboard is loaded."
+                label={this.props.intl.formatMessage({
+                  id: 'kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRow.label',
+                  defaultMessage: 'Store time with dashboard',
+                })}
+                helpText={this.props.intl.formatMessage({
+                  id: 'kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRow.helpText',
+                  defaultMessage: 'This changes the time filter to the currently selected time each time this dashboard is loaded.',
+                })}
               >
                 <EuiSwitch
                   data-test-subj="storeTimeWithDashboard"
@@ -217,7 +254,10 @@ export class DashboardSaveModal extends React.Component {
               data-test-subj="saveCancelButton"
               onClick={this.props.onClose}
             >
-              Cancel
+              <FormattedMessage
+                id="kbn.dashboard.topNav.saveModal.saveDashboardCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButton>
 
             <EuiButton
@@ -226,7 +266,10 @@ export class DashboardSaveModal extends React.Component {
               onClick={this.saveDashboard}
               isLoading={this.state.isLoading}
             >
-              Confirm Save
+              <FormattedMessage
+                id="kbn.dashboard.topNav.saveModal.saveDashboardConfirmButtonLabel"
+                defaultMessage="Confirm Save"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -235,7 +278,7 @@ export class DashboardSaveModal extends React.Component {
   }
 }
 
-DashboardSaveModal.propTypes = {
+DashboardSaveModalUi.propTypes = {
   onSave: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
@@ -243,3 +286,5 @@ DashboardSaveModal.propTypes = {
   timeRestore: PropTypes.bool.isRequired,
   showCopyOnSave: PropTypes.bool.isRequired,
 };
+
+export const DashboardSaveModal = injectI18n(DashboardSaveModalUi);

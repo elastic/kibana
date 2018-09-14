@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -34,19 +35,23 @@ export interface PanelOptionsMenuProps {
   isViewMode: boolean;
 }
 
-export function PanelOptionsMenu({
+function PanelOptionsMenuUi({
   toggleContextMenu,
   isPopoverOpen,
   closeContextMenu,
   panels,
   isViewMode,
+  intl,
 }: PanelOptionsMenuProps) {
   const button = (
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
       color="text"
       className={isViewMode && !isPopoverOpen ? 'dshPanel_optionsMenuButton' : ''}
-      aria-label="Panel options"
+      aria-label={intl.formatMessage({
+        id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButton.ariaLabel',
+        defaultMessage: 'Panel options',
+      })}
       data-test-subj="dashboardPanelToggleMenuIcon"
       onClick={toggleContextMenu}
     />
@@ -67,3 +72,5 @@ export function PanelOptionsMenu({
     </EuiPopover>
   );
 }
+
+export const PanelOptionsMenu = injectI18n(PanelOptionsMenuUi);

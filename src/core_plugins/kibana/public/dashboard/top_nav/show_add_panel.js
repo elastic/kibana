@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -63,12 +64,14 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis, listing
 
   document.body.appendChild(container);
   const element = (
-    <DashboardAddPanel
-      onClose={onClose}
-      find={find}
-      addNewPanel={addNewPanel}
-      addNewVis={addNewVisWithCleanup}
-    />
+    <I18nProvider>
+      <DashboardAddPanel
+        onClose={onClose}
+        find={find}
+        addNewPanel={addNewPanel}
+        addNewVis={addNewVisWithCleanup}
+      />
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

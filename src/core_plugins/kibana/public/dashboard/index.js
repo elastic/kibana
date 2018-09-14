@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
@@ -92,6 +93,23 @@ uiRoutes
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
+    controller($scope) {
+      $scope.addVisualizationToDashboardLinkText = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkText', {
+        defaultMessage: 'Add',
+      });
+
+      $scope.addVisualizationToDashboardLinkAriaLabel = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkAriaLabel', {
+        defaultMessage: 'Add visualization',
+      });
+
+      $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.app.visitVisualizeAppLinkText', {
+        defaultMessage: 'visit the Visualize app',
+      });
+
+      $scope.howToStartWorkingOnNewDashboardEditLinkText = i18n.translate('kbn.dashboard.app.howToStartWorkingOnNewDashboardEditLinkText', {
+        defaultMessage: 'Edit',
+      });
+    },
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
@@ -104,7 +122,7 @@ uiRoutes
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState) {
+      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
@@ -125,7 +143,9 @@ uiRoutes
             if (error instanceof SavedObjectNotFound && id === 'create') {
               // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              toastNotifications.addWarning('The url "dashboard/create" was removed in 6.0. Please update your bookmarks.');
+              toastNotifications.addWarning(i18n('kbn.dashboard.routes.toastNotifications.urlDashboardWasRemovedInSixZeroWarningMessage',
+                { defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.' }
+              ));
             } else {
               throw error;
             }
@@ -140,8 +160,12 @@ uiRoutes
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'dashboard',
-    title: 'Dashboard',
-    description: 'Display and share a collection of visualizations and saved searches.',
+    title: i18n.translate('kbn.dashboard.featureCatalogue.dashboard.title', {
+      defaultMessage: 'Dashboard',
+    }),
+    description: i18n.translate('kbn.dashboard.featureCatalogue.dashboard.description', {
+      defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+    }),
     icon: 'dashboardApp',
     path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

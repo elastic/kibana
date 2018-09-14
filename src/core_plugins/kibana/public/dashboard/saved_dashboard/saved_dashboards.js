@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import './saved_dashboard';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
@@ -29,7 +30,9 @@ const module = uiModules.get('app/dashboard');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedDashboards',
-  title: 'dashboards'
+  title: i18n.translate('kbn.dashboard.savedDashboards.title', {
+    defaultMessage: 'dashboards',
+  }),
 });
 
 // This is the only thing that gets injected into controllers

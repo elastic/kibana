@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { Embeddable } from 'ui/embeddable';
 import { PanelId } from '../../selectors';
@@ -30,12 +31,13 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
 }
 
-export function PanelHeader({
+function PanelHeaderUi({
   title,
   panelId,
   embeddable,
   isViewOnlyMode,
   hidePanelTitles,
+  intl,
 }: PanelHeaderProps) {
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
@@ -56,7 +58,13 @@ export function PanelHeader({
         data-test-subj="dashboardPanelTitle"
         className="dshPanel__title"
         title={title}
-        aria-label={`Dashboard panel: ${title}`}
+        aria-label={intl.formatMessage({
+          id: 'kbn.dashboard.panel.header.dashboardPanelAriaLabel',
+          defaultMessage: 'Dashboard panel: {title}',
+          values: {
+            title,
+          },
+        })}
       >
         {hidePanelTitles ? '' : title}
       </span>
@@ -67,3 +75,5 @@ export function PanelHeader({
     </div>
   );
 }
+
+export const PanelHeader = injectI18n(PanelHeaderUi);

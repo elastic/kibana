@@ -20,6 +20,7 @@
 import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ContextMenuAction } from 'ui/embeddable';
 import { DashboardViewMode } from '../../../dashboard_view_mode';
@@ -31,7 +32,9 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
 export function getEditPanelAction() {
   return new ContextMenuAction(
     {
-      displayName: 'Edit visualization',
+      displayName: i18n.translate('kbn.dashboard.panel.header.actions.editPanel.displayName', {
+        defaultMessage: 'Edit visualization',
+      }),
       id: 'editPanel',
       parentPanelId: 'mainMenu',
     },

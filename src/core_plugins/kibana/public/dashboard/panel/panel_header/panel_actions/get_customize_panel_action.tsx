@@ -18,6 +18,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ContextMenuAction, ContextMenuPanel } from 'ui/embeddable';
 import { DashboardViewMode } from '../../../dashboard_view_mode';
@@ -36,7 +37,9 @@ export function getCustomizePanelAction({
 }): ContextMenuAction {
   return new ContextMenuAction(
     {
-      displayName: 'Customize panel',
+      displayName: i18n.translate('kbn.dashboard.panel.header.actions.customizePanel.displayName', {
+        defaultMessage: 'Customize panel',
+      }),
       id: 'customizePanel',
       parentPanelId: 'mainMenu',
     },
@@ -44,7 +47,9 @@ export function getCustomizePanelAction({
       childContextMenuPanel: new ContextMenuPanel(
         {
           id: 'panelSubOptionsMenu',
-          title: 'Customize panel',
+          title: i18n.translate('kbn.dashboard.panel.header.actions.customizePanel.title', {
+            defaultMessage: 'Customize panel',
+          }),
         },
         {
           getContent: () => (

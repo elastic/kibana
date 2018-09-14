@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { DashboardCloneModal } from './clone_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
 export function showCloneModal(onClone, title) {
   const container = document.createElement('div');
@@ -37,7 +39,16 @@ export function showCloneModal(onClone, title) {
   };
   document.body.appendChild(container);
   const element = (
-    <DashboardCloneModal onClone={onCloneConfirmed} onClose={closeModal} title={title + ' Copy'} />
+    <I18nProvider>
+      <DashboardCloneModal
+        onClone={onCloneConfirmed}
+        onClose={closeModal}
+        title={i18n.translate('kbn.dashboard.topNav.showCloneModal.dashboardCloneModal.title', {
+          defaultMessage: '{title} Copy',
+          values: { title },
+        })}
+      />
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

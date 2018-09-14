@@ -15,7 +15,13 @@
         aria-level="1"
       >
         <div class="kuiLocalBreadcrumb">
-          <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+          <a
+            class="kuiLocalBreadcrumb__link"
+            href="{{landingPageUrl()}}"
+            i18n-id="kbn.dashboard.app.dashboardLinkLabel"
+            i18n-default-message="Dashboard"
+          >
+          </a>
         </div>
         <div class="kuiLocalBreadcrumb">
           {{ getDashTitle() }}
@@ -46,22 +52,51 @@
     ng-show="getShouldShowEditHelp()"
     class="dshStartScreen"
   >
-    <h2 class="kuiTitle kuiVerticalRhythm">
-      This dashboard is empty. Let&rsquo;s fill it up!
+    <h2
+      class="kuiTitle kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.app.fillDashboardTitle"
+      i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
+    >
     </h2>
 
-    <p class="kuiText kuiVerticalRhythm">
-      Click the <a kbn-accessible-click class="kuiButton kuiButton--primary kuiButton--small" ng-click="showAddPanel()" aria-label="Add visualization" data-test-subj="emptyDashboardAddPanelButton">Add</a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't set up any visualizations yet, <a class="kuiLink" href="#/visualize">visit the Visualize app</a> to create your first visualization.
+    <p
+      class="kuiText kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.app.addVisualizationToDashboardDescription"
+      i18n-default-message="Click the {addVisualizationToDashboardLink} button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
+      i18n-values="{
+        addVisualizationToDashboardLink: '<a
+          kbn-accessible-click
+          class="kuiButton kuiButton--primary kuiButton--small"
+          ng-click="showAddPanel()"
+          aria-label="' + addVisualizationToDashboardLinkAriaLabel + '"
+          data-test-subj="emptyDashboardAddPanelButton">' + addVisualizationToDashboardLinkText + '</a>',
+        br: '<br/>',
+        visitVisualizeAppLink: '<a class="kuiLink" href="#/visualize">' + visitVisualizeAppLinkText + '</a>'}"
+    >
     </p>
   </div>
 
   <div ng-show="getShouldShowViewHelp()" class="dshStartScreen">
-    <h2 class="kuiTitle kuiVerticalRhythm">
-      This dashboard is empty. Let&rsquo;s fill it up!
+    <h2
+      class="kuiTitle kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.app.fillDashboardTitle"
+      i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
+    >
     </h2>
 
-    <p class="kuiText kuiVerticalRhythm">
-      Click the <a kbn-accessible-click class="kuiButton kuiButton--primary kuiButton--small" ng-click="enterEditMode()">Edit</a> button in the menu bar above to start working on your new dashboard.
+    <p
+      class="kuiText kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.app.howToStartWorkingOnNewDashboardDescription"
+      i18n-default-message="Click the {howToStartWorkingOnNewDashboardEditLink} button in the menu bar above to start working on your new dashboard."
+      i18n-values="{
+        howToStartWorkingOnNewDashboardEditLink: '
+          <a
+            kbn-accessible-click
+            class="kuiButton kuiButton--primary kuiButton--small"
+            ng-click="enterEditMode()"
+          >' + howToStartWorkingOnNewDashboardEditLinkText + '</a>'
+      }"
+    >
     </p>
   </div>
 
