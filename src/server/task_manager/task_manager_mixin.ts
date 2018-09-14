@@ -17,14 +17,8 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import { TaskManagerLogger } from './logger';
-import {
-  SanitizedTaskDefinition,
-  TaskDefinition,
-  TaskDictionary,
-  validateTaskDefinition,
-} from './task';
+import { extractTaskDefinitions } from './lib/extract_task_definitions';
+import { TaskManagerLogger } from './lib/logger';
 import { TaskManager } from './task_manager';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
@@ -39,31 +33,4 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
   const client = new TaskManager({ logger, maxWorkers, definitions });
   server.decorate('server', 'taskManager', client);
   kbnServer.afterPluginsInit(() => client.afterPluginsInit(kbnServer, server, config));
-}
-
-// TODO, move this to a file and properly test it
-function extractTaskDefinitions(
-  maxWorkers: number,
-  taskDefinitions: TaskDictionary<TaskDefinition> = {},
-  overrideNumWorkers: { [taskType: string]: number }
-): TaskDictionary<SanitizedTaskDefinition> {
-  return Object.keys(taskDefinitions).reduce(
-    (acc, type) => {
-      const rawDefinition = taskDefinitions[type];
-      rawDefinition.type = type;
-      const definition = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      const numWorkers = Math.min(
-        maxWorkers,
-        overrideNumWorkers[definition.type] || definition.numWorkers || 1
-      );
-
-      acc[type] = {
-        ...definition,
-        numWorkers,
-      };
-
-      return acc;
-    },
-    {} as TaskDictionary<SanitizedTaskDefinition>
-  );
 }

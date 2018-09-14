@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger } from './logger';
+import { Logger } from './lib/logger';
 import { TaskRunner } from './task_runner';
 
 interface Opts {

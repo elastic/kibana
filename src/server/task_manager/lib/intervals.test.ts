@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { assertValidInterval, intervalFromNow, minutesFromNow } from './task_intervals';
+import { assertValidInterval, intervalFromNow, minutesFromNow } from './intervals';
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {

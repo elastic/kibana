@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RunContext, TaskInstance } from './task';
+import { RunContext, TaskInstance } from '../task';
 
 /*
  * BeforeSaveMiddlewareParams is nearly identical to RunContext, but

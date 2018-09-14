@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { minutesFromNow } from './lib/intervals';
 import { ConcreteTaskInstance, TaskDefinition } from './task';
-import { minutesFromNow } from './task_intervals';
 import { TaskManagerRunner } from './task_runner';
 
 describe('TaskManagerRunner', () => {

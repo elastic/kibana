@@ -18,8 +18,9 @@
  */
 
 import Joi from 'joi';
-import { Logger } from './logger';
-import { BeforeRunFunction } from './middleware';
+import { intervalFromNow, minutesFromNow } from './lib/intervals';
+import { Logger } from './lib/logger';
+import { BeforeRunFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
@@ -28,7 +29,6 @@ import {
   TaskDefinition,
   validateRunResult,
 } from './task';
-import { intervalFromNow, minutesFromNow } from './task_intervals';
 import { RemoveResult } from './task_store';
 
 export interface TaskRunner {
