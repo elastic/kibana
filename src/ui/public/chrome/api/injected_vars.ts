@@ -17,6 +17,24 @@
  * under the License.
  */
 
-export { UiSettingsService, UiSettingsStartContract } from './ui_settings_service';
-export { UiSettingsClient } from './ui_settings_client';
-export { UiSettingsState } from './types';
+import { cloneDeep } from 'lodash';
+import { InjectedMetadataStartContract } from '../../../../core/public/injected_metadata';
+
+let newPlatformInjectedVars: InjectedMetadataStartContract;
+
+export function __newPlatformInit__(instance: InjectedMetadataStartContract) {
+  if (newPlatformInjectedVars) {
+    throw new Error('ui/chrome/api/injected_vars is already initialized');
+  }
+
+  newPlatformInjectedVars = instance;
+}
+
+export function initChromeInjectedVarsApi(chrome: { [key: string]: any }) {
+  chrome.getInjected = (name: string, defaultValue: any) =>
+    cloneDeep(
+      name
+        ? newPlatformInjectedVars.getInjectedVar(name, defaultValue)
+        : newPlatformInjectedVars.getInjectedVars()
+    );
+}

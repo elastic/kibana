@@ -66,6 +66,7 @@ export class LegacyPlatformService {
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
+    require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
