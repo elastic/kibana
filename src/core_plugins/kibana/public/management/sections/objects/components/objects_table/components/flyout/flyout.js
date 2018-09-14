@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, take } from 'lodash';
+import { groupBy, take, get as getField } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -420,7 +420,7 @@ export class Flyout extends Component {
             Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
           </p>
           <p>
-            {failedImports.map(({ error }) => error.message || '').join(' ')}
+            {failedImports.map(({ error }) => getField(error, 'body.message', error.message || '')).join(' ')}
           </p>
         </EuiCallOut>
       );

@@ -60,6 +60,7 @@
  * given an empty migrationVersion property {} if no such property exists.
 */
 
+import Boom from 'boom';
 import _ from 'lodash';
 import Semver from 'semver';
 import { MigrationVersion, SavedObjectDoc } from '../../serialization';
@@ -225,8 +226,6 @@ function buildDocumentTransform({
   validateDoc: ValidateDoc;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectDoc) {
-    assertCanTransform(doc, kibanaVersion);
-
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
@@ -312,26 +311,32 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn, log:
 }
 
 /**
- * Throws an exception if the doc has props with a later version than the current Kibana instance.
- */
-function assertCanTransform(doc: SavedObjectDoc, kibanaVersion: string) {
-  const futureEntry = Object.entries(doc.migrationVersion || {}).find(([, v]) =>
-    Semver.gt(v, kibanaVersion)
-  );
-
-  if (futureEntry) {
-    throw new Error(
-      `Document ${doc.id} has property ${futureEntry[0]} which is belongs to a` +
-        ` more recent version of Kibana (${futureEntry[1]}).`
-    );
-  }
-}
-
-/**
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => propVersion(migrations, p) !== propVersion(doc, p));
+  return props(doc).find(p => {
+    const latestVersion = propVersion(migrations, p);
+    const docVersion = propVersion(doc, p);
+
+    if (latestVersion === docVersion) {
+      return false;
+    }
+
+    // We verify that the version is not greater than the version supported by Kibana.
+    // If we didn't, this would cause an infinite loop, as we'd be unable to migrate the property
+    // but it would continue to show up as unmigrated.
+    // If we have a docVersion and the latestVersion is smaller than it or does not exist,
+    // we are dealing with a document that belongs to a future Kibana / plugin version.
+    if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
+      throw Boom.badData(
+        `Document "${doc.id}" has property "${p}" with version "${docVersion}" but only ` +
+          `"${latestVersion || '0.0.0'}" or lower is supported by this version of Kibana.`,
+        doc
+      );
+    }
+
+    return true;
+  });
 }
 
 /**
