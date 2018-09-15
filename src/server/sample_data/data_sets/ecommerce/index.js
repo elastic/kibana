@@ -23,11 +23,19 @@ import { savedObjects } from './saved_objects';
 export function ecommerceSpecProvider() {
   return {
     id: 'ecommerce',
+<<<<<<< HEAD
     name: 'Sample eCommerce orders',
     description: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+=======
+    name: 'Sample eCommerce data',
+    description: 'Sample data, visualizations, and dashboards for monitoring eCommerce.',
+    previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
+    overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+>>>>>>> ecommerce data set
     dataPath: path.join(__dirname, './ecommerce.json.gz'),
     fields: {
       category: {
@@ -45,6 +53,7 @@ export function ecommerceSpecProvider() {
         type: 'date'
       },
       customer_first_name: {
+<<<<<<< HEAD
         type: 'text',
         fields: {
           keyword: {
@@ -52,13 +61,19 @@ export function ecommerceSpecProvider() {
             ignore_above: 256
           }
         }
+=======
+        type: 'keyword'
+>>>>>>> ecommerce data set
       },
       customer_full_name: {
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
+<<<<<<< HEAD
             ignore_above: 256
+=======
+>>>>>>> ecommerce data set
           }
         }
       },
@@ -66,13 +81,23 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       customer_id: {
+<<<<<<< HEAD
         type: 'keyword'
       },
       customer_last_name: {
+=======
+        type: 'integer'
+      },
+      customer_last_name: {
+        type: 'keyword'
+      },
+      customer_phone: {
+>>>>>>> ecommerce data set
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
+<<<<<<< HEAD
             ignore_above: 256
           }
         }
@@ -80,6 +105,11 @@ export function ecommerceSpecProvider() {
       customer_phone: {
         type: 'keyword'
       },
+=======
+          }
+        }
+      },
+>>>>>>> ecommerce data set
       day_of_week: {
         type: 'keyword'
       },
@@ -101,27 +131,47 @@ export function ecommerceSpecProvider() {
         type: 'date'
       },
       order_id: {
+<<<<<<< HEAD
         type: 'keyword'
       },
       products: {
         properties: {
           base_price: { type: 'half_float' },
           discount_percentage: { type: 'half_float' },
+=======
+        type: 'integer'
+      },
+      products: {
+        type: 'nested',
+        properties: {
+          base_price: { type: 'float' },
+          discount_percentage: { type: 'float' },
+>>>>>>> ecommerce data set
           quantity: { type: 'integer' },
           manufacturer: {
             type: 'text',
             fields: {
               keyword: {
+<<<<<<< HEAD
                 type: 'keyword'
               }
             }
           },
           tax_amount: { type: 'half_float' },
           product_id: { type: 'long' },
+=======
+                type: 'keyword',
+              }
+            }
+          },
+          tax_amount: { type: 'float' },
+          product_id: { type: 'integer' },
+>>>>>>> ecommerce data set
           category: {
             type: 'text',
             fields: {
               keyword: {
+<<<<<<< HEAD
                 type: 'keyword'
               }
             }
@@ -163,6 +213,45 @@ export function ecommerceSpecProvider() {
       },
       taxless_total_price: {
         type: 'half_float'
+=======
+                type: 'keyword',
+              }
+            }
+          },
+          sku: { type: 'keyword' },
+          taxless_price: { type: 'float' },
+          unit_discount_amount: { type: 'float' },
+          min_price: { type: 'float' },
+          _id: { type: 'keyword' },
+          discount_amount: { type: 'float' },
+          created_on: { type: 'float' },
+          product_name: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+              }
+            }
+          },
+          price: { type: 'float' },
+          taxful_price: { type: 'float' },
+          base_unit_price: { type: 'float' },
+        }
+      },
+      sku: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          }
+        }
+      },
+      taxful_total_price: {
+        type: 'float'
+      },
+      taxless_total_price: {
+        type: 'float'
+>>>>>>> ecommerce data set
       },
       total_quantity: {
         type: 'integer'
@@ -177,17 +266,36 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       geoip: {
+<<<<<<< HEAD
         properties: {
           country_iso_code: { type: 'keyword' },
           location: { type: 'geo_point' },
           region_name: { type: 'keyword' },
+=======
+        type: 'nested',
+        properties: {
+          country_iso_code: { type: 'keyword' },
+          location: { type: 'geo_point' },
+          region_name: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+              }
+            }
+          },
+>>>>>>> ecommerce data set
           continent_name: { type: 'keyword' },
           city_name: { type: 'keyword' }
         }
       }
     },
     timeFields: ['order_date'],
+<<<<<<< HEAD
     currentTimeMarker: '2016-12-11T00:00:00',
+=======
+    currentTimeMarker: '2018-01-09T00:00:00',
+>>>>>>> ecommerce data set
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
