@@ -21,12 +21,16 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl } from '../../../services';
+
+const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 export class StepLogisticsUi extends Component {
   static propTypes = {
@@ -35,7 +39,70 @@ export class StepLogisticsUi extends Component {
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     isValidatingIndexPattern: PropTypes.bool.isRequired,
+    hasMatchingIndices: PropTypes.bool.isRequired,
     indexPatternAsyncErrors: PropTypes.array,
+  }
+
+  renderIndexPatternHelpText() {
+    const {
+      isValidatingIndexPattern,
+      hasMatchingIndices,
+    } = this.props;
+
+    if(!isValidatingIndexPattern && hasMatchingIndices) {
+      return (
+        <EuiTextColor color="secondary">
+          <p>
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatches.label"
+              defaultMessage="Success! Index pattern has matching indices."
+            />
+          </p>
+        </EuiTextColor>
+      );
+    }
+
+    let indexPatternValidationStatus;
+
+    if (isValidatingIndexPattern) {
+      indexPatternValidationStatus = (
+        <p>
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpSearching.label"
+            defaultMessage="Looking for matching indices..."
+          />
+        </p>
+      );
+    } else {
+      indexPatternValidationStatus = (
+        <p>
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpMustMatch.label"
+            defaultMessage="Index pattern must match at least one non-rollup index."
+          />
+        </p>
+      );
+    }
+
+    return (
+      <Fragment>
+        {indexPatternValidationStatus}
+        <p>
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllow.label"
+            defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+            values={{ asterisk: <strong>*</strong> }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallow.label"
+            defaultMessage="You can't use spaces or the characters {characterList}"
+            values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+          />
+        </p>
+      </Fragment>
+    );
   }
 
   render() {
@@ -63,9 +130,6 @@ export class StepLogisticsUi extends Component {
       rollupCron: errorRollupCron,
       rollupPageSize: errorRollupPageSize,
     } = fieldErrors;
-
-    const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-    const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
     return (
       <Fragment>
@@ -174,26 +238,9 @@ export class StepLogisticsUi extends Component {
                   defaultMessage="Index pattern"
                 />
               )}
-              error={errorIndexPattern || indexPatternAsyncErrors}
+              error={isValidatingIndexPattern ? undefined : (errorIndexPattern || indexPatternAsyncErrors)}
               isInvalid={Boolean((areStepErrorsVisible && errorIndexPattern)) || Boolean(indexPatternAsyncErrors)}
-              helpText={(
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllow.label"
-                      defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                      values={{ asterisk: <strong>*</strong> }}
-                    />
-                  </p>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallow.label"
-                      defaultMessage="You can't use spaces or the characters {characterList}"
-                      values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
-                    />
-                  </p>
-                </Fragment>
-              )}
+              helpText={this.renderIndexPatternHelpText()}
               fullWidth
             >
               <EuiFieldText

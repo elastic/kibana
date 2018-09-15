@@ -134,7 +134,7 @@ export class StepDateHistogramUi extends Component {
             label={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
-                defaultMessage="Time zone (optional)"
+                defaultMessage="Time zone"
               />
             )}
             error={errorDateHistogramTimeZone || ''}
