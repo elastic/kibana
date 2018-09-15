@@ -111,3 +111,4 @@
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
 #i18n.locale: "en"
+xpack.reporting.capture.browser.type: "chromium"
