@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { GlobalBannerList } from './global_banner_list';
-export { banners } from './banners';
+export { Banners, Banner, BannersService, BannersStartContract } from './banners_service';

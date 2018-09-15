@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { BannersService } from './banners';
 import { ToastsService } from './toasts';
 
 interface Params {
@@ -25,26 +26,36 @@ interface Params {
 
 export class NotificationsService {
   private readonly toasts: ToastsService;
+  private readonly banners: BannersService;
 
   private readonly toastsContainer: HTMLElement;
+  private readonly bannersContainer: HTMLElement;
 
   constructor(private readonly params: Params) {
     this.toastsContainer = document.createElement('div');
     this.toasts = new ToastsService({
       targetDomElement: this.toastsContainer,
     });
+
+    this.bannersContainer = document.createElement('div');
+    this.banners = new BannersService({
+      targetDomElement: this.bannersContainer,
+    });
   }
 
   public start() {
     this.params.targetDomElement.appendChild(this.toastsContainer);
+    const toasts = this.toasts.start();
 
-    return {
-      toasts: this.toasts.start(),
-    };
+    this.params.targetDomElement.appendChild(this.bannersContainer);
+    const banners = this.banners.start();
+
+    return { toasts, banners };
   }
 
   public stop() {
     this.toasts.stop();
+    this.banners.stop();
 
     this.params.targetDomElement.textContent = '';
   }
