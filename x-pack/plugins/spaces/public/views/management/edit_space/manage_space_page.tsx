@@ -213,12 +213,14 @@ export class ManageSpacePage extends Component<Props, State> {
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={this.saveSpace}>
+          <EuiButton fill onClick={this.saveSpace} data-test-subj="save-space-button">
             {saveText}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.backToSpacesList}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
+            Cancel
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
         {this.getActionButton()}
@@ -231,6 +233,7 @@ export class ManageSpacePage extends Component<Props, State> {
       return (
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
+            data-test-subj="delete-space-button"
             space={this.state.space as Space}
             spacesManager={this.props.spacesManager}
             spacesNavState={this.props.spacesNavState}
