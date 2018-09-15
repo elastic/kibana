@@ -33,9 +33,14 @@ export function ecommerceSpecProvider() {
     name: 'Sample eCommerce data',
     description: 'Sample data, visualizations, and dashboards for monitoring eCommerce.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
+<<<<<<< HEAD
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
 >>>>>>> ecommerce data set
+=======
+    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+    defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+>>>>>>> fix ids
     dataPath: path.join(__dirname, './ecommerce.json.gz'),
     fields: {
       category: {
