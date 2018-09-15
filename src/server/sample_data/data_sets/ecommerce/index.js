@@ -125,7 +125,7 @@ export function ecommerceSpecProvider() {
           min_price: { type: 'float' },
           _id: { type: 'keyword' },
           discount_amount: { type: 'float' },
-          created_on: { type: 'float' },
+          created_on: { type: 'date' },
           product_name: {
             type: 'text',
             fields: {

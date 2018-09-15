@@ -38,3 +38,15 @@ test('load log data', async () => {
   expect(myDocsCount).toBe(14005);
   expect(count).toBe(14005);
 });
+
+test('load ecommerce data', done => {
+  let myDocsCount = 0;
+  const bulkInsertMock = (docs) => {
+    myDocsCount += docs.length;
+  };
+  loadData('./src/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock, async (err, count) => {
+    expect(myDocsCount).toBe(4675);
+    expect(count).toBe(4675);
+    done();
+  });
+});
