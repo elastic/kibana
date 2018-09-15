@@ -18,9 +18,18 @@
  */
 
 export class ParseEsIntervalInvalidCalendarIntervalError extends Error {
-  constructor(public readonly interval: string) {
+  constructor(
+    public readonly interval: string,
+    public readonly value: number,
+    public readonly unit: string,
+    public readonly type: string
+  ) {
     super(`Invalid calendar interval: ${interval}, value must be 1`);
+
     this.name = 'ParseEsIntervalInvalidCalendarIntervalError';
+    this.value = value;
+    this.unit = unit;
+    this.type = type;
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
