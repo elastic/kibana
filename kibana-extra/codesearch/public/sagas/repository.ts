@@ -26,7 +26,6 @@ import {
   indexRepoSuccess,
   initRepoCommand,
 } from '../actions';
-import { loadStatus } from '../actions/status';
 import { history } from '../utils/url';
 
 function requestRepos(): any {
@@ -37,9 +36,6 @@ function* handleFetchRepos() {
   try {
     const repos = yield call(requestRepos);
     yield put(fetchReposSuccess(repos));
-    for (const repo of repos) {
-      yield put(loadStatus(repo.uri));
-    }
   } catch (err) {
     yield put(fetchReposFailed(err));
   }

@@ -7,12 +7,31 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import io from 'socket.io-client';
+import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 
-import 'ui/autoload/styles';
+import { loadStatusSuccess } from './actions/status';
 import { App } from './components/app';
 import { store } from './stores';
+
+const basePath = chrome.getBasePath();
+export const socket = io(undefined, { path: `${basePath}/ws` });
+
+socket.on('clone-progress', (data: any) => {
+  const { repoUri, progress, cloneProgress } = data;
+  store.dispatch(
+    loadStatusSuccess({
+      repoUri,
+      status: {
+        uri: repoUri,
+        progress,
+        cloneProgress,
+      },
+    })
+  );
+});
 
 const app = uiModules.get('apps/codesearch');
 

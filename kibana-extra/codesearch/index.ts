@@ -22,10 +22,12 @@ import {
   repositorySearchRoute,
   symbolSearchRoute,
 } from './server/routes/search';
+import { socketRoute } from './server/routes/socket';
 import { workspaceRoute } from './server/routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
+import { SocketService } from './server/socket_service';
 
 // tslint:disable-next-line no-default-export
 export default (kibana: any) =>
@@ -67,6 +69,8 @@ export default (kibana: any) =>
       const log = new Log(server);
       const serverOptions = new ServerOptions(options, server.config());
 
+      const socketService = new SocketService(log);
+
       // Initialize search clients
       const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
@@ -96,7 +100,8 @@ export default (kibana: any) =>
         log,
         objectsClient,
         adminCluster.getClient(),
-        indexWorker
+        indexWorker,
+        socketService
       ).bind();
       const deleteWorker = new DeleteWorker(
         queue,
@@ -145,6 +150,7 @@ export default (kibana: any) =>
       workspaceRoute(server, serverOptions, objectsClient);
       monacoRoute(server);
       symbolByQnameRoute(server, symbolSearchClient);
+      socketRoute(server, socketService, log);
 
       lspService.launchServers().then(() => {
         // register lsp route after language server launched

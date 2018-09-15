@@ -12,6 +12,7 @@ import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../mod
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
+import { SocketService } from '../socket_service';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { IndexWorker } from './index_worker';
 import { Job } from './job';
@@ -24,7 +25,8 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly log: Log,
     protected readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
-    private readonly indexWorker: IndexWorker
+    private readonly indexWorker: IndexWorker,
+    private readonly socketService?: SocketService
   ) {
     super(queue, log, objectsClient, client);
   }
@@ -36,11 +38,19 @@ export class CloneWorker extends AbstractGitWorker {
     const repo = RepositoryUtils.buildRepository(url);
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
       this.updateProgress(repo.uri, progress, cloneProgress);
+      if (this.socketService) {
+        this.socketService.boardcastCloneProgress(repo.uri, progress, cloneProgress);
+      }
     });
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     this.log.info(`Clone job done for ${res.repo.uri}`);
+
+    if (this.socketService) {
+      this.socketService.boardcastCloneProgress(res.repo.uri, 100, undefined);
+    }
+
     // Throw out a repository index request.
     const { dataPath } = job.payload;
     const payload = {
