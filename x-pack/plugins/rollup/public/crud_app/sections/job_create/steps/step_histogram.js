@@ -110,7 +110,7 @@ export class StepHistogramUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepHistogram.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Histogram docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

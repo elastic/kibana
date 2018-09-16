@@ -164,7 +164,7 @@ export class StepLogisticsUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Logistics docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

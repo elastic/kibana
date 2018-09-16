@@ -115,7 +115,7 @@ export class StepTermsUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepTerms.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

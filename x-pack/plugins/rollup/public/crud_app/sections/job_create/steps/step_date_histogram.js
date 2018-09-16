@@ -227,7 +227,7 @@ export class StepDateHistogramUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepDateHistogram.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Date histogram docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

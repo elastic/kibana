@@ -203,7 +203,7 @@ export class StepMetricsUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepMetrics.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
