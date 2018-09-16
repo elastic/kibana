@@ -80,6 +80,14 @@ const getLayerListRaw = createSelector(({ map }) => {
   return map.layerList ?  map.layerList : [];
 }, x => x);
 
+export const getMapExtent = createSelector(({ map }) => {
+  return map.exent ?  map.extent : [];
+}, x => x);
+
+export const getMapZoom = createSelector(({ map }) => {
+  return map.zoom ?  map.zoom : 0;
+}, x => x);
+
 export function getMetadata({ config }) {
   return config && config.meta || {};
 }
