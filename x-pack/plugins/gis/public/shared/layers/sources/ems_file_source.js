@@ -20,12 +20,10 @@ export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
 
-  static createDescriptor(name, { format, meta = null }) {
+  static createDescriptor(name) {
     return {
-      format,
       type: EMSFileSource.type,
-      name: name,
-      featureCollectionPath: meta && `objects.${meta.feature_collection_path}` || ''
+      name: name
     };
   }
 
@@ -39,9 +37,7 @@ export class EMSFileSource extends VectorSource {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].text;
-      const emsVectorDetails = emsVectorOptionsRaw.find(({ name }) => name === selectedId);
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(
-        selectedId, emsVectorDetails);
+      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
     };
