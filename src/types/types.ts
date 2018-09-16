@@ -22,8 +22,8 @@ export interface GithubCommit {
   sha: string;
 }
 
-export interface GithubIssues {
-  items: GithubIssue[];
+export interface GithubSearch<T> {
+  items: T[];
 }
 
 export interface GithubPullRequestPayload {

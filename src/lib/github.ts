@@ -5,13 +5,14 @@ import {
   Commit,
   GithubIssue,
   GithubPullRequestPayload,
-  GithubIssues,
-  GithubApiError
+  GithubApiError,
+  GithubSearch
 } from '../types/types';
 
 import axios, { AxiosResponse } from 'axios';
 import querystring from 'querystring';
 import get from 'lodash.get';
+import isEmpty from 'lodash.isempty';
 import { HandledError } from './errors';
 
 let accessToken: string;
@@ -62,14 +63,25 @@ export async function getCommit(
   sha: string
 ): Promise<Commit> {
   try {
-    const res: AxiosResponse<GithubCommit> = await axios(
-      `https://api.github.com/repos/${owner}/${repoName}/commits/${sha}?access_token=${accessToken}`
+    const res: AxiosResponse<GithubSearch<GithubCommit>> = await axios(
+      `https://api.github.com/search/commits?q=hash:${sha}%20repo:${owner}/${repoName}&per_page=1&access_token=${accessToken}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.cloak-preview'
+        }
+      }
     );
-    const fullSha = res.data.sha;
+
+    if (isEmpty(res.data.items)) {
+      throw new HandledError(`No commit found for SHA: ${sha}`);
+    }
+
+    const commitRes = res.data.items[0];
+    const fullSha = commitRes.sha;
     const pullRequest = await getPullRequestBySha(owner, repoName, fullSha);
 
     return {
-      message: getCommitMessage(res.data.commit.message),
+      message: getCommitMessage(commitRes.commit.message),
       sha: fullSha,
       pullRequest
     };
@@ -119,7 +131,7 @@ async function getPullRequestBySha(
   commitSha: string
 ): Promise<number> {
   try {
-    const res: AxiosResponse<GithubIssues> = await axios(
+    const res: AxiosResponse<GithubSearch<GithubIssue>> = await axios(
       `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}+base:master&access_token=${accessToken}`
     );
     return get(res.data.items[0], 'number');
