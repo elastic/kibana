@@ -11,6 +11,44 @@ import { calculateTimeseriesInterval } from '../../../../lib/calculate_timeserie
 import { getSeries } from '../../../../lib/details/get_series';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 
+async function getSyncLagTimeSeries(req, esIndexPattern, filters, min, max, bucketSize) {
+  return await getSeries(
+    req,
+    esIndexPattern,
+    'ccr_sync_lag_time',
+    filters,
+    { min, max, bucketSize }
+  );
+}
+
+async function getSyncLagOpsSeries(req, esIndexPattern, filters, min, max, bucketSize) {
+  return await getSeries(
+    req,
+    esIndexPattern,
+    'ccr_sync_lag_ops',
+    filters,
+    { min, max, bucketSize }
+  );
+}
+
+async function getCcrStat(req, esIndexPattern, filters) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+
+  return await callWithRequest(req, 'search', {
+    index: esIndexPattern,
+    size: 1,
+    filterPath: `hits.hits._source.ccr_stats`,
+    body: {
+      sort: [{ timestamp: { order: 'desc' } }],
+      query: {
+        bool: {
+          must: filters,
+        }
+      }
+    }
+  });
+}
+
 export function ccrShardRoute(server) {
   server.route({
     method: 'POST',
@@ -43,107 +81,42 @@ export function ccrShardRoute(server) {
       const minIntervalSeconds = config.get('xpack.monitoring.min_interval_seconds');
       const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
 
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-
-      try {
-        const syncLagTime = await getSeries(
-          req,
-          esIndexPattern,
-          'ccr_sync_lag_time',
-          [
-            {
-              term: {
-                type: {
-                  value: 'ccr_stats'
-                }
-              }
-            },
-            {
-              term: {
-                'ccr_stats.follower_index': {
-                  value: index,
-                }
-              }
-            },
-            {
-              term: {
-                'ccr_stats.shard_id': {
-                  value: shardId,
-                }
-              }
-            }
-          ],
-          { min, max, bucketSize }
-        );
-
-        const syncLagOps = await getSeries(
-          req,
-          esIndexPattern,
-          'ccr_sync_lag_ops',
-          [
-            {
-              term: {
-                type: {
-                  value: 'ccr_stats'
-                }
-              }
-            },
-            {
-              term: {
-                'ccr_stats.follower_index': {
-                  value: index,
-                }
-              }
-            },
-            {
-              term: {
-                'ccr_stats.shard_id': {
-                  value: shardId,
-                }
-              }
-            }
-          ],
-          { min, max, bucketSize }
-        );
-
-        const ccrResponse = await callWithRequest(req, 'search', {
-          index: esIndexPattern,
-          size: 1,
-          filterPath: `hits.hits._source.ccr_stats`,
-          body: {
-            sort: [{ timestamp: { order: 'desc' } }],
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      type: {
-                        value: 'ccr_stats'
-                      }
-                    }
-                  },
-                  {
-                    term: {
-                      'ccr_stats.follower_index': {
-                        value: index,
-                      }
-                    }
-                  },
-                  {
-                    term: {
-                      'ccr_stats.shard_id': {
-                        value: shardId,
-                      }
-                    }
-                  }
-                ]
-              }
+      const filters = [
+        {
+          term: {
+            type: {
+              value: 'ccr_stats'
             }
           }
-        });
+        },
+        {
+          term: {
+            'ccr_stats.follower_index': {
+              value: index,
+            }
+          }
+        },
+        {
+          term: {
+            'ccr_stats.shard_id': {
+              value: shardId,
+            }
+          }
+        }
+      ];
+
+      try {
+        const [
+          syncLagTime,
+          syncLagOps,
+          ccrResponse
+        ] = await Promise.all([
+          getSyncLagTimeSeries(req, esIndexPattern, filters, min, max, bucketSize),
+          getSyncLagOpsSeries(req, esIndexPattern, filters, min, max, bucketSize),
+          getCcrStat(req, esIndexPattern, filters)
+        ]);
 
         const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats');
-
         reply({
           metrics: {
             sync_lag_time: syncLagTime,

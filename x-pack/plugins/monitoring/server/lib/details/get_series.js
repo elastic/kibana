@@ -111,8 +111,6 @@ function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
     }
   };
 
-  metric.type === 'ccr' && console.log(JSON.stringify(params));
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params);
 }
