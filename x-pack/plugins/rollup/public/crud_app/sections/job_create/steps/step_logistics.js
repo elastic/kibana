@@ -357,7 +357,7 @@ export class StepLogisticsUi extends Component {
               fullWidth
             >
               <EuiFieldNumber
-                value={rollupPageSize}
+                value={rollupPageSize ? Number(rollupPageSize) : ''}
                 onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
