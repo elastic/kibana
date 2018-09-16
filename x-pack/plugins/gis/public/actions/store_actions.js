@@ -103,16 +103,18 @@ export function clearTemporaryLayers() {
 }
 
 export function mapExtentChanged(newMapConstants) {
-  return async (dispatch, getState) => {
+  const requestToken = Symbol('data_request_sync_extentchange');
 
+  return async (dispatch, getState) => {
+    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: newMapConstants
     });
 
     const layerList = getLayerList(getState());
-    layerList.forEach((layer) => {
-      layer.syncDataToMapState(newMapConstants, Symbol('data_request_sync_extentchange'), dispatch);
+    layerList.forEach(layer => {
+      layer.syncDataToMapState(dataLoading, newMapConstants);
     });
   };
 }
