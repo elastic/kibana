@@ -5,9 +5,8 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapExtent, getMapZoom, getMetadata }
+import { getLayerList, getMapExtent, getMapZoom, getDataSources }
   from '../selectors/map_selectors';
-import _ from 'lodash';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -46,11 +45,11 @@ export function replaceLayerList(newLayerList) {
     });
 
     const state = getState();
-    // TODO: establish better link between layer and metadata state
+    // TODO: establish better link between layer and datasources state
     const replaceState = {
       extent: getMapExtent(state),
       zoom: getMapZoom(state),
-      ...(_.get(state, 'config.meta.data_sources', {}))
+      ...(getDataSources(state))
     };
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
@@ -143,7 +142,7 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
 
   return async (dispatch, getState) => {
     const dataLoading = getDataLoadingFunction(dispatch, requestToken);
-    const metadata = getMetadata(getState());
+    const metadata = getDataSources(getState());
 
     await dispatch(addLayer(layerDescriptor, position));
     layer.syncDataToMapState(dataLoading, metadata);

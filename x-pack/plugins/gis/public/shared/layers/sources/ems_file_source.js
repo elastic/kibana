@@ -60,7 +60,7 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  async getGeoJson({ ems }) {
+  async getGeoJson({ ems = {} }) {
     const { file = [] } = ems;
     const { name } = this._descriptor;
     const fileSource = file.find((source => source.name === name));
