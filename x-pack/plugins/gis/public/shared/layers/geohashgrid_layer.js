@@ -6,7 +6,6 @@
 
 import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 
@@ -115,7 +114,7 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(mapState, requestToken, dispatch) {
+  async syncDataToMapState(dataLoading, mapState) {
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
@@ -127,28 +126,32 @@ export class GeohashGridLayer extends ALayer {
         return;
       }
     }
-    return this._fetchNewData(mapState, requestToken, targetPrecision, dispatch);
+    const fetchState = {
+      precision: targetPrecision,
+      extent: mapState.extent
+    };
+    return this._fetchNewData(dataLoading, fetchState);
   }
 
 
-  async _fetchNewData(mapState, requestToken, precision, dispatch) {
+  async _fetchNewData(dataLoading, mapState) {
+    const { precision, extent } = mapState;
     const scaleFactor = 0.5;
-    const width = mapState.extent[2] - mapState.extent[0];
-    const height = mapState.extent[3] - mapState.extent[1];
+    const width = extent[2] - extent[0];
+    const height = extent[3] - extent[1];
     const expandExtent = [
-      mapState.extent[0] - width * scaleFactor,
-      mapState.extent[1] - height * scaleFactor,
-      mapState.extent[2] + width * scaleFactor,
-      mapState.extent[3] + height * scaleFactor
+      extent[0] - width * scaleFactor,
+      extent[1] - height * scaleFactor,
+      extent[2] + width * scaleFactor,
+      extent[3] + height * scaleFactor
     ];
 
-    dispatch(startDataLoad(this.getId(), {
-      mapState: mapState,
-      precision: precision,
+    dataLoading(true, this.getId(), {
+      precision,
       extent: expandExtent
-    }, requestToken));
+    });
     const data = await this._source.getGeoJsonPointsWithTotalCount(precision, expandExtent);
-    dispatch(endDataLoad(this.getId(), data, requestToken));
+    dataLoading(false, this.getId(), data);
   }
 
 }

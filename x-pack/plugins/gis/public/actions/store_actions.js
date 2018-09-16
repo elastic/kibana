@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapState } from '../selectors/map_selectors';
+import { getLayerList, getMapExtent, getMapZoom } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -22,17 +22,35 @@ export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
+function getDataLoadingFunction(dispatch, requestToken) {
+  return (boolLoading, layerId, loadState = {}) => {
+    if (boolLoading) {
+      dispatch(startDataLoad(layerId, requestToken, loadState));
+    } else {
+      dispatch(endDataLoad(layerId, requestToken, loadState));
+    }
+  };
+}
 
 export function replaceLayerList(newLayerList) {
+  const requestToken = Symbol('data_request_sync_layerreplacement');
+
   return async (dispatch, getState) => {
+    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+
     await dispatch({
       type: REPLACE_LAYERLIST,
       layerList: newLayerList
     });
-    const layerList = getLayerList(getState());
-    const mapState = getMapState(getState());
-    layerList.forEach((layer) => {
-      layer.syncDataToMapState(mapState, Symbol('data_request_sync_layerreplacement'), dispatch);
+
+    const state = getState();
+    const extentState = {
+      extent: getMapExtent(state),
+      zoom: getMapZoom(state),
+    };
+    const layerList = getLayerList(state);
+    layerList.forEach(layer => {
+      layer.syncDataToMapState(dataLoading, extentState);
     });
   };
 
@@ -96,16 +114,16 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function startDataLoad(layerId, dataMeta, requestToken) {
+export function startDataLoad(layerId, requestToken, initLoadState) {
   return ({
+    initLoadState,
     type: LAYER_DATA_LOAD_STARTED,
     layerId: layerId,
-    dataMeta: dataMeta,
     requestToken: requestToken
   });
 }
 
-export function endDataLoad(layerId, data, requestToken) {
+export function endDataLoad(layerId, requestToken, data) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
     layerId: layerId,
@@ -114,15 +132,16 @@ export function endDataLoad(layerId, data, requestToken) {
   });
 }
 
-
 export function addLayerFromSource(source, layerOptions = {}, position) {
-  return async (dispatch, getState) => {
-    const state = getState();
-    const layer = source.createDefaultLayer(layerOptions);
-    const layerDescriptor = layer.toLayerDescriptor();
+  const requestToken = Symbol('data_request');
+  const layer = source.createDefaultLayer(layerOptions);
+  const layerDescriptor = layer.toLayerDescriptor();
+
+  return async dispatch => {
+    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+
     await dispatch(addLayer(layerDescriptor, position));
-    const mapState = getMapState(state);
-    layer.syncDataToMapState(mapState, Symbol('data_request'), dispatch);
+    layer.syncDataToMapState(dataLoading);
   };
 }
 

@@ -45,7 +45,7 @@ export function map(state = INITIAL_STATE, action) {
     case REPLACE_LAYERLIST:
       return { ...state, layerList: [ ...action.layerList] };
     case LAYER_DATA_LOAD_STARTED:
-      return updateWithDataRequest(state, action);
+      return updateWithDataRequest({ ...state, ...action.initLoadState }, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case MAP_EXTENT_CHANGED:

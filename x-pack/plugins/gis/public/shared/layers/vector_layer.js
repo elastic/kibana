@@ -6,7 +6,6 @@
 
 import { ALayer } from './layer';
 import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
-import { endDataLoad, startDataLoad } from '../../actions/store_actions';
 
 export class VectorLayer extends ALayer {
 
@@ -42,13 +41,13 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(mapState, requestToken, dispatch) {
+  async syncDataToMapState(dataLoading, configState = {}) {
     if (this._descriptor.data || this._descriptor.dataRequestToken) {
       return;
     }
-    dispatch(startDataLoad(this.getId(), mapState, requestToken));
-    const data = await this._source.getGeoJson();
-    dispatch(endDataLoad(this.getId(), data, requestToken));
+    dataLoading(true, this.getId());
+    const data = await this._source.getGeoJson(configState);
+    dataLoading(false, this.getId(), data);
   }
 
   syncLayerWithMB(mbMap) {
