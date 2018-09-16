@@ -85,31 +85,6 @@ export class JobListUi extends Component {
     this.props.closeDetailPanel();
   }
 
-  renderLoading() {
-    return (
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.loading.title"
-                defaultMessage="Loading rollup jobs..."
-              />
-            </EuiTextColor>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   renderEmpty() {
     return (
       <EuiEmptyPrompt
@@ -150,7 +125,38 @@ export class JobListUi extends Component {
     );
   }
 
-  renderTable() {
+  renderList() {
+    const { isLoading } = this.props;
+
+    let table;
+
+    if (isLoading) {
+      table = (
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          alignItems="center"
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobList.loading.title"
+                  defaultMessage="Loading rollup jobs..."
+                />
+              </EuiTextColor>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      table = <JobTable />;
+    }
+
     return (
       <Fragment>
         <EuiPageContentHeader>
@@ -177,7 +183,7 @@ export class JobListUi extends Component {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
-        <JobTable />
+        {table}
 
         <DetailPanel />
       </Fragment>
@@ -189,14 +195,10 @@ export class JobListUi extends Component {
 
     let content;
 
-    if (isLoading) {
-      content = this.renderLoading();
+    if (!isLoading && !jobs.length) {
+      content = this.renderEmpty();
     } else {
-      if (jobs.length) {
-        content = this.renderTable();
-      } else {
-        content = this.renderEmpty();
-      }
+      content = this.renderList();
     }
 
     return (
