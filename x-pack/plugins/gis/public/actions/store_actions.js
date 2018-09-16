@@ -5,7 +5,9 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapExtent, getMapZoom } from '../selectors/map_selectors';
+import { getLayerList, getMapExtent, getMapZoom, getMetadata }
+  from '../selectors/map_selectors';
+import _ from 'lodash';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -44,13 +46,15 @@ export function replaceLayerList(newLayerList) {
     });
 
     const state = getState();
-    const extentState = {
+    // TODO: establish better link between layer and metadata state
+    const replaceState = {
       extent: getMapExtent(state),
       zoom: getMapZoom(state),
+      ...(_.get(state, 'config.meta.data_sources', {}))
     };
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      layer.syncDataToMapState(dataLoading, extentState);
+      layer.syncDataToMapState(dataLoading, replaceState);
     });
   };
 
@@ -137,11 +141,12 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
   const layer = source.createDefaultLayer(layerOptions);
   const layerDescriptor = layer.toLayerDescriptor();
 
-  return async dispatch => {
+  return async (dispatch, getState) => {
     const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+    const metadata = getMetadata(getState());
 
     await dispatch(addLayer(layerDescriptor, position));
-    layer.syncDataToMapState(dataLoading);
+    layer.syncDataToMapState(dataLoading, metadata);
   };
 }
 

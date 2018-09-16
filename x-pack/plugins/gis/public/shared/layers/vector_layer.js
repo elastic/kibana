@@ -41,12 +41,12 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(dataLoading, configState = {}) {
+  async syncDataToMapState(dataLoading, metadata = {}) {
     if (this._descriptor.data || this._descriptor.dataRequestToken) {
       return;
     }
     dataLoading(true, this.getId());
-    const data = await this._source.getGeoJson(configState);
+    const data = await this._source.getGeoJson(metadata);
     dataLoading(false, this.getId(), data);
   }
 

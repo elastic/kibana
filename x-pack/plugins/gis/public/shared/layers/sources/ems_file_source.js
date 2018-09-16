@@ -60,20 +60,26 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  async getGeoJson() {
+  async getGeoJson({ ems }) {
+    const { file = [] } = ems;
+    const { name } = this._descriptor;
+    const fileSource = file.find((source => source.name === name));
     let jsonFeatures;
-    const { name, format, featureCollectionPath } = this._descriptor;
     try {
+      const { format, meta } = fileSource;
       const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(name)}`);
       const fetchedJson = await vectorFetch.json();
 
       if (format === 'geojson') {
         jsonFeatures = fetchedJson;
       } else if (format === 'topojson') {
-        const features = _.get(fetchedJson, featureCollectionPath || 'objects.data');
+        const featureCollectionPath = meta && meta.feature_collection_path
+          && `objects.${meta.feature_collection_path}` || 'objects.data';
+        const features = _.get(fetchedJson, featureCollectionPath);
         jsonFeatures = topojson.feature(fetchedJson, features);
       } else {
         //should never happen
+        jsonFeatures = {};
         throw new Error(`Unrecognized format: ${format}`);
       }
     } catch (e) {
