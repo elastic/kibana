@@ -111,6 +111,8 @@ function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
     }
   };
 
+  metric.type === 'ccr' && console.log(JSON.stringify(params));
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params);
 }
@@ -213,18 +215,12 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
-export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize, metricOpts }) {
+export async function getSeries(req, indexPattern, metricName, filters, { min, max, bucketSize }) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
-  }
-  if (metricOpts) {
-    Object.assign(metric, metricOpts);
-    // for (const optName in metricOpts) {
-    //   metric[optName] = metricOpts[optName];
-    // }
   }
   const response = await fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters);
 

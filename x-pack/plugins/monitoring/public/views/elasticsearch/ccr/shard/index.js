@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import React from 'react';
-// import { find } from 'lodash';
+import React from 'react';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
-// import { timefilter } from 'ui/timefilter';
+import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -37,11 +36,10 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         this.renderReact(data);
       });
 
-      this.renderReact = ({ data }) => {
-        console.log('hey', data);
-        // super.renderReact(
-        //   <Ccr data={data} />
-        // );
+      this.renderReact = ({ metrics, stat }) => {
+        super.renderReact(
+          <CcrShard metrics={metrics} stat={stat} />
+        );
       };
     }
   }

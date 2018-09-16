@@ -16,6 +16,7 @@ import {
   ThreadPoolRejectedMetric,
   WriteThreadPoolQueueMetric,
   WriteThreadPoolRejectedMetric,
+  DifferenceMetric,
 } from './classes';
 import {
   LARGE_FLOAT,
@@ -947,11 +948,26 @@ export const metrics = {
   }),
 
   // CCR
-  ccr_sync_lag_time: new RequestRateMetric({
+  ccr_sync_lag_time: new ElasticsearchMetric({
     title: 'Sync Lag Over Time', // title to use for the chart
-    field: '__dynamic',
     type: 'ccr',
-    label: 'Sync Lag', // label to use for this line in the chart
-    description: 'FILL ME OUT',
+    field: 'ccr_stats.time_since_last_fetch_millis',
+    label: 'Sync Lag',
+    description: 'The amount of time the follower index is lagging behind the leader.',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: 'ms'
+  }),
+  ccr_sync_lag_ops: new DifferenceMetric({
+    title: 'Sync Lag Over Time', // title to use for the chart
+    type: 'ccr',
+    fieldSource: 'ccr_stats',
+    metric: 'leader_max_seq_no',
+    metric2: 'follower_global_checkpoint',
+    label: 'Sync Lag',
+    description: 'The amount of time the follower index is lagging behind the leader.',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: 'ms'
   }),
 };

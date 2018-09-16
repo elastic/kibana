@@ -33,6 +33,36 @@ export class ElasticsearchMetric extends Metric {
   }
 }
 
+export class DifferenceMetric extends ElasticsearchMetric {
+  constructor({ fieldSource, metric, metric2, ...opts }) {
+    super({
+      ...opts,
+      field: '', // NOTE: this is not used for this
+      format: LARGE_FLOAT,
+      metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
+      units: 'ms'
+    });
+
+    this.checkRequiredParams({
+      metric,
+      metric2
+    });
+
+    this.aggs = {
+      metric_max: {
+        max: { field: `${fieldSource}.${metric}` }
+      },
+      metric2_max: {
+        max: { field: `${fieldSource}.${metric2}` }
+      },
+    };
+
+    this.calculation = (bucket) => {
+      return _.get(bucket, 'metric_max') - _.get(bucket, 'metric2_max');
+    };
+  }
+}
+
 export class LatencyMetric extends ElasticsearchMetric {
   constructor({ metric, fieldSource, ...opts }) {
     super({

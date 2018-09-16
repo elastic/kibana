@@ -8,7 +8,6 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 import { timefilter } from 'ui/timefilter';
 
 export function getPageData($injector) {
-  console.log('getPageData()');
   const $http = $injector.get('$http');
   const $route = $injector.get('$route');
   const globalState = $injector.get('globalState');
