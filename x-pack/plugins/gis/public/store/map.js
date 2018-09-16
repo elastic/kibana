@@ -118,7 +118,7 @@ function updateWithDataRequest(state, action) {
   const layerRequestingData = findLayerById(state, action.layerId);
   if (layerRequestingData) {
     layerRequestingData.dataDirty = true;//needs to be synced to OL/MB
-    layerRequestingData.dataMetaAtStart = action.dataMeta ? { ...action.dataMeta } : null;
+    layerRequestingData.dataMetaAtStart = state.mapState;
     layerRequestingData.dataRequestToken = action.requestToken;
     const layerList = [...state.layerList];
     return { ...state, layerList };
