@@ -155,7 +155,7 @@ const CourierRequestHandlerProvider = function () {
 
               searchSource.finalResponse = resp;
 
-              const parsedTimeRange = getTime(aggs.indexPattern, timeRange);
+              const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
 
               searchSource.tabifiedResponse = tabifyAggResponse(vis.getAggConfig(), resp, {
                 metricsAtAllLevels: vis.isHierarchical(),
