@@ -37,7 +37,7 @@ export function ccrRoute(server) {
         const response = await callWithRequest(req, 'search', {
           index: esIndexPattern,
           size: config.get('xpack.monitoring.max_bucket_size'),
-          filterPath: 'hits.hits._source.ccr_stats',
+          filterPath: 'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats',
           body: {
             sort: [{ timestamp: { order: 'desc' } }],
             query: {
@@ -54,12 +54,23 @@ export function ccrRoute(server) {
               }
             },
             collapse: {
-              field: 'ccr_stats.follower_index'
+              field: 'ccr_stats.follower_index',
+              inner_hits: {
+                name: 'by_shard',
+                collapse: {
+                  field: 'ccr_stats.shard_id',
+                }
+              }
             },
           }
         });
 
-        const stats = get(response, 'hits.hits').map(hit => hit._source.ccr_stats);
+        const stats = get(response, 'hits.hits').reduce((accum, hit) => {
+          const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
+          accum.push(...innerHits.map(innerHit => get(innerHit, '_source.ccr_stats')));
+          return accum;
+        }, []);
+
         const data = stats.reduce((accum, _stat) => {
           const { allByFollowerIndex, shardStatsByFollowerIndex } = accum;
 

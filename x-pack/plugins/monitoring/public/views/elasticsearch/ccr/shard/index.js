@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -23,7 +24,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, pageData) {
       super({
         title: 'Elasticsearch - Ccr - Shard',
         reactNodeId: 'elasticsearchCcrShardReact',
@@ -31,6 +32,8 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         $scope,
         $injector
       });
+
+      $scope.followerIndex = get(pageData, 'stat.follower_index');
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
