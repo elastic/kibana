@@ -220,7 +220,9 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         migrationVersion: { dog: '10.2.0' },
       })
-    ).toThrow(/Document "smelly" has property "dog" with version "10\.2\.0"/i);
+    ).toThrow(
+      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \(10\.2\.0\)/i
+    );
   });
 
   it('rejects docs that belong to a newer plugin', () => {
@@ -239,7 +241,9 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         migrationVersion: { dawg: '1.2.4' },
       })
-    ).toThrow(/Document "fleabag" has property "dawg" with version "1\.2\.4"/i);
+    ).toThrow(
+      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \(1\.2\.4\)/i
+    );
   });
 
   it('applies migrations in order', () => {

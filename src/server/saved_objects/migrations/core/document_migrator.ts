@@ -329,8 +329,8 @@ function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
     // we are dealing with a document that belongs to a future Kibana / plugin version.
     if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
       throw Boom.badData(
-        `Document "${doc.id}" has property "${p}" with version "${docVersion}" but only ` +
-          `"${latestVersion || '0.0.0'}" or lower is supported by this version of Kibana.`,
+        `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
+          ` version of Kibana (${docVersion}).`,
         doc
       );
     }
