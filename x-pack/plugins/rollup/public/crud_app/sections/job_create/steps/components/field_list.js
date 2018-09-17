@@ -28,7 +28,7 @@ export const FieldList = ({
       name: 'Remove',
       isPrimary: true,
       description: 'Remove this field',
-      icon: 'cross',
+      icon: 'trash',
       type: 'icon',
       color: 'danger',
       onClick: (field) => onRemoveField(field),

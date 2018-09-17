@@ -95,7 +95,7 @@ export class StepHistogramUi extends Component {
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepHistogram.description"
                   defaultMessage={`
-                    Select the fields you want to bucket using numeric histgogram intervals.
+                    Select the fields you want to bucket using numeric histogram intervals.
                   `}
                 />
               </p>
