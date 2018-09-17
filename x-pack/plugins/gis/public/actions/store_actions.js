@@ -23,7 +23,7 @@ export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-function getDataLoadingFunction(dispatch, requestToken) {
+function getLayerLoadingFunction(dispatch, requestToken) {
   return (boolLoading, layerId, loadState = {}) => {
     if (boolLoading) {
       dispatch(startDataLoad(layerId, requestToken, loadState));
@@ -37,7 +37,7 @@ export function replaceLayerList(newLayerList) {
   const requestToken = Symbol('data_request_sync_layerreplacement');
 
   return async (dispatch, getState) => {
-    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+    const layerLoading = getLayerLoadingFunction(dispatch, requestToken);
 
     await dispatch({
       type: REPLACE_LAYERLIST,
@@ -53,7 +53,7 @@ export function replaceLayerList(newLayerList) {
     };
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      layer.syncDataToMapState(dataLoading, replaceState);
+      layer.syncDataToMapState(layerLoading, replaceState);
     });
   };
 
@@ -111,10 +111,10 @@ export function mapExtentChanged(newMapConstants) {
       mapState: newMapConstants
     });
 
-    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+    const layerLoading = getLayerLoadingFunction(dispatch, requestToken);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      layer.syncDataToMapState(dataLoading, newMapConstants);
+      layer.syncDataToMapState(layerLoading, newMapConstants);
     });
   };
 }
@@ -143,11 +143,11 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
   const layerDescriptor = layer.toLayerDescriptor();
 
   return async (dispatch, getState) => {
-    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
+    const layerLoading = getLayerLoadingFunction(dispatch, requestToken);
     const metadata = getDataSources(getState());
 
     await dispatch(addLayer(layerDescriptor, position));
-    layer.syncDataToMapState(dataLoading, metadata);
+    layer.syncDataToMapState(layerLoading, metadata);
   };
 }
 
