@@ -91,6 +91,8 @@ export class StepTermsUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage
@@ -105,7 +107,7 @@ export class StepTermsUi extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -118,6 +120,20 @@ export class StepTermsUi extends Component {
                 defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
+
+            <EuiSpacer size="m" />
+
+            <FieldChooser
+              buttonLabel={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
+                  defaultMessage="Add terms fields"
+                />
+              )}
+              columns={columns}
+              fields={unselectedTermsFields}
+              onSelectField={this.onSelectField}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -125,20 +141,6 @@ export class StepTermsUi extends Component {
           columns={columns}
           fields={terms}
           onRemoveField={this.onRemoveField}
-        />
-
-        <EuiSpacer />
-
-        <FieldChooser
-          buttonLabel={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
-              defaultMessage="Select terms fields"
-            />
-          )}
-          columns={columns}
-          fields={unselectedTermsFields}
-          onSelectField={this.onSelectField}
         />
       </Fragment>
     );

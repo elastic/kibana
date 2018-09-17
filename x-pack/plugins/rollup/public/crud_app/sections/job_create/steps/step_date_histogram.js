@@ -197,6 +197,8 @@ export class StepDateHistogramUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage

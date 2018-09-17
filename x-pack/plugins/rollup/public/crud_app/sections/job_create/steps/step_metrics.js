@@ -180,6 +180,8 @@ export class StepMetricsUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage
@@ -193,7 +195,7 @@ export class StepMetricsUi extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -206,6 +208,20 @@ export class StepMetricsUi extends Component {
                 defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
+
+            <EuiSpacer size="m" />
+
+            <FieldChooser
+              buttonLabel={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
+                  defaultMessage="Add metrics fields"
+                />
+              )}
+              columns={this.chooserColumns}
+              fields={unselectedMetricsFields}
+              onSelectField={this.onSelectField}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -213,20 +229,6 @@ export class StepMetricsUi extends Component {
           columns={this.listColumns}
           fields={metrics}
           onRemoveField={this.onRemoveField}
-        />
-
-        <EuiSpacer />
-
-        <FieldChooser
-          buttonLabel={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
-              defaultMessage="Select metrics fields"
-            />
-          )}
-          columns={this.chooserColumns}
-          fields={unselectedMetricsFields}
-          onSelectField={this.onSelectField}
         />
       </Fragment>
     );

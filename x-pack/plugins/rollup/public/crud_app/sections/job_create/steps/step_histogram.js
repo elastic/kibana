@@ -88,6 +88,8 @@ export class StepHistogramUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage
@@ -100,7 +102,7 @@ export class StepHistogramUi extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -113,6 +115,20 @@ export class StepHistogramUi extends Component {
                 defaultMessage="Histogram docs"
               />
             </EuiButtonEmpty>
+
+            <EuiSpacer size="m" />
+
+            <FieldChooser
+              buttonLabel={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepHistogram.fieldsChooser.label"
+                  defaultMessage="Add histogram fields"
+                />
+              )}
+              columns={columns}
+              fields={unselectedHistogramFields}
+              onSelectField={this.onSelectField}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -120,20 +136,6 @@ export class StepHistogramUi extends Component {
           columns={columns}
           fields={histogram}
           onRemoveField={this.onRemoveField}
-        />
-
-        <EuiSpacer />
-
-        <FieldChooser
-          buttonLabel={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepHistogram.fieldsChooser.label"
-              defaultMessage="Select histogram fields"
-            />
-          )}
-          columns={columns}
-          fields={unselectedHistogramFields}
-          onSelectField={this.onSelectField}
         />
 
         {this.renderInterval()}

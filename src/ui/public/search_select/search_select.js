@@ -39,6 +39,7 @@ export class SearchSelect extends Component {
     onSelectItem: PropTypes.func.isRequired,
     searchField: PropTypes.string.isRequired,
     prompt: PropTypes.string,
+    anchorPosition: PropTypes.string,
   }
 
   static defaultProps = {
@@ -69,6 +70,8 @@ export class SearchSelect extends Component {
       isOpen,
       close,
       prompt,
+      anchorPosition,
+      ...rest
     } = this.props;
 
     const {
@@ -94,7 +97,8 @@ export class SearchSelect extends Component {
         button={button}
         isOpen={isOpen}
         closePopover={close}
-        anchorPosition="rightDown"
+        anchorPosition={anchorPosition}
+        {...rest}
       >
         <EuiFieldSearch
           placeholder={prompt}
