@@ -1,22 +1,16 @@
 window.onload = function () {
-  function createAnchor(href) {
-    var anchor = document.createElement('a');
-    anchor.setAttribute('href', href);
-    return anchor.href;
-  }
-
   var files = [
-    createAnchor('{{bundlePath}}/vendors.style.css'),
-    createAnchor('{{bundlePath}}/commons.style.css'),
-    createAnchor('{{bundlePath}}/{{appId}}.style.css'),
+    '{{bundlePath}}/vendors.style.css',
+    '{{bundlePath}}/commons.style.css',
+    '{{bundlePath}}/{{appId}}.style.css',
 
-    createAnchor('{{bundlePath}}/vendors.bundle.js'),
-    createAnchor('{{bundlePath}}/commons.bundle.js'),
-    createAnchor('{{bundlePath}}/{{appId}}.bundle.js')
+    '{{bundlePath}}/vendors.bundle.js',
+    '{{bundlePath}}/commons.bundle.js',
+    '{{bundlePath}}/{{appId}}.bundle.js'
   ];
 
   {{#each styleSheetPaths}}
-    files.push(createAnchor('{{this}}'));
+    files.unshift('{{this}}');
   {{/each}}
 
   (function next() {
