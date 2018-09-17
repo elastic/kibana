@@ -33,3 +33,11 @@ export const RedirectToContainerLogs = ({
     }}
   </WithSource>
 );
+
+export const getContainerLogsUrl = ({
+  containerId,
+  time,
+}: {
+  containerId: string;
+  time?: number;
+}) => ['#/link-to/container-logs/', containerId, ...(time ? [`?time=${time}`] : [])].join('');

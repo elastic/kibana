@@ -33,3 +33,6 @@ export const RedirectToHostLogs = ({
     }}
   </WithSource>
 );
+
+export const getHostLogsUrl = ({ hostname, time }: { hostname: string; time?: number }) =>
+  ['#/link-to/host-logs/', hostname, ...(time ? [`?time=${time}`] : [])].join('');

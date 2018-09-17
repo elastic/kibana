@@ -5,6 +5,6 @@
  */
 
 export { LinkToPage } from './link_to';
-export { RedirectToContainerLogs } from './redirect_to_container_logs';
-export { RedirectToHostLogs } from './redirect_to_host_logs';
-export { RedirectToPodLogs } from './redirect_to_pod_logs';
+export { getContainerLogsUrl, RedirectToContainerLogs } from './redirect_to_container_logs';
+export { getHostLogsUrl, RedirectToHostLogs } from './redirect_to_host_logs';
+export { getPodLogsUrl, RedirectToPodLogs } from './redirect_to_pod_logs';

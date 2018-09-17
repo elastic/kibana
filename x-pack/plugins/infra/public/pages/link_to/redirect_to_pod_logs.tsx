@@ -30,3 +30,6 @@ export const RedirectToPodLogs = ({ match, location }: RouteComponentProps<{ pod
     }}
   </WithSource>
 );
+
+export const getPodLogsUrl = ({ podId, time }: { podId: string; time?: number }) =>
+  ['#/link-to/pod-logs/', podId, ...(time ? [`?time=${time}`] : [])].join('');
