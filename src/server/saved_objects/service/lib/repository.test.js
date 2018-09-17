@@ -371,14 +371,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('requires type to be defined', async () => {
-      try {
-        await savedObjectsRepository.find({});
-        throw new Error('expected find() to reject');
-      } catch (error) {
-        sinon.assert.notCalled(callAdminCluster);
-        sinon.assert.notCalled(onBeforeWrite);
-        expect(error.message).toMatch('options\.type must be');
-      }
+      await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('requires searchFields be an array if defined', async () => {
