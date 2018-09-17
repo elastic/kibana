@@ -95,7 +95,7 @@ export class KibanaRegionmapSource extends VectorSource {
   }
 
   getDisplayName() {
-    return this._descriptor.url + ' todo should use name from config instead';
+    return this._descriptor.name;
   }
 
 }
