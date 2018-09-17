@@ -5,8 +5,9 @@
   "license": "Apache-2.0",
   "private": true,
   "main": "target/index.js",
+  "typings": "target/index.d.ts",
   "scripts": {
-    "build": "babel src --out-dir target",
+    "build": "babel src --out-dir target --copy-files",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
@@ -16,6 +17,7 @@
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "moment": "^2.13.0"
+    "moment": "^2.13.0",
+    "tslib": "^1.9.3"
   }
 }

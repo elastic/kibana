@@ -11,7 +11,6 @@ import {
   getSeverity,
   getSeverityWithLow,
   getSeverityColor,
-  labelDuplicateDetectorDescriptions,
   getEntityFieldName,
   getEntityFieldValue,
   showActualForFunction,
@@ -280,24 +279,6 @@ describe('ML - anomaly utils', () => {
       expect(getSeverityColor('value')).to.be('#ffffff');
     });
 
-  });
-
-  describe('labelDuplicateDetectorDescriptions', () => {
-    const detectorsByJob = {
-      'job1': ['detector1', 'detector2'],
-      'job2': ['detector1', 'detector3']
-    };
-    const result = labelDuplicateDetectorDescriptions(detectorsByJob);
-
-    it('appends the job ID for detectors with identical descriptions to those in other jobs', () => {
-      expect(result.job1[0]).to.be('detector1 (job1)');
-      expect(result.job2[0]).to.be('detector1 (job2)');
-    });
-
-    it('leaves description unchanged for detectors with different descriptions to those in other jobs', () => {
-      expect(result.job1[1]).to.be('detector2');
-      expect(result.job2[1]).to.be('detector3');
-    });
   });
 
   describe('getEntityFieldName', () => {

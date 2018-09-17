@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { AggResponseIndexProvider } from '../../agg_response';
 import { LegacyResponseHandlerProvider } from './legacy';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
 const VislibResponseHandlerProvider = function (Private) {
-  const aggResponse = Private(AggResponseIndexProvider);
   const tableResponseProvider = Private(LegacyResponseHandlerProvider).handler;
 
   function convertTableGroup(vis, tableGroup) {
@@ -61,19 +59,13 @@ const VislibResponseHandlerProvider = function (Private) {
   }
 
   function convertTable(vis, table) {
-    return vis.type.responseConverter ? vis.type.responseConverter(vis, table) : table;
+    return vis.type.responseConverter ? vis.type.responseConverter(table) : table;
   }
 
   return {
     name: 'vislib',
     handler: function (vis, response) {
       return new Promise((resolve) => {
-        if (vis.isHierarchical()) {
-          // the hierarchical converter is very self-contained (woot!)
-          // todo: it should be updated to be based on tabified data just as other responseConverters
-          resolve(aggResponse.hierarchical(vis, response));
-        }
-
         return tableResponseProvider(vis, response).then(tableGroup => {
           let converted = convertTableGroup(vis, tableGroup);
           if (!converted) {
