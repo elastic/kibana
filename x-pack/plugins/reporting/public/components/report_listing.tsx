@@ -14,7 +14,6 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-// @ts-ignore: implicit any for JS file
 import { Poller } from '../../../../common/poller';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient } from '../lib/job_queue_client';
@@ -46,8 +45,10 @@ interface Job {
 }
 
 interface Props {
-  xpackInfo: any;
-  kbnUrl: any;
+  badLicenseMessage: string;
+  showLinks: boolean;
+  enableLinks: boolean;
+  redirect: (url: string) => void;
 }
 
 interface State {
@@ -171,7 +172,7 @@ export class ReportListing extends Component<Props, State> {
           {
             render: (record: Job) => {
               return (
-                <div className="euiTableCellContent__hoverItem">
+                <div>
                   {this.renderDownloadButton(record)}
                   {this.renderReportErrorButton(record)}
                 </div>
@@ -202,7 +203,7 @@ export class ReportListing extends Component<Props, State> {
     );
   }
 
-  private renderDownloadButton = (record: any) => {
+  private renderDownloadButton = (record: Job) => {
     if (record.status !== 'completed') {
       return;
     }
@@ -226,7 +227,7 @@ export class ReportListing extends Component<Props, State> {
     return button;
   };
 
-  private renderReportErrorButton = (record: any) => {
+  private renderReportErrorButton = (record: Job) => {
     if (record.status !== 'failed') {
       return;
     }
@@ -234,7 +235,7 @@ export class ReportListing extends Component<Props, State> {
     return <ReportErrorButton jobId={record.id} />;
   };
 
-  private onTableChange = ({ page }: { page: any }) => {
+  private onTableChange = ({ page }: { page: { index: number } }) => {
     const { index: pageIndex } = page;
 
     this.setState(
@@ -259,10 +260,8 @@ export class ReportListing extends Component<Props, State> {
       this.isInitialJobsFetch = false;
     } catch (kfetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
-        toastNotifications.addDanger(
-          this.props.xpackInfo.get('features.reporting.management.message')
-        );
-        this.props.kbnUrl.redirect('/management');
+        toastNotifications.addDanger(this.props.badLicenseMessage);
+        this.props.redirect('/management');
         return;
       }
 
@@ -298,10 +297,7 @@ export class ReportListing extends Component<Props, State> {
   };
 
   private licenseAllowsToShowThisPage = () => {
-    return (
-      this.props.xpackInfo.get('features.reporting.management.showLinks') &&
-      this.props.xpackInfo.get('features.reporting.management.enableLinks')
-    );
+    return this.props.showLinks && this.props.enableLinks;
   };
 
   private formatDate(timestamp: string) {

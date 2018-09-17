@@ -30,8 +30,10 @@ routes.when('/management/kibana/reporting', {
 
       render(
         <ReportListing
-          xpackInfo={xpackInfo}
-          kbnUrl={kbnUrl}
+          badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
+          showLinks={xpackInfo.get('features.reporting.management.showLinks')}
+          enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
+          redirect={kbnUrl.redirect}
         />,
         node,
       );
