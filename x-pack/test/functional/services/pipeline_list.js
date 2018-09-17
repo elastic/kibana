@@ -35,7 +35,7 @@ export function PipelineListProvider({ getService }) {
   const SUBJ_CELL_DESCRIPTION = `pipelineList pipelineTable cellDescription`;
   const SUBJ_CELL_LAST_MODIFIED = `pipelineList pipelineTable cellLastModified`;
   const SUBJ_CELL_USERNAME = `pipelineList pipelineTable cellUsername`;
-  const SUBJ_BTN_NEXT_PAGE = `pipelineList btnNextPage`;
+  const SUBJ_BTN_NEXT_PAGE = `pipelineList pagination-button-next`;
 
   return new class PipelineList {
     /**
@@ -69,17 +69,14 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Array<Object>>}
      */
     async getRowsFromTable() {
-      // TODO: clean this up
+      const ids = await this.getRowIds();
       const valuesByKey = await propsAsync({
-        selected: [],
-        id: await this.getRowIds(),
+        selected: ids.map(id => testSubjects.isSelected(getSelectCheckbox(id))),
+        id: ids,
         description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
         lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
         username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME),
       });
-      valuesByKey.selected = await Promise.all(
-        valuesByKey.id.map(id => testSubjects.isSelected(getSelectCheckbox(id)))
-      );
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows

@@ -133,8 +133,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // TODO: re-enable these after EUI releases next version and Kibana updates @elastic/eui dependency
-    xdescribe('next page button', () => {
+    describe('next page button', () => {
       it('is enabled', async () => {
         await pipelineList.assertNextPageButton({ enabled: true });
       });
