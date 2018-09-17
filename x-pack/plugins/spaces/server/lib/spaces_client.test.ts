@@ -93,7 +93,9 @@ describe('#getAll', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const actualSpaces = await client.getAll();
 
@@ -125,7 +127,9 @@ describe('#getAll', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const actualSpaces = await client.getAll();
 
@@ -170,7 +174,9 @@ describe('#getAll', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
       await expect(client.getAll()).rejects.toThrowErrorMatchingSnapshot();
 
@@ -217,7 +223,9 @@ describe('#getAll', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
       const actualSpaces = await client.getAll();
 
@@ -248,7 +256,15 @@ describe('#canEnumerateSpaces', () => {
       const authorization = null;
       const request = Symbol();
 
-      const client = new SpacesClient(mockAuditLogger as any, authorization, null, null, request);
+      const client = new SpacesClient(
+        mockAuditLogger as any,
+        authorization,
+        null,
+        null,
+        request,
+        null,
+        []
+      );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
       expect(canEnumerateSpaces).toEqual(true);
@@ -269,7 +285,9 @@ describe('#canEnumerateSpaces', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
       const canEnumerateSpaces = await client.canEnumerateSpaces();
 
@@ -296,7 +314,9 @@ describe('#canEnumerateSpaces', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
@@ -327,7 +347,9 @@ describe('#canEnumerateSpaces', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       const canEnumerateSpaces = await client.canEnumerateSpaces();
@@ -375,7 +397,9 @@ describe('#get', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.get(id);
@@ -402,7 +426,9 @@ describe('#get', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.get(id);
@@ -432,7 +458,9 @@ describe('#get', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = 'foo-space';
 
@@ -465,7 +493,9 @@ describe('#get', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
 
@@ -530,7 +560,9 @@ describe('#create', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -559,7 +591,9 @@ describe('#create', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -591,7 +625,9 @@ describe('#create', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingSnapshot();
@@ -624,7 +660,9 @@ describe('#create', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -689,7 +727,9 @@ describe('#update', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -717,7 +757,9 @@ describe('#update', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -748,7 +790,9 @@ describe('#update', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       await expect(client.update(id, spaceToUpdate)).rejects.toThrowErrorMatchingSnapshot();
@@ -782,7 +826,9 @@ describe('#update', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -837,7 +883,9 @@ describe('#delete', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -853,7 +901,12 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
+        deleteByQuery: jest.fn(),
       };
+      const mockSchema = {
+        isNamespaceAgnostic: (type: string) => type === 'space',
+      };
+
       const request = Symbol();
 
       const client = new SpacesClient(
@@ -861,13 +914,19 @@ describe('#delete', () => {
         authorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        mockSchema,
+        ['space', 'foo', 'bar']
       );
 
       await client.delete(id);
 
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockCallWithRequestRepository.deleteByQuery).toHaveBeenCalledWith({
+        namespace: id,
+        type: ['foo', 'bar'],
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -888,7 +947,9 @@ describe('#delete', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -906,6 +967,10 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
+        deleteByQuery: jest.fn(),
+      };
+      const mockSchema = {
+        isNamespaceAgnostic: (type: string) => type === 'space',
       };
       const request = Symbol();
 
@@ -914,7 +979,9 @@ describe('#delete', () => {
         mockAuthorization,
         mockCallWithRequestRepository,
         null,
-        request
+        request,
+        mockSchema,
+        ['space', 'foo', 'bar']
       );
 
       await client.delete(id);
@@ -922,6 +989,10 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockCallWithRequestRepository.deleteByQuery).toHaveBeenCalledWith({
+        namespace: id,
+        type: ['foo', 'bar'],
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -943,7 +1014,9 @@ describe('#delete', () => {
         mockAuthorization,
         null,
         null,
-        request
+        request,
+        null,
+        []
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -975,7 +1048,9 @@ describe('#delete', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        null,
+        []
       );
 
       await expect(client.delete(id)).rejects.toThrowErrorMatchingSnapshot();
@@ -1002,6 +1077,10 @@ describe('#delete', () => {
       const mockInternalRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
+        deleteByQuery: jest.fn(),
+      };
+      const mockSchema = {
+        isNamespaceAgnostic: (type: string) => type === 'space',
       };
       const request = Symbol();
       const client = new SpacesClient(
@@ -1009,7 +1088,9 @@ describe('#delete', () => {
         mockAuthorization,
         null,
         mockInternalRepository,
-        request
+        request,
+        mockSchema,
+        ['space', 'foo', 'bar']
       );
 
       await client.delete(id);
@@ -1021,6 +1102,10 @@ describe('#delete', () => {
       );
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
+      expect(mockInternalRepository.deleteByQuery).toHaveBeenCalledWith({
+        namespace: id,
+        type: ['foo', 'bar'],
+      });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
     });

@@ -126,7 +126,7 @@ export class SavedObjectsRepository {
           }
         },
         {
-          ... namespace && !this._schema.isNamespaceAgnostic(object.type) && { namespace },
+          ...namespace && !this._schema.isNamespaceAgnostic(object.type) && { namespace },
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes,
@@ -222,6 +222,35 @@ export class SavedObjectsRepository {
     throw new Error(
       `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
     );
+  }
+
+  async deleteByQuery(options = {}) {
+    const {
+      type,
+      search,
+      searchFields,
+      namespace,
+    } = options;
+
+    if (searchFields && !Array.isArray(searchFields)) {
+      throw new TypeError('options.searchFields must be an array');
+    }
+
+    const esOptions = {
+      index: this._index,
+      ignore: [404],
+      body: {
+        version: true,
+        ...getSearchDsl(this._mappings, this._schema, {
+          namespace,
+          search,
+          searchFields,
+          type,
+        })
+      }
+    };
+
+    return await this._writeToCluster('deleteByQuery', esOptions);
   }
 
   /**
