@@ -5,6 +5,7 @@
  */
 
 import { workpad } from './workpad';
+import { kibana } from './kibana';
 import { socketApi } from './socket';
 import { translate } from './translate';
 import { esFields } from './es_fields';
@@ -14,6 +15,7 @@ import { plugins } from './plugins';
 
 export function routes(server) {
   workpad(server);
+  kibana(server);
   socketApi(server);
   translate(server);
   esFields(server);
