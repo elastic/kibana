@@ -8,6 +8,9 @@ you will only see the dashboards and other saved objects that belong to that spa
 
 With {xpack} security, you can control which users have access to individual spaces.
 
+[role="screenshot"]
+image::spaces/images/space-selector.png["Spaces"]
+
 include::getting-started.asciidoc[]
 include::managing-spaces.asciidoc[]
 include::securing-spaces.asciidoc[]

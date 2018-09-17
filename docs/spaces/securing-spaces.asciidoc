@@ -3,3 +3,5 @@
 === Securing spaces
 
 With {xpack} security enabled, you can control who has access to specific spaces. You can manage access from the role management screen in {kib} (Management => Roles)
+
+image::spaces/images/securing-spaces.png["Securing spaces"]

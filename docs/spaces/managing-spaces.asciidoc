@@ -6,8 +6,17 @@ Spaces can be managed from the Management => Spaces screen. From here, you can c
 [NOTE]
 There is an <<spaces-api, experimental API>> available if you wish to create your spaces programatically.
 
+[role="screenshot"]
+image::spaces/images/space-management.png["Space Management"]
+
 ==== Creating and updating spaces
 Spaces can be managed from the Management => Spaces screen. You can create as many spaces as you'd like, but each space must have a unique space identifier.
 
+[role="screenshot"]
+image::spaces/images/edit-space.png["Updating a space"]
+
 ==== Deleting spaces
 Deleting a space is a destructive operation, which cannot be undone. When you delete a space, all of the saved objects that belong to that space are also deleted.
+
+[role="screenshot"]
+image::spaces/images/delete-space.png["Deleting a space"]
