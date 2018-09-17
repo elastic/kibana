@@ -60,6 +60,30 @@ export default function ({ getService }) {
         .then((response) => response.body);
     }
 
+    it('should support middleware', async () => {
+      const historyItem = _.random(1, 100);
+
+      await scheduleTask({
+        taskType: 'sampleTask',
+        interval: '30m',
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs;
+
+        expect(task.attempts).to.eql(0);
+        expect(task.state.count).to.eql(1);
+
+        expect(task.params).to.eql({
+          superFly: 'My middleware param!',
+          originalParams: { historyItem },
+        });
+      });
+    });
+
     it('should remove non-recurring tasks after they complete', async () => {
       await scheduleTask({
         taskType: 'sampleTask',
@@ -80,10 +104,10 @@ export default function ({ getService }) {
       });
 
       await retry.try(async () => {
-        const [scheduleTask] = (await currentTasks()).docs;
-        expect(scheduleTask.id).to.eql(task.id);
-        expect(scheduleTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(task.runAt)).to.be.greaterThan(new Date());
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.attempts).to.be.greaterThan(0);
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.now());
       });
     });
 
@@ -128,23 +152,6 @@ export default function ({ getService }) {
         expect(task.state.count).to.eql(1);
         expect(Date.parse(task.runAt)).to.be.greaterThan(Date.now() + (intervalMilliseconds - buffer));
         expect(Date.parse(task.runAt).getTime()).to.be.lessThan(Date.now() + intervalMilliseconds);
-      });
-    });
-
-    it('should support middleware', async () => {
-      const historyItem = _.random(1, 100);
-
-      await scheduleTask({
-        taskType: 'sampleTask',
-        params: { historyItem },
-      });
-
-      await retry.try(async () => {
-        const history = await historyDocs();
-        expect(JSON.parse(history[0]._source.params)).to.eql({
-          superFly: 'My middleware param!',
-          originalParams: { historyItem },
-        });
       });
     });
   });

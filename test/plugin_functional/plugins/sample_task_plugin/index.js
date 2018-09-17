@@ -61,10 +61,11 @@ export default function (kibana) {
                   state: JSON.stringify(state),
                   ranAt: new Date(),
                 },
+                refresh: true,
               });
 
               return {
-                state: { count: prevState.count + 1 },
+                state: { count: (prevState.count || 0) + 1 },
                 runAt: millisecondsFromNow(params.nextRunMilliseconds),
               };
             },
@@ -83,6 +84,7 @@ export default function (kibana) {
               superFly: 'My middleware param!',
             },
           };
+
           return {
             ...opts,
             taskInstance: modifiedInstance,
@@ -94,7 +96,7 @@ export default function (kibana) {
             ...opts,
             taskInstance: {
               ...taskInstance,
-              params: taskInstance.originalParams,
+              params: taskInstance.params.originalParams,
             },
           };
         },

@@ -79,6 +79,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
    * @prop {Updatable} store - The store used to read / write tasks instance info
    * @prop {kbnServer} kbnServer - An async function that provides the task's run context
+   * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
   constructor(opts: Opts) {
