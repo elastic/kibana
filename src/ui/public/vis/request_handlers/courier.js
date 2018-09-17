@@ -72,7 +72,7 @@ const CourierRequestHandlerProvider = function () {
 
   return {
     name: 'courier',
-    handler: function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch }) {
+    handler: function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch, partialRows }) {
 
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -155,12 +155,20 @@ const CourierRequestHandlerProvider = function () {
 
               searchSource.finalResponse = resp;
 
+              const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
+
+              searchSource.tabifiedResponse = tabifyAggResponse(vis.getAggConfig(), resp, {
+                metricsAtAllLevels: vis.isHierarchical(),
+                partialRows,
+                timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
+              });
+
               vis.API.inspectorAdapters.data.setTabularLoader(
                 () => buildTabularInspectorData(vis, searchSource, lastAggConfig),
                 { returnsFormattedValues: true }
               );
 
-              resolve(resp);
+              resolve(searchSource.tabifiedResponse);
             }).catch(e => reject(e));
 
             requestSearchSource.getSearchRequestBody().then(req => {
@@ -168,7 +176,7 @@ const CourierRequestHandlerProvider = function () {
             });
 
           } else {
-            resolve(searchSource.finalResponse);
+            resolve(searchSource.tabifiedResponse);
           }
         });
       });
