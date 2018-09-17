@@ -61,6 +61,7 @@
   "dependencies": {
     "@elastic/eui": "4.0.1",
     "@elastic/filesaver": "1.1.2",
+    "@elastic/good": "8.1.1-kibana1",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
@@ -106,7 +107,6 @@
     "font-awesome": "4.4.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
-    "good": "github:elastic/good#v8.1.1-kibana1",
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
     "h2o2-latest": "npm:h2o2@8.1.2",

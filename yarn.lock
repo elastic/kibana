@@ -121,6 +121,15 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
+"@elastic/good@8.1.1-kibana1":
+  version "8.1.1-kibana1"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana1.tgz#d8e444fdac8cc7dad36d4e29acc566cbf93298b9"
+  dependencies:
+    hoek "5.x.x"
+    joi "13.x.x"
+    oppsy "2.x.x"
+    pumpify "1.3.x"
+
 "@elastic/node-crypto@0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
@@ -5756,15 +5765,6 @@ good-squeeze@2.1.0:
   dependencies:
     hoek "2.x.x"
     json-stringify-safe "5.0.x"
-
-"good@github:elastic/good#v8.1.1-kibana1":
-  version "8.1.1"
-  resolved "https://codeload.github.com/elastic/good/tar.gz/f0fc68722eac1ed59a0cbd991c9e37079a631019"
-  dependencies:
-    hoek "5.x.x"
-    joi "13.x.x"
-    oppsy "2.x.x"
-    pumpify "1.3.x"
 
 got@5.6.0:
   version "5.6.0"

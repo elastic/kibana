@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import good from 'good';
+import good from '@elastic/good';
 import loggingConfiguration from './configuration';
 
 export async function setupLogging(server, config) {
