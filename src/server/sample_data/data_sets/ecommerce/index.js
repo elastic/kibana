@@ -184,7 +184,7 @@ export function ecommerceSpecProvider() {
       }
     },
     timeFields: ['order_date'],
-    currentTimeMarker: '2018-01-09T00:00:00',
+    currentTimeMarker: '2016-12-11T00:00:00',
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
