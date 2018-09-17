@@ -28,11 +28,11 @@ At a high-level, the task manager works like this:
 
 ## Pooling
 
-Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `workersOccupied` to limit how many tasks of a given type can be run at once.
+Each task manager instance runs tasks in a pool which ensures that at most N tasks are run at a time, where N is configurable. This prevents the system from running too many tasks at once in resource constrained environments. In addition to this, each individual task can also specify `numWorkers` which tells the system how many workers are consumed by a single running instance of a task. This effectively limits how many tasks of a given type can be run at once.
 
-For example, we may have a system with a `max_workers` of 10, but a super expensive task (such as reporting) which specifies a `workersOccupied` of 10.
+For example, we may have a system with a `max_workers` of 10, but a super expensive task (such as `reporting`) which specifies a `numWorkers` of 10. In this case, `reporting` tasks will run one at a time.
 
-If a task specifies a higher `workersOccupied` than the system supports, the system's `max_workers` setting will be substituted for it.
+If a task specifies a higher `numWorkers` than the system supports, the system's `max_workers` setting will be substituted for it.
 
 ## Config options
 
@@ -44,13 +44,14 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 - `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
-  - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by task of type `reporting`
+  - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by tasks of type `reporting`
   - This allows sysadmins to tweak the operational performance of Kibana, allowing more or fewer tasks of a specific type to run simultaneously
-
 
 ## Task definitions
 
 Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`.
+
+A sample task can be found in the [plugin_functional/sample_task_plugin](../../test/plugin_functional/sample_task_plugin/) folder.
 
 ```js
 {
@@ -73,44 +74,55 @@ Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`
       // overridden by the `override_num_workers` config value, if specified.
       numWorkers: 2,
 
-      // The method that actually runs this task. It is passed a task
-      // context: { params, state, callCluster }, documented below.
-      // Its return value should fit the TaskResult interface, documented
-      // below. Invalid return values will result in a logged warning.
-      async run(context) {
-        // Do some work
-        // Conditionally send some alerts
-        // Return some result or other...
-      },
+      // The createTaskRunner function / method returns an object that is responsible for
+      // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
+      createTaskRunner(context) {
+        // Perform the work of the task. The return value should fit the TaskResult interface, documented
+        // below. Invalid return values will result in a logged warning.
+        async run() {
+          // Do some work
+          // Conditionally send some alerts
+          // Return some result or other...
+        },
+
+        // Optional, will be called if a running instance of this task times out, allowing the task
+        // to attempt to clean itself up.
+        async cancel() {
+          // Do whatever is required to cancel this task, such as killing any spawned processes
+        },
+      }
     },
   },
 }
 ```
 
-When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its run method, passing it a run context which looks like this:
+When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its createTaskRunner's method, passing it a run context which looks like this:
 
 ```js
 {
-  // A function that provides user-scoped access to Elasticsearch
-  callCluster,
+  // An instance of the Kibana server object.
+  kbnServer,
 
+  // The data associated with this instance of the task, with two properties being most notable:
+  //
+  // params:
   // An object, specific to this task instance, used by the
   // task to determine exactly what work should be performed.
   // e.g. a cluster-monitoring task might have a `clusterName`
   // property in here, but a movie-monitoring task might have
   // a `directorName` property.
-  params,
-
+  //
+  // state:
   // The state returned from the previous run of this task instance.
   // If this task instance has never succesfully run, this will
   // be an empty object: {}
-  state,
+  taskInstance,
 }
 ```
 
 ## Task result
 
-The task's run method is expected to return a promise that resolves to an object that conforms to the following interface. Other return values will result in a warning, but the system should continue to work.
+The task runner's `run` method is expected to return a promise that resolves to either undefined, or to an object that looks like the following. Other return values will result in a warning, but the system should continue to work.
 
 ```js
 {
@@ -123,20 +135,16 @@ The task's run method is expected to return a promise that resolves to an object
   error: { message: 'Hrumph!' },
 
   // Optional, this will be passed into the next run of the task, if
-  // there is one...
+  // this is a recurring task.
   state: {
     anything: 'goes here',
   },
 }
 ```
 
-If the promise returned by the run function has a cancel method, the cancel method will be called if Kibana determines that the task has timed out. The cancel method itself can return a promise, and Kibana will wait for the cancellation before attempting a re-run. Tasks that spawn processes or threads (e.g. w/ napajs or similar) can perform cleanup work here.
-
-As a convenience, Kibana provides a `Cancellable` helper class in the `@kbn/cancellable` package that provides a cancellable promise implementation. Any task that resolves a sequence of promises can wrap those in a cancellable call to allow Kibana to cancel the task before all promises have resolved. See [packages/kbn-cancellable](../../packages/kbn-cancellable) for details.
-
 ## Task instances
 
-The task_manager module will store scheduled task instances in an index. This allows recover of failed tasks, coordination across Kibana clusters, etc.
+The task_manager module will store scheduled task instances in an index. This allows for recovery of failed tasks, coordination across Kibana clusters, persistence across Kibana reboots, etc.
 
 The data stored for a task instance looks something like this:
 
@@ -182,12 +190,14 @@ The data stored for a task instance looks something like this:
   // and will be different per task type.
   state: '{ "status": "green" }',
 
-  // The token of the user who scheduled this task, used to ensure
-  // the task runs in the same security context as the user who
-  // scheduled the task.
+  // An extension point for 3rd parties to build in security features on
+  // top of the task manager. For example, this might be the token of the user
+  // who scheduled this task.
   userContext: 'the token of the user who scheduled this task',
 
-  // The id of the user that scheduled this task.
+  // An extension point for 3rd parties to build in security features on
+  // top of the task manager, and is expected to be the id of the user, if any,
+  // that scheduled this task.
   user: '23lk3l42',
 
   // An application-specific designation, allowing different Kibana
@@ -198,7 +208,7 @@ The data stored for a task instance looks something like this:
 
 ## Programmatic access
 
-The task manager plugin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
+The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
 ```js
 const manager = server.taskManager;
@@ -215,13 +225,13 @@ const task = await manager.schedule({
 });
 
 // Removes the specified task
-manager.remove({ id: task.id });
+await manager.remove({ id: task.id });
 
 // Fetches tasks, supports pagination, via the search-after API:
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
 // If scope is not specified, all tasks are returned, otherwise only tasks
 // with the given scope are returned.
-const results = manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
+const results = await manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
 
 // results look something like this:
 {
@@ -245,7 +255,7 @@ There is only a rudimentary mechanism for coordinating tasks and handling expire
 
 There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
 
-The task manager's public API is create / delete / list. Updates aren't directly supported, and listing is scoped so that users only see their own tasks.
+The task manager's public API is create / delete / list. Updates aren't directly supported, and listing should be scoped so that users only see their own tasks.
 
 ## Testing
 
@@ -254,6 +264,6 @@ The task manager's public API is create / delete / list. Updates aren't directly
 Integration tests can be run like so:
 
 ```
-node scripts/functional_tests_server
+node scripts/functional_tests_server.js --config test/plugin_functional/config.js
 node scripts/functional_test_runner --config test/api_integration/config.js --grep task_manager
 ```

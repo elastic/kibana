@@ -149,13 +149,25 @@ export class TaskStore {
    *
    * @param task - The task being scheduled.
    */
-  public schedule(task: TaskInstance): Promise<RawTaskDoc> {
-    return this.callCluster('index', {
+  public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+    const body = rawSource(taskInstance);
+    const { task } = body;
+    const result = await this.callCluster('index', {
+      body,
       index: this.index,
       type: DOC_TYPE,
-      body: rawSource(task),
       refresh: true,
     });
+
+    return {
+      ...taskInstance,
+      id: result._id,
+      version: result._version,
+      attempts: 0,
+      status: task.status,
+      runAt: task.runAt,
+      state: taskInstance.state || {},
+    };
   }
 
   /**

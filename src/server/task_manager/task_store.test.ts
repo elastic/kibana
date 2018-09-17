@@ -67,7 +67,12 @@ describe('TaskStore', () => {
 
   describe('schedule', () => {
     async function testSchedule(task: TaskInstance) {
-      const callCluster = sinon.spy();
+      const callCluster = sinon.spy(() =>
+        Promise.resolve({
+          _id: 'testid',
+          _version: 3344,
+        })
+      );
       const store = new TaskStore({
         callCluster,
         index: 'tasky',
@@ -75,11 +80,11 @@ describe('TaskStore', () => {
         supportedTypes: ['a', 'b', 'c'],
       });
 
-      await store.schedule(task);
+      const result = await store.schedule(task);
 
       sinon.assert.calledOnce(callCluster);
 
-      return { callCluster, arg: callCluster.args[0][1] };
+      return { result, callCluster, arg: callCluster.args[0][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -102,6 +107,21 @@ describe('TaskStore', () => {
             state: JSON.stringify(task.state),
           },
         },
+      });
+    });
+
+    test('retiurns a concrete task instance', async () => {
+      const task = {
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+      const { result } = await testSchedule(task);
+
+      expect(result).toMatchObject({
+        ...task,
+        version: 3344,
+        id: 'testid',
       });
     });
 

@@ -62,7 +62,7 @@ export default function ({ getService }) {
 
     it('should remove non-recurring tasks after they complete', async () => {
       await scheduleTask({
-        taskType: 'simpleTask',
+        taskType: 'sampleTask',
         params: { },
       });
 
@@ -74,14 +74,15 @@ export default function ({ getService }) {
     });
 
     it('should reschedule if task errors', async () => {
-      await scheduleTask({
-        taskType: 'simpleTask',
+      const task = await scheduleTask({
+        taskType: 'sampleTask',
         params: { failWith: 'Dangit!!!!!' },
       });
 
       await retry.try(async () => {
-        const [task] = (await currentTasks()).docs;
-        expect(task.attempts).to.be.greaterThan(0);
+        const [scheduleTask] = (await currentTasks()).docs;
+        expect(scheduleTask.id).to.eql(task.id);
+        expect(scheduleTask.attempts).to.be.greaterThan(0);
         expect(Date.parse(task.runAt)).to.be.greaterThan(new Date());
       });
     });
@@ -92,7 +93,7 @@ export default function ({ getService }) {
       const buffer = 10000;
 
       await scheduleTask({
-        taskType: 'simpleTask',
+        taskType: 'sampleTask',
         params: { nextRunMilliseconds },
         state: { count },
       });
@@ -114,7 +115,7 @@ export default function ({ getService }) {
       const buffer = 10000;
 
       await scheduleTask({
-        taskType: 'simpleTask',
+        taskType: 'sampleTask',
         interval: `${interval}m`,
         params: { },
       });
@@ -134,7 +135,7 @@ export default function ({ getService }) {
       const historyItem = _.random(1, 100);
 
       await scheduleTask({
-        taskType: 'simpleTask',
+        taskType: 'sampleTask',
         params: { historyItem },
       });
 

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { TaskInstance } from './task';
+import { ConcreteTaskInstance, TaskInstance } from './task';
 import { TaskPoller } from './task_poller';
-import { FetchOpts, FetchResult, RawTaskDoc, RemoveResult, TaskStore } from './task_store';
+import { FetchOpts, FetchResult, RemoveResult, TaskStore } from './task_store';
 
 interface Opts {
   poller: TaskPoller;
@@ -35,7 +35,7 @@ export class TaskManager {
     this.store = opts.store;
   }
 
-  public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
+  public async schedule(task: TaskInstance): Promise<ConcreteTaskInstance> {
     const result = await this.store.schedule(task);
     this.poller.attemptWork();
     return result;
