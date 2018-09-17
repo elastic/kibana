@@ -39,7 +39,6 @@ export class PipelineEditor extends React.Component {
       username,
     } = this.props;
 
-    // TODO: clean up this regex pattern
     this.pipelineIdPattern = /[a-zA-Z_][a-zA-Z0-9_\-]*/;
 
     const pipelineWorkers = settings['pipeline.workers'] ? settings['pipeline.workers'] : 1;
@@ -53,7 +52,6 @@ export class PipelineEditor extends React.Component {
           'pipeline.batch.delay': settings['pipeline.batch.delay'],
           'pipeline.batch.size': settings['pipeline.batch.size'],
           'pipeline.workers': pipelineWorkers,
-          // TODO: this setting isn't getting saved
           'queue.checkpoint.writes': settings['queue.checkpoint.writes'],
           'queue.max_bytes': settings['queue.max_bytes.number'] + settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
