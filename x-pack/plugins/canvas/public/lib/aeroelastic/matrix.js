@@ -231,9 +231,9 @@ const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   }
 };
 
-const translateComponent = a => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], a[15]];
+const translateComponent = a => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1];
 
-const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l]) => [
+const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => [
   a,
   b,
   c,
@@ -249,7 +249,7 @@ const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l]) => [
   0,
   0,
   0,
-  1,
+  p,
 ];
 
 const add = (
