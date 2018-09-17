@@ -38,6 +38,7 @@ export const ml = (kibana) => {
         description: 'Machine Learning for the Elastic Stack',
         icon: 'plugins/ml/ml.svg',
         main: 'plugins/ml/app',
+        styleSheetPath: `${__dirname}/public/index.scss`,
       },
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature']
