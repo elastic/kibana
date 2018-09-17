@@ -7,14 +7,13 @@
 
 
 /*
- * Angular controller for the container for the anomaly charts in the
+ * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
- * The controller processes the data required to draw each of the charts
+ * The service processes the data required to draw each of the charts
  * and manages the layout of the charts in the containing div.
  */
 
 import _ from 'lodash';
-import $ from 'jquery';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits } from '../../util/chart_utils';
@@ -25,10 +24,9 @@ import { mlJobService } from '../../services/job_service';
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
-  callback
+  callback,
+  $chartContainer
 ) {
-  const $chartContainer = $('.explorer-charts');
-
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
@@ -60,7 +58,10 @@ export function explorerChartsContainerServiceFactory(
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     const chartsContainerWidth = Math.floor($chartContainer.width());
-    const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    if (allSeriesRecords.length === 1) {
+      chartsPerRow = 1;
+    }
 
     data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
 
@@ -73,8 +74,15 @@ export function explorerChartsContainerServiceFactory(
 
     // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
     data.tooManyBuckets = false;
-    const { chartRange, tooManyBuckets } = calculateChartRange(seriesConfigs, earliestMs, latestMs,
-      Math.floor(chartsContainerWidth / chartsPerRow), recordsToPlot, data.timeFieldName);
+    const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
+    const { chartRange, tooManyBuckets } = calculateChartRange(
+      seriesConfigs,
+      earliestMs,
+      latestMs,
+      chartWidth,
+      recordsToPlot,
+      data.timeFieldNam
+    );
     data.tooManyBuckets = tooManyBuckets;
 
     // initialize the charts with loading indicators

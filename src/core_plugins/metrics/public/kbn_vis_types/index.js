@@ -19,7 +19,6 @@
 
 import '../visualizations/less/main.less';
 import '../less/main.less';
-import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
@@ -40,7 +39,7 @@ export default function MetricsVisProvider(Private) {
     title: 'Visual Builder',
     description: 'Build time-series using a visual pipeline interface',
     category: CATEGORY.TIME,
-    image,
+    icon: 'visVisualBuilder',
     stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {

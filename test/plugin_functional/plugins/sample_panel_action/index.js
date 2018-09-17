@@ -20,7 +20,7 @@
 function samplePanelAction(kibana) {
   return new kibana.Plugin({
     uiExports: {
-      dashboardPanelActions: ['plugins/sample_panel_action/sample_panel_action'],
+      contextMenuActions: ['plugins/sample_panel_action/sample_panel_action'],
     },
   });
 }

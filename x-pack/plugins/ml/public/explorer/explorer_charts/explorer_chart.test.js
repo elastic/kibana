@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { chartData as mockChartData } from './__mocks__/mock_chart_data';
+import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
+
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
 jest.mock('ui/time_buckets', () => ({
@@ -26,44 +29,6 @@ import { ExplorerChart } from './explorer_chart';
 import { chartLimits } from '../../util/chart_utils';
 
 describe('ExplorerChart', () => {
-  const seriesConfig = {
-    jobId: 'population-03',
-    detectorIndex: 0,
-    metricFunction: 'sum',
-    timeField: '@timestamp',
-    interval: '1h',
-    datafeedConfig: {
-      datafeed_id: 'datafeed-population-03',
-      job_id: 'population-03',
-      query_delay: '60s',
-      frequency: '600s',
-      indices: ['filebeat-7.0.0*'],
-      types: ['doc'],
-      query: { match_all: { boost: 1 } },
-      scroll_size: 1000,
-      chunking_config: { mode: 'auto' },
-      state: 'stopped'
-    },
-    metricFieldName: 'nginx.access.body_sent.bytes',
-    functionDescription: 'sum',
-    bucketSpanSeconds: 3600,
-    detectorLabel: 'high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)',
-    fieldName: 'nginx.access.body_sent.bytes',
-    entityFields: [{
-      fieldName: 'nginx.access.remote_ip',
-      fieldValue: '72.57.0.53',
-      $$hashKey: 'object:813'
-    }],
-    infoTooltip: `<div class=\"explorer-chart-info-tooltip\">job ID: population-03<br/>
-      aggregation interval: 1h<br/>chart function: sum nginx.access.body_sent.bytes<br/>
-      nginx.access.remote_ip: 72.57.0.53</div>`,
-    loading: false,
-    plotEarliest: 1487534400000,
-    plotLatest: 1488168000000,
-    selectedEarliest: 1487808000000,
-    selectedLatest: 1487894399999
-  };
-
   const mlSelectSeverityServiceMock = {
     state: {
       get: () => ({
@@ -74,9 +39,7 @@ describe('ExplorerChart', () => {
 
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
-  beforeEach(() => SVGElement.prototype.getBBox = () => {
-    return mockedGetBBox;
-  });
+  beforeEach(() => SVGElement.prototype.getBBox = () => mockedGetBBox);
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
@@ -122,29 +85,7 @@ describe('ExplorerChart', () => {
   }
 
   it('Anomaly Explorer Chart with multiple data points', () => {
-    // prepare data for the test case
-    const chartData = [
-      {
-        date: new Date('2017-02-23T08:00:00.000Z'),
-        value: 228243469, anomalyScore: 63.32916, numberOfCauses: 1,
-        actual: [228243469], typical: [133107.7703441773]
-      },
-      { date: new Date('2017-02-23T09:00:00.000Z'), value: null },
-      { date: new Date('2017-02-23T10:00:00.000Z'), value: null },
-      { date: new Date('2017-02-23T11:00:00.000Z'), value: null },
-      {
-        date: new Date('2017-02-23T12:00:00.000Z'),
-        value: 625736376, anomalyScore: 97.32085, numberOfCauses: 1,
-        actual: [625736376], typical: [132830.424736973]
-      },
-      {
-        date: new Date('2017-02-23T13:00:00.000Z'),
-        value: 201039318, anomalyScore: 59.83488, numberOfCauses: 1,
-        actual: [201039318], typical: [132739.5267403542]
-      }
-    ];
-
-    const wrapper = init(chartData);
+    const wrapper = init(mockChartData);
 
     // the loading indicator should not be shown
     expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(0);
@@ -167,8 +108,8 @@ describe('ExplorerChart', () => {
 
     const selectedInterval = rects[1];
     expect(selectedInterval.getAttribute('class')).toBe('selected-interval');
-    expect(+selectedInterval.getAttribute('y')).toBe(1);
-    expect(+selectedInterval.getAttribute('height')).toBe(169);
+    expect(+selectedInterval.getAttribute('y')).toBe(2);
+    expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(0);
