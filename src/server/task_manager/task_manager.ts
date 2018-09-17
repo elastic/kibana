@@ -17,35 +17,128 @@
  * under the License.
  */
 
-import { TaskInstance } from './task';
+import { fillPool } from './fill_pool';
+import { TaskManagerLogger } from './logger';
+import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './middleware';
+import {
+  ConcreteTaskInstance,
+  RunContext,
+  SanitizedTaskDefinition,
+  TaskDictionary,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
+import { TaskPool } from './task_pool';
+import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, RawTaskDoc, RemoveResult, TaskStore } from './task_store';
 
-interface Opts {
-  poller: TaskPoller;
-  store: TaskStore;
+interface ConstructOpts {
+  logger: TaskManagerLogger;
+  maxWorkers: number;
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
 }
 
 export class TaskManager {
-  private poller: TaskPoller;
-  private store: TaskStore;
+  private logger: TaskManagerLogger;
+  private maxWorkers: number;
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private middleware: Middleware;
+  private poller: TaskPoller | null;
+  private store: TaskStore | null;
+  private initialized: boolean;
 
-  constructor(opts: Opts) {
-    this.poller = opts.poller;
-    this.store = opts.store;
+  constructor(opts: ConstructOpts) {
+    this.initialized = false;
+
+    const { logger, maxWorkers, definitions } = opts;
+    this.logger = logger;
+    this.maxWorkers = maxWorkers;
+    this.definitions = definitions;
+
+    this.middleware = {
+      beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
+      beforeRun: async (runOpts: RunContext) => runOpts,
+    };
+
+    this.poller = null;
+    this.store = null;
   }
 
-  public async schedule(task: TaskInstance): Promise<RawTaskDoc> {
-    const result = await this.store.schedule(task);
+  public async afterPluginsInit(kbnServer: any, server: any, config: any) {
+    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+    const store = new TaskStore({
+      index: config.get('task_manager.index'),
+      callCluster,
+      maxAttempts: config.get('task_manager.max_attempts'),
+      supportedTypes: Object.keys(this.definitions),
+    });
+    this.store = store;
+
+    this.logger.debug('Initializing the task manager index');
+    await store.init();
+
+    const pool = new TaskPool({
+      logger: this.logger,
+      maxWorkers: this.maxWorkers,
+    });
+
+    const poller = new TaskPoller({
+      logger: this.logger,
+      pollInterval: config.get('task_manager.poll_interval'),
+      work: () =>
+        fillPool(
+          pool.run,
+          store.fetchAvailableTasks,
+          (instance: ConcreteTaskInstance) =>
+            new TaskManagerRunner({
+              logger: this.logger,
+              definition: this.definitions[instance.taskType],
+              kbnServer,
+              instance,
+              store,
+              beforeRun: this.middleware.beforeRun,
+            })
+        ),
+    });
+    this.poller = poller;
+    await this.poller.start();
+
+    this.initialized = true;
+  }
+
+  public addMiddleware(middleware: Middleware) {
+    const prevMiddleWare = this.middleware;
+    this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
+  }
+
+  /*
+   * Saves a task
+   * @param {TaskInstance} taskInstance
+   */
+  public async schedule(taskInstance: TaskInstance, options?: any): Promise<RawTaskDoc> {
+    if (!this.initialized || !this.poller || !this.store) {
+      throw new Error('Task Manager service is not ready for tasks to be scheduled');
+    }
+    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      ...options,
+      taskInstance,
+    });
+    const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
   }
 
-  public fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public fetch(opts: FetchOpts = {}): Promise<FetchResult> | null {
+    if (!this.initialized || !this.store) {
+      throw new Error('Task Manager service is not ready to fetch tasks');
+    }
     return this.store.fetch(opts);
   }
 
-  public remove(id: string): Promise<RemoveResult> {
+  public remove(id: string): Promise<RemoveResult> | null {
+    if (!this.initialized || !this.store) {
+      throw new Error('Task Manager service is not ready to remove a task');
+    }
     return this.store.remove(id);
   }
 }

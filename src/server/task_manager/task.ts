@@ -34,16 +34,8 @@ export type ElasticJs = (action: string, args: any) => Promise<any>;
  */
 export interface RunContext {
   /**
-   * The elastic search js wrapper function which the task can use
-   * to access Elastic.
-   */
-  callCluster: ElasticJs;
-
-  /**
    * The Kibana server object. This gives tasks full-access to the server object,
-   * but if the task needs to query ES in the context of the user who scheduled
-   * the task, it hsould use `callCluster` rather than the various ES options
-   * available in kbnServer.
+   * including the various ES options client functions
    */
   kbnServer: object;
 

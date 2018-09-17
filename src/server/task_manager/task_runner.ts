@@ -19,11 +19,11 @@
 
 import Joi from 'joi';
 import { Logger } from './logger';
+import { BeforeRunFunction } from './middleware';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
-  RunContext,
   RunResult,
   TaskDefinition,
   validateRunResult,
@@ -45,14 +45,13 @@ interface Updatable {
   remove(id: string): Promise<RemoveResult>;
 }
 
-type ContextProvider = (instance: ConcreteTaskInstance) => Promise<RunContext>;
-
 interface Opts {
   logger: Logger;
   definition: TaskDefinition;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  contextProvider: ContextProvider;
+  kbnServer: any;
+  beforeRun: BeforeRunFunction;
 }
 
 /**
@@ -69,7 +68,8 @@ export class TaskManagerRunner implements TaskRunner {
   private definition: TaskDefinition;
   private logger: Logger;
   private store: Updatable;
-  private contextProvider: ContextProvider;
+  private kbnServer: any;
+  private beforeRun: BeforeRunFunction;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -78,7 +78,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
    * @prop {Updatable} store - The store used to read / write tasks instance info
-   * @prop {ContextProvider} contextProvider - An async function that provides the task's run context
+   * @prop {kbnServer} kbnServer - An async function that provides the task's run context
    * @memberof TaskManagerRunner
    */
   constructor(opts: Opts) {
@@ -86,7 +86,8 @@ export class TaskManagerRunner implements TaskRunner {
     this.definition = opts.definition;
     this.logger = opts.logger;
     this.store = opts.store;
-    this.contextProvider = opts.contextProvider;
+    this.kbnServer = opts.kbnServer;
+    this.beforeRun = opts.beforeRun;
   }
 
   /**
@@ -140,7 +141,10 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
-   * Runs the task, handling the task result, errors, etc, rescheduling if need be.
+   * Runs the task, handling the task result, errors, etc, rescheduling if need
+   * be. NOTE: the time of applying the middleware's beforeRun is incorporated
+   * into the total timeout time the task in configured with. We may decide to
+   * start the timer after beforeRun resolves
    *
    * @returns {Promise<RunResult>}
    * @memberof TaskManagerRunner
@@ -148,8 +152,12 @@ export class TaskManagerRunner implements TaskRunner {
   public async run(): Promise<RunResult> {
     try {
       this.logger.debug(`Running task ${this}`);
-      const context = await this.contextProvider(this.instance);
-      this.task = this.definition.createTaskRunner(context);
+      const modifiedContext = await this.beforeRun({
+        kbnServer: this.kbnServer,
+        taskInstance: this.instance,
+      });
+      const task = this.definition.createTaskRunner(modifiedContext);
+      this.task = task;
       return this.processResult(this.validateResult(await this.task.run()));
     } catch (error) {
       this.logger.warning(`Task ${this} failed ${error.stack}`);

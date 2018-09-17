@@ -222,11 +222,8 @@ describe('TaskManagerRunner', () => {
       remove: sinon.stub(),
     };
     const runner = new TaskManagerRunner({
-      contextProvider: async (taskInstance: ConcreteTaskInstance) => ({
-        callCluster,
-        kbnServer: sinon.stub(),
-        taskInstance,
-      }),
+      kbnServer: sinon.stub(),
+      beforeRun: context => Promise.resolve(context),
       logger,
       store,
       instance: Object.assign(
