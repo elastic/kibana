@@ -120,9 +120,15 @@ export class StepTermsUi extends Component {
                 defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiSpacer size="m" />
-
+        <FieldList
+          columns={columns}
+          fields={terms}
+          onRemoveField={this.onRemoveField}
+          emptyMessage={<p>No terms fields added</p>}
+          addButton={(
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
@@ -134,13 +140,7 @@ export class StepTermsUi extends Component {
               fields={unselectedTermsFields}
               onSelectField={this.onSelectField}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <FieldList
-          columns={columns}
-          fields={terms}
-          onRemoveField={this.onRemoveField}
+          )}
         />
       </Fragment>
     );

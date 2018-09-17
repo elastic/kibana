@@ -116,9 +116,15 @@ export class StepHistogramUi extends Component {
                 defaultMessage="Histogram docs"
               />
             </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiSpacer size="m" />
-
+        <FieldList
+          columns={columns}
+          fields={histogram}
+          onRemoveField={this.onRemoveField}
+          emptyMessage={<p>No histogram fields added</p>}
+          addButton={(
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
@@ -130,13 +136,7 @@ export class StepHistogramUi extends Component {
               fields={unselectedHistogramFields}
               onSelectField={this.onSelectField}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <FieldList
-          columns={columns}
-          fields={histogram}
-          onRemoveField={this.onRemoveField}
+          )}
         />
 
         {this.renderInterval()}

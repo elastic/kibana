@@ -10,15 +10,25 @@ import PropTypes from 'prop-types';
 import {
   EuiInMemoryTable,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 export const FieldList = ({
   columns,
   fields,
   onRemoveField,
+  addButton,
+  emptyMessage,
 }) => {
+  let message;
+
   if (!fields.length) {
-    return null;
+    message = (
+      <EuiEmptyPrompt
+        title={emptyMessage}
+        titleSize="xs"
+      />
+    );
   }
 
   const extendedColumns = columns.concat({
@@ -36,6 +46,7 @@ export const FieldList = ({
   });
 
   const search = {
+    toolsRight: addButton,
     box: {
       incremental: true,
     },
@@ -57,6 +68,7 @@ export const FieldList = ({
         search={search}
         pagination={pagination}
         sorting={true}
+        message={message}
       />
     </Fragment>
   );
@@ -66,4 +78,6 @@ FieldList.propTypes = {
   columns: PropTypes.array.isRequired,
   fields: PropTypes.array.isRequired,
   onRemoveField: PropTypes.func.isRequired,
+  addButton: PropTypes.node.isRequired,
+  emptyMessage: PropTypes.node.isRequired,
 };

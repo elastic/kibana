@@ -208,9 +208,15 @@ export class StepMetricsUi extends Component {
                 defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiSpacer size="m" />
-
+        <FieldList
+          columns={this.listColumns}
+          fields={metrics}
+          onRemoveField={this.onRemoveField}
+          emptyMessage={<p>No metrics fields added</p>}
+          addButton={(
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
@@ -222,13 +228,7 @@ export class StepMetricsUi extends Component {
               fields={unselectedMetricsFields}
               onSelectField={this.onSelectField}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <FieldList
-          columns={this.listColumns}
-          fields={metrics}
-          onRemoveField={this.onRemoveField}
+          )}
         />
       </Fragment>
     );
