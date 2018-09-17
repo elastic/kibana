@@ -55,8 +55,9 @@ The list of common parameters:
 
 - *name*: unique visualization name, only lowercase letters and underscore
 - *title*: title of your visualization as displayed in kibana
-- *icon*: the icon class to use (font awesome)
-- *image*: instead of icon you can provide svg image (imported)
+- *icon*: <string> the https://elastic.github.io/eui/#/display/icons[EUI icon] type to use for this visualization
+- *image*: instead of an icon you can provide a SVG image (imported)
+- *legacyIcon*: (DEPRECATED) <string> provide a class name (e.g. for a font awesome icon)
 - *description*: description of your visualization as shown in kibana
 - *category*: the category your visualization falls into (one of `ui/vis/vis_category` values)
 - *visConfig*: object holding visualization parameters

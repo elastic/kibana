@@ -86,6 +86,14 @@ jest.mock('ui/chrome/api/ui_settings', () => {
   };
 });
 
+const mockInjectedVarsInit = jest.fn();
+jest.mock('ui/chrome/api/injected_vars', () => {
+  mockLoadOrder.push('ui/chrome/api/injected_vars');
+  return {
+    __newPlatformInit__: mockInjectedVarsInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -203,6 +211,17 @@ describe('#start()', () => {
 
       expect(mockUiSettingsInit).toHaveBeenCalledTimes(1);
       expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsStartContract);
+    });
+
+    it('passes injectedMetadata service to ui/chrome/api/injected_vars', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockInjectedVarsInit).toHaveBeenCalledTimes(1);
+      expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataStartContract);
     });
 
     describe('useLegacyTestHarness = false', () => {
