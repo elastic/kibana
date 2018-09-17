@@ -8,6 +8,7 @@ import React from 'react';
 import uiRoutes from 'ui/routes';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
 
@@ -26,6 +27,8 @@ uiRoutes.when('/elasticsearch/ccr', {
         $scope,
         $injector
       });
+
+      timefilter.disableTimeRangeSelector();
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
