@@ -15,7 +15,6 @@ interface AssignmentListProps {
 export const AssignmentList = ({
   assignmentOptions: { items, renderAssignmentOptions },
 }: AssignmentListProps) => (
-  // @ts-ignore direction prop not available on current typing
   <EuiFlexGroup direction="column" gutterSize="xs">
     {items.map((options, index) => renderAssignmentOptions(options, `${index}`))}
   </EuiFlexGroup>
