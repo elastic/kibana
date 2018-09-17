@@ -19,33 +19,38 @@
 
 import Joi from 'joi';
 
-export const createCreateRoute = (prereqs) => {
+export const createCreateRoute = prereqs => {
   return {
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     options: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
-        query: Joi.object().keys({
-          overwrite: Joi.boolean().default(false)
-        }).default(),
-        params: Joi.object().keys({
-          type: Joi.string().required(),
-          id: Joi.string()
-        }).required(),
+        query: Joi.object()
+          .keys({
+            overwrite: Joi.boolean().default(false),
+          })
+          .default(),
+        params: Joi.object()
+          .keys({
+            type: Joi.string().required(),
+            id: Joi.string(),
+          })
+          .required(),
         payload: Joi.object({
-          attributes: Joi.object().required()
-        }).required()
+          attributes: Joi.object().required(),
+          migrationVersion: Joi.object().optional(),
+        }).required(),
       },
       handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { overwrite } = request.query;
-        // Optional params default to empty string, set to null to be more explicit.
-        const options = { id: id || null, overwrite };
+        const { migrationVersion } = request.payload;
+        const options = { id, overwrite, migrationVersion };
 
         return savedObjectsClient.create(type, request.payload.attributes, options);
-      }
-    }
+      },
+    },
   };
 };

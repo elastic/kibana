@@ -60,7 +60,8 @@ export function registerScrollForExportRoute(server) {
           _source: hit.attributes,
           _meta: {
             savedObjectVersion: 2
-          }
+          },
+          _migrationVersion: hit.migrationVersion,
         };
       });
     }
