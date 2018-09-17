@@ -106,12 +106,12 @@ export function mapExtentChanged(newMapConstants) {
   const requestToken = Symbol('data_request_sync_extentchange');
 
   return async (dispatch, getState) => {
-    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: newMapConstants
     });
 
+    const dataLoading = getDataLoadingFunction(dispatch, requestToken);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
       layer.syncDataToMapState(dataLoading, newMapConstants);
