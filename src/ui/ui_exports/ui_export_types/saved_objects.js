@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { flatConcatAtType } from './reduce';
-import { alias, mapSpec, wrap } from './modify_reduce';
+import { flatConcatAtType, mergeAtType } from './reduce';
+import { alias, mapSpec, uniqueKeys, wrap } from './modify_reduce';
 
 // mapping types
 export const mappings = wrap(
@@ -29,3 +29,5 @@ export const mappings = wrap(
   })),
   flatConcatAtType
 );
+
+export const savedObjectsSchema = wrap(uniqueKeys(), mergeAtType);
