@@ -72,7 +72,10 @@ export class VisualizeDataLoader {
 
     try {
       // searchSource is only there for courier request handler
-      const requestHandlerResponse = await this.requestHandler(this.vis, params);
+      const requestHandlerResponse = await this.requestHandler(this.vis, {
+        partialRows: this.vis.params.partialRows || this.vis.type.name === 'tile_map',
+        ...params,
+      });
 
       // No need to call the response handler when there have been no data nor has been there changes
       // in the vis-state (response handler does not depend on uiStat
