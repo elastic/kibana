@@ -5,4 +5,5 @@
  */
 
 export { TagAssignment } from './tag_assignment';
+export { TagBadge } from './tag_badge';
 export { TagEdit } from './tag_edit';
