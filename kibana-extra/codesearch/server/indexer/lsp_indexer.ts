@@ -34,6 +34,9 @@ import {
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
+  // Currently without the multi revision support, we use this placeholder revision string
+  // to construct any ES document id.
+  private PLACEHOLDER_REVISION: string = 'head';
 
   constructor(
     protected readonly lspService: LspService,
@@ -78,13 +81,13 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async prepareRequests(repoUri: RepositoryUri) {
-    const {
-      workspaceRepo,
-      workspaceRevision,
-    } = await this.lspService.workspaceHandler.openWorkspace(repoUri, 'head');
-    const workspaceDir = workspaceRepo.workdir();
-    const gitOperator = new GitOperations(this.options.repoPath);
     try {
+      const {
+        workspaceRepo,
+        workspaceRevision,
+      } = await this.lspService.workspaceHandler.openWorkspace(repoUri, 'head');
+      const workspaceDir = workspaceRepo.workdir();
+      const gitOperator = new GitOperations(this.options.repoPath);
       const fileTree = await gitOperator.fileTree(repoUri, '');
       return RepositoryUtils.getAllFiles(fileTree).map((filePath: string) => {
         const req: LspIndexRequest = {
@@ -116,7 +119,7 @@ export class LspIndexer extends AbstractIndexer {
       await this.client.index({
         index: SymbolIndexName(repoUri),
         type: SymbolTypeName,
-        id: `${repoUri}:${revision}:${filePath}:${symbol.symbolInformation.name}`,
+        id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${symbol.symbolInformation.name}`,
         body: symbol,
       });
       symbolNames.add(symbol.symbolInformation.name);
@@ -126,7 +129,7 @@ export class LspIndexer extends AbstractIndexer {
       await this.client.index({
         index: ReferenceIndexName(repoUri),
         type: ReferenceTypeName,
-        id: `${repoUri}:${revision}:${filePath}:${ref.location.uri}:${
+        id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
           ref.location.range.start.line
         }:${ref.location.range.start.character}`,
         body: ref,
@@ -147,7 +150,7 @@ export class LspIndexer extends AbstractIndexer {
     await this.client.index({
       index: DocumentIndexName(repoUri),
       type: DocumentTypeName,
-      id: `${repoUri}:${revision}:${filePath}`,
+      id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}`,
       body,
     });
     return;

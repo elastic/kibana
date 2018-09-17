@@ -14,6 +14,8 @@ export class ServerOptions {
 
   public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
 
+  public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
+
   public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;

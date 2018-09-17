@@ -135,7 +135,7 @@ export function repositoryRoute(
           type: RepositoryTypeName,
           id: repoUri,
         });
-        const repo: Repository = response._source.repository;
+        const repo: Repository = response._source[RepositoryReserviedField];
         reply(repo);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
@@ -188,7 +188,7 @@ export function repositoryRoute(
         });
         const hits: any[] = response.hits.hits;
         const repos: Repository[] = hits.map(hit => {
-          const repo: Repository = hit._source.repository;
+          const repo: Repository = hit._source[RepositoryReserviedField];
           return repo;
         });
         reply(repos);
@@ -209,10 +209,15 @@ export function repositoryRoute(
     async handler(req, reply) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
+      const objectClient = req.getSavedObjectsClient();
 
       try {
+        const response = await objectClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri);
+        const cloneStatus: CloneWorkerProgress = response.attributes;
+
         const payload = {
           uri: repoUri,
+          revision: cloneStatus.revision,
           dataPath: options.repoPath,
         };
         await indexWorker.enqueueJob(payload, {});

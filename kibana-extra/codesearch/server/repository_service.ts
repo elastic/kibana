@@ -32,10 +32,14 @@ export class RepositoryService {
       if (fs.existsSync(localPath)) {
         this.log.info(`Repository exist in local path: ${localPath}. Do update instead of clone.`);
         // Do update instead of clone if the local repo exists.
-        await this.update(repo.uri);
+        const updateRes = await this.update(repo.uri);
         return {
           uri: repo.uri,
-          repo,
+          repo: {
+            ...repo,
+            defaultBranch: updateRes.branch,
+            revision: updateRes.revision,
+          },
         };
       } else {
         try {
@@ -67,14 +71,20 @@ export class RepositoryService {
           });
           const headCommit = await gitRepo.getHeadCommit();
           const headRevision = headCommit.sha();
+          const currentBranch = await gitRepo.getCurrentBranch();
+          const currentBranchName = currentBranch.shorthand();
           this.log.info(
             `Clone repository from ${
               repo.url
-            } to ${localPath} done with head revision ${headRevision}`
+            } to ${localPath} done with head revision ${headRevision} and default branch ${currentBranchName}`
           );
           return {
             uri: repo.uri,
-            repo,
+            repo: {
+              ...repo,
+              defaultBranch: currentBranchName,
+              revision: headRevision,
+            },
           };
         } catch (error) {
           const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;

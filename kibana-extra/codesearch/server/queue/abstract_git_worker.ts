@@ -9,7 +9,7 @@ import { EsClient, Esqueue } from '@codesearch/esqueue';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
-import { getDefaultBranch } from '../git_operations';
+import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import {
   RepositoryIndexName,
   RepositoryReserviedField,
@@ -36,7 +36,10 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     const { dataPath } = job.payload;
     const repoUri = res.uri;
     const localPath = RepositoryUtils.repositoryLocalPath(dataPath, repoUri);
+    const revision = await getHeadRevision(localPath);
     const defaultBranch = await getDefaultBranch(localPath);
+
+    // Update the repository data.
     this.client.update({
       index: RepositoryIndexName(repoUri),
       type: RepositoryTypeName,
@@ -45,10 +48,21 @@ export abstract class AbstractGitWorker extends AbstractWorker {
         doc: {
           [RepositoryReserviedField]: {
             defaultBranch,
+            revision,
           },
         },
       }),
     });
+
+    // Update the clone status.
+    try {
+      return await this.objectsClient.update(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri, {
+        revision,
+        progress: 100,
+      });
+    } catch (error) {
+      this.log.debug(`Update revision of repo clone progress error: ${error}`);
+    }
 
     return await super.onJobCompleted(job, res);
   }

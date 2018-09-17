@@ -14,6 +14,7 @@ export interface Repository {
   name?: string;
   org?: string;
   defaultBranch?: string;
+  revision?: string;
 }
 
 export interface FileTree {
@@ -39,6 +40,9 @@ export enum FileTreeItemType {
 export interface WorkerResult {
   uri: string;
 }
+
+// TODO(mengwei): create a AbstractGitWorkerResult since we now have an
+// AbstractGitWorker now.
 export interface CloneWorkerResult extends WorkerResult {
   repo: Repository;
 }
@@ -65,6 +69,7 @@ export interface WorkerProgress {
   uri: string;
   progress: number;
   timestamp: Date;
+  revision?: string;
 }
 
 export interface CloneProgress {

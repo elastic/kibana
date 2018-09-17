@@ -58,6 +58,9 @@ export const DocumentSchema = {
       defaultBranch: {
         type: 'keyword',
       },
+      revision: {
+        type: 'keyword',
+      },
     },
   },
 };

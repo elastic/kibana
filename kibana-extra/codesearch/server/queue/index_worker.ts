@@ -29,7 +29,7 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async executeJob(job: Job) {
-    const { uri } = job.payload;
+    const { uri, revision } = job.payload;
 
     const progressReporter = async (progress: IndexProgress) => {
       let statusIndex;
@@ -43,6 +43,7 @@ export class IndexWorker extends AbstractWorker {
         uri,
         progress: progress.percentage,
         timestamp: new Date(),
+        revision,
       };
       try {
         return await this.objectsClient.create(statusIndex, p, {
@@ -55,14 +56,14 @@ export class IndexWorker extends AbstractWorker {
     };
 
     for (const indexer of this.indexers) {
-      // TODO: add revision and make indexers run in parallel.
-      await indexer.start(uri, progressReporter);
+      // TODO: make indexers run in parallel.
+      await indexer.start(uri, revision, progressReporter);
     }
 
     // TODO: populate the actual index result
     const res: IndexWorkerResult = {
       uri,
-      revision: 'HEAD',
+      revision,
       // Number of symbols indexed.
       symbols: 0,
       // Number of files indexed.
@@ -72,11 +73,12 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async onJobEnqueued(job: Job) {
-    const { uri } = job.payload;
+    const { uri, revision } = job.payload;
     const progress: WorkerProgress = {
       uri,
       progress: 0,
       timestamp: new Date(),
+      revision,
     };
     try {
       await this.objectsClient.create(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, progress, {
@@ -94,5 +96,20 @@ export class IndexWorker extends AbstractWorker {
       // If the object already exists then update the status
       return await this.objectsClient.update(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri, progress);
     }
+  }
+
+  public async onJobCompleted(job: Job, res: WorkerProgress) {
+    const { uri } = job.payload;
+    await this.objectsClient.update(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri, {
+      progress: 100,
+      timestamp: new Date(),
+    });
+
+    await this.objectsClient.update(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri, {
+      progress: 100,
+      timestamp: new Date(),
+    });
+
+    return await super.onJobCompleted(job, res);
   }
 }

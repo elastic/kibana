@@ -16,8 +16,12 @@ export abstract class AbstractIndexer implements Indexer {
 
   constructor(protected readonly client: EsClient, protected readonly log: Log) {}
 
-  public async start(repoUri: RepositoryUri, progressReporter?: ProgressReporter) {
-    this.log.info(`Indexer ${this.type} started for repo ${repoUri}`);
+  public async start(
+    repoUri: RepositoryUri,
+    revision: string,
+    progressReporter?: ProgressReporter
+  ) {
+    this.log.info(`Indexer ${this.type} started for repo ${repoUri} with revision ${revision}`);
 
     // Prepare the ES index
     const res = await this.prepareIndex(repoUri);

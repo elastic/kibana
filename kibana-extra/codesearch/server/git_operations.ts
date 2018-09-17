@@ -195,3 +195,9 @@ export async function getDefaultBranch(path: string): Promise<string> {
   }
   return name;
 }
+
+export async function getHeadRevision(path: string): Promise<string> {
+  const repo = await Repository.open(path);
+  const commit = await repo.getHeadCommit();
+  return commit.sha();
+}

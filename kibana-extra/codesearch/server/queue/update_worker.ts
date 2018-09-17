@@ -6,6 +6,7 @@
 
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
+import { CloneWorkerResult } from '../../model';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractGitWorker } from './abstract_git_worker';
@@ -20,7 +21,13 @@ export class UpdateWorker extends AbstractGitWorker {
 
   public async executeJob(job: Job) {
     const { uri, dataPath } = job.payload;
+    this.log.info(`Execute update job for ${uri}`);
     const repoService = new RepositoryService(dataPath, this.log);
     return await repoService.update(uri);
+  }
+
+  public async onJobCompleted(job: Job, res: CloneWorkerResult) {
+    this.log.info(`Update job done for ${job.payload.uri}`);
+    return await super.onJobCompleted(job, res);
   }
 }

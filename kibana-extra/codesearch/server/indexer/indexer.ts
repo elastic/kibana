@@ -17,5 +17,5 @@ export interface IndexProgress {
 export type ProgressReporter = (progress: IndexProgress) => void;
 
 export interface Indexer {
-  start(repoUri: RepositoryUri, ProgressReporter?: ProgressReporter): void;
+  start(repoUri: RepositoryUri, revision: string, ProgressReporter?: ProgressReporter): void;
 }

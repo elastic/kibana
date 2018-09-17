@@ -23,9 +23,9 @@ import {
   symbolSearchRoute,
 } from './server/routes/search';
 import { workspaceRoute } from './server/routes/workspace';
+import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
-import { UpdateScheduler } from './server/update_scheduler';
 
 // tslint:disable-next-line no-default-export
 export default (kibana: any) =>
@@ -51,7 +51,8 @@ export default (kibana: any) =>
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
-        updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default.
+        updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default
+        indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000), // 1 day by default
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
@@ -89,11 +90,13 @@ export default (kibana: any) =>
         timeout: queueTimeout,
         doctype: 'esqueue',
       });
+      const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
       const cloneWorker = new CloneWorker(
         queue,
         log,
         objectsClient,
-        adminCluster.getClient()
+        adminCluster.getClient(),
+        indexWorker
       ).bind();
       const deleteWorker = new DeleteWorker(
         queue,
@@ -107,15 +110,23 @@ export default (kibana: any) =>
         objectsClient,
         adminCluster.getClient()
       ).bind();
-      const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
 
-      // Initialize scheduler.
-      const scheduler = new UpdateScheduler(
+      // Initialize schedulers.
+      const updateScheduler = new UpdateScheduler(
         updateWorker,
         serverOptions,
-        adminCluster.callWithInternalUser
+        adminCluster.getClient(),
+        log
       );
-      scheduler.start();
+      const indexScheduler = new IndexScheduler(
+        indexWorker,
+        serverOptions,
+        objectsClient,
+        adminCluster.getClient(),
+        log
+      );
+      updateScheduler.start();
+      indexScheduler.start();
 
       // Add server routes and initialize the plugin here
       repositoryRoute(
