@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "description": "Kibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
   "keywords": [
     "kibana",
     "elasticsearch",
@@ -10,7 +10,7 @@
     "dashboards",
     "dashboarding"
   ],
-  "private": false,
+  "private": true,
   "version": "7.0.0-alpha1",
   "branch": "master",
   "build": {
@@ -21,7 +21,6 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
-  "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "preinstall": "node ./preinstall_check",
@@ -97,8 +96,8 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^14.2.1",
-    "elasticsearch-browser": "^14.2.1",
+    "elasticsearch": "^15.1.1",
+    "elasticsearch-browser": "^15.1.1",
     "encode-uri-query": "1.0.0",
     "execa": "^0.10.0",
     "expiry-js": "0.1.7",
