@@ -11,11 +11,10 @@ answers for frequently asked questions related to {monitoring}.
 [float]
 === Cannot view the cluster because the license information is invalid
 
-//TBD: Does this error occur when you're performing a particular task?
-
 *Symptoms:*
 
-The following error appears in a banner at the top of the screen in {kib}:
+The following error appears in a banner at the top of the screen in {kib} on the 
+*Monitoring > Clusters* page:
 `You can't view the "<my_cluster>" cluster because the license information is invalid.`
 
 *Resolution:*
