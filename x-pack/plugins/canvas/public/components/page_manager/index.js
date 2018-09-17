@@ -7,10 +7,12 @@
 import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
 import * as pageActions from '../../state/actions/pages';
+import { getEditing } from '../../state/selectors/app';
 import { getSelectedPage, getWorkpad, getPages } from '../../state/selectors/workpad';
 import { PageManager as Component } from './page_manager';
 
 const mapStateToProps = state => ({
+  isEditing: getEditing(state),
   pages: getPages(state),
   selectedPage: getSelectedPage(state),
   workpadId: getWorkpad(state).id,

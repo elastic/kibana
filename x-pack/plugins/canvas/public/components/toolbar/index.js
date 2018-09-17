@@ -7,7 +7,6 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, getContext, withHandlers } from 'recompose';
-import { getEditing } from '../../state/selectors/app';
 
 import {
   getWorkpad,
@@ -19,7 +18,6 @@ import {
 import { Toolbar as Component } from './toolbar';
 
 const mapStateToProps = state => ({
-  editing: getEditing(state),
   workpadName: getWorkpadName(state),
   workpadId: getWorkpad(state).id,
   totalPages: getWorkpad(state).pages.length,

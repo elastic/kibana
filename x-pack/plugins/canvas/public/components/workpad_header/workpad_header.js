@@ -24,8 +24,9 @@ import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
 export const WorkpadHeader = ({
-  editing,
+  isEditing,
   toggleEditing,
+  readOnly,
   hasAssets,
   addElement,
   setShowElementModal,
@@ -78,25 +79,27 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <WorkpadExport />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-              <EuiToolTip
-                position="bottom"
-                content={editing ? 'Hide editing controls' : 'Show editing controls'}
-              >
-                <EuiButtonIcon
-                  iconType={editing ? 'eye' : 'eyeClosed'}
-                  onClick={() => {
-                    toggleEditing();
-                  }}
-                  size="s"
-                  aria-label={editing ? 'Hide editing controls' : 'Show editing controls'}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+            {!readOnly && (
+              <EuiFlexItem grow={false}>
+                <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
+                <EuiToolTip
+                  position="bottom"
+                  content={isEditing ? 'Hide editing controls' : 'Show editing controls'}
+                >
+                  <EuiButtonIcon
+                    iconType={isEditing ? 'eye' : 'eyeClosed'}
+                    onClick={() => {
+                      toggleEditing();
+                    }}
+                    size="s"
+                    aria-label={isEditing ? 'Hide editing controls' : 'Show editing controls'}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {editing ? (
+        {isEditing ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {hasAssets && (
@@ -123,7 +126,7 @@ export const WorkpadHeader = ({
 };
 
 WorkpadHeader.propTypes = {
-  editing: PropTypes.bool,
+  isEditing: PropTypes.bool,
   toggleEditing: PropTypes.func,
   hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,

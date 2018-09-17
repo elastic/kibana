@@ -14,6 +14,7 @@ import { PagePreview } from '../page_preview';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {
+    isEditing: PropTypes.bool.isRequired,
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
@@ -95,11 +96,11 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const { isEditing, selectedPage, workpadId, movePage, duplicatePage } = this.props;
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isEditing}>
         {provided => (
           <div
             key={page.id}

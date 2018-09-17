@@ -17,7 +17,7 @@ const mapStateToProps = state => {
   const appReady = getAppReady(state);
 
   return {
-    editing: getEditing(state),
+    isEditing: getEditing(state),
     appReady: typeof appReady === 'object' ? appReady : { ready: appReady },
     workpad: getWorkpad(state),
   };
