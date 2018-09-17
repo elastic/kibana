@@ -37,10 +37,10 @@ export function ExplorerChartsContainer({
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
               <div className="explorer-chart-label">
                 <div className="explorer-chart-label-fields">
-                  {(entityFields.length > 0) && (
+                  {(detectorLabel.length > 0 && entityFields.length > 0) && (
                     <span>{detectorLabel} - </span>
                   )}
-                  {(entityFields.length === 0) && (
+                  {(detectorLabel.length > 0 && entityFields.length === 0) && (
                     <span>{detectorLabel}</span>
                   )}
                   {entityFields.map((entity, j) => {
