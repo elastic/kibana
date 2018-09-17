@@ -10,6 +10,9 @@ import { get } from 'lodash';
 export function getEditing(state) {
   return get(state, 'transient.editing', false);
 }
+export function getReadOnly(state) {
+  return get(state, 'transient.readOnly', false);
+}
 
 export function getFullscreen(state) {
   return get(state, 'transient.fullscreen', false);

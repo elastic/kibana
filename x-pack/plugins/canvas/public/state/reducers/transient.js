@@ -29,7 +29,11 @@ export const transientReducer = handleActions(
     },
 
     [actions.setEditing]: (transientState, { payload }) => {
-      return set(transientState, 'editing', Boolean(payload));
+      return set(transientState, 'editing', Boolean(payload && !transientState.readOnly));
+    },
+
+    [actions.setReadOnly]: (transientState, { payload }) => {
+      return set(transientState, 'readOnly', Boolean(payload));
     },
 
     [actions.setFullscreen]: (transientState, { payload }) => {
