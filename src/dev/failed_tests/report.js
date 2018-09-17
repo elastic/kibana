@@ -24,7 +24,7 @@ import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';
 
-const GITHUB_FLAKY_TEST_LABEL = 'flaky-failing-test';
+const GITHUB_FLAKY_TEST_LABEL = 'failed-test';
 const GITHUB_OWNER = 'elastic';
 const GITHUB_REPO = 'kibana';
 const BUILD_URL = process.env.BUILD_URL;
