@@ -41,3 +41,5 @@ include::upgrade/upgrade-standard.asciidoc[]
 include::upgrade/upgrade-standard-reindex.asciidoc[]
 
 include::upgrade/upgrade-new-install.asciidoc[]
+
+include::upgrade/migrations.asciidoc[]
