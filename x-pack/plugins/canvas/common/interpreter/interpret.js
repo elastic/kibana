@@ -32,7 +32,7 @@ export function interpretProvider(config) {
 
   return interpret;
 
-  function interpret(node, context = null) {
+  async function interpret(node, context = null) {
     switch (getType(node)) {
       case 'expression':
         return invokeChain(node.chain, context);

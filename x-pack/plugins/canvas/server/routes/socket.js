@@ -10,7 +10,8 @@ import { socketInterpreterProvider } from '../../common/interpreter/socket_inter
 import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
-import { loadServerPlugins } from '../lib/load_server_plugins';
+import { populateServerRegistries } from '../lib/populate_server_registries';
+import { routeExpressionProvider } from '../lib/route_expression';
 import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
@@ -21,32 +22,21 @@ export function socketApi(server) {
 
     // This is the HAPI request object
     const request = socket.handshake;
-
     const authHeader = getAuthHeader(request, server);
-
-    // Create the function list
-    socket.emit('getFunctionList');
-    const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
+    const types = typesRegistry.toJS();
+    const { serialize, deserialize } = serializeProvider(types);
+    const routeExpression = routeExpressionProvider({ socket, serialize, deserialize });
 
     socket.on('getFunctionList', () => {
-      loadServerPlugins().then(() => socket.emit('functionList', functionsRegistry.toJS()));
+      populateServerRegistries(['serverFunctions', 'types']).then(() =>
+        socket.emit('functionList', functionsRegistry.toJS())
+      );
     });
 
     const handler = ({ ast, context, id }) => {
-      Promise.all([getClientFunctions, authHeader]).then(([clientFunctions, authHeader]) => {
+      Promise.all([authHeader]).then(([authHeader]) => {
         if (server.plugins.security) request.headers.authorization = authHeader;
-
-        const types = typesRegistry.toJS();
-        const interpret = socketInterpreterProvider({
-          types,
-          functions: functionsRegistry.toJS(),
-          handlers: createHandlers(request, server),
-          referableFunctions: clientFunctions,
-          socket: socket,
-        });
-
-        const { serialize, deserialize } = serializeProvider(types);
-        return interpret(ast, deserialize(context))
+        return routeExpression(ast, context)
           .then(value => {
             socket.emit(`resp:${id}`, { value: serialize(value) });
           })

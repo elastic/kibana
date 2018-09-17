@@ -7,7 +7,7 @@
 import { routes } from './server/routes';
 import { functionsRegistry } from './common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
+import { populateServerRegistries } from './server/lib/populate_server_registries';
 import { registerCanvasUsageCollector } from './server/usage';
 
 export default function(server /*options*/) {
@@ -29,6 +29,6 @@ export default function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
-  loadServerPlugins().then(() => routes(server));
   registerCanvasUsageCollector(server);
+  return populateServerRegistries(['serverFunctions', 'types']).then(() => routes(server));
 }

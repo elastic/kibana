@@ -32,7 +32,7 @@ const types = {
   argumentUIs: argTypeRegistry,
 };
 
-export const loadBrowserPlugins = () =>
+export const populateBrowserRegistries = () =>
   new Promise(resolve => {
     loadPrivateBrowserFunctions();
     const remainingTypes = Object.keys(types);
