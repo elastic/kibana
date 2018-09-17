@@ -30,7 +30,7 @@ export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
   public static convertPanelDataPre_6_1(panel: {
     panelIndex: string;
-    gridData: { x: number; y: number; w: number; h: number; i: string };
+    gridData: { x: number; y: number; w: number; h: number; id: string };
     col: number;
     row: number;
     size_x: any;
