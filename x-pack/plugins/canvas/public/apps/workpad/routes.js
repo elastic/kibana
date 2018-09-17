@@ -11,6 +11,7 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { gotoPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { setReadOnly, setEditing } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -48,6 +49,13 @@ export const routes = [
               const { assets, ...workpad } = fetchedWorkpad;
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
+
+              workpadService.update(params.id, fetchedWorkpad).catch(err => {
+                if (err.response.status === 403) {
+                  dispatch(setReadOnly(true));
+                  dispatch(setEditing(false));
+                }
+              });
             } catch (err) {
               notify.error(err, { title: `Couldn't load workpad with ID` });
               return router.redirectTo('home');
