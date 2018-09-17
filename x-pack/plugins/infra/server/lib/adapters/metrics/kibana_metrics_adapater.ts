@@ -9,6 +9,7 @@ import moment from 'moment';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
+import { checkValidNode } from './lib/check_valid_node';
 import { metricModels } from './models';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -22,6 +23,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     req: InfraFrameworkRequest,
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]> {
+    const search = <Aggregation>(searchOptions: object) =>
+      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
     const fields = {
       [InfraNodeType.host]: options.sourceConfiguration.fields.hostname,
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
@@ -40,12 +43,19 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       const filters = [{ match: { [nodeField]: options.nodeId } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
+    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
+    if (!validNode) {
+      throw new Error(`${options.nodeId} does not exist.`);
+    }
     return Promise.all(requests)
       .then(results => {
         return results.map(result => {
           const metricIds = Object.keys(result).filter(k => k !== 'type');
           return metricIds.map((id: string) => {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
+            if (!infraMetricId) {
+              throw new Error(`${id} is not a valid InfraMetric`);
+            }
             const panel = result[infraMetricId];
             return {
               id: infraMetricId,

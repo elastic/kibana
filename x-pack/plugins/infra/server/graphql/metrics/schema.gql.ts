@@ -22,7 +22,6 @@ export const metricsSchema: any = gql`
     podOverview
     podCpuUsage
     podMemoryUsage
-    podDiskUsage
     podLogUsage
     podNetworkTraffic
     containerOverview
@@ -30,7 +29,6 @@ export const metricsSchema: any = gql`
     containerCpuUsage
     containerDiskIOOps
     containerDiskIOBytes
-    containerHealth
     containerMemory
     containerNetworkTraffic
   }

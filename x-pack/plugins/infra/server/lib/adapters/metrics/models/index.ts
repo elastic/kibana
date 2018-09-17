@@ -26,6 +26,14 @@ import { podMemoryUsage } from './pod/pod_memory_usage';
 import { podNetworkTraffic } from './pod/pod_network_traffic';
 import { podOverview } from './pod/pod_overview';
 
+import { containerCpuKernel } from './container/container_cpu_kernel';
+import { containerCpuUsage } from './container/container_cpu_usage';
+import { containerDiskIOBytes } from './container/container_disk_io_bytes';
+import { containerDiskIOOps } from './container/container_diskio_ops';
+import { containerMemory } from './container/container_memory';
+import { containerNetworkTraffic } from './container/container_network_traffic';
+import { containerOverview } from './container/container_overview';
+
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
 }
@@ -49,4 +57,12 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.podDiskUsage]: podDiskUsage,
   [InfraMetric.podLogUsage]: podLogUsage,
   [InfraMetric.podNetworkTraffic]: podNetworkTraffic,
+
+  [InfraMetric.containerCpuKernel]: containerCpuKernel,
+  [InfraMetric.containerCpuUsage]: containerCpuUsage,
+  [InfraMetric.containerDiskIOBytes]: containerDiskIOBytes,
+  [InfraMetric.containerDiskIOOps]: containerDiskIOOps,
+  [InfraMetric.containerNetworkTraffic]: containerNetworkTraffic,
+  [InfraMetric.containerMemory]: containerMemory,
+  [InfraMetric.containerOverview]: containerOverview,
 };

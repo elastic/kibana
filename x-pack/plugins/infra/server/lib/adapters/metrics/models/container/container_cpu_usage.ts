@@ -15,7 +15,7 @@ export const containerCpuUsage: InfraMetricModelCreator = (timeField, indexPatte
   type: 'timeseries',
   series: [
     {
-      id: 'total',
+      id: 'cpu',
       split_mode: 'everything',
       metrics: [
         {

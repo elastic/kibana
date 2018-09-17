@@ -7,7 +7,6 @@
 import React from 'react';
 
 import {
-  EuiCallOut,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -24,6 +23,7 @@ import { Metrics } from '../../components/metrics';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import { WithOptions } from '../../containers/with_options';
+import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
 import { InfraMetricLayoutSection } from './layouts/types';
 
@@ -52,36 +52,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
     const nodeType = this.props.match.params.type as InfraNodeType;
     const layoutCreator = layoutCreators[nodeType];
     if (!layoutCreator) {
-      return (
-        <ColumnarPage>
-          <Header />
-          <DetailPageContent>
-            <EuiPage style={{ flex: '1 0 auto' }}>
-              <EuiPageBody>
-                <EuiPageHeader>
-                  <EuiPageHeaderSection>
-                    <EuiTitle size="m">
-                      <h1>Oops!</h1>
-                    </EuiTitle>
-                  </EuiPageHeaderSection>
-                </EuiPageHeader>
-                <EuiPageContent>
-                  <EuiCallOut
-                    color="danger"
-                    title={`"${nodeType}" is not a valid node type`}
-                    iconType={'alert'}
-                  >
-                    <p>
-                      The URL you're trying to access is not valid. Please click the back button and
-                      try again.
-                    </p>
-                  </EuiCallOut>
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </DetailPageContent>
-        </ColumnarPage>
-      );
+      return <Error message={`"${nodeType}" is not a valid node type`} />;
     }
     const layout = layoutCreator(this.props.theme);
     const breadcrumbs = [{ text: nodeName }];
@@ -109,25 +80,30 @@ class MetricDetailPage extends React.PureComponent<Props> {
                 nodeType={nodeType}
                 nodeId={nodeName}
               >
-                {({ metrics }) => (
-                  <EuiPage style={{ flex: '1 0 auto' }}>
-                    <EuiPageSideBar>
-                      <EuiSideNav items={sideNav} style={{ position: 'fixed' }} />
-                    </EuiPageSideBar>
-                    <EuiPageBody>
-                      <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                        <EuiPageHeaderSection>
-                          <EuiTitle size="m">
-                            <h1>{nodeName}</h1>
-                          </EuiTitle>
-                        </EuiPageHeaderSection>
-                      </EuiPageHeader>
-                      <EuiPageContentWithRelative>
-                        <Metrics layout={layout} metrics={metrics} />
-                      </EuiPageContentWithRelative>
-                    </EuiPageBody>
-                  </EuiPage>
-                )}
+                {({ metrics, error }) => {
+                  if (error) {
+                    return <ErrorPageBody message={error} />;
+                  }
+                  return (
+                    <EuiPage style={{ flex: '1 0 auto' }}>
+                      <EuiPageSideBar>
+                        <EuiSideNav items={sideNav} style={{ position: 'fixed' }} />
+                      </EuiPageSideBar>
+                      <EuiPageBody>
+                        <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                          <EuiPageHeaderSection>
+                            <EuiTitle size="m">
+                              <h1>{nodeName}</h1>
+                            </EuiTitle>
+                          </EuiPageHeaderSection>
+                        </EuiPageHeader>
+                        <EuiPageContentWithRelative>
+                          <Metrics layout={layout} metrics={metrics} />
+                        </EuiPageContentWithRelative>
+                      </EuiPageBody>
+                    </EuiPage>
+                  );
+                }}
               </WithMetrics>
             )}
           </WithOptions>

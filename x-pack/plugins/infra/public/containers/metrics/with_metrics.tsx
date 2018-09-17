@@ -18,6 +18,8 @@ import { metricsQuery } from './metrics.gql_query';
 
 interface WithMetricsArgs {
   metrics: InfraMetricData[];
+  error?: string | undefined;
+  loading: boolean;
 }
 
 interface WithMetricsProps {
@@ -55,11 +57,13 @@ export const WithMetrics = ({
         timerange,
       }}
     >
-      {({ data }) =>
-        children({
+      {({ data, error, loading }) => {
+        return children({
           metrics: filterOnlyInfraMetricData(data && data.source && data.source.metrics),
-        })
-      }
+          error: error && error.message,
+          loading,
+        });
+      }}
     </Query>
   );
 };
