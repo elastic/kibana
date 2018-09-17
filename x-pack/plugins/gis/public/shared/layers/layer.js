@@ -33,10 +33,6 @@ export class ALayer {
     return this._descriptor.id;
   }
 
-  getType() {
-    return this._descriptor.type;
-  }
-
   isVisible() {
     return this._descriptor.visible;
   }
