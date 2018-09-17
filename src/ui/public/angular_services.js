@@ -24,8 +24,10 @@ export let SearchSource;
 export let indexPatterns;
 
 uiModules.get('kibana/index_patterns').run(($injector) => {
+  indexPatterns = $injector.get('indexPatterns');
+});
+
+uiModules.get('kibana/courier').run(($injector) => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
-
-  indexPatterns = $injector.get('indexPatterns');
 });
