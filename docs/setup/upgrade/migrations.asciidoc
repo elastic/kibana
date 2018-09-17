@@ -1,0 +1,16 @@
+[[migrations]]
+== Kibana index migrations
+
+When Kibana starts, before it starts serving HTTP traffic, it checks to see if the `.kibana` index (or whatever the `kibana.yml` value of `kibana.index` is) contains any documents that are out of date. If there are out-of-date documents, Kibana will perform an index migration-- a process by which old documents are upgraded to be compatible with the current version of Kibana.
+
+An index migration consists of reindexing the old Kibana index so that no data is lost, then creating a new Kibana index and moving documents from the old index to the new one, updating documents prior to saving them to the new index.
+
+The original `.kibana` index is now `.kibana_1` and `.kibana` is now an alias that points to the latest, up-to-date index.
+
+After migrations have run, you will see multiple Kibana indices (`.kibana_1`, `.kibana_2`, etc). Kibana only uses the index that the `.kibana` alias points to. The other Kibana indices can safely be deleted, but are left around as a matter of historical record, and to allow rolling Kibana back to a previous version.
+
+If the Kibana crashes or terminates unexpectedly while migrating an index, Kibana is left in a "pending" state, and will fail to start until the underlying issue is resolved. To get past this, the new index will need to be deleted or renamed so that Kibana can reattempt the index migration.
+
+If you are running a cluster of Kibana servers, only one server will perform index migrations. Which one is unknown until the migration is in progress. The others will log a warning and wait for the primary Kibana server to finish migrating the index. 
+
+When rolling Kibana back to a previous version, point the `.kibana` alias to the appropriate Kibana index. You will also want to delete or rename / reindex the more recent `.kibana` indices so that future upgrades are based on the current Kibana index.
