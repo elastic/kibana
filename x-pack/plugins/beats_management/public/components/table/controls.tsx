@@ -8,16 +8,14 @@ import React from 'react';
 import {
   AssignmentOptionList,
   AssignmentOptionSearch,
-  AssignmentPrimaryOptions,
-  isPrimaryOptions,
+  BaseAssignmentOptions,
 } from './assignment_option_types';
 import { AssignmentOptions } from './assignment_options';
 import { PrimaryOptions } from './primary_options';
 import { ControlDefinitions } from './table_type_configs';
 
 interface ControlBarProps {
-  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | AssignmentPrimaryOptions;
-
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | BaseAssignmentOptions;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
 }
@@ -31,7 +29,7 @@ export function ControlBar(props: ControlBarProps) {
     selectionCount,
   } = props;
 
-  return isPrimaryOptions(assignmentOptions) ? (
+  return assignmentOptions.type === 'primary' ? (
     <PrimaryOptions
       actionHandler={actionHandler}
       filters={filters.length ? filters : null}

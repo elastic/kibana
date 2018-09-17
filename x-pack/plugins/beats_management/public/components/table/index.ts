@@ -9,7 +9,8 @@ export { ControlBar } from './controls';
 export {
   AssignmentOptionSearch,
   AssignmentOptionList,
-  AssignmentPrimaryOptions,
+  AssignmentOptionsComponent,
+  BaseAssignmentOptions,
 } from './assignment_option_types';
 export {
   ActionDefinition,

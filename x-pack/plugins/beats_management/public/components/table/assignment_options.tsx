@@ -11,6 +11,7 @@ import { AssignmentList } from './assignment_list';
 import {
   AssignmentOptionList,
   AssignmentOptionSearch,
+  BaseAssignmentOptions,
   isListOptions,
   isSearchOptions,
 } from './assignment_option_types';
@@ -18,7 +19,7 @@ import { AssignmentSearch } from './assignment_search';
 import { ControlDefinitions } from './table_type_configs';
 
 interface AssignmentOptionsProps {
-  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch;
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | BaseAssignmentOptions;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
 }

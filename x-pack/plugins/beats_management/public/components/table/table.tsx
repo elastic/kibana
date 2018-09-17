@@ -15,13 +15,13 @@ import { TABLE_CONFIG } from '../../../common/constants';
 import {
   AssignmentOptionList,
   AssignmentOptionSearch,
-  AssignmentPrimaryOptions,
+  BaseAssignmentOptions,
 } from './assignment_option_types';
 import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
 interface TableProps {
-  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | AssignmentPrimaryOptions;
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | BaseAssignmentOptions;
   items: any[];
   type: TableType;
 }

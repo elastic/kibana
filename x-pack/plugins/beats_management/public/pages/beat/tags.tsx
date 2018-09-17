@@ -8,7 +8,7 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import { get } from 'lodash';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
-import { AssignmentPrimaryOptions } from '../../components/table';
+import { AssignmentOptionsComponent, BaseAssignmentOptions } from '../../components/table';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
 
@@ -19,7 +19,7 @@ interface BeatTagsPageProps {
 }
 
 interface BeatTagsPageState {
-  assignmentOptions: AssignmentPrimaryOptions;
+  assignmentOptions: BaseAssignmentOptions;
   mounted: boolean;
   notifications: any[];
   tags: BeatTag[];
@@ -34,7 +34,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
       assignmentOptions: {
         actionHandler: this.handleTableAction,
         title: 'Manage Tags',
-        type: 'primary',
+        type: AssignmentOptionsComponent.Primary,
       },
       mounted: false,
       notifications: [],

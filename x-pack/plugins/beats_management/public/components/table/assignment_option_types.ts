@@ -6,9 +6,15 @@
 
 import { ColumnDefinition } from './table_type_configs';
 
-interface BaseAssignmentOptions {
+export enum AssignmentOptionsComponent {
+  List = 'list',
+  Primary = 'primary',
+  Search = 'search',
+}
+
+export interface BaseAssignmentOptions {
   title: string;
-  type: 'list' | 'search' | 'primary';
+  type: AssignmentOptionsComponent;
   actionHandler(action: string, payload?: any): void;
 }
 
@@ -24,18 +30,10 @@ export interface AssignmentOptionSearch extends BaseAssignmentOptions {
   searchFailureMessage?: string;
 }
 
-export interface AssignmentPrimaryOptions extends BaseAssignmentOptions {
-  opt?: any;
-}
-
 export function isListOptions(options: any): options is AssignmentOptionList {
   return options.type === 'list';
 }
 
 export function isSearchOptions(options: any): options is AssignmentOptionSearch {
   return options.type === 'search';
-}
-
-export function isPrimaryOptions(options: any): options is AssignmentPrimaryOptions {
-  return options.type === 'primary';
 }
