@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       log.debug('click Reporting button');
-      await PageObjects.reporting.openReportingPanel();
+      await PageObjects.reporting.openCsvReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const queueReportError = await PageObjects.reporting.getQueueReportError();
       expect(queueReportError).to.be(true);

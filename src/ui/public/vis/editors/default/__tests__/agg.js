@@ -64,8 +64,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
     $parentScope.agg = {
       id: 1,
       params: {},
-      schema: makeConfig(),
-      getFieldOptions: () => null
+      schema: makeConfig()
     };
     $parentScope.groupName = 'metrics';
     $parentScope.group = [{

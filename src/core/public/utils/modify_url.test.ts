@@ -26,7 +26,7 @@ it('supports returning a new url spec', () => {
 it('supports modifying the passed object', () => {
   expect(
     modifyUrl('http://localhost', parsed => {
-      parsed.port = 9999;
+      parsed.port = '9999';
       parsed.auth = 'foo:bar';
     })
   ).toBe('http://foo:bar@localhost:9999/');
@@ -43,7 +43,7 @@ it('supports changing pathname', () => {
 it('supports changing port', () => {
   expect(
     modifyUrl('http://localhost:5601', parsed => {
-      parsed.port = parsed.port! + 1;
+      parsed.port = String(Number(parsed.port) + 1);
     })
   ).toBe('http://localhost:5602/');
 });

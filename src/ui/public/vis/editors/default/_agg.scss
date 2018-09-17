@@ -1,0 +1,201 @@
+.indented {
+  margin-left: 2em;
+}
+
+.vis-editor-agg {
+  @include flex-parent();
+  width: 100%;
+  max-width: 100%;
+
+  //IE10/11 - prevent flex item from overflowing
+  flex-basis: 100%;
+}
+
+// wraps the .vis-editor-agg
+.vis-editor-agg-wrapper {
+  display: flex;
+}
+
+vis-editor-agg-group {
+  @include flex-parent(0, 1, auto);
+}
+
+.vis-editor-agg-group {
+  @include flex-parent(0, 1, auto);
+  color: $euiColorDarkShade;
+}
+
+.vis-editor-agg-header {
+  display: flex;
+  align-items: center;
+  flex: 1 0 auto;
+  margin-bottom: $vis-editor-agg-editor-spacing;
+}
+
+.vis-editor-agg-header-toggle {
+  flex: 0 0 auto;
+  margin-right: $vis-editor-agg-editor-spacing;
+  min-width: 22px;
+  min-height: 22px;
+  text-align: center;
+}
+
+.vis-editor-agg-header-subagg-icon {
+  flex: 0 1 auto;
+  padding-right: 5px;
+}
+
+.vis-editor-agg-header-title {
+  flex: 0 0 auto;
+  @include euiTextTruncate;
+  font-weight: $euiFontWeightBold;
+}
+
+.vis-editor-agg-header-title--grow {
+  flex-grow: 1;
+}
+
+.vis-editor-agg-header-description {
+  font-weight: normal;
+  padding-right: $vis-editor-agg-editor-spacing;
+  padding-left: 5px;
+  @include euiTextTruncate;
+  flex: 1 1 0;
+
+  &.danger {
+    color: $euiColorDanger;
+    font-weight: bold;
+  }
+}
+
+.vis-editor-agg-header-controls {
+  flex: 0 0 auto;
+}
+
+.vis-editor-agg-error {
+  margin: $vis-editor-agg-editor-spacing 0;
+  padding: $vis-editor-agg-editor-spacing;
+  text-align: center;
+  background: $euiColorDanger;
+  color: $euiColorEmptyShade;
+  line-height: 1.5;
+}
+
+.vis-editor-agg-editor-ranges {
+  td {
+    padding: 0 $vis-editor-agg-editor-spacing $vis-editor-agg-editor-spacing 0;
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+.vis-editor-agg-editor-advanced-toggle {
+  text-align: right;
+}
+
+.vis-editor-agg-form-row {
+  display: flex;
+
+  > * {
+    flex: 1 1 auto;
+    margin-right: $vis-editor-agg-editor-spacing;
+
+    &:last-child {
+      margin-right: 0px;
+    }
+  }
+}
+
+/**
+  * 1. Hack to split child elements evenly.
+  */
+.vis-editor-agg-form-row__even-split {
+  flex: 1 1 0 !important; /* 1 */
+}
+
+.vis-editor-agg-form-value {
+  align-self: center;
+  margin: 0 0 0 $vis-editor-agg-editor-spacing;
+  font-size: 1.2em;
+}
+
+.vis-editor-agg-wide-btn {
+  text-align: center;
+}
+
+.vis-editor-agg-wide-btn-add {
+  width: 140px;
+  margin: -2px auto 5px auto;
+  text-align: center;
+  border: 2px solid;
+  border-color: $euiColorLightShade;
+  border-top: 0px;
+  padding: 3px;
+  border-bottom-right-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
+  background-color: $euiColorEmptyShade;
+  font-weight: $euiFontWeightBold;
+
+  &:hover {
+    color: $euiColorDarkestShade;
+    background-color: $euiColorLightShade;
+  }
+}
+
+.vis-editor-agg-add {
+  @include flex-parent();
+}
+
+.vis-editor-agg-add-schemas {
+  margin-bottom: 10px;
+}
+
+.vis-editor-agg-order-agg {
+  border: 2px solid;
+  border-color: $euiColorLightShade;
+  border-radius: $euiBorderRadius;
+  background-color: transparent;
+  margin: $vis-editor-agg-editor-spacing;
+  padding: $vis-editor-agg-editor-spacing;
+}
+
+/**
+* 1. Show invalid state if the user has interacted with the input without selecting an option.
+*/
+.vis-editor-field-ui-select {
+
+  .ui-select-match-text,
+  .vis-editor-field-ui-select__field-entry {
+    @include euiTextTruncate;
+  }
+
+  &.ng-invalid.ng-dirty,
+  &.ng-invalid.ng-touched {
+    .ui-select-match {
+      .btn {
+        border-color: $euiColorDanger; /* 1 */
+      }
+    }
+  }
+}
+
+vis-editor-agg,
+vis-editor-agg-params,
+vis-editor-agg-param,
+vis-editor-vis-options,
+vis-editor-vis-options > * {
+  @include flex-parent();
+}
+
+.vis-editor-config .ems-hotlink {
+  font-size: $euiFontSizeXS; // 12px
+}
+
+.agg-select-label {
+  display: inline !important;
+}
+
+.agg-select-help {
+  float: right;
+}

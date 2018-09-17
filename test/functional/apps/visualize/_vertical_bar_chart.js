@@ -208,6 +208,17 @@ export default function ({ getService, getPageObjects }) {
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
+
+      it('should allow custom sorting of series', async () => {
+        await PageObjects.visualize.toggleOpenEditor(1, 'false');
+        await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = ['404', '200', '503'];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
     });
 
     describe('vertical bar with multiple splits', function () {
@@ -271,6 +282,17 @@ export default function ({ getService, getPageObjects }) {
         ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it('should show an error if last bucket aggregation is terms', async () => {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+
+        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
+        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
       });
 
     });

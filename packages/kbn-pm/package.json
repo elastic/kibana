@@ -60,9 +60,12 @@
     "strong-log-transformer": "^1.0.6",
     "tempy": "^0.2.1",
     "ts-loader": "^3.5.0",
-    "typescript": "^2.9.2",
+    "typescript": "^3.0.3",
     "webpack": "^3.11.0",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^3.1.0"
+  },
+  "dependencies": {
+    "tslib": "^1.9.3"
   }
 }
