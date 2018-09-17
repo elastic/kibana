@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GIS_API_PATH } from '../../../../common/constants';
 import { VectorSource } from './source';
 import React, { Fragment } from 'react';
-import * as topojson from 'topojson-client';
-import _ from 'lodash';
 import {
   EuiText,
   EuiSelect,
   EuiSpacer
 } from '@elastic/eui';
 import { VectorLayer } from '../vector_layer';
+import { GIS_API_PATH } from '../../../../common/constants';
 
 export class EMSFileSource extends VectorSource {
 
@@ -36,8 +34,8 @@ export class EMSFileSource extends VectorSource {
     })) : [];
 
     const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].text;
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
+      const selectedName = target.options[target.selectedIndex].text;
+      const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedName);
       const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
     };
@@ -60,29 +58,8 @@ export class EMSFileSource extends VectorSource {
     const { file = [] } = ems;
     const { name } = this._descriptor;
     const fileSource = file.find((source => source.name === name));
-    let jsonFeatures;
-    try {
-      const { format, meta } = fileSource;
-      const vectorFetch = await fetch(`../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(name)}`);
-      const fetchedJson = await vectorFetch.json();
-
-      if (format === 'geojson') {
-        jsonFeatures = fetchedJson;
-      } else if (format === 'topojson') {
-        const featureCollectionPath = meta && meta.feature_collection_path
-          && `objects.${meta.feature_collection_path}` || 'objects.data';
-        const features = _.get(fetchedJson, featureCollectionPath);
-        jsonFeatures = topojson.feature(fetchedJson, features);
-      } else {
-        //should never happen
-        jsonFeatures = {};
-        throw new Error(`Unrecognized format: ${format}`);
-      }
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-    return jsonFeatures;
+    const fetchUrl = `../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(name)}`;
+    return super.getGeoJson(fileSource, fetchUrl);
   }
 
   renderDetails() {

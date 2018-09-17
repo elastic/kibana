@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import * as topojson from 'topojson-client';
+import _ from 'lodash';
 
 export class ASource {
 
@@ -45,7 +47,29 @@ export class TMSSource extends ASource {
 }
 
 export class VectorSource extends ASource {
-  getGeoJson() {
-    throw new Error('Should implement VectorSource#getGeoJson');
+  async getGeoJson({ format, meta }, fetchUrl) {
+    let jsonFeatures;
+    try {
+      format = _.get(format, 'type', format); // Hacky workaround for differing config data structure
+      const vectorFetch = await fetch(fetchUrl);
+      const fetchedJson = await vectorFetch.json();
+
+      if (format === 'geojson') {
+        jsonFeatures = fetchedJson;
+      } else if (format === 'topojson') {
+        const featureCollectionPath = meta && meta.feature_collection_path
+          && `objects.${meta.feature_collection_path}` || 'objects.data';
+        const features = _.get(fetchedJson, featureCollectionPath);
+        jsonFeatures = topojson.feature(fetchedJson, features);
+      } else {
+        //should never happen
+        jsonFeatures = {};
+        throw new Error(`Unrecognized format: ${format}`);
+      }
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+    return jsonFeatures;
   }
 }
