@@ -247,6 +247,42 @@ const results = await manager.find({ scope: 'my-fanci-app', searchAfter: ['ids']
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
 
+## Middleware
+
+The task manager exposes a middleware layer that allows modifying tasks before they are scheduled / persisted to the task manager index, and modifying tasks / the run context before a task is run.
+
+For example:
+
+```js
+// In your plugin's init
+server.taskManager.addMiddleware({
+  async beforeSave({ taskInstance, ...opts }) {
+    console.log(`About to save a task of type ${taskInstance.taskType}`);
+
+    return {
+      ...opts,
+      taskInstance: {
+        ...taskInstance,
+        params: {
+          ...taskInstance.params,
+          example: 'Added to params!',
+        },
+      },
+    };
+  },
+
+  async beforeRun({ taskInstance, ...opts }) {
+    console.log(`About to run ${taskInstance.taskType} ${taskInstance.id}`);
+    const { example, ...taskWithoutExampleProp } = taskInstance;
+
+    return {
+      ...opts,
+      taskInstance: taskWithoutExampleProp,
+    };
+  },
+});
+```
+
 ## Limitations in v1.0
 
 In v1, the system only understands 1 minute increments (e.g. '1m', '7m'). Tasks which need something more robust will need to specify their own "runAt" in their run method's return value.
