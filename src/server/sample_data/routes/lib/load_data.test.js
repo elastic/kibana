@@ -45,10 +45,14 @@ test('load ecommerce data', done => {
     myDocsCount += docs.length;
   };
 <<<<<<< HEAD
+<<<<<<< HEAD
   loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock, async (err, count) => {
 =======
   loadData('./src/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock, async (err, count) => {
 >>>>>>> added saved objects, new screenshot
+=======
+  loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock, async (err, count) => {
+>>>>>>> fix test
     expect(myDocsCount).toBe(4675);
     expect(count).toBe(4675);
     done();
