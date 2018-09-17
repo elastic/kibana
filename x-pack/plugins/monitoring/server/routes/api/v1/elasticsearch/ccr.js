@@ -61,7 +61,7 @@ export function ccrRoute(server) {
 
         const stats = get(response, 'hits.hits').map(hit => hit._source.ccr_stats);
         const data = stats.reduce((accum, _stat) => {
-          const { allByFollowerIndex, shardStatsByFollowerIndex, keyedIndicesInError } = accum;
+          const { allByFollowerIndex, shardStatsByFollowerIndex } = accum;
 
           let follows = _stat.leader_index;
           if (_stat.leader_index.includes(':')) {
@@ -79,10 +79,6 @@ export function ccrRoute(server) {
             syncLagOps: _stat.leader_max_seq_no - _stat.follower_global_checkpoint,
             error: _stat.fetch_exceptions[0]
           };
-
-          if (stat.error) {
-            keyedIndicesInError[stat.id] = stat.error;
-          }
 
           const statByShardId = allByFollowerIndex[stat.id];
           if (statByShardId) {
@@ -107,15 +103,11 @@ export function ccrRoute(server) {
         }, {
           allByFollowerIndex: {},
           shardStatsByFollowerIndex: {},
-          keyedIndicesInError: {},
         });
 
         data.all = Object.values(data.allByFollowerIndex);
         data.all.sort((a, b) => a.index > b.index);
         delete data.allByFollowerIndex;
-
-        data.indicesInError = Object.keys(data.keyedIndicesInError);
-        delete data.keyedIndicesInError;
 
         reply({ data });
       } catch(err) {
