@@ -73,7 +73,7 @@ export class VisualizeDataLoader {
     try {
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler(this.vis, {
-        partialRows: this.vis.params.partialRows || this.vis.type.name === 'tile_map',
+        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
         ...params,
       });
 

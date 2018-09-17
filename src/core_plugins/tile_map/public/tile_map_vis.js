@@ -57,6 +57,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     responseHandler: makeGeoJsonResponseHandler(),
+    requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
