@@ -100,7 +100,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: null };
+    const options = { overwrite: false, id: undefined, migrationVersion: undefined };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);
