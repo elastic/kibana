@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { logFilterActions, logFilterSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { UrlStateContainer } from '../../utils/url_state';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 
 const withLogFilter = connect(
   (state: State) => ({
@@ -71,3 +71,9 @@ const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
         expression: value.expression,
       }
     : undefined;
+
+export const replaceLogFilterInQueryString = (expression: string) =>
+  replaceStateKeyInQueryString<LogFilterUrlState>('logFilter', {
+    kind: 'kuery',
+    expression,
+  });

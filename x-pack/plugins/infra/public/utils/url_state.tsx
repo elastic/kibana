@@ -56,7 +56,10 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
   private replaceStateInLocation = throttle(1000, (urlState: UrlState | undefined) => {
     const { history, location, urlStateKey } = this.props;
 
-    const newLocation = updateLocationWithUrlState(urlStateKey, urlState, this.props.location);
+    const newLocation = replaceQueryStringInLocation(
+      location,
+      replaceStateKeyInQueryString(urlStateKey, urlState)(getQueryStringFromLocation(location))
+    );
 
     if (newLocation !== location) {
       history.replace(newLocation);
@@ -70,8 +73,10 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
       return;
     }
 
-    const newQueryValue = parseLocation(location)[urlStateKey];
-    const newUrlStateString = Array.isArray(newQueryValue) ? newQueryValue[0] : newQueryValue;
+    const newUrlStateString = getParamFromQueryString(
+      getQueryStringFromLocation(location),
+      urlStateKey
+    );
     const newUrlState = mapToUrlState(decodeRisonUrlState(newUrlStateString));
 
     onInitialize(newUrlState);
@@ -84,13 +89,14 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
       return;
     }
 
-    const previousQueryValue = parseLocation(prevLocation)[urlStateKey];
-    const newQueryValue = parseLocation(newLocation)[urlStateKey];
-
-    const previousUrlStateString = Array.isArray(previousQueryValue)
-      ? previousQueryValue[0]
-      : previousQueryValue;
-    const newUrlStateString = Array.isArray(newQueryValue) ? newQueryValue[0] : newQueryValue;
+    const previousUrlStateString = getParamFromQueryString(
+      getQueryStringFromLocation(prevLocation),
+      urlStateKey
+    );
+    const newUrlStateString = getParamFromQueryString(
+      getQueryStringFromLocation(newLocation),
+      urlStateKey
+    );
 
     if (previousUrlStateString !== newUrlStateString) {
       const previousUrlState = mapToUrlState(decodeRisonUrlState(previousUrlStateString));
@@ -113,7 +119,7 @@ export const UrlStateContainer = <UrlState extends any>(
   </Route>
 );
 
-const decodeRisonUrlState = (value: string): RisonValue | undefined => {
+export const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -126,27 +132,33 @@ const decodeRisonUrlState = (value: string): RisonValue | undefined => {
 
 const encodeRisonUrlState = (state: any) => encode(state);
 
-const parseLocation = (location: Location) => parseQueryString(location.search.substring(1));
+export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
-const updateLocationWithUrlState = <UrlState extends any>(
+export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
+  const queryParam = parseQueryString(queryString)[key];
+  return Array.isArray(queryParam) ? queryParam[0] : queryParam;
+};
+
+export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
-  urlState: UrlState | undefined,
-  location: Location
-): Location => {
-  const previousQueryValues = parseLocation(location);
+  urlState: UrlState | undefined
+) => (queryString: string) => {
+  const previousQueryValues = parseQueryString(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  const newQueryString = stringifyQueryString({
+  return stringifyQueryString({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,
   });
+};
 
-  if (newQueryString === location.search.substring(1)) {
+const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
+  if (queryString === getQueryStringFromLocation(location)) {
     return location;
   } else {
     return {
       ...location,
-      search: `?${newQueryString}`,
+      search: `?${queryString}`,
     };
   }
 };
