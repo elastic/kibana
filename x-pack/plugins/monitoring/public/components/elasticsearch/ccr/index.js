@@ -13,9 +13,6 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiIcon,
-  EuiCallOut,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection
 } from '@elastic/eui';
 
 export class Ccr extends Component {
@@ -127,45 +124,12 @@ export class Ccr extends Component {
     );
   }
 
-  renderSummary() {
-    const { data: { indicesInError } } = this.props;
-
-    if (indicesInError.length === 0) {
-      return (
-        <EuiCallOut
-          title="Looking good!"
-          color="success"
-        >
-          <p>No reported errors!</p>
-        </EuiCallOut>
-      );
-    }
-
-    return (
-      <EuiCallOut
-        title="Something is wrong"
-        color="danger"
-        iconType="cross"
-      >
-        <p>
-          The following indices contain errors: {indicesInError.join(', ')}
-        </p>
-      </EuiCallOut>
-    );
-  }
-
   render() {
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection style={{ flexGrow: 1 }}>
-                {this.renderSummary()}
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
             <EuiPageContentBody>
-
               {this.renderTable()}
             </EuiPageContentBody>
           </EuiPageContent>
