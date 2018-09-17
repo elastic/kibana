@@ -107,11 +107,11 @@ const defaultEditor = function ($rootScope, $compile) {
 
           $scope.getSidebarClass = () => {
             if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
-              return 'collapsible-sidebar--small';
+              return 'visEditor__collapsibleSidebar--small';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
-              return 'collapsible-sidebar--medium';
+              return 'visEditor__collapsibleSidebar--medium';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
-              return 'collapsible-sidebar--large';
+              return 'visEditor__collapsibleSidebar--large';
             }
           };
 
@@ -160,7 +160,7 @@ const defaultEditor = function ($rootScope, $compile) {
         }
 
         if (!this._handler) {
-          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          const visualizationEl = this.el.find('.visEditor__canvas')[0];
           getVisualizeLoader().then(loader => {
             if (!visualizationEl) {
               return;

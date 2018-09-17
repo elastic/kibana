@@ -34,6 +34,7 @@ describe('SavedObjectsRepository', () => {
   let callAdminCluster;
   let onBeforeWrite;
   let savedObjectsRepository;
+  let migrator;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
@@ -101,11 +102,15 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
+    migrator = {
+      migrateDocument: sinon.spy((doc) => doc),
+    };
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
+      migrator,
       onBeforeWrite
     });
 
@@ -152,6 +157,29 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWith(callAdminCluster, 'index');
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('migrates the doc', async () => {
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.title = doc.attributes.title + '!!';
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+      expect(callAdminCluster.args[0][1]).toMatchObject({
+        body: {
+          'index-pattern': { id: 'logstash-*', title: 'Logstash!!' },
+          migrationVersion: { foo: '2.3.4' },
+          type: 'index-pattern',
+          updated_at: '2017-08-14T15:49:14.886Z'
+        },
+      });
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
@@ -203,16 +231,41 @@ describe('SavedObjectsRepository', () => {
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
+      const bulkCalls = callAdminCluster.args.filter(([path]) => path === 'bulk');
+
+      expect(bulkCalls.length).toEqual(1);
+
+      expect(bulkCalls[0][1].body).toEqual([
+        { create: { _type: 'doc', _id: 'config:one' } },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+        { create: { _type: 'doc', _id: 'index-pattern:two' } },
+        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+      ]);
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('migrates the docs', async () => {
+      callAdminCluster.returns({ items: [] });
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.title = doc.attributes.title + '!!';
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'config:one' } },
-          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One!!' }, migrationVersion: { foo: '2.3.4' } },
           { create: { _type: 'doc', _id: 'index-pattern:two' } },
-          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two!!' }, migrationVersion: { foo: '2.3.4' } }
         ]
       }));
-
-      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
@@ -224,7 +277,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses create because overwriting is not allowed
           { create: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {}, migrationVersion: undefined },
         ]
       }));
 
@@ -239,7 +292,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses index because overwriting is allowed
           { index: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {}, migrationVersion: undefined },
         ]
       }));
 

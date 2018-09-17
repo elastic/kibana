@@ -13,7 +13,6 @@ import moment from 'moment';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { ml } from './ml_api_service';
 
-import { labelDuplicateDetectorDescriptions } from '../../common/util/anomaly_utils';
 import { mlMessageBarService } from '../components/messagebar/messagebar_service';
 import { isWebUrl } from '../util/string_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../common/util/job_utils';
@@ -1009,12 +1008,11 @@ function checkSaveResponse(resp, origJob) {
 
 function processBasicJobInfo(localJobService, jobsList) {
   // Process the list of job data obtained from the jobs endpoint to return
-  // an array of objects containing the basic information (id, description, bucketSpan, detectors
-  // and detectorDescriptions properties, plus a customUrls key if custom URLs
+  // an array of objects containing the basic information (id, description, bucketSpan,
+  // and detectors properties, plus a customUrls key if custom URLs
   // have been configured for the job) used by various result dashboards in the ml plugin.
   // The key information is stored in the jobService object for quick access.
   const processedJobsList = [];
-  let detectorDescriptionsByJob = {};
   const detectorsByJob = {};
   const customUrlsByJob = {};
 
@@ -1037,15 +1035,8 @@ function processBasicJobInfo(localJobService, jobsList) {
       job.description = jobObj.job_id;
     }
 
-    job.detectorDescriptions = [];
-    job.detectors = [];
-    const detectors = _.get(analysisConfig, 'detectors', []);
-    _.each(detectors, (detector)=> {
-      if (_.has(detector, 'detector_description')) {
-        job.detectorDescriptions.push(detector.detector_description);
-        job.detectors.push(detector);
-      }
-    });
+    job.detectors = _.get(analysisConfig, 'detectors', []);
+    detectorsByJob[job.id] = job.detectors;
 
 
     if (_.has(jobObj, 'custom_settings.custom_urls')) {
@@ -1063,18 +1054,10 @@ function processBasicJobInfo(localJobService, jobsList) {
     }
 
     localJobService.jobDescriptions[job.id] = job.description;
-    detectorDescriptionsByJob[job.id] = job.detectorDescriptions;
-    detectorsByJob[job.id] = job.detectors;
     localJobService.basicJobs[job.id] = job;
     processedJobsList.push(job);
   });
 
-  detectorDescriptionsByJob = labelDuplicateDetectorDescriptions(detectorDescriptionsByJob);
-  _.each(detectorsByJob, (dtrs, jobId) => {
-    _.each(dtrs, (dtr, i) => {
-      dtr.detector_description = detectorDescriptionsByJob[jobId][i];
-    });
-  });
   localJobService.detectorsByJob = detectorsByJob;
   localJobService.customUrlsByJob = customUrlsByJob;
 

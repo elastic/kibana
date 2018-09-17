@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { Vis } from '../vis';
-
-export type ResponseHandler = <Response, Data>(vis: Vis, response: Response) => Data;
+export type ResponseHandler = <Response, Data>(response: Response) => Data;
 
 export interface ResponseHandlerDescription {
   name: string;
