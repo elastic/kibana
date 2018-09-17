@@ -25,7 +25,6 @@ export function dashboardMode(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      styleSheetPaths: `${__dirname}/public/index.scss`,
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
           name: 'Dashboards only roles',
@@ -52,7 +51,8 @@ export function dashboardMode(kibana) {
             icon: 'plugins/kibana/assets/dashboard.svg',
           }
         ],
-      }
+      },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     },
 
     config(Joi) {
