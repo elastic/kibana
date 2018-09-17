@@ -187,7 +187,7 @@ export const BeatDetailTagsTable: TableType = {
     },
     {
       align: 'right',
-      field: 'configurations',
+      field: 'configuration_blocks',
       name: 'Configurations',
       render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
       sortable: true,
