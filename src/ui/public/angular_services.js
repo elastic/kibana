@@ -18,9 +18,14 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { SearchSourceProvider } from 'ui/courier';
 
+export let SearchSource;
 export let indexPatterns;
 
 uiModules.get('kibana/index_patterns').run(($injector) => {
+  const Private = $injector.get('Private');
+  SearchSource = Private(SearchSourceProvider);
+
   indexPatterns = $injector.get('indexPatterns');
 });
