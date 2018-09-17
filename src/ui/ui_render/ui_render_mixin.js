@@ -68,7 +68,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${bundlePath}/vendors.style.css`,
           `${bundlePath}/commons.style.css`,
           `${bundlePath}/${app.getId()}.style.css`,
-        ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`));
+        ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
 
         const bootstrap = new AppBootstrap({
           templateData: {

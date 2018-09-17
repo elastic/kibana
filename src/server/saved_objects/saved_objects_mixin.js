@@ -18,6 +18,7 @@
  */
 
 import { createSavedObjectsService } from './service';
+import { KibanaMigrator } from './migrations';
 
 import {
   createBulkCreateRoute,
@@ -30,10 +31,17 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  const migrator = new KibanaMigrator({ kbnServer });
+
+  server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
+
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
-    server.log(['warning', 'saved-objects'], `Saved Objects uninitialized because the Kibana plugin is disabled.`);
+    server.log(
+      ['warning', 'saved-objects'],
+      `Saved Objects uninitialized because the Kibana plugin is disabled.`
+    );
     return;
   }
 
@@ -54,7 +62,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, migrator));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
