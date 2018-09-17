@@ -23,7 +23,11 @@ import moment from 'moment';
 // because it won't work with the jest tests
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
-import { numTicksForDateFormat } from '../../util/chart_utils';
+import {
+  getTickValues,
+  numTicksForDateFormat,
+  removeLabelOverlap
+} from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlEscape } from '../../util/string_utils';
@@ -48,6 +52,7 @@ export class ExplorerChartRare extends React.Component {
 
   renderChart() {
     const {
+      tooManyBuckets,
       mlSelectSeverityService
     } = this.props;
 
@@ -98,7 +103,13 @@ export class ExplorerChartRare extends React.Component {
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
-      const scaleCategories = _.uniq(chartData.map(d => d.entity));
+      const scaleCategories = d3.nest()
+        .key(d => d.entity)
+        .entries(chartData)
+        .sort((a, b) => {
+          return b.values.length - a.values.length;
+        })
+        .map(d => d.key);
 
       if (CHART_TYPE === 'population') {
         lineChartYScale = d3.scale.linear()
@@ -109,8 +120,10 @@ export class ExplorerChartRare extends React.Component {
           ])
           .nice();
       } else if (CHART_TYPE === 'rare') {
+        // avoid overflowing the border of the highlighted area
+        const rowMargin = 5;
         lineChartYScale = d3.scale.ordinal()
-          .rangePoints([0, chartHeight])
+          .rangePoints([rowMargin, chartHeight - rowMargin])
           .domain(scaleCategories);
       } else {
         throw `CHART_TYPE '${CHART_TYPE}' not supported`;
@@ -192,13 +205,28 @@ export class ExplorerChartRare extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
+      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
+      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      // +1 ms to account for the ms that was substracted for query aggregations.
+      const interval = emphasisEnd - emphasisStart + 1;
+      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat))
         .tickFormat(d => moment(d).format(xAxisTickFormat));
+
+      // With tooManyBuckets the chart would end up with no x-axis labels
+      // because the ticks are based on the span of the emphasis section,
+      // and the highlighted area spans the whole chart.
+      if (tooManyBuckets === false) {
+        xAxis.tickValues(tickValues);
+      } else {
+        xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
+      }
+
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
         .orient('left')
@@ -212,7 +240,7 @@ export class ExplorerChartRare extends React.Component {
 
       const axes = lineChartGroup.append('g');
 
-      axes.append('g')
+      const gAxis = axes.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
@@ -220,17 +248,13 @@ export class ExplorerChartRare extends React.Component {
       axes.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+      if (tooManyBuckets === false) {
+        removeLabelOverlap(gAxis, emphasisStart, interval, vizWidth);
+      }
     }
 
-    function drawRareChartDots(data, rareChartGroup, rareChartValuesLine, radius = 1.5) {
-      // We need to do this because when creating a line for a chart which has data gaps,
-      // if there are single datapoints without any valid data before and after them,
-      // the lines created by using d3...defined() do not contain these data points.
-      // So this function adds additional circle elements to display the single
-      // datapoints in additional to the line created for the chart.
-
-      const dotsData = data;
-
+    function drawRareChartDots(dotsData, rareChartGroup, rareChartValuesLine, radius = 1.5) {
       // check if `g.values-dots` already exists, if not create it
       // in both cases assign the element to `dotGroup`
       const dotGroup = (rareChartGroup.select('.values-dots').empty())
@@ -260,10 +284,12 @@ export class ExplorerChartRare extends React.Component {
 
       lineChartGroup.append('rect')
         .attr('class', 'selected-interval')
-        .attr('x', lineChartXScale(new Date(rectStart)))
-        .attr('y', 1)
-        .attr('width', rectWidth)
-        .attr('height', chartHeight - 1);
+        .attr('x', lineChartXScale(new Date(rectStart)) + 2)
+        .attr('y', 2)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', rectWidth - 4)
+        .attr('height', chartHeight - 4);
     }
 
     function drawRareChartMarkers(data) {

@@ -142,11 +142,19 @@ export function explorerChartsContainerServiceFactory(
 
     // Query 4 - load the rare chart's event distribution
     function getEventDistribution(config, range) {
+      let splitField = config.entityFields.find(f => f.fiedType === 'partition');
+      let filterField = null;
+      if (config.functionDescription === 'rare') {
+        splitField = config.entityFields.find(f => f.fieldType === 'by');
+        filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      }
+
       const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
       return mlResultsService.getEventDistributionData(
         config.datafeedConfig.indices,
         config.datafeedConfig.types,
-        config.entityFields,
+        splitField,
+        filterField,
         datafeedQuery,
         config.metricFunction,
         config.metricFieldName,

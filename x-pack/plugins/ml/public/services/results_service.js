@@ -1401,7 +1401,8 @@ function getEventRateData(
 function getEventDistributionData(
   index,
   types,
-  entityFields,
+  splitField,
+  filterField = null,
   query,
   metricFunction,
   metricFieldName,
@@ -1439,8 +1440,13 @@ function getEventDistributionData(
       mustCriteria.push(query);
     }
 
-
-    const entityFieldName = entityFields[0].fieldName;
+    if (filterField !== null) {
+      mustCriteria.push({
+        term: {
+          [filterField.fieldName]: filterField.fieldValue
+        }
+      });
+    }
 
     const body = {
       query: {
@@ -1462,8 +1468,8 @@ function getEventDistributionData(
           aggs: {
             entities: {
               terms: {
-                field: entityFieldName,
-                size: 1000
+                field: splitField.fieldName,
+                size: 10
               }
             }
           }
@@ -1496,30 +1502,20 @@ function getEventDistributionData(
       body
     })
       .then((resp) => {
-
-        const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
-
         // normalize data
-        const data = [];
-        dataByTime.forEach((dataForTime) => {
+        const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
+        const data = dataByTime.reduce((d, dataForTime) => {
           const date = +dataForTime.key;
           const entities = _.get(dataForTime, ['entities', 'buckets'], []);
           entities.forEach((entity) => {
-            data.push({
+            d.push({
               date,
               entity: entity.key,
               value: entity.doc_count
             });
           });
-        });
-
-        // group data by entity
-        /*
-        const nestedData = d3.nest()
-          .key(d => d.entity)
-          .entries(data);
-        */
-
+          return d;
+        }, []);
         resolve(data);
       })
       .catch((resp) => {
