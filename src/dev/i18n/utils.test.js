@@ -26,6 +26,7 @@ import {
   traverseNodes,
   formatJSString,
   checkValuesProperty,
+  createParserErrorMessage,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -50,6 +51,7 @@ describe('i18n utils', () => {
   test('should remove escaped linebreak', () => {
     expect(formatJSString('Test\\\n str\\\ning')).toEqual('Test string');
   });
+
   test('should not escape linebreaks', () => {
     expect(
       formatJSString(`Text\n with
@@ -57,6 +59,7 @@ describe('i18n utils', () => {
 `)
     ).toMatchSnapshot();
   });
+
   test('should detect i18n translate function call', () => {
     let source = i18nTranslateSources[0];
     let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find(node =>
@@ -81,6 +84,26 @@ describe('i18n utils', () => {
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
     expect(isPropertyWithKey(objectExpresssionProperty, 'not_id')).toBe(false);
+  });
+
+  test('should create verbose parser error message', () => {
+    expect.assertions(1);
+
+    const content = `function testFunction() {
+  const object = {
+    object: 'with',
+    semicolon: '->';
+  };
+
+  return object;
+}
+`;
+
+    try {
+      parse(content);
+    } catch (error) {
+      expect(createParserErrorMessage(content, error)).toMatchSnapshot();
+    }
   });
 
   test('should validate conformity of "values" and "defaultMessage"', () => {

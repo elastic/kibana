@@ -68,7 +68,7 @@ const siblingPipelineAggHelper = {
         makeAgg: function (agg, state) {
           state = state || { type: 'date_histogram' };
           state.schema = bucketAggSchema;
-          const orderAgg = new AggConfig(agg.vis, state);
+          const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
@@ -90,7 +90,7 @@ const siblingPipelineAggHelper = {
         makeAgg: function (agg, state) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
-          const orderAgg = new AggConfig(agg.vis, state);
+          const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },

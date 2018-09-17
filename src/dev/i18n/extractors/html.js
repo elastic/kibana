@@ -27,6 +27,7 @@ import {
   formatJSString,
   traverseNodes,
   checkValuesProperty,
+  createParserErrorMessage,
   extractMessageValueFromNode,
   extractValuesKeysFromNode,
   extractContextValueFromNode,
@@ -47,10 +48,23 @@ const I18N_FILTER_MARKER = '| i18n: ';
  * @returns {string} Default message
  */
 function parseFilterObjectExpression(expression, messageId) {
-  // parse an object expression instead of block statement
-  const nodes = parse(`+${expression}`).program.body;
+  let ast;
 
-  for (const node of traverseNodes(nodes)) {
+  try {
+    // parse an object expression instead of block statement
+    ast = parse(`+${expression}`);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
+      throw createFailError(
+        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
+      );
+    }
+
+    throw error;
+  }
+
+  for (const node of traverseNodes(ast.program.body)) {
     if (!isObjectExpression(node)) {
       continue;
     }
@@ -80,7 +94,22 @@ function parseFilterObjectExpression(expression, messageId) {
 }
 
 function parseIdExpression(expression) {
-  for (const node of traverseNodes(parse(expression).program.directives)) {
+  let ast;
+
+  try {
+    ast = parse(expression);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(expression, error);
+      throw createFailError(
+        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
+      );
+    }
+
+    throw error;
+  }
+
+  for (const node of traverseNodes(ast.program.directives)) {
     if (isDirectiveLiteral(node)) {
       return formatJSString(node.value);
     }

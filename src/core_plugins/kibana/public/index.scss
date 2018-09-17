@@ -6,6 +6,10 @@
 // Home styles
 @import './home/index';
 
+// Visualize styles
+@import './visualize/index';
+@import 'ui/public/vis/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
