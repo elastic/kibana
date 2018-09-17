@@ -36,7 +36,7 @@ export class EMSFileSource extends VectorSource {
     const onChange = ({ target }) => {
       const selectedName = target.options[target.selectedIndex].text;
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedName);
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, emsVectorOptionsRaw);
       onPreviewSource(emsFileSource);
     };
     return (
@@ -54,11 +54,14 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  async getGeoJson({ ems = {} }) {
-    const { file = [] } = ems;
-    const { name } = this._descriptor;
-    const fileSource = file.find((source => source.name === name));
-    const fetchUrl = `../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(name)}`;
+  constructor(descriptor, emsFiles) {
+    super(descriptor);
+    this._emsFiles = emsFiles;
+  }
+
+  async getGeoJson() {
+    const fileSource = this._emsFiles.find((source => source.name === this._descriptor.name));
+    const fetchUrl = `../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`;
     return this._getGeoJson(fileSource, fetchUrl);
   }
 

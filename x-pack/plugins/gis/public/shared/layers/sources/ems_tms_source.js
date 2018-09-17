@@ -18,6 +18,11 @@ export class EMSTMSSource extends TMSSource {
     };
   }
 
+  constructor(descriptor, emsTileServices) {
+    super(descriptor);
+    this._emsTileServices = emsTileServices;
+  }
+
   renderDetails() {
     return (
       <Fragment>
@@ -34,8 +39,8 @@ export class EMSTMSSource extends TMSSource {
     );
   }
 
-  _getTMSOptions(allServices) {
-    return allServices.find(service => {
+  _getTMSOptions() {
+    return this._emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
   }
@@ -58,8 +63,8 @@ export class EMSTMSSource extends TMSSource {
     return this._descriptor.id;
   }
 
-  getUrlTemplate(dataSourceMeta) {
-    const service = this._getTMSOptions(dataSourceMeta.ems.tms);
+  getUrlTemplate() {
+    const service = this._getTMSOptions();
     return service.url;
   }
 

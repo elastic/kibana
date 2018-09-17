@@ -17,12 +17,12 @@ export class TileLayer extends ALayer {
   }
 
 
-  syncLayerWithMB(mbMap, dataSources) {
+  syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
     const layerId = this.getId() + '_raster';
     if (!source) {
-      const url = this._source.getUrlTemplate(dataSources);
+      const url = this._source.getUrlTemplate();
       mbMap.addSource(this.getId(), {
         type: 'raster',
         tiles: [url],

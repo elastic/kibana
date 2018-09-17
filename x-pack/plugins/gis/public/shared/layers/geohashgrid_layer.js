@@ -9,10 +9,6 @@ import { HeatmapStyle } from './styles/heatmap_style';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 
-
-window._turf = turf;
-window._turfBooleanContains = turf;
-
 const ZOOM_TO_PRECISION = {
   "0": 1,
   "1": 2,
@@ -114,11 +110,11 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(dataLoading, mapState) {
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(mapState.zoom)];
+  async syncDataToMapState(dataLoading, zoomAndExtent) {
+    const targetPrecision = ZOOM_TO_PRECISION[Math.round(zoomAndExtent.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
-      const mapStateExtent = turf.bboxPolygon(mapState.extent);
+      const mapStateExtent = turf.bboxPolygon(zoomAndExtent.extent);
       const isContained = turfBooleanContains(dataExtent, mapStateExtent);
       // const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
       const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
@@ -128,14 +124,14 @@ export class GeohashGridLayer extends ALayer {
     }
     const fetchState = {
       precision: targetPrecision,
-      extent: mapState.extent
+      extent: zoomAndExtent.extent
     };
     return this._fetchNewData(dataLoading, fetchState);
   }
 
 
-  async _fetchNewData(dataLoading, mapState) {
-    const { precision, extent } = mapState;
+  async _fetchNewData(dataLoading, zoomAndExtent) {
+    const { precision, extent } = zoomAndExtent;
     const scaleFactor = 0.5;
     const width = extent[2] - extent[0];
     const height = extent[3] - extent[1];
