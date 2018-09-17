@@ -101,7 +101,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     }
   });
 
-  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
 
     return {
@@ -119,15 +119,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided()
-      }),
-      vars: await replaceInjectedVars(
-        request,
-        defaults(
-          injectedVarsOverrides,
-          await server.getInjectedUiAppVars(app.getId()),
-          defaultInjectedVars,
-        ),
-      )
+      })
     };
   }
 
@@ -144,6 +136,15 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
+        basePath,
+        vars: await replaceInjectedVars(
+          request,
+          defaults(
+            injectedVarsOverrides,
+            await server.getInjectedUiAppVars(app.getId()),
+            defaultInjectedVars,
+          ),
+        ),
         legacyMetadata: await getLegacyKibanaPayload({
           app,
           translations,

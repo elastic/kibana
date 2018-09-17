@@ -5,7 +5,7 @@
       <ng-form name="{{aggType}}Form">
         <vis-editor-agg-params
           agg="agg.params[aggType]"
-          index-pattern="agg._indexPattern"
+          index-pattern="agg.getIndexPattern()"
           group-name="'{{aggGroup}}'">
         </vis-editor-agg-params>
       </ng-form>

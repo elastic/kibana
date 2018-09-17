@@ -312,7 +312,7 @@ describe('visualize loader', () => {
         expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
-      describe('should allow updating the time range of the visualization', async () => {
+      it('should allow updating the time range of the visualization', async () => {
         const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {

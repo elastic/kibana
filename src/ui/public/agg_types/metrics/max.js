@@ -28,6 +28,7 @@ export const maxMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number,date'
     }
   ]

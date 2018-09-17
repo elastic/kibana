@@ -17,7 +17,7 @@ import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
  * @param {String} end The end time of the request.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getTelemetry(req, config, start, end, { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = { }) {
+export async function getTelemetry(req, config, start, end, { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = {}) {
   let response = [];
 
   if (config.get('xpack.monitoring.enabled')) {
@@ -26,13 +26,43 @@ export async function getTelemetry(req, config, start, end, { _getAllStats = get
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = [ await _getLocalStats(req) ];
+    response = [await _getLocalStats(req)];
   }
 
   return response;
 }
 
 export function telemetryRoute(server) {
+  /**
+   * Change Telemetry Opt-In preference.
+   */
+  server.route({
+    method: 'POST',
+    path: '/api/telemetry/v1/optIn',
+    config: {
+      validate: {
+        payload: Joi.object({
+          enabled: Joi.bool().required()
+        })
+      }
+    },
+    handler: async (req, h) => {
+      const savedObjectsClient = req.getSavedObjectsClient();
+      try {
+        await savedObjectsClient.create('telemetry', {
+          enabled: req.payload.enabled
+        }, {
+          id: 'telemetry',
+          overwrite: true,
+        });
+      } catch (err) {
+        return boomify(err);
+      }
+      return h.response({}).code(200);
+    }
+  });
+
+
   /**
    * Telemetry Data
    *
