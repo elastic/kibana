@@ -17,9 +17,12 @@
  * under the License.
  */
 
-export function createIndexName(sampleDataSetId, dataIndexId) {
-  if (sampleDataSetId === dataIndexId) {
-    return `kibana_sample_data_${sampleDataSetId}`;
-  }
-  return `kibana_sample_data_${sampleDataSetId}_${dataIndexId}`;
-}
+import { createIndexName } from './create_index_name';
+
+test('should include sampleDataSetId and dataIndexId in elasticsearch index name', async () => {
+  expect(createIndexName('mySampleDataSetId', 'myDataIndexId')).toBe('kibana_sample_data_mySampleDataSetId_myDataIndexId');
+});
+
+test('should only include sampleDataSetId when sampleDataSetId and dataIndexId are identical', async () => {
+  expect(createIndexName('flights', 'flights')).toBe('kibana_sample_data_flights');
+});
