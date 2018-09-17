@@ -127,6 +127,7 @@ export class PageManager extends React.PureComponent {
                   aria-label={`Load page number ${pageNumber}`}
                 >
                   <PagePreview
+                    isEditing={isEditing}
                     page={page}
                     height={100}
                     pageNumber={pageNumber}
