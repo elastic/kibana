@@ -61,6 +61,7 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
       silent: false,
       watch: false,
       basePath: false,
+      optimize: false,
     },
     isDevClusterMaster: false,
   });

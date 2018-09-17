@@ -110,6 +110,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
+  if (opts.optimize) {
+    set('server.autoListen', false);
+    set('plugins.initialize', false);
+  }
+
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
     opts.pluginDir
@@ -167,7 +172,9 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--optimize', 'Optimize and then stop the server');
+
 
   if (XPACK_OPTIONAL) {
     command
@@ -205,6 +212,7 @@ export default function (program) {
           silent: !!opts.silent,
           watch: !!opts.watch,
           basePath: !!opts.basePath,
+          optimize: !!opts.optimize,
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
@@ -214,4 +222,5 @@ export default function (program) {
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
       });
     });
+
 }
