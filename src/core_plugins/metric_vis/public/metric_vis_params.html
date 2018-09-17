@@ -4,7 +4,7 @@
     <label
       class="kuiSideBarFormRow__label"
       for="percentageMode"
-      i18n-id="metricVis.public.metricVisParams.percentageModeLabel"
+      i18n-id="metricVis.params.percentageModeLabel"
       i18n-default-message="Percentage Mode"
     >
     </label>
@@ -17,7 +17,7 @@
     <label
       class="kuiSideBarFormRow__label"
       for="showLabels"
-      i18n-id="metricVis.public.metricVisParams.showLabelsLabel"
+      i18n-id="metricVis.params.showLabelsLabel"
       i18n-default-message="Show Labels"
     >
     </label>
@@ -32,7 +32,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorRange}}"
         aria-controls="metricOptionsRanges"
-        aria-label="{{ 'metricVis.public.metricVisParams.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
+        aria-label="{{'metricVis.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorRange = !showColorRange"
       >
@@ -43,7 +43,7 @@
       ></span>
         <span
           class="kuiSideBarCollapsibleTitle__text"
-          i18n-id="metricVis.public.metricVisParams.rangesTitle"
+          i18n-id="metricVis.params.rangesTitle"
           i18n-default-message="Ranges"
         >
       </span>
@@ -57,7 +57,7 @@
             <th scope="col">
               <label
                 id="metricOptionsCustomRangeFrom"
-                i18n-id="metricVis.public.metricVisParams.ranges.fromLabel"
+                i18n-id="metricVis.params.ranges.fromLabel"
                 i18n-default-message="From"
               >
               </label>
@@ -65,7 +65,7 @@
             <th scope="col" colspan="2">
               <label
                 id="metricOptionsCustomRangeTo"
-                i18n-id="metricVis.public.metricVisParams.ranges.toLabel"
+                i18n-id="metricVis.params.ranges.toLabel"
                 i18n-default-message="To"
               >
               </label>
@@ -110,22 +110,19 @@
         <div class="hintbox" ng-show="!editorState.params.metric.colorsRange.length">
           <p>
             <i class="fa fa-danger text-danger"></i>
-            <strong
-              i18n-id="metricVis.public.metricVisParams.ranges.warning.requiredDescription"
-              i18n-default-message="Required:"
-            >
-            </strong> 
             <span
-              i18n-id="metricVis.public.metricVisParams.ranges.warning.specifyRangeDescription"
-              i18n-default-message="You must specify at least one range."
-            ></span>
+              i18n-id="metricVis.params.ranges.warning.specifyRangeDescription"
+              i18n-default-message="{strongRequiredDescripion} You must specify at least one range."
+              i18n-values="{ strongRequiredDescripion: '<strong>' + editorState.requiredDescription + '</strong>' }"
+            >
+            </span>
           </p>
         </div>
 
         <div
           ng-click="addRange()"
           class="kuiButton kuiButton--primary kuiButton--fullWidth"
-          i18n-id="metricVis.public.metricVisParams.ranges.addRangeButtonLabel"
+          i18n-id="metricVis.params.ranges.addRangeButtonLabel"
           i18n-default-message="Add Range"
         >
         </div>
@@ -138,7 +135,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorOptions}}"
         aria-controls="metricOptionsColors"
-        aria-label="{{ 'metricVis.public.metricVisParams.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
+        aria-label="{{'metricVis.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorOptions = !showColorOptions"
       >
@@ -152,7 +149,7 @@
       ></span>
         <span
           class="kuiSideBarCollapsibleTitle__text"
-          i18n-id="metricVis.public.metricVisParams.color.colorOptionsTitle"
+          i18n-id="metricVis.params.color.colorOptionsTitle"
           i18n-default-message="Color Options"
         >
       </span>
@@ -164,7 +161,7 @@
           <label
             class="kuiSideBarFormRow__label"
             for="metricColorMode"
-            i18n-id="metricVis.public.metricVisParams.color.useForLabel"
+            i18n-id="metricVis.params.color.useForLabel"
             i18n-default-message="Use Color For"
           >
           </label>
@@ -181,7 +178,7 @@
           <label
             class="kuiSideBarFormRow__label"
             for="colorSchema"
-            i18n-id="metricVis.public.metricVisParams.color.schemaLabel"
+            i18n-id="metricVis.params.color.schemaLabel"
             i18n-default-message="Color Schema"
           >
           </label>
@@ -194,7 +191,7 @@
             ></select>
           </div>
           <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()"
-            i18n-id="metricVis.public.metricVisParams.color.resetColorDescription"
+            i18n-id="metricVis.params.color.resetColorDescription"
             i18n-default-message="reset colors"
           >
           </div>
@@ -204,7 +201,7 @@
           <label
             class="kuiSideBarFormRow__label"
             for="invertColors"
-            i18n-id="metricVis.public.metricVisParams.color.reverseSchemaLabel"
+            i18n-id="metricVis.params.color.reverseSchemaLabel"
             i18n-default-message="Reverse Color Schema"
           >
           </label>
@@ -222,7 +219,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showStyle}}"
         aria-controls="metricOptionsStyle"
-        aria-label="{{ 'metricVis.public.metricVisParams.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
+        aria-label="{{'metricVis.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showStyle = !showStyle"
       >
@@ -236,7 +233,7 @@
         ></span>
         <span
           class="kuiSideBarCollapsibleTitle__text"
-          i18n-id="metricVis.public.metricVisParams.style.styleTitle"
+          i18n-id="metricVis.params.style.styleTitle"
           i18n-default-message="Style"
         >
         </span>
@@ -249,11 +246,11 @@
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="metricFontSize">
             <span
-              i18n-id="metricVis.public.metricVisParams.style.fontSizeLabel"
-              i18n-default-message="Font Size"
+              i18n-id="metricVis.params.style.fontSizeLabel"
+              i18n-default-message="Font Size ({fontSize}pt)"
+              i18n-values="{ fontSize: editorState.params.metric.style.fontSize }"
             >
             </span>
-             (<span ng-bind="editorState.params.metric.style.fontSize"></span>pt)
           </label>
           <div class="kuiSideBarFormRow__control">
             <input id="metricFontSize" type="range" ng-model="editorState.params.metric.style.fontSize" class="form-control" min="12" max="120" />

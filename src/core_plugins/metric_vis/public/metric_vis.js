@@ -39,9 +39,9 @@ function MetricVisProvider(Private, i18n) {
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'metric',
-    title: i18n('metricVis.public.metricVis.metricTitle', { defaultMessage: 'Metric' }),
+    title: i18n('metricVis.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
-    description: i18n('metricVis.public.metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
+    description: i18n('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
     category: CATEGORY.DATA,
     visConfig: {
       component: MetricVisComponent,
@@ -81,7 +81,7 @@ function MetricVisProvider(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('metricVis.public.metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid',
@@ -92,7 +92,7 @@ function MetricVisProvider(Private, i18n) {
         }, {
           group: 'buckets',
           name: 'group',
-          title: i18n('metricVis.public.metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']
