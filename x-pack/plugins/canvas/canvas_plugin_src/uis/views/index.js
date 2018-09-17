@@ -18,6 +18,7 @@ import { render } from './render';
 import { shape } from './shape';
 import { table } from './table';
 import { timefilterControl } from './timefilterControl';
+import { visualize } from './visualize';
 
 export const viewSpecs = [
   dropdownControl,
@@ -34,4 +35,5 @@ export const viewSpecs = [
   shape,
   table,
   timefilterControl,
+  visualize,
 ];

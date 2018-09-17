@@ -30,6 +30,7 @@ import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
+import { visualize } from './visualize';
 
 export const elementSpecs = [
   areaChart,
@@ -58,4 +59,5 @@ export const elementSpecs = [
   verticalBarChart,
   verticalProgressBar,
   verticalProgressPill,
+  visualize,
 ];

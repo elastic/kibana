@@ -31,6 +31,7 @@ export function canvas(kibana) {
         // Client side plugins go here
         'plugins/canvas/lib/load_expression_types.js',
         'plugins/canvas/lib/load_transitions.js',
+        'plugins/canvas/lib/load_render_functions.js',
       ],
       mappings,
     },

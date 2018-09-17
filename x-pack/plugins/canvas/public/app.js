@@ -19,5 +19,8 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
 
+// Import other parts that certain functions need
+import 'ui/courier/search_strategy/default_search_strategy'; // used by visualize function
+
 // load the application
 chrome.setRootController('canvas', CanvasRootController);

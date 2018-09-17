@@ -5,9 +5,10 @@
  */
 
 import { color } from './color';
-import { seriesStyle } from './series_style';
 import { containerStyle } from './container_style';
 import { font } from './font';
+import { seriesStyle } from './series_style';
+import { visualizeSelect } from './visualize_select';
 
 // Anything that uses the color picker has to be loaded privately because the color picker uses Redux
-export const argTypeSpecs = [color, containerStyle, font, seriesStyle];
+export const argTypeSpecs = [color, containerStyle, font, seriesStyle, visualizeSelect];

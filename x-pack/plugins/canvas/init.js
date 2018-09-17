@@ -11,12 +11,20 @@ import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';
 
 export default function(server /*options*/) {
-  server.injectUiAppVars('canvas', () => {
+  server.injectUiAppVars('canvas', async () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = config.get('xpack.reporting.capture.browser.type');
 
+    // used to inject kibana injected vars, which visualize integration needs
+    const { regionmapsConfig, mapConfig, tilemapsConfig } = await server.getInjectedUiAppVars(
+      'kibana'
+    );
+
     return {
+      regionmapsConfig,
+      mapConfig,
+      tilemapsConfig,
       kbnIndex: config.get('kibana.index'),
       esShardTimeout: config.get('elasticsearch.shardTimeout'),
       esApiVersion: config.get('elasticsearch.apiVersion'),
