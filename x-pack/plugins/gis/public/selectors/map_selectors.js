@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import _ from 'lodash';
 import { TileLayer } from '../shared/layers/tile_layer';
 import { VectorLayer } from '../shared/layers/vector_layer';
 import { GeohashGridLayer } from '../shared/layers/geohashgrid_layer';
@@ -17,8 +18,8 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 import { FillAndOutlineStyle } from '../shared/layers/styles/fill_and_outline_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 
-function createLayerInstance(layerDescriptor) {
-  const source = createSourceInstance(layerDescriptor.sourceDescriptor);
+function createLayerInstance(layerDescriptor, dataSources) {
+  const source = createSourceInstance(layerDescriptor.sourceDescriptor, dataSources);
   const style = createStyleInstance(layerDescriptor.style);
   switch (layerDescriptor.type) {
     case TileLayer.type:
@@ -32,18 +33,21 @@ function createLayerInstance(layerDescriptor) {
   }
 }
 
-function createSourceInstance(sourceDescriptor) {
+function createSourceInstance(sourceDescriptor, dataSources) {
   switch (sourceDescriptor.type) {
     case XYZTMSSource.type:
       return new XYZTMSSource(sourceDescriptor);
     case EMSTMSSource.type:
-      return new EMSTMSSource(sourceDescriptor);
+      const emsTmsServices = _.get(dataSources, 'ems.tms', []);
+      return new EMSTMSSource(sourceDescriptor, emsTmsServices);
     case KibanaTilemapSource.type:
       return new KibanaTilemapSource(sourceDescriptor);
     case EMSFileSource.type:
-      return new EMSFileSource(sourceDescriptor);
+      const emsregions = _.get(dataSources, 'ems.file', []);
+      return new EMSFileSource(sourceDescriptor, emsregions);
     case KibanaRegionmapSource.type:
-      return new KibanaRegionmapSource(sourceDescriptor);
+      const regions = _.get(dataSources, 'kibana.regionmap', []);
+      return new KibanaRegionmapSource(sourceDescriptor, regions);
     case ESGeohashGridSource.type:
       return new ESGeohashGridSource(sourceDescriptor);
     default:
@@ -68,7 +72,6 @@ function createStyleInstance(styleDescriptor) {
   }
 }
 
-
 export const getMapState = ({ map }) => map && map.mapState;
 
 
@@ -89,21 +92,22 @@ export const getMapZoom = createSelector(({ map }) => {
 }, x => x);
 
 export function getMetadata({ config }) {
-  return config && config.meta || {};
+  return config && config.meta;
 }
 
 export const getDataSources = createSelector(
   getMetadata,
-  metadata => metadata.data_sources || {}
+  metadata => metadata ? metadata.data_sources : null
 );
 
-export const getSelectedLayer = createSelector(getSelectedLayerId, getLayerListRaw, (selectedLayerId, layerList) => {
-  const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
-  return createLayerInstance(selectedLayer);
-});
+export const getSelectedLayer = createSelector(getSelectedLayerId, getLayerListRaw, getDataSources,
+  (selectedLayerId, layerList, dataSources) => {
+    const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
+    return createLayerInstance(selectedLayer, dataSources);
+  });
 
-export const getLayerList = createSelector(getLayerListRaw, (layerList) => {
-  return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor));
+export const getLayerList = createSelector(getLayerListRaw, getDataSources, (layerList, dataSources) => {
+  return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor, dataSources));
 });
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList, getMapState, getDataSources } from "../../../selectors/map_selectors";
+import { getLayerList, getMapState } from "../../../selectors/map_selectors";
 import { getMbMap } from './global_mb_map';
 import _ from 'lodash';
 
@@ -77,14 +77,13 @@ const getMbMapAndSyncWithMapState = createSelector(
 export const syncMBState = createSelector(
   getMbMapAndSyncWithMapState,
   getLayerList,
-  getDataSources,
-  (mbMap, layerList, dataSources) => {
+  (mbMap, layerList) => {
     if (!mbMap) {
       return;
     }
     removeOrphanedSourcesAndLayers(mbMap, layerList);
     layerList.forEach((layer) => {
-      layer.syncLayerWithMB(mbMap, dataSources);
+      layer.syncLayerWithMB(mbMap);
     });
     syncLayerOrder(mbMap, layerList);
   }

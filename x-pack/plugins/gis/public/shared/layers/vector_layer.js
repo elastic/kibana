@@ -41,12 +41,12 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(dataLoading, metadata = {}) {
+  async syncDataToMapState(dataLoading) {
     if (this._descriptor.data || this._descriptor.dataRequestToken) {
       return;
     }
     dataLoading(true, this.getId());
-    const data = await this._source.getGeoJson(metadata);
+    const data = await this._source.getGeoJson();
     dataLoading(false, this.getId(), data);
   }
 
@@ -68,19 +68,13 @@ export class VectorLayer extends ALayer {
         id: fillLayerId,
         type: 'fill',
         source: this.getId(),
-        paint: {
-          // 'fill-color': 'rgb(220,0,0)',
-          // 'fill-opacity': 0.6
-        }
+        paint: {}
       });
       mbMap.addLayer({
         id: strokeLayerId,
         type: 'line',
         source: this.getId(),
-        paint: {
-          // 'line-color': 'rgb(0,0,0)',
-          // 'line-width': 1
-        }
+        paint: {}
       });
     }
 
@@ -89,8 +83,6 @@ export class VectorLayer extends ALayer {
     if (this._descriptor.data !== mbSourceAfter._data) {
       mbSourceAfter.setData(this._descriptor.data);
     }
-
-    // window._ly = mbMap.getLayer();
     this._style.setMBPaintProperties(mbMap, fillLayerId, strokeLayerId, this.isTemporary());
 
 

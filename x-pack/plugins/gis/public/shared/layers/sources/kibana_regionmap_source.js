@@ -17,13 +17,13 @@ export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
 
-  /**
-   * todo: needs to use name of the layer, not URL
-   * similar to EMS-file source
-   */
+  constructor(descriptor, regionList) {
+    super(descriptor);
+    this._regionList = regionList;
+  }
+
   static createDescriptor(name) {
-    return {
-      name,
+    return { name,
       type: KibanaRegionmapSource.type
     };
   }
@@ -38,7 +38,7 @@ export class KibanaRegionmapSource extends VectorSource {
     const onChange = ({ target }) => {
       const selectedName = target.options[target.selectedIndex].text;
       const kibanaRegionmapSourceDescriptor = KibanaRegionmapSource.createDescriptor(selectedName);
-      const kibanaRegionmapSource = new KibanaRegionmapSource(kibanaRegionmapSourceDescriptor);
+      const kibanaRegionmapSource = new KibanaRegionmapSource(kibanaRegionmapSourceDescriptor, regionmapOptionsRaw);
       onPreviewSource(kibanaRegionmapSource);
     };
 
@@ -73,10 +73,9 @@ export class KibanaRegionmapSource extends VectorSource {
     );
   }
 
-  async getGeoJson({ kibana = {} }) {
-    const { regionmap = [] } = kibana;
-    const { name } = this._descriptor;
-    const fileSource = regionmap.find((source => source.name === name));
+  async getGeoJson() {
+    console.log('getgjson', this);
+    const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
     return this._getGeoJson(fileSource, fileSource.url);
   }
 
