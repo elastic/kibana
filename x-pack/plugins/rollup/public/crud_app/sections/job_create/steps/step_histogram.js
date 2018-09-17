@@ -11,6 +11,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -168,47 +169,49 @@ export class StepHistogramUi extends Component {
 
     return (
       <Fragment>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="xl" />
 
-        <EuiTitle size="s">
-          <h4>
+        <EuiDescribedFormGroup
+          title={(
+            <EuiTitle size="s">
+              <h4>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.title"
+                  defaultMessage="Histogram interval"
+                />
+              </h4>
+            </EuiTitle>
+          )}
+          description={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.title"
-              defaultMessage="Histogram interval"
-            />
-          </h4>
-        </EuiTitle>
-
-        <EuiText>
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.description"
-            defaultMessage={`
-              This is the interval of histogram buckets to be generated when rolling up, e.g. 5
-              will create buckets that are five units wide (0-5, 5-10, etc). Note that only one
-              interval can be specified in the histogram group, meaning that all fields being
-              grouped via the histogram must share the same interval.
-            `}
-          />
-        </EuiText>
-
-        <EuiSpacer />
-
-        <EuiFormRow
-          label={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepHistogram.fieldHistogramInterval.label"
-              defaultMessage="Interval"
+              id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.description"
+              defaultMessage={`
+                This is the interval of histogram buckets to be generated when rolling up, e.g. 5
+                will create buckets that are five units wide (0-5, 5-10, etc). Note that only one
+                interval can be specified in the histogram group, meaning that all fields being
+                grouped via the histogram must share the same interval.
+              `}
             />
           )}
-          error={errorHistogramInterval}
-          isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
+          fullWidth
         >
-          <EuiFieldNumber
-            value={(!histogramInterval && histogramInterval !== 0) ? '' : Number(histogramInterval)}
-            onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
+          <EuiFormRow
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepHistogram.fieldHistogramInterval.label"
+                defaultMessage="Interval"
+              />
+            )}
+            error={errorHistogramInterval}
             isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
-          />
-        </EuiFormRow>
+          >
+            <EuiFieldNumber
+              value={(!histogramInterval && histogramInterval !== 0) ? '' : Number(histogramInterval)}
+              onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
+              isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
       </Fragment>
     );
   }
