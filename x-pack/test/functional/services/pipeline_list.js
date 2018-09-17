@@ -71,7 +71,7 @@ export function PipelineListProvider({ getService }) {
     async getRowsFromTable() {
       const ids = await this.getRowIds();
       const valuesByKey = await propsAsync({
-        selected: ids.map(id => testSubjects.isSelected(getSelectCheckbox(id))),
+        selected: Promise.all(ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))),
         id: ids,
         description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
         lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
