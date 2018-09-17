@@ -1,8 +1,3 @@
-@import (reference) "~ui/styles/variables";
-@import (reference) "~ui/styles/mixins";
-@import (reference) "~ui/styles/theme";
-@import (reference) '~ui/styles/variables/colors';
-
 .actionTypeChoice {
   display: flex;
 }
@@ -14,8 +9,8 @@
 
 .actionTypeIcon {
   flex: 1 0 auto;
-  margin-right: 10px;
-  font-size: 14pt;
+  margin-right: $euiSizeM;
+  font-size: $euiFontSizeL;
 }
 
 .actionTypeDescription {
@@ -23,7 +18,9 @@
   width: 100%;
 }
 
-action-type-select {
+.watchActionsActionType {
+  flex: 1 1 auto;
+  width: 450px;
 
   .ui-select-bootstrap > .ui-select-choices {
     min-width: 350px;
@@ -31,17 +28,17 @@ action-type-select {
 
   // Bootstrap ui select tweaks
   .ui-select-bootstrap .ui-select-choices-row>span {
-    padding: 10px 20px;
+    padding: $euiSizeM $euiSizeL;
   }
 
   .ui-select-match .btn {
-    border-color: @globalColorBlue;
-    color: @globalColorBlue;
+    border-color: $euiColorPrimary;
+    color: $euiColorPrimary;
   }
 
   .ui-select-placeholder {
-    color:  @globalColorBlue !important;
-    padding-right: 10px;
+    color:  $euiColorPrimary !important;
+    padding-right: $euiSizeM;
   }
 
 }

@@ -1,10 +1,6 @@
-@import (reference) "~ui/styles/variables";
-@import (reference) "~ui/styles/mixins";
-@import (reference) "~ui/styles/theme";
-
 watch-edit-execute-detail {
   .json-editor {
-    height:300px;
+    height: 300px;
   }
 
   .copyFromPrevious {
@@ -13,11 +9,11 @@ watch-edit-execute-detail {
   }
 
   .kuiFormSection {
-    padding-left: 15px;
+    padding-left: $euiSize;
   }
 
   label.collapserLabel {
     font-weight: normal;
-    color: @kibanaGray2;
+    color: $euiColorDarkShade;
   }
 }
