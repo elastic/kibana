@@ -86,7 +86,7 @@ export async function bootstrap({
   if (cliArgs.optimize) {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Optimization done.');
-    await shutdown()
+    await shutdown();
   }
 
   process.on('SIGHUP', () => {
