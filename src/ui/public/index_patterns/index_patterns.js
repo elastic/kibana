@@ -25,9 +25,6 @@ import { IndexPatternsIntervalsProvider } from './_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { fieldFormats } from '../registry/field_formats';
 import { uiModules } from '../modules';
-
-let _indexPatterns;
-
 const module = uiModules.get('kibana/index_patterns');
 
 export function IndexPatternsProvider(Notifier, Private, config) {
@@ -78,11 +75,3 @@ export function IndexPatternsProvider(Notifier, Private, config) {
 }
 
 module.service('indexPatterns', Private => Private(IndexPatternsProvider));
-
-module.run((indexPatterns) => {
-  _indexPatterns = indexPatterns;
-});
-
-export function getIndexPatterns() {
-  return _indexPatterns;
-}

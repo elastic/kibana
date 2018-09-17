@@ -17,13 +17,10 @@
  * under the License.
  */
 
-export { IndexPatternsProvider } from './index_patterns';
+import { uiModules } from 'ui/modules';
 
-export {
-  IndexPatternsApiClientProvider,
-} from './index_patterns_api_client_provider';
+export let indexPatterns;
 
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
+uiModules.get('kibana/index_patterns').run(($injector) => {
+  indexPatterns = $injector.get('indexPatterns');
+});
