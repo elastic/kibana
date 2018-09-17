@@ -297,10 +297,14 @@ export function ecommerceSpecProvider() {
     },
     timeFields: ['order_date'],
 <<<<<<< HEAD
+<<<<<<< HEAD
     currentTimeMarker: '2016-12-11T00:00:00',
 =======
     currentTimeMarker: '2018-01-09T00:00:00',
 >>>>>>> ecommerce data set
+=======
+    currentTimeMarker: '2016-12-11T00:00:00',
+>>>>>>> fixes based on Nathan's feedback
     preserveDayOfWeekTimeOfDay: true,
     savedObjects: savedObjects,
   };
