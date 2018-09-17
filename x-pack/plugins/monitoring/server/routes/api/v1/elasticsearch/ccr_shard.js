@@ -16,7 +16,12 @@ async function getCcrStat(req, esIndexPattern, filters) {
   return await callWithRequest(req, 'search', {
     index: esIndexPattern,
     size: 1,
-    filterPath: `hits.hits._source.ccr_stats`,
+    filterPath: [
+      `hits.hits._source.ccr_stats.follower_index`,
+      `hits.hits._source.ccr_stats.shard_id`,
+      `hits.hits._source.ccr_stats.leader_index`,
+      `hits.hits._source.ccr_stats.operations_received`,
+    ],
     body: {
       sort: [{ timestamp: { order: 'desc' } }],
       query: {
