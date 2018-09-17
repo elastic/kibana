@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.4.1>>
 * <<release-notes-6.4.0>>
 * <<release-notes-6.3.2>>
 * <<release-notes-6.3.1>>
@@ -74,6 +75,79 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.4.1]]
+== {kib} 6.4.1
+coming[6.4.1]
+
+[float]
+[[bug-6.4.1]]
+=== Bug fixes
+
+APM::
+
+* Reverts the default value for indices to `apm-*` {pull}22445[#22445]
+* Fixes links that were missing the base path {pull}22592[#22592]
+* Fixes links to machine learning jobs {pull}22820[#22820]
+
+Design::
+* Resolves a problem that caused tooltips to generate an error in Internet Explorer 11 {pull}23006[#23006]
+
+Discover::
+* Fixes regression in `CallClient` that caused request errors, 
+such as timeouts, to result in fatal errors {pull}22558[#22558]
+* Improves test coverage for `CallClient` error cases {pull}22599[#22599]
+* Adds explicit format parameter to `docvalue_fields` requests {pull}22771[#22771]
+
+Docs::
+* Sets branch to 6.4 for doc links {pull}22845[#22845]
+
+Machine Learning::
+* Fixes links to results for jobs with no results {pull}22650[#22650]
+* Adds milliseconds to watch start and end times {pull}22659[#22659]
+* Removes calendars from job when cloning {pull}22667[#22667]
+* Fixes issue with incorrect timezones in Jobs list {pull}22714[#22714]
+* Disables links on the Jobs list to Single Metric Viewer for non-applicable jobs {pull}22809[#22809]
+
+Management::
+* Fixes issue with importing a visualization with a missing saved search {pull}22029[#22029]
+* Fixes issue with importing saved objects when an index pattern is missing {pull}22068[#22068]
+* Fixes the alignment of the Save and Cancel buttons on the Settings page {pull}21898[#21898]
+* Fixes _source formatting {pull}22800[#22800]
+
+Monitoring::
+* Uses 0 as the default for shard count if the node is not found {pull}21000[#21000]
+* Fixes logging when Monitoring reinitializes with a HUP signal (#22464) {pull}22513[#22513]
+* Fixes the problem where the *Shard Legend* panel in *Monitoring > Indices* 
+only shows one replica per shard {pull}23183[#23183]
+
+Platform::
+* Calculates the content length for the export API {pull}22847[#22847]
+* Relies on RFC1123 when validating `server.host` {pull}22469[#22469]
+* Fixes a problem with force `del()` when `bundleDir` is outside the current 
+working directory {pull}22981[#22981]
++
+Trying to run a {kib} optimization (usually after installing or disabling a plugin) 
+from a directory that is not a parent of the `optimize.bundleDir` configuration or 
+the {kib} installation no longer fails with "Cannot delete files/folders outside 
+the current working directory."
+
+Reporting::
+* Removes the `shouldComponentUpdate` function from `MarkdownVisComponent` 
+because it caused reporting failures {pull}21501[#21501]
+
+
+Sharing::
+* Displays warning state when status check has no data {pull}22178[#22178]
+* Adds detection of invalid JSON searchSource to saved_object and dashboard {pull}20379[#20379]
+* Updates dashboard-only mode to display saved searches {pull}22685[#22685]
+* Adds `aria-label` to search input on dashboard listing view {pull}22467[#22467]
+* In the Controls visualization, safely handles case where value can not be 
+extracted from Kibana filter {pull}22885[#22885]
+
+Visualization::
+* Fixes broken visualize CSS {pull}22713[#22713]
+* Fixes the editor so that it correctly shows errors for parent pipeline aggregations {pull}22874[#22874]
 
 [[release-notes-6.4.0]]
 == {kib} 6.4.0
