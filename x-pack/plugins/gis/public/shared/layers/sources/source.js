@@ -47,7 +47,12 @@ export class TMSSource extends ASource {
 }
 
 export class VectorSource extends ASource {
-  async getGeoJson({ format, meta }, fetchUrl) {
+
+  async getGeoJson() {
+    throw new Error('Should implement');
+  }
+
+  async _getGeoJson({ format, meta }, fetchUrl) {
     let jsonFeatures;
     try {
       format = _.get(format, 'type', format); // Hacky workaround for differing config data structure
@@ -72,4 +77,6 @@ export class VectorSource extends ASource {
     }
     return jsonFeatures;
   }
+
+
 }

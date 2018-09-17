@@ -77,7 +77,7 @@ export class KibanaRegionmapSource extends VectorSource {
     const { regionmap = [] } = kibana;
     const { name } = this._descriptor;
     const fileSource = regionmap.find((source => source.name === name));
-    return super.getGeoJson(fileSource, fileSource.url);
+    return this._getGeoJson(fileSource, fileSource.url);
   }
 
   _createDefaultLayerDescriptor(options) {

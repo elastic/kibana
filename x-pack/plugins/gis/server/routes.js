@@ -10,7 +10,8 @@ import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import *  as elasticsearch from 'elasticsearch';
 import _ from 'lodash';
-import WORLD_COUNTRIES from './junk/world_countries';
+import ZIPCODES from './junk/usa_zip_codes_v2';
+// import WORLD_COUNTRIES from './junk/world_countries';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -31,7 +32,7 @@ export function initRoutes(server) {
     method: 'get',
     path: `${ROOT}/junk`,
     handler: async (request, reply) => {
-      reply(WORLD_COUNTRIES);
+      reply(ZIPCODES);
     }
   });
 
