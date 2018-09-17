@@ -23,7 +23,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import markdownVisParamsTemplate from './markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import image from './images/icon-markdown.svg';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // we need to load the css ourselves
 
@@ -41,7 +40,7 @@ function MarkdownVisProvider(Private) {
     name: 'markdown',
     title: 'Markdown',
     isAccessible: true,
-    image,
+    icon: 'visText',
     description: 'Create a document using markdown syntax',
     category: CATEGORY.OTHER,
     visConfig: {

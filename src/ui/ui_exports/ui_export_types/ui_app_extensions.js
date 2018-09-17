@@ -40,7 +40,7 @@ export const visEditorTypes = appExtension;
 export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
 export const embeddableFactories = appExtension;
-export const dashboardPanelActions = appExtension;
+export const contextMenuActions = appExtension;
 export const fieldFormats = appExtension;
 export const fieldFormatEditors = appExtension;
 export const chromeNavControls = appExtension;
@@ -52,6 +52,7 @@ export const hacks = appExtension;
 export const home = appExtension;
 export const inspectorViews = appExtension;
 export const search = appExtension;
+export const shareContextMenuExtensions = appExtension;
 // Add a visualize app extension that should be used for visualize specific stuff
 export const visualize = appExtension;
 

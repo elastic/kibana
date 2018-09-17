@@ -18,7 +18,7 @@
  */
 
 import Stream from 'stream';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
@@ -66,10 +66,10 @@ export default class TransformObjStream extends Stream.Transform {
   }
 
   extractAndFormatTimestamp(data, format) {
-    const { useUTC } = this.config;
+    const { timezone } = this.config;
     const date = moment(data['@timestamp']);
-    if (useUTC) {
-      date.utc();
+    if (timezone) {
+      date.tz(timezone);
     }
     return date.format(format);
   }
