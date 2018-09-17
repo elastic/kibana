@@ -19,7 +19,7 @@ const findLastFullBucket = (
   bucket: InfraBucket,
   bucketSize: number,
   options: InfraNodeRequestOptions
-) => {
+): InfraBucket | undefined => {
   const { buckets } = bucket.timeseries;
   const to = moment.utc(options.timerange.to);
   return buckets.reduce((current, item) => {
@@ -40,6 +40,9 @@ function createNodeMetrics(
   const { timerange, metrics } = options;
   const bucketSize = getBucketSizeInSeconds(timerange.interval);
   const lastBucket = findLastFullBucket(bucket, bucketSize, options);
+  if (!lastBucket) {
+    throw new Error('Date histogram returned an empty set of buckets.');
+  }
   return metrics.filter(metric => lastBucket[metric.type]).map(metric => {
     const metricObj = lastBucket[metric.type];
     return { name: metric.type, value: (metricObj && metricObj.value) || 0 };

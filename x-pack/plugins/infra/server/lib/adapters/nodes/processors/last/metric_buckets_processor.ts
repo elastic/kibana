@@ -7,7 +7,7 @@
 import { cloneDeep, set } from 'lodash';
 import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
 import { createBasePath } from '../../lib/create_base_path';
-import { metrics as metricAggregationCreators } from '../../metric_aggregation_creators';
+import { metricAggregationCreators } from '../../metric_aggregation_creators';
 
 export const metricBucketsProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {

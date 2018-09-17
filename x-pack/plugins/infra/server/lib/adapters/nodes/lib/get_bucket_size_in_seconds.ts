@@ -27,5 +27,5 @@ export const getBucketSizeInSeconds = (interval: string): number => {
   if (matches) {
     return parseFloat(matches[1]) * units[matches[2]];
   }
-  return 60;
+  throw new Error('Invalid interval string format.');
 };

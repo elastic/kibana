@@ -12,7 +12,7 @@ import { memory } from './memory';
 import { rx } from './rx';
 import { tx } from './tx';
 
-export const metrics = {
+export const metricAggregationCreators = {
   [InfraMetricType.count]: count,
   [InfraMetricType.cpu]: cpu,
   [InfraMetricType.memory]: memory,

@@ -30,10 +30,10 @@ export interface InfraSourceConfiguration {
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
-  container: string /** The field to identify a container by */;
-  host: string /** The fields to identify a host by */;
+  containers: string /** The field to identify a container by */;
+  hosts: string /** The fields to identify a host by */;
   message: string[] /** The fields that may contain the log event message. The first field found win. */;
-  pod: string /** The field to identify a pod by */;
+  pods: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
@@ -87,11 +87,11 @@ export interface InfraLogMessageConstantSegment {
 /** A consecutive sequence of log summary buckets */
 export interface InfraLogSummaryInterval {
   start?:
-  | number
-  | null /** The millisecond timestamp corresponding to the start of the interval covered by the summary */;
+    | number
+    | null /** The millisecond timestamp corresponding to the start of the interval covered by the summary */;
   end?:
-  | number
-  | null /** The millisecond timestamp corresponding to the end of the interval covered by the summary */;
+    | number
+    | null /** The millisecond timestamp corresponding to the end of the interval covered by the summary */;
   filterQuery?: string | null /** The query the log entries were filtered by */;
   buckets: InfraLogSummaryBucket[] /** A list of the log entries */;
 }
@@ -353,7 +353,7 @@ export namespace InfraNodeResolvers {
   export type PathResolver = Resolver<InfraNodePath[]>;
   export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
   export interface MetricsArgs {
-    metrics?: InfraMetricInput[] | null;
+    metrics: InfraMetricInput[];
   }
 }
 
@@ -389,11 +389,11 @@ export interface InfraTimerangeInput {
 export interface InfraPathInput {
   type: InfraPathType /** The type of path */;
   label?:
-  | string
-  | null /** The label to use in the results for the group by for the terms group by */;
+    | string
+    | null /** The label to use in the results for the group by for the terms group by */;
   field?:
-  | string
-  | null /** The field to group by from a terms aggregation, this is ignored by the filter type */;
+    | string
+    | null /** The field to group by from a terms aggregation, this is ignored by the filter type */;
   filters?: InfraPathFilterInput[] | null /** The fitlers for the filter group by */;
 }
 /** A group by filter */
@@ -438,7 +438,7 @@ export interface NodesInfraResponseArgs {
   path?: InfraPathInput[] | null;
 }
 export interface MetricsInfraNodeArgs {
-  metrics?: InfraMetricInput[] | null;
+  metrics: InfraMetricInput[];
 }
 
 export enum InfraIndexType {

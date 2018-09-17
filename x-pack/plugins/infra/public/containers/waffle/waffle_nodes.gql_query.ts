@@ -11,8 +11,8 @@ export const waffleNodesQuery = gql`
     $sourceId: ID!
     $timerange: InfraTimerangeInput!
     $filterQuery: String
-    $metrics: [InfraMetricInput!]
-    $path: [InfraPathInput!]
+    $metrics: [InfraMetricInput!]!
+    $path: [InfraPathInput!]!
   ) {
     source(id: $sourceId) {
       id
