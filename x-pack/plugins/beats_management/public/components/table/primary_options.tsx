@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore typings for EuiSearchar not included in EUI
-  EuiSearchBar,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { ActionDefinition, FilterDefinition } from '../table';
 import { ActionButton } from './action_button';
-
 interface PrimaryOptionsProps {
   filters: FilterDefinition[] | null;
   primaryActions: ActionDefinition[];
@@ -34,7 +28,7 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
     };
   }
   public render() {
-    const { actionHandler, filters, primaryActions, onSearchQueryChange } = this.props;
+    const { actionHandler, primaryActions } = this.props;
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -46,13 +40,7 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
             showPopover={this.showPopover}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSearchBar
-            box={{ incremental: true }}
-            filters={filters}
-            onChange={onSearchQueryChange}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem>{/* <KueryBar /> */}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
