@@ -51,7 +51,7 @@ export class PanelUtils {
       y: panel.row - 1,
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
-      i: panel.panelIndex.toString(),
+      id: panel.panelIndex.toString(),
     };
     panel.version = chrome.getKibanaVersion();
     panel.panelIndex = panel.panelIndex;
