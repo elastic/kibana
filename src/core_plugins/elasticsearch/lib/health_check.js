@@ -23,7 +23,6 @@ import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
-import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -67,12 +66,6 @@ export default function (plugin, server) {
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
         .then(waitForEsVersion)
         .then(() => ensureNotTribe(callAdminAsKibanaUser))
-        .then(() => patchKibanaIndex({
-          callCluster: callAdminAsKibanaUser,
-          log: (...args) => server.log(...args),
-          indexName: config.get('kibana.index'),
-          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }))
         .then(() => {
           const tribeUrl = config.get('elasticsearch.tribe.url');
           if (tribeUrl) {
