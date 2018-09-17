@@ -28,6 +28,11 @@ export const selectSourceMetricAlias = createSelector(
   configuration => (configuration ? configuration.metricAlias : null)
 );
 
+export const selectSourceFields = createSelector(
+  selectSourceConfiguration,
+  configuration => (configuration ? configuration.fields : null)
+);
+
 export const selectSourceStatus = createSelector(
   selectSource,
   source => (source ? source.status : null)

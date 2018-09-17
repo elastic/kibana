@@ -659,6 +659,14 @@ export namespace SourceQuery {
     __typename?: 'InfraSourceConfiguration';
     metricAlias: string;
     logAlias: string;
+    fields: Fields;
+  };
+
+  export type Fields = {
+    __typename?: 'InfraSourceFields';
+    container: string;
+    hostname: string;
+    pod: string;
   };
 
   export type Status = {
