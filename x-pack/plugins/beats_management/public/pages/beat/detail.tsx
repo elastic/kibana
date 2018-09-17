@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore EuiInMemoryTable typings not yet available
@@ -16,8 +15,10 @@ import {
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import React from 'react';
+import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../../components/connected_link';
+import { TagBadge } from '../../components/tag';
 
 interface BeatDetailPageProps {
   beat: CMPopulatedBeat | undefined;
@@ -63,7 +64,10 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
       name: 'Tag',
       render: (id: string, block: any) => (
         <ConnectedLink path={`/tag/edit/${id}`}>
-          <EuiBadge color={block.tagColor}>{id}</EuiBadge>
+          <TagBadge
+            maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
+            tag={{ color: block.tagColor, id }}
+          />
         </ConnectedLink>
       ),
       sortable: true,

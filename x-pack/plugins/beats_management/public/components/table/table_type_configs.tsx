@@ -9,10 +9,9 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { flatten, sortBy, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-
-import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConnectedLink } from '../connected_link';
+import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {
   align?: string;
@@ -72,7 +71,9 @@ export const BeatsTableType: TableType = {
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
           {(sortBy(beat.full_tags, 'id') || []).map(tag => (
             <EuiFlexItem key={tag.id} grow={false}>
-              <EuiBadge color={tag.color ? tag.color : 'primary'}>{tag.id}</EuiBadge>
+              <ConnectedLink path={`/tag/edit/${tag.id}`}>
+                <TagBadge tag={tag} />
+              </ConnectedLink>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -123,17 +124,6 @@ export const BeatsTableType: TableType = {
   }),
 };
 
-const TagBadge = (props: { tag: { color?: string; id: string } }) => {
-  const { tag } = props;
-  return (
-    <EuiBadge color={tag.color ? tag.color : 'primary'}>
-      {tag.id.length > TABLE_CONFIG.TRUNCATE_TAG_LENGTH
-        ? `${tag.id.substring(0, TABLE_CONFIG.TRUNCATE_TAG_LENGTH)}...`
-        : tag.id}
-    </EuiBadge>
-  );
-};
-
 export const TagsTableType: TableType = {
   columnDefinitions: [
     {
@@ -181,7 +171,11 @@ export const BeatDetailTagsTable: TableType = {
     {
       field: 'id',
       name: 'Tag name',
-      render: (id: string, tag: BeatTag) => <TagBadge tag={tag} />,
+      render: (id: string, tag: BeatTag) => (
+        <ConnectedLink path={`/tag/edit/${tag.id}`}>
+          <TagBadge tag={tag} />
+        </ConnectedLink>
+      ),
       sortable: true,
       width: '55%',
     },
