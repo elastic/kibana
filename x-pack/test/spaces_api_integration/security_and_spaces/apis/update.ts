@@ -23,7 +23,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     createExpectLegacyForbidden,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe.only('update', () => {
+  describe('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
