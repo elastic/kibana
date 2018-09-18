@@ -27,7 +27,7 @@ interface Params {
   api: UiSettingsApi;
   onUpdateError: UiSettingsClient['onUpdateError'];
   defaults: UiSettingsState;
-  initialSettings: UiSettingsState;
+  initialSettings?: UiSettingsState;
 }
 
 export class UiSettingsClient {
