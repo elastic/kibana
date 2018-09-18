@@ -22,7 +22,7 @@ import { RunContext, TaskInstance } from '../task';
 /*
  * BeforeSaveMiddlewareParams is nearly identical to RunContext, but
  * taskInstance is before save (no _id property)
- * 
+ *
  * taskInstance property is guaranteed to exist. The params can optionally
  * include fields from an "options" object passed as the 2nd parameter to
  * taskManager.schedule()
