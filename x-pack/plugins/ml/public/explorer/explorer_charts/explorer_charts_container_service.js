@@ -452,7 +452,6 @@ export function explorerChartsContainerServiceFactory(
       max: midpointMs + (halfPoints * maxBucketSpanMs)
     };
 
-
     if (plotPoints > CHART_MAX_POINTS) {
       tooManyBuckets = true;
       // For each series being plotted, display the record with the highest score if possible.
