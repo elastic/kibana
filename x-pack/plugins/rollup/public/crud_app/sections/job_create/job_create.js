@@ -536,6 +536,8 @@ export class JobCreateUi extends Component {
           <StepMetrics
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
+            fieldErrors={currentStepFieldErrors}
+            areStepErrorsVisible={areStepErrorsVisible}
             metricsFields={indexPatternMetricsFields}
           />
         );

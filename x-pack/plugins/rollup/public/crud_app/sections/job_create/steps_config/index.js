@@ -13,6 +13,7 @@ import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
 import { validateDateHistogramDelay } from './validate_date_histogram_delay';
 import { validateHistogramInterval } from './validate_histogram_interval';
+import { validateMetrics } from './validate_metrics';
 
 export const STEP_LOGISTICS = 'STEP_LOGISTICS';
 export const STEP_DATE_HISTOGRAM = 'STEP_DATE_HISTOGRAM';
@@ -108,6 +109,17 @@ export const stepIdToStepConfigMap = {
   [STEP_METRICS]: {
     defaultFields: {
       metrics: [],
+    },
+    fieldsValidator: fields => {
+      const {
+        metrics,
+      } = fields;
+
+      const errors = {
+        metrics: validateMetrics(metrics),
+      };
+
+      return errors;
     },
   },
   [STEP_REVIEW]: {},

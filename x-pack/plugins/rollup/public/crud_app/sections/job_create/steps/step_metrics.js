@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +35,8 @@ export class StepMetricsUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
+    fieldErrors: PropTypes.object.isRequired,
+    areStepErrorsVisible: PropTypes.bool.isRequired,
     metricsFields: PropTypes.array.isRequired,
   }
 
@@ -234,6 +237,28 @@ export class StepMetricsUi extends Component {
               onSelectField={this.onSelectField}
             />
           )}
+        />
+
+        {this.renderErrors()}
+      </Fragment>
+    );
+  }
+
+  renderErrors = () => {
+    const { areStepErrorsVisible, fieldErrors } = this.props;
+    const { metrics: errorMetrics } = fieldErrors;
+
+    if (!areStepErrorsVisible) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={errorMetrics}
+          color="danger"
+          iconType="cross"
         />
       </Fragment>
     );
