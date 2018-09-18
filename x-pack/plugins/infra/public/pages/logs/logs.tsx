@@ -91,7 +91,7 @@ export class LogsPage extends React.Component {
               </LogCustomizationMenu>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <WithLogPosition>
+              <WithLogPosition resetOnUnmount>
                 {({
                   visibleMidpointTime,
                   isAutoReloading,

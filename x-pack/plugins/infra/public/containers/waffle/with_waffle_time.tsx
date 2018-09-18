@@ -27,7 +27,9 @@ export const withWaffleTime = connect(
   })
 );
 
-export const WithWaffleTime = asChildFunctionRenderer(withWaffleTime);
+export const WithWaffleTime = asChildFunctionRenderer(withWaffleTime, {
+  onCleanup: ({ stopAutoReload }) => stopAutoReload(),
+});
 
 /**
  * Url State
