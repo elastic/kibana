@@ -37,24 +37,72 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
     },
     options: [
       {
-        value: 'system',
-        text: 'system',
-      },
-      {
         value: 'apache2',
         text: 'apache2',
       },
       {
-        value: 'nginx',
-        text: 'nginx',
+        value: 'auditd',
+        text: 'auditd',
+      },
+      {
+        value: 'elasticsearch',
+        text: 'elasticsearch',
+      },
+      {
+        value: 'haproxy',
+        text: 'haproxy',
+      },
+      {
+        value: 'icinga',
+        text: 'icinga',
+      },
+      {
+        value: 'iis',
+        text: 'iis',
+      },
+      {
+        value: 'kafka',
+        text: 'kafka',
+      },
+      {
+        value: 'kibana',
+        text: 'kibana',
+      },
+      {
+        value: 'logstash',
+        text: 'logstash',
       },
       {
         value: 'mongodb',
         text: 'mongodb',
       },
       {
-        value: 'elasticsearch',
-        text: 'elasticsearch',
+        value: 'mysql',
+        text: 'mysql',
+      },
+      {
+        value: 'nginx',
+        text: 'nginx',
+      },
+      {
+        value: 'osquery',
+        text: 'osquery',
+      },
+      {
+        value: 'postgresql',
+        text: 'postgresql',
+      },
+      {
+        value: 'redis',
+        text: 'redis',
+      },
+      {
+        value: 'system',
+        text: 'system',
+      },
+      {
+        value: 'traefik',
+        text: 'traefik',
       },
     ],
     error: 'Please select a module',
@@ -80,20 +128,144 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
     },
     options: [
       {
-        value: 'system',
-        text: 'system',
+        value: 'aerospike',
+        text: 'aerospike',
       },
       {
-        value: 'apache2',
-        text: 'apache2',
+        value: 'apache',
+        text: 'apache',
+      },
+      {
+        value: 'ceph',
+        text: 'ceph',
+      },
+      {
+        value: 'couchbase',
+        text: 'couchbase',
+      },
+      {
+        value: 'docker',
+        text: 'docker',
+      },
+      {
+        value: 'dropwizard',
+        text: 'dropwizard',
+      },
+      {
+        value: 'elasticsearch',
+        text: 'elasticsearch',
+      },
+      {
+        value: 'envoyproxy',
+        text: 'envoyproxy',
+      },
+      {
+        value: 'etcd',
+        text: 'etcd',
+      },
+      {
+        value: 'golang',
+        text: 'golang',
+      },
+      {
+        value: 'graphite',
+        text: 'graphite',
+      },
+      {
+        value: 'haproxy',
+        text: 'haproxy',
+      },
+      {
+        value: 'http',
+        text: 'http',
+      },
+      {
+        value: 'jolokia',
+        text: 'jolokia',
+      },
+      {
+        value: 'kafka',
+        text: 'kafka',
+      },
+      {
+        value: 'kibana',
+        text: 'kibana',
+      },
+      {
+        value: 'kubernetes',
+        text: 'kubernetes',
+      },
+      {
+        value: 'kvm',
+        text: 'kvm',
+      },
+      {
+        value: 'logstash',
+        text: 'logstash',
+      },
+      {
+        value: 'memcached',
+        text: 'memcached',
+      },
+      {
+        value: 'mongodb',
+        text: 'mongodb',
+      },
+      {
+        value: 'munin',
+        text: 'munin',
+      },
+      {
+        value: 'mysql',
+        text: 'mysql',
       },
       {
         value: 'nginx',
         text: 'nginx',
       },
       {
-        value: 'mongodb',
-        text: 'mongodb',
+        value: 'php_fpm',
+        text: 'php_fpm',
+      },
+      {
+        value: 'postgresql',
+        text: 'postgresql',
+      },
+      {
+        value: 'prometheus',
+        text: 'prometheus',
+      },
+      {
+        value: 'rabbitmq',
+        text: 'rabbitmq',
+      },
+      {
+        value: 'redis',
+        text: 'redis',
+      },
+      {
+        value: 'system',
+        text: 'system',
+      },
+      {
+        value: 'traefik',
+        text: 'traefik',
+      },
+      {
+        value: 'uwsgi',
+        text: 'uwsgi',
+      },
+      {
+        value: 'vsphere',
+        text: 'vsphere',
+      },
+      {
+        value: 'windows',
+        text: 'windows',
+      },
+      {
+        value: 'zookeeper',
+        text: 'zookeeper',
       },
     ],
     error: 'Please select a module',
@@ -192,6 +364,6 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
 export const supportedConfigs = [
   { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
   { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
-  { text: 'Metricbeat Input', value: 'metricbeat.modules', config: metricbeatModuleConfig },
+  { text: 'Metricbeat Module', value: 'metricbeat.modules', config: metricbeatModuleConfig },
   // { text: 'Output', value: 'output', config: outputConfig },
 ];
