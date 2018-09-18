@@ -11,7 +11,7 @@ You, the feature or plugin developer, mainly need to worry about the first meani
 1. Create a usage collector using a factory function
 2. Register the usage collector with the Telemetry service
 
-NOTE: To a lesser extent, there's also a need to update the telemetry payload of Kibana stats and telemetry cluster field mappings to include your fields. This part is typically handled not by you, the developer, but different maintainers of the telemetry cluster. Usually, this step just means file an issue in the telemetry repo and have someone approve your data model.
+NOTE: To a lesser extent, there's also a need to update the telemetry payload of Kibana stats and telemetry cluster field mappings to include your fields. This part is typically handled not by you, the developer, but different maintainers of the telemetry cluster. Usually, this step just means talk to the Platform team and have them approve your data model or added fields.
 
 ## Creating a Usage Collector
 
@@ -89,7 +89,7 @@ There are a few ways you can test that your usage collector is working properly.
 3. **How should I design my data model?**  
    Keep it simple, and keep it to a model that Kibana will be able to understand. In short, that means don't rely on nested fields (arrays with objects). Flat arrays, such as arrays of strings are fine.
 4. **Can the telemetry payload include dynamic fields?**  
-   Yes. In the issue you file in the telemetry repo, point out specifically which properties will have dynamic inner fields.
+   Yes. When you talk to the Platform team about new fields being added, point out specifically which properties will have dynamic inner fields.
 5. **If I accumulate an event counter in server memory, which my fetch method returns, won't it reset when the Kibana server restarts?**  
    Yes, but that is not a major concern. A visualization on such info might be a date histogram that gets events-per-second or something, which would be impacted by server restarts, so we'll have to offset the beginning of the time range when we detect that the latest metric is smaller than the earliest metric. That would be a pretty custom visualization, but perhaps future Kibana enhancements will be able to support that.
 6. **Who can I talk to with more questions?**  
