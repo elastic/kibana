@@ -23,6 +23,7 @@ import './style/main.less';
 
 import template from './templates/index.html';
 import { GISApp } from './components/gis_app';
+import './shared/utils/observers';
 
 import 'ui/vis/map/service_settings';
 
