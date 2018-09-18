@@ -22,8 +22,11 @@ import {
 } from '../../../services';
 
 import {
-  FieldChooser,
   FieldList,
+} from '../../components';
+
+import {
+  FieldChooser,
 } from './components';
 
 export class StepTermsUi extends Component {
@@ -91,6 +94,8 @@ export class StepTermsUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage
@@ -105,7 +110,7 @@ export class StepTermsUi extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -115,30 +120,32 @@ export class StepTermsUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepTerms.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer />
+
         <FieldList
           columns={columns}
           fields={terms}
           onRemoveField={this.onRemoveField}
-        />
-
-        <EuiSpacer />
-
-        <FieldChooser
-          buttonLabel={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
-              defaultMessage="Select terms fields"
+          emptyMessage={<p>No terms fields added</p>}
+          addButton={(
+            <FieldChooser
+              buttonLabel={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
+                  defaultMessage="Add terms fields"
+                />
+              )}
+              columns={columns}
+              fields={unselectedTermsFields}
+              onSelectField={this.onSelectField}
             />
           )}
-          columns={columns}
-          fields={unselectedTermsFields}
-          onSelectField={this.onSelectField}
         />
       </Fragment>
     );

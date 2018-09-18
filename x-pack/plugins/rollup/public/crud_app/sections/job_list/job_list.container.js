@@ -8,10 +8,22 @@ import { connect } from 'react-redux';
 import { JobList as JobListView } from './job_list';
 
 import {
+  getPageOfJobs,
+  isLoading,
+} from '../../store/selectors';
+
+import {
   loadJobs,
   openDetailPanel,
   closeDetailPanel,
 } from '../../store/actions';
+
+const mapStateToProps = (state) => {
+  return {
+    jobs: getPageOfJobs(state),
+    isLoading: isLoading(state),
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
@@ -27,4 +39,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const JobList = connect(null, mapDispatchToProps)(JobListView);
+export const JobList = connect(mapStateToProps, mapDispatchToProps)(JobListView);
