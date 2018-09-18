@@ -6,12 +6,21 @@
 
 import { ResizeChecker } from 'ui/resize_checker';
 import { getStore } from '../../store/store';
-import { changeBannerSize, changeNavSize } from '../../actions/ui_actions';
+import { changeBannerVisible, changeNavExpanded }
+  from '../../actions/ui_actions';
 
 const navElementSelector = '.global-nav';
-const globalBannerSelector = '#globalBannerList';
+const navElementExpanded = () => window.localStorage
+  .getItem('kibana.isGlobalNavOpen');
 
-const assignResizeWatch = (qSelector, actionUpdate) => {
+const globalBannerSelector = '#globalBannerList';
+const globalBannerVisible = () => {
+  const { offsetWidth, offsetHeight } = document
+    .querySelector(globalBannerSelector);
+  return !!(offsetWidth * offsetHeight);
+};
+
+const assignResizeWatch = (qSelector, actionUpdate, getElemStatus) => {
   let checker;
   let resizeElement;
   const checkExist = setInterval(() => {
@@ -19,12 +28,14 @@ const assignResizeWatch = (qSelector, actionUpdate) => {
     if (resizeElement) {
       checker = new ResizeChecker(resizeElement);
       checker.on('resize', () => {
-        getStore().then(store => store.dispatch(actionUpdate));
+        const newStatus = getElemStatus();
+        getStore().then(store => store.dispatch(
+          () => actionUpdate(newStatus)));
       });
       clearInterval(checkExist);
     }
   }, 300); // check every 300ms
 };
 
-assignResizeWatch(navElementSelector, changeNavSize);
-assignResizeWatch(globalBannerSelector, changeBannerSize);
+assignResizeWatch(navElementSelector, changeNavExpanded, navElementExpanded);
+assignResizeWatch(globalBannerSelector, changeBannerVisible, globalBannerVisible);
