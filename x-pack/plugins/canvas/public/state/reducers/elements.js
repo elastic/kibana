@@ -85,15 +85,6 @@ export const elementsReducer = handleActions(
 
       return push(workpadState, ['pages', pageIndex, 'elements'], element);
     },
-    [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
-      const pageIndex = getPageIndexById(workpadState, pageId);
-      if (pageIndex < 0) return workpadState;
-
-      const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
-      if (elementIndex < 0) return workpadState;
-
-      return del(workpadState, ['pages', pageIndex, 'elements', elementIndex]);
-    },
     [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) return workpadState;

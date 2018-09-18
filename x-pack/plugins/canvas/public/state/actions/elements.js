@@ -204,22 +204,6 @@ export const duplicateElement = createThunk(
   }
 );
 
-export const removeElement = createThunk(
-  'removeElement',
-  ({ dispatch, getState }, elementId, pageId) => {
-    const element = getElementById(getState(), elementId, pageId);
-    const shouldRefresh = element.filter != null && element.filter.length > 0;
-
-    const _removeElement = createAction('removeElement', (elementId, pageId) => ({
-      pageId,
-      elementId,
-    }));
-    dispatch(_removeElement(elementId, pageId));
-
-    if (shouldRefresh) dispatch(fetchAllRenderables());
-  }
-);
-
 export const removeElements = createThunk(
   'removeElements',
   ({ dispatch, getState }, elementIds, pageId) => {
