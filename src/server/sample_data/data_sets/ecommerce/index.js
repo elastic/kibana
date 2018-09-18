@@ -143,7 +143,7 @@ export function ecommerceSpecProvider() {
           created_on: { type: 'date' },
           product_name: {
             type: 'text',
-            analytzer: 'english',
+            analyzer: 'english',
             fields: {
               keyword: {
                 type: 'keyword'
