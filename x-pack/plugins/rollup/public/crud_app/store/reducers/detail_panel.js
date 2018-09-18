@@ -26,7 +26,7 @@ export function detailPanel(state = initialState, action) {
       } = payload;
 
       return {
-        panelType,
+        panelType: panelType || state.panelType,
         jobId,
         isOpen: true,
       };

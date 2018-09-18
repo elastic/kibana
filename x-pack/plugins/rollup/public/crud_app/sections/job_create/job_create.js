@@ -147,21 +147,21 @@ export class JobCreateUi extends Component {
         indexPatternAsyncErrors = [(
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
-            defaultMessage="Index pattern must not match rollup indices"
+            defaultMessage="Index pattern must not match rollup indices."
           />
         )];
       } else if (!doesIndexPatternMatchIndices) {
         indexPatternAsyncErrors = [(
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
-            defaultMessage="Index pattern must match at least one non-rollup index"
+            defaultMessage="Index pattern doesn't match any indices."
           />
         )];
       } else if (!indexPatternDateFields.length) {
         indexPatternAsyncErrors = [(
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
-            defaultMessage="Index pattern must match indices that contain time fields"
+            defaultMessage="Index pattern must match indices that contain time fields."
           />
         )];
       }
@@ -495,6 +495,7 @@ export class JobCreateUi extends Component {
             areStepErrorsVisible={areStepErrorsVisible}
             isValidatingIndexPattern={isValidatingIndexPattern}
             indexPatternAsyncErrors={indexPatternAsyncErrors}
+            hasMatchingIndices={Boolean(indexPatternDateFields.length)}
           />
         );
 
@@ -535,6 +536,8 @@ export class JobCreateUi extends Component {
           <StepMetrics
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
+            fieldErrors={currentStepFieldErrors}
+            areStepErrorsVisible={areStepErrorsVisible}
             metricsFields={indexPatternMetricsFields}
           />
         );

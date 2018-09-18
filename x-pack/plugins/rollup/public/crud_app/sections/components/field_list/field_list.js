@@ -9,33 +9,49 @@ import PropTypes from 'prop-types';
 
 import {
   EuiInMemoryTable,
-  EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 export const FieldList = ({
   columns,
   fields,
   onRemoveField,
+  addButton,
+  emptyMessage,
 }) => {
+  let message;
+
   if (!fields.length) {
-    return null;
+    message = (
+      <EuiEmptyPrompt
+        title={emptyMessage}
+        titleSize="xs"
+      />
+    );
   }
 
-  const extendedColumns = columns.concat({
-    name: 'Remove',
-    width: '80px',
-    actions: [{
+  let extendedColumns;
+
+  if (onRemoveField) {
+    extendedColumns = columns.concat({
       name: 'Remove',
-      isPrimary: true,
-      description: 'Remove this field',
-      icon: 'cross',
-      type: 'icon',
-      color: 'danger',
-      onClick: (field) => onRemoveField(field),
-    }]
-  });
+      width: '80px',
+      actions: [{
+        name: 'Remove',
+        isPrimary: true,
+        description: 'Remove this field',
+        icon: 'trash',
+        type: 'icon',
+        color: 'danger',
+        onClick: (field) => onRemoveField(field),
+      }]
+    });
+  } else {
+    extendedColumns = columns;
+  }
 
   const search = {
+    toolsRight: addButton ? addButton : undefined,
     box: {
       incremental: true,
     },
@@ -48,8 +64,6 @@ export const FieldList = ({
 
   return (
     <Fragment>
-      <EuiSpacer />
-
       <EuiInMemoryTable
         items={fields}
         itemId="name"
@@ -57,6 +71,7 @@ export const FieldList = ({
         search={search}
         pagination={pagination}
         sorting={true}
+        message={message}
       />
     </Fragment>
   );
@@ -65,5 +80,7 @@ export const FieldList = ({
 FieldList.propTypes = {
   columns: PropTypes.array.isRequired,
   fields: PropTypes.array.isRequired,
-  onRemoveField: PropTypes.func.isRequired,
+  onRemoveField: PropTypes.func,
+  addButton: PropTypes.node,
+  emptyMessage: PropTypes.node,
 };
