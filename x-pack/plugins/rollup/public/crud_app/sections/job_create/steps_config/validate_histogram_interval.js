@@ -13,7 +13,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
     return undefined;
   }
 
-  if (histogramInterval === 0) {
+  if (histogramInterval <= 0) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalZero"

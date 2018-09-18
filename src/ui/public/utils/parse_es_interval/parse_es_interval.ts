@@ -59,7 +59,7 @@ export function parseEsInterval(interval: string): { value: number; unit: string
   const type = unit && dateMath.unitsMap[unit].type;
 
   if (type === 'calendar' && value !== 1) {
-    throw new ParseEsIntervalInvalidCalendarIntervalError(interval);
+    throw new ParseEsIntervalInvalidCalendarIntervalError(interval, value, unit, type);
   }
 
   return {
