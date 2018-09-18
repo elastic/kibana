@@ -49,7 +49,7 @@ export class BannersService {
 
     return {
       /**
-       * Add a component that should be rendered at the top of the page along with an optional priority.
+       * Add a banner that should be rendered at the top of the page along with an optional priority.
        */
       add: (renderFn: Banner['render'], priority = 0) => {
         const id = `${++uniqueId}`;
@@ -58,14 +58,15 @@ export class BannersService {
       },
 
       /**
-       * Remove a component from the top of the page.
+       * Remove a banner from the top of the page.
        */
       remove: (id: string) => {
         banners$.next(banners$.getValue().filter(banner => banner.id !== id));
       },
 
       /**
-       * Replace a banner component with a new one, potentially with a new priority
+       * Replace a banner and its priority. If the render function is not === to the
+       * previous render function the previous banner will be unmounted and re-rendered.
        */
       replace: (id: string, renderFn: Banner['render'], priority = 0) => {
         const newId = `${++uniqueId}`;
