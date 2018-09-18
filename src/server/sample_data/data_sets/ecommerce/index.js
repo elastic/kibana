@@ -23,8 +23,8 @@ import { savedObjects } from './saved_objects';
 export function ecommerceSpecProvider() {
   return {
     id: 'ecommerce',
-    name: 'Sample eCommerce data',
-    description: 'Sample data, visualizations, and dashboards for monitoring eCommerce.',
+    name: 'Sample eCommerce orders',
+    description: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
