@@ -27,16 +27,6 @@ export const containerDiskIOBytes: InfraMetricModelCreator = (
           id: 'avg-diskio-bytes',
           type: InfraMetricModelMetricType.avg,
         },
-        {
-          field: 'avg-diskio-bytes',
-          id: 'deriv-avg-diskio-bytes',
-          type: InfraMetricModelMetricType.derivative,
-        },
-        {
-          field: 'deriv-avg-diskio-bytes',
-          id: 'posonly-deriv-avg-diskio-bytes',
-          type: InfraMetricModelMetricType.positive_only,
-        },
       ],
     },
     {
@@ -47,16 +37,6 @@ export const containerDiskIOBytes: InfraMetricModelCreator = (
           field: 'docker.diskio.write.bytes',
           id: 'avg-diskio-bytes',
           type: InfraMetricModelMetricType.avg,
-        },
-        {
-          field: 'avg-diskio-bytes',
-          id: 'deriv-avg-diskio-bytes',
-          type: InfraMetricModelMetricType.derivative,
-        },
-        {
-          field: 'deriv-avg-diskio-bytes',
-          id: 'posonly-deriv-avg-diskio-bytes',
-          type: InfraMetricModelMetricType.positive_only,
         },
       ],
     },

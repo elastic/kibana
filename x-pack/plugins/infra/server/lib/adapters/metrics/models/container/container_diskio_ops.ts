@@ -19,19 +19,9 @@ export const containerDiskIOOps: InfraMetricModelCreator = (timeField, indexPatt
       split_mode: 'everything',
       metrics: [
         {
-          field: 'docker.diskio.read.ops',
+          field: 'docker.diskio.read.rate',
           id: 'avg-diskio-ops',
           type: InfraMetricModelMetricType.avg,
-        },
-        {
-          field: 'avg-diskio-ops',
-          id: 'deriv-avg-diskio-ops',
-          type: InfraMetricModelMetricType.derivative,
-        },
-        {
-          field: 'deriv-avg-diskio-ops',
-          id: 'posonly-deriv-avg-diskio-ops',
-          type: InfraMetricModelMetricType.positive_only,
         },
       ],
     },
@@ -40,19 +30,9 @@ export const containerDiskIOOps: InfraMetricModelCreator = (timeField, indexPatt
       split_mode: 'everything',
       metrics: [
         {
-          field: 'docker.diskio.write.ops',
+          field: 'docker.diskio.write.rate',
           id: 'avg-diskio-ops',
           type: InfraMetricModelMetricType.avg,
-        },
-        {
-          field: 'avg-diskio-ops',
-          id: 'deriv-avg-diskio-ops',
-          type: InfraMetricModelMetricType.derivative,
-        },
-        {
-          field: 'deriv-avg-diskio-ops',
-          id: 'posonly-deriv-avg-diskio-ops',
-          type: InfraMetricModelMetricType.positive_only,
         },
       ],
     },

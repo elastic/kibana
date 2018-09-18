@@ -61,7 +61,6 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           stacked: true,
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
           seriesOverrides: {
             cpu: { color: theme.eui.euiColorVis1 },
           },
@@ -76,7 +75,6 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           stacked: true,
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
           seriesOverrides: {
             cpu: { color: theme.eui.euiColorVis1 },
           },
