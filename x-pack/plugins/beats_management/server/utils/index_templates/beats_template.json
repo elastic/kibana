@@ -91,6 +91,9 @@
             "metadata": {
               "dynamic": "true",
               "type": "object"
+            },
+            "name": {
+              "type": "keyword"
             }
           }
         }
