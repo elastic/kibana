@@ -34,10 +34,10 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
           unit: '1s',
         },
         {
-          field: 'deriv-max-network-out',
           id: 'posonly-deriv-max-network-out',
-          type: InfraMetricModelMetricType.positive_only,
-          unit: '',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-out' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
       ],
     },
@@ -57,10 +57,10 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
           unit: '1s',
         },
         {
-          field: 'deriv-max-network-in',
           id: 'posonly-deriv-max-network-in',
-          type: InfraMetricModelMetricType.positive_only,
-          unit: '',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-in' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
         {
           id: 'invert-posonly-deriv-max-network-in',

@@ -96,10 +96,10 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
           unit: '1s',
         },
         {
-          field: 'deriv-max-net-in',
           id: 'posonly-deriv-max-net-in',
-          type: InfraMetricModelMetricType.positive_only,
-          unit: '',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-in' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
         {
           function: 'sum',
@@ -125,10 +125,10 @@ export const hostSystemOverview: InfraMetricModelCreator = (timeField, indexPatt
           unit: '1s',
         },
         {
-          field: 'deriv-max-net-out',
           id: 'posonly-deriv-max-net-out',
-          type: InfraMetricModelMetricType.positive_only,
-          unit: '',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-out' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
         {
           function: 'sum',
