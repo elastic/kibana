@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { FieldList } from './field_list';
+
 export { JobActionMenu } from './job_action_menu';
 
 export {

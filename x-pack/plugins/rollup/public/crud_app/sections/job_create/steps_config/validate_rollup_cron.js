@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import cronstrue from 'cronstrue';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateRollupCron(rollupCron) {
@@ -15,6 +16,14 @@ export function validateRollupCron(rollupCron) {
         defaultMessage="You must provide an interval"
       />
     )];
+  }
+
+  try {
+    cronstrue.toString(rollupCron);
+  } catch(error) {
+    // Note: cronstrue ships with a localizable version. Refer to the docs for more
+    // info on how we can display a localized error value.
+    return error;
   }
 
   return undefined;
