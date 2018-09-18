@@ -9,7 +9,7 @@ import { TestInvoker } from '../../common/lib/types';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
 // tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function createTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -18,6 +18,7 @@ export default function({ getService }: TestInvoker) {
     createTest,
     createExpectSpaceAwareResults,
     expectNotSpaceAwareResults,
+    expectNotFound,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -45,6 +46,20 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+      },
+    });
+
+    createTest('in a non-existent space', {
+      ...SPACES.NON_EXISTENT,
+      tests: {
+        spaceAware: {
+          statusCode: 404,
+          response: expectNotFound,
+        },
+        notSpaceAware: {
+          statusCode: 404,
+          response: expectNotFound,
         },
       },
     });

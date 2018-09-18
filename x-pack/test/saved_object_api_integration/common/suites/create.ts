@@ -156,10 +156,19 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(actualNamespace).to.eql(undefined);
   };
 
+  const expectNotFound = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 404,
+      message: 'Not Found',
+      error: 'Not Found',
+    });
+  };
+
   return {
     createTest,
     createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
+    expectNotFound,
     expectNotSpaceAwareResults,
     expectNotSpaceAwareRbacForbidden: createExpectRbacForbidden(notSpaceAwareType),
     expectSpaceAwareRbacForbidden: createExpectRbacForbidden(spaceAwareType),

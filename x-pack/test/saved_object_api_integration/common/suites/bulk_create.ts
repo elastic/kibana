@@ -97,6 +97,14 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     });
   };
 
+  const expectNotFound = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 404,
+      message: 'Not Found',
+      error: 'Not Found',
+    });
+  };
+
   const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: any) => {
     expect(resp.body).to.eql({
       saved_objects: [
@@ -164,6 +172,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
 
   return {
     bulkCreateTest,
+    expectNotFound,
     createExpectLegacyForbidden,
     createExpectResults,
     expectRbacForbidden,
