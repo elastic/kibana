@@ -44,6 +44,22 @@ describe('GET /api/saved_objects/_find', () => {
     savedObjectsClient.find.resetHistory();
   });
 
+  it('returns with status 400 when type is missing', async () => {
+    const request = {
+      method: 'GET',
+      url: '/api/saved_objects/_find'
+    };
+
+    const { payload, statusCode } = await server.inject(request);
+
+    expect(statusCode).toEqual(400);
+    expect(JSON.parse(payload)).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'child "type" fails because ["type" is required]',
+    });
+  });
+
   it('formats successful response', async () => {
     const request = {
       method: 'GET',
