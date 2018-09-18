@@ -29,8 +29,7 @@ const assignResizeWatch = (qSelector, actionUpdate, getElemStatus) => {
       checker = new ResizeChecker(resizeElement);
       checker.on('resize', () => {
         const newStatus = getElemStatus();
-        getStore().then(store => store.dispatch(
-          () => actionUpdate(newStatus)));
+        getStore().then(store => store.dispatch(actionUpdate(newStatus)));
       });
       clearInterval(checkExist);
     }
