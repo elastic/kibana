@@ -18,8 +18,9 @@
  */
 
 import chalk from 'chalk';
-import { omit } from 'lodash';
 import { isMaster } from 'cluster';
+import { omit, pick } from 'lodash';
+
 import { CliArgs, Env, RawConfigService } from './config';
 import { LegacyObjectToConfigAdapter } from './legacy_compat';
 import { Root } from './root';
@@ -114,7 +115,7 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // tslint:disable no-console
     // https://nodejs.org/api/errors.html#errors_error_info
-    const pickedError = _.pick(error, [
+    const pickedError: any = pick(reason, [
       'stack',
       'message',
       'code',
@@ -125,12 +126,9 @@ function onRootShutdown(reason?: any) {
     ]);
     const duck = Boolean(pickedError.stack && pickedError.message);
     const loggedError = duck
-      ? Object.assign(
-        new Error(pickedError.message),
-        omit(pickedError, 'message')
-      )
-      : error.toString();
-    console.error('FATAL', loggedError);
+      ? Object.assign(new Error(pickedError.message), omit(pickedError, 'message'))
+      : reason.toString();
+    console.error(chalk.white.bgRed(' FATAL '), loggedError);
   }
 
   process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
