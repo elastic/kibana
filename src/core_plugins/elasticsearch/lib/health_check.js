@@ -22,7 +22,6 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -63,13 +62,7 @@ export default function (plugin, server) {
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-        .then(waitForEsVersion)
-        .then(() => patchKibanaIndex({
-          callCluster: callAdminAsKibanaUser,
-          log: (...args) => server.log(...args),
-          indexName: config.get('kibana.index'),
-          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }));
+        .then(waitForEsVersion);
 
     return healthCheck
       .then(setGreenStatus)
