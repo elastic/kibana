@@ -23,13 +23,17 @@
 
 import { uiModules } from '../../../modules';
 import { Header } from './components/header';
+import k7GlobalNavTemplate from './k7_global_nav.html';
 import './k7_global_nav.less';
 
 const module = uiModules.get('kibana');
 
 module.directive('k7Header', (reactDirective) => {
   return reactDirective(Header, [
-    ['navLinks', { watchDepth: 'collection' }]
+    ['navLinks', { watchDepth: 'collection' }],
+    'appTitle',
+    'isVisible',
+    'otherProp'
   ]);
 });
 
@@ -44,45 +48,10 @@ module.directive('k7GlobalNav', (globalNavState, chrome) => {
       smallLogoBrand: '=',
       appTitle: '=',
     },
-    template: '<div class="k7-header-wrapper"><k7-header nav-links="{{ navLinks }}" /></div>',
+    template: k7GlobalNavTemplate,
     link: (scope) => {
-      // TODO: change data binding for observable
+      // TODO: change data binding to observable
       scope.navLinks = chrome.getNavLinks();
     }
-
-    // link: scope => {
-    //   // App switcher functionality.
-    //   function updateGlobalNav() {
-    //     const isOpen = globalNavState.isOpen();
-    //     scope.isGlobalNavOpen = isOpen;
-    //     scope.globalNavToggleButton = {
-    //       classes: isOpen ? 'global-nav-link--close' : undefined,
-    //       title: isOpen ? 'Collapse' : 'Expand',
-    //       tooltipContent: isOpen ? 'Collapse side bar' : 'Expand side bar',
-    //     };
-
-    //     // Notify visualizations, e.g. the dashboard, that they should re-render.
-    //     scope.$root.$broadcast('globalNav:update');
-    //   }
-
-    //   updateGlobalNav();
-
-    //   scope.$root.$on('globalNavState:change', () => {
-    //     updateGlobalNav();
-    //   });
-
-    //   scope.getHref = path => {
-    //     return chrome.addBasePath(path);
-    //   };
-
-    //   scope.toggleGlobalNav = event => {
-    //     event.preventDefault();
-    //     globalNavState.setOpen(!globalNavState.isOpen());
-    //   };
-
-    //   scope.isHomeActive = () => {
-    //     return window.location.hash.indexOf('#/home') === 0;
-    //   };
-    // }
   };
 });

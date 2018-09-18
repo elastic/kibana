@@ -45,26 +45,14 @@ export class Header extends Component {
   }
 
   renderBreadcrumbs() {
+    const { appTitle } = this.props;
+
+    if (!appTitle) {
+      return null;
+    }
+
     const breadcrumbs = [{
-      text: 'Management',
-      href: '#',
-      onClick: (e) => { e.preventDefault(); },
-      'data-test-subj': 'breadcrumbsAnimals',
-      className: 'customClass',
-    }, {
-      text: 'Truncation test is here for a really long item',
-      href: '#',
-      onClick: (e) => { e.preventDefault(); },
-    }, {
-      text: 'hidden',
-      href: '#',
-      onClick: (e) => { e.preventDefault(); },
-    }, {
-      text: 'Users',
-      href: '#',
-      onClick: (e) => { e.preventDefault(); },
-    }, {
-      text: 'Create',
+      text: appTitle
     }];
 
     return (
@@ -73,7 +61,12 @@ export class Header extends Component {
   }
 
   render() {
-    const { navLinks } = this.props;
+    const { navLinks, isVisible } = this.props;
+
+    if (!isVisible) {
+      return null;
+    }
+
     return (
       <EuiHeader>
         <EuiHeaderSection>
