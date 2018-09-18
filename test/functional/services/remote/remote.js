@@ -47,6 +47,9 @@ export async function RemoteProvider({ getService }) {
   // chromeOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
+  log.debug(chromeDriver.path);
+  log.debug(geckoDriver.path);
+
   const chromeService = new chrome.ServiceBuilder(chromeDriver.path)
     // .loggingTo(process.stdout)
     .enableVerboseLogging();
