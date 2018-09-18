@@ -57,6 +57,7 @@ export function ccrRoute(server) {
               field: 'ccr_stats.follower_index',
               inner_hits: {
                 name: 'by_shard',
+                sort: [{ timestamp: 'desc' }],
                 collapse: {
                   field: 'ccr_stats.shard_id',
                 }
