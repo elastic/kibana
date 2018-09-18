@@ -43,6 +43,7 @@ import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
 import { initSavedObjectClient } from './api/saved_object_client';
 import { initChromeBasePathApi } from './api/base_path';
+import { initChromeInjectedVarsApi } from './api/injected_vars';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -65,6 +66,7 @@ initSavedObjectClient(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
 initChromeBasePathApi(chrome);
+initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
