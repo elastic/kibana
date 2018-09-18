@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fatal error logs no metadata to stderr 1`] = `
+" instead.
+FATAL ValidationError: child \\"elasticsearch\\" fails because [child \\"url\\" fails because [\\"url\\" must be a string]]
+    at Object.exports.process
+    at internals.Object._validateWithOptions
+    at module.exports.internals.Any.root.validate
+    at Config._commit
+    at Config.set
+    at Config.extendSchema
+    at extendConfigService
+    at <anonymous>
+"
+`;

@@ -231,5 +231,4 @@ export default function (program) {
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
       });
     });
-
 }
