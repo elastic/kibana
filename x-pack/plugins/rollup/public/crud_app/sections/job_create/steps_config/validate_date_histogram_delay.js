@@ -25,7 +25,7 @@ export function validateDateHistogramDelay(dateHistogramDelay) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidFormat"
-          defaultMessage="Invalid interval format"
+          defaultMessage="Invalid delay format"
         />
       )];
     }

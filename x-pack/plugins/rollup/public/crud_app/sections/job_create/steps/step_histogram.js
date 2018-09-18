@@ -209,11 +209,13 @@ export class StepHistogramUi extends Component {
             )}
             error={errorHistogramInterval}
             isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
+            fullWidth
           >
             <EuiFieldNumber
               value={(!histogramInterval && histogramInterval !== 0) ? '' : Number(histogramInterval)}
               onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
+              fullWidth
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

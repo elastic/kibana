@@ -23,8 +23,13 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+
+import {
+  parseEsInterval,
+} from 'ui/utils/parse_es_interval';
 
 import {
   dateHistogramDetailsUrl,
@@ -162,6 +167,103 @@ export class StepDateHistogramUi extends Component {
     );
   }
 
+  renderIntervalHelpText() {
+    const { fields } = this.props;
+    const { dateHistogramInterval } = fields;
+
+    let preferFixedWarning;
+
+    try {
+      const { value, unit } = parseEsInterval(dateHistogramInterval);
+
+      if (value === 1) {
+        switch (unit) {
+          case 'd':
+            preferFixedWarning = (
+              <EuiTextColor color="warning">
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningDay.label"
+                    defaultMessage="Consider using 24h instead of 1d. This will allow for more flexible queries."
+                  />
+                </p>
+              </EuiTextColor>
+            );
+            break;
+
+          case 'h':
+            preferFixedWarning = (
+              <EuiTextColor color="warning">
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningHour.label"
+                    defaultMessage="Consider using 60m instead of 1h. This will allow for more flexible queries."
+                  />
+                </p>
+              </EuiTextColor>
+            );
+            break;
+        }
+      }
+
+      switch (unit) {
+        case 'y':
+          preferFixedWarning = (
+            <EuiTextColor color="warning">
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningYear.label"
+                  defaultMessage="Consider using the d unit instead of y. This will allow for more flexible queries."
+                />
+              </p>
+            </EuiTextColor>
+          );
+          break;
+
+        case 'M':
+          preferFixedWarning = (
+            <EuiTextColor color="warning">
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningMonth.label"
+                  defaultMessage="Consider using the d unit instead of M. This will allow for more flexible queries."
+                />
+              </p>
+            </EuiTextColor>
+          );
+          break;
+
+        case 'w':
+          preferFixedWarning = (
+            <EuiTextColor color="warning">
+              <p>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningWeek.label"
+                  defaultMessage="Consider using the d unit instead of w. This will allow for more flexible queries."
+                />
+              </p>
+            </EuiTextColor>
+          );
+          break;
+      }
+    } catch(error) {
+      // Swallow error; the validation logic will handle it elsewhere.
+    }
+
+    return (
+      <Fragment>
+        {preferFixedWarning}
+
+        <p>
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
+            defaultMessage="Example intervals: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
+          />
+        </p>
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       fields,
@@ -289,16 +391,7 @@ export class StepDateHistogramUi extends Component {
               )}
               error={errorDateHistogramInterval}
               isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
-              helpText={(
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
-                      defaultMessage="Example intervals: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
-                    />
-                  </p>
-                </Fragment>
-              )}
+              helpText={this.renderIntervalHelpText()}
               fullWidth
             >
               <EuiFieldText
