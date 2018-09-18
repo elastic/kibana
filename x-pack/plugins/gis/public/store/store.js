@@ -31,8 +31,10 @@ uiModules
     initConfig = {};
   });
 
+let storePromise;
 export const getStore = async function () {
-  return new Promise(resolve => {
+  if (storePromise) return storePromise;
+  storePromise = new Promise(resolve => {
     const handle = setInterval(() => {
       if (initConfig !== null) {
         clearInterval(handle);
@@ -46,4 +48,5 @@ export const getStore = async function () {
       }
     }, 10);
   });
+  return storePromise;
 };
