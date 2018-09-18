@@ -10,17 +10,15 @@ import { changeBannerVisible, changeNavExpanded }
   from '../../actions/ui_actions';
 
 const navElementSelector = '.global-nav';
-export const navElementExpanded = () => window.localStorage
+const navElementExpanded = () => window.localStorage
   .getItem('kibana.isGlobalNavOpen');
 
 const globalBannerSelector = '#globalBannerList';
-export const globalBannerVisible = (() => {
-  const banner = globalBannerSelector;
-  return () => {
-    const { offsetWidth, offsetHeight } = document.querySelector(banner);
-    return !!(offsetWidth * offsetHeight);
-  };
-})();
+const globalBannerVisible = () => {
+  const { offsetWidth, offsetHeight } = document
+    .querySelector(globalBannerSelector);
+  return !!(offsetWidth * offsetHeight);
+};
 
 const assignResizeWatch = (qSelector, actionUpdate, getElemStatus) => {
   let checker;
