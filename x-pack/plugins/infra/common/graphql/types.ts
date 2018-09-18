@@ -30,10 +30,10 @@ export interface InfraSourceConfiguration {
 }
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
-  containers: string /** The field to identify a container by */;
-  hosts: string /** The fields to identify a host by */;
+  container: string /** The field to identify a container by */;
+  host: string /** The fields to identify a host by */;
   message: string[] /** The fields that may contain the log event message. The first field found win. */;
-  pods: string /** The field to identify a pod by */;
+  pod: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
@@ -194,18 +194,18 @@ export namespace InfraSourceConfigurationResolvers {
 /** A mapping of semantic fields to their document counterparts */
 export namespace InfraSourceFieldsResolvers {
   export interface Resolvers {
-    containers?: ContainersResolver /** The field to identify a container by */;
-    hosts?: HostsResolver /** The fields to identify a host by */;
+    container?: ContainerResolver /** The field to identify a container by */;
+    host?: HostResolver /** The fields to identify a host by */;
     message?: MessageResolver /** The fields that may contain the log event message. The first field found win. */;
-    pods?: PodsResolver /** The field to identify a pod by */;
+    pod?: PodResolver /** The field to identify a pod by */;
     tiebreaker?: TiebreakerResolver /** The field to use as a tiebreaker for log events that have identical timestamps */;
     timestamp?: TimestampResolver /** The field to use as a timestamp for metrics and logs */;
   }
 
-  export type ContainersResolver = Resolver<string>;
-  export type HostsResolver = Resolver<string>;
+  export type ContainerResolver = Resolver<string>;
+  export type HostResolver = Resolver<string>;
   export type MessageResolver = Resolver<string[]>;
-  export type PodsResolver = Resolver<string>;
+  export type PodResolver = Resolver<string>;
   export type TiebreakerResolver = Resolver<string>;
   export type TimestampResolver = Resolver<string>;
 }
@@ -479,8 +479,8 @@ export namespace WaffleNodesQuery {
     sourceId: string;
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
-    metrics?: InfraMetricInput[] | null;
-    path?: InfraPathInput[] | null;
+    metrics: InfraMetricInput[];
+    path: InfraPathInput[];
   };
 
   export type Query = {

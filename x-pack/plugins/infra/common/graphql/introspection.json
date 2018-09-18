@@ -352,7 +352,7 @@
         "description": "A mapping of semantic fields to their document counterparts",
         "fields": [
           {
-            "name": "containers",
+            "name": "container",
             "description": "The field to identify a container by",
             "args": [],
             "type": {
@@ -364,7 +364,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hosts",
+            "name": "host",
             "description": "The fields to identify a host by",
             "args": [],
             "type": {
@@ -397,7 +397,7 @@
             "deprecationReason": null
           },
           {
-            "name": "pods",
+            "name": "pod",
             "description": "The field to identify a pod by",
             "args": [],
             "type": {
