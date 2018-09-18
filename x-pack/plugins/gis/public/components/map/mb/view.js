@@ -25,6 +25,10 @@ export class MBMapContainer extends React.Component {
     };
   }
 
+  shouldComponentUpdate() {
+    this._mbMap.resize();
+  }
+
   componentWillUnmount() {
     console.warn('Should tear down all resources of this component, including this._mbMap');
   }
