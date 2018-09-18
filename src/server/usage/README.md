@@ -1,6 +1,6 @@
-# Kibana Telemetry
+# Kibana Telemetry Service
 
-Telemetry is a service in Kibana that features and plugins can register with for tracking usage. The general term "telemetry" refers to multiple things:
+Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
 1. Integrating with the telemetry service to express how to collect usage data (Collecting).
 2. Sending a payload of usage data up to Elastic's telemetry cluster, once per browser per day (Sending).
