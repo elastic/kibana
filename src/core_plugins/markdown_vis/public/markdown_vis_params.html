@@ -3,14 +3,14 @@
     <div>
       <label
         for="markdownVisInput"
-        i18n-id="markdownVis.public.markdownVisParams.markdownLabel"
+        i18n-id="markdownVis.params.markdownLabel"
         i18n-default-message="Markdown"
       >
       </label>
       <small class="pull-right">
         <a target="_window" href="https://help.github.com/articles/github-flavored-markdown/">
           <span
-            i18n-id="markdownVis.public.markdownVisParams.helpLinkLabel"
+            i18n-id="markdownVis.params.helpLinkLabel"
             i18n-default-message="Help"
           >
           </span>
@@ -21,11 +21,11 @@
     <div class="kuiSideBarFormRow">
       <label class="kuiSideBarFormRow__label" for="markdownVisFontSize">
         <span
-          i18n-id="markdownVis.public.markdownVisParams.fontSizeLabel"
-          i18n-default-message="Font Size"
+          i18n-id="markdownVis.params.fontSizeLabel"
+          i18n-default-message="Font Size ({fontSize}pt)"
+          i18n-values="{ fontSize: editorState.params.fontSize }"
         >
         </span>
-         (<span ng-bind="editorState.params.fontSize"></span>pt)
       </label>
       <div class="kuiSideBarFormRow__control">
         <input id="markdownVisFontSize" type="range" ng-model="editorState.params.fontSize" class="form-control" min="8" max="36" />
@@ -35,7 +35,7 @@
       <label
         class="kuiSideBarFormRow__label"
         for="markdownVisOpenLinksInNewTab"
-        i18n-id="markdownVis.public.markdownVisParams.openLinksLabel"
+        i18n-id="markdownVis.params.openLinksLabel"
         i18n-default-message="Open links in new tabdown"
       >
       </label>

@@ -38,10 +38,10 @@ function MarkdownVisProvider(Private, i18n) {
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'markdown',
-    title: i18n('markdownVis.public.markdownVis.markdownTitle', { defaultMessage: 'Markdown' }),
+    title: i18n('markdownVis.markdownTitle', { defaultMessage: 'Markdown' }),
     isAccessible: true,
     icon: 'visText',
-    description: i18n('markdownVis.public.markdownVis.markdownDescription', { defaultMessage: 'Create a document using markdown syntax' }),
+    description: i18n('markdownVis.markdownDescription', { defaultMessage: 'Create a document using markdown syntax' }),
     category: CATEGORY.OTHER,
     visConfig: {
       component: MarkdownVisWrapper,
