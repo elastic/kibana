@@ -137,10 +137,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
 <<<<<<< HEAD
+<<<<<<< HEAD
         expect(panelCount).to.be(12);
 =======
         expect(panelCount).to.be(10);
 >>>>>>> added saved objects, new screenshot
+=======
+        expect(panelCount).to.be(12);
+>>>>>>> some dashboard changes
       });
 
     });
