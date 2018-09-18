@@ -65,6 +65,17 @@ export function ccrRoute(server) {
           }
         });
 
+
+        if (!response || Object.keys(response).length === 0) {
+          reply({
+            data: {
+              all: [],
+              shardStatsByFollowerIndex: {}
+            }
+          });
+          return;
+        }
+
         const stats = get(response, 'hits.hits').reduce((accum, hit) => {
           const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
           accum.push(...innerHits.map(innerHit => get(innerHit, '_source.ccr_stats')));
