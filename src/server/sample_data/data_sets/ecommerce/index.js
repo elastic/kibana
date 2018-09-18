@@ -59,6 +59,9 @@ export function ecommerceSpecProvider() {
       },
       customer_first_name: {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> mappings fix
         type: 'text',
         fields: {
           keyword: {
@@ -66,9 +69,12 @@ export function ecommerceSpecProvider() {
             ignore_above: 256
           }
         }
+<<<<<<< HEAD
 =======
         type: 'keyword'
 >>>>>>> ecommerce data set
+=======
+>>>>>>> mappings fix
       },
       customer_full_name: {
         type: 'text',
@@ -76,9 +82,13 @@ export function ecommerceSpecProvider() {
           keyword: {
             type: 'keyword',
 <<<<<<< HEAD
+<<<<<<< HEAD
             ignore_above: 256
 =======
 >>>>>>> ecommerce data set
+=======
+            ignore_above: 256
+>>>>>>> mappings fix
           }
         }
       },
@@ -86,6 +96,7 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       customer_id: {
+<<<<<<< HEAD
 <<<<<<< HEAD
         type: 'keyword'
       },
@@ -98,10 +109,16 @@ export function ecommerceSpecProvider() {
       },
       customer_phone: {
 >>>>>>> ecommerce data set
+=======
+        type: 'keyword'
+      },
+      customer_last_name: {
+>>>>>>> mappings fix
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
+<<<<<<< HEAD
 <<<<<<< HEAD
             ignore_above: 256
           }
@@ -115,6 +132,15 @@ export function ecommerceSpecProvider() {
         }
       },
 >>>>>>> ecommerce data set
+=======
+            ignore_above: 256
+          }
+        }
+      },
+      customer_phone: {
+        type: 'keyword'
+      },
+>>>>>>> mappings fix
       day_of_week: {
         type: 'keyword'
       },
@@ -137,6 +163,7 @@ export function ecommerceSpecProvider() {
       },
       order_id: {
 <<<<<<< HEAD
+<<<<<<< HEAD
         type: 'keyword'
       },
       products: {
@@ -145,18 +172,26 @@ export function ecommerceSpecProvider() {
           discount_percentage: { type: 'half_float' },
 =======
         type: 'integer'
+=======
+        type: 'keyword'
+>>>>>>> mappings fix
       },
       products: {
-        type: 'nested',
         properties: {
+<<<<<<< HEAD
           base_price: { type: 'float' },
           discount_percentage: { type: 'float' },
 >>>>>>> ecommerce data set
+=======
+          base_price: { type: 'half_float' },
+          discount_percentage: { type: 'half_float' },
+>>>>>>> mappings fix
           quantity: { type: 'integer' },
           manufacturer: {
             type: 'text',
             fields: {
               keyword: {
+<<<<<<< HEAD
 <<<<<<< HEAD
                 type: 'keyword'
               }
@@ -172,10 +207,19 @@ export function ecommerceSpecProvider() {
           tax_amount: { type: 'float' },
           product_id: { type: 'integer' },
 >>>>>>> ecommerce data set
+=======
+                type: 'keyword'
+              }
+            }
+          },
+          tax_amount: { type: 'half_float' },
+          product_id: { type: 'long' },
+>>>>>>> mappings fix
           category: {
             type: 'text',
             fields: {
               keyword: {
+<<<<<<< HEAD
 <<<<<<< HEAD
                 type: 'keyword'
               }
@@ -220,43 +264,54 @@ export function ecommerceSpecProvider() {
         type: 'half_float'
 =======
                 type: 'keyword',
+=======
+                type: 'keyword'
+>>>>>>> mappings fix
               }
             }
           },
           sku: { type: 'keyword' },
-          taxless_price: { type: 'float' },
-          unit_discount_amount: { type: 'float' },
-          min_price: { type: 'float' },
-          _id: { type: 'keyword' },
-          discount_amount: { type: 'float' },
-          created_on: { type: 'date' },
-          product_name: {
+          taxless_price: { type: 'half_float' },
+          unit_discount_amount: { type: 'half_float' },
+          min_price: { type: 'half_float' },
+          _id: {
             type: 'text',
             fields: {
               keyword: {
                 type: 'keyword',
+                ignore_above: 256
               }
             }
           },
-          price: { type: 'float' },
-          taxful_price: { type: 'float' },
-          base_unit_price: { type: 'float' },
+          discount_amount: { type: 'half_float' },
+          created_on: { type: 'date' },
+          product_name: {
+            type: 'text',
+            analytzer: 'english',
+            fields: {
+              keyword: {
+                type: 'keyword'
+              }
+            }
+          },
+          price: { type: 'half_float' },
+          taxful_price: { type: 'half_float' },
+          base_unit_price: { type: 'half_float' },
         }
       },
       sku: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          }
-        }
+        type: 'keyword'
       },
       taxful_total_price: {
-        type: 'float'
+        type: 'half_float'
       },
       taxless_total_price: {
+<<<<<<< HEAD
         type: 'float'
 >>>>>>> ecommerce data set
+=======
+        type: 'half_float'
+>>>>>>> mappings fix
       },
       total_quantity: {
         type: 'integer'
@@ -271,6 +326,7 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       geoip: {
+<<<<<<< HEAD
 <<<<<<< HEAD
         properties: {
           country_iso_code: { type: 'keyword' },
@@ -290,6 +346,12 @@ export function ecommerceSpecProvider() {
             }
           },
 >>>>>>> ecommerce data set
+=======
+        properties: {
+          country_iso_code: { type: 'keyword' },
+          location: { type: 'geo_point' },
+          region_name: { type: 'keyword' },
+>>>>>>> mappings fix
           continent_name: { type: 'keyword' },
           city_name: { type: 'keyword' }
         }
