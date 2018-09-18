@@ -27,6 +27,42 @@ import {
   translateTimeRelativeToWeek
 } from './lib/translate_timestamp';
 
+function insertDataIntoIndex(dataIndexConfig, index, nowReference, request, server, callWithRequest) {
+  function updateTimestamps(doc) {
+    dataIndexConfig.timeFields.forEach(timeFieldName => {
+      if (doc[timeFieldName]) {
+        doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
+          ? translateTimeRelativeToWeek(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference)
+          : translateTimeRelativeToDifference(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference);
+      }
+    });
+    return doc;
+  }
+
+  const insertCmd = {
+    index: {
+      _index: index
+    }
+  };
+
+  const bulkInsert = async (docs) => {
+    const bulk = [];
+    docs.forEach(doc => {
+      bulk.push(insertCmd);
+      bulk.push(updateTimestamps(doc));
+    });
+    const resp = await callWithRequest(request, 'bulk', { body: bulk });
+    if (resp.errors) {
+      server.log(
+        ['warning'],
+        `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, '')}`);
+      return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
+    }
+  };
+
+  return loadData(dataIndexConfig.dataPath, bulkInsert);
+}
+
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
   method: 'POST',
@@ -52,26 +88,11 @@ export const createInstallRoute = () => ({
 
       const now = request.query.now ? request.query.now : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
-      function updateTimestamps(doc, dataIndexConfig) {
-        dataIndexConfig.timeFields.forEach(timeFieldName => {
-          if (doc[timeFieldName]) {
-            doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
-              ? translateTimeRelativeToWeek(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference)
-              : translateTimeRelativeToDifference(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference);
-          }
-        });
-        return doc;
-      }
 
       const counts = {};
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
-        const insertCmd = {
-          index: {
-            _index: index
-          }
-        };
 
         // clean up any old installation of dataset
         try {
@@ -104,23 +125,9 @@ export const createInstallRoute = () => ({
           return reply(errMsg).code(err.status);
         }
 
-        const bulkInsert = async (docs) => {
-          const bulk = [];
-          docs.forEach(doc => {
-            bulk.push(insertCmd);
-            bulk.push(updateTimestamps(doc, dataIndexConfig));
-          });
-          const resp = await callWithRequest(request, 'bulk', { body: bulk });
-          if (resp.errors) {
-            server.log(
-              ['warning'],
-              `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, '')}`);
-            return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
-          }
-        };
-
         try {
-          const count = await loadData(dataIndexConfig.dataPath, bulkInsert);
+          const count = await insertDataIntoIndex(
+            dataIndexConfig, index, nowReference, request, server, callWithRequest);
           counts[index] = count;
         } catch (err) {
           server.log(['warning'], `sample_data install errors while loading data. Error: ${err}`);
