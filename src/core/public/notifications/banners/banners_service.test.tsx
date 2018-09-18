@@ -20,11 +20,19 @@
 import { unmountComponentAtNode } from 'react-dom';
 import { BannersService } from './banners_service';
 
+function renderFn(innerHTML: string) {
+  return (el: HTMLDivElement) => {
+    el.innerHTML = innerHTML;
+    return () => (el.innerHTML = '');
+  };
+}
+
 describe('start.add()', () => {
   it('renders the component in the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    start.add('foo');
+    start.add(renderFn('foo'));
+
     expect(targetDomElement).toMatchInlineSnapshot(`
 <div>
   <div
@@ -43,9 +51,10 @@ describe('start.add()', () => {
   it('renders higher-priority banners abover lower-priority ones', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    start.add('100', 100);
-    start.add('1', 1);
-    start.add('200', 200);
+    start.add(renderFn('100'), 100);
+    start.add(renderFn('1'), 1);
+    start.add(renderFn('200'), 200);
+
     expect(targetDomElement).toMatchInlineSnapshot(`
 <div>
   <div
@@ -76,7 +85,7 @@ describe('start.remove()', () => {
   it('removes the component from the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    const id = start.add('foo');
+    const id = start.add(renderFn('foo'));
     start.remove(id);
     expect(targetDomElement).toMatchInlineSnapshot(`<div />`);
   });
@@ -84,7 +93,7 @@ describe('start.remove()', () => {
   it('does nothing if the id is unknown', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    start.add('foo');
+    start.add(renderFn('foo'));
     start.remove('something random');
     expect(targetDomElement).toMatchInlineSnapshot(`
 <div>
@@ -106,8 +115,21 @@ describe('start.replace()', () => {
   it('replaces the banner with the matching id', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    const id = start.add('foo');
-    start.replace(id, 'bar');
+    const id = start.add(renderFn('foo'));
+    expect(targetDomElement).toMatchInlineSnapshot(`
+<div>
+  <div
+    class="globalBanner__list"
+  >
+    <div
+      class="globalBanner__item"
+    >
+      foo
+    </div>
+  </div>
+</div>
+`);
+    start.replace(id, renderFn('bar'));
     expect(targetDomElement).toMatchInlineSnapshot(`
 <div>
   <div
@@ -126,8 +148,8 @@ describe('start.replace()', () => {
   it('adds the banner if the id is unknown', () => {
     const targetDomElement = document.createElement('div');
     const start = new BannersService({ targetDomElement }).start();
-    start.add('foo');
-    start.replace('something random', 'bar');
+    start.add(renderFn('foo'));
+    start.replace('something random', renderFn('bar'));
     expect(targetDomElement).toMatchInlineSnapshot(`
 <div>
   <div
@@ -161,7 +183,7 @@ describe('stop', () => {
   it('cleans out the content of the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     const service = new BannersService({ targetDomElement });
-    service.start().add('foo-bar');
+    service.start().add(renderFn('foo-bar'));
     service.stop();
     expect(targetDomElement).toMatchInlineSnapshot(`<div />`);
   });

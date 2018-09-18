@@ -17,12 +17,19 @@
  * under the License.
  */
 
+import React from 'react';
 import { __newPlatformInit__, banners } from './banners';
 
-__newPlatformInit__({
+const newPlatformBanners = {
   add: jest.fn((...args) => ['add', args]),
   remove: jest.fn((...args) => ['remove', args]),
   replace: jest.fn((...args) => ['replace', args]),
+};
+
+__newPlatformInit__(newPlatformBanners);
+
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 it('forwards calls to newPlatformBanners.add()', () => {
@@ -30,7 +37,7 @@ it('forwards calls to newPlatformBanners.add()', () => {
 Array [
   "add",
   Array [
-    "foo",
+    [Function],
     10,
   ],
 ]
@@ -49,14 +56,48 @@ Array [
 });
 
 it('forwards calls to newPlatformBanners.replace()', () => {
-  expect(banners.set({ id: 'id', component: 'bar', priority: 100 })).toMatchInlineSnapshot(`
+  expect(banners.set({ id: 'id', component: 'foo', priority: 100 })).toMatchInlineSnapshot(`
 Array [
   "replace",
   Array [
     "id",
-    "bar",
+    [Function],
     100,
   ],
 ]
 `);
+});
+
+describe('component is a react element', () => {
+  it('renders with react, returns unrender function', () => {
+    banners.add({ component: <span>foo</span> });
+    const [[renderFn]] = newPlatformBanners.add.mock.calls;
+    const div = document.createElement('div');
+    const unrender = renderFn(div);
+    expect(div).toMatchInlineSnapshot(`
+<div>
+  <span>
+    foo
+  </span>
+</div>
+`);
+    unrender();
+    expect(div).toMatchInlineSnapshot(`<div />`);
+  });
+});
+
+describe('component is a string', () => {
+  it('renders string with react, returns unrender function', () => {
+    banners.add({ component: 'foo' });
+    const [[renderFn]] = newPlatformBanners.add.mock.calls;
+    const div = document.createElement('div');
+    const unrender = renderFn(div);
+    expect(div).toMatchInlineSnapshot(`
+<div>
+  foo
+</div>
+`);
+    unrender();
+    expect(div).toMatchInlineSnapshot(`<div />`);
+  });
 });

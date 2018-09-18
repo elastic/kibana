@@ -20,14 +20,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import * as Rx from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { GlobalBannerList } from './global_banner_list';
+import { GlobalBannersContainer } from './containers/global_banners_container';
 
 export interface Banner {
   readonly id: string;
-  readonly component: React.ReactChild;
   readonly priority: number;
+  readonly render: (targetDomElement: HTMLDivElement) => (() => void) | void;
 }
 
 export type Banners = Banner[];
@@ -42,19 +41,19 @@ export class BannersService {
   public start() {
     let uniqueId = 0;
     const banners$ = new Rx.BehaviorSubject<Banners>([]);
-    const sortedBanners$ = banners$.pipe(
-      map(banners => banners.slice().sort((a, b) => b.priority - a.priority))
-    );
 
-    render(<GlobalBannerList banners$={sortedBanners$} />, this.params.targetDomElement);
+    render(
+      <GlobalBannersContainer banners$={banners$.asObservable()} />,
+      this.params.targetDomElement
+    );
 
     return {
       /**
        * Add a component that should be rendered at the top of the page along with an optional priority.
        */
-      add: (component: React.ReactChild, priority = 0) => {
+      add: (renderFn: Banner['render'], priority = 0) => {
         const id = `${++uniqueId}`;
-        banners$.next([...banners$.getValue(), { id, component, priority }]);
+        banners$.next([...banners$.getValue(), { id, priority, render: renderFn }]);
         return id;
       },
 
@@ -68,11 +67,11 @@ export class BannersService {
       /**
        * Replace a banner component with a new one, potentially with a new priority
        */
-      replace: (id: string, component: React.ReactChild, priority = 0) => {
+      replace: (id: string, renderFn: Banner['render'], priority = 0) => {
         const newId = `${++uniqueId}`;
         banners$.next([
           ...banners$.getValue().filter(banner => banner.id !== id),
-          { id: newId, component, priority },
+          { id: newId, priority, render: renderFn },
         ]);
         return newId;
       },

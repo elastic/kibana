@@ -20,50 +20,23 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { GlobalBannerList } from './global_banner_list';
+import { GlobalBannersContainer } from './global_banners_container';
 
 it('renders nothing without banners', () => {
-  const component = shallow(<GlobalBannerList banners$={Rx.EMPTY} />);
+  const component = shallow(<GlobalBannersContainer banners$={Rx.EMPTY} />);
   expect(component).toMatchInlineSnapshot(`""`);
 });
 
-it('renders banners in the order received', () => {
-  const component = shallow(
-    <GlobalBannerList
-      banners$={Rx.of([
-        {
-          id: '123',
-          component: <div>first</div>,
-          priority: Math.random(),
-        },
-        {
-          id: '456',
-          component: <div>second</div>,
-          priority: Math.random(),
-        },
-      ])}
-    />
-  );
-  expect(component).toMatchInlineSnapshot(`
-<div
-  className="globalBanner__list"
->
-  <div
-    className="globalBanner__item"
-    key="123"
-  >
-    <div>
-      first
-    </div>
-  </div>
-  <div
-    className="globalBanner__item"
-    key="456"
-  >
-    <div>
-      second
-    </div>
-  </div>
-</div>
+it('passes banners to the GlobalBannerList', () => {
+  expect(shallow(<GlobalBannersContainer banners$={Rx.of(['banner2', 'banner1']) as any} />))
+    .toMatchInlineSnapshot(`
+<GlobalBannerList
+  banners={
+    Array [
+      "banner2",
+      "banner1",
+    ]
+  }
+/>
 `);
 });

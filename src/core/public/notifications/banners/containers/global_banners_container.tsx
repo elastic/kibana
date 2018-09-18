@@ -20,7 +20,8 @@
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { Banners } from './banners_service';
+import { Banners } from '../banners_service';
+import { GlobalBannerList } from '../components/global_banner_list';
 import './global_banner_list.css';
 
 interface Props {
@@ -32,7 +33,7 @@ interface State {
   banners?: Banners;
 }
 
-export class GlobalBannerList extends React.Component<Props> {
+export class GlobalBannersContainer extends React.Component<Props> {
   public state: State = {};
   private subscription?: Rx.Subscription;
 
@@ -64,14 +65,6 @@ export class GlobalBannerList extends React.Component<Props> {
       return null;
     }
 
-    return (
-      <div className="globalBanner__list">
-        {banners.map(({ id, component, priority, ...rest }) => (
-          <div key={id} className="globalBanner__item" {...rest}>
-            {component}
-          </div>
-        ))}
-      </div>
-    );
+    return <GlobalBannerList banners={banners} />;
   }
 }

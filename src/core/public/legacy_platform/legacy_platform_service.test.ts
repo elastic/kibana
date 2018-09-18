@@ -62,6 +62,14 @@ jest.mock('ui/notify/toasts', () => {
   };
 });
 
+const mockNotifyBannersInit = jest.fn();
+jest.mock('ui/notify/banners', () => {
+  mockLoadOrder.push('ui/notify/banners');
+  return {
+    __newPlatformInit__: mockNotifyBannersInit,
+  };
+});
+
 const mockLoadingCountInit = jest.fn();
 jest.mock('ui/chrome/api/loading_count', () => {
   mockLoadOrder.push('ui/chrome/api/loading_count');
@@ -99,6 +107,7 @@ import { LegacyPlatformService } from './legacy_platform_service';
 const fatalErrorsStartContract = {} as any;
 const notificationsStartContract = {
   toasts: {},
+  banners: {},
 } as any;
 
 const injectedMetadataStartContract: any = {
@@ -178,6 +187,17 @@ describe('#start()', () => {
 
       expect(mockNotifyToastsInit).toHaveBeenCalledTimes(1);
       expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStartContract.toasts);
+    });
+
+    it('passes banners service to ui/notify/banners', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockNotifyBannersInit).toHaveBeenCalledTimes(1);
+      expect(mockNotifyBannersInit).toHaveBeenCalledWith(notificationsStartContract.banners);
     });
 
     it('passes loadingCount service to ui/chrome/api/loading_count', () => {

@@ -63,6 +63,7 @@ export class LegacyPlatformService {
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/notify/banners').__newPlatformInit__(notifications.banners);
     require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);

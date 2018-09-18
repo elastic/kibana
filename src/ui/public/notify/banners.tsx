@@ -17,16 +17,33 @@
  * under the License.
  */
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+
 import { BannersStartContract } from '../../../core/public/notifications/banners';
 
 let newPlatformBanners: BannersStartContract;
 
 export function __newPlatformInit__(instance: BannersStartContract) {
   if (newPlatformBanners) {
-    throw new Error('ui/chrome/api/base_path is already initialized');
+    throw new Error('ui/notify/banners is already initialized');
   }
 
   newPlatformBanners = instance;
+}
+
+function renderWithReact<T>(componentOrString: React.ReactElement<T> | string) {
+  const component =
+    typeof componentOrString === 'string' ? (
+      <React.Fragment>{componentOrString}</React.Fragment>
+    ) : (
+      componentOrString
+    );
+
+  return (el: HTMLDivElement) => {
+    render(component, el);
+    return () => unmountComponentAtNode(el);
+  };
 }
 
 export const banners = {
@@ -37,8 +54,8 @@ export const banners = {
    * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
    * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
-  add(banner: { component: React.ReactChild; priority?: number }) {
-    return newPlatformBanners.add(banner.component, banner.priority);
+  add<T>(banner: { component: React.ReactElement<T> | string; priority?: number }) {
+    return newPlatformBanners.add(renderWithReact(banner.component), banner.priority);
   },
 
   /**
@@ -62,7 +79,11 @@ export const banners = {
    * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
    * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
-  set(banner: { id: string; component: React.ReactChild; priority?: number }) {
-    return newPlatformBanners.replace(banner.id, banner.component, banner.priority);
+  set<T>(banner: { id: string; component: React.ReactElement<T> | string; priority?: number }) {
+    return newPlatformBanners.replace(
+      banner.id,
+      renderWithReact(banner.component),
+      banner.priority
+    );
   },
 };
