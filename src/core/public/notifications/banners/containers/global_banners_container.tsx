@@ -22,7 +22,6 @@ import * as Rx from 'rxjs';
 
 import { Banners } from '../banners_service';
 import { GlobalBannerList } from '../components/global_banner_list';
-import './global_banner_list.css';
 
 interface Props {
   banners$: Rx.Observable<Banners>;
