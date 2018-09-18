@@ -1,7 +1,7 @@
 [[development-security-rbac]]
 === Role-based access control
 
-Role-based access control (RBAC) in {kib} relies upon the {ref}/security-api-privileges.html[privilege APIs] that Elasticsearch exposes. This {kib} to define the privileges that {kib} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled within a secured instance of the `SavedObjectsClient` and available transparently to consumers when using `request.getSavedObjectsClient()` or `savedObjects.getScopedSavedObjectsClient()`.
+Role-based access control (RBAC) in {kib} relies upon the {xpack-ref}/security-privileges.html#application-privileges[application privileges] that Elasticsearch exposes. This allows {kib} to define the privileges that {kib} wishes to grant to users, assign them to the relevant users using roles, and then authorize the user to perform a specific action. This is handled within a secured instance of the `SavedObjectsClient` and available transparently to consumers when using `request.getSavedObjectsClient()` or `savedObjects.getScopedSavedObjectsClient()`.
 
 [[development-rbac-privileges]]
 ==== {kib} Privileges
@@ -70,12 +70,13 @@ The application is created by concatenating the prefix of `kibana-` with the val
  }
 ----------------------------------
 
-Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management* / *Security* / *Roles* page, not directly using the {es} {ref}/security-api-roles.html[Role Management API]. This role can then be assigned to users using {es}'s {ref}/security-api-users.html[User Management APIs].
+Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management* / *Security* / *Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es} 
+{ref}/security-api.html#security-user-apis[user management APIs].
 
 [[development-rbac-authorization]]
 ==== Authorization
 
-The {es} {ref}/security-api-privileges.html#security-api-privileges[has privileges API]determines whether the user is authorized to perform a specific action:
+The {es} {ref}/security-api-has-privileges.html[has privileges API] determines whether the user is authorized to perform a specific action:
 
 [source,js]
 ----------------------------------
@@ -103,7 +104,7 @@ Once we have authorized the user to perform a specific action, we can execute th
 [[development-rbac-legacy-fallback]]
 ==== Legacy Fallback
 
-Users have existign roles that rely on index privileges to the `.kibana` index. The legacy fallback uses the `callWithRequest` method when the user doesn't have and application privileges. This relies on the user have index privileges on `.kibana`. The legacy fallback will be available until 7.0.
+Users have existing roles that rely on index privileges to the `.kibana` index. The legacy fallback uses the `callWithRequest` method when the user doesn't have any application privileges. This relies on the user having index privileges on `.kibana`. The legacy fallback will be available until 7.0.
 
 Within the secured instance of the `SavedObjectsClient` the `_has_privileges` check determines if the user has any index privileges on the `.kibana` index:
 

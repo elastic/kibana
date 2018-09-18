@@ -1,0 +1,35 @@
+{
+  "laneLabels": [
+    "Overall"
+  ],
+  "points": [
+    {
+      "laneLabel": "Overall",
+      "time": 1486425600,
+      "value": 0
+    },
+    {
+      "laneLabel": "Overall",
+      "time": 1486440000,
+      "value": 0.01107053
+    },
+    {
+      "laneLabel": "Overall",
+      "time": 1486454400,
+      "value": 0.1870243
+    },
+    {
+      "laneLabel": "Overall",
+      "time": 1486468800,
+      "value": 0.5947769
+    },
+    {
+      "laneLabel": "Overall",
+      "time": 1486483200,
+      "value": 0
+    }
+  ],
+  "interval": 14400,
+  "earliest": 1486425600,
+  "latest": 1486483200
+}

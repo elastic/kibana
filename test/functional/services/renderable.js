@@ -42,7 +42,7 @@ export function RenderableProvider({ getService }) {
           throw new Error(`${completedElements.length} elements completed rendering, waiting on a total of ${count}`);
         }
 
-        const stillLoadingElements = await find.allByCssSelector(DATA_LOADING_SELECTOR);
+        const stillLoadingElements = await find.allByCssSelector(DATA_LOADING_SELECTOR, 1000);
         if (stillLoadingElements.length > 0) {
           throw new Error(`${stillLoadingElements.length} elements still loading contents`);
         }

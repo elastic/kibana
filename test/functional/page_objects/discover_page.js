@@ -145,7 +145,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       // 3). get the chart-wrapper elements
         .then(function () {
           return getRemote()
-          // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
             .findAllByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {
@@ -224,29 +224,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return getRemote()
         .findAllByCssSelector('mark')
         .getVisibleText();
-    }
-
-    clickShare() {
-      return testSubjects.click('discoverShareButton');
-    }
-
-    clickShortenUrl() {
-      return testSubjects.click('sharedSnapshotShortUrlButton');
-    }
-
-    async clickCopyToClipboard() {
-      await testSubjects.click('sharedSnapshotCopyButton');
-
-      // Confirm that the content was copied to the clipboard.
-      return await testSubjects.exists('shareCopyToClipboardSuccess');
-    }
-
-    async getShareCaption() {
-      return await testSubjects.getVisibleText('shareUiTitle');
-    }
-
-    async getSharedUrl() {
-      return await testSubjects.getProperty('sharedSnapshotUrl', 'value');
     }
 
     async toggleSidebarCollapse() {

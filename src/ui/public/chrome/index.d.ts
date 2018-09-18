@@ -26,6 +26,8 @@ declare class Chrome {
   public dangerouslyGetActiveInjector(): Promise<IInjector>;
   public getBasePath(): string;
   public getXsrfToken(): string;
+  public getKibanaVersion(): string;
+  public getUiSettingsClient(): any;
 }
 
 declare const chrome: Chrome;

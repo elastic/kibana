@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaMigrator migratorOptsFromKbnServer returns full index mappings w/ core properties 1`] = `
+Object {
+  "doc": Object {
+    "dynamic": "strict",
+    "properties": Object {
+      "amap": Object {
+        "type": "text",
+      },
+      "bmap": Object {
+        "type": "text",
+      },
+      "config": Object {
+        "dynamic": "true",
+        "properties": Object {
+          "buildNum": Object {
+            "type": "keyword",
+          },
+        },
+      },
+      "migrationVersion": Object {
+        "dynamic": "true",
+        "type": "object",
+      },
+      "type": Object {
+        "type": "keyword",
+      },
+      "updated_at": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;

@@ -55,8 +55,6 @@ exports[`render 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -70,8 +68,6 @@ exports[`render 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
@@ -137,8 +133,6 @@ exports[`statusCheckState checking status 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -152,14 +146,12 @@ exports[`statusCheckState checking status 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
         },
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -173,13 +165,9 @@ exports[`statusCheckState checking status 1`] = `
                 component="div"
                 grow={true}
               >
-                <EuiText
-                  grow={true}
-                >
-                  <p>
-                    custom status check description
-                  </p>
-                </EuiText>
+                <Content
+                  text="custom status check description"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 component="div"
@@ -200,7 +188,7 @@ exports[`statusCheckState checking status 1`] = `
             <EuiSpacer
               size="s"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "checkStatusStep",
           "status": "incomplete",
           "title": "custom title",
@@ -266,8 +254,6 @@ exports[`statusCheckState failed status check - error 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -281,14 +267,12 @@ exports[`statusCheckState failed status check - error 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
         },
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -302,13 +286,9 @@ exports[`statusCheckState failed status check - error 1`] = `
                 component="div"
                 grow={true}
               >
-                <EuiText
-                  grow={true}
-                >
-                  <p>
-                    custom status check description
-                  </p>
-                </EuiText>
+                <Content
+                  text="custom status check description"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 component="div"
@@ -334,9 +314,9 @@ exports[`statusCheckState failed status check - error 1`] = `
               size="m"
               title="custom error msg"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "checkStatusStep",
-          "status": "complete",
+          "status": "danger",
           "title": "custom title",
         },
       ]
@@ -400,8 +380,6 @@ exports[`statusCheckState failed status check - no data 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -415,14 +393,12 @@ exports[`statusCheckState failed status check - no data 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
         },
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -436,13 +412,9 @@ exports[`statusCheckState failed status check - no data 1`] = `
                 component="div"
                 grow={true}
               >
-                <EuiText
-                  grow={true}
-                >
-                  <p>
-                    custom status check description
-                  </p>
-                </EuiText>
+                <Content
+                  text="custom status check description"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 component="div"
@@ -468,9 +440,9 @@ exports[`statusCheckState failed status check - no data 1`] = `
               size="m"
               title="custom error msg"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "checkStatusStep",
-          "status": "complete",
+          "status": "warning",
           "title": "custom title",
         },
       ]
@@ -534,8 +506,6 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -549,14 +519,12 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
         },
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -570,13 +538,9 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
                 component="div"
                 grow={true}
               >
-                <EuiText
-                  grow={true}
-                >
-                  <p>
-                    custom status check description
-                  </p>
-                </EuiText>
+                <Content
+                  text="custom status check description"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 component="div"
@@ -597,7 +561,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
             <EuiSpacer
               size="s"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "checkStatusStep",
           "status": "incomplete",
           "title": "custom title",
@@ -663,8 +627,6 @@ exports[`statusCheckState successful status check 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 0,
           "title": "step 1",
@@ -678,14 +640,12 @@ exports[`statusCheckState successful status check 1`] = `
             }
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
-            textPost={undefined}
-            textPre={undefined}
           />,
           "key": 1,
           "title": "step 2",
         },
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -699,13 +659,9 @@ exports[`statusCheckState successful status check 1`] = `
                 component="div"
                 grow={true}
               >
-                <EuiText
-                  grow={true}
-                >
-                  <p>
-                    custom status check description
-                  </p>
-                </EuiText>
+                <Content
+                  text="custom status check description"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 component="div"
@@ -731,7 +687,7 @@ exports[`statusCheckState successful status check 1`] = `
               size="m"
               title="custom success msg"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "checkStatusStep",
           "status": "complete",
           "title": "custom title",

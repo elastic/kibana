@@ -1,7 +1,15 @@
-@import '../../../../src/ui/public/styles/styling_constants';
-
-// Dashboard styles
-@import './dashboard/index';
+@import 'ui/public/styles/styling_constants';
 
 // Discover styles
-@import 'discover/index';
+@import './discover/index';
+
+// Home styles
+@import './home/index';
+
+// Visualize styles
+@import './visualize/index';
+@import 'ui/public/vis/index';
+
+// Dashboard styles
+// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
+@import './dashboard/index';

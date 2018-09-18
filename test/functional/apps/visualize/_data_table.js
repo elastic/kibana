@@ -60,18 +60,18 @@ export default function ({ getService, getPageObjects }) {
       expect(isApplyButtonEnabled).to.be(true);
     });
 
-    it('should allow resseting changed params', async () => {
+    it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
       const interval = await PageObjects.visualize.getInputTypeParam('interval');
       expect(interval).to.be('2000');
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric');
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
       await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
@@ -177,6 +177,20 @@ export default function ({ getService, getPageObjects }) {
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
       ]);
+    });
+
+    it('should show correct data for a data table with top hits', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
+      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data);
+      expect(data.length).to.be.greaterThan(0);
     });
   });
 }

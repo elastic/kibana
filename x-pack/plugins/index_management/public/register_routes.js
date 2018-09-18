@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import { setHttpClient } from './services/api';
 
 import { App } from './app';
@@ -21,11 +22,13 @@ import { indexManagementStore } from './store';
 
 const renderReact = async (elem) => {
   render(
-    <Provider store={indexManagementStore()}>
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </Provider>,
+    <I18nProvider>
+      <Provider store={indexManagementStore()}>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </Provider>
+    </I18nProvider>,
     elem
   );
 };

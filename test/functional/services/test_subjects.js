@@ -39,10 +39,12 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async existOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.existOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element exists, or else fail the test consuming this.
-      expect(doesExist).to.be(true);
+      await retry.try(async () => {
+        log.debug(`TestSubjects.existOrFail(${selector})`);
+        const doesExist = await this.exists(selector, timeout);
+        // Verify element exists, or else fail the test consuming this.
+        expect(doesExist).to.be(true);
+      });
     }
 
     async missingOrFail(selector, timeout = 1000) {
@@ -189,6 +191,10 @@ export function TestSubjectsProvider({ getService }) {
         const elements = await this.findAll(selectorAll);
         return await mapAsync(elements, mapFn);
       });
+    }
+
+    async waitForDeleted(selector) {
+      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
   }
 
