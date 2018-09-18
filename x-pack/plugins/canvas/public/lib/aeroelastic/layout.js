@@ -1200,6 +1200,16 @@ const resizeGroup = (shapes, selectedShapes) => {
   };
 };
 
+const getLeafs = (descendCondition, allShapes, shapes) =>
+  removeDuplicates(
+    s => s.id,
+    flatten(
+      shapes.map(
+        shape => (descendCondition(shape) ? allShapes.filter(s => s.parent === shape.id) : shape)
+      )
+    )
+  );
+
 const grouping = select((shapes, selectedShapes) => {
   const preexistingAdHocGroups = shapes.filter(isAdHocGroup);
   const freshSelectedShapes = shapes.filter(idsMatch(selectedShapes));
@@ -1231,16 +1241,10 @@ const grouping = select((shapes, selectedShapes) => {
   } else {
     // group together the multiple items
     const group = axisAlignedBoundingBoxShape(freshSelectedShapes);
-    const selectedLeafShapes = removeDuplicates(
-      s => s.id,
-      flatten(
-        freshSelectedShapes.map(
-          shape =>
-            shape.subtype === config.adHocGroupName
-              ? shapes.filter(s => s.parent === shape.id)
-              : shape
-        )
-      )
+    const selectedLeafShapes = getLeafs(
+      shape => shape.subtype === config.adHocGroupName,
+      shapes,
+      freshSelectedShapes
     );
     const parentedSelectedShapes = selectedLeafShapes.map(shape => ({
       ...shape,
@@ -1344,9 +1348,19 @@ const nextScene = select(
     mouseTransformState,
     selectedShapes
   ) => {
+    const selectedLeafShapes = getLeafs(
+      shape => shape.subtype === config.adHocGroupName,
+      shapes,
+      selectionState.shapes.map(
+        s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s)
+      )
+    )
+      .filter(shape => shape.type !== 'annotation')
+      .map(s => s.id);
     return {
       hoveredShape,
       selectedShapes: selectedShapeIds,
+      selectedLeafShapes,
       selectedPrimaryShapes,
       shapes,
       gestureEnd,

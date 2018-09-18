@@ -8,7 +8,7 @@ import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as actions from '../actions/transient';
-import { removeElement } from '../actions/elements';
+import { removeElement, removeElements } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 
 export const transientReducer = handleActions(
@@ -25,6 +25,17 @@ export const transientReducer = handleActions(
           selectedElement: selectedElement === elementId ? null : selectedElement,
         },
         ['resolvedArgs', elementId]
+      );
+    },
+
+    [removeElements]: (transientState, { payload: { elementIds } }) => {
+      const { selectedElement } = transientState;
+      return del(
+        {
+          ...transientState,
+          selectedElement: elementIds.indexOf(selectedElement) === -1 ? selectedElement : null,
+        },
+        ['resolvedArgs', elementIds]
       );
     },
 

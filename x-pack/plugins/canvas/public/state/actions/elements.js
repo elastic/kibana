@@ -220,6 +220,25 @@ export const removeElement = createThunk(
   }
 );
 
+export const removeElements = createThunk(
+  'removeElements',
+  ({ dispatch, getState }, elementIds, pageId) => {
+    const shouldRefresh = elementIds.some(elementId => {
+      const element = getElementById(getState(), elementId, pageId);
+      const filterIsApplied = element.filter != null && element.filter.length > 0;
+      return filterIsApplied;
+    });
+
+    const _removeElements = createAction('removeElements', (elementIds, pageId) => ({
+      pageId,
+      elementIds,
+    }));
+    dispatch(_removeElements(elementIds, pageId));
+
+    if (shouldRefresh) dispatch(fetchAllRenderables());
+  }
+);
+
 export const setFilter = createThunk(
   'setFilter',
   ({ dispatch }, filter, elementId, pageId, doRender = true) => {
