@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { fillPool } from './fill_pool';
-import { TaskManagerLogger } from './logger';
-import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './middleware';
+import { fillPool } from './lib/fill_pool';
+import { TaskManagerLogger } from './lib/logger';
+import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import {
   ConcreteTaskInstance,
   RunContext,

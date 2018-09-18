@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger } from './logger';
+import { Logger } from './lib/logger';
 
 type WorkFn = () => Promise<void>;
 
