@@ -80,7 +80,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                 nodeType={nodeType}
                 nodeId={nodeName}
               >
-                {({ metrics, error }) => {
+                {({ metrics, error, loading }) => {
                   if (error) {
                     return <ErrorPageBody message={error} />;
                   }
@@ -98,7 +98,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                           </EuiPageHeaderSection>
                         </EuiPageHeader>
                         <EuiPageContentWithRelative>
-                          <Metrics layout={layout} metrics={metrics} />
+                          <Metrics layout={layout} metrics={metrics} loading={loading} />
                         </EuiPageContentWithRelative>
                       </EuiPageBody>
                     </EuiPage>

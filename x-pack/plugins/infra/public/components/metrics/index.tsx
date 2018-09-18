@@ -14,11 +14,12 @@ import { Section } from './section';
 interface Props {
   metrics: InfraMetricData[];
   layout: InfraMetricLayout[];
+  loading: boolean;
 }
 
 export class Metrics extends React.PureComponent<Props> {
   public render() {
-    if (this.props.metrics.length === 0) {
+    if (this.props.loading) {
       return (
         <LoadingContainer>
           <EuiLoadingChart />
