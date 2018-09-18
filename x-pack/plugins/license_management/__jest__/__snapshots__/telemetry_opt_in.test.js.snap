@@ -40,25 +40,17 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               Read more
             </EuiLink>
           }
+          className="licenseManagement__baseline"
           closePopover={[Function]}
           hasArrow={true}
           id="readMorePopover"
           isOpen={false}
           ownFocus={true}
           panelPaddingSize="m"
-          style={
-            Object {
-              "verticalAlign": "baseline",
-            }
-          }
         >
           <EuiText
+            className="licenseManagement__narrowText"
             grow={true}
-            style={
-              Object {
-                "width": 240,
-              }
-            }
           >
             <p>
               This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an 
@@ -119,31 +111,22 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 Read more
               </EuiLink>
             }
+            className="licenseManagement__baseline"
             closePopover={[Function]}
             hasArrow={true}
             id="readMorePopover"
             isOpen={false}
             ownFocus={true}
             panelPaddingSize="m"
-            style={
-              Object {
-                "verticalAlign": "baseline",
-              }
-            }
           >
             <EuiOutsideClickDetector
               onOutsideClick={[Function]}
             >
               <div
-                className="euiPopover euiPopover--anchorDownCenter"
+                className="euiPopover euiPopover--anchorDownCenter licenseManagement__baseline"
                 id="readMorePopover"
                 onClick={[Function]}
                 onKeyDown={[Function]}
-                style={
-                  Object {
-                    "verticalAlign": "baseline",
-                  }
-                }
               >
                 <div
                   className="euiPopover__anchor"

@@ -114,9 +114,9 @@ export class StartTrial extends React.PureComponent {
               <EuiFlexItem grow={false}>
                 <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+              <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
                 <EuiFlexGroup responsive={false}>
-                  <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+                  <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
                     <EuiButtonEmpty
                       data-test-subj="confirmModalCancelButton"
                       onClick={this.cancel}
@@ -125,7 +125,7 @@ export class StartTrial extends React.PureComponent {
                 Cancel
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+                  <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
                     <EuiButton
                       data-test-subj="confirmModalConfirmButton"
                       onClick={this.startLicenseTrial}

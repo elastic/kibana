@@ -29,6 +29,18 @@ export class TelemetryOptIn extends React.Component {
   closeReadMorePopover = () => {
     this.setState({ showMoreTelemetryInfo: false });
   }
+  onClickReadMore = () => {
+    const { showMoreTelemetryInfo } = this.state;
+    this.setState({ showMoreTelemetryInfo: !showMoreTelemetryInfo });
+  }
+  onClickExample = () => {
+    this.setState({ showExample: true });
+    this.closeReadMorePopover();
+  }
+  onChangeOptIn = event => {
+    const isOptingInToTelemetry = event.target.checked;
+    this.setState({ isOptingInToTelemetry });
+  }
   render() {
     const { showMoreTelemetryInfo, isOptingInToTelemetry, showExample } = this.state;
     const { isStartTrial } = this.props;
@@ -56,7 +68,7 @@ export class TelemetryOptIn extends React.Component {
     }
 
     const readMoreButton = (
-      <EuiLink onClick={() => { this.setState({ showMoreTelemetryInfo: !showMoreTelemetryInfo });}}>
+      <EuiLink onClick={this.onClickReadMore}>
       Read more
       </EuiLink>
     );
@@ -68,13 +80,13 @@ export class TelemetryOptIn extends React.Component {
         button={readMoreButton}
         isOpen={showMoreTelemetryInfo}
         closePopover={this.closeReadMorePopover}
-        style={{ verticalAlign: 'baseline' }}
+        className="licenseManagement__baseline"
       >
-        <EuiText style={{ width: 240 }} >
+        <EuiText className="licenseManagement__narrowText" >
           <p>
         This feature periodically sends basic feature usage statistics.
         This information will not be shared outside of Elastic.
-        See an <EuiLink onClick={() => { this.setState({ showExample: true }); this.closeReadMorePopover(); }}>example</EuiLink>
+        See an <EuiLink onClick={this.onClickExample}>example</EuiLink>
             {' '}
           or read our
             {' '}
@@ -98,10 +110,7 @@ export class TelemetryOptIn extends React.Component {
           label={<span>Send basic feature usage statistics to Elastic periodically. {popover}</span>}
           id="isOptingInToTelemetry"
           checked={isOptingInToTelemetry}
-          onChange={event => {
-            const isOptingInToTelemetry = event.target.checked;
-            this.setState({ isOptingInToTelemetry });
-          }}
+          onChange={this.onChangeOptIn}
         />
       </Fragment>
     ) : null;

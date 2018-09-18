@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { BASE_PATH } from '../../../common/constants';
 import {
   EuiButton,
@@ -95,7 +95,7 @@ export class UploadLicense extends React.PureComponent {
   render() {
     const { currentLicenseType, applying } = this.props;
     return (
-      <React.Fragment>
+      <Fragment>
         <EuiTitle className="eui-textCenter" size="l">
           <h1>Upload your license</h1>
         </EuiTitle>
@@ -147,7 +147,7 @@ export class UploadLicense extends React.PureComponent {
             </EuiForm>
           </EuiPageContentBody>
         </EuiPageContent>
-      </React.Fragment>
+      </Fragment>
     );
   }
 }
