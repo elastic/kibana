@@ -45,13 +45,20 @@ export function ecommerceSpecProvider() {
         type: 'date'
       },
       customer_first_name: {
-        type: 'keyword'
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256
+          }
+        }
       },
       customer_full_name: {
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
+            ignore_above: 256
           }
         }
       },
@@ -59,18 +66,19 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       customer_id: {
-        type: 'integer'
-      },
-      customer_last_name: {
         type: 'keyword'
       },
-      customer_phone: {
+      customer_last_name: {
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
+            ignore_above: 256
           }
         }
+      },
+      customer_phone: {
+        type: 'keyword'
       },
       day_of_week: {
         type: 'keyword'
@@ -93,65 +101,68 @@ export function ecommerceSpecProvider() {
         type: 'date'
       },
       order_id: {
-        type: 'integer'
+        type: 'keyword'
       },
       products: {
-        type: 'nested',
         properties: {
-          base_price: { type: 'float' },
-          discount_percentage: { type: 'float' },
+          base_price: { type: 'half_float' },
+          discount_percentage: { type: 'half_float' },
           quantity: { type: 'integer' },
           manufacturer: {
             type: 'text',
             fields: {
               keyword: {
-                type: 'keyword',
+                type: 'keyword'
               }
             }
           },
-          tax_amount: { type: 'float' },
-          product_id: { type: 'integer' },
+          tax_amount: { type: 'half_float' },
+          product_id: { type: 'long' },
           category: {
             type: 'text',
             fields: {
               keyword: {
-                type: 'keyword',
+                type: 'keyword'
               }
             }
           },
           sku: { type: 'keyword' },
-          taxless_price: { type: 'float' },
-          unit_discount_amount: { type: 'float' },
-          min_price: { type: 'float' },
-          _id: { type: 'keyword' },
-          discount_amount: { type: 'float' },
-          created_on: { type: 'date' },
-          product_name: {
+          taxless_price: { type: 'half_float' },
+          unit_discount_amount: { type: 'half_float' },
+          min_price: { type: 'half_float' },
+          _id: {
             type: 'text',
             fields: {
               keyword: {
                 type: 'keyword',
+                ignore_above: 256
               }
             }
           },
-          price: { type: 'float' },
-          taxful_price: { type: 'float' },
-          base_unit_price: { type: 'float' },
+          discount_amount: { type: 'half_float' },
+          created_on: { type: 'date' },
+          product_name: {
+            type: 'text',
+            analytzer: 'english',
+            fields: {
+              keyword: {
+                type: 'keyword'
+              }
+            }
+          },
+          price: { type: 'half_float' },
+          taxful_price: { type: 'half_float' },
+          base_unit_price: { type: 'half_float' },
         }
       },
       sku: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          }
-        }
+        type: 'keyword'
       },
       taxful_total_price: {
-        type: 'float'
+        type: 'half_float'
       },
       taxless_total_price: {
-        type: 'float'
+        type: 'half_float'
       },
       total_quantity: {
         type: 'integer'
@@ -166,18 +177,10 @@ export function ecommerceSpecProvider() {
         type: 'keyword'
       },
       geoip: {
-        type: 'nested',
         properties: {
           country_iso_code: { type: 'keyword' },
           location: { type: 'geo_point' },
-          region_name: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-              }
-            }
-          },
+          region_name: { type: 'keyword' },
           continent_name: { type: 'keyword' },
           city_name: { type: 'keyword' }
         }
