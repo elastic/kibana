@@ -21,7 +21,7 @@ export function infra(kibana: any) {
     uiExports: {
       app: {
         description: 'Explore your infrastructure',
-        icon: 'plugins/infra/images/infra.svg',
+        icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
         title: 'Infra',
         listed: false,
@@ -30,7 +30,7 @@ export function infra(kibana: any) {
       links: [
         {
           description: 'Explore your infrastructure',
-          icon: 'plugins/infra/images/infra.svg',
+          icon: 'plugins/infra/images/infra_mono_white.svg',
           id: 'infra:home',
           order: 8000,
           title: 'Infra',
@@ -38,7 +38,7 @@ export function infra(kibana: any) {
         },
         {
           description: 'Explore your logs',
-          icon: 'plugins/infra/images/infra.svg',
+          icon: 'plugins/infra/images/logging_mono_white.svg',
           id: 'infra:logs',
           order: 8001,
           title: 'Logs',
