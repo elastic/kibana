@@ -23,6 +23,7 @@
 
 interface RouteConfiguration {
   controller?: string | (() => void);
+  reloadOnSearch?: boolean;
   template?: string;
 }
 

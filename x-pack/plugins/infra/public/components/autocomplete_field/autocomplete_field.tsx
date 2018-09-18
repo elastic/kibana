@@ -31,6 +31,7 @@ interface AutocompleteFieldProps {
 
 interface AutocompleteFieldState {
   areSuggestionsVisible: boolean;
+  isFocused: boolean;
   selectedIndex: number | null;
 }
 
@@ -40,6 +41,7 @@ export class AutocompleteField extends React.Component<
 > {
   public readonly state: AutocompleteFieldState = {
     areSuggestionsVisible: false,
+    isFocused: false,
     selectedIndex: null,
   };
 
@@ -50,7 +52,7 @@ export class AutocompleteField extends React.Component<
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
     return (
-      <EuiOutsideClickDetector onOutsideClick={this.hideSuggestions}>
+      <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
           <FixedEuiFieldSearch
             fullWidth
@@ -58,7 +60,7 @@ export class AutocompleteField extends React.Component<
             isLoading={isLoadingSuggestions}
             isInvalid={!isValid}
             onChange={this.handleChange}
-            onFocus={this.showSuggestions}
+            onFocus={this.handleFocus}
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
@@ -91,7 +93,7 @@ export class AutocompleteField extends React.Component<
       this.updateSuggestions();
     }
 
-    if (hasNewSuggestions) {
+    if (hasNewSuggestions && this.state.isFocused) {
       this.showSuggestions();
     }
   }
@@ -150,6 +152,14 @@ export class AutocompleteField extends React.Component<
     }
   };
 
+  private handleFocus = () => {
+    this.setState(composeStateUpdaters(withSuggestionsVisible, withFocused));
+  };
+
+  private handleBlur = () => {
+    this.setState(composeStateUpdaters(withSuggestionsHidden, withUnfocused));
+  };
+
   private selectSuggestionAt = (index: number) => () => {
     this.setState(withSuggestionAtIndexSelected(index));
   };
@@ -194,10 +204,6 @@ export class AutocompleteField extends React.Component<
 
   private showSuggestions = () => {
     this.setState(withSuggestionsVisible);
-  };
-
-  private hideSuggestions = () => {
-    this.setState(withSuggestionsHidden);
   };
 
   private submit = () => {
@@ -264,6 +270,16 @@ const withSuggestionsHidden = (state: AutocompleteFieldState) => ({
   ...state,
   areSuggestionsVisible: false,
   selectedIndex: null,
+});
+
+const withFocused = (state: AutocompleteFieldState) => ({
+  ...state,
+  isFocused: true,
+});
+
+const withUnfocused = (state: AutocompleteFieldState) => ({
+  ...state,
+  isFocused: false,
 });
 
 const FixedEuiFieldSearch: React.SFC<

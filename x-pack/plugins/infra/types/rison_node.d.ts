@@ -6,11 +6,19 @@
 // tslint:disable:variable-name
 
 declare module 'rison-node' {
-  export const decode_object: <ResultObject extends {}>(
-    input: string
-  ) => ResultObject;
+  export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
 
-  export const encode_object: <InputObject extends {}>(
-    input: InputObject
-  ) => string;
+  export interface RisonArray extends Array<RisonValue> {}
+
+  export interface RisonObject {
+    [key: string]: RisonValue;
+  }
+
+  export const decode: (input: string) => RisonValue;
+
+  export const decode_object: (input: string) => RisonObject;
+
+  export const encode: <Input extends RisonValue>(input: Input) => string;
+
+  export const encode_object: <Input extends RisonObject>(input: Input) => string;
 }

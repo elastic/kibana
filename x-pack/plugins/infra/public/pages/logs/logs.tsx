@@ -20,19 +20,22 @@ import { ScrollableLogTextStreamView } from '../../components/logging/log_text_s
 import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../components/logging/log_time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithLogFilter } from '../../containers/logs/with_log_filter';
-import { WithLogMinimap } from '../../containers/logs/with_log_minimap';
-import { WithLogPosition } from '../../containers/logs/with_log_position';
+import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithLogMinimap, WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
+import { WithLogPosition, WithLogPositionUrlState } from '../../containers/logs/with_log_position';
+import { WithLogTextview, WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
-import { WithTextScale } from '../../containers/logs/with_text_scale_controls_props';
-import { WithTextWrap } from '../../containers/logs/with_text_wrap_controls_props';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 export class LogsPage extends React.Component {
   public render() {
     return (
       <ColumnarPage>
+        <WithLogFilterUrlState />
+        <WithLogPositionUrlState />
+        <WithLogMinimapUrlState />
+        <WithLogTextviewUrlState />
         <Header breadcrumbs={[{ text: 'Logs' }]} />
         <Toolbar>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
@@ -42,6 +45,7 @@ export class LogsPage extends React.Component {
                   <WithLogFilter>
                     {({
                       applyFilterQueryFromKueryExpression,
+                      filterQuery,
                       filterQueryDraft,
                       isFilterQueryDraftValid,
                       setFilterQueryDraftFromKueryExpression,
@@ -72,33 +76,31 @@ export class LogsPage extends React.Component {
                     />
                   )}
                 </WithLogMinimap>
-                <WithTextWrap>
-                  {({ wrap, setTextWrap }) => (
-                    <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                <WithLogTextview>
+                  {({ availableTextScales, textScale, setTextScale, setTextWrap, wrap }) => (
+                    <>
+                      <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                      <LogTextScaleControls
+                        availableTextScales={availableTextScales}
+                        textScale={textScale}
+                        setTextScale={setTextScale}
+                      />
+                    </>
                   )}
-                </WithTextWrap>
-                <WithTextScale>
-                  {({ availableTextScales, textScale, setTextScale }) => (
-                    <LogTextScaleControls
-                      availableTextScales={availableTextScales}
-                      textScale={textScale}
-                      setTextScale={setTextScale}
-                    />
-                  )}
-                </WithTextScale>
+                </WithLogTextview>
               </LogCustomizationMenu>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <WithLogPosition>
                 {({
-                  visibleMidpoint,
+                  visibleMidpointTime,
                   isAutoReloading,
                   jumpToTargetPositionTime,
                   startLiveStreaming,
                   stopLiveStreaming,
                 }) => (
                   <LogTimeControls
-                    currentTime={visibleMidpoint}
+                    currentTime={visibleMidpointTime}
                     isLiveStreaming={isAutoReloading}
                     jumpToTime={jumpToTargetPositionTime}
                     startLiveStreaming={startLiveStreaming}
@@ -112,58 +114,54 @@ export class LogsPage extends React.Component {
         <PageContent>
           <AutoSizer content>
             {({ measureRef, content: { width = 0, height = 0 } }) => (
-              <LogPageEventStreamColumn innerRef={measureRef as any}>
-                <WithTextScale>
-                  {({ textScale }) => (
-                    <WithTextWrap>
-                      {({ wrap }) => (
-                        <WithLogPosition initializeOnMount>
+              <LogPageEventStreamColumn innerRef={measureRef}>
+                <WithLogTextview>
+                  {({ textScale, wrap }) => (
+                    <WithLogPosition>
+                      {({
+                        isAutoReloading,
+                        jumpToTargetPosition,
+                        reportVisiblePositions,
+                        targetPosition,
+                      }) => (
+                        <WithStreamItems>
                           {({
-                            isAutoReloading,
-                            jumpToTargetPosition,
-                            reportVisiblePositions,
-                            targetPosition,
+                            hasMoreAfterEnd,
+                            hasMoreBeforeStart,
+                            isLoadingMore,
+                            isReloading,
+                            items,
+                            lastLoadedTime,
                           }) => (
-                            <WithStreamItems>
-                              {({
-                                hasMoreAfterEnd,
-                                hasMoreBeforeStart,
-                                isLoadingMore,
-                                isReloading,
-                                items,
-                                lastLoadedTime,
-                              }) => (
-                                <ScrollableLogTextStreamView
-                                  hasMoreAfterEnd={hasMoreAfterEnd}
-                                  hasMoreBeforeStart={hasMoreBeforeStart}
-                                  height={height}
-                                  isLoadingMore={isLoadingMore}
-                                  isReloading={isReloading}
-                                  isStreaming={isAutoReloading}
-                                  items={items}
-                                  jumpToTarget={jumpToTargetPosition}
-                                  lastLoadedTime={lastLoadedTime}
-                                  reportVisibleInterval={reportVisiblePositions}
-                                  scale={textScale}
-                                  target={targetPosition}
-                                  width={width}
-                                  wrap={wrap}
-                                />
-                              )}
-                            </WithStreamItems>
+                            <ScrollableLogTextStreamView
+                              hasMoreAfterEnd={hasMoreAfterEnd}
+                              hasMoreBeforeStart={hasMoreBeforeStart}
+                              height={height}
+                              isLoadingMore={isLoadingMore}
+                              isReloading={isReloading}
+                              isStreaming={isAutoReloading}
+                              items={items}
+                              jumpToTarget={jumpToTargetPosition}
+                              lastLoadedTime={lastLoadedTime}
+                              reportVisibleInterval={reportVisiblePositions}
+                              scale={textScale}
+                              target={targetPosition}
+                              width={width}
+                              wrap={wrap}
+                            />
                           )}
-                        </WithLogPosition>
+                        </WithStreamItems>
                       )}
-                    </WithTextWrap>
+                    </WithLogPosition>
                   )}
-                </WithTextScale>
+                </WithLogTextview>
               </LogPageEventStreamColumn>
             )}
           </AutoSizer>
           <AutoSizer content>
             {({ measureRef, content: { width = 0, height = 0 } }) => {
               return (
-                <LogPageMinimapColumn innerRef={measureRef as any}>
+                <LogPageMinimapColumn innerRef={measureRef}>
                   <WithLogMinimap>
                     {({ intervalSize }) => (
                       <WithSummary>
@@ -172,7 +170,7 @@ export class LogsPage extends React.Component {
                             {({
                               jumpToTargetPosition,
                               reportVisibleSummary,
-                              visibleMidpoint,
+                              visibleMidpointTime,
                               visibleTimeInterval,
                             }) => (
                               <LogMinimap
@@ -183,7 +181,7 @@ export class LogsPage extends React.Component {
                                 jumpToTarget={jumpToTargetPosition}
                                 reportVisibleInterval={reportVisibleSummary}
                                 summaryBuckets={buckets}
-                                target={visibleMidpoint}
+                                target={visibleMidpointTime}
                               />
                             )}
                           </WithLogPosition>
