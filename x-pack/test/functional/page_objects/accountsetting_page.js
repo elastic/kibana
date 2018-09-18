@@ -4,23 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map as mapAsync } from 'bluebird';
+//import { map as mapAsync } from 'bluebird';
 
-export function AccountSettingProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
-  const config = getService('config');
-  const retry = getService('retry');
-  const find = getService('find');
+export function AccountSettingProvider({ getService }) {
+  // const remote = getService('remote');
+  // const config = getService('config');
+  // const retry = getService('retry');
+  // const find = getService('find');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+  //const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
+  //const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class AccountSettingsPage {
     async verifyAccountSettings(user) {
       log.info(user.username);
       log.info(user.email);
     }
+
     async changePasswordLink(passwords) {
       return await testSubjects.exists('change-Password-link');
       return await testSubjects.click('change-Password-link');

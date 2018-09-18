@@ -16,14 +16,13 @@ export default function ({ getService, getPageObjects }) {
   describe('useremail', function () {
     before(async () => {
       //await esArchiver.unload('logstash_functional');
-      //await esArchiver.load('empty_kibana');
+      await esArchiver.load('discover');
       //await esArchiver.loadIfNeeded('makelogs');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
     after(async () => {
-      //await esArchiver.unload('empty_kibana');
       //await esArchiver.unload('makelogs');
     });
 
@@ -46,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
     it('should add new user', async function () {
       await PageObjects.security.addUser({ username: 'newuser', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'newuserFirst newuserLast', email: 'newuser@myEmail.com',
-        save: true, roles: ['kibana_user'] });
+        save: true, roles: ['kibana_user','superuser'] });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.newuser.roles).to.eql(['kibana_user', 'superuser']);
@@ -58,23 +57,22 @@ export default function ({ getService, getPageObjects }) {
 
     it('login as new user and verify email', async function () {
       await PageObjects.security.login('newuser', 'changeme');
-      await PageObjects.common.sleep(6000);
+      await PageObjects.common.navigateToUrl('account', '');
       await PageObjects.accountSetting.verifyAccountSettings({ email: "newuser@myEmail.com", username: "newuser" });
       //add assertion
     });
 
-    // it('click changepassword link, change the password and re-login', async function () {
-    //   //await PageObjects.security.login('newuser', 'changeme');
-    //   await PageObjects.common.sleep(6000);
-    //   await PageObjects.accountSetting.changePasswordLink({ currentPassword: "changeme", newPassword: "mechange" });
-    //   await PageObjects.security.logout();
-    // });
-    //
-    // //
-    // it('login as new user with changed password', async function () {
-    //   await PageObjects.common.sleep(6000);
-    //   await PageObjects.security.login('newuser', 'mechange');
-    //   await PageObjects.accountSetting.verifyAccountSettings({ email: "newuser@myEmail.com", username: "newuser" });
-    // });
+    it('click changepassword link, change the password and re-login', async function () {
+      await PageObjects.accountSetting.userNamelink('newuserFirst newuserLast');
+      await PageObjects.accountSetting.changePasswordLink({ currentPassword: "changeme", newPassword: "mechange" });
+      await PageObjects.security.logout();
+    });
+
+
+    it('login as new user with changed password', async function () {
+      await PageObjects.common.sleep(6000);
+      await PageObjects.security.login('newuser', 'mechange');
+      await PageObjects.accountSetting.verifyAccountSettings({ email: "newuser@myEmail.com", username: "newuser" });
+    });
   });
 }
