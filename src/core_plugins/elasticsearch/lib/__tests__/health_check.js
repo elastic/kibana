@@ -26,7 +26,6 @@ const NoConnections = require('elasticsearch').errors.NoConnections;
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import * as patchKibanaIndexNS from '../patch_kibana_index';
 
 const esPort = 9220;
 const esUrl = `http://elastic:changement@localhost:9220`;
@@ -49,7 +48,6 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
 
       // setup the plugin stub
       plugin = {
