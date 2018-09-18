@@ -248,6 +248,7 @@ export default class BaseOptimizer {
           {
             resource: createSourceFileResourceSelector(/\.js$/),
             use: maybeAddCacheLoader('babel', [
+              'thread-loader',
               {
                 loader: 'babel-loader',
                 options: {
