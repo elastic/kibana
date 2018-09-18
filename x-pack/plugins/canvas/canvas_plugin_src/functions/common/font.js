@@ -28,7 +28,7 @@ export const font = () => ({
     },
     family: {
       types: ['string'],
-      default: `"${openSans.value}"`,
+      default: openSans.value,
       help: 'An acceptable CSS web font string',
     },
     color: {

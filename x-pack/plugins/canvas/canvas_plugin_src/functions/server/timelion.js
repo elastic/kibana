@@ -18,7 +18,7 @@ export const timelion = () => ({
       types: ['string'],
       aliases: ['_', 'q'],
       help: 'A timelion query',
-      default: '".es(*)"',
+      default: '.es(*)',
     },
     interval: {
       types: ['string'],

@@ -16,7 +16,7 @@ export const markdown = () => ({
       displayName: 'Markdown content',
       help: 'Markdown formatted text',
       argType: 'textarea',
-      default: '""',
+      default: '',
       options: {
         confirm: 'Apply',
       },

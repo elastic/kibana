@@ -7,6 +7,7 @@
 import PropTypes from 'prop-types';
 import { lifecycle } from 'recompose';
 import { get } from 'lodash';
+import { fromExpression } from '../../../../common/lib/ast';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
@@ -39,5 +40,5 @@ export const seriesStyle = () => ({
   help: 'Set the style for a selected named series',
   template: templateFromReactComponent(EnhancedExtendedTemplate),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
-  default: '{seriesStyle}',
+  default: fromExpression('{seriesStyle}', 'argument'),
 });

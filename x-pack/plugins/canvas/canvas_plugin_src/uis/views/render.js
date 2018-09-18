@@ -20,9 +20,9 @@ export const render = () => ({
       displayName: 'CSS',
       help: 'A CSS stylesheet scoped to your element',
       argType: 'textarea',
-      default: `".canvasRenderEl {
+      default: `.canvasRenderEl {
 
-}"`,
+}`,
       options: {
         confirm: 'Apply stylesheet',
       },

@@ -130,6 +130,6 @@ export const datacolumn = () => ({
   name: 'datacolumn',
   displayName: 'Column',
   help: 'Select the data column',
-  default: '""',
+  default: '',
   simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
 });

@@ -5,6 +5,7 @@
  */
 
 import { Handlebars } from '../../../common/lib/handlebars';
+import { fromExpression } from '../../../common/lib/ast';
 
 export const markdown = () => ({
   name: 'markdown',
@@ -20,13 +21,13 @@ export const markdown = () => ({
       aliases: ['_'],
       types: ['string'],
       help: 'A markdown expression. You can pass this multiple times to achieve concatenation',
-      default: '""',
+      default: '',
       multi: true,
     },
     font: {
       types: ['style'],
       help: 'Font settings. Technically you can stick other styles in here too!',
-      default: '{font}',
+      default: fromExpression('{font}', 'argument'),
     },
   },
   fn: (context, args) => {

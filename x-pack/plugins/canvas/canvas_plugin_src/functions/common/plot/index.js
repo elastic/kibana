@@ -8,6 +8,7 @@ import keyBy from 'lodash.keyby';
 import { groupBy, get, set, map, sortBy } from 'lodash';
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 import { getLegendConfig } from '../../../../common/lib/get_legend_config';
+import { fromExpression } from '../../../../common/lib/ast';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
@@ -31,17 +32,17 @@ export const plot = () => ({
       multi: false,
       types: ['seriesStyle'],
       help: 'The default style to use for every series',
-      default: '{seriesStyle points=5}',
+      default: fromExpression('{seriesStyle points=5}', 'argument'),
     },
     palette: {
       types: ['palette'],
       help: 'A palette object for describing the colors to use on this plot',
-      default: '{palette}',
+      default: fromExpression('{palette}', 'argument'),
     },
     font: {
       types: ['style'],
       help: 'Legend and tick mark fonts',
-      default: '{font}',
+      default: fromExpression('{font}', 'argument'),
     },
     legend: {
       types: ['string', 'boolean'],

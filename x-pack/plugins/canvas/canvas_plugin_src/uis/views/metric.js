@@ -5,6 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
+import { fromExpression } from '../../../common/lib/ast';
 
 export const metric = () => ({
   name: 'metric',
@@ -17,21 +18,27 @@ export const metric = () => ({
       displayName: 'Label',
       help: 'Describes the metric',
       argType: 'string',
-      default: '""',
+      default: '',
     },
     {
       name: 'metricFont',
       displayName: 'Metric Text Settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
-      default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+      default: fromExpression(
+        `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+        'argument'
+      ),
     },
     {
       name: 'labelFont',
       displayName: 'Label Text Settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
-      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+      default: fromExpression(
+        `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+        'argument'
+      ),
     },
   ],
 });

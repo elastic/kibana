@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { getType } from '../../../common/lib/get_type';
+import { fromExpression } from '../../../common/lib/ast';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
@@ -67,7 +68,9 @@ export const palette = () => ({
   name: 'palette',
   displayName: 'Color Palette',
   help: 'Choose a color palette',
-  default:
+  default: fromExpression(
     '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
+    'argument'
+  ),
   simpleTemplate: templateFromReactComponent(PaletteArgInput),
 });

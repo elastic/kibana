@@ -28,14 +28,14 @@ export const repeatImage = () => ({
       help:
         'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
       argType: 'number',
-      default: '100',
+      default: 100,
     },
     {
       name: 'max',
       displayName: 'Max count',
       help: 'The maximum number of repeated images',
       argType: 'number',
-      default: '1000',
+      default: 1000,
     },
   ],
 });
