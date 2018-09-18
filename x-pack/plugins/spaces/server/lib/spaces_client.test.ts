@@ -102,6 +102,7 @@ describe('#getAll', () => {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
@@ -134,6 +135,7 @@ describe('#getAll', () => {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
@@ -178,6 +180,7 @@ describe('#getAll', () => {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
@@ -226,6 +229,7 @@ describe('#getAll', () => {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
