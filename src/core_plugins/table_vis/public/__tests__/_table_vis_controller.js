@@ -18,13 +18,13 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 describe('Table Vis Controller', function () {
   let $rootScope;
@@ -36,6 +36,7 @@ describe('Table Vis Controller', function () {
   let fixtures;
   let AppState;
   let tableAggResponse;
+  let tabifiedResponse;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -76,6 +77,7 @@ describe('Table Vis Controller', function () {
   function initController(vis) {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
+    tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
@@ -108,7 +110,7 @@ describe('Table Vis Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(await tableAggResponse(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.hasSomeRows).to.be(true);
     expect($scope.tableGroups).to.have.property('tables');
@@ -121,7 +123,7 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(await tableAggResponse(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
     removeEsResponseFromScope();
 
     expect(!$scope.hasSomeRows).to.be.ok();
@@ -136,11 +138,7 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis({ sort: sortObj });
     initController(vis);
 
-    // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
-    resp.aggregations.agg_2.buckets = {};
-
-    attachEsResponseToScope(await tableAggResponse(vis, resp));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
     expect($scope.sort.direction).to.equal(sortObj.direction);
@@ -150,11 +148,9 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
-    resp.aggregations.agg_2.buckets = {};
+    tabifiedResponse.rows = [];
 
-    attachEsResponseToScope(await tableAggResponse(vis, resp));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.hasSomeRows).to.be(false);
     expect(!$scope.tableGroups).to.be.ok();
