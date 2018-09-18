@@ -20,7 +20,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
     sections: [
       {
         id: InfraMetric.containerOverview,
-        label: 'System Overview',
+        label: 'Overview',
         requires: 'system',
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
