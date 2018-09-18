@@ -18,9 +18,8 @@
  */
 // @ts-check
 
-
 // @ts-ignore
-import { SearchSourceProvider } from 'ui/courier';
+import { SearchSource, indexPatterns } from 'ui/angular_services';
 
 import { reverseSortDirection } from './utils/sorting';
 
@@ -46,12 +45,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns, Private) {
-  /**
-   * @type {{new(): SearchSourceT}}
-   */
-  const SearchSource = Private(SearchSourceProvider);
-
+function fetchContextProvider() {
   return {
     fetchPredecessors,
     fetchSuccessors,
