@@ -24,6 +24,7 @@ export function ecommerceSpecProvider() {
   return {
     id: 'ecommerce',
 <<<<<<< HEAD
+<<<<<<< HEAD
     name: 'Sample eCommerce orders',
     description: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
     previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
@@ -32,6 +33,10 @@ export function ecommerceSpecProvider() {
 =======
     name: 'Sample eCommerce data',
     description: 'Sample data, visualizations, and dashboards for monitoring eCommerce.',
+=======
+    name: 'Sample eCommerce orders',
+    description: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
+>>>>>>> updated description
     previewImagePath: '/plugins/kibana/home/sample_data_resources/ecommerce/dashboard.png',
 <<<<<<< HEAD
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
