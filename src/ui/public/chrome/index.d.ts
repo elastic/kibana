@@ -27,6 +27,7 @@ declare class Chrome {
   public getBasePath(): string;
   public getXsrfToken(): string;
   public getKibanaVersion(): string;
+  public getUiSettingsClient(): any;
 }
 
 declare const chrome: Chrome;

@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import './setup_mocks';
 import ace from 'brace';
 import 'brace/mode/json';
-const $ = require('jquery');
+import $ from 'jquery';
 import { initializeInput } from '../../src/input';
-
 
 const tokenIterator = ace.acequire('ace/token_iterator');
 

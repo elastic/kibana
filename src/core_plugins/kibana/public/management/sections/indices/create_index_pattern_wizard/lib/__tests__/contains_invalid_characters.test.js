@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { containsInvalidCharacters } from '../contains_invalid_characters';
+import { containsIllegalCharacters } from '../contains_illegal_characters';
 
-describe('containsInvalidCharacters', () => {
-  it('should fail with illegal characters', () => {
-    const valid = containsInvalidCharacters('abc', ['a']);
-    expect(valid).toBeFalsy();
+describe('containsIllegalCharacters', () => {
+  it('returns true with illegal characters', () => {
+    const isInvalid = containsIllegalCharacters('abc', ['a']);
+    expect(isInvalid).toBe(true);
   });
 
-  it('should pass with no illegal characters', () => {
-    const valid = containsInvalidCharacters('abc', ['%']);
-    expect(valid).toBeTruthy();
+  it('returns false with no illegal characters', () => {
+    const isInvalid = containsIllegalCharacters('abc', ['%']);
+    expect(isInvalid).toBe(false);
   });
 });

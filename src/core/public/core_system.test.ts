@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
+import { UiSettingsService } from './ui_settings';
 
 const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
   function _MockLegacyPlatformService(this: any) {
@@ -71,9 +73,28 @@ const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotif
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+  this.stop = jest.fn();
 });
 jest.mock('./loading_count', () => ({
   LoadingCountService: MockLoadingCountService,
+}));
+
+const mockBasePathStartContract = {};
+const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
+  this.start = jest.fn().mockReturnValue(mockBasePathStartContract);
+});
+jest.mock('./base_path', () => ({
+  BasePathService: MockBasePathService,
+}));
+
+const mockUiSettingsContract = {};
+const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificationsService(
+  this: any
+) {
+  this.start = jest.fn().mockReturnValue(mockUiSettingsContract);
+});
+jest.mock('./ui_settings', () => ({
+  UiSettingsService: MockUiSettingsService,
 }));
 
 import { CoreSystem } from './core_system';
@@ -101,6 +122,8 @@ describe('constructor', () => {
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
+    expect(MockBasePathService).toHaveBeenCalledTimes(1);
+    expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -175,16 +198,50 @@ describe('constructor', () => {
 });
 
 describe('#stop', () => {
-  it('call legacyPlatform.stop()', () => {
+  it('calls legacyPlatform.stop()', () => {
     const coreSystem = new CoreSystem({
       ...defaultCoreSystemParams,
     });
 
-    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
-
+    const [legacyPlatformService] = MockLegacyPlatformService.mock.instances;
     expect(legacyPlatformService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(legacyPlatformService.stop).toHaveBeenCalled();
+  });
+
+  it('calls notifications.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [notificationsService] = MockNotificationsService.mock.instances;
+    expect(notificationsService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(notificationsService.stop).toHaveBeenCalled();
+  });
+
+  it('calls loadingCount.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [loadingCountService] = MockLoadingCountService.mock.instances;
+    expect(loadingCountService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(loadingCountService.stop).toHaveBeenCalled();
+  });
+
+  it('clears the rootDomElement', () => {
+    const rootDomElement = document.createElement('div');
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
+    });
+
+    coreSystem.start();
+    expect(rootDomElement.innerHTML).not.toBe('');
+    coreSystem.stop();
+    expect(rootDomElement.innerHTML).toBe('');
   });
 });
 
@@ -218,6 +275,27 @@ describe('#start()', () => {
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith({
       fatalErrors: mockFatalErrorsStartContract,
+    });
+  });
+
+  it('calls basePath#start()', () => {
+    startCore();
+    const [mockInstance] = MockBasePathService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      injectedMetadata: mockInjectedMetadataStartContract,
+    });
+  });
+
+  it('calls uiSettings#start()', () => {
+    startCore();
+    const [mockInstance] = MockUiSettingsService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      notifications: mockNotificationStartContract,
+      loadingCount: mockLoadingCountContract,
+      injectedMetadata: mockInjectedMetadataStartContract,
+      basePath: mockBasePathStartContract,
     });
   });
 

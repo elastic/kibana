@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,17 +25,28 @@ export function apacheMetricsSpecProvider() {
   const moduleName = 'apache';
   return {
     id: 'apacheMetrics',
-    name: 'Apache metrics',
+    name: i18n.translate('kbn.server.tutorials.apacheMetrics.nameTitle', {
+      defaultMessage: 'Apache metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Apache 2 HTTP server.',
-    longDescription: 'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-apache.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.apacheMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Apache 2 HTTP server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.apacheMetrics.longDescription', {
+      defaultMessage: 'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-apache.html',
+      },
+    }),
     euiIconType: 'logoApache',
     artifacts: {
       dashboards: [
         {
           id: 'Metricbeat-Apache-HTTPD-server-status',
-          linkLabel: 'Apache metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.apacheMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Apache metrics dashboard',
+          }),
           isOverview: true
         }
       ],

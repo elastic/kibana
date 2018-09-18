@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 export default class WatcherButton extends Component {
@@ -31,7 +32,9 @@ export default class WatcherButton extends Component {
         {
           name: 'View existing watches',
           icon: 'tableOfContents',
-          href: '/app/kibana#/management/elasticsearch/watcher/',
+          href: chrome.addBasePath(
+            '/app/kibana#/management/elasticsearch/watcher/'
+          ),
           target: '_blank',
           onClick: () => this.closePopover()
         }
