@@ -50,6 +50,7 @@ export class Search extends PureComponent {
 
     const box = {
       incremental: true,
+      'aria-label': 'Search advanced settings' // hack until EuiSearchBar is fixed
     };
 
     const filters = [
@@ -69,6 +70,7 @@ export class Search extends PureComponent {
         onChange={onQueryChange}
         query={query}
       />
+
     );
   }
 }

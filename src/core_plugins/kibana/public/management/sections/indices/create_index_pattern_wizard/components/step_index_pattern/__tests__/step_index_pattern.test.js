@@ -26,6 +26,12 @@ jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
 
+// If we don't mock this, Jest fails with the error `TypeError: Cannot redefine property: prototype
+// at Function.defineProperties`.
+jest.mock('ui/index_patterns', () => ({
+  INDEX_PATTERN_ILLEGAL_CHARACTERS: ['\\', '/', '?', '"', '<', '>', '|', ' '],
+}));
+
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',

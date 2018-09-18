@@ -18,16 +18,9 @@
  */
 
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesAddToSiriProvider } from '../_add_to_siri';
+import { addToSiri } from '../_add_to_siri';
 
 describe('addToSiri', function () {
-  let addToSiri;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    addToSiri = Private(PointSeriesAddToSiriProvider);
-  }));
 
   it('creates a new series the first time it sees an id', function () {
     const series = new Map();

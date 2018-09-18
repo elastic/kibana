@@ -210,7 +210,9 @@ exports[`InspectorPanel should render as expected 1`] = `
                                   </svg>
                                 </arrowDown>
                               </EuiIcon>
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 View: 
                                 View 1
                               </span>

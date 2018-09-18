@@ -24,7 +24,9 @@ export {
 
 export {
   mappings,
-} from './saved_object_mappings';
+  migrations,
+  validations,
+} from './saved_object';
 
 export {
   app,
@@ -43,7 +45,7 @@ export {
   inspectorViews,
   chromeNavControls,
   navbarExtensions,
-  dashboardPanelActions,
+  contextMenuActions,
   managementSections,
   devTools,
   docViews,
@@ -54,6 +56,7 @@ export {
   visualize,
   search,
   autocompleteProviders,
+  shareContextMenuExtensions,
 } from './ui_app_extensions';
 
 export {

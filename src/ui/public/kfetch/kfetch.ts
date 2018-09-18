@@ -19,36 +19,85 @@
 
 import 'isomorphic-fetch';
 import { merge } from 'lodash';
+// @ts-ignore not really worth typing
+import { metadata } from 'ui/metadata';
 import url from 'url';
 import chrome from '../chrome';
+import { KFetchError } from './kfetch_error';
 
-// @ts-ignore not really worth typing
-import { metadata } from '../metadata';
-
-class FetchError extends Error {
-  constructor(public readonly res: Response, public readonly body?: any) {
-    super(res.statusText);
-
-    // captureStackTrace is only available in the V8 engine, so any browser using
-    // a different JS engine won't have access to this method.
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FetchError);
-    }
-  }
+interface KFetchQuery {
+  [key: string]: string | number | boolean;
 }
 
 export interface KFetchOptions extends RequestInit {
   pathname?: string;
-  query?: { [key: string]: string | number | boolean };
+  query?: KFetchQuery;
 }
 
 export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-export function kfetch(fetchOptions: KFetchOptions, kibanaOptions?: KFetchKibanaOptions) {
-  // fetch specific options with defaults
-  const { pathname, query, ...combinedFetchOptions } = merge(
+export interface Interceptor {
+  request?: (config: KFetchOptions) => Promise<KFetchOptions> | KFetchOptions;
+  requestError?: (e: any) => Promise<KFetchOptions> | KFetchOptions;
+  response?: (res: any) => any;
+  responseError?: (e: any) => any;
+}
+
+const interceptors: Interceptor[] = [];
+export const resetInterceptors = () => (interceptors.length = 0);
+export const addInterceptor = (interceptor: Interceptor) => interceptors.push(interceptor);
+
+export async function kfetch(
+  options: KFetchOptions,
+  { prependBasePath = true }: KFetchKibanaOptions = {}
+) {
+  const combinedOptions = withDefaultOptions(options);
+  const promise = requestInterceptors(combinedOptions).then(
+    ({ pathname, query, ...restOptions }) => {
+      const fullUrl = url.format({
+        pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
+        query,
+      });
+
+      return fetch(fullUrl, restOptions).then(async res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new KFetchError(res, await getBodyAsJson(res));
+      });
+    }
+  );
+
+  return responseInterceptors(promise);
+}
+
+// Request/response interceptors are called in opposite orders.
+// Request hooks start from the newest interceptor and end with the oldest.
+function requestInterceptors(config: KFetchOptions): Promise<KFetchOptions> {
+  return interceptors.reduceRight((acc, interceptor) => {
+    return acc.then(interceptor.request, interceptor.requestError);
+  }, Promise.resolve(config));
+}
+
+// Response hooks start from the oldest interceptor and end with the newest.
+function responseInterceptors(responsePromise: Promise<any>) {
+  return interceptors.reduce((acc, interceptor) => {
+    return acc.then(interceptor.response, interceptor.responseError);
+  }, responsePromise);
+}
+
+async function getBodyAsJson(res: Response) {
+  try {
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export function withDefaultOptions(options?: KFetchOptions): KFetchOptions {
+  return merge(
     {
       method: 'GET',
       credentials: 'same-origin',
@@ -57,35 +106,6 @@ export function kfetch(fetchOptions: KFetchOptions, kibanaOptions?: KFetchKibana
         'kbn-version': metadata.version,
       },
     },
-    fetchOptions
+    options
   );
-
-  // kibana specific options with defaults
-  const combinedKibanaOptions = {
-    prependBasePath: true,
-    ...kibanaOptions,
-  };
-
-  const fullUrl = url.format({
-    pathname: combinedKibanaOptions.prependBasePath ? chrome.addBasePath(pathname) : pathname,
-    query,
-  });
-
-  const fetching = new Promise<any>(async (resolve, reject) => {
-    const res = await fetch(fullUrl, combinedFetchOptions);
-
-    if (res.ok) {
-      return resolve(await res.json());
-    }
-
-    try {
-      // attempt to read the body of the response
-      return reject(new FetchError(res, await res.json()));
-    } catch (_) {
-      // send FetchError without the body if we are not be able to read the body for some reason
-      return reject(new FetchError(res));
-    }
-  });
-
-  return fetching;
 }

@@ -17,34 +17,88 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export function createCommonNetflowInstructions() {
   return {
     CONFIG: {
       ON_PREM: {
         OSX: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config/logstash.yml` to set the configuration parameters:',
+            title: i18n.translate('kbn.server.tutorials.netflow.common.config.onPrem.osxTitle', {
+              defaultMessage: 'Edit the configuration',
+            }),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPrem.osxTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config/logstash.yml`',
+                },
+              }
+            ),
             commands: ['modules:', '  - name: netflow', '    var.input.udp.port: <udp_port>'],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPrem.osxTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data.',
+                values: {
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
         WINDOWS: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config\\logstash.yml` to set the configuration parameters:',
+            title: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTitle',
+              {
+                defaultMessage: 'Edit the configuration',
+              }
+            ),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config\\logstash.yml`',
+                },
+              }
+            ),
             commands: ['modules:', '  - name: netflow', '    var.input.udp.port: <udp_port>'],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data.',
+                values: {
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
       },
       ON_PREM_ELASTIC_CLOUD: {
         OSX: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config/logstash.yml` to set the configuration parameters:',
+            title: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTitle',
+              {
+                defaultMessage: 'Edit the configuration',
+              }
+            ),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config/logstash.yml`',
+                },
+              }
+            ),
             commands: [
               'modules:',
               '  - name: netflow',
@@ -53,16 +107,40 @@ export function createCommonNetflowInstructions() {
               '    var.elasticsearch.username: elastic',
               '    var.elasticsearch.password: <password>',
             ],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, ' +
-              '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and ' +
-              '`<password>` is the password of the `elastic` user.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data, \
+  {esUrl} is the URL of Elasticsearch running on Elastic Cloud, and \
+  {password} is the password of the {elastic} user.',
+                values: {
+                  elastic: '`elastic`',
+                  esUrl: '`<es_url>`',
+                  password: '`<password>`',
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
         WINDOWS: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config\\logstash.yml` to set the configuration parameters:',
+            title: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTitle',
+              {
+                defaultMessage: 'Edit the configuration',
+              }
+            ),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config\\logstash.yml`',
+                },
+              }
+            ),
             commands: [
               'modules:',
               '  - name: netflow',
@@ -71,18 +149,42 @@ export function createCommonNetflowInstructions() {
               '    var.elasticsearch.username: elastic',
               '    var.elasticsearch.password: <password>',
             ],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, ' +
-              '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and ' +
-              '`<password>` is the password of the `elastic` user.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data, \
+  {esUrl} is the URL of Elasticsearch running on Elastic Cloud, and \
+  {password} is the password of the {elastic} user.',
+                values: {
+                  elastic: '`elastic`',
+                  esUrl: '`<es_url>`',
+                  password: '`<password>`',
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
       },
       ELASTIC_CLOUD: {
         OSX: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config/logstash.yml` to set the configuration parameters:',
+            title: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTitle',
+              {
+                defaultMessage: 'Edit the configuration',
+              }
+            ),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config/logstash.yml`',
+                },
+              }
+            ),
             commands: [
               'cloud.id: "{config.cloud.id}"',
               'cloud.auth: "elastic:<password>"',
@@ -91,15 +193,38 @@ export function createCommonNetflowInstructions() {
               '  - name: netflow',
               '    var.input.udp.port: <udp_port>',
             ],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and ' +
-              '`<password>` is the password of the `elastic` user.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data and \
+  {password} is the password of the {elastic} user.',
+                values: {
+                  elastic: '`elastic`',
+                  password: '`<password>`',
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
         WINDOWS: [
           {
-            title: 'Edit the configuration',
-            textPre: 'Modify `config\\logstash.yml` to set the configuration parameters:',
+            title: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTitle',
+              {
+                defaultMessage: 'Edit the configuration',
+              }
+            ),
+            textPre: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTextPre',
+              {
+                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+                values: {
+                  logstashConfigPath: '`config\\logstash.yml`',
+                },
+              }
+            ),
             commands: [
               'cloud.id: "{config.cloud.id}"',
               'cloud.auth: "elastic:<password>"',
@@ -108,9 +233,19 @@ export function createCommonNetflowInstructions() {
               '  - name: netflow',
               '    var.input.udp.port: <udp_port>',
             ],
-            textPost:
-              'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and ' +
-              '`<password>` is the password of the `elastic` user.',
+            textPost: i18n.translate(
+              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTextPost',
+              {
+                defaultMessage:
+                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data and \
+  {password} is the password of the {elastic} user.',
+                values: {
+                  elastic: '`elastic`',
+                  password: '`<password>`',
+                  udpPort: '`<udp_port>`',
+                },
+              }
+            ),
           },
         ],
       },
@@ -118,22 +253,42 @@ export function createCommonNetflowInstructions() {
     SETUP: {
       OSX: [
         {
-          title: 'Run the Netflow module',
-          textPre: 'Run:',
+          title: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTitle', {
+            defaultMessage: 'Run the Netflow module',
+          }),
+          textPre: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTextPre', {
+            defaultMessage: 'Run:',
+          }),
           commands: ['./bin/logstash --modules netflow --setup'],
-          textPost:
-            'The `--setup` option creates a `netflow-*` index pattern in Elasticsearch and imports' +
-            ' Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+          textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTextPost', {
+            defaultMessage:
+              'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
+  Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+            values: {
+              setupOption: '`--setup`',
+              netflowPrefix: '`netflow-*`',
+            },
+          }),
         },
       ],
       WINDOWS: [
         {
-          title: 'Run the Netflow module',
-          textPre: 'Run:',
+          title: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTitle', {
+            defaultMessage: 'Run the Netflow module',
+          }),
+          textPre: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTextPre', {
+            defaultMessage: 'Run:',
+          }),
           commands: ['bin\\logstash --modules netflow --setup'],
-          textPost:
-            'The `--setup` option creates a `netflow-*` index pattern in Elasticsearch and imports' +
-            ' Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+          textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTextPost', {
+            defaultMessage:
+              'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
+  Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
+            values: {
+              setupOption: '`--setup`',
+              netflowPrefix: '`netflow-*`',
+            },
+          }),
         },
       ],
     },

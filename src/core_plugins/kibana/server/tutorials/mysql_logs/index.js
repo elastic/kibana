@@ -36,7 +36,6 @@ export function mysqlLogsSpecProvider() {
       defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
 [Learn more]({learnMoreLink}).',
       values: {

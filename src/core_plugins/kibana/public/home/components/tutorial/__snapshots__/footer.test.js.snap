@@ -23,7 +23,11 @@ exports[`render 1`] = `
         grow={true}
       >
         <p>
-          When all steps are complete, you're ready to explore your data.
+          <FormattedMessage
+            defaultMessage="When all steps are complete, you're ready to explore your data."
+            id="kbn.home.exploreYourDataDescription"
+            values={Object {}}
+          />
         </p>
       </EuiText>
     </EuiFlexItem>

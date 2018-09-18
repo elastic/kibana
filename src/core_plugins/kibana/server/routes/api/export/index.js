@@ -45,7 +45,7 @@ export function exportApi(server) {
           reply(json)
             .header('Content-Disposition', `attachment; filename="${filename}"`)
             .header('Content-Type', 'application/json')
-            .header('Content-Length', json.length);
+            .header('Content-Length', Buffer.byteLength(json, 'utf8'));
         })
         .catch(err => reply(Boom.boomify(err, { statusCode: 400 })));
     }
