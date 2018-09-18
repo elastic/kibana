@@ -1,4 +1,4 @@
-# Kibana 6.4.1
+# Kibana 6.4.2
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
@@ -43,9 +43,9 @@ For the daring, snapshot builds are available. These builds are created nightly 
 
 | platform | default | OSS |
 | --- | --- | --- |
-| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.1-SNAPSHOT-darwin-x86_64.tar.gz) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.1-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.1-SNAPSHOT-x86_64.rpm) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.1-SNAPSHOT-x86_64.rpm) |
-| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.1-SNAPSHOT-windows-x86_64.zip) | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.1-SNAPSHOT-windows-x86_64.zip) |
+| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.2-SNAPSHOT-darwin-x86_64.tar.gz) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.2-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.2-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.2-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.2-SNAPSHOT-x86_64.rpm) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.2-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.2-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.2-SNAPSHOT-x86_64.rpm) |
+| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.4.2-SNAPSHOT-windows-x86_64.zip) | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-oss-6.4.2-SNAPSHOT-windows-x86_64.zip) |
 
 ## Documentation
 
