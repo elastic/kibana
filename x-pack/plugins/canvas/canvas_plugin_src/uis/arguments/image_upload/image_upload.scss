@@ -1,0 +1,9 @@
+@import '../../../lib/eui.scss';
+
+.canvasArgImage {
+  .canvasArgImage--preview {
+    max-height: 100px;
+    overflow: hidden;
+    border: $euiBorderThin;
+  }
+}
