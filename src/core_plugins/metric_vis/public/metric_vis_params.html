@@ -170,7 +170,7 @@
               id="metricColorMode"
               class="kuiSelect kuiSideBarSelect"
               ng-model="editorState.params.metric.metricColorMode"
-              ng-options="mode for mode in collections.metricColorMode"
+              ng-options="mode.id as mode.label for mode in collections.metricColorMode"
             ></select>
           </div>
         </div>

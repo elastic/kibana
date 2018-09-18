@@ -73,7 +73,20 @@ function MetricVisProvider(Private, i18n) {
     },
     editorConfig: {
       collections: {
-        metricColorMode: ['None', 'Labels', 'Background'],
+        metricColorMode: [
+          {
+            id: 'None',
+            label: i18n('metricVis.colorModes.noneOptionLabel', { defaultMessage: 'None' })
+          },
+          {
+            id: 'Labels',
+            label: i18n('metricVis.colorModes.labelsOptionLabel', { defaultMessage: 'Labels' })
+          },
+          {
+            id: 'Background',
+            label: i18n('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
+          }
+        ],
         colorSchemas: Object.keys(vislibColorMaps),
       },
       optionsTemplate: '<metric-vis-params></metric-vis-params>',
