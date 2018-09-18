@@ -27,7 +27,7 @@ export function createSpacesService(server: any): SpacesService {
     return spaceId;
   }
 
-  function _getActiveSpace(request: any) {
+  function getActiveSpace(request: any) {
     const cache = contextCache.get(request);
 
     let activeSpacePromise = cache ? cache.activeSpacePromise : undefined;
@@ -59,6 +59,6 @@ export function createSpacesService(server: any): SpacesService {
 
   return {
     getSpaceId,
-    getActiveSpace: _getActiveSpace,
+    getActiveSpace,
   };
 }
