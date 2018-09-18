@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CHANGE_BANNER_SIZE = 'CHANGE_BANNER_SIZE';
-export const CHANGE_NAV_SIZE = 'CHANGE_NAV_SIZE';
+export const CHANGE_BANNER_VISIBLE = 'CHANGE_BANNER_VISIBLE';
+export const CHANGE_NAV_EXPANDED = 'CHANGE_NAV_EXPANDED';
 
-export function changeBannerSize() {
-  console.log(CHANGE_BANNER_SIZE);
+export function changeBannerVisible(boolVisible) {
   return {
-    type: CHANGE_BANNER_SIZE
+    type: CHANGE_BANNER_VISIBLE,
+    visible: boolVisible
   };
 }
 
-export function changeNavSize() {
-  console.log(CHANGE_NAV_SIZE);
+export function changeNavExpanded(boolExpanded) {
   return {
-    type: CHANGE_NAV_SIZE
+    type: CHANGE_NAV_EXPANDED,
+    expanded: boolExpanded
   };
 }
