@@ -5,13 +5,14 @@
  */
 
 import socket from 'socket.io';
-import { createHandlers } from '../lib/create_handlers';
-import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { populateServerRegistries } from '../lib/populate_server_registries';
 import { routeExpressionProvider } from '../lib/route_expression';
+import { browser } from '../lib/route_expression/browser';
+import { thread } from '../lib/route_expression/thread';
+import { server as serverEnv } from '../lib/route_expression/server';
 import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
@@ -22,10 +23,23 @@ export function socketApi(server) {
 
     // This is the HAPI request object
     const request = socket.handshake;
+    console.log(socket);
     const authHeader = getAuthHeader(request, server);
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
-    const routeExpression = routeExpressionProvider({ socket, serialize, deserialize });
+
+    const environments = [browser({ socket }), thread(), serverEnv({ server, socket })];
+
+    // We'd be better off creating the environments here, then passing them to the expression router
+    const routeExpression = routeExpressionProvider([
+      browser({ socket, onFunctionNotFound }),
+      thread({ onFunctionNotFound }),
+      serverEnv({ server, socket, onFunctionNotFound }),
+    ]);
+
+    function onFunctionNotFound(ast, context) {
+      routeExpression(ast, context);
+    }
 
     socket.on('getFunctionList', () => {
       populateServerRegistries(['serverFunctions', 'types']).then(() =>

@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { thread } from './thread';
 import { server } from './server';
 import { browser } from './browser';
@@ -23,8 +29,6 @@ export const routeExpressionProvider = ({ socket, serialize, deserialize }) => {
       for (let i = 0; i < environmentFunctions.length; i++) {
         if (environmentFunctions[i].includes(fnName))
           // If we find it, run in that environment, and only that environment
-
-          // TODO: Deserialize here?
           return environments[i].interpret(ast, context);
       }
 

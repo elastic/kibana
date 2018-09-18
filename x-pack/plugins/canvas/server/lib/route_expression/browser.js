@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import uuid from 'uuid/v4';
 export const browser = config => {
   // Note that we need to be careful about how many times routeExpressionProvider is called, because of the socket.once below.
