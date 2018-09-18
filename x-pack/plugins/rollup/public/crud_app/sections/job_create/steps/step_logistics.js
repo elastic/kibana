@@ -363,6 +363,7 @@ export class StepLogisticsUi extends Component {
                 onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
+                min="0"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
