@@ -29,8 +29,8 @@ export const hostMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern
       id: 'used',
       metrics: [
         {
-          field: 'avg-memory-used',
-          id: '0b5ad9f1-0b76-11e8-84d7-1d34a708be9c',
+          field: 'system.memory.actual.used.bytes',
+          id: 'avg-memory-used',
           type: InfraMetricModelMetricType.avg,
         },
       ],
