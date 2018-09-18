@@ -22,7 +22,7 @@ import { SavedObjectsSchema } from '../schema';
 import { ROOT_TYPE, SavedObjectsSerializer } from './index';
 
 describe('saved object conversion', () => {
-  describe('rawToSavedObject', () => {
+  describe('#rawToSavedObject', () => {
     test('it converts the id and type properties, and retains migrationVersion', () => {
       const now = new Date();
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
@@ -195,7 +195,7 @@ describe('saved object conversion', () => {
     expect(v1._id).not.toEqual(v2._id);
   });
 
-  describe('isRawSavedObject', () => {
+  describe('#isRawSavedObject', () => {
     test('is true if the id is prefixed and the type matches', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
