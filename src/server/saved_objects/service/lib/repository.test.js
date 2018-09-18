@@ -24,6 +24,8 @@ import * as getSearchDslNS from './search_dsl/search_dsl';
 import { getSearchDsl } from './search_dsl';
 import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
+import { SavedObjectsSchema } from '../../schema';
+import { SavedObjectsSerializer } from '../../serialization';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -106,11 +108,13 @@ describe('SavedObjectsRepository', () => {
       migrateDocument: sinon.spy((doc) => doc),
     };
 
+    const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
       migrator,
+      serializer,
       onBeforeWrite
     });
 

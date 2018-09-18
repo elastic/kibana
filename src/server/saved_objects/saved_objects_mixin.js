@@ -19,6 +19,8 @@
 
 import { createSavedObjectsService } from './service';
 import { KibanaMigrator } from './migrations';
+import { SavedObjectsSchema } from './schema';
+import { SavedObjectsSerializer } from './serialization';
 
 import {
   createBulkCreateRoute,
@@ -62,7 +64,9 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server, migrator));
+  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const serializer = new SavedObjectsSerializer(schema);
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, serializer, migrator));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {

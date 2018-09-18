@@ -21,7 +21,6 @@ import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
-import { savedObjectToRaw, rawToSavedObject, generateRawId } from '../../serialization';
 import * as errors from './errors';
 
 
@@ -34,6 +33,7 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
+      serializer,
       migrator = { migrateDocument: (doc) => doc },
       onBeforeWrite = () => { },
     } = options;
@@ -51,6 +51,7 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
+    this._serializer = serializer;
   }
 
   /**
@@ -83,7 +84,7 @@ export class SavedObjectsRepository {
         updated_at: time,
       });
 
-      const raw = savedObjectToRaw(migrated);
+      const raw = this._serializer.savedObjectToRaw(migrated);
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
@@ -93,7 +94,7 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      return rawToSavedObject({
+      return this._serializer.rawToSavedObject({
         ...raw,
         ...response,
       });
@@ -129,7 +130,7 @@ export class SavedObjectsRepository {
         migrationVersion: object.migrationVersion,
         updated_at: time,
       });
-      const raw = savedObjectToRaw(migrated);
+      const raw = this._serializer.savedObjectToRaw(migrated);
 
       return [
         {
@@ -202,7 +203,7 @@ export class SavedObjectsRepository {
    */
   async delete(type, id) {
     const response = await this._writeToCluster('delete', {
-      id: generateRawId(type, id),
+      id: this._serializer.generateRawId(type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -294,7 +295,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(rawToSavedObject),
+      saved_objects: response.hits.hits.map(hit => this._serializer.rawToSavedObject(hit)),
     };
   }
 
@@ -319,7 +320,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: generateRawId(object.type, object.id),
+          _id: this._serializer.generateRawId(object.type, object.id),
           _type: this._type,
         }))
       }
@@ -359,7 +360,7 @@ export class SavedObjectsRepository {
    */
   async get(type, id) {
     const response = await this._callCluster('get', {
-      id: generateRawId(type, id),
+      id: this._serializer.generateRawId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -396,7 +397,7 @@ export class SavedObjectsRepository {
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: generateRawId(type, id),
+      id: this._serializer.generateRawId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,

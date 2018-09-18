@@ -23,6 +23,7 @@
  */
 
 import uuid from 'uuid';
+import { SavedObjectsSchema } from '../schema';
 
 /**
  * The root document type. In 7.0, this needs to change to '_doc'.
@@ -57,71 +58,11 @@ export interface SavedObjectDoc {
   attributes: object;
   id: string;
   type: string;
+  namespace?: string;
   migrationVersion?: MigrationVersion;
   version?: number;
 
   [rootProp: string]: any;
-}
-
-/**
- * Determines whether or not the raw document can be converted to a saved object.
- *
- * @param {RawDoc} rawDoc - The raw ES document to be tested
- */
-export function isRawSavedObject(rawDoc: RawDoc) {
-  const { type } = rawDoc._source;
-  return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
-}
-
-/**
- * Converts a document from the format that is stored in elasticsearch to the saved object client format.
- *
- *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
- */
-export function rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
-  const { type } = _source;
-  return {
-    type,
-    id: trimIdPrefix(type, _id),
-    attributes: _source[type],
-    ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
-    ...(_source.updated_at && { updated_at: _source.updated_at }),
-    ...(_version != null && { version: _version }),
-  };
-}
-
-/**
- * Converts a document from the saved object client format to the format that is stored in elasticsearch.
- *
- * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
- */
-export function savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-  const { id, type, attributes, version } = savedObj;
-  const source = {
-    ...savedObj,
-    [type]: attributes,
-  };
-
-  delete source.id;
-  delete source.attributes;
-  delete source.version;
-
-  return {
-    _id: generateRawId(type, id),
-    _source: source,
-    _type: ROOT_TYPE,
-    ...(version != null && { _version: version }),
-  };
-}
-
-/**
- * Given a saved object type and id, generates the compound id that is stored in the raw document.
- *
- * @param {string} type - The saved object type
- * @param {string} id - The id of the saved object
- */
-export function generateRawId(type: string, id?: string) {
-  return `${type}:${id || uuid.v1()}`;
 }
 
 function assertNonEmptyString(value: string, name: string) {
@@ -130,15 +71,83 @@ function assertNonEmptyString(value: string, name: string) {
   }
 }
 
-function trimIdPrefix(type: string, id: string) {
-  assertNonEmptyString(id, 'document id');
-  assertNonEmptyString(type, 'saved object type');
+export class SavedObjectsSerializer {
+  private readonly schema: SavedObjectsSchema;
 
-  const prefix = `${type}:`;
-
-  if (!id.startsWith(prefix)) {
-    return id;
+  constructor(schema: SavedObjectsSchema) {
+    this.schema = schema;
+  }
+  /**
+   * Determines whether or not the raw document can be converted to a saved object.
+   *
+   * @param {RawDoc} rawDoc - The raw ES document to be tested
+   */
+  public isRawSavedObject(rawDoc: RawDoc) {
+    const { type } = rawDoc._source;
+    return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
   }
 
-  return id.slice(prefix.length);
+  /**
+   * Converts a document from the format that is stored in elasticsearch to the saved object client format.
+   *
+   *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
+   */
+  public rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
+    const { type } = _source;
+    return {
+      type,
+      id: this.trimIdPrefix(type, _id),
+      attributes: _source[type],
+      ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
+      ...(_source.updated_at && { updated_at: _source.updated_at }),
+      ...(_version != null && { version: _version }),
+    };
+  }
+
+  /**
+   * Converts a document from the saved object client format to the format that is stored in elasticsearch.
+   *
+   * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
+   */
+  public savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
+    const { id, type, attributes, version } = savedObj;
+    const source = {
+      ...savedObj,
+      [type]: attributes,
+    };
+
+    delete source.id;
+    delete source.attributes;
+    delete source.version;
+
+    return {
+      _id: this.generateRawId(type, id),
+      _source: source,
+      _type: ROOT_TYPE,
+      ...(version != null && { _version: version }),
+    };
+  }
+
+  /**
+   * Given a saved object type and id, generates the compound id that is stored in the raw document.
+   *
+   * @param {string} type - The saved object type
+   * @param {string} id - The id of the saved object
+   */
+  public generateRawId(type: string, id?: string) {
+    return `${type}:${id || uuid.v1()}`;
+  }
+
+  private trimIdPrefix(type: string, id: string) {
+    assertNonEmptyString(id, 'document id');
+    assertNonEmptyString(type, 'saved object type');
+
+    const prefix = `${type}:`;
+
+    if (!id.startsWith(prefix)) {
+      return id;
+    }
+
+    return id.slice(prefix.length);
+  }
 }

@@ -18,19 +18,15 @@
  */
 
 import _ from 'lodash';
-import {
-  generateRawId,
-  isRawSavedObject,
-  rawToSavedObject,
-  ROOT_TYPE,
-  savedObjectToRaw,
-} from './index';
+import { SavedObjectsSchema } from '../schema';
+import { ROOT_TYPE, SavedObjectsSerializer } from './index';
 
 describe('saved object conversion', () => {
   describe('rawToSavedObject', () => {
     test('it converts the id and type properties, and retains migrationVersion', () => {
       const now = new Date();
-      const actual = rawToSavedObject({
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
         _type: ROOT_TYPE,
         _version: 3,
@@ -65,7 +61,8 @@ describe('saved object conversion', () => {
     });
 
     test('it ignores version if not in the raw doc', () => {
-      const actual = rawToSavedObject({
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
         _type: ROOT_TYPE,
         _source: {
@@ -86,7 +83,8 @@ describe('saved object conversion', () => {
     });
 
     test('it handles unprefixed ids', () => {
-      const actual = rawToSavedObject({
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
         _source: {
@@ -100,7 +98,8 @@ describe('saved object conversion', () => {
     });
 
     test('it does not pass unknown properties through', () => {
-      const actual = rawToSavedObject({
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
         _source: {
@@ -121,7 +120,8 @@ describe('saved object conversion', () => {
     });
 
     test('it does not create attributes if [type] is missing', () => {
-      const actual = rawToSavedObject({
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
         _source: {
@@ -135,8 +135,9 @@ describe('saved object conversion', () => {
     });
 
     test('it fails for documents which do not specify a type', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(() =>
-        rawToSavedObject({
+        serializer.rawToSavedObject({
           _id: 'universe',
           _type: ROOT_TYPE,
           _source: {
@@ -149,6 +150,7 @@ describe('saved object conversion', () => {
     });
 
     test('it is complimentary with savedObjectToRaw', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       const raw = {
         _id: 'foo:bar',
         _type: ROOT_TYPE,
@@ -167,19 +169,22 @@ describe('saved object conversion', () => {
         },
       };
 
-      expect(savedObjectToRaw(rawToSavedObject(_.cloneDeep(raw)))).toEqual(raw);
+      expect(serializer.savedObjectToRaw(serializer.rawToSavedObject(_.cloneDeep(raw)))).toEqual(
+        raw
+      );
     });
   });
 
   test('savedObjectToRaw generates an id, if none is specified', () => {
-    const v1 = savedObjectToRaw({
+    const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+    const v1 = serializer.savedObjectToRaw({
       type: 'foo',
       attributes: {
         bar: true,
       },
     } as any);
 
-    const v2 = savedObjectToRaw({
+    const v2 = serializer.savedObjectToRaw({
       type: 'foo',
       attributes: {
         bar: true,
@@ -192,8 +197,9 @@ describe('saved object conversion', () => {
 
   describe('isRawSavedObject', () => {
     test('is true if the id is prefixed and the type matches', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
-        isRawSavedObject({
+        serializer.isRawSavedObject({
           _id: 'hello:world',
           _source: {
             type: 'hello',
@@ -204,8 +210,9 @@ describe('saved object conversion', () => {
     });
 
     test('is false if the id is not prefixed', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
-        isRawSavedObject({
+        serializer.isRawSavedObject({
           _id: 'world',
           _source: {
             type: 'hello',
@@ -216,8 +223,9 @@ describe('saved object conversion', () => {
     });
 
     test('is false if the type attribute is missing', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
-        isRawSavedObject({
+        serializer.isRawSavedObject({
           _id: 'hello:world',
           _source: {
             hello: {},
@@ -227,8 +235,9 @@ describe('saved object conversion', () => {
     });
 
     test('is false if the type attribute does not match the id', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
-        isRawSavedObject({
+        serializer.isRawSavedObject({
           _id: 'hello:world',
           _source: {
             type: 'jam',
@@ -240,8 +249,9 @@ describe('saved object conversion', () => {
     });
 
     test('is false if there is no [type] attribute', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
       expect(
-        isRawSavedObject({
+        serializer.isRawSavedObject({
           _id: 'hello:world',
           _source: {
             type: 'hello',
@@ -253,12 +263,14 @@ describe('saved object conversion', () => {
   });
 
   test('generateRawId generates an id, if none is specified', () => {
-    const id = generateRawId('goodbye');
+    const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+    const id = serializer.generateRawId('goodbye');
     expect(id).toMatch(/goodbye\:[\w-]+$/);
   });
 
   test('generateRawId uses the id that is specified', () => {
-    const id = generateRawId('hello', 'world');
+    const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+    const id = serializer.generateRawId('hello', 'world');
     expect(id).toMatch('hello:world');
   });
 });

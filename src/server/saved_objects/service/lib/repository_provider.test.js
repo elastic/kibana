@@ -18,6 +18,8 @@
  */
 
 import { SavedObjectsRepositoryProvider } from './repository_provider';
+import { SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsSchema } from '../../schema';
 
 test('requires "callCluster" to be provided', () => {
   const provider = new SavedObjectsRepositoryProvider({
@@ -41,6 +43,7 @@ test('creates a valid Repository', async () => {
         }
       }
     },
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
     onBeforeWrite: jest.fn()
   };
 

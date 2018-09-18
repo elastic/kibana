@@ -28,11 +28,13 @@ export class SavedObjectsRepositoryProvider {
     index,
     mappings,
     migrator,
+    serializer,
     onBeforeWrite
   }) {
     this._index = index;
     this._mappings = mappings;
     this._migrator = migrator;
+    this._serializer = serializer;
     this._onBeforeWrite = onBeforeWrite;
   }
 
@@ -46,6 +48,7 @@ export class SavedObjectsRepositoryProvider {
       index: this._index,
       mappings: this._mappings,
       migrator: this._migrator,
+      serializer: this._serializer,
       onBeforeWrite: this._onBeforeWrite,
       callCluster,
     });
