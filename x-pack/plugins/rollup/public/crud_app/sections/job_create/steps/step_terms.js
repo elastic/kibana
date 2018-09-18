@@ -22,8 +22,11 @@ import {
 } from '../../../services';
 
 import {
-  FieldChooser,
   FieldList,
+} from '../../components';
+
+import {
+  FieldChooser,
 } from './components';
 
 export class StepTermsUi extends Component {
@@ -122,6 +125,8 @@ export class StepTermsUi extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
 
         <FieldList
           columns={columns}

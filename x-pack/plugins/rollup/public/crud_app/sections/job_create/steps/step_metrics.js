@@ -23,8 +23,11 @@ import {
 } from '../../../services';
 
 import {
-  FieldChooser,
   FieldList,
+} from '../../components';
+
+import {
+  FieldChooser,
 } from './components';
 
 export class StepMetricsUi extends Component {
@@ -210,6 +213,8 @@ export class StepMetricsUi extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
 
         <FieldList
           columns={this.listColumns}

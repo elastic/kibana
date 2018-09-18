@@ -4,45 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { injectI18n } from '@kbn/i18n/react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { FieldList } from '../../field_list';
 
-export const TabTermsUi = ({ terms }) => {
-  // TODO: Render a table if there are more than 20 fields.
-  const renderedTerms = terms.map(({ name }) => {
-    return (
-      <li key={name}>
-        {name}
-      </li>
-    );
-  });
+const columns = [{
+  field: 'name',
+  name: 'Field',
+  truncateText: true,
+  sortable: true,
+}];
 
-  return (
-    <Fragment>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.rollupJobs.jobDetails.tabTerms.sectionTerms.title"
-            defaultMessage="Terms"
-          />
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
-      <EuiText>
-        <ul>
-          {renderedTerms}
-        </ul>
-      </EuiText>
-    </Fragment>
-  );
-};
+export const TabTermsUi = ({ terms }) => (
+  <FieldList
+    columns={columns}
+    fields={terms}
+  />
+);
 
 export const TabTerms = injectI18n(TabTermsUi);

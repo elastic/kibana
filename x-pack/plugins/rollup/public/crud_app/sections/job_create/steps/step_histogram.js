@@ -26,8 +26,11 @@ import {
 } from '../../../services';
 
 import {
-  FieldChooser,
   FieldList,
+} from '../../components';
+
+import {
+  FieldChooser,
 } from './components';
 
 export class StepHistogramUi extends Component {
@@ -118,6 +121,8 @@ export class StepHistogramUi extends Component {
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
 
         <FieldList
           columns={columns}
