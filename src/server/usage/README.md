@@ -83,7 +83,7 @@ There are a few ways you can test that your usage collector is working properly.
 ## FAQ
 
 1. **Can telemetry track UI interactions, such as button click?**  
-   Brief answer: no. Telemetry collection happens on the server-side so the usage data will only include information that the server-side is aware of.
+   Brief answer: no. Telemetry collection happens on the server-side so the usage data will only include information that the server-side is aware of. There is no generic way to do this today, but UI-interaction KPIs can be tracked with a custom server endpoint that gets called for tracking when the UI event happens.
 2. **Does the telemetry service have a hook that I can call whenever some event happens in my feature?**  
    Brief answer: no. Telemetry collection is a fetch model, not a push model. Telemetry fetches info from your collector.
 3. **How should I design my data model?**  
