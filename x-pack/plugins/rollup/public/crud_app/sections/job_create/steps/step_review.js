@@ -15,12 +15,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { serializeJob } from '../../../services';
+
 import {
   JobDetails,
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
 } from '../../components';
 
 const JOB_DETAILS_TABS = [
@@ -28,6 +31,7 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_TERMS,
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
+  JOB_DETAILS_TAB_JSON,
 ];
 
 export class StepReviewUi extends Component {
@@ -99,6 +103,7 @@ export class StepReviewUi extends Component {
   render() {
     const { job } = this.props;
     const { selectedTab } = this.state;
+    const json = serializeJob(job);
 
     return (
       <Fragment>
@@ -114,7 +119,11 @@ export class StepReviewUi extends Component {
 
         {this.renderTabs()}
 
-        <JobDetails job={job} tab={selectedTab} />
+        <JobDetails
+          job={job}
+          json={json}
+          tab={selectedTab}
+        />
       </Fragment>
     );
   }

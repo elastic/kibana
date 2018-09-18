@@ -49,13 +49,13 @@ export function serializeJob(jobConfig) {
   };
 
   if (terms.length) {
-    serializedJob.terms = {
+    serializedJob.groups.terms = {
       fields: terms.map(({ name }) => name),
     };
   }
 
   if (histogram.length) {
-    serializedJob.histogram = {
+    serializedJob.groups.histogram = {
       interval: histogramInterval,
       fields: histogram.map(({ name }) => name),
     };

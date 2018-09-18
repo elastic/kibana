@@ -35,10 +35,23 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
     }
 
     if (error instanceof ParseEsIntervalInvalidCalendarIntervalError) {
+      const { unit } = error;
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval"
-          defaultMessage="This type of calendar interval must have a time-span of 1"
+          defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
+          values={{
+            unit,
+            suggestion: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval.suggestion"
+                  defaultMessage="1{unit}"
+                  values={{ unit }}
+                />
+              </strong>
+            )
+          }}
         />
       )];
     }

@@ -8,7 +8,9 @@ import { getRouter } from '../../services';
 import { CLOSE_DETAIL_PANEL } from '../action_types';
 
 export const detailPanel = () => next => action => {
-  switch (action.type) {
+  const { type } = action;
+
+  switch (type) {
     case CLOSE_DETAIL_PANEL:
       const { history } = getRouter();
 

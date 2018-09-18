@@ -25,16 +25,29 @@ export function validateDateHistogramDelay(dateHistogramDelay) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidFormat"
-          defaultMessage="Invalid interval format"
+          defaultMessage="Invalid delay format"
         />
       )];
     }
 
     if (error instanceof ParseEsIntervalInvalidCalendarIntervalError) {
+      const { unit } = error;
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidCalendarInterval"
-          defaultMessage="This type of calendar interval must have a time-span of 1"
+          defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
+          values={{
+            unit,
+            suggestion: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidCalendarInterval.suggestion"
+                  defaultMessage="1{unit}"
+                  values={{ unit }}
+                />
+              </strong>
+            )
+          }}
         />
       )];
     }

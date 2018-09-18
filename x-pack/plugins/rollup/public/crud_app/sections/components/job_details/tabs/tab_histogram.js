@@ -8,60 +8,43 @@ import React, { Fragment } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiTitle,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
-export const TabHistogramUi = ({ histogram, histogramInterval }) => {
-  // TODO: Render a table if there are more than 20 fields.
+import { FieldList } from '../../field_list';
 
-  const renderedTerms = histogram.map(({ name }) => {
-    return (
-      <li key={name}>
-        {name}
-      </li>
-    );
-  });
+const columns = [{
+  field: 'name',
+  name: 'Field',
+  truncateText: true,
+  sortable: true,
+}];
 
-  return (
-    <Fragment>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobDetails.tabHistogram.sectionHistogram.title"
-                defaultMessage="Histogram"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
+export const TabHistogramUi = ({ histogram, histogramInterval }) => (
+  <Fragment>
+    <EuiDescriptionList textStyle="reverse">
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.rollupJobs.jobDetails.tabHistogram.interval.label"
+          defaultMessage="Histogram interval"
+        />
+      </EuiDescriptionListTitle>
 
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobDetails.tabHistogram.interval.label"
-                defaultMessage="Interval: {histogramInterval}"
-                values={{ histogramInterval }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiDescriptionListDescription>
+        {histogramInterval}
+      </EuiDescriptionListDescription>
+    </EuiDescriptionList>
 
-      <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
 
-      <EuiText>
-        <ul>
-          {renderedTerms}
-        </ul>
-      </EuiText>
-    </Fragment>
-  );
-};
+    <FieldList
+      columns={columns}
+      fields={histogram}
+    />
+  </Fragment>
+);
 
 export const TabHistogram = injectI18n(TabHistogramUi);

@@ -4,40 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { injectI18n } from '@kbn/i18n/react';
 
-import {
-  EuiDescriptionList,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { FieldList } from '../../field_list';
 
-export const TabMetricsUi = ({ metrics }) => {
-  // TODO: Render a table if there are more than 20 metrics.
-  const listMetrics = metrics.map(({ name, types }) => {
-    return {
-      title: name,
-      description: types.join(', '),
-    };
-  });
+const columns = [{
+  field: 'name',
+  name: 'Field',
+  truncateText: true,
+  sortable: true,
+}, {
+  name: 'Types',
+  render: ({ types }) => types.join(', '),
+}];
 
-  return (
-    <Fragment>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.rollupJobs.jobDetails.tabMetrics.sectionMetrics.title"
-            defaultMessage="Metrics"
-          />
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
-      <EuiDescriptionList listItems={listMetrics} />
-    </Fragment>
-  );
-};
+export const TabMetricsUi = ({ metrics }) => (
+  <FieldList
+    columns={columns}
+    fields={metrics}
+  />
+);
 
 export const TabMetrics = injectI18n(TabMetricsUi);

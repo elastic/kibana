@@ -17,5 +17,14 @@ export function validateRollupPageSize(rollupPageSize) {
     )];
   }
 
+  if (rollupPageSize <= 0) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.rollupPageSizeGreaterThanZero"
+        defaultMessage="Page size must be greater than zero"
+      />
+    )];
+  }
+
   return undefined;
 }

@@ -45,7 +45,6 @@ export class FieldChooser extends Component {
 
   onSelect = (field) => {
     this.props.onSelectField(field);
-    this.close();
   }
 
   render() {
@@ -77,6 +76,7 @@ export class FieldChooser extends Component {
         onSelectItem={this.onSelect}
         searchField="name"
         prompt="Search fields"
+        anchorPosition="downRight"
       />
     );
   }

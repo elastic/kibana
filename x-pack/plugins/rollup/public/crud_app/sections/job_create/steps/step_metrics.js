@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,14 +24,19 @@ import {
 } from '../../../services';
 
 import {
-  FieldChooser,
   FieldList,
+} from '../../components';
+
+import {
+  FieldChooser,
 } from './components';
 
 export class StepMetricsUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
+    fieldErrors: PropTypes.object.isRequired,
+    areStepErrorsVisible: PropTypes.bool.isRequired,
     metricsFields: PropTypes.array.isRequired,
   }
 
@@ -180,6 +186,8 @@ export class StepMetricsUi extends Component {
               </h3>
             </EuiTitle>
 
+            <EuiSpacer size="s" />
+
             <EuiText>
               <p>
                 <FormattedMessage
@@ -193,7 +201,7 @@ export class StepMetricsUi extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
             <EuiButtonEmpty
               size="s"
               flush="right"
@@ -203,30 +211,54 @@ export class StepMetricsUi extends Component {
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepMetrics.readDocsButton.label"
-                defaultMessage="Read the docs"
+                defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer />
+
         <FieldList
           columns={this.listColumns}
           fields={metrics}
           onRemoveField={this.onRemoveField}
-        />
-
-        <EuiSpacer />
-
-        <FieldChooser
-          buttonLabel={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
-              defaultMessage="Select metrics fields"
+          emptyMessage={<p>No metrics fields added</p>}
+          addButton={(
+            <FieldChooser
+              buttonLabel={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
+                  defaultMessage="Add metrics fields"
+                />
+              )}
+              columns={this.chooserColumns}
+              fields={unselectedMetricsFields}
+              onSelectField={this.onSelectField}
             />
           )}
-          columns={this.chooserColumns}
-          fields={unselectedMetricsFields}
-          onSelectField={this.onSelectField}
+        />
+
+        {this.renderErrors()}
+      </Fragment>
+    );
+  }
+
+  renderErrors = () => {
+    const { areStepErrorsVisible, fieldErrors } = this.props;
+    const { metrics: errorMetrics } = fieldErrors;
+
+    if (!areStepErrorsVisible) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={errorMetrics}
+          color="danger"
+          iconType="cross"
         />
       </Fragment>
     );

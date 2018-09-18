@@ -11,7 +11,7 @@ import {
   getPager,
   getFilter,
   getSortField,
-  isSortAscending
+  isSortAscending,
 } from '../../../store/selectors';
 
 import {
