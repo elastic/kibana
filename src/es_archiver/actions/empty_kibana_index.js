@@ -16,16 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
-import { flatConcatAtType } from './reduce';
-import { alias, mapSpec, wrap } from './modify_reduce';
-
-// mapping types
-export const mappings = wrap(
-  alias('savedObjectMappings'),
-  mapSpec((spec, type, pluginSpec) => ({
-    pluginId: pluginSpec.getId(),
-    properties: spec
-  })),
-  flatConcatAtType
-);
+export async function emptyKibanaIndexAction({ client, log }) {
+  const stats = createStats('emptyKibanaIndex', log);
+  await deleteKibanaIndices({ client, stats });
+  await migrateKibanaIndex({ client, log, stats });
+  return stats;
+}
