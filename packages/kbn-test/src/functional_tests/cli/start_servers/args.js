@@ -27,18 +27,12 @@ const options = {
     desc: 'Pass in a config',
   },
   esFrom: {
-    arg: '<snapshot|source>',
-    choices: ['snapshot', 'source'],
-    desc: 'Build Elasticsearch from source or run from snapshot.',
-    default: 'snapshot',
+    arg: '<snapshot|source|path>',
+    desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
   },
   'kibana-install-dir': {
     arg: '<dir>',
     desc: 'Run Kibana from existing install directory instead of from source.',
-  },
-  'es-install-dir': {
-    arg: '<dir>',
-    desc: 'Run Elasticsearch from existing install directory instead of from source or snapshot.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -58,7 +52,7 @@ export function displayHelp() {
       };
     })
     .map(option => {
-      return `--${option.usage.padEnd(28)} ${option.desc} ${option.default}`;
+      return `--${option.usage.padEnd(30)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
 
@@ -84,14 +78,13 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
+  if (!userOptions.esFrom) {
+    userOptions.esFrom = 'snapshot';
+  }
+
   if (userOptions['kibana-install-dir']) {
     userOptions.installDir = userOptions['kibana-install-dir'];
     delete userOptions['kibana-install-dir'];
-  }
-
-  if (userOptions['es-install-dir']) {
-    userOptions.esInstallDir = userOptions['es-install-dir'];
-    delete userOptions['es-install-dir'];
   }
 
   function createLogger() {

@@ -26,6 +26,7 @@ import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 import { KIBANA_ROOT } from '../';
 import elasticsearch from 'elasticsearch';
+const path = require('path');
 
 export function createEsTestCluster(options = {}) {
   const {
@@ -35,7 +36,6 @@ export function createEsTestCluster(options = {}) {
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
-    esInstallDir,
   } = options;
 
   const randomHash = Math.random()
@@ -64,12 +64,14 @@ export function createEsTestCluster(options = {}) {
     async start(esArgs = []) {
       let installPath;
 
-      if (esInstallDir) {
-        installPath = esInstallDir;
-      } else if (esFrom === 'source') {
+      if (esFrom === 'source') {
         installPath = (await cluster.installSource(config)).installPath;
-      } else {
+      } else if (esFrom === 'snapshot') {
         installPath = (await cluster.installSnapshot(config)).installPath;
+      } else if (path.isAbsolute(esFrom)) {
+        installPath = esFrom;
+      } else {
+        throw new Error(`unknown option esFrom "${esFrom}"`);
       }
 
       await cluster.start(installPath, {
