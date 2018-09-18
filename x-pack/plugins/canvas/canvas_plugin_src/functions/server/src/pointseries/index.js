@@ -8,8 +8,8 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
-import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
-import { unquoteString } from '../../../../common/lib/unquote_string';
+import { pivotObjectArray } from '../../../../../common/lib/pivot_object_array';
+import { unquoteString } from '../../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 import { getExpressionType } from './lib/get_expression_type';
 

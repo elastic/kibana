@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { queryDatatable } from '../../../../common/lib/datatable/query';
+import { queryDatatable } from '../../../../../common/lib/datatable/query';
 import { getDemoRows } from './get_demo_rows';
 
 export const demodata = () => ({
