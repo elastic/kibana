@@ -57,7 +57,9 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, $location, $http, Private) {
+        controller($scope, $rootScope, $location, $http, Private, config) {
+          $scope.useNewNavigation = config.get('useNewNavigation', false);
+
           const getUnhashableStates = Private(getUnhashableStatesProvider);
 
           // are we showing the embedded version of the chrome?

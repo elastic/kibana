@@ -44,6 +44,11 @@ export function getUiSettingDefaults() {
       description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
         features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
     },
+    'useNewNavigation': {
+      name: 'Use the new K7 header navigation',
+      value: false,
+      description: `When set, Kibana will use the new K7 targetted for release in 7.0. At this time, not all features are implemented.`,
+    },
     'search:queryLanguage': {
       name: 'Query language',
       value: 'lucene',

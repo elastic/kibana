@@ -30,6 +30,7 @@ export class UiApp {
       order = 0,
       description,
       icon,
+      k7IconType,
       hidden,
       linkToLastSubUrl,
       listed,
@@ -47,6 +48,7 @@ export class UiApp {
     this._order = order;
     this._description = description;
     this._icon = icon;
+    this._k7IconType = k7IconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._listed = listed;
@@ -69,6 +71,7 @@ export class UiApp {
         order: this._order,
         description: this._description,
         icon: this._icon,
+        k7IconType: this._k7IconType,
         url: this._url,
         linkToLastSubUrl: this._linkToLastSubUrl
       });
@@ -139,6 +142,7 @@ export class UiApp {
       title: this._title,
       description: this._description,
       icon: this._icon,
+      k7IconType: this._k7IconType,
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,

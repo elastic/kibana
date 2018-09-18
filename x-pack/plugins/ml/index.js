@@ -37,6 +37,7 @@ export const ml = (kibana) => {
         title: 'Machine Learning',
         description: 'Machine Learning for the Elastic Stack',
         icon: 'plugins/ml/ml.svg',
+        k7IconType: 'machineLearningApp',
         main: 'plugins/ml/app',
         styleSheetPath: `${__dirname}/public/index.scss`,
       },
