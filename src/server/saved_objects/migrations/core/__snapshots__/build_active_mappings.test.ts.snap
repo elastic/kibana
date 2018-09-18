@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
+Object {
+  "doc": Object {
+    "dynamic": "strict",
+    "properties": Object {
+      "aaa": Object {
+        "type": "text",
+      },
+      "bbb": Object {
+        "type": "long",
+      },
+      "config": Object {
+        "dynamic": "true",
+        "properties": Object {
+          "buildNum": Object {
+            "type": "keyword",
+          },
+        },
+      },
+      "migrationVersion": Object {
+        "dynamic": "true",
+        "type": "object",
+      },
+      "type": Object {
+        "type": "keyword",
+      },
+      "updated_at": Object {
+        "type": "date",
+      },
+    },
+  },
+}
+`;

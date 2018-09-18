@@ -60,6 +60,8 @@ export const schema = Joi.object().keys({
     otherwise: Joi.default([]),
   }),
 
+  excludeTestFiles: Joi.array().items(Joi.string()).default([]),
+
   services: Joi.object().pattern(
     ID_PATTERN,
     Joi.func().required()
@@ -94,6 +96,10 @@ export const schema = Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
     rootDirectory: Joi.string(),
+  }).default(),
+
+  mochaReporter: Joi.object().keys({
+    captureLogOutput: Joi.boolean().default(!!process.env.CI),
   }).default(),
 
   users: Joi.object().pattern(
@@ -138,7 +144,12 @@ export const schema = Joi.object().keys({
 
   // settings for the esArchiver module
   esArchiver: Joi.object().keys({
-    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver'))
+    directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+  }).default(),
+
+  // settings for the kibanaServer.uiSettings module
+  uiSettings: Joi.object().keys({
+    defaults: Joi.object().unknown(true)
   }).default(),
 
   // settings for the screenshots module

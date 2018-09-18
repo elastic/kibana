@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
@@ -24,15 +25,26 @@ export function cephMetricsSpecProvider() {
   const moduleName = 'ceph';
   return {
     id: 'cephMetrics',
-    name: 'Ceph metrics',
+    name: i18n.translate('kbn.server.tutorials.cephMetrics.nameTitle', {
+      defaultMessage: 'Ceph metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Ceph server.',
-    longDescription: 'The `ceph` Metricbeat module fetches internal metrics from Ceph.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-ceph.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.cephMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Ceph server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.cephMetrics.longDescription', {
+      defaultMessage: 'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ceph.html',
+      },
+    }),
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.cephMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],

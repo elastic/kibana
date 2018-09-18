@@ -186,6 +186,15 @@ export function getUiSettingDefaults() {
         used when <strong>courier:setRequestPreference</strong> is set to "custom".`,
       category: ['search'],
     },
+    'courier:maxConcurrentShardRequests': {
+      name: 'Max Concurrent Shard Requests',
+      value: 0,
+      type: 'number',
+      description: `Controls the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+        target="_blank" rel="noopener noreferrer">max_concurrent_shard_requests</a>
+        setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.`,
+      category: ['search'],
+    },
     'fields:popularLimit': {
       name: 'Popular fields limit',
       value: 10,
@@ -509,6 +518,14 @@ export function getUiSettingDefaults() {
         that have the same timestamp value. From this list the first field that
         is present and sortable in the current index pattern is used.`,
       category: ['discover'],
+    },
+    'accessibility:disableAnimations': {
+      name: 'Disable Animations',
+      value: false,
+      description: `
+        Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
+      `,
+      category: ['accessibility'],
     },
   };
 }

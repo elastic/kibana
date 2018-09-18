@@ -30,6 +30,8 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;
   if (textPre) {
@@ -65,7 +67,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
             size="s"
             onClick={copy}
           >
-            Copy snippet
+            <FormattedMessage id="kbn.home.tutorial.instraction.copyButtonLabel" defaultMessage="Copy snippet"/>
           </EuiButton>
         )}
       </EuiCopy>
@@ -81,7 +83,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   }
 
   return (
-    <div className="instruction">
+    <div>
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
