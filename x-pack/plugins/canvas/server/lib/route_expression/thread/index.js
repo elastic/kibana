@@ -7,6 +7,12 @@
 import { fork } from 'child_process';
 import { resolve } from 'path';
 import uuid from 'uuid/v4';
+import { serializeProvider } from '../../../../common/lib/serialize';
+import { populateServerRegistries } from '../../populate_server_registries';
+
+const serialization = populateServerRegistries(['types']).then(({ types }) =>
+  serializeProvider(types.toJS())
+);
 
 const heap = {};
 
@@ -26,7 +32,7 @@ worker.on('message', msg => {
     // TODO: deserialize
     const { threadId } = msg;
     const { ast, context } = value;
-    heap[threadId].routeExpression(ast, context).then(value => {
+    heap[threadId].onFunctionNotFound(ast, context).then(value => {
       worker.send({ type: 'result', id, value: value });
     });
   }
@@ -40,8 +46,10 @@ worker.on('message', msg => {
 });
 
 // Tip: This can return a promise
-export const thread = ({ routeExpression, serialize, deserialize }) => {
-  return functionList.then(functions => {
+export const thread = ({ onFunctionNotFound }) => {
+  return Promise.all([functionList, serialization]).then(([functions, serialization]) => {
+    const { serialize, deserialize } = serialization;
+
     return {
       interpret: (ast, context) => {
         const id = uuid();
@@ -50,8 +58,8 @@ export const thread = ({ routeExpression, serialize, deserialize }) => {
         return new Promise(resolve => {
           heap[id] = {
             resolve: value => resolve(deserialize(value)),
-            routeExpression: (ast, context) =>
-              routeExpression(ast, deserialize(context)).then(serialize),
+            onFunctionNotFound: (ast, context) =>
+              onFunctionNotFound(ast, deserialize(context)).then(serialize),
           };
         });
       },

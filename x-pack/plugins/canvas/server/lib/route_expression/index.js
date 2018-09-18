@@ -4,17 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { thread } from './thread';
-import { server } from './server';
-import { browser } from './browser';
-
-// Tip: Don't do any serialization or deserialization in here, that should all be handled inside of the environments or the socket
-// This only deals with deserialized objects
-export const routeExpressionProvider = ({ socket, serialize, deserialize }) => {
-  const environments = [thread, server, browser].map(env =>
-    env({ routeExpression, socket, serialize, deserialize })
-  );
-
+export const routeExpressionProvider = environments => {
   function routeExpression(ast, context = null) {
     // List of environments in order of preference
 

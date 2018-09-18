@@ -7,25 +7,33 @@
 import { populateServerRegistries } from '../populate_server_registries';
 import { interpretProvider } from '../../../common/interpreter/interpret';
 import { createHandlers } from '../create_handlers';
+import { getAuthHeader } from '../../routes/get_auth/get_auth_header';
 
 const pluginsReady = populateServerRegistries(['serverFunctions', 'types']);
 
-export const server = ({ routeExpression }) => {
-  return pluginsReady.then(({ serverFunctions, types }) => {
-    return {
-      interpret: async (ast, context) => {
-        const interpret = interpretProvider({
-          types: types.toJS(),
-          functions: serverFunctions.toJS(),
-          handlers: { environment: 'server' }, // TODO: Real handlers // Need server & request here
-          onFunctionNotFound: (ast, context) => {
-            return routeExpression(ast, context);
-          },
-        });
+export const server = ({ onFunctionNotFound, server, socket }) => {
+  const request = socket.handshake;
+  const authHeader = getAuthHeader(request, server);
 
-        return interpret(ast, context);
-      },
-      getFunctions: () => Object.keys(serverFunctions.toJS()),
-    };
-  });
+  return Promise.all([pluginsReady, authHeader]).then(
+    ([{ serverFunctions, types }, authHeader]) => {
+      if (server.plugins.security) request.headers.authorization = authHeader;
+
+      return {
+        interpret: async (ast, context) => {
+          const interpret = interpretProvider({
+            types: types.toJS(),
+            functions: serverFunctions.toJS(),
+            handlers: createHandlers(request, server), // TODO: Real handlers // Need server & request here
+            onFunctionNotFound: (ast, context) => {
+              return onFunctionNotFound(ast, context);
+            },
+          });
+
+          return interpret(ast, context);
+        },
+        getFunctions: () => Object.keys(serverFunctions.toJS()),
+      };
+    }
+  );
 };

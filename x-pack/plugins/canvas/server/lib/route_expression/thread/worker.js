@@ -59,7 +59,6 @@ process.on('message', msg => {
           process.send({ type: 'result', value: serialize(value), id });
         })
         .catch(value => {
-          console.log('NOPE', value);
           process.send({ type: 'error', value, id });
         });
     }

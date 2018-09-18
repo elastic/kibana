@@ -23,22 +23,19 @@ export function socketApi(server) {
 
     // This is the HAPI request object
     const request = socket.handshake;
-    console.log(socket);
     const authHeader = getAuthHeader(request, server);
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
-    const environments = [browser({ socket }), thread(), serverEnv({ server, socket })];
-
     // We'd be better off creating the environments here, then passing them to the expression router
     const routeExpression = routeExpressionProvider([
-      browser({ socket, onFunctionNotFound }),
-      thread({ onFunctionNotFound }),
-      serverEnv({ server, socket, onFunctionNotFound }),
+      browser({ socket, onFunctionNotFound, serialize, deserialize }),
+      thread({ onFunctionNotFound, serialize, deserialize }),
+      serverEnv({ server, socket, onFunctionNotFound, serialize, deserialize }),
     ]);
 
     function onFunctionNotFound(ast, context) {
-      routeExpression(ast, context);
+      return routeExpression(ast, context);
     }
 
     socket.on('getFunctionList', () => {
