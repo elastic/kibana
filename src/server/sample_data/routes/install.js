@@ -28,24 +28,24 @@ import {
 } from './lib/translate_timestamp';
 
 function insertDataIntoIndex(dataIndexConfig, index, nowReference, request, server, callWithRequest) {
-  function updateTimestamps(doc) {
-    dataIndexConfig.timeFields.forEach(timeFieldName => {
-      if (doc[timeFieldName]) {
-        doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
-          ? translateTimeRelativeToWeek(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference)
-          : translateTimeRelativeToDifference(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference);
-      }
-    });
-    return doc;
-  }
-
-  const insertCmd = {
-    index: {
-      _index: index
-    }
-  };
-
   const bulkInsert = async (docs) => {
+    function updateTimestamps(doc) {
+      dataIndexConfig.timeFields.forEach(timeFieldName => {
+        if (doc[timeFieldName]) {
+          doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
+            ? translateTimeRelativeToWeek(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference)
+            : translateTimeRelativeToDifference(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference);
+        }
+      });
+      return doc;
+    }
+
+    const insertCmd = {
+      index: {
+        _index: index
+      }
+    };
+
     const bulk = [];
     docs.forEach(doc => {
       bulk.push(insertCmd);
