@@ -2,13 +2,20 @@
 
 exports[`renders dynamic options should display disabled dynamic options with tooltip for non-string fields 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
-    controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
-    indexPatternId="mockIndexPattern"
-    onChange={[Function]}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="indexPatternSelect-0"
+    label="Index Pattern"
+  >
+    <IndexPatternSelect
+      data-test-subj="indexPatternSelect-0"
+      indexPatternId="mockIndexPattern"
+      onChange={[Function]}
+      placeholder="Select index pattern..."
+    />
+  </EuiFormRow>
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"
@@ -72,13 +79,20 @@ exports[`renders dynamic options should display disabled dynamic options with to
 
 exports[`renders dynamic options should display dynamic options for string fields 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
-    controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
-    indexPatternId="mockIndexPattern"
-    onChange={[Function]}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="indexPatternSelect-0"
+    label="Index Pattern"
+  >
+    <IndexPatternSelect
+      data-test-subj="indexPatternSelect-0"
+      indexPatternId="mockIndexPattern"
+      onChange={[Function]}
+      placeholder="Select index pattern..."
+    />
+  </EuiFormRow>
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
@@ -123,13 +137,20 @@ exports[`renders dynamic options should display dynamic options for string field
 
 exports[`renders dynamic options should display size field when dynamic options is disabled 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
-    controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
-    indexPatternId="mockIndexPattern"
-    onChange={[Function]}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="indexPatternSelect-0"
+    label="Index Pattern"
+  >
+    <IndexPatternSelect
+      data-test-subj="indexPatternSelect-0"
+      indexPatternId="mockIndexPattern"
+      onChange={[Function]}
+      placeholder="Select index pattern..."
+    />
+  </EuiFormRow>
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
@@ -193,13 +214,20 @@ exports[`renders dynamic options should display size field when dynamic options 
 
 exports[`renders should display chaining input when parents are provided 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
-    controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
-    indexPatternId="indexPattern1"
-    onChange={[Function]}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="indexPatternSelect-0"
+    label="Index Pattern"
+  >
+    <IndexPatternSelect
+      data-test-subj="indexPatternSelect-0"
+      indexPatternId="indexPattern1"
+      onChange={[Function]}
+      placeholder="Select index pattern..."
+    />
+  </EuiFormRow>
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
@@ -296,13 +324,20 @@ exports[`renders should display chaining input when parents are provided 1`] = `
 
 exports[`renders should not display any options until field is selected 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
-    controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
-    indexPatternId="mockIndexPattern"
-    onChange={[Function]}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="indexPatternSelect-0"
+    label="Index Pattern"
+  >
+    <IndexPatternSelect
+      data-test-subj="indexPatternSelect-0"
+      indexPatternId="mockIndexPattern"
+      onChange={[Function]}
+      placeholder="Select index pattern..."
+    />
+  </EuiFormRow>
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName=""
