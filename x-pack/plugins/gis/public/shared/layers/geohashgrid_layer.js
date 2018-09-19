@@ -111,12 +111,16 @@ export class GeohashGridLayer extends ALayer {
   }
 
   async syncDataToMapState(startLoading, stopLoading, zoomAndExtent) {
+
+    if (!zoomAndExtent.extent) {
+      return;
+    }
+
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(zoomAndExtent.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
       const mapStateExtent = turf.bboxPolygon(zoomAndExtent.extent);
       const isContained = turfBooleanContains(dataExtent, mapStateExtent);
-      // const isContained = ol.extent.containsExtent(this._descriptor.dataMeta.extent, mapState.extent);
       const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
       if (samePrecision && isContained) {
         return;

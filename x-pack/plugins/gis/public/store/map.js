@@ -33,7 +33,8 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 const INITIAL_STATE = {
   mapState: {
     zoom: 4,
-    center: [-100.41, 32.82]
+    center: [-100.41, 32.82],
+    extent: null
   },
   selectedLayerId: null,
   layerList: []
@@ -49,7 +50,12 @@ export function map(state = INITIAL_STATE, action) {
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case MAP_EXTENT_CHANGED:
-      return { ...state, mapState: { ...action.mapState } };
+      const newMapState = {
+        center: action.mapState.center,
+        zoom: action.mapState.zoom,
+        extent: action.mapState.extent
+      };
+      return { ...state, mapState: newMapState };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
@@ -123,7 +129,7 @@ function updateWithDataRequest(state, action) {
     const layerList = [...state.layerList];
     return { ...state, layerList };
   } else {
-    return state;
+    return { ...state };
   }
 }
 
@@ -138,7 +144,7 @@ function updateWithDataResponse(state, action) {
   ) {
     //hackyest way to deal with race conditions
     //just pick response of last request
-    return state;
+    return { ...state };
   }
   layerReceivingData.data = action.data;
   layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;

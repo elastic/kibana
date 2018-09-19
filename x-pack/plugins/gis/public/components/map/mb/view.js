@@ -37,6 +37,11 @@ export class MBMapContainer extends React.Component {
       const newMapState = this._getMapState();
       this.props.extentChanged(newMapState);
     });
+    this._mbMap.on('load', () => {
+      //todo: under consideration if we need this
+      const newMapState = this._getMapState();
+      this.props.extentChanged(newMapState);
+    });
     const newMapState = this._getMapState();
     this.props.initialize(newMapState);
   }

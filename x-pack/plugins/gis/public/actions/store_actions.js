@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapExtent, getMapZoom } from '../selectors/map_selectors';
+import { getLayerList, getMapZoom } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -32,7 +32,7 @@ function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
 
 function getZoomAndExtent(state) {
   return {
-    extent: getMapExtent(state),
+    extent: state.map.mapState.extent,
     zoom: getMapZoom(state)
   };
 }
@@ -54,6 +54,7 @@ export function replaceLayerList(newLayerList) {
       const { startLoading, stopLoading } =
         getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
       layer.syncDataToMapState(startLoading, stopLoading, zoomAndExtent);
+
     });
   };
 
@@ -105,6 +106,7 @@ export function clearTemporaryLayers() {
 export function mapExtentChanged(newMapConstants) {
   const tokenString = 'data_request_sync_extentchange';
 
+
   return async (dispatch, getState) => {
     dispatch({
       type: MAP_EXTENT_CHANGED,
@@ -113,8 +115,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } =
-        getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
       layer.syncDataToMapState(startLoading, stopLoading, newMapConstants);
     });
   };
@@ -148,6 +149,9 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
     const zoomAndExtent = getZoomAndExtent(getState());
     const { startLoading, stopLoading } =
       getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+
+
+
     layer.syncDataToMapState(startLoading, stopLoading, zoomAndExtent);
   };
 }
