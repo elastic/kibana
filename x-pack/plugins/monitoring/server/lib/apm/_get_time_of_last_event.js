@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { createApmQuery } from './create_apm_query';
-import { BeatsClusterMetric } from '../metrics';
+import { ApmClusterMetric } from '../metrics';
 
 export async function getTimeOfLastEvent({ req, callWithRequest, apmIndexPattern, start, end, clusterUuid }) {
   const params = {
@@ -24,7 +24,7 @@ export async function getTimeOfLastEvent({ req, callWithRequest, apmIndexPattern
         start,
         end,
         clusterUuid,
-        metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+        metric: ApmClusterMetric.getMetricFields(),
         filters: [
           {
             range: {
