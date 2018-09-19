@@ -1,0 +1,89 @@
+{
+  "data": {
+    "shardStatsByFollowerIndex": {
+      "follower2": {
+        "0": {
+          "id": "follower2",
+          "index": "follower2",
+          "follows": "leader2",
+          "shardId": 0,
+          "opsSynced": 52,
+          "syncLagTime": 4900,
+          "syncLagOps": 0,
+          "error": null
+        },
+        "1": {
+          "id": "follower2",
+          "index": "follower2",
+          "follows": "leader2",
+          "shardId": 1,
+          "opsSynced": 48,
+          "syncLagTime": 9919,
+          "syncLagOps": 0,
+          "error": null
+        },
+        "4": {
+          "id": "follower2",
+          "index": "follower2",
+          "follows": "leader2",
+          "shardId": 4,
+          "opsSynced": 156,
+          "syncLagTime": 49923,
+          "syncLagOps": 0,
+          "error": null
+        }
+      },
+      "follower": {
+        "0": {
+          "id": "follower",
+          "index": "follower",
+          "follows": "leader",
+          "shardId": 0,
+          "opsSynced": 86,
+          "syncLagTime": 19886,
+          "syncLagOps": 0,
+          "error": null
+        },
+        "1": {
+          "id": "follower",
+          "index": "follower",
+          "follows": "leader",
+          "shardId": 1,
+          "opsSynced": 257,
+          "syncLagTime": 19886,
+          "syncLagOps": 0,
+          "error": null
+        },
+        "2": {
+          "id": "follower",
+          "index": "follower",
+          "follows": "leader",
+          "shardId": 2,
+          "opsSynced": 77,
+          "syncLagTime": 14899,
+          "syncLagOps": 0,
+          "error": null
+        }
+      }
+    },
+    "all": [{
+      "id": "follower",
+      "index": "follower",
+      "follows": "leader",
+      "shardId": 1,
+      "opsSynced": 257,
+      "syncLagTime": 19886,
+      "syncLagOps": 0,
+      "error": null
+    }, {
+      "id": "follower2",
+      "index": "follower2",
+      "follows": "leader2",
+      "shardId": 4,
+      "opsSynced": 156,
+      "syncLagTime": 49923,
+      "syncLagOps": 0,
+      "error": null
+    }]
+  }
+}
