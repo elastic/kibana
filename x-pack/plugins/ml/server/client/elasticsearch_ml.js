@@ -603,6 +603,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
             type: 'string'
           },
         }
+      },
+      {
+        fmt: '/_xpack/ml/find_file_structure'
       }
     ],
     needBody: true,

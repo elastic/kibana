@@ -75,7 +75,7 @@ export class FileDataVisualizerView extends Component {
           fileSize: file.size,
         });
 
-        await this.createSettings(data);
+        await this.loadSettings(data);
 
       } catch (error) {
         console.error(error);
@@ -97,10 +97,8 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async createSettings(data) {
+  async loadSettings(data, overrides) {
     try {
-      const overrides = this.createUrlOverrides();
-
       console.log('overrides', overrides);
       const resp = await  ml.analyzeFile(data, overrides);
       const serverSettings = processResults(resp.results);
@@ -160,54 +158,14 @@ export class FileDataVisualizerView extends Component {
     this.showEditFlyout = () => {};
   }
 
-  createUrlOverrides() {
-    const formattedOverrides = {};
-    for (const o in overrideDefaults) {
-      if (overrideDefaults.hasOwnProperty(o)) {
-        let value = this.overrides[o];
-        if (
-          (Array.isArray(value) && isEqual(value, this.originalSettings[o]) ||
-          (value === undefined || value === this.originalSettings[o]))
-        ) {
-          value = '';
-        }
-
-        const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
-        formattedOverrides[snakeCaseO] = value;
-      }
-    }
-
-    if (formattedOverrides.format === '' && this.originalSettings.format === 'delimited') {
-      if (
-        formattedOverrides.should_trim_fields !== '' ||
-        formattedOverrides.has_header_row !== '' ||
-        formattedOverrides.delimiter !== '' ||
-        formattedOverrides.quote !== '' ||
-        formattedOverrides.column_names !== ''
-      ) {
-        formattedOverrides.format = this.originalSettings.format;
-      }
-    }
-
-    if (formattedOverrides.format === 'json' || this.originalSettings.format === 'json') {
-      formattedOverrides.should_trim_fields = '';
-      formattedOverrides.has_header_row = '';
-      formattedOverrides.delimiter = '';
-      formattedOverrides.quote = '';
-      formattedOverrides.column_names = '';
-    }
-
-    return formattedOverrides;
-  }
-
   setOverrides = (overrides) => {
     console.log('setOverrides', overrides);
-    this.overrides = overrides;
     this.setState({
       loading: true,
       loaded: false,
     }, () => {
-      this.createSettings(this.state.fileContents);
+      const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
+      this.loadSettings(this.state.fileContents, formattedOverrides);
     });
   }
 
@@ -294,6 +252,46 @@ function readFile(file) {
       reject();
     }
   });
+}
+
+function createUrlOverrides(overrides, originalSettings) {
+  const formattedOverrides = {};
+  for (const o in overrideDefaults) {
+    if (overrideDefaults.hasOwnProperty(o)) {
+      let value = overrides[o];
+      if (
+        (Array.isArray(value) && isEqual(value, originalSettings[o]) ||
+        (value === undefined || value === originalSettings[o]))
+      ) {
+        value = '';
+      }
+
+      const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
+      formattedOverrides[snakeCaseO] = value;
+    }
+  }
+
+  if (formattedOverrides.format === '' && originalSettings.format === 'delimited') {
+    if (
+      formattedOverrides.should_trim_fields !== '' ||
+      formattedOverrides.has_header_row !== '' ||
+      formattedOverrides.delimiter !== '' ||
+      formattedOverrides.quote !== '' ||
+      formattedOverrides.column_names !== ''
+    ) {
+      formattedOverrides.format = originalSettings.format;
+    }
+  }
+
+  if (formattedOverrides.format === 'json' || originalSettings.format === 'json') {
+    formattedOverrides.should_trim_fields = '';
+    formattedOverrides.has_header_row = '';
+    formattedOverrides.delimiter = '';
+    formattedOverrides.quote = '';
+    formattedOverrides.column_names = '';
+  }
+
+  return formattedOverrides;
 }
 
 function processResults(results) {
