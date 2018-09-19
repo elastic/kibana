@@ -14,6 +14,7 @@ import {
   EuiPageContentBody,
   EuiIcon,
 } from '@elastic/eui';
+import { formatMetric } from '../../../lib/format_number';
 
 export class Ccr extends Component {
   constructor(props) {
@@ -58,7 +59,8 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagTime',
-              name: 'Last fetch time (ms)'
+              name: 'Last fetch time (ms)',
+              render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')}</span>
             },
             {
               field: 'syncLagOps',
@@ -106,7 +108,8 @@ export class Ccr extends Component {
           },
           {
             field: 'syncLagTime',
-            name: 'Last fetch time (ms)'
+            name: 'Last fetch time (ms)',
+            render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')}</span>
           },
           {
             field: 'syncLagOps',
