@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "description": "Kibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
   "keywords": [
     "kibana",
     "elasticsearch",
@@ -10,7 +10,7 @@
     "dashboards",
     "dashboarding"
   ],
-  "private": false,
+  "private": true,
   "version": "7.0.0-alpha1",
   "branch": "master",
   "build": {
@@ -21,7 +21,6 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
-  "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "preinstall": "node ./preinstall_check",
@@ -97,8 +96,8 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^14.2.1",
-    "elasticsearch-browser": "^14.2.1",
+    "elasticsearch": "^15.1.1",
+    "elasticsearch-browser": "^15.1.1",
     "encode-uri-query": "1.0.0",
     "even-better": "7.0.2",
     "execa": "^0.10.0",
@@ -214,6 +213,7 @@
     "@types/angular": "^1.6.45",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",
+    "@types/boom": "^7.2.0",
     "@types/chance": "^1.0.0",
     "@types/classnames": "^2.2.3",
     "@types/dedent": "^0.7.0",
@@ -239,11 +239,14 @@
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
     "@types/react-virtualized": "^9.18.7",
+    "@types/redux": "^3.6.31",
     "@types/redux-actions": "^2.2.1",
-    "@types/sinon": "^5.0.0",
+    "@types/semver": "^5.5.0",
+    "@types/sinon": "^5.0.1",
     "@types/strip-ansi": "^3.0.0",
     "@types/supertest": "^2.0.5",
     "@types/type-detect": "^4.0.1",
+    "@types/uuid": "^3.4.4",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "babel-jest": "^23.4.2",
@@ -272,7 +275,7 @@
     "expect.js": "0.3.1",
     "faker": "1.1.0",
     "fetch-mock": "^5.13.1",
-    "geckodriver": "1.11.0",
+    "geckodriver": "1.12.2",
     "getopts": "2.0.0",
     "globby": "^8.0.1",
     "grunt": "1.0.1",

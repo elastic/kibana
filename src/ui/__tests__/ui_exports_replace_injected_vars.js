@@ -30,7 +30,7 @@ import { createRoot, getKbnServer, request } from '../../test_utils/kbn_server';
 const getInjectedVarsFromResponse = (resp) => {
   const $ = cheerio.load(resp.text);
   const data = $('kbn-injected-metadata').attr('data');
-  return JSON.parse(data).legacyMetadata.vars;
+  return JSON.parse(data).vars;
 };
 
 const injectReplacer = (kbnServer, replacer) => {

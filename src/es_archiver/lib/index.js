@@ -26,6 +26,8 @@ export {
   createCreateIndexStream,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
+  deleteKibanaIndices,
+  migrateKibanaIndex,
 } from './indices';
 
 export {
