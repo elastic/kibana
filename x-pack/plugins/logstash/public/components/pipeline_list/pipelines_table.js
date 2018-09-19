@@ -125,7 +125,7 @@ export function PipelinesTable({
       {
         type: 'field_value_selection',
         field: 'id',
-        name: 'Id',
+        name: 'Filter by ID',
         multiSelect: false,
         options: pipelines.map(({ id }) => {
           return {
