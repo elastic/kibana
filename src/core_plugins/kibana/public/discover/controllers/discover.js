@@ -35,7 +35,7 @@ import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
-import { VislibResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -58,6 +58,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -156,7 +157,7 @@ function discoverController(
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const responseHandler = Private(VislibResponseHandlerProvider).handler;
+  const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier({
     location: 'Discover'
@@ -626,9 +627,10 @@ function discoverController(
       $scope.mergedEsResp = merged;
 
       if ($scope.opts.timefield) {
+        const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler($scope.vis, merged))
+          .resolve(responseHandler(tabifiedData))
           .then(resp => {
             $scope.visData = resp;
             const visEl = $element.find('#discoverHistogram')[0];

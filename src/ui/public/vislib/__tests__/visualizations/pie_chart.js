@@ -27,8 +27,8 @@ import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import { VisProvider } from '../../../vis';
 import '../../../persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { BuildHierarchicalDataProvider } from '../../../agg_response/hierarchical/build_hierarchical_data';
-import { VislibResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
+import { VislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
+import { tabifyAggResponse } from '../../../agg_response/tabify';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -89,7 +89,6 @@ describe('No global chart settings', function () {
   let Vis;
   let persistedState;
   let indexPattern;
-  let buildHierarchicalData;
   let responseHandler;
   let data1;
   let data2;
@@ -103,8 +102,7 @@ describe('No global chart settings', function () {
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    buildHierarchicalData = Private(BuildHierarchicalDataProvider);
-    responseHandler = Private(VislibResponseHandlerProvider).handler;
+    responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
 
     let id1 = 1;
     let id2 = 1;
@@ -118,10 +116,7 @@ describe('No global chart settings', function () {
     });
 
     stubVis1.isHierarchical = () => true;
-    stubVis1.type.responseConverter = buildHierarchicalData;
-
     stubVis2.isHierarchical = () => true;
-    stubVis2.type.responseConverter = buildHierarchicalData;
 
     // We need to set the aggs to a known value.
     _.each(stubVis1.aggs, function (agg) {
@@ -133,8 +128,10 @@ describe('No global chart settings', function () {
   }));
 
   beforeEach(async () => {
-    data1 = await responseHandler(stubVis1, fixtures.threeTermBuckets);
-    data2 = await responseHandler(stubVis2, fixtures.threeTermBuckets);
+    const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
+    const table2 = tabifyAggResponse(stubVis2.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
+    data1 = await responseHandler(table1);
+    data2 = await responseHandler(table2);
 
     chart1.render(data1, persistedState);
     chart2.render(data2, persistedState);
@@ -208,7 +205,7 @@ describe('Vislib PieChart Class Test Suite', function () {
         Vis = Private(VisProvider);
         persistedState = new ($injector.get('PersistedState'))();
         indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-        responseHandler = Private(VislibResponseHandlerProvider).handler;
+        responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
 
         let id = 1;
         stubVis = new Vis(indexPattern, {
@@ -222,7 +219,8 @@ describe('Vislib PieChart Class Test Suite', function () {
       }));
 
       beforeEach(async () => {
-        data = await responseHandler(stubVis, fixtures.threeTermBuckets);
+        const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, { metricsAtAllLevels: true });
+        data = await responseHandler(table);
         vis.render(data, persistedState);
       });
 

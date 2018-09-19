@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
+import { kySaltTrucksSpecProvider } from './server/sample_data/ky_salt_trucks';
 
 export function gis(kibana) {
 
@@ -32,6 +33,8 @@ export function gis(kibana) {
 
     init(server) {
       initRoutes(server);
+
+      server.registerSampleDataset(kySaltTrucksSpecProvider);
 
       server.injectUiAppVars('gis', async () => {
         return await server.getInjectedUiAppVars('kibana');

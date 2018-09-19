@@ -105,6 +105,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     // the id of the document
     this.id = config.id || void 0;
 
+    // the migration version of the document, should only be set on imports
+    this.migrationVersion = config.migrationVersion;
+
     // Whether to create a copy when the object is saved. This should eventually go away
     // in favor of a better rename/save flow.
     this.copyOnSave = false;
@@ -287,6 +290,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       return this._source && this._source.title !== this.title;
     };
 
+    this.creationOpts = (opts = {}) => ({
+      id: this.id,
+      migrationVersion: this.migrationVersion,
+      ...opts,
+    });
+
     /**
      * Attempts to create the current object using the serialized source. If an object already
      * exists, a warning message requests an overwrite confirmation.
@@ -299,14 +308,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      * @resolved {SavedObject}
      */
     const createSource = (source) => {
-      return savedObjectsClient.create(esType, source, { id: this.id })
+      return savedObjectsClient.create(esType, source, this.creationOpts())
         .catch(err => {
           // record exists, confirm overwriting
           if (_.get(err, 'res.status') === 409) {
             const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
-              .then(() => savedObjectsClient.create(esType, source, { id: this.id, overwrite: true }))
+              .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true })))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
           return Promise.reject(err);
@@ -383,7 +392,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (confirmOverwrite) {
             return createSource(source);
           } else {
-            return savedObjectsClient.create(esType, source, { id: this.id, overwrite: true });
+            return savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true }));
           }
         })
         .then((resp) => {

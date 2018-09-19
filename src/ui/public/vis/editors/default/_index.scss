@@ -1,0 +1,25 @@
+$vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+$vis-editor-sidebar-min-width: 350px;
+$vis-editor-agg-editor-spacing: $euiSizeS;
+$vis-editor-resizer-width: $euiSizeM;
+
+// Main layout
+@import './default';
+@import './sidebar';
+
+// Components
+@import './agg';
+
+.visualization-options {
+
+  .form-group {
+    margin-bottom: $vis-editor-agg-editor-spacing;
+  }
+  .form-horizontal .control-label {
+    text-align: left;
+  }
+
+  .kuiSideBarSelect {
+    width: 100%;
+  }
+}
