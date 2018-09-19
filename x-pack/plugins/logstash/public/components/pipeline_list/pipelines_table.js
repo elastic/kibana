@@ -106,26 +106,18 @@ export function PipelinesTable({
     }
     : null;
 
-  const toolsRight = [
-    <EuiButton
-      isDisabled={isReadOnly}
-      key="btnAdd"
-      fill
-      onClick={createPipeline}
-      data-test-subj="btnAdd"
-    >
-      Create pipeline
-    </EuiButton>,
-    <EuiButton
-      isDisabled={!selection.length || isReadOnly}
-      key="btnDeletePipelines"
-      color="danger"
-      onClick={onDeleteSelectedPipelines}
-      data-test-subj="btnDeletePipeline"
-    >
-      Delete
-    </EuiButton>,
-  ];
+  // display when > 0 selected and user has write permission
+  const deleteButton =
+    selection.length && !isReadOnly ? (
+      <EuiButton
+        key="btnDeletePipelines"
+        color="danger"
+        onClick={onDeleteSelectedPipelines}
+        data-test-subj="btnDeletePipeline"
+      >
+        Delete
+      </EuiButton>
+    ) : null;
 
   const search = {
     box: { incremental: true, 'data-test-subj': 'filter' },
@@ -144,7 +136,18 @@ export function PipelinesTable({
         }),
       },
     ],
-    toolsRight,
+    toolsLeft: deleteButton,
+    toolsRight: (
+      <EuiButton
+        isDisabled={isReadOnly}
+        key="btnAdd"
+        fill
+        onClick={createPipeline}
+        data-test-subj="btnAdd"
+      >
+        Create pipeline
+      </EuiButton>
+    ),
   };
 
   const columns = getColumns(openPipeline, clonePipeline);
