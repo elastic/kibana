@@ -257,7 +257,7 @@ export class ExplorerSwimlane extends React.Component {
 
 
   clearSelection() {
-    const { appState, mlExplorerDashboardService } = this.props;
+    const { mlExplorerDashboardService } = this.props;
 
     // This selects both overall and viewby swimlane
     const wrapper = d3.selectAll('.ml-explorer-swimlane');
@@ -267,11 +267,6 @@ export class ExplorerSwimlane extends React.Component {
     wrapper.selectAll('.sl-cell-inner.sl-cell-inner-selected').classed('sl-cell-inner-selected', false);
     wrapper.selectAll('.sl-cell-inner-dragselect.sl-cell-inner-selected').classed('sl-cell-inner-selected', false);
     wrapper.selectAll('.ds-selected').classed('sl-cell-inner-selected', false);
-
-    delete appState.mlExplorerSwimlane.selectedType;
-    delete appState.mlExplorerSwimlane.selectedLanes;
-    delete appState.mlExplorerSwimlane.selectedTimes;
-    appState.save();
 
     mlExplorerDashboardService.swimlaneCellClick.changed({});
   }
@@ -322,6 +317,16 @@ export class ExplorerSwimlane extends React.Component {
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
+    function cellMouseOverFactory(time, i) {
+      // Don't use an arrow function here because we need access to `this`,
+      // which is where d3 supplies a reference to the corresponding DOM element.
+      return function (lane) {
+        const bucketScore = getBucketScore(lane, time);
+        if (bucketScore === 0) { return; }
+        cellMouseover(this, lane, bucketScore, i, time);
+      };
+    }
+
     function cellMouseover(target, laneLabel, bucketScore, index, time) {
       if (bucketScore === undefined || cellMouseoverActive === false) {
         return;
@@ -370,16 +375,6 @@ export class ExplorerSwimlane extends React.Component {
             .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });
-
-    function cellMouseOverFactory(time, i) {
-      // Don't use an arrow function here because we need access to `this`,
-      // which is where d3 supplies a reference to the corresponding DOM element.
-      return function (lane) {
-        const bucketScore = getBucketScore(lane, time);
-        if (bucketScore === 0) { return; }
-        cellMouseover(this, lane, bucketScore, i, time);
-      };
-    }
 
     const cellsContainer = d3LanesEnter.append('div').classed('cells-container', true);
 

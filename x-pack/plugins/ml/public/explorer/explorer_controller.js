@@ -65,6 +65,11 @@ function getDefaultViewBySwimlaneData() {
   };
 }
 
+const SWIMLANE_TYPE = {
+  OVERALL: 'overall',
+  VIEW_BY: 'viewBy'
+};
+
 module.controller('MlExplorerController', function (
   $scope,
   $timeout,
@@ -93,7 +98,7 @@ module.controller('MlExplorerController', function (
   const VIEW_BY_JOB_LABEL = 'job ID';
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
-  // make sure dragSelect is only available if the mouse point is actually over a swimlane
+  // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
   let disableDragSelectOnMouseLeave = true;
   // skip listening to clicks on swimlanes while they are loading to avoid race conditions
   let skipCellClicks = true;
@@ -274,12 +279,7 @@ module.controller('MlExplorerController', function (
 
   // Listen for changes to job selection.
   mlJobSelectService.listenJobSelectionChange($scope, (event, selections) => {
-    // Clear swimlane selection from state.
-    delete $scope.appState.mlExplorerSwimlane.selectedType;
-    delete $scope.appState.mlExplorerSwimlane.selectedLane;
-    delete $scope.appState.mlExplorerSwimlane.selectedTime;
-    delete $scope.appState.mlExplorerSwimlane.selectedInterval;
-
+    clearSwimlaneSelectionFromAppState();
     $scope.setSelectedJobs(selections);
   });
 
@@ -299,12 +299,45 @@ module.controller('MlExplorerController', function (
     }, 300);
   });
 
+  function clearSwimlaneSelectionFromAppState() {
+    delete $scope.appState.mlExplorerSwimlane.selectedType;
+    delete $scope.appState.mlExplorerSwimlane.selectedLane;
+    delete $scope.appState.mlExplorerSwimlane.selectedTime;
+    delete $scope.appState.mlExplorerSwimlane.selectedInterval;
+  }
+
+  function getSwimlaneData(swimlaneType) {
+    switch (swimlaneType) {
+      case SWIMLANE_TYPE.OVERALL:
+        return $scope.overallSwimlaneData;
+      case SWIMLANE_TYPE.VIEW_BY:
+        return $scope.viewBySwimlaneData;
+    }
+  }
+
+  function mapScopeToSwimlaneProps(swimlaneType) {
+    const swimlaneData = getSwimlaneData(swimlaneType);
+    return {
+      lanes: swimlaneData.laneLabels,
+      startTime: swimlaneData.earliest,
+      endTime: swimlaneData.latest,
+      stepSecs: swimlaneData.interval,
+      points: swimlaneData.points,
+      chartWidth: $scope.swimlaneWidth,
+      MlTimeBuckets: TimeBuckets,
+      swimlaneData,
+      swimlaneType,
+      mlExplorerDashboardService,
+      appState: $scope.appState
+    };
+  }
+
   function redrawOnResize() {
     $scope.swimlaneWidth = getSwimlaneContainerWidth();
     $scope.$apply();
 
-    mlExplorerDashboardService.swimlaneDataChange.changed('overall');
-    mlExplorerDashboardService.swimlaneDataChange.changed('viewBy');
+    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
+    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
 
     if (
       mlCheckboxShowChartsService.state.get('showCharts') &&
@@ -740,6 +773,7 @@ module.controller('MlExplorerController', function (
       overallBucketsBounds.max.valueOf(),
       $scope.swimlaneBucketInterval.asSeconds() + 's'
     ).then((resp) => {
+      skipCellClicks = false;
       processOverallResults(resp.results, searchBounds);
       console.log('Explorer overall swimlane data set:', $scope.overallSwimlaneData);
 
@@ -758,8 +792,7 @@ module.controller('MlExplorerController', function (
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
       $timeout(() => {
         $scope.$broadcast('render');
-        mlExplorerDashboardService.swimlaneDataChange.changed('overall');
-        skipCellClicks = false;
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
       }, 0);
     });
 
@@ -791,6 +824,7 @@ module.controller('MlExplorerController', function (
     // finish() function, called after each data set has been loaded and processed.
     // The last one to call it will trigger the page render.
     function finish() {
+      skipCellClicks = false;
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);
       if (swimlaneCellClickListenerQueue.length > 0) {
         const cellData = swimlaneCellClickListenerQueue.pop();
@@ -801,8 +835,7 @@ module.controller('MlExplorerController', function (
       // Fire event to indicate swimlane data has changed.
       // Need to use $timeout to ensure this happens after the child scope is updated with the new data.
       $timeout(() => {
-        skipCellClicks = false;
-        mlExplorerDashboardService.swimlaneDataChange.changed('viewBy');
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
       }, 0);
     }
 
@@ -965,6 +998,7 @@ module.controller('MlExplorerController', function (
     loadTopInfluencers(jobIds, earliestMs, latestMs);
     loadDataForCharts(jobIds, earliestMs, latestMs);
     loadAnomaliesTableData();
+    clearSwimlaneSelectionFromAppState();
   }
 
   function calculateSwimlaneBucketInterval() {
