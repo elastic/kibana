@@ -35,7 +35,6 @@ import {
 
 import { HeaderAppMenu } from './header_app_menu';
 import { HeaderNavControl } from './header_nav_control';
-import { HeaderSpacesMenu } from './header_spaces_menu';
 
 import { ChromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
 import { NavControl, NavControlSide, NavLink } from '../';
@@ -93,10 +92,6 @@ export class Header extends Component<Props> {
       <EuiHeader>
         <EuiHeaderSection>
           <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
-
-          <EuiHeaderSectionItem border="right">
-            <HeaderSpacesMenu />
-          </EuiHeaderSectionItem>
 
           {leftNavControls && this.renderControls(leftNavControls.inOrder)}
 
