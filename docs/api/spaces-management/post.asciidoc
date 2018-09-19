@@ -12,7 +12,7 @@ To create a space, issue a POST request to the
 
 [source,js]
 --------------------------------------------------
-PUT /api/spaces/space
+POST /api/spaces/space
 --------------------------------------------------
 
 ==== Request Body

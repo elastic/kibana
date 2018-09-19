@@ -1,16 +1,19 @@
 [role="xpack"]
 [[spaces-managing]]
 === Managing spaces
-Spaces can be managed from the Management => Spaces screen. From here, you can create, edit, or delete any of your spaces.
+You can manage spaces from the **Management > Spaces** page. Here you can create, edit, and delete your spaces.
 
 [NOTE]
-There is an <<spaces-api, experimental API>> available if you wish to create your spaces programatically.
+{kib} has an <<spaces-api, experimental API>> if you want to create your spaces programatically.
 
 [role="screenshot"]
 image::spaces/images/space-management.png["Space Management"]
 
 ==== Creating and updating spaces
-Spaces can be managed from the Management => Spaces screen. You can create as many spaces as you'd like, but each space must have a unique space identifier.
+You can create as many spaces as you like, but each space must have a unique space identifier. The space identifier is a short string of text that is part of the {kib} URL when you are inside that space. {kib} automatically suggests a space identifier based on the name of your space, but you are free to customize this to your liking.
+
+[NOTE]
+You cannot change the space identifier once the space is created.
 
 [role="screenshot"]
 image::spaces/images/edit-space.png["Updating a space"]

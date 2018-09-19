@@ -65,7 +65,7 @@ A successful call returns a response code of `204` and no response body.
 
 
 ==== Granting access to specific spaces
-To grant access to individual Spaces within Kibana, specify the space identifier within the `kibana` object.
+To grant access to individual spaces within {kib}, specify the space identifier within the `kibana` object.
 
 Note: granting access 
 
