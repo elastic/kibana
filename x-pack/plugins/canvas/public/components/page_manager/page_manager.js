@@ -146,7 +146,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId } = this.props;
+    const { pages, addPage, deleteId, isEditing } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -173,17 +173,19 @@ export class PageManager extends React.PureComponent {
               </Droppable>
             </DragDropContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              anchorClassName="canvasPageManager__addPageTip"
-              content="Add a new page to this workpad"
-              position="left"
-            >
-              <button onClick={addPage} className="canvasPageManager__addPage">
-                <EuiIcon color="ghost" type="plusInCircle" size="l" />
-              </button>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {isEditing && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                anchorClassName="canvasPageManager__addPageTip"
+                content="Add a new page to this workpad"
+                position="left"
+              >
+                <button onClick={addPage} className="canvasPageManager__addPage">
+                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                </button>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}

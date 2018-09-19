@@ -3,6 +3,11 @@
     position: relative;
   }
 
+  .canvasPageManager__pages,
+  .canvasPageManager__addPage {
+    height: 144px;
+  }
+
   .canvasPageManager__pageList {
     @include euiScrollBar;
     display: flex;
@@ -15,6 +20,20 @@
     bottom: 0;
   }
 
+  .canvasPageManager__addPage {
+    width: $euiSizeXXL + $euiSize;
+    background: $euiColorSecondary;
+    color: $euiColorGhost;
+    opacity: 0;
+    animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    animation-fill-mode: forwards;
+  }
+
+  .canvasPageManager__addPageTip {
+    display: block;
+    height: 100%;
+  }
+
   .canvasPageManager--trayPop > div {
     animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     opacity: 0;
@@ -24,21 +43,6 @@
     .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
       animation-delay: #{$i * 0.05}s;
     }
-  }
-
-  .canvasPageManager__addPage {
-    width: $euiSizeXXL + $euiSize;
-    background: $euiColorSecondary;
-    color: $euiColorGhost;
-    opacity: 0;
-    animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
-    animation-fill-mode: forwards;
-    height: 144px;
-  }
-
-  .canvasPageManager__addPageTip {
-    display: block;
-    height: 100%;
   }
 
   .canvasPageManager__page {
