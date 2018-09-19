@@ -154,6 +154,10 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+    if (!this.supportedTypes.includes(taskInstance.taskType)) {
+      throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
+    }
+
     const body = rawSource(taskInstance);
     const { task } = body;
     const result = await this.callCluster('index', {

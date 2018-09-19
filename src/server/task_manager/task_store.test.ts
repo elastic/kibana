@@ -77,7 +77,7 @@ describe('TaskStore', () => {
         callCluster,
         index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        supportedTypes: ['report', 'dernstraight', 'yawn'],
       });
 
       const result = await store.schedule(task);
@@ -135,6 +135,12 @@ describe('TaskStore', () => {
       const { arg } = await testSchedule({ taskType: 'yawn' } as any);
       expect(arg.body.task.params).toEqual('{}');
       expect(arg.body.task.state).toEqual('{}');
+    });
+
+    test('errors if the task type is unknown', async () => {
+      await expect(testSchedule({ taskType: 'nope', params: {} })).rejects.toThrow(
+        /Unsupported task type "nope"/i
+      );
     });
   });
 

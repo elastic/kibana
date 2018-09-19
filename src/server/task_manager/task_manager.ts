@@ -150,8 +150,8 @@ async function beginPolling(opts: TaskManagerOpts & { middleware: Middleware }) 
 
   logger.debug('Creating the store');
   const store = new TaskStore({
-    index: config.get('task_manager.index'),
     callCluster,
+    index: config.get('task_manager.index'),
     maxAttempts: config.get('task_manager.max_attempts'),
     supportedTypes: Object.keys(definitions),
   });
