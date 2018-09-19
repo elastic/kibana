@@ -16,7 +16,7 @@ export const progressWheel = () => ({
   image: header,
   expression: `filters
 | demodata
-| math "sum(min(cost) / max(cost))"
+| math "mean(percent_uptime)"
 | progress shape="wheel" label={formatnumber 0%} font={font size=24 family="${
     openSans.value
   }" color="#000000" align=center}
