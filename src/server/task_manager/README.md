@@ -77,19 +77,21 @@ A sample task can be found in the [plugin_functional/sample_task_plugin](../../t
       // The createTaskRunner function / method returns an object that is responsible for
       // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
       createTaskRunner(context) {
-        // Perform the work of the task. The return value should fit the TaskResult interface, documented
-        // below. Invalid return values will result in a logged warning.
-        async run() {
-          // Do some work
-          // Conditionally send some alerts
-          // Return some result or other...
-        },
-
-        // Optional, will be called if a running instance of this task times out, allowing the task
-        // to attempt to clean itself up.
-        async cancel() {
-          // Do whatever is required to cancel this task, such as killing any spawned processes
-        },
+        return {
+          // Perform the work of the task. The return value should fit the TaskResult interface, documented
+          // below. Invalid return values will result in a logged warning.
+          async run() {
+            // Do some work
+            // Conditionally send some alerts
+            // Return some result or other...
+          },
+  
+          // Optional, will be called if a running instance of this task times out, allowing the task
+          // to attempt to clean itself up.
+          async cancel() {
+            // Do whatever is required to cancel this task, such as killing any spawned processes
+          },
+        };
       }
     },
   },
