@@ -5,32 +5,56 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import Joi from 'joi';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 
 async function getCcrStat(req, esIndexPattern, filters) {
+  const min = moment.utc(req.payload.timeRange.min).valueOf();
+  const max = moment.utc(req.payload.timeRange.max).valueOf();
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-  return await callWithRequest(req, 'search', {
+  const params = {
     index: esIndexPattern,
     size: 1,
     filterPath: [
-      `hits.hits._source.ccr_stats.follower_index`,
-      `hits.hits._source.ccr_stats.shard_id`,
-      `hits.hits._source.ccr_stats.leader_index`,
-      `hits.hits._source.ccr_stats.operations_received`,
+      'hits.hits._source.ccr_stats',
+      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_operations_indexed',
+      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_failed_fetches',
     ],
     body: {
       sort: [{ timestamp: { order: 'desc' } }],
       query: {
         bool: {
-          must: filters,
+          must: [
+            ...filters,
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: min,
+                  lte: max,
+                }
+              }
+            }
+          ]
+        }
+      },
+      collapse: {
+        field: 'ccr_stats.follower_index',
+        inner_hits: {
+          name: 'oldest',
+          size: 1,
+          sort: [{ timestamp: 'asc' }]
         }
       }
     }
-  });
+  };
+
+  return await callWithRequest(req, 'search', params);
 }
 
 export function ccrShardRoute(server) {
@@ -98,9 +122,12 @@ export function ccrShardRoute(server) {
         ]);
 
         const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats');
+        const oldestStat = get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats');
+
         reply({
           metrics,
-          stat
+          stat,
+          oldestStat,
         });
       } catch(err) {
         reply(handleError(err, req));

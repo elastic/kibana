@@ -33,15 +33,15 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         $injector
       });
 
-      $scope.followerIndex = get(pageData, 'stat.follower_index');
+      $scope.instance = `${get(pageData, 'stat.follower_index')} - ${get(pageData, 'stat.shard_id')}`;
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
       });
 
-      this.renderReact = ({ metrics, stat }) => {
+      this.renderReact = (props) => {
         super.renderReact(
-          <CcrShard metrics={metrics} stat={stat} />
+          <CcrShard {...props} />
         );
       };
     }

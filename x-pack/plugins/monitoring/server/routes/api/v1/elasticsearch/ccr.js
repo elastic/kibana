@@ -100,7 +100,7 @@ export function ccrRoute(server) {
             opsSynced: _stat.number_of_operations_indexed,
             syncLagTime: _stat.time_since_last_fetch_millis,
             syncLagOps: _stat.leader_max_seq_no - _stat.follower_global_checkpoint,
-            error: _stat.fetch_exceptions[0]
+            error: _stat.fetch_exceptions.length ? _stat.fetch_exceptions[0].exception.type : null
           };
 
           const statByShardId = allByFollowerIndex[stat.id];

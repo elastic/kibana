@@ -12,6 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
+  EuiBasicTable,
+  EuiCodeBlock,
+  EuiTextColor,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
@@ -41,17 +46,70 @@ export class CcrShard extends PureComponent {
     );
   }
 
-  render() {
+  renderExceptions() {
     const { stat } = this.props;
+    if (stat.fetch_exceptions && stat.fetch_exceptions.length > 0) {
+      return (
+        <Fragment>
+          <EuiPanel>
+            <EuiTitle size="s" color="danger">
+              <h3>
+                <EuiTextColor color="danger">Exceptions</EuiTextColor>
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s"/>
+            <EuiBasicTable
+              items={stat.fetch_exceptions}
+              columns={[
+                {
+                  name: 'Type',
+                  field: 'exception.type'
+                },
+                {
+                  name: 'Reason',
+                  field: 'exception.reason',
+                  width: '75%'
+                }
+              ]}
+            />
+          </EuiPanel>
+          <EuiHorizontalRule/>
+        </Fragment>
+      );
+    }
+    return null;
+  }
+
+  renderLatestStat() {
+    const { stat } = this.props;
+
+    return (
+      <Fragment>
+        <EuiTitle>
+          <h2>Advanced</h2>
+        </EuiTitle>
+        <EuiSpacer size="s"/>
+        <EuiCodeBlock language="json">
+          {JSON.stringify(stat, null, 2)}
+        </EuiCodeBlock>
+      </Fragment>
+    );
+  }
+
+  render() {
+    const { stat, oldestStat } = this.props;
 
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stats={stat}/>
+          <Status stat={stat} oldestStat={oldestStat}/>
           <EuiSpacer size="s"/>
+          {this.renderExceptions()}
           <EuiFlexGroup wrap>
             {this.renderCharts()}
           </EuiFlexGroup>
+          <EuiHorizontalRule/>
+          {this.renderLatestStat()}
         </EuiPageBody>
       </EuiPage>
     );

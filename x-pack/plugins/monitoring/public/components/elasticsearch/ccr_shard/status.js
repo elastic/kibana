@@ -8,13 +8,19 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 
-export function Status({ stats }) {
+export function Status({ stat, oldestStat }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
     leader_index: leaderIndex,
-    operations_received: operationsReceived
-  } = stats;
+    number_of_operations_indexed: operationsReceived,
+    number_of_failed_fetches: failedFetches
+  } = stat;
+
+  const {
+    number_of_operations_indexed: oldestOperationsReceived,
+    number_of_failed_fetches: oldestFailedFetches
+  } = oldestStat;
 
   const metrics = [
     {
@@ -33,9 +39,14 @@ export function Status({ stats }) {
       dataTestSubj: 'leaderIndex'
     },
     {
-      label: 'Total Ops Synced',
-      value: formatMetric(operationsReceived, 'int_commas'),
+      label: 'Ops Synced',
+      value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
       dataTestSubj: 'operationsReceived'
+    },
+    {
+      label: 'Failed Fetches',
+      value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
+      dataTestSubj: 'failedFetches'
     },
   ];
 
