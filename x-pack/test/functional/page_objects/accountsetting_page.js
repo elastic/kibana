@@ -5,42 +5,28 @@
  */
 
 //import { map as mapAsync } from 'bluebird';
+import expect from 'expect.js';
 
 export function AccountSettingProvider({ getService }) {
-  // const remote = getService('remote');
-  // const config = getService('config');
-  // const retry = getService('retry');
-  // const find = getService('find');
-  const log = getService('log');
-  //const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  //const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class AccountSettingsPage {
-    async verifyAccountSettings(user) {
-      log.info(user.username);
-      log.info(user.email);
+    async verifyAccountSettings(expectedEmail, expectedUserName) {
+      await testSubjects.click('loggedInUser');
+      const usernameField = await testSubjects.find('usernameField');
+      const userName = await usernameField.getVisibleText();
+      expect(userName).to.be(expectedUserName);
+      const emailIdField = await testSubjects.find('emailIdField');
+      const emailField = await emailIdField.getVisibleText();
+      expect(emailField).to.be(expectedEmail);
     }
 
-    async changePasswordLink(passwords) {
-      return await testSubjects.exists('change-Password-link');
-      return await testSubjects.click('change-Password-link');
-      return await testSubjects.exists('current-Password-input');
-      const currentPasswordField =  await testSubjects.find('currentPasswordInput');
-      await currentPasswordField.click();
-      await currentPasswordField.type(passwords.currentPassword);
-
-      const newPasswordField =  await testSubjects.find('newPasswordInput');
-      await newPasswordField.click();
-      await currentPasswordField.type(passwords.newPassword);
-
-      const confirmPasswordField =  await testSubjects.find('confirmPasswordInput');
-      await newPasswordField.click();
-      await confirmPasswordField.type(passwords.newPassword);
-
-      const savePasswordButton =  await testSubjects.find('saveChangesButton');
-      await savePasswordButton.click();
-
+    async changePasswordLink(currentPassword, newPassword) {
+      await testSubjects.click('changePasswordLink');
+      await testSubjects.setValue('newPasswordInput', newPassword);
+      await testSubjects.setValue('currentPasswordInput', currentPassword);
+      await testSubjects.setValue('confirmPasswordInput', newPassword);
+      return await testSubjects.click('saveChangesButton');
     }
   }
   return new AccountSettingsPage();
