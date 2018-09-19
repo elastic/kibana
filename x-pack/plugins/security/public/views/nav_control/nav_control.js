@@ -7,15 +7,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
-import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+
 import { uiModules } from 'ui/modules';
+
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import template from 'plugins/security/views/nav_control/nav_control.html';
-import { SecurityNavControl } from './nav_control_component';
 import 'plugins/security/services/shield_user';
 import '../account/account';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+
+import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import { SecurityNavControl } from './nav_control_component';
+import { NavControlSide } from 'ui/chrome/directives/k7_global_nav';
 
 chromeNavControlsRegistry.register(constant({
   name: 'security',
@@ -46,6 +50,7 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
 chromeK7NavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
   name: 'security',
   order: 1000,
+  side: NavControlSide.Right,
   render(el) {
     const xpackInfo = Private(XPackInfoProvider);
     const showSecurityLinks = xpackInfo.get('features.security.showLinks');

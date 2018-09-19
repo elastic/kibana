@@ -17,4 +17,24 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
 import './k7_global_nav';
+
+export enum NavControlSide {
+  Left = 'left',
+  Right = 'right',
+}
+
+export interface NavControl {
+  name: string;
+  order: string;
+  side: NavControlSide;
+  render: (targetDomElement: HTMLDivElement) => (() => void) | void;
+}
+
+export interface NavLink {
+  title: string;
+  url: string;
+  id: string;
+  k7IconType: IconType;
+}

@@ -37,11 +37,12 @@ import { HeaderAppMenu } from './header_app_menu';
 import { HeaderNavControl } from './header_nav_control';
 import { HeaderSpacesMenu } from './header_spaces_menu';
 
-import { NavControl, NavLink } from '../';
+import { ChromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import { NavControl, NavControlSide, NavLink } from '../';
 
 interface Props {
   navLinks: NavLink[];
-  navControls: NavControl[];
+  navControls: ChromeK7NavControlsRegistry;
   isVisible: boolean;
   appTitle?: string;
 }
@@ -67,9 +68,7 @@ export class Header extends Component<Props> {
     return <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
   }
 
-  public renderControls() {
-    const { navControls } = this.props;
-
+  public renderControls(navControls: NavControl[]) {
     return (
       navControls &&
       navControls.map(navControl => (
@@ -81,11 +80,14 @@ export class Header extends Component<Props> {
   }
 
   public render() {
-    const { navLinks, isVisible } = this.props;
+    const { navControls, navLinks, isVisible } = this.props;
 
     if (!isVisible) {
       return null;
     }
+
+    const leftNavControls = navControls.bySide[NavControlSide.Left];
+    const rightNavControls = navControls.bySide[NavControlSide.Right];
 
     return (
       <EuiHeader>
@@ -96,11 +98,13 @@ export class Header extends Component<Props> {
             <HeaderSpacesMenu />
           </EuiHeaderSectionItem>
 
+          {leftNavControls && this.renderControls(leftNavControls.inOrder)}
+
           {this.renderBreadcrumbs()}
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">
-          {this.renderControls()}
+          {rightNavControls && this.renderControls(rightNavControls.inOrder)}
 
           <EuiHeaderSectionItem>
             <HeaderAppMenu navLinks={navLinks} />

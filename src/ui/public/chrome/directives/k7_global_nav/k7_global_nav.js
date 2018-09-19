@@ -27,7 +27,7 @@ const module = uiModules.get('kibana');
 
 module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
   const navLinks = chrome.getNavLinks();
-  const navControls = Private(chromeK7NavControlsRegistry).inOrder;
+  const navControls = Private(chromeK7NavControlsRegistry);
 
   return reactDirective(Header, [
     // scope accepted by directive, passed in as React props
