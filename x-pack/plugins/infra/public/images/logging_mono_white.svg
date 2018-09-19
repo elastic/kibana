@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>logging-mono</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="logging-mono" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(0.000000, 2.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <path d="M7,4 L25,4 L25,22 L7,22 L7,4 Z M9,7 L9,9 L12,9 L12,7 L9,7 Z M9,12 L9,14 L12,14 L12,12 L9,12 Z M9,17 L9,19 L12,19 L12,17 L9,17 Z M14,7 L14,9 L22,9 L22,7 L14,7 Z M14,12 L14,14 L22,14 L22,12 L14,12 Z M14,17 L14,19 L22,19 L22,17 L14,17 Z" id="Combined-Shape"></path>
+            <path d="M26.6713328,1.11022302e-16 C25.6518335,0.824977754 25,2.08636695 25,3.5 L25,5 L10.5,5 L10.5,0 L26.6713328,0 Z" id="Combined-Shape"></path>
+            <path d="M10.5,0 C8.56700338,0 7,1.56700338 7,3.5 L7,5 L10.5,5" id="Oval-3"></path>
+            <path d="M18,24 L18,24.5 C18,25.9136331 18.6518335,27.1750222 19.6713328,28 L4,28 L4,24 L18,24 Z M20,24 L20,24.5 L20,24 Z" id="Combined-Shape"></path>
+            <path d="M7,27.5 C7,25.5670034 5.43299662,24 3.5,24 C1.56700338,24 0,25.5670034 0,27.5 L0,28 L7,28 L7,27.5 Z" id="Oval-3" transform="translate(3.500000, 26.000000) scale(1, -1) translate(-3.500000, -26.000000) "></path>
+            <path d="M25,23.8 C25,22.2536027 23.8807119,21 22.5,21 C21.1192881,21 20,22.2536027 20,23.8 L20,27 L25,27 L25,23.8 Z" id="Oval-3" transform="translate(22.500000, 24.000000) scale(1, -1) translate(-22.500000, -24.000000) "></path>
+            <path d="M32,3.60186768 C32,2.05547038 30.8807119,1 29.5,1 C28.1192881,1 27,2.05547038 27,3.60186768 L27,6 L32,6 L32,3.60186768 Z" id="Oval-3"></path>
+        </g>
+    </g>
+</svg>
