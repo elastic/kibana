@@ -17,47 +17,36 @@
  * under the License.
  */
 
-/**
- * Banners represents a prioritized list of displayed components.
- */
-export class Banners {
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-  constructor() {
-    // sorted in descending order (100, 99, 98...) so that higher priorities are in front
-    this.list = [];
-    this.uniqueId = 0;
-    this.onChangeCallback = null;
+import { BannersStartContract } from '../../../core/public/notifications/banners';
+
+let newPlatformBanners: BannersStartContract;
+
+export function __newPlatformInit__(instance: BannersStartContract) {
+  if (newPlatformBanners) {
+    throw new Error('ui/notify/banners is already initialized');
   }
 
-  _changed = () => {
-    if (this.onChangeCallback) {
-      this.onChangeCallback();
-    }
-  }
+  newPlatformBanners = instance;
+}
 
-  _remove = id => {
-    const index = this.list.findIndex(details => details.id === id);
+function renderWithReact<T>(componentOrString: React.ReactElement<T> | string) {
+  const component =
+    typeof componentOrString === 'string' ? (
+      <React.Fragment>{componentOrString}</React.Fragment>
+    ) : (
+      componentOrString
+    );
 
-    if (index !== -1) {
-      this.list.splice(index, 1);
+  return (el: HTMLDivElement) => {
+    render(component, el);
+    return () => unmountComponentAtNode(el);
+  };
+}
 
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Set the {@code callback} to invoke whenever changes are made to the banner list.
-   *
-   * Use {@code null} or {@code undefined} to unset it.
-   *
-   * @param {Function} callback The callback to use.
-   */
-  onChange = callback => {
-    this.onChangeCallback = callback;
-  }
-
+export const banners = {
   /**
    * Add a new banner.
    *
@@ -65,25 +54,9 @@ export class Banners {
    * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
    * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
-  add = ({ component, priority = 0 }) => {
-    const id = `${++this.uniqueId}`;
-    const bannerDetails = { id, component, priority };
-
-    // find the lowest priority item to put this banner in front of
-    const index = this.list.findIndex(details => priority > details.priority);
-
-    if (index !== -1) {
-      // we found something with a lower priority; so stick it in front of that item
-      this.list.splice(index, 0, bannerDetails);
-    } else {
-      // nothing has a lower priority, so put it at the end
-      this.list.push(bannerDetails);
-    }
-
-    this._changed();
-
-    return id;
-  }
+  add<T>(banner: { component: React.ReactElement<T> | string; priority?: number }) {
+    return newPlatformBanners.add(renderWithReact(banner.component), banner.priority);
+  },
 
   /**
    * Remove an existing banner.
@@ -91,15 +64,9 @@ export class Banners {
    * @param {String} id The ID of the banner to remove.
    * @return {Boolean} {@code true} if the ID is recognized and the banner is removed. {@code false} otherwise.
    */
-  remove = id => {
-    const removed = this._remove(id);
-
-    if (removed) {
-      this._changed();
-    }
-
-    return removed;
-  }
+  remove(id: string) {
+    return newPlatformBanners.remove(id);
+  },
 
   /**
    * Replace an existing banner by removing it, if it exists, and adding a new one in its place.
@@ -112,15 +79,11 @@ export class Banners {
    * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
    * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
-  set = ({ component, id, priority = 0 }) => {
-    this._remove(id);
-
-    return this.add({ component, priority });
-  }
-
-}
-
-/**
- * A singleton instance meant to represent all Kibana banners.
- */
-export const banners = new Banners();
+  set<T>(banner: { id: string; component: React.ReactElement<T> | string; priority?: number }) {
+    return newPlatformBanners.replace(
+      banner.id,
+      renderWithReact(banner.component),
+      banner.priority
+    );
+  },
+};

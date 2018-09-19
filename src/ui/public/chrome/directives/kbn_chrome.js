@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 import './kbn_chrome.less';
@@ -27,11 +25,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from '../../state_management/state_hashing';
-import {
-  notify,
-  GlobalBannerList,
-  banners,
-} from '../../notify';
+import { notify } from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -85,17 +79,6 @@ export function kbnChromeProvider(chrome, internals) {
 
           // Notifications
           $scope.notifList = notify._notifs;
-
-          // Non-scope based code (e.g., React)
-
-          // Banners
-          ReactDOM.render(
-            <GlobalBannerList
-              banners={banners.list}
-              subscribe={banners.onChange}
-            />,
-            document.getElementById('globalBannerList')
-          );
 
           return chrome;
         }

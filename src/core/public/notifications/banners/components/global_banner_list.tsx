@@ -18,48 +18,24 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
-import { GlobalBannerList } from './global_banner_list';
 
-describe('GlobalBannerList', () => {
+import { Banners } from '../banners_service';
+import { GlobalBannerItem } from './global_banner_item';
+import './global_banner_list.css';
 
-  test('is rendered', () => {
-    const component = render(
-      <GlobalBannerList />
-    );
+interface Props {
+  banners: Banners;
+}
 
-    expect(component)
-      .toMatchSnapshot();
+const sortByPriority = (banners: Banners) =>
+  banners.slice().sort((a, b) => b.priority - a.priority);
 
-  });
-
-  describe('props', () => {
-
-    describe('banners', () => {
-
-      test('is rendered', () => {
-        const banners = [{
-          id: 'a',
-          component: 'a component',
-          priority: 1,
-        }, {
-          'data-test-subj': 'b',
-          id: 'b',
-          component: 'b good',
-        }];
-
-        const component = render(
-          <GlobalBannerList
-            banners={banners}
-          />
-        );
-
-        expect(component)
-          .toMatchSnapshot();
-      });
-
-    });
-
-  });
-
-});
+export function GlobalBannerList(props: Props) {
+  return (
+    <div className="globalBanner__list">
+      {sortByPriority(props.banners).map(banner => (
+        <GlobalBannerItem key={banner.id} banner={banner} />
+      ))}
+    </div>
+  );
+}

@@ -17,5 +17,26 @@
  * under the License.
  */
 
-export { GlobalBannerList } from './global_banner_list';
-export { banners } from './banners';
+import { shallow } from 'enzyme';
+import React from 'react';
+import * as Rx from 'rxjs';
+import { GlobalBannersContainer } from './global_banners_container';
+
+it('renders nothing without banners', () => {
+  const component = shallow(<GlobalBannersContainer banners$={Rx.EMPTY} />);
+  expect(component).toMatchInlineSnapshot(`""`);
+});
+
+it('passes banners to the GlobalBannerList', () => {
+  expect(shallow(<GlobalBannersContainer banners$={Rx.of(['banner2', 'banner1']) as any} />))
+    .toMatchInlineSnapshot(`
+<GlobalBannerList
+  banners={
+    Array [
+      "banner2",
+      "banner1",
+    ]
+  }
+/>
+`);
+});
