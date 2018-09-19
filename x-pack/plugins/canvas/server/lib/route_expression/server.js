@@ -24,7 +24,7 @@ export const server = ({ onFunctionNotFound, server, socket }) => {
           const interpret = interpretProvider({
             types: types.toJS(),
             functions: serverFunctions.toJS(),
-            handlers: createHandlers(request, server), // TODO: Real handlers // Need server & request here
+            handlers: createHandlers(request, server),
             onFunctionNotFound: (ast, context) => {
               return onFunctionNotFound(ast, context);
             },

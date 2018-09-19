@@ -13,7 +13,6 @@ import { routeExpressionProvider } from '../lib/route_expression';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
-import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
@@ -22,16 +21,15 @@ export function socketApi(server) {
     console.log('User connected, attaching handlers');
 
     // This is the HAPI request object
-    const request = socket.handshake;
-    const authHeader = getAuthHeader(request, server);
+
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
     // We'd be better off creating the environments here, then passing them to the expression router
     const routeExpression = routeExpressionProvider([
-      browser({ socket, onFunctionNotFound, serialize, deserialize }),
       thread({ onFunctionNotFound, serialize, deserialize }),
       serverEnv({ server, socket, onFunctionNotFound, serialize, deserialize }),
+      browser({ socket, onFunctionNotFound, serialize, deserialize }),
     ]);
 
     function onFunctionNotFound(ast, context) {
@@ -45,19 +43,16 @@ export function socketApi(server) {
     });
 
     const handler = ({ ast, context, id }) => {
-      Promise.all([authHeader]).then(([authHeader]) => {
-        if (server.plugins.security) request.headers.authorization = authHeader;
-        return routeExpression(ast, context)
-          .then(value => {
-            socket.emit(`resp:${id}`, { value: serialize(value) });
-          })
-          .catch(e => {
-            socket.emit(`resp:${id}`, {
-              error: e.message,
-              stack: e.stack,
-            });
+      return routeExpression(ast, deserialize(context))
+        .then(value => {
+          socket.emit(`resp:${id}`, { value: serialize(value) });
+        })
+        .catch(e => {
+          socket.emit(`resp:${id}`, {
+            error: e.message,
+            stack: e.stack,
           });
-      });
+        });
     };
 
     socket.on('run', handler);

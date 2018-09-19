@@ -39,7 +39,6 @@ export const browser = ({ socket }) => {
 
           socket.once(`resp:${id}`, listener);
 
-          // TODO serialize is not working here, probably because the registry is empty. We should probably pass serialize and deserialize in
           socket.emit('run', { ast, context: serialize(context), id });
         });
       },

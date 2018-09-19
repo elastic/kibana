@@ -13,6 +13,12 @@ import { pluginPaths } from './plugin_paths';
 const lstat = promisify(fs.lstat);
 const readdir = promisify(fs.readdir);
 
+/*
+  TODO: This needs to read multiple paths.
+  - Kibana plugin dir
+  - Our own plugin dir
+  - Kibana data dir
+*/
 const kibanaPluginPath = path.resolve(__dirname, '..', '..', '..');
 const canvasPluginDirectoryName = 'canvas_plugin';
 
