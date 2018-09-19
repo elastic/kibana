@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
-import { chromeNavControlsRegistry, chromeK7NavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
 import { uiModules } from 'ui/modules';
 import template from 'plugins/security/views/nav_control/nav_control.html';
 import { SecurityNavControl } from './nav_control_component';
@@ -44,7 +46,7 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
 chromeK7NavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
   name: 'security',
   order: 1000,
-  render() {
+  render(el) {
     const xpackInfo = Private(XPackInfoProvider);
     const showSecurityLinks = xpackInfo.get('features.security.showLinks');
     if (Private(PathProvider).isLoginOrLogout() || !showSecurityLinks) return null;
@@ -54,6 +56,11 @@ chromeK7NavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
       route: `${kbnBaseUrl}#/account`,
     };
 
-    return <SecurityNavControl {...props} />;
+    props.user.$promise.then(() => {
+      // Wait for the user to be propogated before rendering into the DOM.
+      ReactDOM.render(<SecurityNavControl {...props} />, el);
+    });
+
+    return () => ReactDOM.unmountComponentAtNode(el);
   }
 }));

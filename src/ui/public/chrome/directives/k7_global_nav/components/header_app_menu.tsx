@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
-  EuiIcon,
+  // TODO: add type annotations
+  // @ts-ignore
   EuiHeaderSectionItemButton,
+  // @ts-ignore
+  EuiIcon,
+  // @ts-ignore
   EuiKeyPadMenu,
+  // @ts-ignore
   EuiKeyPadMenuItem,
   EuiPopover,
 } from '@elastic/eui';
 
-export class HeaderAppMenu extends Component {
-  constructor(props) {
+import { NavLink } from '../';
+
+interface Props {
+  navLinks: NavLink[];
+}
+
+interface State {
+  isOpen: boolean;
+}
+
+export class HeaderAppMenu extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -38,19 +51,19 @@ export class HeaderAppMenu extends Component {
     };
   }
 
-  onMenuButtonClick = () => {
+  public onMenuButtonClick = () => {
     this.setState({
       isOpen: !this.state.isOpen,
     });
   };
 
-  closeMenu = () => {
+  public closeMenu = () => {
     this.setState({
       isOpen: false,
     });
   };
 
-  render() {
+  public render() {
     const { navLinks = [] } = this.props;
 
     const button = (
@@ -74,18 +87,16 @@ export class HeaderAppMenu extends Component {
         closePopover={this.closeMenu}
       >
         <EuiKeyPadMenu id="keyPadMenu" style={{ width: 288 }}>
-          {
-            navLinks.map((navLink) => (
-              <EuiKeyPadMenuItem
-                label={navLink.title}
-                href={navLink.url}
-                key={navLink.id}
-                onClick={this.closeMenu}
-              >
-                <EuiIcon type={navLink.k7IconType} size="l" />
-              </EuiKeyPadMenuItem>
-            ))
-          }
+          {navLinks.map(navLink => (
+            <EuiKeyPadMenuItem
+              label={navLink.title}
+              href={navLink.url}
+              key={navLink.id}
+              onClick={this.closeMenu}
+            >
+              <EuiIcon type={navLink.k7IconType} size="l" />
+            </EuiKeyPadMenuItem>
+          ))}
         </EuiKeyPadMenu>
       </EuiPopover>
     );

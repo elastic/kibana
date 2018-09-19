@@ -28,15 +28,7 @@ export class SecurityNavControl extends Component {
 
     this.state = {
       isOpen: false,
-      userLoaded: this.props.user ? this.props.user.$resolved : false
     };
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // Force re-rendering once the user promise resolves
-    if (this.props.user && !prevState.userLoaded) {
-      this.props.user.$promise.then(() => this.setState({ userLoaded: true }));
-    }
   }
 
   onMenuButtonClick = () => {
@@ -52,11 +44,6 @@ export class SecurityNavControl extends Component {
   };
 
   render() {
-    // Wait for the user to finish loading
-    if (!this.state.userLoaded) {
-      return null;
-    }
-
     const { user, route } = this.props;
     const name = user.full_name || user.username || '';
     const button = (

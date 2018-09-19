@@ -17,27 +17,23 @@
  * under the License.
  */
 
+import { ListIterator } from 'lodash';
 
-import { uiModules } from '../../../modules';
-import { Header } from './components/header';
-import './k7_global_nav.less';
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+interface IndexedArrayConfig<T> {
+  index?: string[];
+  group?: string[];
+  order?: string[];
+  initialSet?: T[];
+  immutable?: boolean;
+}
 
-const module = uiModules.get('kibana');
+declare class IndexedArray<T> extends Array<T> {
+  public immutable: boolean;
+  public raw: T[];
 
-module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
-  const navLinks = chrome.getNavLinks();
-  const navControls = Private(chromeK7NavControlsRegistry).inOrder;
+  constructor(config: IndexedArrayConfig<T>);
 
-  return reactDirective(Header, [
-    // scope accepted by directive, passed in as React props
-    'appTitle',
-    'isVisible',
-  ],
-  {},
-  // angular injected React props
-  {
-    navLinks,
-    navControls
-  });
-});
+  public remove(predicate: ListIterator<T, boolean>): T[];
+
+  public toJSON(): T[];
+}

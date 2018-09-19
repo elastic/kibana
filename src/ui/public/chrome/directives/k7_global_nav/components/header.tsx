@@ -17,59 +17,70 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
+  // TODO: add type annotations
+  // @ts-ignore
   EuiHeader,
+  // @ts-ignore
   EuiHeaderBreadcrumbs,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
+  // @ts-ignore
   EuiHeaderLogo,
+  // @ts-ignore
+  EuiHeaderSection,
+  // @ts-ignore
+  EuiHeaderSectionItem,
 } from '@elastic/eui';
 
 import { HeaderAppMenu } from './header_app_menu';
+import { HeaderNavControl } from './header_nav_control';
 import { HeaderSpacesMenu } from './header_spaces_menu';
 
-export class Header extends Component {
-  constructor(props) {
-    super(props);
+import { NavControl, NavLink } from '../';
+
+interface Props {
+  navLinks: NavLink[];
+  navControls: NavControl[];
+  isVisible: boolean;
+  appTitle?: string;
+}
+
+export class Header extends Component<Props> {
+  public renderLogo() {
+    return <EuiHeaderLogo iconType="logoKibana" href="/" aria-label="Go to home page" />;
   }
 
-  renderLogo() {
-    return (
-      <EuiHeaderLogo iconType="logoKibana" href="/" aria-label="Go to home page" />
-    );
-  }
-
-  renderBreadcrumbs() {
+  public renderBreadcrumbs() {
     const { appTitle } = this.props;
 
     if (!appTitle) {
       return null;
     }
 
-    const breadcrumbs = [{
-      text: appTitle
-    }];
+    const breadcrumbs = [
+      {
+        text: appTitle,
+      },
+    ];
+
+    return <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
+  }
+
+  public renderControls() {
+    const { navControls } = this.props;
 
     return (
-      <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
+      navControls &&
+      navControls.map(navControl => (
+        <EuiHeaderSectionItem key={navControl.name}>
+          <HeaderNavControl navControl={navControl} />
+        </EuiHeaderSectionItem>
+      ))
     );
   }
 
-  renderControls() {
-    const { navControls } = this.props;
-
-    return navControls && navControls.map(navControl => (
-      <EuiHeaderSectionItem key={navControl.name}>
-        {navControl.render()}
-      </EuiHeaderSectionItem>
-    ));
-  }
-
-  render() {
+  public render() {
     const { navLinks, isVisible } = this.props;
 
     if (!isVisible) {
@@ -79,9 +90,7 @@ export class Header extends Component {
     return (
       <EuiHeader>
         <EuiHeaderSection>
-          <EuiHeaderSectionItem border="right">
-            {this.renderLogo()}
-          </EuiHeaderSectionItem>
+          <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem border="right">
             <HeaderSpacesMenu />

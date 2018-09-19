@@ -23,8 +23,3 @@ export const chromeNavControlsRegistry = uiRegistry({
   name: 'chromeNavControls',
   order: ['order']
 });
-
-export const chromeK7NavControlsRegistry = uiRegistry({
-  name: 'chromeK7NavControls',
-  order: ['order']
-});

@@ -17,27 +17,10 @@
  * under the License.
  */
 
+import { NavControl } from '../chrome/directives/k7_global_nav';
+import { uiRegistry, UIRegistry } from './_registry';
 
-import { uiModules } from '../../../modules';
-import { Header } from './components/header';
-import './k7_global_nav.less';
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
-
-const module = uiModules.get('kibana');
-
-module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
-  const navLinks = chrome.getNavLinks();
-  const navControls = Private(chromeK7NavControlsRegistry).inOrder;
-
-  return reactDirective(Header, [
-    // scope accepted by directive, passed in as React props
-    'appTitle',
-    'isVisible',
-  ],
-  {},
-  // angular injected React props
-  {
-    navLinks,
-    navControls
-  });
+export const chromeK7NavControlsRegistry: UIRegistry<NavControl> = uiRegistry({
+  name: 'chromeK7NavControls',
+  order: ['order'],
 });

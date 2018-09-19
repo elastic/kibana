@@ -17,27 +17,15 @@
  * under the License.
  */
 
+import { IndexedArray, IndexedArrayConfig } from '../indexed_array';
 
-import { uiModules } from '../../../modules';
-import { Header } from './components/header';
-import './k7_global_nav.less';
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+interface UIRegistry<T> extends IndexedArray<T> {
+  register<T>(privateModule: T): UIRegistry<T>;
+}
 
-const module = uiModules.get('kibana');
+interface UIRegistrySpec<T> extends IndexedArrayConfig<T> {
+  name: string;
+  filter?(item: T): boolean;
+}
 
-module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
-  const navLinks = chrome.getNavLinks();
-  const navControls = Private(chromeK7NavControlsRegistry).inOrder;
-
-  return reactDirective(Header, [
-    // scope accepted by directive, passed in as React props
-    'appTitle',
-    'isVisible',
-  ],
-  {},
-  // angular injected React props
-  {
-    navLinks,
-    navControls
-  });
-});
+declare function uiRegistry<T>(spec: UIRegistrySpec<T>): UIRegistry<T>;
