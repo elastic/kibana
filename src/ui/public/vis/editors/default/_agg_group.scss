@@ -14,19 +14,6 @@
 }
 
 .visEditorAggGroup {
-  // wraps the .vis-editor-agg and nesting-indicator
+  // wraps the .vis-editor-agg
   color: $euiColorDarkShade;
 }
-
-// SASSTODO: This element is targeted via tests, but can't find
-// where it's actually implemented
-.visEditor nesting-indicator {
-  display: flex;
-  flex: 0 0 auto;
-
-  > span {
-    width: $vis-editor-nesting-width;
-    background-color: $euiColorSuccess;
-  }
-}
-
