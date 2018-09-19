@@ -70,8 +70,9 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
     <div>
       <EuiButtonEmpty
         onClick={() => {
-          window.alert('This will later go to more general beats install instructions.');
-          window.location.href = '#/home/tutorial/dockerMetrics';
+          // random, but spacific number ensures new tab does not overwrite another _newtab in chrome
+          // and at the same time not truly random so that many clicks of the link open many tabs at this same URL
+          window.open('https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html','_newtab35628937456');
         }}
       >
         Learn how to install beats
