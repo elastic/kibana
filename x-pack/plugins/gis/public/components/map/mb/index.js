@@ -7,7 +7,6 @@
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
 import { syncMBState } from './mb_map_selector';
-import { detectExternalUIChanges } from '../../../selectors/ui_selectors';
 import { mapExtentChanged } from '../../../actions/store_actions';
 
 
@@ -19,10 +18,6 @@ function mapStateToProps(state = {}) {
    * on the mapbox component.
    */
   syncMBState(state);
-
-  return {
-    externalElemChange: detectExternalUIChanges(state)
-  };
 }
 
 function mapDispatchToProps(dispatch) {
