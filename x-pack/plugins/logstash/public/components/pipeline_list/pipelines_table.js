@@ -69,6 +69,7 @@ function getColumns(openPipeline, clonePipeline) {
         ) : null;
       },
       sortable: false,
+      width: '100px',
     },
   ];
 }
