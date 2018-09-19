@@ -17,17 +17,23 @@ export function fileDataVisualizerProvider(callWithRequest) {
   async function analyzeFile(data, overrides) {
     let cached = false;
     let results = [];
-    const hasOverrides = false;
 
     try {
       results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
       cached = await cacheData(data);
     } catch (error) {
+      console.error(error);
       const err = (error.message !== undefined) ? error.message : error;
       throw Boom.badRequest(err);
     }
-    return {
+
+    const {
       hasOverrides,
+      reducedOverrides
+    } = formatOverrides(overrides);
+
+    return {
+      ...hasOverrides && { overrides: reducedOverrides },
       cached,
       results,
     };
@@ -63,5 +69,34 @@ export function fileDataVisualizerProvider(callWithRequest) {
 
   return {
     analyzeFile
+  };
+}
+
+function formatOverrides(overrides) {
+  let hasOverrides = false;
+
+  const reducedOverrides = Object.keys(overrides).reduce((p, c) => {
+    if (overrides[c] !== '') {
+      p[c] = overrides[c];
+      hasOverrides = true;
+    }
+    return p;
+  }, {});
+
+  if (reducedOverrides.column_names !== undefined) {
+    reducedOverrides.column_names = reducedOverrides.column_names.split(',');
+  }
+
+  if (reducedOverrides.has_header_row !== undefined) {
+    reducedOverrides.has_header_row = (reducedOverrides.has_header_row === 'true');
+  }
+
+  if (reducedOverrides.should_trim_fields !== undefined) {
+    reducedOverrides.should_trim_fields = (reducedOverrides.should_trim_fields === 'true');
+  }
+
+  return  {
+    reducedOverrides,
+    hasOverrides,
   };
 }

@@ -22,7 +22,7 @@ import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { overrideDefaults } from './overrides';
-
+import { MAX_BYTES } from '../../../../common/constants/file_datavisualizer';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -40,23 +40,15 @@ export class FileDataVisualizerView extends Component {
       results: undefined,
     };
 
-    this.overrides = {
-      ...overrideDefaults
-    };
-
-    this.defaultSettings = {};
-
-    this.maxPayloadBytes = this.props.maxPayloadBytes;
+    this.overrides = {};
+    this.originalSettings = {};
     this.showEditFlyout = () => {};
   }
 
   onChange = (files) => {
-    this.overrides = {
-      ...overrideDefaults
-    };
+    this.overrides = {};
 
     this.setState({
-      files,
       loading: (files.length > 0),
       loaded: false,
       fileContents: '',
@@ -74,15 +66,16 @@ export class FileDataVisualizerView extends Component {
   };
 
   async analyzeFile(file) {
-    if (file.size < this.maxPayloadBytes) {
-      let data = null;
+    if (file.size < MAX_BYTES) {
       try {
         const fileContents = await readFile(file);
-        data = fileContents.data;
+        const data = fileContents.data;
         this.setState({
           fileContents: data,
           fileSize: file.size,
         });
+
+        await this.createSettings(data);
 
       } catch (error) {
         console.error(error);
@@ -93,7 +86,7 @@ export class FileDataVisualizerView extends Component {
         });
       }
 
-      await this.findSettings(data);
+
     } else {
       this.setState({
         loaded: false,
@@ -104,37 +97,58 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async findSettings(data) {
-    if (data !== null) {
-      try {
-        const overrides = this.createUrlOverrides();
-        console.log('overrides', overrides);
-        const resp = await  ml.analyzeFile(data, overrides);
+  async createSettings(data) {
+    try {
+      const overrides = this.createUrlOverrides();
 
-        if (resp.hasOverrides === false) {
-          this.setDefaultSettings(resp.results);
+      console.log('overrides', overrides);
+      const resp = await  ml.analyzeFile(data, overrides);
+      const serverSettings = processResults(resp.results);
+      const serverOverrides = resp.overrides;
+
+      this.overrides = {};
+
+      if (serverOverrides === undefined) {
+        this.originalSettings = serverSettings;
+      } else {
+        for (const o in serverOverrides) {
+          if (serverOverrides.hasOwnProperty(o)) {
+            const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
+            this.overrides[camelCaseO] = serverOverrides[o];
+          }
         }
-        this.setState({
-          results: resp.results,
-          loaded: true,
-          loading: false,
-        });
-      } catch (error) {
-        console.error(error);
-        const msg = (error.message || '').split('::')[0];
-        this.setState({
-          results: undefined,
-          loaded: false,
-          loading: false,
-          fileCouldNotBeRead: true,
-          serverErrorMessage: msg,
-        });
+
+        // check to see if the settings from the server which haven't been overridden have changed.
+        // e.g. changing the name of the time field which is also the time field
+        // will cause the timestamp_field setting to change.
+        // if any have change, update the originalSettings value
+        for (const o in serverSettings) {
+          if (serverSettings.hasOwnProperty(o)) {
+            const value = serverSettings[o];
+            if (
+              this.overrides[o] === undefined &&
+              (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
+              (value !== this.originalSettings[o]))
+            ) {
+              this.originalSettings[o] = value;
+            }
+          }
+        }
       }
-    } else {
+
       this.setState({
+        results: resp.results,
+        loaded: true,
+        loading: false,
+      });
+    } catch (error) {
+      console.error(error);
+      this.setState({
+        results: undefined,
         loaded: false,
         loading: false,
         fileCouldNotBeRead: true,
+        serverErrorMessage: error.message,
       });
     }
   }
@@ -146,39 +160,14 @@ export class FileDataVisualizerView extends Component {
     this.showEditFlyout = () => {};
   }
 
-
-  setDefaultSettings(results) {
-    let timestampFormat = results.timestamp_format;
-    if (
-      timestampFormat === undefined &&
-      results.timestamp_formats !== undefined &&
-      results.timestamp_formats.length
-    ) {
-      timestampFormat = results.timestamp_formats[0];
-    }
-
-    this.defaultSettings = {
-      format: results.format,
-      delimiter: results.delimiter,
-      timestampField: results.timestamp_field,
-      timestampFormat,
-      quote: '"', //results.quote,
-      hasHeaderRow: results.has_header_row,
-      shouldTrimFields: results.should_trim_fields,
-      charset: results.charset,
-      columnNames: results.column_names,
-      grokPattern: results.grok_pattern,
-    };
-  }
-
   createUrlOverrides() {
     const formattedOverrides = {};
-    for (const o in this.overrides) {
-      if (this.overrides.hasOwnProperty(o)) {
+    for (const o in overrideDefaults) {
+      if (overrideDefaults.hasOwnProperty(o)) {
         let value = this.overrides[o];
         if (
-          (Array.isArray(value) && isEqual(value, this.defaultSettings[o]) ||
-          (value === null || value === this.defaultSettings[o]))
+          (Array.isArray(value) && isEqual(value, this.originalSettings[o]) ||
+          (value === undefined || value === this.originalSettings[o]))
         ) {
           value = '';
         }
@@ -187,13 +176,39 @@ export class FileDataVisualizerView extends Component {
         formattedOverrides[snakeCaseO] = value;
       }
     }
+
+    if (formattedOverrides.format === '' && this.originalSettings.format === 'delimited') {
+      if (
+        formattedOverrides.should_trim_fields !== '' ||
+        formattedOverrides.has_header_row !== '' ||
+        formattedOverrides.delimiter !== '' ||
+        formattedOverrides.quote !== '' ||
+        formattedOverrides.column_names !== ''
+      ) {
+        formattedOverrides.format = this.originalSettings.format;
+      }
+    }
+
+    if (formattedOverrides.format === 'json' || this.originalSettings.format === 'json') {
+      formattedOverrides.should_trim_fields = '';
+      formattedOverrides.has_header_row = '';
+      formattedOverrides.delimiter = '';
+      formattedOverrides.quote = '';
+      formattedOverrides.column_names = '';
+    }
+
     return formattedOverrides;
   }
 
   setOverrides = (overrides) => {
-    console.log(overrides);
+    console.log('setOverrides', overrides);
     this.overrides = overrides;
-    this.findSettings(this.state.fileContents);
+    this.setState({
+      loading: true,
+      loaded: false,
+    }, () => {
+      this.createSettings(this.state.fileContents);
+    });
   }
 
   render() {
@@ -231,7 +246,7 @@ export class FileDataVisualizerView extends Component {
         {(fileTooLarge) &&
           <FileTooLarge
             fileSize={fileSize}
-            maxFileSize={this.maxPayloadBytes}
+            maxFileSize={MAX_BYTES}
           />
         }
 
@@ -249,7 +264,7 @@ export class FileDataVisualizerView extends Component {
         <EditFlyout
           setShowFunction={this.setShowEditFlyoutFunction}
           setOverrides={this.setOverrides}
-          defaultSettings={this.defaultSettings}
+          originalSettings={this.originalSettings}
           overrides={this.overrides}
           fields={fields}
         />
@@ -279,4 +294,28 @@ function readFile(file) {
       reject();
     }
   });
+}
+
+function processResults(results) {
+  let timestampFormat = results.timestamp_format;
+  if (
+    timestampFormat === undefined &&
+    results.timestamp_formats !== undefined &&
+    results.timestamp_formats.length
+  ) {
+    timestampFormat = results.timestamp_formats[0];
+  }
+
+  return {
+    format: results.format,
+    delimiter: results.delimiter,
+    timestampField: results.timestamp_field,
+    timestampFormat,
+    quote: '"', //results.quote,
+    hasHeaderRow: results.has_header_row,
+    shouldTrimFields: results.should_trim_fields,
+    charset: results.charset,
+    columnNames: results.column_names,
+    grokPattern: results.grok_pattern,
+  };
 }

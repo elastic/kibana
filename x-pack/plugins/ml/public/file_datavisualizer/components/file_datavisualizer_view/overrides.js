@@ -6,14 +6,14 @@
 
 
 export const overrideDefaults = {
-  timestampFormat: null,
-  timestampField: null,
-  format: null,
-  delimiter: null,
-  quote: null,
-  hasHeaderRow: null,
-  charset: null,
-  columnNames: null,
-  shouldTrimFields: null,
-  grokPattern: null,
+  timestampFormat: undefined,
+  timestampField: undefined,
+  format: undefined,
+  delimiter: undefined,
+  quote: undefined,
+  hasHeaderRow: undefined,
+  charset: undefined,
+  columnNames: undefined,
+  shouldTrimFields: undefined,
+  grokPattern: undefined,
 };

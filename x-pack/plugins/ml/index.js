@@ -75,7 +75,6 @@ export const ml = (kibana) => {
         return {
           kbnIndex: config.get('kibana.index'),
           esServerUrl: config.get('elasticsearch.url'),
-          maxPayloadBytes: config.get('server.maxPayloadBytes'),
         };
       });
 

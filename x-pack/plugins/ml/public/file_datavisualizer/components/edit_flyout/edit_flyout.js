@@ -73,7 +73,7 @@ export class EditFlyout extends Component {
       const {
         setOverrides,
         overrides,
-        defaultSettings,
+        originalSettings,
         fields,
       } = this.props;
 
@@ -95,7 +95,7 @@ export class EditFlyout extends Component {
             <Overrides
               setOverrides={setOverrides}
               overrides={overrides}
-              defaultSettings={defaultSettings}
+              originalSettings={originalSettings}
               setApplyOverrides={this.setApplyOverrides}
               fields={fields}
             />

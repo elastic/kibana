@@ -9,10 +9,10 @@ import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
 
-export function FileDataVisualizerPage({ maxPayloadBytes }) {
+export function FileDataVisualizerPage({ }) {
   return (
     <div className="file-datavisualizer-container">
-      <FileDataVisualizerView maxPayloadBytes={maxPayloadBytes} />
+      <FileDataVisualizerView />
     </div>
   );
 }

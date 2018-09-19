@@ -15,6 +15,8 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiCheckbox,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import {
@@ -29,7 +31,7 @@ export class Overrides extends Component {
   constructor(props) {
     super(props);
 
-    this.defaultSettings = this.props.defaultSettings;
+    this.originalSettings = this.props.originalSettings;
     this.overrides = this.props.overrides;
 
     const {
@@ -48,26 +50,30 @@ export class Overrides extends Component {
     const {
       delimiter: d,
       customDelimiter: customD
-    } = convertDelimiter((delimiter === null) ? this.defaultSettings.delimiter : delimiter);
+    } = convertDelimiter((delimiter === undefined) ? this.originalSettings.delimiter : delimiter);
+
+    const tempColumnNames = (columnNames === undefined && this.originalSettings.columnNames !== undefined) ?
+      [...this.originalSettings.columnNames] : columnNames;
 
     this.state = {
-      charset: (charset === null) ? this.defaultSettings.charset : charset,
-      format: (format === null) ? this.defaultSettings.format : format,
-      hasHeaderRow: (hasHeaderRow === null) ? this.defaultSettings.hasHeaderRow : hasHeaderRow,
-      columnNames: (columnNames === null) ? this.defaultSettings.columnNames : columnNames,
+      charset: (charset === undefined) ? this.originalSettings.charset : charset,
+      format: (format === undefined) ? this.originalSettings.format : format,
+      hasHeaderRow: (hasHeaderRow === undefined) ? this.originalSettings.hasHeaderRow : hasHeaderRow,
+      columnNames: tempColumnNames,
       delimiter: d,
       customDelimiter: customD,
-      quote: (quote === null) ? this.defaultSettings.quote : quote,
-      shouldTrimFields: (shouldTrimFields === null) ? this.defaultSettings.shouldTrimFields : shouldTrimFields,
-      grokPattern: (grokPattern === null) ? this.defaultSettings.grokPattern : grokPattern,
-      timestampFormat: (timestampFormat === null) ? this.defaultSettings.timestampFormat : timestampFormat,
-      timestampField: (timestampField === null) ? this.defaultSettings.timestampField : timestampField,
+      quote: (quote === undefined) ? this.originalSettings.quote : quote,
+      shouldTrimFields: (shouldTrimFields === undefined) ? this.originalSettings.shouldTrimFields : shouldTrimFields,
+      grokPattern: (grokPattern === undefined) ? this.originalSettings.grokPattern : grokPattern,
+      timestampFormat: (timestampFormat === undefined) ? this.originalSettings.timestampFormat : timestampFormat,
+      timestampField: (timestampField === undefined) ? this.originalSettings.timestampField : timestampField,
     };
 
     this.fields = this.props.fields;
     this.fieldOptions = this.fields.map(f => ({ value: f, inputDisplay: f }));
+    this.originalColumnNames = (this.state.columnNames !== undefined) ? [...this.state.columnNames] : [];
 
-    console.log(this.state);
+    console.log('Overrides constructor', this.state);
   }
 
   componentDidMount() {
@@ -90,6 +96,10 @@ export class Overrides extends Component {
     this.props.setOverrides(overrides);
   }
 
+  onFormatChange = (format) => {
+    this.setState({ format });
+  }
+
   onTimestampFormatChange = (timestampFormat) => {
     this.setState({ timestampFormat });
   }
@@ -98,16 +108,16 @@ export class Overrides extends Component {
     this.setState({ timestampField });
   }
 
-  onFormatChange = (format) => {
-    this.setState({ format });
-  }
-
   onDelimiterChange = (delimiter) => {
     this.setState({ delimiter });
   }
 
   onCustomDelimiterChange = (e) => {
     this.setState({ customDelimiter: e.target.value });
+  }
+
+  onQuoteChange = (quote) => {
+    this.setState({ quote });
   }
 
   onHasHeaderRowChange = (e) => {
@@ -122,6 +132,13 @@ export class Overrides extends Component {
     this.setState({ charset });
   }
 
+  onColumnNameChange = (e, i) => {
+    const columnNames = this.state.columnNames;
+    columnNames[i] = e.target.value;
+    this.setState({ columnNames });
+  }
+
+
   render() {
     const {
       timestampFormat,
@@ -133,6 +150,7 @@ export class Overrides extends Component {
       hasHeaderRow,
       shouldTrimFields,
       charset,
+      columnNames,
     } = this.state;
 
     return (
@@ -140,7 +158,6 @@ export class Overrides extends Component {
       <EuiForm>
         <EuiFormRow
           label="Data format"
-          // helpText="I am some friendly help text."
         >
           <EuiSuperSelect
             options={formatOptions}
@@ -153,7 +170,6 @@ export class Overrides extends Component {
           <React.Fragment>
             <EuiFormRow
               label="Delimiter"
-              // helpText="I am some friendly help text."
             >
               <EuiSuperSelect
                 options={delimiterOptions}
@@ -165,7 +181,6 @@ export class Overrides extends Component {
               (delimiter === 'other') &&
               <EuiFormRow
                 label="Custom delimiter"
-                // helpText="I am some friendly help text."
               >
                 <EuiFieldText
                   value={customDelimiter}
@@ -176,12 +191,11 @@ export class Overrides extends Component {
 
             <EuiFormRow
               label="Quote character"
-              // helpText="I am some friendly help text."
             >
               <EuiSuperSelect
                 options={quoteOptions}
                 valueOfSelected={quote}
-                onChange={this.onDelimiterChange}
+                onChange={this.onQuoteChange}
               />
             </EuiFormRow>
 
@@ -208,7 +222,6 @@ export class Overrides extends Component {
         }
         <EuiFormRow
           label="Time stamp format"
-          // helpText="I am some friendly help text."
         >
           <EuiSuperSelect
             options={timestampFormatOptions}
@@ -219,7 +232,6 @@ export class Overrides extends Component {
 
         <EuiFormRow
           label="Time field"
-          // helpText="I am some friendly help text."
         >
           <EuiSuperSelect
             options={this.fieldOptions}
@@ -230,7 +242,6 @@ export class Overrides extends Component {
 
         <EuiFormRow
           label="charset"
-          // helpText="I am some friendly help text."
         >
           <EuiSuperSelect
             options={charsetOptions}
@@ -238,6 +249,31 @@ export class Overrides extends Component {
             onChange={this.onCharsetChange}
           />
         </EuiFormRow>
+        {
+          (this.state.format === 'delimited') &&
+
+          <React.Fragment>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>Edit field names</h3>
+            </EuiTitle>
+
+            {
+              this.originalColumnNames.map((f, i) => (
+                <EuiFormRow
+                  label={f}
+                  key={f}
+                >
+                  <EuiFieldText
+                    value={columnNames[i]}
+                    onChange={(e) => this.onColumnNameChange(e, i)}
+                  />
+                </EuiFormRow>
+              ))
+            }
+          </React.Fragment>
+        }
+
       </EuiForm>
 
     );
@@ -251,10 +287,30 @@ function convertDelimiter(d) {
         delimiter: 'comma',
         customDelimiter: ''
       };
+    case '\t':
+      return {
+        delimiter: 'tab',
+        customDelimiter: ''
+      };
+    case ';':
+      return {
+        delimiter: 'semicolon',
+        customDelimiter: ''
+      };
+    case '|':
+      return {
+        delimiter: 'pipe',
+        customDelimiter: ''
+      };
+    case ' ':
+      return {
+        delimiter: 'space',
+        customDelimiter: ''
+      };
 
     default:
       return {
-        delimiter: 'comma', // default to comma
+        delimiter: undefined, // default to comma
         customDelimiter: ''
       };
   }
@@ -264,10 +320,18 @@ function convertDelimiterBack({ delimiter, customDelimiter }) {
   switch (delimiter) {
     case 'comma':
       return ',';
+    case 'tab':
+      return '\t';
+    case 'semicolon':
+      return ';';
+    case 'pipe':
+      return '|';
+    case 'space':
+      return ' ';
     case 'other':
       return customDelimiter;
 
     default:
-      return null;
+      return undefined;
   }
 }
