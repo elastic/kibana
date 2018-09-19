@@ -61,6 +61,7 @@ export interface SavedObjectDoc {
   namespace?: string;
   migrationVersion?: MigrationVersion;
   version?: number;
+  updated_at?: Date;
 
   [rootProp: string]: any;
 }
@@ -83,8 +84,14 @@ export class SavedObjectsSerializer {
    * @param {RawDoc} rawDoc - The raw ES document to be tested
    */
   public isRawSavedObject(rawDoc: RawDoc) {
-    const { type } = rawDoc._source;
-    return type && rawDoc._id.startsWith(type) && rawDoc._source.hasOwnProperty(type);
+    const { type, namespace } = rawDoc._source;
+    const namespacePrefix =
+      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+    return (
+      type &&
+      rawDoc._id.startsWith(`${namespacePrefix}${type}`) &&
+      rawDoc._source.hasOwnProperty(type)
+    );
   }
 
   /**
@@ -93,10 +100,11 @@ export class SavedObjectsSerializer {
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
   public rawToSavedObject({ _id, _source, _version }: RawDoc): SavedObjectDoc {
-    const { type } = _source;
+    const { type, namespace } = _source;
     return {
       type,
-      id: this.trimIdPrefix(type, _id),
+      id: this.trimIdPrefix(namespace, type, _id),
+      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       attributes: _source[type],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
@@ -110,18 +118,17 @@ export class SavedObjectsSerializer {
    * @param {SavedObjectDoc} savedObj - The saved object to be converted to raw ES format.
    */
   public savedObjectToRaw(savedObj: SavedObjectDoc): RawDoc {
-    const { id, type, attributes, version } = savedObj;
+    const { id, type, namespace, attributes, migrationVersion, updated_at, version } = savedObj;
     const source = {
-      ...savedObj,
       [type]: attributes,
+      type,
+      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
+      ...(migrationVersion && { migrationVersion }),
+      ...(updated_at && { updated_at }),
     };
 
-    delete source.id;
-    delete source.attributes;
-    delete source.version;
-
     return {
-      _id: this.generateRawId(type, id),
+      _id: this.generateRawId(namespace, type, id),
       _source: source,
       _type: ROOT_TYPE,
       ...(version != null && { _version: version }),
@@ -131,18 +138,23 @@ export class SavedObjectsSerializer {
   /**
    * Given a saved object type and id, generates the compound id that is stored in the raw document.
    *
+   * @param {string} namespace - The namespace of the saved object
    * @param {string} type - The saved object type
    * @param {string} id - The id of the saved object
    */
-  public generateRawId(type: string, id?: string) {
-    return `${type}:${id || uuid.v1()}`;
+  public generateRawId(namespace: string | undefined, type: string, id?: string) {
+    const namespacePrefix =
+      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+    return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
-  private trimIdPrefix(type: string, id: string) {
+  private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
-    const prefix = `${type}:`;
+    const namespacePrefix =
+      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+    const prefix = `${namespacePrefix}${type}:`;
 
     if (!id.startsWith(prefix)) {
       return id;

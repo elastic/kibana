@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import { omit } from 'lodash';
 import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
-
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -63,6 +63,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -70,6 +71,7 @@ export class SavedObjectsRepository {
       id,
       migrationVersion,
       overwrite = false,
+      namespace,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -79,6 +81,7 @@ export class SavedObjectsRepository {
       const migrated = this._migrator.migrateDocument({
         id,
         type,
+        namespace,
         attributes,
         migrationVersion,
         updated_at: time,
@@ -94,10 +97,11 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      return this._serializer.rawToSavedObject({
+      const savedObject = this._serializer.rawToSavedObject({
         ...raw,
         ...response,
       });
+      return omit(savedObject, 'namespace');
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -114,11 +118,13 @@ export class SavedObjectsRepository {
    * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      namespace,
+      overwrite = false,
     } = options;
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
@@ -128,6 +134,7 @@ export class SavedObjectsRepository {
         type: object.type,
         attributes: object.attributes,
         migrationVersion: object.migrationVersion,
+        namespace,
         updated_at: time,
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
@@ -199,11 +206,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id) {
+  async delete(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._writeToCluster('delete', {
-      id: this._serializer.generateRawId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -238,6 +251,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -295,7 +309,10 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => this._serializer.rawToSavedObject(hit)),
+      saved_objects: response.hits.hits.map(hit => {
+        const savedObject = this._serializer.rawToSavedObject(hit);
+        return omit(savedObject, 'namespace');
+      }),
     };
   }
 
@@ -303,6 +320,8 @@ export class SavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -311,7 +330,11 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
+    const {
+      namespace
+    } = options;
+
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -320,7 +343,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._serializer.generateRawId(object.type, object.id),
+          _id: this._serializer.generateRawId(namespace, object.type, object.id),
           _type: this._type,
         }))
       }
@@ -356,11 +379,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
+  async get(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._callCluster('get', {
-      id: this._serializer.generateRawId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -392,15 +421,21 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const {
+      version,
+      namespace
+    } = options;
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version: options.version,
+      version,
       refresh: 'wait_for',
       ignore: [404],
       body: {

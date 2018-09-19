@@ -281,7 +281,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses create because overwriting is not allowed
           { create: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {}, migrationVersion: undefined },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
@@ -296,7 +296,7 @@ describe('SavedObjectsRepository', () => {
         body: [
           // uses index because overwriting is allowed
           { index: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', ...mockTimestampFields, 'foo': {}, migrationVersion: undefined },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
