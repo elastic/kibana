@@ -17,24 +17,12 @@
  * under the License.
  */
 
-import { loadData } from './load_data';
+import { createIndexName } from './create_index_name';
 
-test('load flight data', async () => {
-  let myDocsCount = 0;
-  const bulkInsertMock = (docs) => {
-    myDocsCount += docs.length;
-  };
-  const count = await loadData('./src/server/sample_data/data_sets/flights/flights.json.gz', bulkInsertMock);
-  expect(myDocsCount).toBe(13059);
-  expect(count).toBe(13059);
+test('should include sampleDataSetId and dataIndexId in elasticsearch index name', async () => {
+  expect(createIndexName('mySampleDataSetId', 'myDataIndexId')).toBe('kibana_sample_data_mySampleDataSetId_myDataIndexId');
 });
 
-test('load log data', async () => {
-  let myDocsCount = 0;
-  const bulkInsertMock = (docs) => {
-    myDocsCount += docs.length;
-  };
-  const count = await loadData('./src/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock);
-  expect(myDocsCount).toBe(14005);
-  expect(count).toBe(14005);
+test('should only include sampleDataSetId when sampleDataSetId and dataIndexId are identical', async () => {
+  expect(createIndexName('flights', 'flights')).toBe('kibana_sample_data_flights');
 });
