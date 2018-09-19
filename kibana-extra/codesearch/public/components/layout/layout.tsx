@@ -45,6 +45,7 @@ import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 import 'github-markdown-css/github-markdown.css';
 import { cloneProgressSelector, progressSelector } from '../../selectors';
 import { AlignCenterContainer } from '../../styled_components/align_center_container';
+import { CommitMessages } from './commit_messages';
 
 enum Tabs {
   FILE_TREE = 'file-tree',
@@ -91,7 +92,7 @@ const DirectoryView = withRouter(props => {
         return (
           <div key={file.name} className="directoryItem">
             <Link to={`/${resource}/${org}/${repo}/${PathTypes.tree}/${revision}/${file.path}`}>
-              {file.name}
+              {file.name}/
             </Link>
           </div>
         );
@@ -109,10 +110,10 @@ const Commits = props => {
     </div>
   ));
   return (
-    <div>
+    <CommitMessages>
       <h1 className="commitsHeader">Commits</h1>
       {commitList}
-    </div>
+    </CommitMessages>
   );
 };
 

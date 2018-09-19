@@ -38,11 +38,13 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  overflow: auto;
 }
 
 .directoryItem {
   height: 2rem;
   line-height: 2rem;
+  margin: 0 0.5rem;
 }
 
 .directoryItem>a {
@@ -59,6 +61,7 @@
 
 .commitItem {
   padding: 0.5rem 0;
+  white-space: nowrap;
 }
 
 .contentItem {
