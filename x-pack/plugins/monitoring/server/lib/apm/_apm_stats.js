@@ -22,8 +22,6 @@ export const getDiffCalculation = (max, min) => {
 
 export const apmAggFilterPath = [
   'aggregations.total',
-  'aggregations.types.buckets.key',
-  'aggregations.types.buckets.uuids.buckets.doc_count',
   'aggregations.min_events_total.value',
   'aggregations.max_events_total.value',
   'aggregations.min_mem_rss_total.value',
@@ -32,20 +30,6 @@ export const apmAggFilterPath = [
 ];
 
 export const apmUuidsAgg = maxBucketSize => ({
-  types: {
-    terms: {
-      field: 'beats_stats.beat.type',
-      size: 1000 // 1000 different types of beats possible seems like enough
-    },
-    aggs: {
-      uuids: {
-        terms: {
-          field: 'beats_stats.beat.uuid',
-          size: maxBucketSize,
-        }
-      }
-    }
-  },
   total: {
     cardinality: {
       field: 'beats_stats.beat.uuid',
