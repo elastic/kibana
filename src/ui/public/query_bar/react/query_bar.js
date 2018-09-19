@@ -99,7 +99,9 @@ export class QueryBar extends Component {
 
   updateSuggestions = debounce(async () => {
     const suggestions = await this.getSuggestions();
-    this.setState({ suggestions });
+    if (!this.componentIsUnmounting) {
+      this.setState({ suggestions });
+    }
   }, 100);
 
   getSuggestions = async () => {
@@ -311,7 +313,10 @@ export class QueryBar extends Component {
     }
   }
 
-  // TODO when component unmounts cancel the getSuggestions debounce
+  componentWillUnmount() {
+    this.updateSuggestions.cancel();
+    this.componentIsUnmounting = true;
+  }
 
   render() {
     return (
