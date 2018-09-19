@@ -41,13 +41,13 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(dataLoading) {
+  async syncDataToMapState(startLoading, stopLoading) {
     if (this._descriptor.data || this._descriptor.dataRequestToken) {
       return;
     }
-    dataLoading(true, this.getId());
+    startLoading();
     const data = await this._source.getGeoJson();
-    dataLoading(false, this.getId(), data);
+    stopLoading(data);
   }
 
   syncLayerWithMB(mbMap) {

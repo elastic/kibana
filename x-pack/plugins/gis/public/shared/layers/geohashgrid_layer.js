@@ -110,7 +110,7 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(dataLoading, zoomAndExtent) {
+  async syncDataToMapState(startLoading, stopLoading, zoomAndExtent) {
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(zoomAndExtent.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
       const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
@@ -126,11 +126,11 @@ export class GeohashGridLayer extends ALayer {
       precision: targetPrecision,
       extent: zoomAndExtent.extent
     };
-    return this._fetchNewData(dataLoading, fetchState);
+    return this._fetchNewData(startLoading, stopLoading, fetchState);
   }
 
 
-  async _fetchNewData(dataLoading, zoomAndExtent) {
+  async _fetchNewData(startLoading, stopLoading, zoomAndExtent) {
     const { precision, extent } = zoomAndExtent;
     const scaleFactor = 0.5;
     const width = extent[2] - extent[0];
@@ -142,12 +142,12 @@ export class GeohashGridLayer extends ALayer {
       extent[3] + height * scaleFactor
     ];
 
-    dataLoading(true, this.getId(), {
+    startLoading({
       precision,
       extent: expandExtent
     });
     const data = await this._source.getGeoJsonPointsWithTotalCount(precision, expandExtent);
-    dataLoading(false, this.getId(), data);
+    stopLoading(data);
   }
 
 }
