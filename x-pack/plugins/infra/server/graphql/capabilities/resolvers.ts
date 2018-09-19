@@ -4,27 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* tslint:disable: no-console */
+import { InfraSourceResolvers } from '../../../common/graphql/types';
+import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
+import { InfraCapabilitiesDomain } from '../../lib/domains/capabilities_domain';
+import { InfraContext } from '../../lib/infra_types';
+import { QuerySourceResolver } from '../sources/resolvers';
 
-export const createCapabilitiesResolvers = () => ({
+type InfraSourceCapabilitiesByNodeResolver = InfraResolverOf<
+  InfraSourceResolvers.CapabilitiesByNodeResolver,
+  InfraResolvedResult<QuerySourceResolver>,
+  InfraContext
+>;
+
+export const createCapabilitiesResolvers = (libs: {
+  capabilities: InfraCapabilitiesDomain;
+}): {
   InfraSource: {
-    capabilitiesByNode(source: any, args: any, { req }: any) {
-      console.log('source: ', source);
-      console.log('args: ', args);
-      return [
-        { name: 'mysql.status', source: 'metrics' },
-        { name: 'system.memory', source: 'metrics' },
-        { name: 'system.process', source: 'metrics' },
-        { name: 'system.cpu', source: 'metrics' },
-        { name: 'system.diskio', source: 'metrics' },
-        { name: 'system.fsstat', source: 'metrics' },
-        { name: 'system.load', source: 'metrics' },
-        { name: 'system.network', source: 'metrics' },
-        { name: 'system.process_summary', source: 'metrics' },
-        { name: 'system.auth', source: 'logs' },
-        { name: 'system.syslog', source: 'logs' },
-        { name: 'mysql.error', source: 'logs' },
-      ];
+    capabilitiesByNode: InfraSourceCapabilitiesByNodeResolver;
+  };
+} => ({
+  InfraSource: {
+    async capabilitiesByNode(source: any, args: any, { req }: any) {
+      const result = await libs.capabilities.getCapabilities(req, source.id, args.nodeName);
+      return result;
     },
   },
 });

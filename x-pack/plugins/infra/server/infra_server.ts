@@ -17,7 +17,7 @@ import { initLegacyLoggingRoutes } from './logging_legacy';
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createCapabilitiesResolvers() as IResolvers,
+      createCapabilitiesResolvers(libs) as IResolvers,
       createLogEntriesResolvers(libs) as IResolvers,
       createNodeResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
