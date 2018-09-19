@@ -34,7 +34,7 @@
     height: $euiSizeL;
     line-height: $euiSizeL;
     border-radius: $euiSizeL/2;
-    border: 1px solid $euiColorLightShade;
+    border: $euiBorderthin;
     background-color: $euiColorLightestShade;
     z-index: $euiZLevel1;
   }
