@@ -24,7 +24,6 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import image from './images/icon-tagcloud.svg';
 import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function (Private) {
@@ -34,7 +33,7 @@ VisTypesRegistryProvider.register(function (Private) {
   return VisFactory.createBaseVisualization({
     name: 'tagcloud',
     title: 'Tag Cloud',
-    image,
+    icon: 'visTagCloud',
     description: 'A group of words, sized according to their importance',
     category: CATEGORY.OTHER,
     visConfig: {
@@ -48,7 +47,6 @@ VisTypesRegistryProvider.register(function (Private) {
     },
     requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
     visualization: TagCloudVisualization,
-    responseHandler: 'tabify',
     editorConfig: {
       collections: {
         scales: ['linear', 'log', 'square root'],

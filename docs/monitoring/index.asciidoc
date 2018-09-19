@@ -25,3 +25,4 @@ or instance starts.
 --
 
 include::viewing-metrics.asciidoc[]
+include::monitoring-troubleshooting.asciidoc[]

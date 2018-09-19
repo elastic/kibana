@@ -54,7 +54,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Sorting
                 </span>
               </span>
@@ -66,6 +68,16 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     <table
       className="euiTable euiTable--responsive"
     >
+      <caption
+        aria-live="polite"
+        aria-relevant="text"
+        className="euiScreenReaderOnly"
+        role="status"
+      >
+        Below is a table of 
+        0
+         items.
+      </caption>
       <thead>
         <tr>
           <th
@@ -286,7 +298,9 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Rows per page: 10
                 </span>
               </span>
@@ -366,7 +380,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Sorting
                 </span>
               </span>
@@ -378,6 +394,16 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     <table
       className="euiTable euiTable--responsive"
     >
+      <caption
+        aria-live="polite"
+        aria-relevant="text"
+        className="euiScreenReaderOnly"
+        role="status"
+      >
+        Below is a table of 
+        2
+         items.
+      </caption>
       <thead>
         <tr>
           <th
@@ -708,7 +734,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span>
+                <span
+                  className="euiButtonEmpty__text"
+                >
                   Rows per page: 10
                 </span>
               </span>

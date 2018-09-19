@@ -15,7 +15,6 @@ export class SecureSavedObjectsClient {
       callWithRequestRepository,
       checkPrivileges,
       auditLogger,
-      savedObjectTypes,
       actions,
     } = options;
 
@@ -24,7 +23,6 @@ export class SecureSavedObjectsClient {
     this._callWithRequestRepository = callWithRequestRepository;
     this._checkPrivileges = checkPrivileges;
     this._auditLogger = auditLogger;
-    this._savedObjectTypes = savedObjectTypes;
     this._actions = actions;
   }
 
@@ -57,11 +55,12 @@ export class SecureSavedObjectsClient {
   }
 
   async find(options = {}) {
-    if (options.type) {
-      return await this._findWithTypes(options);
-    }
-
-    return await this._findAcrossAllTypes(options);
+    return await this._execute(
+      options.type,
+      'find',
+      { options },
+      repository => repository.find(options)
+    );
   }
 
   async bulkGet(objects = []) {
@@ -95,7 +94,7 @@ export class SecureSavedObjectsClient {
   async _checkSavedObjectPrivileges(actions) {
     try {
       return await this._checkPrivileges(actions);
-    } catch(error) {
+    } catch (error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
@@ -119,49 +118,5 @@ export class SecureSavedObjectsClient {
       default:
         throw new Error('Unexpected result from hasPrivileges');
     }
-  }
-
-  async _findAcrossAllTypes(options) {
-    const action = 'find';
-
-    // we have to filter for only their authorized types
-    const types = this._savedObjectTypes;
-    const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
-    const { result, username, missing } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
-
-    if (result === CHECK_PRIVILEGES_RESULT.LEGACY) {
-      return await this._callWithRequestRepository.find(options);
-    }
-
-    const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([ , privilege]) => !missing.includes(privilege))
-      .map(([type]) => type);
-
-    if (authorizedTypes.length === 0) {
-      this._auditLogger.savedObjectsAuthorizationFailure(
-        username,
-        action,
-        types,
-        missing,
-        { options }
-      );
-      throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
-    }
-
-    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, { options });
-
-    return await this._internalRepository.find({
-      ...options,
-      type: authorizedTypes
-    });
-  }
-
-  async _findWithTypes(options) {
-    return await this._execute(
-      options.type,
-      'find',
-      { options },
-      repository => repository.find(options)
-    );
   }
 }
