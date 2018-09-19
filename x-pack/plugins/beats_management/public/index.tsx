@@ -14,11 +14,17 @@ import { FrontendLibs } from './lib/lib';
 import { PageRouter } from './router';
 
 // TODO use theme provided from parentApp when kibana supports it
+import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import '@elastic/eui/dist/eui_theme_light.css';
+import { ThemeProvider } from 'styled-components';
 
 function startApp(libs: FrontendLibs) {
   libs.framework.registerManagementSection('beats', 'Beats Management', BASE_PATH);
-  libs.framework.render(<PageRouter libs={libs} />);
+  libs.framework.render(
+    <ThemeProvider theme={{ eui: euiVars }}>
+      <PageRouter libs={libs} />
+    </ThemeProvider>
+  );
 }
 
 startApp(compose());

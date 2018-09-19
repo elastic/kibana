@@ -22,6 +22,14 @@ interface TableProps {
   renderAssignmentOptions?: (item: any) => any;
   showAssignmentOptions: boolean;
   type: TableType;
+
+  isLoadingSuggestions: boolean;
+  isFilterQueryDraftValid: boolean;
+  loadSuggestions: any;
+  setFilterQueryDraftFromKueryExpression: any;
+  applyFilterQueryFromKueryExpression: any;
+  suggestions: any;
+  filterQueryDraft: any;
   actionHandler(action: string, payload?: any): void;
 }
 
@@ -61,6 +69,13 @@ export class Table extends React.Component<TableProps, TableState> {
       items,
       showAssignmentOptions,
       type,
+      isLoadingSuggestions,
+      isFilterQueryDraftValid,
+      loadSuggestions,
+      setFilterQueryDraftFromKueryExpression,
+      applyFilterQueryFromKueryExpression,
+      suggestions,
+      filterQueryDraft,
     } = this.props;
 
     const pagination = {
@@ -78,6 +93,13 @@ export class Table extends React.Component<TableProps, TableState> {
     return (
       <TableContainer>
         <ControlBar
+          isLoadingSuggestions={isLoadingSuggestions}
+          isFilterQueryDraftValid={isFilterQueryDraftValid}
+          loadSuggestions={loadSuggestions}
+          setFilterQueryDraftFromKueryExpression={setFilterQueryDraftFromKueryExpression}
+          applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+          suggestions={suggestions}
+          filterQueryDraft={filterQueryDraft}
           actionHandler={actionHandler}
           assignmentOptions={assignmentOptions || null}
           renderAssignmentOptions={renderAssignmentOptions}

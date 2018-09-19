@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag } from '../../../../common/domain_types';
-import { supportedConfigs } from '../../../config_schemas';
-import { CMTagsAdapter } from '../../adapters/tags/adapter_types';
+import { BeatTag } from '../../../common/domain_types';
+import { supportedConfigs } from '../../config_schemas';
+import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 import { TagsLib } from '../tags';
 
 describe('Tags Client Domain Lib', () => {

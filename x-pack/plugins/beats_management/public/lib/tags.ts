@@ -5,9 +5,9 @@
  */
 import yaml from 'js-yaml';
 import { omit, pick } from 'lodash';
-import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
-import { CMTagsAdapter } from '../adapters/tags/adapter_types';
-import { ConfigContent } from './../../../common/domain_types';
+import { BeatTag, ConfigurationBlock } from '../../common/domain_types';
+import { ConfigContent } from '../../common/domain_types';
+import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
 export class TagsLib {
   constructor(private readonly adapter: CMTagsAdapter, private readonly tagConfigs: any) {}

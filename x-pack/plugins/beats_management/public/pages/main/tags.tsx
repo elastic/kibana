@@ -16,10 +16,12 @@ import {
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
+import { AppURLState } from '../../app';
 import { Table, TagsTableType } from '../../components/table';
+import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 
-interface TagsPageProps {
+interface TagsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
 }
 
@@ -29,12 +31,12 @@ interface TagsPageState {
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
-  public static ActionArea = ({ history }: any) => (
+  public static ActionArea = ({ goTo }: TagsPageProps) => (
     <EuiButton
       size="s"
       color="primary"
       onClick={async () => {
-        history.push(`/tag/create`);
+        goTo('/tag/create');
       }}
     >
       Add Tag

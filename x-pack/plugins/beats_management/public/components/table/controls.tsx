@@ -17,6 +17,14 @@ interface ControlBarProps {
   showAssignmentOptions: boolean;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
+
+  isLoadingSuggestions: any;
+  isFilterQueryDraftValid: any;
+  loadSuggestions: any;
+  setFilterQueryDraftFromKueryExpression: any;
+  applyFilterQueryFromKueryExpression: any;
+  suggestions: any;
+  filterQueryDraft: any;
   actionHandler(actionType: string, payload?: any): void;
 }
 
@@ -29,6 +37,13 @@ export function ControlBar(props: ControlBarProps) {
     controlDefinitions,
     selectionCount,
     showAssignmentOptions,
+    isLoadingSuggestions,
+    isFilterQueryDraftValid,
+    loadSuggestions,
+    setFilterQueryDraftFromKueryExpression,
+    applyFilterQueryFromKueryExpression,
+    suggestions,
+    filterQueryDraft,
   } = props;
 
   const filters = controlDefinitions.filters.length === 0 ? null : controlDefinitions.filters;
@@ -43,6 +58,13 @@ export function ControlBar(props: ControlBarProps) {
     />
   ) : (
     <PrimaryOptions
+      isLoadingSuggestions={isLoadingSuggestions}
+      isFilterQueryDraftValid={isFilterQueryDraftValid}
+      loadSuggestions={loadSuggestions}
+      setFilterQueryDraftFromKueryExpression={setFilterQueryDraftFromKueryExpression}
+      applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+      suggestions={suggestions}
+      filterQueryDraft={filterQueryDraft}
       actionHandler={actionHandler}
       filters={filters}
       onSearchQueryChange={(query: any) => actionHandler('search', query)}

@@ -8,8 +8,9 @@ import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
-import { BeatsLib } from './domains/beats';
-import { TagsLib } from './domains/tags';
+import { BeatsLib } from './beats';
+import { ElasticsearchLib } from './elasticsearch';
+import { TagsLib } from './tags';
 
 export interface FrontendDomainLibs {
   beats: BeatsLib;
@@ -18,6 +19,7 @@ export interface FrontendDomainLibs {
 }
 
 export interface FrontendLibs extends FrontendDomainLibs {
+  elasticsearch: ElasticsearchLib;
   framework: FrameworkAdapter;
 }
 

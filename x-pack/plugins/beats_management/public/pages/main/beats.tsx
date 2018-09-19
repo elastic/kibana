@@ -8,14 +8,16 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
+import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
 import { TagAssignment } from '../../components/tag';
+import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
-interface BeatsPageProps {
+interface BeatsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
-  location: any;
 }
 
 interface BeatsPageState {
@@ -39,24 +41,35 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
     this.loadBeats();
   }
-  public componentDidUpdate(prevProps: any) {
-    if (this.props.location !== prevProps.location) {
+  public componentDidUpdate(prevProps: BeatsPageProps) {
+    if (this.props.pathname !== prevProps.pathname) {
       this.loadBeats();
     }
   }
   public render() {
     return (
       <div>
-        <Table
-          actionHandler={this.handleBeatsActions}
-          assignmentOptions={this.state.tags}
-          assignmentTitle="Set tags"
-          items={this.state.beats.sort(this.sortBeats) || []}
-          ref={this.state.tableRef}
-          showAssignmentOptions={true}
-          renderAssignmentOptions={this.renderTagAssignment}
-          type={BeatsTableType}
-        />
+        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
+          {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+            <Table
+              isLoadingSuggestions={isLoadingSuggestions}
+              isFilterQueryDraftValid={false} // todo
+              loadSuggestions={loadSuggestions}
+              setFilterQueryDraftFromKueryExpression={() => null} // todo
+              applyFilterQueryFromKueryExpression={() => null} // todo
+              suggestions={suggestions}
+              filterQueryDraft={'false'} // todo
+              actionHandler={this.handleBeatsActions}
+              assignmentOptions={this.state.tags}
+              assignmentTitle="Set tags"
+              items={this.state.beats.sort(this.sortBeats) || []}
+              ref={this.state.tableRef}
+              showAssignmentOptions={true}
+              renderAssignmentOptions={this.renderTagAssignment}
+              type={BeatsTableType}
+            />
+          )}
+        </WithKueryAutocompletion>
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}

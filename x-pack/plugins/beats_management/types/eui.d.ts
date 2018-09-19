@@ -37,4 +37,11 @@ declare module '@elastic/eui' {
 
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
+
+  interface EuiOutsideClickDetectorProps {
+    children: React.ReactNode;
+    isDisabled?: boolean;
+    onOutsideClick: React.MouseEventHandler<Element>;
+  }
+  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 }

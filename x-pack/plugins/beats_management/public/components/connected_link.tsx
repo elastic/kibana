@@ -11,12 +11,14 @@ import { Link, withRouter } from 'react-router-dom';
 export function ConnectedLinkComponent({
   location,
   path,
+  query,
   disabled,
   ...props
 }: {
   location: any;
   path: string;
   disabled: boolean;
+  query: any;
   [key: string]: any;
 }) {
   if (disabled) {
@@ -29,7 +31,7 @@ export function ConnectedLinkComponent({
   return (
     <Link
       {...props}
-      to={{ ...location, ...props.to, pathname }}
+      to={{ ...location, ...props.to, pathname, query }}
       className={`euiLink euiLink--primary ${props.className || ''}`}
     />
   );

@@ -6,11 +6,22 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+// @ts-ignore
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteField } from '../autocomplete_field/index';
 import { ActionDefinition, FilterDefinition } from '../table';
 import { ActionButton } from './action_button';
+
 interface PrimaryOptionsProps {
   filters: FilterDefinition[] | null;
   primaryActions: ActionDefinition[];
+  isLoadingSuggestions: boolean;
+  loadSuggestions: () => any;
+  suggestions: AutocompleteSuggestion[];
+  applyFilterQueryFromKueryExpression: any;
+  filterQueryDraft: any;
+  isFilterQueryDraftValid: any;
+  setFilterQueryDraftFromKueryExpression: any;
   actionHandler(actionType: string, payload?: any): void;
   onSearchQueryChange(query: any): void;
 }
@@ -28,7 +39,18 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
     };
   }
   public render() {
-    const { actionHandler, primaryActions } = this.props;
+    // filterQueryDraft,
+
+    const {
+      actionHandler,
+      primaryActions,
+      isLoadingSuggestions,
+      loadSuggestions,
+      suggestions,
+      applyFilterQueryFromKueryExpression,
+      isFilterQueryDraftValid,
+      setFilterQueryDraftFromKueryExpression,
+    } = this.props;
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -40,7 +62,18 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
             showPopover={this.showPopover}
           />
         </EuiFlexItem>
-        <EuiFlexItem>{/* <KueryBar /> */}</EuiFlexItem>
+        <EuiFlexItem>
+          <AutocompleteField
+            value={''}
+            isLoadingSuggestions={isLoadingSuggestions}
+            isValid={isFilterQueryDraftValid}
+            loadSuggestions={loadSuggestions}
+            onChange={setFilterQueryDraftFromKueryExpression}
+            onSubmit={applyFilterQueryFromKueryExpression}
+            placeholder="Filter results"
+            suggestions={suggestions}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

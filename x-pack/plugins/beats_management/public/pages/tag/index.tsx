@@ -10,14 +10,14 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 
-interface TagPageProps {
+interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
-  history: any;
-  match: any;
 }
 
 interface TagPageState {
@@ -26,7 +26,7 @@ interface TagPageState {
   tag: BeatTag;
 }
 
-export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
+export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageState> {
   private mode: 'edit' | 'create' = 'create';
   constructor(props: TagPageProps) {
     super(props);
@@ -34,14 +34,14 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
       showFlyout: false,
       attachedBeats: null,
       tag: {
-        id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
+        id: props.URLParams.action === 'create' ? '' : props.URLParams.tagid,
         color: '#DD0A73',
         configuration_blocks: [],
         last_updated: new Date(),
       },
     };
 
-    if (props.match.params.action !== 'create') {
+    if (props.URLParams.action !== 'create') {
       this.mode = 'edit';
       this.loadTag();
       this.loadAttachedBeats();
@@ -78,7 +78,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => this.props.history.push('/overview/tags')}>
+              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tags')}>
                 Cancel
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -88,7 +88,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
     );
   }
   private loadTag = async () => {
-    const tags = await this.props.libs.tags.getTagsWithIds([this.props.match.params.tagid]);
+    const tags = await this.props.libs.tags.getTagsWithIds([this.props.URLParams.tagid]);
     if (tags.length === 0) {
       // TODO do something to error
     }
@@ -98,7 +98,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
   };
 
   private loadAttachedBeats = async () => {
-    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
+    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.URLParams.tagid);
 
     this.setState({
       attachedBeats: beats,
@@ -106,6 +106,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
   };
   private saveTag = async () => {
     await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
-    this.props.history.push('/overview/tags');
+    this.props.goTo(`/overview/tags`);
   };
 }
+export const TagPage = withUrlState<TagPageProps>(TagPageComponent);

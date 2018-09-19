@@ -12,14 +12,15 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { TagsPage } from './tags';
 
-interface MainPagesProps {
-  history: any;
+interface MainPagesProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
 }
 
@@ -29,13 +30,12 @@ interface MainPagesState {
   } | null;
 }
 
-export class MainPages extends React.PureComponent<MainPagesProps, MainPagesState> {
-  constructor(props: any) {
+class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
+  constructor(props: MainPagesProps) {
     super(props);
   }
-
   public onSelectedTabChanged = (id: string) => {
-    this.props.history.push(id);
+    this.props.goTo(id);
   };
 
   public render() {
@@ -60,13 +60,14 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
     const renderedTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.props.history.location.pathname}
+        isSelected={tab.id === this.props.pathname}
         disabled={tab.disabled}
         key={index}
       >
         {tab.name}
       </EuiTab>
     ));
+
     return (
       <PrimaryLayout
         title="Beats"
@@ -74,11 +75,11 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
           <Switch>
             <Route
               path="/overview/beats/:action?/:enrollmentToken?"
-              render={(props: any) => <BeatsPage.ActionArea libs={this.props.libs} {...props} />}
+              render={() => <BeatsPage.ActionArea libs={this.props.libs} {...this.props} />}
             />
             <Route
               path="/overview/tags"
-              render={(props: any) => <TagsPage.ActionArea libs={this.props.libs} {...props} />}
+              render={() => <TagsPage.ActionArea libs={this.props.libs} {...this.props} />}
             />
           </Switch>
         }
@@ -105,3 +106,5 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
     );
   }
 }
+
+export const MainPages = withUrlState<MainPagesProps>(MainPagesComponent);

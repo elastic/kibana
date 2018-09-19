@@ -17,13 +17,16 @@ import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_a
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 
-import { BeatsLib } from '../domains/beats';
+import { BeatsLib } from '../beats';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
 import { supportedConfigs } from '../../config_schemas';
-import { TagsLib } from '../domains/tags';
+import { TagsLib } from '../tags';
+import { TestElasticsearchAdapter } from './../adapters/elasticsearch/test';
+import { ElasticsearchLib } from './../elasticsearch';
 
 export function compose(): FrontendLibs {
+  const esAdapter = new TestElasticsearchAdapter();
   const tags = new TagsLib(new MemoryTagsAdapter([]), supportedConfigs);
   const tokens = new MemoryTokensAdapter();
   const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });
@@ -45,6 +48,7 @@ export function compose(): FrontendLibs {
   );
   const libs: FrontendLibs = {
     ...domainLibs,
+    elasticsearch: new ElasticsearchLib(esAdapter),
     framework,
   };
   return libs;
