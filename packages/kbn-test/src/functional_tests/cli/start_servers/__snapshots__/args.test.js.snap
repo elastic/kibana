@@ -11,7 +11,7 @@ Usage:
 Options:
   --help                           Display this menu and exit. 
   --config <file>                  Pass in a config 
-  --esFrom <snapshot|source|path>  Build Elasticsearch from source, snapshot or path to existing install dir. 
+  --esFrom <snapshot|source|path>  Build Elasticsearch from source, snapshot or path to existing install dir. Default: snapshot
   --kibana-install-dir <dir>       Run Kibana from existing install directory instead of from source. 
   --verbose                        Log everything. 
   --debug                          Run in debug mode. 

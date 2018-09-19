@@ -29,6 +29,7 @@ const options = {
   esFrom: {
     arg: '<snapshot|source|path>',
     desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
+    default: 'snapshot',
   },
   'kibana-install-dir': {
     arg: '<dir>',
