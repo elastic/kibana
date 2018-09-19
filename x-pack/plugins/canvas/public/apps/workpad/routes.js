@@ -50,6 +50,7 @@ export const routes = [
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
 
+              // tests if user has permissions to write to workpads
               workpadService.update(params.id, fetchedWorkpad).catch(err => {
                 if (err.response.status === 403) {
                   dispatch(setReadOnly(true));
