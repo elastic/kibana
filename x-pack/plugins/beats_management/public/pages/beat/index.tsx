@@ -74,11 +74,11 @@ class BeatDetailsPageComponent extends React.PureComponent<
         name: 'Config',
         disabled: false,
       },
-      {
-        id: `/beat/${id}/activity`,
-        name: 'Beat Activity',
-        disabled: false,
-      },
+      // {
+      //   id: `/beat/${id}/activity`,
+      //   name: 'Beat Activity',
+      //   disabled: false,
+      // },
       {
         id: `/beat/${id}/tags`,
         name: 'Tags',

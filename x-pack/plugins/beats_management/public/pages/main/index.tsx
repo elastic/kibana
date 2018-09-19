@@ -46,11 +46,11 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         name: 'Beats List',
         disabled: false,
       },
-      {
-        id: '/overview/activity',
-        name: 'Beats Activity',
-        disabled: false,
-      },
+      // {
+      //   id: '/overview/activity',
+      //   name: 'Beats Activity',
+      //   disabled: false,
+      // },
       {
         id: '/overview/tags',
         name: 'Tags',
