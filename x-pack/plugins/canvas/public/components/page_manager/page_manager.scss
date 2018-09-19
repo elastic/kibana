@@ -8,6 +8,17 @@
     height: 144px;
   }
 
+  .canvasPageManager--trayPop > div {
+    animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  @for $i from 1 through 20 {
+    .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+
   .canvasPageManager__pageList {
     @include euiScrollBar;
     display: flex;
@@ -32,17 +43,6 @@
   .canvasPageManager__addPageTip {
     display: block;
     height: 100%;
-  }
-
-  .canvasPageManager--trayPop > div {
-    animation: trayPop $euiAnimSpeedNormal $euiAnimSlightResistance;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-  @for $i from 1 through 20 {
-    .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
-      animation-delay: #{$i * 0.05}s;
-    }
   }
 
   .canvasPageManager__page {
