@@ -44,6 +44,8 @@ export function kbnChromeProvider(chrome, internals) {
           const $content = $(require('./kbn_chrome.html'));
           const $app = $content.find('.application');
 
+          $app.attr('id', `${internals.app.id}-app`);
+
           if (internals.rootController) {
             $app.attr('ng-controller', internals.rootController);
           }

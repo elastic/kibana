@@ -39,7 +39,6 @@ export const ml = (kibana) => {
         icon: 'plugins/ml/ml.svg',
         main: 'plugins/ml/app',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature']
     },

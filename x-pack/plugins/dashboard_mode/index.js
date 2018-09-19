@@ -52,7 +52,6 @@ export function dashboardMode(kibana) {
           }
         ],
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
     },
 
     config(Joi) {
