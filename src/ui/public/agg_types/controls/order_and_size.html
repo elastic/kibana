@@ -1,6 +1,6 @@
 <div>
   <div class="visEditorAgg__formRow--flex">
-    <div ng-if="agg.type.params.byName.order" class="form-group">
+    <div ng-if="agg.type.params.byName.order && aggParam.options" class="form-group">
       <label for="visEditorOrderByOrder{{agg.id}}">Order</label>
       <select
         id="visEditorOrderByOrder{{agg.id}}"
