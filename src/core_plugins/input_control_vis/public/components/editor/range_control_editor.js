@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { IndexPatternSelect } from './index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { FieldSelect } from './field_select';
 
 import {
@@ -27,13 +27,13 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function filterField(field) {
   return field.type === 'number';
 }
 
-export function RangeControlEditor(props) {
+function RangeControlEditorUi(props) {
   const stepSizeId = `stepSize-${props.controlIndex}`;
   const decimalPlacesId = `decimalPlaces-${props.controlIndex}`;
   const handleDecimalPlacesChange = (evt) => {
@@ -42,16 +42,27 @@ export function RangeControlEditor(props) {
   const handleStepChange = (evt) => {
     props.handleNumberOptionChange(props.controlIndex, 'step', evt);
   };
+  const indexPatternSelectId = `indexPatternSelect-${props.controlIndex}`;
   return (
     <div>
 
-      <IndexPatternSelect
-        indexPatternId={props.controlParams.indexPattern}
-        onChange={props.handleIndexPatternChange}
-        getIndexPatterns={props.getIndexPatterns}
-        getIndexPattern={props.getIndexPattern}
-        controlIndex={props.controlIndex}
-      />
+      <EuiFormRow
+        id={indexPatternSelectId}
+        label={props.intl.formatMessage({
+          id: 'inputControl.editor.indexPatternSelect.patternLabel',
+          defaultMessage: 'Index Pattern'
+        })}
+      >
+        <IndexPatternSelect
+          placeholder={props.intl.formatMessage({
+            id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
+            defaultMessage: 'Select index pattern...'
+          })}
+          indexPatternId={props.controlParams.indexPattern}
+          onChange={props.handleIndexPatternChange}
+          data-test-subj={indexPatternSelectId}
+        />
+      </EuiFormRow>
 
       <FieldSelect
         fieldName={props.controlParams.fieldName}
@@ -95,8 +106,7 @@ export function RangeControlEditor(props) {
   );
 }
 
-RangeControlEditor.propTypes = {
-  getIndexPatterns: PropTypes.func.isRequired,
+RangeControlEditorUi.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   controlIndex: PropTypes.number.isRequired,
   controlParams: PropTypes.object.isRequired,
@@ -104,3 +114,5 @@ RangeControlEditor.propTypes = {
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired
 };
+
+export const RangeControlEditor = injectI18n(RangeControlEditorUi);
