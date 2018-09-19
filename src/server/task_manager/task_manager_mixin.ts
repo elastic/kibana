@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { extractTaskDefinitions } from './lib/extract_task_definitions';
-import { TaskManagerLogger } from './lib/logger';
 import { TaskManager } from './task_manager';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
-  const maxWorkers = config.get('task_manager.max_workers');
-  const definitions = extractTaskDefinitions(
-    maxWorkers,
-    kbnServer.uiExports.taskDefinitions,
-    config.get('task_manager.override_num_workers')
-  );
+  const taskManager = new TaskManager();
 
-  const client = new TaskManager({ logger, maxWorkers, definitions });
-  server.decorate('server', 'taskManager', client);
-  kbnServer.afterPluginsInit(() => client.afterPluginsInit(kbnServer, server, config));
+  server.decorate('server', 'taskManager', taskManager);
+
+  kbnServer.afterPluginsInit(() =>
+    taskManager.init({
+      kbnServer,
+      server,
+      config,
+    })
+  );
 }
