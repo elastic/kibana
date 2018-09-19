@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/*
+ * This module contains the core logic for running an individual task.
+ * It handles the full lifecycle of a task run, including error handling,
+ * rescheduling, middleware application, etc.
+ */
+
 import Joi from 'joi';
 import { intervalFromNow, minutesFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
@@ -93,9 +99,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets how many workers are occupied by this task instance.
-   *
-   * @readonly
-   * @memberof TaskManagerRunner
    */
   public get numWorkers() {
     return this.definition.numWorkers || 1;
@@ -103,9 +106,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets the id of this task instance.
-   *
-   * @readonly
-   * @memberof TaskManagerRunner
    */
   public get id() {
     return this.instance.id;
@@ -113,9 +113,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets the task type of this task instance.
-   *
-   * @readonly
-   * @memberof TaskManagerRunner
    */
   public get taskType() {
     return this.instance.taskType;
@@ -123,9 +120,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets whether or not this task has run longer than its expiration setting allows.
-   *
-   * @readonly
-   * @memberof TaskManagerRunner
    */
   public get isExpired() {
     return this.instance.runAt < new Date();
@@ -133,9 +127,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Returns a log-friendly representation of this task.
-   *
-   * @returns
-   * @memberof TaskManagerRunner
    */
   public toString() {
     return `${this.instance.taskType} "${this.instance.id}"`;
@@ -148,7 +139,6 @@ export class TaskManagerRunner implements TaskRunner {
    * start the timer after beforeRun resolves
    *
    * @returns {Promise<RunResult>}
-   * @memberof TaskManagerRunner
    */
   public async run(): Promise<RunResult> {
     try {
@@ -172,8 +162,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Attempts to claim exclusive rights to run the task. If the attempt fails
    * with a 409 (http conflict), we assume another Kibana instance beat us to the punch.
    *
-   * @returns
-   * @memberof TaskManagerRunner
+   * @returns {Promise<boolean>}
    */
   public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
@@ -198,8 +187,7 @@ export class TaskManagerRunner implements TaskRunner {
   /**
    * Attempts to cancel the task.
    *
-   * @returns
-   * @memberof TaskManagerRunner
+   * @returns {Promise<void>}
    */
   public async cancel() {
     const { task } = this;

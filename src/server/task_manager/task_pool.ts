@@ -17,6 +17,11 @@
  * under the License.
  */
 
+/*
+ * This module contains the logic that ensures we don't run too many
+ * tasks at once in a given Kibana instance.
+ */
+
 import { Logger } from './lib/logger';
 import { TaskRunner } from './task_runner';
 
@@ -27,9 +32,6 @@ interface Opts {
 
 /**
  * Runs tasks in batches, taking costs into account.
- *
- * @export
- * @class TaskPool
  */
 export class TaskPool {
   private maxWorkers: number;
@@ -43,7 +45,6 @@ export class TaskPool {
    * @prop {number} maxWorkers - The total number of workers / work slots available
    *    (e.g. maxWorkers is 4, then 2 tasks of cost 2 can run at a time, or 4 tasks of cost 1)
    * @prop {Logger} logger - The task manager logger.
-   * @memberof TaskPool
    */
   constructor(opts: Opts) {
     this.maxWorkers = opts.maxWorkers;
@@ -75,7 +76,6 @@ export class TaskPool {
    *
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
-   * @memberof TaskPool
    */
   public run = (tasks: TaskRunner[]) => {
     this.cancelExpiredTasks();

@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/*
+ * This module contains the logic for polling the task manager index for new work.
+ */
+
 import { Logger } from './lib/logger';
 
 type WorkFn = () => Promise<void>;

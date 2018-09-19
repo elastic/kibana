@@ -25,6 +25,16 @@ import {
   validateTaskDefinition,
 } from '../task';
 
+/**
+ * Sanitizes the system's task definitions. Task definitions have optional properties, and
+ * this ensures they all are given a reasonable default. This also overrides certain task
+ * definition properties with kibana.yml overrides (such as the `override_num_workers` config
+ * value).
+ *
+ * @param maxWorkers - The maxiumum numer of workers allowed to run at once
+ * @param taskDefinitions - The Kibana task definitions dictionary
+ * @param overrideNumWorkers - The kibana.yml overrides numWorkers per task type.
+ */
 export function extractTaskDefinitions(
   maxWorkers: number,
   taskDefinitions: TaskDictionary<TaskDefinition> = {},

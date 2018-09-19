@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/*
+ * This module contains helpers for managing the task manager storage layer.
+ */
+
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
 const DOC_TYPE = '_doc';
