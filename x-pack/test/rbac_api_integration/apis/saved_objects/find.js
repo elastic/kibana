@@ -31,85 +31,15 @@ export default function ({ getService }) {
       });
     };
 
-    const expectResultsWithValidTypes = (resp) => {
+    const expectBadRequest = (resp) => {
       expect(resp.body).to.eql({
-        page: 1,
-        per_page: 20,
-        total: 4,
-        saved_objects: [
-          {
-            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            type: 'index-pattern',
-            updated_at: '2017-09-21T18:49:16.270Z',
-            version: 1,
-            attributes: resp.body.saved_objects[0].attributes
-          },
-          {
-            id: '7.0.0-alpha1',
-            type: 'config',
-            updated_at: '2017-09-21T18:49:16.302Z',
-            version: 1,
-            attributes: resp.body.saved_objects[1].attributes
-          },
-          {
-            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-            type: 'visualization',
-            updated_at: '2017-09-21T18:51:23.794Z',
-            version: 1,
-            attributes: resp.body.saved_objects[2].attributes
-          },
-          {
-            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            type: 'dashboard',
-            updated_at: '2017-09-21T18:57:40.826Z',
-            version: 1,
-            attributes: resp.body.saved_objects[3].attributes
-          },
-        ]
-      });
-    };
-
-    const expectAllResultsIncludingInvalidTypes = (resp) => {
-      expect(resp.body).to.eql({
-        page: 1,
-        per_page: 20,
-        total: 5,
-        saved_objects: [
-          {
-            id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            type: 'index-pattern',
-            updated_at: '2017-09-21T18:49:16.270Z',
-            version: 1,
-            attributes: resp.body.saved_objects[0].attributes
-          },
-          {
-            id: '7.0.0-alpha1',
-            type: 'config',
-            updated_at: '2017-09-21T18:49:16.302Z',
-            version: 1,
-            attributes: resp.body.saved_objects[1].attributes
-          },
-          {
-            id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-            type: 'visualization',
-            updated_at: '2017-09-21T18:51:23.794Z',
-            version: 1,
-            attributes: resp.body.saved_objects[2].attributes
-          },
-          {
-            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-            type: 'dashboard',
-            updated_at: '2017-09-21T18:57:40.826Z',
-            version: 1,
-            attributes: resp.body.saved_objects[3].attributes
-          },
-          {
-            id: 'visualization:dd7caf20-9efd-11e7-acb3-3dab96693faa',
-            type: 'not-a-visualization',
-            updated_at: '2017-09-21T18:51:23.794Z',
-            version: 1
-          },
-        ]
+        error: 'Bad Request',
+        message: 'child "type" fails because ["type" is required]',
+        statusCode: 400,
+        validation: {
+          keys: ['type'],
+          source: 'query'
+        }
       });
     };
 
@@ -127,14 +57,6 @@ export default function ({ getService }) {
         statusCode: 403,
         error: 'Forbidden',
         message: `Unable to find ${type}, missing action:saved_objects/${type}/find`
-      });
-    };
-
-    const expectForbiddenCantFindAnyTypes = resp => {
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Not authorized to find saved_object`
       });
     };
 
@@ -221,8 +143,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: `forbidded can't find any types`,
-          statusCode: 403,
-          response: expectForbiddenCantFindAnyTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         }
       }
     });
@@ -255,8 +177,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       },
     });
@@ -289,8 +211,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectAllResultsIncludingInvalidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       },
     });
@@ -323,8 +245,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectAllResultsIncludingInvalidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       }
     });
@@ -357,8 +279,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       },
     });
@@ -391,8 +313,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       }
     });
@@ -425,8 +347,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       },
     });
@@ -459,8 +381,8 @@ export default function ({ getService }) {
         },
         noType: {
           description: 'all objects',
-          statusCode: 200,
-          response: expectResultsWithValidTypes,
+          statusCode: 400,
+          response: expectBadRequest,
         },
       }
     });
