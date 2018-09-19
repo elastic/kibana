@@ -264,6 +264,7 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
+      namespace,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -287,7 +288,8 @@ export class SavedObjectsRepository {
           searchFields,
           type,
           sortField,
-          sortOrder
+          sortOrder,
+          namespace,
         })
       }
     };
