@@ -37,7 +37,6 @@ import {
 } from '@elastic/eui';
 
 /*
-TODO: suggestions component throws up when given an object (query dsl)
 TODO: styling
 TODO: refactoring
  */
