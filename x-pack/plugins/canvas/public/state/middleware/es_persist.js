@@ -44,6 +44,7 @@ export const esPersistMiddleware = ({ getState }) => {
     next(action);
     const newState = getState();
 
+    // skips the update request if in read only mode
     if (getReadOnly(newState)) return;
 
     // if the workpad changed, save it to elasticsearch
