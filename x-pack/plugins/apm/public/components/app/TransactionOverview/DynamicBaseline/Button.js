@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import chrome from 'ui/chrome';
 import { EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
 
 export default class DynamicBaselineButton extends Component {
@@ -31,7 +32,7 @@ export default class DynamicBaselineButton extends Component {
         {
           name: 'View existing jobs',
           icon: 'tableOfContents',
-          href: '/app/ml',
+          href: chrome.addBasePath('/app/ml'),
           target: '_blank',
           onClick: () => this.closePopover()
         }

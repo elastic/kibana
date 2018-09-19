@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects } from '../..//mappings';
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider, SavedObjectsRepositoryProvider } from './lib';
+
+import {
+  SavedObjectsRepository,
+  ScopedSavedObjectsClientProvider,
+  SavedObjectsRepositoryProvider,
+} from './lib';
+import { getRootPropertiesObjects } from '../../mappings';
 import { SavedObjectsClient } from './saved_objects_client';
 
-export function createSavedObjectsService(server) {
+// The migrator here is (hopefully) temporary. We currently use the saved object API to perform
+// import / export from the Kibana UI. Import / export functionality needs to apply migrations to documents.
+// Eventually, we hope to build a first-class import / export API, at which point, we can
+// remove the migrator from the saved objects client and leave only document validation here.
+export function createSavedObjectsService(server, migrator) {
   const onBeforeWrite = async () => {
     const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
@@ -40,8 +49,7 @@ export function createSavedObjectsService(server) {
       });
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
-        tmpl:
-          'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
+        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
         es: {
           resp: error.body,
           status: error.status,
@@ -62,6 +70,7 @@ export function createSavedObjectsService(server) {
   const mappings = server.getKibanaIndexMappingsDsl();
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
+    migrator,
     mappings,
     onBeforeWrite,
   });
@@ -79,19 +88,16 @@ export function createSavedObjectsService(server) {
       const repository = repositoryProvider.getRepository(callCluster);
 
       return new SavedObjectsClient(repository);
-    }
+    },
   });
 
   return {
     types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
     SavedObjectsRepository,
-    getSavedObjectsRepository: (...args) =>
-      repositoryProvider.getRepository(...args),
-    getScopedSavedObjectsClient: (...args) =>
-      scopedClientProvider.getClient(...args),
-    setScopedSavedObjectsClientFactory: (...args) =>
-      scopedClientProvider.setClientFactory(...args),
+    getSavedObjectsRepository: (...args) => repositoryProvider.getRepository(...args),
+    getScopedSavedObjectsClient: (...args) => scopedClientProvider.getClient(...args),
+    setScopedSavedObjectsClientFactory: (...args) => scopedClientProvider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       scopedClientProvider.addClientWrapperFactory(...args),
   };

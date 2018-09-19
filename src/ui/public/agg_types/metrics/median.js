@@ -30,6 +30,7 @@ export const medianMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number'
     },
     {

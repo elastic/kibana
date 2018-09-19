@@ -48,7 +48,6 @@ export const UI_EXPORT_DEFAULTS = {
     visResponseHandlers: [
       'ui/vis/response_handlers/vislib',
       'ui/vis/response_handlers/none',
-      'ui/vis/response_handlers/tabify',
       'ui/vis/response_handlers/legacy',
     ],
     visEditorTypes: [

@@ -116,6 +116,11 @@
   .ml-anomalies-controls {
     padding-top: 5px;
 
+    .ml-select-severity.euiComboBox {
+      // Overrides .euiComboBox z-index to ensure it appears below the job picker.
+      z-index: 0;
+    }
+
     #show_charts_checkbox_control {
       padding-top: 28px;
     }

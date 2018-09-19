@@ -25,7 +25,7 @@
   <div ng-if="agg.params.metricAgg === 'custom'" class="visEditorAgg__subAgg">
     <ng-form name="customMetricForm">
       <vis-editor-agg-params
-        index-pattern="agg._indexPattern"
+        index-pattern="agg.getIndexPattern()"
         agg="agg.params.customMetric"
         group-name="'metrics'">
       </vis-editor-agg-params>

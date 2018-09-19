@@ -97,5 +97,6 @@ export default function HistogramVisType(Private) {
       ])
     },
     hierarchicalData: true,
+    responseHandler: 'vislib_slices',
   });
 }

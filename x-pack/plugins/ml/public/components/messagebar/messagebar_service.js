@@ -6,7 +6,7 @@
 
 
 import { notify } from 'ui/notify';
-import { MLRequestFailure } from 'plugins/ml/util/ml_error';
+import { MLRequestFailure } from '../../util/ml_error';
 
 const messages = [];
 

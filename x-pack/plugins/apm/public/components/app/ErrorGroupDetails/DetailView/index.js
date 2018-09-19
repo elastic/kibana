@@ -17,7 +17,7 @@ import {
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
 
-import { ContextProperties } from '../../../shared/ContextProperties';
+import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import DiscoverButton from '../../../shared/DiscoverButton';
 import {
@@ -30,7 +30,8 @@ import {
   ERROR_GROUP_ID,
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
-  USER_ID
+  USER_ID,
+  REQUEST_URL_FULL
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 
@@ -87,9 +88,20 @@ function DetailView({ errorGroup, urlParams, location }) {
   const { serviceName } = urlParams;
 
   const timestamp = get(errorGroup, 'data.error.@timestamp');
-  const url = get(errorGroup.data.error, 'context.request.url.full', 'N/A');
+  const url = get(errorGroup.data.error, REQUEST_URL_FULL, 'N/A');
 
   const stickyProperties = [
+    {
+      label: 'Timestamp',
+      fieldName: '@timestamp',
+      val: timestamp
+    },
+    {
+      fieldName: REQUEST_URL_FULL,
+      label: 'URL',
+      val: url,
+      truncated: true
+    },
     {
       label: 'Request method',
       fieldName: 'context.request.method',
@@ -154,11 +166,7 @@ function DetailView({ errorGroup, urlParams, location }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <ContextProperties
-        timestamp={timestamp}
-        url={url}
-        stickyProperties={stickyProperties}
-      />
+      <StickyProperties stickyProperties={stickyProperties} />
 
       <TabContainer>
         {tabs.map(key => {
