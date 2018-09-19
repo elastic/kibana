@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter } from '../../filter_manager/lib/exists';
-import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
+import { buildExistsFilter, buildPhrasesFilter } from '../../../../utils/filters';
 import { buildQueryFromFilters } from '../../courier';
 
 /**

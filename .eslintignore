@@ -8,8 +8,8 @@ bower_components
 /src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap
 /src/ui/public/flot-charts
-/src/ui/public/kuery/ast/kuery.js
-/src/ui/public/kuery/ast/legacy_kuery.js
+/src/utils/kuery/ast/kuery.js
+/src/utils/kuery/ast/legacy_kuery.js
 /test/fixtures/scenarios
 /src/core_plugins/console/public/webpackShims
 /src/core_plugins/console/public/tests/webpackShims

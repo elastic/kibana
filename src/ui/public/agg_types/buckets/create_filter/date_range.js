@@ -19,7 +19,7 @@
 
 import chrome from '../../../chrome';
 import { dateRange } from '../../../utils/date_range';
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '../../../../../utils/filters';
 
 const config = chrome.getUiSettingsClient();
 

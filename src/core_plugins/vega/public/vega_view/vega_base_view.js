@@ -25,7 +25,7 @@ import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
-import { buildQueryFilter } from 'ui/filter_manager/lib';
+import { buildQueryFilter } from '../../../../utils/filters';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 

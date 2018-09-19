@@ -154,7 +154,7 @@ module.exports = (function() {
             if (value.type === 'cursor') return value;
 
             if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
-              throw new errors.NoLeadingWildcardsError();
+              error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
             }
 
             const isPhrase = buildLiteralNode(false);
@@ -1661,7 +1661,7 @@ module.exports = (function() {
     }
 
 
-      const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes, errors } } = options;
+      const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
       const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
       const buildLiteralNode = nodeTypes.literal.buildNode;
       const buildWildcardNode = nodeTypes.wildcard.buildNode;

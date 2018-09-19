@@ -18,7 +18,6 @@
  */
 
 import { groupBy, has } from 'lodash';
-import { decorateQuery } from '../decorate_query';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
@@ -35,7 +34,7 @@ export function BuildESQueryProvider(config) {
     const queriesByLanguage = groupBy(validQueries, 'language');
 
     const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config);
-    const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, decorateQuery);
+    const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config);
     const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
     return {

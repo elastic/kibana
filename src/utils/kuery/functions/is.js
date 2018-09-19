@@ -21,7 +21,7 @@ import _ from 'lodash';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
-import { getPhraseScript } from '../../filter_manager/lib/phrase';
+import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {

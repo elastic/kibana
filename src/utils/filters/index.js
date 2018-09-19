@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '../../../../../utils/filters';
-
-export function createFilterHistogram(aggConfig, key) {
-  const value = parseInt(key, 10);
-
-  return buildRangeFilter(
-    aggConfig.params.field,
-    { gte: value, lt: value + aggConfig.params.interval },
-    aggConfig.getIndexPattern(),
-    aggConfig.fieldFormatter()(key)
-  );
-}
+export * from './exists';
+export * from './phrase';
+export * from './phrases';
+export * from './query';
+export * from './range';

@@ -5,7 +5,7 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import { fromKueryExpression } from 'ui/kuery/ast';
+import { fromKueryExpression } from 'ui/kuery';
 import { getSuggestionsProvider as field } from './field';
 import { getSuggestionsProvider as value } from './value';
 import { getSuggestionsProvider as operator } from './operator';

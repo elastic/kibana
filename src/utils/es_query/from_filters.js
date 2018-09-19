@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { migrateFilter } from '../migrate_filter';
+import { migrateFilter } from './migrate_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set

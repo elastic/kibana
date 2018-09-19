@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { buildRangeFilter } from '../filter_manager/lib/range';
+import { buildRangeFilter } from '../../../utils/filters';
 import { timefilter } from 'ui/timefilter';
 
 export function onBrushEvent(event, $state) {

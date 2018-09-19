@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { KbnError } from '../../errors';
+import _ from 'lodash';
+import { decorateQuery } from './decorate_query';
+import { luceneStringToDsl } from './lucene_string_to_dsl';
 
-export class NoLeadingWildcardsError extends KbnError {
-  constructor() {
-    super(
-      'Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.',
-      NoLeadingWildcardsError
-    );
-  }
+export function buildQueryFromLucene(queries, config) {
+  const combinedQueries = _.map(queries, (query) => {
+    const queryDsl = luceneStringToDsl(query.query);
+    return decorateQuery(queryDsl, config);
+  });
+
+  return {
+    must: [].concat(combinedQueries),
+    filter: [],
+    should: [],
+    must_not: [],
+  };
 }

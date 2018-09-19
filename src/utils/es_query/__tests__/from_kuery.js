@@ -17,69 +17,59 @@
  * under the License.
  */
 
-import { BuildESQueryProvider } from '../build_es_query';
+import { buildQueryFromKuery } from '../from_kuery';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
-import { luceneStringToDsl } from '../lucene_string_to_dsl';
-import { decorateQuery } from '../../decorate_query';
+import expect from 'expect.js';
+import { fromKueryExpression, toElasticsearchQuery } from '../../../../../../utils/kuery';
 
 let indexPattern;
-let buildEsQuery;
 
 describe('build query', function () {
+  const configStub = { get: () => true };
 
-  describe('buildESQuery', function () {
+  describe('buildQueryFromKuery', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(StubbedLogstashIndexPatternProvider);
-      buildEsQuery = Private(BuildESQueryProvider);
     }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
-      const result = buildEsQuery();
+      const result = buildQueryFromKuery(null, [], configStub);
       const expected = {
-        bool: {
-          must: [],
-          filter: [],
-          should: [],
-          must_not: [],
-        }
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
       };
       expectDeepEqual(result, expected);
     });
 
-    it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
+    it('should transform an array of kuery queries into ES queries combined in the bool\'s filter clause', function () {
       const queries = [
         { query: 'extension:jpg', language: 'kuery' },
-        { query: 'bar:baz', language: 'lucene' },
-      ];
-      const filters = [
-        {
-          match_all: {},
-          meta: { type: 'match_all' },
-        },
+        { query: 'machine.os:osx', language: 'kuery' },
       ];
 
-      const expectedResult = {
-        bool: {
-          must: [
-            decorateQuery(luceneStringToDsl('bar:baz')),
-            { match_all: {} },
-          ],
-          filter: [
-            toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
-          ],
-          should: [],
-          must_not: [],
+      const expectedESQueries = queries.map(
+        (query) => {
+          return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
         }
-      };
+      );
 
-      const result = buildEsQuery(indexPattern, queries, filters);
+      const result = buildQueryFromKuery(indexPattern, queries, configStub);
 
-      expectDeepEqual(result, expectedResult);
+      expectDeepEqual(result.filter, expectedESQueries);
+    });
+
+    it('should throw a useful error if it looks like query is using an old, unsupported syntax', function () {
+      const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
+
+      expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery], configStub).to.throwError(
+        /It looks like you're using an outdated Kuery syntax./
+      );
     });
 
   });

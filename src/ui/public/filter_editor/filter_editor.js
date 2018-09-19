@@ -38,7 +38,7 @@ import {
   areIndexPatternsProvided,
   isFilterPinned
 } from './lib/filter_editor_utils';
-import * as filterBuilder from '../filter_manager/lib';
+import * as filterBuilder from '../../../utils/filters';
 import { keyMap } from '../utils/key_map';
 
 const module = uiModules.get('kibana');

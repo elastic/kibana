@@ -17,8 +17,19 @@
  * under the License.
  */
 
-export { buildExistsFilter } from './exists';
-export { buildPhraseFilter } from './phrase';
-export { buildPhrasesFilter } from './phrases';
-export { buildQueryFilter } from './query';
-export { buildRangeFilter } from './range';
+import _ from 'lodash';
+
+/**
+ * Decorate queries with default parameters
+ * @param {query} query object
+ * @returns {object}
+ */
+export function decorateQuery(query, config) {
+  const queryOptions = config.get('query:queryString:options');
+
+  if (_.has(query, 'query_string.query')) {
+    _.extend(query.query_string, queryOptions);
+  }
+
+  return query;
+}
