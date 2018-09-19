@@ -117,23 +117,27 @@ export class QueryBar extends Component {
     return [...suggestions, ...recentSearchSuggestions];
   };
 
-  // TODO do I need this since I took the selectSuggestion method from APM?
-  //
-  // onSuggestionSelect = ({ type, text, start, end }) => {
-  //   const { query } = this.localQuery;
-  //   const inputEl = this.inputRef;
-  //   const { selectionStart, selectionEnd } = inputEl;
-  //   const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
-  //
-  //   this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
-  //   inputEl.setSelectionRange(start + text.length, start + text.length);
-  //
-  //   if (type === 'recentSearch') {
-  //     this.submit();
-  //   } else {
-  //     this.updateSuggestions();
-  //   }
-  // };
+  selectSuggestion = ({ type, text, start, end }) => {
+    const query = this.state.query.query;
+    const { selectionStart, selectionEnd } = this.inputRef;
+    const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
+
+    this.setState({
+      query: {
+        ...this.state.query,
+        query: value.substr(0, start) + text + value.substr(end),
+      },
+      index: null,
+    }, () => {
+      this.inputRef.setSelectionRange(start + text.length, start + text.length);
+
+      if (type === 'recentSearch') {
+        this.onSubmit();
+      } else {
+        this.updateSuggestions();
+      }
+    });
+  };
 
   getRecentSearchSuggestions = (query) => {
     if (!this.persistedLog) return [];
@@ -148,16 +152,6 @@ export class QueryBar extends Component {
       const end = query.length;
       return { type: 'recentSearch', text, start, end };
     });
-  };
-
-  selectSuggestion = (suggestion) => {
-    const nextInputValue =
-      this.state.query.query.substr(0, suggestion.start) +
-      suggestion.text +
-      this.state.query.query.substr(suggestion.end);
-
-    this.setState({ query: { ...this.state.query, query: nextInputValue }, index: null });
-    this.updateSuggestions();
   };
 
   onOutsideClick = () => {
@@ -265,7 +259,10 @@ export class QueryBar extends Component {
   };
 
   onSubmit = (event) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
+
     this.persistedLog.add(this.state.query.query);
 
     this.props.onSubmit({
