@@ -38,8 +38,7 @@ import {
 
 /*
 TODO: recent search suggestions don't seem to be working
-TODO: query disappears when I hit enter and language reverts to lucene
-TODO: might be related to ^^, suggestions component throws up when given an object (query dsl)
+TODO: suggestions component throws up when given an object (query dsl)
 TODO: styling
 TODO: refactoring
  */
@@ -243,8 +242,7 @@ export class QueryBar extends Component {
         if (isSuggestionsVisible && this.state.suggestions[index]) {
           this.selectSuggestion(this.state.suggestions[index]);
         } else {
-          this.setState({ isSuggestionsVisible: false });
-          this.props.onSubmit(value);
+          this.onSubmit(event);
         }
         break;
       case KEY_CODES.ESC:
@@ -330,7 +328,6 @@ export class QueryBar extends Component {
           <form
             role="form"
             name="queryBarForm"
-            onSubmit={this.onSubmit}
             onKeyDown={this.onKeyDown}
             onKeyUp={this.onKeyUp}
           >
