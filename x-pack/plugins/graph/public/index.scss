@@ -10,4 +10,16 @@
 //   gphChart__legend--small
 //   gphChart__legend-isLoading
 
+$gphNodeColor--selected: yellowgreen;
+$gphVertexFieldButtonSize: 26px; // same as svg
+
+@mixin gphSvgText() {
+  font-family: $euiFontFamily;
+  font-size: $euiSizeS;
+  line-height: $euiSizeM;
+  fill: $euiColorDarkShade;
+  color: $euiColorDarkShade;
+}
+
 @import './main';
+@import './templates/index';

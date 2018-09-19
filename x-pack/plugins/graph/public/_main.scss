@@ -1,310 +1,126 @@
-// @import (reference) "~ui/styles/variables";
-// @import '~plugins/xpack_main/style/main.less';
+/**
+ * Lists
+ */
 
-
-$gphNodeColor--selected: yellowgreen;
-$gphNodeColor--marker: #e1e897;
-$gphColor--pulse: #00A69B;
-$gphVertexFieldButtonSize: 26px; // same as svg
-
-.selectedFieldLine{
-  background: $euiColorLightShade;
+.gphStripedList {
+  max-height: $euiSize * 10;
+  overflow-y: auto;
 }
 
-.nodeCircle {
-  fill: $euiColorMediumShade;
-  opacity: 0.95;
-}
-
-.nodeCircle.selectedNode {
-  stroke-width: $euiSizeXS;
-  stroke: $gphNodeColor--selected;
-}
-.disabledField{
-    opacity:0.3;
-}
-
-.pulseControl {
-  border: solid 1px $gphColor--pulse;
-}
-
-
-.edge {
-  fill: $euiColorMediumShade;
-  stroke-width: 2;
-  stroke: $euiColorMediumShade;
-  stroke-opacity: 0.5;
-}
-.edge.selectedEdge {
-  stroke: $gphNodeColor--selected;
-  stroke-opacity: 0.95;
-}
-.edge.inferredEdge {
-  stroke-dasharray: 5,5;
-}
-
-.edge:hover {
-  stroke-opacity: 0.95;
-}
-
-.nodeSvgText,
-.nodeHtmlLabel,
-.nodeMarkerText {
-  font-size: $euiSizeS;
-  font-family: $euiFontFamily;
-  fill: $euiColorDarkShade;
-}
-.nodeHtmlLabel {
-  cursor:pointer;
-  @include euiTextTruncate;
-  text-align: center;
-  max-width: 100px;
-  max-height: $euiSizeL;
-}
-
-.dialogFooterText {
-  position: absolute;
-  bottom: 0;
-}
-
-.nodeMarkerText {
-  font-size: $euiSizeXS;
-}
-.nodeMarkerCircle{
-  fill: $gphNodeColor--marker;
-  stroke: $euiColorEmptyShade;
-}
-
-.help-block {
-  font-size: $euiFontSizeXS;
-}
-
-.indexDropDown{
-  max-width: 200px;
-  margin-right: $euiSizeXS;
-}
-
-#qDisplayField{
-  max-width: 280px;
-}
-
-#addVertexFieldButton {
-  border-radius: 50%;
-  font-size: $euiFontSizeXS;
-  margin-right: $euiSizeXS;
-  height: $gphVertexFieldButtonSize;
-  width: $gphVertexFieldButtonSize;
-}
-
-.selButton,
-.selectionActionButton i {
-  margin-right: $euiSizeXS;
-  margin-bottom: 2px;
-  margin-top: 2px;
-}
-
-.selectionActionButton i {
-  font-size: 18px;
-}
-
-.vertexSelectionActionBar {
-  padding-top: 2px;
-}
-
-#sidebar{
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  width: 300px;
-  z-index: 5;
-  background-color: $euiColorEmptyShade;
-  opacity: 0.96;
-}
-.sidebarPanel{
-  border: 1px solid $euiBorderColor;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-bottom: 5px;
-  padding-top: 0px;
-  border-radius: 5px;
-  margin-bottom: 2px;
-}
-
-#qDiversityField{
-  max-width: 220px;
-}
-.small-graph-form {
-  margin-bottom: 5px;
-}
-
-#fieldList {
-      height: 100%;
-      min-width: 300px;
-}
-
-.legend-value-color-picker .dot {
-    line-height: 14px;
-    margin: 2px;
-    font-size: 14px;
-}
-.legend-value-color-picker .dot:hover {
-  margin: 0px;
-  font-size: 18px;
-}
-
-.legend-value-icon-picker .icon {
-    line-height: 14px;
-    margin: 2px;
-    font-size: 14px;
-    color: grey;
-}
-.legend-value-icon-picker .icon:hover {
-  margin: 0px;
-  font-size: 18px;
-  color: black;
-}
-.legend-value-icon-picker .selectedNode{
-  margin: 0px;
-  font-size: 18px;
-  color: black;
-}
-
-.venn1 {
-      fill: $euiColorDanger;
-      fill-opacity:0.5;
-}
-.venn2 {
-      fill: $euiColorPrimary;
-      fill-opacity:0.5;
-}
-
-.vennTerm1{
-  color:$euiColorDanger;
-}
-.vennTerm2{
-  color:$euiColorPrimary;
-}
-.vennTerm12{
-  color:#BC4A84;
-}
-
-.detailPanel{
-  max-height: 300px;
-  overflow: scroll;
-}
-.detailHeader{
-  margin-top: 5px;
-  color: $euiColorEmptyShade;
-  background-color: $euiColorDarkShade;
-  padding: 5px;
-  border-radius: 3px;
-  margin-bottom: 3px;
-}
-
-.grphSelectionList{
-  height: 200px;
-  max-height: 200px;
-  background-color: $euiColorLightestShade;
-  overflow: scroll;
-  margin-bottom: 0px;
-}
-
-.no-margin-bottom{
-  margin-bottom:0px;
-  padding-bottom: 0px;
-}
-
-.noUserSelect{
-  user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-#GraphSvgContainer {
-  position: fixed;
-  height: 100%;
-  width: calc(100% - 53px);
-}
-
-.global-nav.is-global-nav-open + .app-wrapper #GraphSvgContainer {
-  width: calc(100% - 160px);
-}
-
-.requestJsonView{
-  height:200px;
-}
-
-
-.SvgIconFont{
-  font-family: 'FontAwesome';
-  font-size: 1em;
-  fill: $euiColorEmptyShade;
-}
-
-.lowOpacitySvgText{
-  fill-opacity: 0.5;
-}
-
-.SvgZoomedIconButton{
-  fill: $euiColorMediumShade;
-  stroke: $euiColorEmptyShade;
-}
-.SvgZoomedIconButton:hover{
-  fill: $euiColorDarkShade;
-}
-
-
-.SvgZoomedIconButtonText{
-  font-family: 'FontAwesome';
-  font-size: 0.15em;
-  fill: $euiColorEmptyShade;
-}
-.SvgZoomedButtonText{
-  font-size: 0.1em;
-  fill: $euiColorEmptyShade;
-}
-
-navbar .input-group{
-    top: 2px;
-    padding-bottom: 2px;
-}
-
-#fieldFinderIcon{
-  background-color: $euiColorEmptyShade;
+.gphStripedList__item {
   border: none;
-}
-#fieldFinderInput{
-  border: none;
-}
-#fieldIconPlaceholder{
-  min-height: 35px;
-}
-.scrollable-list{
-  max-height: 180px;
-  overflow: scroll;
-}
 
-.scrollable-list ul.li-striped {
-  li {
-    border: none;
-  }
-
-  li:nth-child(even) {
+  &:nth-child(even) {
     background-color: $euiColorLightestShade;
   }
 
-  li:nth-child(odd) {
+  &:nth-child(odd) {
     background-color: $euiColorEmptyShade;
   }
-
 }
 
-.graphPlusButton {
+/**
+ * Nodes
+ */
+
+.gphNode-disabled{
+  opacity:0.3;
+}
+
+.gphNode__circle {
+  fill: $euiColorMediumShade;
+
+  // SASSTODO: Can't definitively change modifier class
+  // because it's not easy to tell what's a class and what's
+  // part of the data object since they are named the same
+  &.selectedNode {
+    stroke-width: $euiSizeXS;
+    stroke: $gphNodeColor--selected;
+  }
+}
+
+.gphNode__text {
+  fill: $euiColorEmptyShade;
+
+  &--lowOpacity{
+    fill-opacity: 0.5;
+  }
+}
+
+
+/**
+ * Forms
+ */
+
+.gphFormGroup--small {
+  margin-bottom: $euiSizeS;
+}
+
+.gphColorPicker__color,
+.gphIconPicker__icon {
+  margin: $euiSizeXS;
+  cursor: pointer;
+
+  &.selectedNode,
+  &:hover,
+  &:focus {
+    transform: scale(1.4);
+  }
+}
+
+.gphIconPicker__icon {
+  opacity: .7;
+
+  &.selectedNode,
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.gphIndexSelect{
+  max-width: $euiSizeL * 10;
+  margin-right: $euiSizeXS;
+
+  &-unselected {
+    @include euiFocusRing;
+  }
+}
+
+.gphAddButton {
   background: $euiColorPrimary;
-  border: none;
   color: $euiColorEmptyShade;
-  &:hover {
+  border-radius: 50%;
+  font-size: $euiFontSizeXS;
+  margin: 2px $euiSizeS 0 $euiSizeXS;
+  height: $gphVertexFieldButtonSize;
+  width: $gphVertexFieldButtonSize;
+
+  &:hover:not(:disabled) {
     background: shadeOrTint($euiColorPrimary, 10%, 10%);
     cursor: pointer;
   }
+
+  &:disabled {
+    background: $euiColorMediumShade;
+    cursor: not-allowed;
+  }
+
+  &-focus {
+    @include euiFocusRing;
+  }
+}
+
+.gphFieldList {
+  min-width: $euiSizeXL * 10;
+}
+
+/**
+ * Utilities
+ */
+
+.gphNoUserSelect{
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
