@@ -37,7 +37,6 @@ import {
 } from '@elastic/eui';
 
 /*
-TODO: recent search suggestions don't seem to be working
 TODO: suggestions component throws up when given an object (query dsl)
 TODO: styling
 TODO: refactoring
@@ -268,6 +267,8 @@ export class QueryBar extends Component {
 
   onSubmit = (event) => {
     event.preventDefault();
+    this.persistedLog.add(this.state.query.query);
+
     this.props.onSubmit({
       query: fromUser(this.state.query.query),
       language: this.state.query.language,
