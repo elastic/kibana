@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard state', function describeIndexTests() {
+  describe('dashboard state @dashboard-state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

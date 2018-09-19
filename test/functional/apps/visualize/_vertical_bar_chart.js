@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('vertical bar chart', function () {
+  describe('vertical bar chart @visualize-vertical-bar-chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';

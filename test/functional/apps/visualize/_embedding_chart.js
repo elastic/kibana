@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('embedding', () => {
 
-    describe('a data table', () => {
+    describe('a data table @visualize-embedding-chart', () => {
       before(async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dark theme', async () => {
+  describe('dark theme @dashbard-dark-theme', async () => {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
     });

@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'timelion', 'header', 'settings']);
 
-  describe('expression typeahead', () => {
+  describe('expression typeahead @timelion-expression-typehead', () => {
     before(async () => {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';

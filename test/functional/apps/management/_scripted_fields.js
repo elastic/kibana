@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
-  describe('scripted fields', () => {
+  describe('scripted fields @management-scripted-fields', () => {
 
     before(async function () {
       await remote.setWindowSize(1200, 800);

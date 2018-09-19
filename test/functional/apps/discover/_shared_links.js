@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share']);
 
-  describe('shared links', function describeIndexTests() {
+  describe('shared links @discover-shared-links', function describeIndexTests() {
     let baseUrl;
 
     before(async function () {

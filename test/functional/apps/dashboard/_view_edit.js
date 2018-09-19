@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
 
-  describe('dashboard view edit mode', function viewEditModeTests() {
+  describe('dashboard view edit mode @dashboard-view-edit-mode', function viewEditModeTests() {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });

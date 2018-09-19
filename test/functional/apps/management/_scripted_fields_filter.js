@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['settings']);
 
-  describe('filter scripted fields', function describeIndexTests() {
+  describe('filter scripted fields @management-scripted-fields-filter', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await remote.setWindowSize(1200, 800);

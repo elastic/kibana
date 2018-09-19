@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
-  describe('source filters', function describeIndexTests() {
+  describe('source filters @discover-source-filters', function describeIndexTests() {
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';

@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }
 
-  describe('inspect', () => {
+  describe('inspect @discover-inspector', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');

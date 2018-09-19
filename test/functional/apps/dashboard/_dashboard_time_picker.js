@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard time picker', function describeIndexTests() {
+  describe('dashboard time picker @dashboard-time-picker', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

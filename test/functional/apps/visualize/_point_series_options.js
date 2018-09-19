@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
   const pointSeriesVis = PageObjects.pointSeries;
 
-  describe('point series', function describeIndexTests() {
+  describe('point series @visualize-point-series', function describeIndexTests() {
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';

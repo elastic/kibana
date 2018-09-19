@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const remote = getService('remote');
 
-  describe('embed mode', async () => {
+  describe('embed mode @dashboard-embed-mode', async () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });

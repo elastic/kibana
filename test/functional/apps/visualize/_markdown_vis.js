@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }) {
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-  describe('visualize app', async () => {
+  describe('visualize app @visualize-markdown-vis', async () => {
     before(async function () {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();

@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['context']);
 
-  describe('context size', function contextSize() {
+  describe('context size @context-size', function contextSize() {
     before(async function () {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,

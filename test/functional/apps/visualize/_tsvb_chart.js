@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
-  describe('visual builder', function describeIndexTests() {
+  describe('visual builder @visualize-tsvb-chart', function describeIndexTests() {
 
     describe('Time Series', function () {
       before(async () => {

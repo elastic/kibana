@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
-  describe('area charts', function indexPatternCreation() {
+  describe('area charts @visualize-area-charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
 
     const initAreaChart = async () => {

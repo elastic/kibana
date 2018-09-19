@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('chart types', function () {
+  describe('chart types @visualize-chart-types', function () {
     before(function () {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new');

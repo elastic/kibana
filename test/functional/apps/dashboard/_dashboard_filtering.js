@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filtering', async () => {
+  describe('dashboard filtering @dashboard-filtering', async () => {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe.skip('vertical bar chart with index without time filter', function () {
+  describe.skip('vertical bar chart with index without time filter @visualize-vertical-bar-chart-nontimeindex', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
     const initBarChart = async () => {

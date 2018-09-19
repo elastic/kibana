@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filter bar', async () => {
+  describe('dashboard filter bar @dashboard-filter-bar', async () => {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });

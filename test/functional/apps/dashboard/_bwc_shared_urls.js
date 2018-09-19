@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
                   `legendOpen:!t))),` +
         `viewMode:edit)`;
 
-  describe('bwc shared urls', function describeIndexTests() {
+  describe('bwc shared urls @dashboard-bwc-shared-urls', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
 

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
 
-  describe('dashboard panel controls', function viewEditModeTests() {
+  describe('dashboard panel controls @dashboard-panel-controls', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await kibanaServer.uiSettings.disableToastAutohide();

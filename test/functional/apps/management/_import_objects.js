@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
 
-  describe('import objects', function describeIndexTests() {
+  describe('import objects @management-import-objects', function describeIndexTests() {
     beforeEach(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});

@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  describe('"Create Index Pattern" wizard', function () {
+  describe('"Create Index Pattern" wizard @management-create-index-pattern-wizard', function () {
 
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it

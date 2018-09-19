@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'context']);
 
-  describe('context filters', function contextSize() {
+  describe('context filters @context-filters', function contextSize() {
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,

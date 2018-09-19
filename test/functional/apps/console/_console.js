@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  describe('console app', function describeIndexTests() {
+  describe('console app @console-test', function describeIndexTests() {
     before(async function () {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

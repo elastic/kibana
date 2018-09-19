@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
-  describe('context link in discover', function contextSize() {
+  describe('context link in discover @context-discover-navigation', function contextSize() {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.setAbsoluteRange(TEST_DISCOVER_START_TIME, TEST_DISCOVER_END_TIME);

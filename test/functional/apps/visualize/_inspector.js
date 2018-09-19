@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('visualize app @visualize-inspector', function describeIndexTests() {
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
