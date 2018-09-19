@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
+<TelemetryOptIn>
+  <EuiText
+    grow={true}
+  >
+    <div
+      className="euiText"
+    >
+      <p>
+        Gold and platinum customers: help support give you better service.
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiCheckbox
+    checked={false}
+    compressed={false}
+    disabled={false}
+    id="isOptingInToTelemetry"
+    indeterminate={false}
+    label={
+      <span>
+        Send basic feature usage statistics to Elastic periodically. 
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiLink
+              color="primary"
+              onClick={[Function]}
+              type="button"
+            >
+              Read more
+            </EuiLink>
+          }
+          className="licenseManagement__baseline"
+          closePopover={[Function]}
+          hasArrow={true}
+          id="readMorePopover"
+          isOpen={false}
+          ownFocus={true}
+          panelPaddingSize="m"
+        >
+          <EuiText
+            className="licenseManagement__narrowText"
+            grow={true}
+          >
+            <p>
+              This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an 
+              <EuiLink
+                color="primary"
+                onClick={[Function]}
+                type="button"
+              >
+                example
+              </EuiLink>
+               
+              or read our
+               
+              <EuiLink
+                color="primary"
+                href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                target="_blank"
+                type="button"
+              >
+                telemetry privacy statement
+              </EuiLink>
+              . You can disable this feature any time.
+            </p>
+          </EuiText>
+        </EuiPopover>
+      </span>
+    }
+    onChange={[Function]}
+  >
+    <div
+      className="euiCheckbox"
+    >
+      <input
+        checked={false}
+        className="euiCheckbox__input"
+        disabled={false}
+        id="isOptingInToTelemetry"
+        onChange={[Function]}
+        type="checkbox"
+      />
+      <div
+        className="euiCheckbox__square"
+      />
+      <label
+        className="euiCheckbox__label"
+        htmlFor="isOptingInToTelemetry"
+      >
+        <span>
+          Send basic feature usage statistics to Elastic periodically. 
+          <EuiPopover
+            anchorPosition="downCenter"
+            button={
+              <EuiLink
+                color="primary"
+                onClick={[Function]}
+                type="button"
+              >
+                Read more
+              </EuiLink>
+            }
+            className="licenseManagement__baseline"
+            closePopover={[Function]}
+            hasArrow={true}
+            id="readMorePopover"
+            isOpen={false}
+            ownFocus={true}
+            panelPaddingSize="m"
+          >
+            <EuiOutsideClickDetector
+              onOutsideClick={[Function]}
+            >
+              <div
+                className="euiPopover euiPopover--anchorDownCenter licenseManagement__baseline"
+                id="readMorePopover"
+                onClick={[Function]}
+                onKeyDown={[Function]}
+              >
+                <div
+                  className="euiPopover__anchor"
+                >
+                  <EuiLink
+                    color="primary"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <button
+                      className="euiLink euiLink--primary"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      Read more
+                    </button>
+                  </EuiLink>
+                </div>
+              </div>
+            </EuiOutsideClickDetector>
+          </EuiPopover>
+        </span>
+      </label>
+    </div>
+  </EuiCheckbox>
+</TelemetryOptIn>
+`;
+
+exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `<TelemetryOptIn />`;
