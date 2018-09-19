@@ -81,86 +81,86 @@ export const metrics = {
     field: 'beats_stats.metrics.apm-server.server.request.count',
     title: 'Requests',
     label: 'Requested',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests received by server'
   }),
 
   apm_responses_count: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.count',
     title: 'Response Count',
     label: 'Total',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests responded to by server'
   }),
   apm_responses_valid_ok: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.valid.ok',
     title: 'Ok',
     label: 'Ok',
-    description: 'PLZ FILL ME IN'
+    description: '200 OK response count'
   }),
   apm_responses_valid_accepted: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.valid.accepted',
     title: 'Accepted',
     label: 'Accepted',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests successfully reporting new events'
   }),
   apm_responses_errors_toolarge: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.toolarge',
     title: 'Response Errors',
     label: 'Too large',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected due to excessive payload size'
   }),
   apm_responses_errors_validate: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.validate',
     title: 'Validate',
     label: 'Validate',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected due to payload validation error'
   }),
   apm_responses_errors_method: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.method',
     title: 'Method',
     label: 'Method',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected due to incorrect HTTP method'
   }),
   apm_responses_errors_unauthorized: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.unauthorized',
     title: 'Unauthorized',
     label: 'Unauthorized',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected due to invalid secret token'
   }),
   apm_responses_errors_ratelimit: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.ratelimit',
     title: 'Rate limit',
     label: 'Rate limit',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected to due excessive rate limit'
   }),
   apm_responses_errors_queue: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.queue',
     title: 'Queue',
     label: 'Queue',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected to due internal queue filling up'
   }),
   apm_responses_errors_decode: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.decode',
     title: 'Decode',
     label: 'Decode',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected to due decoding errors - invalid json, incorrect data type for entity'
   }),
   apm_responses_errors_forbidden: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.forbidden',
     title: 'Forbidden',
     label: 'Forbidden',
-    description: 'PLZ FILL ME IN'
+    description: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
   }),
   apm_responses_errors_concurrency: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.concurrency',
     title: 'Concurrency',
     label: 'Concurrency',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected due to overall concurrency limit breach'
   }),
   apm_responses_errors_closed: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.closed',
     title: 'Closed',
     label: 'Closed',
-    description: 'PLZ FILL ME IN'
+    description: 'HTTP Requests rejected during server shutdown'
   }),
 
   apm_decoder_deflate_contentlength: new ApmMetric({
@@ -195,25 +195,25 @@ export const metrics = {
     field: 'beats_stats.metrics.apm-server.processor.transaction.transformations',
     title: 'Processed Events',
     label: 'Transaction',
-    description: 'PLZ FILL ME IN'
+    description: 'Transaction events processed'
   }),
   apm_processor_span_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.span.transformations',
     title: 'Transformations',
     label: 'Span',
-    description: 'PLZ FILL ME IN'
+    description: 'Span events processed'
   }),
   apm_processor_error_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.error.transformations',
     title: 'Transformations',
     label: 'Error',
-    description: 'PLZ FILL ME IN'
+    description: 'Error events processed'
   }),
   apm_processor_metric_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.metric.transformations',
     title: 'Transformations',
     label: 'Metric',
-    description: 'PLZ FILL ME IN'
+    description: 'Metric events processed'
   }),
 
 
