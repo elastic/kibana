@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiInfraEmptyPrompt, EuiInfraLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingChart } from '@elastic/eui';
 import { last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -53,14 +53,13 @@ export class Waffle extends React.Component<Props, {}> {
     if (this.props.loading) {
       return (
         <WaffleLoadingContainer>
-          <EuiInfraLoadingChart size="xl" mono />
+          <EuiLoadingChart size="xl" mono />
         </WaffleLoadingContainer>
       );
     } else if (!this.props.loading && this.props.map && this.props.map.length === 0) {
       return (
-        <EuiInfraEmptyPrompt
+        <EuiEmptyPrompt
           iconType="grid"
-          iconSize="m"
           title={<h2>Map not availabe</h2>}
           titleSize="m"
           body={<p>Unable to find data</p>}
