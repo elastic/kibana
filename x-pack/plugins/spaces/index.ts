@@ -17,6 +17,7 @@ import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
 import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
+import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
@@ -62,7 +63,7 @@ export const spaces = (kibana: any) =>
         return {
           spaces: [],
           activeSpace: null,
-          spaceSelectorURL: server.config().get('server.basePath') || '/',
+          spaceSelectorURL: getSpaceSelectorUrl(server.config()),
         };
       },
       async replaceInjectedVars(vars: any, request: any, server: any) {
