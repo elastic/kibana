@@ -310,7 +310,7 @@ function convertDelimiter(d) {
 
     default:
       return {
-        delimiter: undefined, // default to comma
+        delimiter: undefined,
         customDelimiter: ''
       };
   }
