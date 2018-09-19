@@ -2,20 +2,11 @@
 
 exports[`renders RangeControlEditor 1`] = `
 <div>
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    id="indexPatternSelect-0"
-    label="Index Pattern"
-  >
-    <IndexPatternSelect
-      data-test-subj="indexPatternSelect-0"
-      indexPatternId="indexPattern1"
-      onChange={[Function]}
-      placeholder="Select index pattern..."
-    />
-  </EuiFormRow>
+  <InjectIntl(IndexPatternSelectFormRowUi)
+    controlIndex={0}
+    indexPatternId="indexPattern1"
+    onChange={[Function]}
+  />
   <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"

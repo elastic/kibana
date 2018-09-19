@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component }  from 'react';
-import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
+import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -217,29 +217,14 @@ class ListControlEditorUi extends Component {
   }
 
   render() {
-    const { intl } = this.props;
-    const indexPatternSelectId = `indexPatternSelect-${this.props.controlIndex}`;
-
     return (
       <div>
 
-        <EuiFormRow
-          id={indexPatternSelectId}
-          label={intl.formatMessage({
-            id: 'inputControl.editor.indexPatternSelect.patternLabel',
-            defaultMessage: 'Index Pattern'
-          })}
-        >
-          <IndexPatternSelect
-            placeholder={intl.formatMessage({
-              id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
-              defaultMessage: 'Select index pattern...'
-            })}
-            indexPatternId={this.props.controlParams.indexPattern}
-            onChange={this.props.handleIndexPatternChange}
-            data-test-subj={indexPatternSelectId}
-          />
-        </EuiFormRow>
+        <IndexPatternSelectFormRow
+          indexPatternId={this.props.controlParams.indexPattern}
+          onChange={this.props.handleIndexPatternChange}
+          controlIndex={this.props.controlIndex}
+        />
 
         <FieldSelect
           fieldName={this.props.controlParams.fieldName}
