@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { constant } from 'lodash';
-import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
+import { chromeNavControlsRegistry, chromeK7NavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import { uiModules } from 'ui/modules';
 import template from 'plugins/security/views/nav_control/nav_control.html';
+import { SecurityNavControl } from './nav_control_component';
 import 'plugins/security/services/shield_user';
 import '../account/account';
 import { PathProvider } from 'plugins/xpack_main/services/path';
@@ -37,3 +39,21 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
     return tooltip;
   };
 });
+
+
+chromeK7NavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
+  name: 'security',
+  order: 1000,
+  render() {
+    const xpackInfo = Private(XPackInfoProvider);
+    const showSecurityLinks = xpackInfo.get('features.security.showLinks');
+    if (Private(PathProvider).isLoginOrLogout() || !showSecurityLinks) return null;
+
+    const props = {
+      user: ShieldUser.getCurrent(),
+      route: `${kbnBaseUrl}#/account`,
+    };
+
+    return <SecurityNavControl {...props} />;
+  }
+}));

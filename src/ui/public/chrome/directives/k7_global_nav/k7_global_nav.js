@@ -18,40 +18,26 @@
  */
 
 
-// import './app_switcher';
-// import './global_nav_link';
-
 import { uiModules } from '../../../modules';
 import { Header } from './components/header';
-import k7GlobalNavTemplate from './k7_global_nav.html';
 import './k7_global_nav.less';
+import { chromeK7NavControlsRegistry } from '../../../registry/chrome_nav_controls';
 
 const module = uiModules.get('kibana');
 
-module.directive('k7Header', (reactDirective) => {
+module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
+  const navLinks = chrome.getNavLinks();
+  const navControls = Private(chromeK7NavControlsRegistry).inOrder;
+
   return reactDirective(Header, [
-    ['navLinks', { watchDepth: 'collection' }],
+    // scope accepted by directive, passed in as React props
     'appTitle',
     'isVisible',
-    'otherProp'
-  ]);
-});
-
-module.directive('k7GlobalNav', (globalNavState, chrome) => {
-  return {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      chrome: '=',
-      isVisible: '=',
-      logoBrand: '=',
-      smallLogoBrand: '=',
-      appTitle: '=',
-    },
-    template: k7GlobalNavTemplate,
-    link: (scope) => {
-      // TODO: change data binding to observable
-      scope.navLinks = chrome.getNavLinks();
-    }
-  };
+  ],
+  {},
+  // angular injected React props
+  {
+    navLinks,
+    navControls
+  });
 });

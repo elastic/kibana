@@ -86,8 +86,6 @@ export class HeaderAppMenu extends Component {
               </EuiKeyPadMenuItem>
             ))
           }
-
-
         </EuiKeyPadMenu>
       </EuiPopover>
     );

@@ -30,7 +30,6 @@ import {
 } from '@elastic/eui';
 
 import { HeaderAppMenu } from './header_app_menu';
-import { HeaderUserMenu } from './header_user_menu';
 import { HeaderSpacesMenu } from './header_spaces_menu';
 
 export class Header extends Component {
@@ -60,6 +59,16 @@ export class Header extends Component {
     );
   }
 
+  renderControls() {
+    const { navControls } = this.props;
+
+    return navControls && navControls.map(navControl => (
+      <EuiHeaderSectionItem key={navControl.name}>
+        {navControl.render()}
+      </EuiHeaderSectionItem>
+    ));
+  }
+
   render() {
     const { navLinks, isVisible } = this.props;
 
@@ -82,9 +91,7 @@ export class Header extends Component {
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">
-          <EuiHeaderSectionItem>
-            <HeaderUserMenu />
-          </EuiHeaderSectionItem>
+          {this.renderControls()}
 
           <EuiHeaderSectionItem>
             <HeaderAppMenu navLinks={navLinks} />
