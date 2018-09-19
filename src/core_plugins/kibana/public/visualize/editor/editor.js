@@ -42,7 +42,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 uiRoutes
@@ -117,6 +117,7 @@ function VisEditor(
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -138,6 +139,10 @@ function VisEditor(
 
   $scope.vis = vis;
 
+  const $appStatus = this.appStatus = {
+    dirty: !savedVis.id
+  };
+
   $scope.topNavMenu = [{
     key: 'save',
     description: 'Save Visualization',
@@ -156,12 +161,19 @@ function VisEditor(
     description: 'Share Visualization',
     testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
+      const hasUnappliedChanges = vis.dirty;
+      const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
+        shareContextMenuExtensions,
+        sharingData: {
+          title: savedVis.title,
+        },
+        isDirty: hasUnappliedChanges || hasUnsavedChanges,
       });
     }
   }, {
@@ -189,18 +201,6 @@ function VisEditor(
   }];
 
   let stateMonitor;
-
-  const $appStatus = this.appStatus = {
-    dirty: !savedVis.id
-  };
-
-  this.getSharingTitle = () => {
-    return savedVis.title;
-  };
-
-  this.getSharingType = () => {
-    return 'visualization';
-  };
 
   if (savedVis.id) {
     docTitle.change(savedVis.title);

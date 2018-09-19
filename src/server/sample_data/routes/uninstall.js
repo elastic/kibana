@@ -43,12 +43,16 @@ export const createUninstallRoute = () => ({
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = createIndexName(server, sampleDataset.id);
 
-      try {
-        await callWithRequest(request, 'indices.delete', { index: index });
-      } catch (err) {
-        return reply(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
+      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+        const dataIndexConfig = sampleDataset.dataIndices[i];
+        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+
+        try {
+          await callWithRequest(request, 'indices.delete', { index: index });
+        } catch (err) {
+          return reply(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
+        }
       }
 
       const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
