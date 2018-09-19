@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPage } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const ColumnarPage = styled.div`
@@ -18,4 +19,8 @@ export const PageContent = styled.div`
   display: flex;
   flex-direction: row;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
+`;
+
+export const FlexPage = styled(EuiPage)`
+  flex: 1 0 0;
 `;

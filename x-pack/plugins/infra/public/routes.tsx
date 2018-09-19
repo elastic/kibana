@@ -10,6 +10,7 @@ import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
+import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 
 interface RouterProps {
@@ -23,6 +24,7 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
         <Redirect from="/" exact={true} to="/home" />
         <Route path="/logs" component={LogsPage} />
         <Route path="/home" component={HomePage} />
+        <Route path="/link-to" component={LinkToPage} />
         <Route component={NotFoundPage} />
       </Switch>
     </Router>

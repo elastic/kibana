@@ -12,7 +12,7 @@ import { pickTimeKey } from '../../../common/time';
 import { logPositionActions, logPositionSelectors, State } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
-import { UrlStateContainer } from '../../utils/url_state';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 
 export const withLogPosition = connect(
   (state: State) => ({
@@ -113,3 +113,13 @@ const mapToPositionUrlState = (value: any) =>
     : undefined;
 
 const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : undefined);
+
+export const replaceLogPositionInQueryString = (time: number) =>
+  Number.isNaN(time)
+    ? (value: string) => value
+    : replaceStateKeyInQueryString<LogPositionUrlState>('logPosition', {
+        position: {
+          time,
+          tiebreaker: 0,
+        },
+      });

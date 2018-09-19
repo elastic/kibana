@@ -12,6 +12,11 @@ export const sourceQuery = gql`
       configuration {
         metricAlias
         logAlias
+        fields {
+          container
+          hostname
+          pod
+        }
       }
       status {
         indexFields {
