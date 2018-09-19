@@ -23,7 +23,6 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { toUser, fromUser } from '../../parse_query/index.js';
 import { matchPairs } from '../lib/match_pairs';
 import { Suggestions } from './typeahead/suggestions';
-import { ClickOutside } from './typeahead/click_outside';
 import { getAutocompleteProvider } from '../../autocomplete_providers';
 import { getFromLegacyIndexPattern } from '../../index_patterns/static_utils';
 import { PersistedLog } from '../../persisted_log';
@@ -34,11 +33,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 
 /*
 TODO: recent search suggestions don't seem to be working
 TODO: query disappears when I hit enter and language reverts to lucene
+TODO: might be related to ^^, suggestions component throws up when given an object (query dsl)
 TODO: styling
 TODO: refactoring
  */
@@ -162,7 +163,7 @@ export class QueryBar extends Component {
     this.updateSuggestions();
   };
 
-  onClickOutside = () => {
+  onOutsideClick = () => {
     this.setState({ isSuggestionsVisible: false });
   };
 
@@ -319,64 +320,68 @@ export class QueryBar extends Component {
 
   render() {
     return (
-      <ClickOutside
-        onClickOutside={this.onClickOutside}
-        style={{ position: 'relative' }}
+      <EuiOutsideClickDetector
+        onOutsideClick={this.onOutsideClick}
       >
-        <form
-          role="form"
-          name="queryBarForm"
-          onSubmit={this.onSubmit}
-          onKeyDown={this.onKeyDown}
-          onKeyUp={this.onKeyUp}
+        {/* position:relative required on container so the suggestions appear under the query bar*/}
+        <div
+          style={{ position: 'relative' }}
         >
-          <div
-            className="kuiLocalSearch"
-            role="search"
+          <form
+            role="form"
+            name="queryBarForm"
+            onSubmit={this.onSubmit}
+            onKeyDown={this.onKeyDown}
+            onKeyUp={this.onKeyUp}
           >
-            <div className="kuiLocalSearchAssistedInput">
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFieldText
-                    placeholder="Search..."
-                    value={this.state.query.query}
-                    onChange={this.onInputChange}
-                    onClick={this.onClickInput}
-                    fullWidth
-                    autoFocus={!this.props.disableAutoFocus}
-                    inputRef={node => {
-                      if (node) {
-                        this.inputRef = node;
-                      }
-                    }}
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                  <div className="kuiLocalSearchAssistedInput__assistance">
-                    <QueryLanguageSwitcher
-                      language={this.state.query.language}
-                      onSelectLanguage={(language) => {
-                        this.props.onSubmit({
-                          query: '',
-                          language: language,
-                        });
+            <div
+              className="kuiLocalSearch"
+              role="search"
+            >
+              <div className="kuiLocalSearchAssistedInput">
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFieldText
+                      placeholder="Search..."
+                      value={this.state.query.query}
+                      onChange={this.onInputChange}
+                      onClick={this.onClickInput}
+                      fullWidth
+                      autoFocus={!this.props.disableAutoFocus}
+                      inputRef={node => {
+                        if (node) {
+                          this.inputRef = node;
+                        }
                       }}
+                      autoComplete="off"
+                      spellCheck={false}
                     />
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    <div className="kuiLocalSearchAssistedInput__assistance">
+                      <QueryLanguageSwitcher
+                        language={this.state.query.language}
+                        onSelectLanguage={(language) => {
+                          this.props.onSubmit({
+                            query: '',
+                            language: language,
+                          });
+                        }}
+                      />
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
 
-        <Suggestions
-          show={this.state.isSuggestionsVisible}
-          suggestions={this.state.suggestions}
-          index={this.state.index}
-          onClick={this.onClickSuggestion}
-          onMouseEnter={this.onMouseEnterSuggestion}
-        />
-      </ClickOutside>
+          <Suggestions
+            show={this.state.isSuggestionsVisible}
+            suggestions={this.state.suggestions}
+            index={this.state.index}
+            onClick={this.onClickSuggestion}
+            onMouseEnter={this.onMouseEnterSuggestion}
+          />
+        </div>
+      </EuiOutsideClickDetector>
     );
   }
 }

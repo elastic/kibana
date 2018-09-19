@@ -27,6 +27,9 @@ import { Suggestion } from './suggestion';
 import { units, colors, px, unit } from '../../../../../../x-pack/plugins/apm/public/style/variables';
 import { rgba } from 'polished';
 
+
+// TODO get rid of styled usage?
+
 const List = styled.ul`
   width: 100%;
   border: 1px solid ${colors.gray4};
