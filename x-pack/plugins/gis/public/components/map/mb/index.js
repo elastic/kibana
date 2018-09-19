@@ -18,6 +18,7 @@ function mapStateToProps(state = {}) {
    * on the mapbox component.
    */
   syncMBState(state);
+  return {};
 }
 
 function mapDispatchToProps(dispatch) {
