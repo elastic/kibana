@@ -27,9 +27,11 @@
   min-width: 100px;
 }
 
-// TODO: remove this once a fixed height prop is added to EuiModal
-// Issue for adding height prop https://github.com/elastic/eui/issues/1154
-// this prevents height jumpiness when using search inside a modal
+// Canvas has a few modals that necessitate a fixed height due to robust content
+// These styles prevent height jumpiness when using search inside a modal
+// EUI issue for additional props https://github.com/elastic/eui/issues/1154
+// Per the issue, EUI will only be implementing a maxWidth prop while other
+// overrrides will need to be made via the style attribute or CSS classes.
 .canvasModal--fixedSize {
   width: 75vw;
   height: 75vh;

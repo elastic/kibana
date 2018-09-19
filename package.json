@@ -275,7 +275,7 @@
     "expect.js": "0.3.1",
     "faker": "1.1.0",
     "fetch-mock": "^5.13.1",
-    "geckodriver": "1.11.0",
+    "geckodriver": "1.12.2",
     "getopts": "2.0.0",
     "globby": "^8.0.1",
     "grunt": "1.0.1",
