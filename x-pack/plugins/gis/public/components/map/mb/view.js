@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { createGlobalMbMapInstance } from './global_mb_map';
+import { ResizeChecker } from 'ui/resize_checker';
 
 export class MBMapContainer extends React.Component {
 
@@ -25,23 +26,35 @@ export class MBMapContainer extends React.Component {
     };
   }
 
-  shouldComponentUpdate() {
-    this._mbMap.resize();
-  }
-
   componentWillUnmount() {
     console.warn('Should tear down all resources of this component, including this._mbMap');
   }
 
   componentDidMount() {
     this._mbMap = createGlobalMbMapInstance(this.refs.mapContainer);
-    this._mbMap.resize();
+    this.assignSizeWatch();
     this._mbMap.on('moveend', () => {
       const newMapState = this._getMapState();
       this.props.extentChanged(newMapState);
     });
     const newMapState = this._getMapState();
     this.props.initialize(newMapState);
+  }
+
+  assignSizeWatch() {
+    const checker = new ResizeChecker(this.refs.mapContainer);
+    checker.on('resize', (() => {
+      let lastWidth = window.innerWidth;
+      let lastHeight = window.innerHeight;
+      return () => {
+        if (lastWidth === window.innerWidth
+          && lastHeight === window.innerHeight) {
+          this._mbMap.resize();
+        }
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+      };
+    })());
   }
 
   render() {
