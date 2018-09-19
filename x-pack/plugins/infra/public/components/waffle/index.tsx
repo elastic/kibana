@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiInfraEmptyPrompt, EuiInfraLoadingChart } from '@elastic/eui';
 import { last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -27,6 +27,7 @@ import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 interface Props {
   options: InfraWaffleMapOptions;
   map: InfraWaffleData;
+  loading: boolean;
 }
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
@@ -49,6 +50,25 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 export class Waffle extends React.Component<Props, {}> {
   public render() {
     const bounds = calculateBoundsFromMap(this.props.map);
+    if (this.props.loading) {
+      return (
+        <WaffleLoadingContainer>
+          <EuiInfraLoadingChart size="xl" mono />
+        </WaffleLoadingContainer>
+      );
+    } else if (!this.props.loading && this.props.map && this.props.map.length === 0) {
+      return (
+        <EuiInfraEmptyPrompt
+          iconType="grid"
+          iconSize="m"
+          title={<h2>Map not availabe</h2>}
+          titleSize="m"
+          body={<p>Unable to find data</p>}
+          actions={<br />}
+        />
+      );
+    }
+
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
@@ -130,4 +150,12 @@ const WaffleMapInnerContainer = styled.div`
   justify-content: center;
   align-content: flex-start;
   padding: 10px;
+`;
+
+const WaffleLoadingContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 `;

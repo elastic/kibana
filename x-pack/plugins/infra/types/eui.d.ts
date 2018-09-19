@@ -72,7 +72,7 @@ declare module '@elastic/eui' {
   export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
 
   type EuiFilterButtonProps = CommonProps & {
-    color?: ButtonColor;
+    color?: IconColor;
     href?: string;
     iconSide?: ButtonIconSide;
     iconType?: IconType;
@@ -112,4 +112,23 @@ declare module '@elastic/eui' {
     append?: React.ReactNode;
   };
   export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
+
+  type EuiInfraEmptyPromptProps = CommonProps & {
+    iconType: IconType;
+    iconColor?: IconColor;
+    iconSize: string;
+    title: React.ReactNode;
+    titleSize: Size;
+    body: React.ReactNode;
+    actions: React.ReactNode;
+  };
+
+  export const EuiInfraEmptyPrompt: React.SFC<EuiInfraEmptyPromptProps>;
+
+  type EuiInfraLoadingChartProps = CommonProps & {
+    mono?: boolean;
+    size: string;
+  };
+
+  export const EuiInfraLoadingChart: React.SFC<EuiInfraLoadingChartProps>;
 }
