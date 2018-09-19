@@ -42,7 +42,7 @@ export class MBMapContainer extends React.Component {
   }
 
   assignSizeWatch() {
-    const checker = new ResizeChecker(this.refs.mapContainer.parentNode);
+    const checker = new ResizeChecker(this.refs.mapContainer);
     checker.on('resize', (() => {
       let lastWidth = window.innerWidth;
       let lastHeight = window.innerHeight;
