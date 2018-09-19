@@ -22,6 +22,7 @@ import { TagsPage } from './tags';
 
 interface MainPagesProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  location: any;
 }
 
 interface MainPagesState {
@@ -60,7 +61,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     const renderedTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.props.pathname}
+        isSelected={tab.id === this.props.location.pathname}
         disabled={tab.disabled}
         key={index}
       >
@@ -75,11 +76,15 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
           <Switch>
             <Route
               path="/overview/beats/:action?/:enrollmentToken?"
-              render={() => <BeatsPage.ActionArea libs={this.props.libs} {...this.props} />}
+              render={(props: any) => (
+                <BeatsPage.ActionArea {...this.props} {...props} libs={this.props.libs} />
+              )}
             />
             <Route
               path="/overview/tags"
-              render={() => <TagsPage.ActionArea libs={this.props.libs} {...this.props} />}
+              render={(props: any) => (
+                <TagsPage.ActionArea {...this.props} {...props} libs={this.props.libs} />
+              )}
             />
           </Switch>
         }
@@ -89,17 +94,19 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         <Switch>
           <Route
             path="/overview/beats/:action?/:enrollmentToken?"
-            render={(props: any) => <BeatsPage libs={this.props.libs} {...props} />}
+            render={(props: any) => <BeatsPage {...this.props} libs={this.props.libs} {...props} />}
           />
           <Route
             path="/overview/activity"
             exact={true}
-            render={(props: any) => <ActivityPage libs={this.props.libs} {...props} />}
+            render={(props: any) => (
+              <ActivityPage {...this.props} libs={this.props.libs} {...props} />
+            )}
           />
           <Route
             path="/overview/tags"
             exact={true}
-            render={(props: any) => <TagsPage libs={this.props.libs} {...props} />}
+            render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
           />
         </Switch>
       </PrimaryLayout>

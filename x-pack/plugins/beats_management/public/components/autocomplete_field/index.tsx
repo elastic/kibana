@@ -181,7 +181,6 @@ export class AutocompleteField extends React.Component<
 
   private changeValue = (value: string) => {
     const { onChange } = this.props;
-
     if (onChange) {
       onChange(value);
     }

@@ -18,6 +18,7 @@ import { BeatsActionArea } from './beats_action_area';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  location: any;
 }
 
 interface BeatsPageState {
@@ -42,7 +43,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     this.loadBeats();
   }
   public componentDidUpdate(prevProps: BeatsPageProps) {
-    if (this.props.pathname !== prevProps.pathname) {
+    if (this.props.location.pathname !== prevProps.location.pathname) {
       this.loadBeats();
     }
   }
@@ -53,10 +54,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
           {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
             <Table
               isLoadingSuggestions={isLoadingSuggestions}
-              isFilterQueryDraftValid={false} // todo
+              isKueryValid={true} // todo check if query converts to es query correctly
               loadSuggestions={loadSuggestions}
-              setFilterQueryDraftFromKueryExpression={() => null} // todo
-              applyFilterQueryFromKueryExpression={() => null} // todo
+              kueryValue={this.props.urlState.beatsKBar}
+              onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
+              onKueryBarSubmit={() => null} // todo
               suggestions={suggestions}
               filterQueryDraft={'false'} // todo
               actionHandler={this.handleBeatsActions}

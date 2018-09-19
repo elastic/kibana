@@ -14,9 +14,6 @@ type StateCallback<T> = (previousState: T) => T;
 
 export interface URLStateProps<URLState = object> {
   goTo: (path: string) => void;
-  goBack: () => void;
-  pathname: string;
-  URLParams: FlatObject<any>;
   setUrlState: (
     newState: FlatObject<URLState> | StateCallback<URLState> | Promise<StateCallback<URLState>>
   ) => void;
@@ -31,22 +28,24 @@ interface ComponentProps<URLState extends object> {
 export class WithURLStateComponent<URLState extends object> extends React.Component<
   ComponentProps<URLState>
 > {
-  public render() {
-    const { history, match } = this.props;
-
-    return this.props.children({
-      goBack: history.goBack,
-      pathname: history.location.pathname,
-      URLParams: match.params,
-      goTo: this.goTo,
-      setUrlState: this.setURLState,
-      urlState: this.URLState,
-    });
-  }
-
   private get URLState(): URLState {
     // slice because parse does not account for the initial ? in the search string
-    return parse(this.props.history.location.search.slice(0, -1)) as URLState;
+    return parse(decodeURIComponent(this.props.history.location.search).substring(1)) as URLState;
+  }
+
+  private historyListener: (() => void) | null = null;
+
+  public componentWillUnmount() {
+    if (this.historyListener) {
+      this.historyListener();
+    }
+  }
+  public render() {
+    return this.props.children({
+      goTo: this.goTo,
+      setUrlState: this.setURLState,
+      urlState: this.URLState || {},
+    });
   }
 
   private setURLState = async (
@@ -59,6 +58,7 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     } else {
       newState = state;
     }
+
     const search: string = stringify({
       ...(pastState as any),
       ...(newState as any),

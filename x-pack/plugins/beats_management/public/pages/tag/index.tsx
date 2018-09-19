@@ -18,6 +18,7 @@ import { FrontendLibs } from '../../lib/lib';
 
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  match: any;
 }
 
 interface TagPageState {
@@ -34,14 +35,14 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
       showFlyout: false,
       attachedBeats: null,
       tag: {
-        id: props.URLParams.action === 'create' ? '' : props.URLParams.tagid,
+        id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
         color: '#DD0A73',
         configuration_blocks: [],
         last_updated: new Date(),
       },
     };
 
-    if (props.URLParams.action !== 'create') {
+    if (props.match.params.action !== 'create') {
       this.mode = 'edit';
       this.loadTag();
       this.loadAttachedBeats();
@@ -88,7 +89,7 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
     );
   }
   private loadTag = async () => {
-    const tags = await this.props.libs.tags.getTagsWithIds([this.props.URLParams.tagid]);
+    const tags = await this.props.libs.tags.getTagsWithIds([this.props.match.params.tagid]);
     if (tags.length === 0) {
       // TODO do something to error
     }
@@ -98,7 +99,7 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
   };
 
   private loadAttachedBeats = async () => {
-    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.URLParams.tagid);
+    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
 
     this.setState({
       attachedBeats: beats,

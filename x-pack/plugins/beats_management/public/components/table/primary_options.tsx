@@ -18,10 +18,11 @@ interface PrimaryOptionsProps {
   isLoadingSuggestions: boolean;
   loadSuggestions: () => any;
   suggestions: AutocompleteSuggestion[];
-  applyFilterQueryFromKueryExpression: any;
+  onKueryBarSubmit: any;
+  kueryValue: any;
   filterQueryDraft: any;
-  isFilterQueryDraftValid: any;
-  setFilterQueryDraftFromKueryExpression: any;
+  isKueryValid: any;
+  onKueryBarChange: any;
   actionHandler(actionType: string, payload?: any): void;
   onSearchQueryChange(query: any): void;
 }
@@ -47,9 +48,10 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
       isLoadingSuggestions,
       loadSuggestions,
       suggestions,
-      applyFilterQueryFromKueryExpression,
-      isFilterQueryDraftValid,
-      setFilterQueryDraftFromKueryExpression,
+      onKueryBarSubmit,
+      isKueryValid,
+      kueryValue,
+      onKueryBarChange,
     } = this.props;
     return (
       <EuiFlexGroup>
@@ -64,12 +66,12 @@ export class PrimaryOptions extends React.PureComponent<PrimaryOptionsProps, Pri
         </EuiFlexItem>
         <EuiFlexItem>
           <AutocompleteField
-            value={''}
+            value={kueryValue}
             isLoadingSuggestions={isLoadingSuggestions}
-            isValid={isFilterQueryDraftValid}
+            isValid={isKueryValid}
             loadSuggestions={loadSuggestions}
-            onChange={setFilterQueryDraftFromKueryExpression}
-            onSubmit={applyFilterQueryFromKueryExpression}
+            onChange={onKueryBarChange}
+            onSubmit={onKueryBarSubmit}
             placeholder="Filter results"
             suggestions={suggestions}
           />

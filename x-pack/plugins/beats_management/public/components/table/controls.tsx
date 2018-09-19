@@ -19,10 +19,11 @@ interface ControlBarProps {
   selectionCount: number;
 
   isLoadingSuggestions: any;
-  isFilterQueryDraftValid: any;
+  onKueryBarSubmit: any;
+  kueryValue: any;
+  isKueryValid: any;
+  onKueryBarChange: any;
   loadSuggestions: any;
-  setFilterQueryDraftFromKueryExpression: any;
-  applyFilterQueryFromKueryExpression: any;
   suggestions: any;
   filterQueryDraft: any;
   actionHandler(actionType: string, payload?: any): void;
@@ -38,10 +39,11 @@ export function ControlBar(props: ControlBarProps) {
     selectionCount,
     showAssignmentOptions,
     isLoadingSuggestions,
-    isFilterQueryDraftValid,
+    isKueryValid,
+    kueryValue,
     loadSuggestions,
-    setFilterQueryDraftFromKueryExpression,
-    applyFilterQueryFromKueryExpression,
+    onKueryBarChange,
+    onKueryBarSubmit,
     suggestions,
     filterQueryDraft,
   } = props;
@@ -58,11 +60,12 @@ export function ControlBar(props: ControlBarProps) {
     />
   ) : (
     <PrimaryOptions
+      onKueryBarSubmit={onKueryBarSubmit}
+      kueryValue={kueryValue}
+      isKueryValid={isKueryValid}
+      onKueryBarChange={onKueryBarChange}
       isLoadingSuggestions={isLoadingSuggestions}
-      isFilterQueryDraftValid={isFilterQueryDraftValid}
       loadSuggestions={loadSuggestions}
-      setFilterQueryDraftFromKueryExpression={setFilterQueryDraftFromKueryExpression}
-      applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
       suggestions={suggestions}
       filterQueryDraft={filterQueryDraft}
       actionHandler={actionHandler}

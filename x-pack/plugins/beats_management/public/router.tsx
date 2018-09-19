@@ -35,9 +35,15 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             exact={true}
             render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
           />
-          <Route path="/overview" render={() => <MainPages libs={libs} />} />
-          <Route path="/beat/:beatId" render={() => <BeatDetailsPage libs={libs} />} />
-          <Route path="/tag/:action/:tagid?" render={() => <TagPage libs={libs} />} />
+          <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
+          <Route
+            path="/beat/:beatId"
+            render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
+          />
+          <Route
+            path="/tag/:action/:tagid?"
+            render={(props: any) => <TagPage {...props} libs={libs} />}
+          />
         </Switch>
       </div>
     </HashRouter>

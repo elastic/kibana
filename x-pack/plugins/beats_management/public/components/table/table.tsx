@@ -24,10 +24,11 @@ interface TableProps {
   type: TableType;
 
   isLoadingSuggestions: boolean;
-  isFilterQueryDraftValid: boolean;
   loadSuggestions: any;
-  setFilterQueryDraftFromKueryExpression: any;
-  applyFilterQueryFromKueryExpression: any;
+  onKueryBarSubmit: any;
+  isKueryValid: any;
+  kueryValue: any;
+  onKueryBarChange: any;
   suggestions: any;
   filterQueryDraft: any;
   actionHandler(action: string, payload?: any): void;
@@ -70,10 +71,11 @@ export class Table extends React.Component<TableProps, TableState> {
       showAssignmentOptions,
       type,
       isLoadingSuggestions,
-      isFilterQueryDraftValid,
       loadSuggestions,
-      setFilterQueryDraftFromKueryExpression,
-      applyFilterQueryFromKueryExpression,
+      onKueryBarSubmit,
+      isKueryValid,
+      kueryValue,
+      onKueryBarChange,
       suggestions,
       filterQueryDraft,
     } = this.props;
@@ -94,10 +96,11 @@ export class Table extends React.Component<TableProps, TableState> {
       <TableContainer>
         <ControlBar
           isLoadingSuggestions={isLoadingSuggestions}
-          isFilterQueryDraftValid={isFilterQueryDraftValid}
+          kueryValue={kueryValue}
+          isKueryValid={isKueryValid}
           loadSuggestions={loadSuggestions}
-          setFilterQueryDraftFromKueryExpression={setFilterQueryDraftFromKueryExpression}
-          applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+          onKueryBarChange={onKueryBarChange}
+          onKueryBarSubmit={onKueryBarSubmit}
           suggestions={suggestions}
           filterQueryDraft={filterQueryDraft}
           actionHandler={actionHandler}

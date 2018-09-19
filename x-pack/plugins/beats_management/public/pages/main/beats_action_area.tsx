@@ -21,6 +21,7 @@ import { AppURLState } from '../../app';
 import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 interface BeatsProps extends URLStateProps<AppURLState> {
+  match: any
   libs: FrontendLibs;
 }
 export class BeatsActionArea extends React.Component<BeatsProps, any> {
@@ -46,8 +47,8 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
     }
   }
   public async componentDidMount() {
-    if(this.props.URLParams.enrollmentToken) {
-      this.waitForToken(this.props.URLParams.enrollmentToken)
+    if(this.props.match.params.enrollmentToken) {
+      this.waitForToken(this.props.match.params.enrollmentToken)
     }
   }
   public waitForToken = async (token: string) => {
@@ -61,7 +62,7 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
   public render() {
 
     const {
-      URLParams = {},
+      match,
       goTo,
       libs,
     } = this.props;
@@ -87,7 +88,7 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
         Enroll Beats
       </EuiButton>
 
-      {URLParams.enrollmentToken != null && (
+      {match.params.enrollmentToken != null && (
         <EuiOverlayMask>
           <EuiModal onClose={() => { 
             this.pinging = false; 
@@ -107,7 +108,7 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
                 <br />
                 <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
                   <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
-                    $ beats enroll {window.location.protocol}//{window.location.host} {URLParams.enrollmentToken}
+                    $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
                   </div>
                 </div>
                 <br />
