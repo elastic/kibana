@@ -181,7 +181,7 @@ export default ({ getService }) => {
       // The polling instance and the migrating instance should both
       // return a similar migraiton result.
       assert.deepEqual(
-        result.map(({ status, destIndex }) => ({ status, destIndex })),
+        result.map(({ status, destIndex }) => ({ status, destIndex })).sort((a) => a.destIndex ? 0 : 1),
         [
           { status: 'migrated', destIndex: '.migration-c_2' },
           { status: 'skipped', destIndex: undefined },
