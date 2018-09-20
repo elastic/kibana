@@ -27,15 +27,15 @@ import 'ui/vis/map/service_settings';
 
 chrome.setRootTemplate(template);
 
-async function init() {
+async function init(store) {
   const root = document.getElementById('react-gis-root');
-  getStore().then(store => ReactDOM.render(
+  ReactDOM.render(
     <Provider store={store}>
       <GISApp/>
     </Provider>,
-    root));
+    root);
 }
 
-new Promise(initTimepicker).then(() => {
-  init();
-});
+new Promise(initTimepicker)
+  .then(getStore)
+  .then(store => init(store));
