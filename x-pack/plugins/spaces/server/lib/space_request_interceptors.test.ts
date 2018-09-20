@@ -51,6 +51,30 @@ describe('interceptors', () => {
         })
       );
 
+      server.savedObjects = {
+        SavedObjectsClient: {
+          errors: {
+            isNotFoundError: (e: Error) => e.message === 'space not found',
+          },
+        },
+        getSavedObjectsRepository: jest.fn().mockImplementation(() => {
+          return {
+            get: (type: string, id: string) => {
+              if (type === 'space') {
+                if (id === 'not-found') {
+                  throw new Error('space not found');
+                }
+                return {
+                  id,
+                  name: 'test space',
+                };
+              }
+            },
+            create: () => null,
+          };
+        }),
+      };
+
       server.plugins = {
         spaces: {
           spacesClient: {
@@ -61,18 +85,37 @@ describe('interceptors', () => {
 
       initSpacesRequestInterceptors(server);
 
-      server.route({
-        method: 'GET',
-        path: '/',
-        handler: (req: any, reply: any) => {
-          return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+      server.route([
+        {
+          method: 'GET',
+          path: '/',
+          handler: (req: any, reply: any) => {
+            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          },
         },
-      });
+        {
+          method: 'GET',
+          path: '/app/kibana',
+          handler: (req: any, reply: any) => {
+            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          },
+        },
+        {
+          method: 'GET',
+          path: '/api/foo',
+          handler: (req: any, reply: any) => {
+            return reply({ path: req.path, url: req.url, basePath: req.getBasePath() });
+          },
+        },
+      ]);
 
       await setupFn(server);
 
-      server.decorate('request', 'getBasePath', jest.fn());
-      server.decorate('request', 'setBasePath', jest.fn());
+      let basePath: string | undefined;
+      server.decorate('request', 'getBasePath', () => basePath);
+      server.decorate('request', 'setBasePath', (newPath: string) => {
+        basePath = newPath;
+      });
 
       teardowns.push(() => server.stop());
 
@@ -164,6 +207,79 @@ describe('interceptors', () => {
       // Register test inspector
       hapiServer.ext('onPreResponse', testHandler);
     };
+
+    describe('when accessing an app within a non-existent space', () => {
+      it('redirects to the space selector screen', async () => {
+        const testHandler = jest.fn((req, reply) => {
+          const { response } = req;
+
+          if (response && response.isBoom) {
+            throw response;
+          }
+
+          expect(response.statusCode).toEqual(302);
+          expect(response.headers.location).toEqual(serverBasePath);
+
+          return reply.continue();
+        });
+
+        const spaces = [
+          {
+            id: 'a-space',
+            type: 'space',
+            attributes: {
+              name: 'a space',
+            },
+          },
+        ];
+
+        await request(
+          '/s/not-found/app/kibana',
+          (hapiServer: any) => {
+            setupTest(hapiServer, spaces, testHandler);
+          },
+          config
+        );
+
+        expect(testHandler).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('when accessing an API endpoint within a non-existent space', () => {
+      it('allows the request to continue', async () => {
+        const testHandler = jest.fn((req, reply) => {
+          const { response } = req;
+
+          if (response && response.isBoom) {
+            throw response;
+          }
+
+          expect(response.statusCode).toEqual(200);
+
+          return reply.continue();
+        });
+
+        const spaces = [
+          {
+            id: 'a-space',
+            type: 'space',
+            attributes: {
+              name: 'a space',
+            },
+          },
+        ];
+
+        await request(
+          '/s/not-found/api/foo',
+          (hapiServer: any) => {
+            setupTest(hapiServer, spaces, testHandler);
+          },
+          config
+        );
+
+        expect(testHandler).toHaveBeenCalledTimes(1);
+      });
+    });
 
     describe('with a single available space', () => {
       test('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
