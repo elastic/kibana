@@ -5,26 +5,35 @@
  */
 
 import { InfraSourceStatusAdapter } from '../../source_status';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import {
+  InfraBackendFrameworkAdapter,
+  InfraDatabaseGetIndicesResponse,
+  InfraFrameworkRequest,
+} from '../framework';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
 
   public async getIndexNames(request: InfraFrameworkRequest, aliasName: string) {
-    const indexMap = await this.framework
-      .callWithRequest(request, 'indices.getAlias', {
-        name: aliasName,
-      })
-      .catch(error => {
-        if (error.status === 404) {
-          return {};
-        }
-        throw error;
-      });
+    const indexMaps = await Promise.all([
+      this.framework
+        .callWithRequest(request, 'indices.getAlias', {
+          name: aliasName,
+          filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
+        })
+        .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
+      this.framework
+        .callWithRequest(request, 'indices.get', {
+          index: aliasName,
+          filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
+        })
+        .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
+    ]);
 
-    const indexNames = Object.keys(indexMap);
-
-    return indexNames;
+    return indexMaps.reduce(
+      (indexNames, indexMap) => [...indexNames, ...Object.keys(indexMap)],
+      [] as string[]
+    );
   }
 
   public async hasAlias(request: InfraFrameworkRequest, aliasName: string) {
@@ -33,3 +42,12 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     });
   }
 }
+
+const withDefaultIfNotFound = <DefaultValue>(defaultValue: DefaultValue) => (
+  error: any
+): DefaultValue => {
+  if (error && error.status === 404) {
+    return defaultValue;
+  }
+  throw error;
+};
