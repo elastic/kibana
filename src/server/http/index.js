@@ -24,6 +24,7 @@ import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
+import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -31,6 +32,8 @@ export default async function (kbnServer, server, config) {
   server = kbnServer.server;
 
   server.connection(kbnServer.core.serverOptions);
+
+  setupBasePathProvider(server, config);
 
   registerHapiPlugins(server);
 

@@ -52,10 +52,6 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  server.decorate('request', 'getBasePath', function () {
-    return kbnServer.config.get('server.basePath');
-  });
-
   const unusedKeys = getUnusedConfigKeys(kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
     .map(key => `"${key}"`);
 

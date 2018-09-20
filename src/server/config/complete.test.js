@@ -59,16 +59,16 @@ describe('server/config completeMixin()', function () {
   };
 
   describe('server decoration', () => {
-    it('adds several server/request decorations', () => {
-      const { callCompleteMixin, server } = setup({
+    it('adds a config() function to the server', () => {
+      const { config, callCompleteMixin, server } = setup({
         settings: {},
         configValues: {}
       });
 
       callCompleteMixin();
-      sinon.assert.callCount(server.decorate, 2);
-      sinon.assert.calledWithExactly(server.decorate, 'server', 'config', sinon.match.func);
-      sinon.assert.calledWithExactly(server.decorate, 'request', 'getBasePath', sinon.match.func);
+      sinon.assert.calledOnce(server.decorate);
+      sinon.assert.calledWith(server.decorate, 'server', 'config', sinon.match.func);
+      expect(server.decorate.firstCall.args[2]()).toBe(config);
     });
   });
 
