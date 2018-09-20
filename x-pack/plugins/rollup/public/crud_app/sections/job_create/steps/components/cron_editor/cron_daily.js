@@ -9,9 +9,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFlexItem,
-  EuiSelect,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 export const CronDaily = ({
@@ -22,38 +24,52 @@ export const CronDaily = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.rollupJobs.cronEditor.cronDaily.textAt.label"
-        defaultMessage="at"
-      />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronDaily.fieldTime.label"
+          defaultMessage="Time"
+        />
+      )}
+      fullWidth
+    >
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiSelect
             options={hourOptions}
             value={hour}
             onChange={e => onChange({ hour: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.cronEditor.cronDaily.fieldHour.textAt.label"
+                    defaultMessage="At"
+                  />
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          :
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiSelect
             options={minuteOptions}
             value={minute}
             onChange={e => onChange({ minute: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  :
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlexItem>
+    </EuiFormRow>
   </Fragment>
 );
 

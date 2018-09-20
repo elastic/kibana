@@ -9,8 +9,9 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFlexItem,
+  EuiFormRow,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 export const CronHourly = ({
@@ -19,28 +20,32 @@ export const CronHourly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.rollupJobs.cronEditor.cronHourly.textAt.label"
-        defaultMessage="at"
-      />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronHourly.fieldTime.label"
+          defaultMessage="Minute"
+        />
+      )}
+      fullWidth
+    >
       <EuiSelect
         options={minuteOptions}
         value={minute}
         onChange={e => onChange({ minute: e.target.value })}
         fullWidth
+        prepend={(
+          <EuiText size="xs">
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.cronEditor.cronHourly.fieldMinute.textAt.label"
+                defaultMessage="At"
+              />
+            </strong>
+          </EuiText>
+        )}
       />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.rollupJobs.cronEditor.cronHourly.textPastHour.label"
-        defaultMessage="minutes past the hour"
-      />
-    </EuiFlexItem>
+    </EuiFormRow>
   </Fragment>
 );
 

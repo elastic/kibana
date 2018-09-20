@@ -6,12 +6,14 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 export const CronYearly = ({
@@ -26,75 +28,106 @@ export const CronYearly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.rollupJobs.cronEditor.cronYearly.textOnThe.label', {
-            defaultMessage: 'on the',
-          })}
-        </EuiFlexItem>
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonth.label"
+          defaultMessage="Month"
+        />
+      )}
+      fullWidth
+    >
+      <EuiSelect
+        options={monthOptions}
+        value={month}
+        onChange={e => onChange({ month: e.target.value })}
+        fullWidth
+        prepend={(
+          <EuiText size="xs">
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonth.textIn.label"
+                defaultMessage="In"
+              />
+            </strong>
+          </EuiText>
+        )}
+      />
+    </EuiFormRow>
 
-        <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldDate.label"
+          defaultMessage="Date"
+        />
+      )}
+      fullWidth
+    >
+      <EuiSelect
+        options={dateOptions}
+        value={date}
+        onChange={e => onChange({ date: e.target.value })}
+        fullWidth
+        prepend={(
+          <EuiText size="xs">
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.cronEditor.cronYearly.fieldDate.textOnThe.label"
+                defaultMessage="On the"
+              />
+            </strong>
+          </EuiText>
+        )}
+      />
+    </EuiFormRow>
+
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldTime.label"
+          defaultMessage="Time"
+        />
+      )}
+      fullWidth
+    >
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
           <EuiSelect
-            options={dateOptions}
-            value={date}
-            onChange={e => onChange({ date: e.target.value })}
+            options={hourOptions}
+            value={hour}
+            onChange={e => onChange({ hour: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.cronEditor.cronYearly.fieldHour.textAt.label"
+                    defaultMessage="At"
+                  />
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.rollupJobs.cronEditor.cronYearly.textOf.label', {
-            defaultMessage: 'of',
-          })}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
+        <EuiFlexItem>
           <EuiSelect
-            options={monthOptions}
-            value={month}
-            onChange={e => onChange({ month: e.target.value })}
+            options={minuteOptions}
+            value={minute}
+            onChange={e => onChange({ minute: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  :
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.rollupJobs.cronEditor.cronYearly.textAt.label', {
-            defaultMessage: 'at',
-          })}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-              <EuiSelect
-                options={hourOptions}
-                value={hour}
-                onChange={e => onChange({ hour: e.target.value })}
-                fullWidth
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              :
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-              <EuiSelect
-                options={minuteOptions}
-                value={minute}
-                onChange={e => onChange({ minute: e.target.value })}
-                fullWidth
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    </EuiFormRow>
   </Fragment>
 );
 

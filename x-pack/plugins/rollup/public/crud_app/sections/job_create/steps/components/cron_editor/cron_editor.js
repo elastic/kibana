@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { padLeft } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSelect,
+  EuiText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import {
@@ -234,33 +234,36 @@ export class CronEditor extends Component {
     const { unit } = this.state;
 
     return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.textEvery.label"
-                defaultMessage="Every"
-              />
-            </EuiFlexItem>
+      <Fragment>
+        <EuiFormRow
+          label={(
+            <FormattedMessage
+              id="xpack.rollupJobs.cronEditor.fieldInterval.label"
+              defaultMessage="Interval"
+            />
+          )}
+          fullWidth
+        >
+          <EuiSelect
+            options={UNITS}
+            value={unit}
+            onChange={this.onChangeUnit}
+            fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.cronEditor.textEvery.label"
+                    defaultMessage="Every"
+                  />
+                </strong>
+              </EuiText>
+            )}
+          />
+        </EuiFormRow>
 
-            <EuiFlexItem grow={false} className="rollupJobWizardCronEditorField">
-              <EuiSelect
-                options={UNITS}
-                value={unit}
-                onChange={this.onChangeUnit}
-                fullWidth
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" className="rollupJobWizardCronEditorForm">
-            {this.renderForm()}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        {this.renderForm()}
+      </Fragment>
     );
   }
 }

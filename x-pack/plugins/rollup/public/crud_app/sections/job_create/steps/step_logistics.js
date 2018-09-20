@@ -304,20 +304,10 @@ export class StepLogisticsUi extends Component {
             )}
             fullWidth
           >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
-                  defaultMessage="Cron pattern"
-                />
-              )}
-              fullWidth
-            >
-              <CronEditor
-                cronExpression={rollupCron}
-                onChange={rollupCron => onFieldsChange({ rollupCron })}
-              />
-            </EuiFormRow>
+            <CronEditor
+              cronExpression={rollupCron}
+              onChange={rollupCron => onFieldsChange({ rollupCron })}
+            />
 
             <EuiFormRow
               label={(

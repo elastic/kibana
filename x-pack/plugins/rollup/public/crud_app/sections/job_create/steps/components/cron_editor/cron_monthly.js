@@ -9,9 +9,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFlexItem,
-  EuiSelect,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 export const CronMonthly = ({
@@ -24,54 +26,79 @@ export const CronMonthly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.rollupJobs.cronEditor.cronMonthly.textOnThe.label"
-        defaultMessage="on the"
-      />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldDate.label"
+          defaultMessage="Date"
+        />
+      )}
+      fullWidth
+    >
       <EuiSelect
         options={dateOptions}
         value={date}
         onChange={e => onChange({ date: e.target.value })}
         fullWidth
+        prepend={(
+          <EuiText size="xs">
+            <strong>
+              <FormattedMessage
+                id="xpack.rollupJobs.cronEditor.cronMonthly.textOnThe.label"
+                defaultMessage="On the"
+              />
+            </strong>
+          </EuiText>
+        )}
       />
-    </EuiFlexItem>
+    </EuiFormRow>
 
-    <EuiFlexItem grow={false}>
-      <FormattedMessage
-        id="xpack.rollupJobs.cronEditor.cronMonthly.textAt.label"
-        defaultMessage="at"
-      />
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFormRow
+      label={(
+        <FormattedMessage
+          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldTime.label"
+          defaultMessage="Time"
+        />
+      )}
+      fullWidth
+    >
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiSelect
             options={hourOptions}
             value={hour}
             onChange={e => onChange({ hour: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.cronEditor.cronMonthly.fieldHour.textAt.label"
+                    defaultMessage="At"
+                  />
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          :
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiSelect
             options={minuteOptions}
             value={minute}
             onChange={e => onChange({ minute: e.target.value })}
             fullWidth
+            prepend={(
+              <EuiText size="xs">
+                <strong>
+                  :
+                </strong>
+              </EuiText>
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlexItem>
+    </EuiFormRow>
   </Fragment>
 );
 
