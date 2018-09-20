@@ -45,8 +45,6 @@ app.directive('pipelineEdit', function ($injector) {
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
           toastNotifications={toastNotifications}
-          isReadOnly={licenseService.isReadOnly}
-          licenseMessage={licenseService.message}
           licenseService={licenseService}
           notifier={new Notifier({ location: 'Logstash' })}
         />,

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { PropTypes } from 'prop-types';
 
 import 'brace/mode/plain_text';
 import 'brace/theme/github';
@@ -68,9 +69,9 @@ export class PipelineEditor extends React.Component {
   }
 
   componentDidMount = () => {
-    const { isReadOnly, licenseMessage, toastNotifications } = this.props;
+    const { licenseService: { isReadOnly, message }, toastNotifications } = this.props;
     if (isReadOnly) {
-      toastNotifications.addWarning(licenseMessage);
+      toastNotifications.addWarning(message);
     }
   };
 
@@ -244,7 +245,7 @@ export class PipelineEditor extends React.Component {
                   setOptions={{
                     minLines: 25,
                     maxLines: Infinity,
-                    readOnly: this.props.isReadOnly,
+                    readOnly: this.props.licenseService.isReadOnly,
                   }}
                   theme="github"
                   value={this.state.pipeline.pipeline}
@@ -371,3 +372,39 @@ export class PipelineEditor extends React.Component {
     );
   }
 }
+
+PipelineEditor.propTypes = {
+  close: PropTypes.func.isRequired,
+  open: PropTypes.func.isRequired,
+  isNewPipeline: PropTypes.bool.isRequired,
+  pipeline: PropTypes.shape({
+    id: PropTypes.string,
+    description: PropTypes.string,
+    pipeline: PropTypes.any,
+    settings: PropTypes.shape({
+      'pipeline.batch.delay': PropTypes.number.isRequired,
+      'pipeline.batch.size': PropTypes.number.isRequired,
+      'pipeline.workers': PropTypes.number,
+      'queue.checkpoint.writes': PropTypes.number.isRequired,
+      'queue.max_bytes': PropTypes.number,
+      'queue.type': PropTypes.string.isRequired,
+    }),
+  }).isRequired,
+  pipelineService: PropTypes.shape({
+    deletePipeline: PropTypes.func.isRequired,
+    savePipeline: PropTypes.func.isRequired,
+  }).isRequired,
+  toastNotifications: PropTypes.shape({
+    addWarning: PropTypes.func.isRequired,
+    addSuccess: PropTypes.func.isRequired,
+  }).isRequired,
+  licenseService: PropTypes.shape({
+    checkValidity: PropTypes.func.isRequired,
+    isReadOnly: PropTypes.bool.isRequired,
+    message: PropTypes.string,
+  }).isRequired,
+  notifier: PropTypes.shape({
+    error: PropTypes.func.isRequired,
+  }).isRequired,
+  username: PropTypes.string,
+};
