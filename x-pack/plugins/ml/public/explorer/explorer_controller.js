@@ -886,8 +886,8 @@ module.controller('MlExplorerController', function (
       if (resp !== undefined) {
         $scope.viewBySwimlaneData = processViewByResults(resp.results, fieldValues);
 
-        // do a sanity check against cellData. I can happen that a previously
-        // selected lane loaded via URL/AppState is not be available anymore.
+        // do a sanity check against cellData. It can happen that a previously
+        // selected lane loaded via URL/AppState is not available anymore.
         if (
           $scope.cellData !== undefined &&
           $scope.cellData.type === SWIMLANE_TYPE.VIEW_BY
