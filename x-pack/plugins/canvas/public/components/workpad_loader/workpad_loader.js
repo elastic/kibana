@@ -62,7 +62,8 @@ export class WorkpadLoader extends React.PureComponent {
   }
 
   componentWillReceiveProps(newProps) {
-    // the workpadId prop will change when a is created or loaded, close the toolbar when it does
+    // the workpadId prop will change when a workpad is created or loaded
+    // onClose closes the workpad loader toolbar when the next workpad loads
     const { workpadId, onClose } = this.props;
     if (workpadId !== newProps.workpadId) onClose();
   }

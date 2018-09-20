@@ -15,6 +15,7 @@ export const getInitialState = path => {
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},
+      historyInFlight: false,
       refresh: {
         interval: 0,
       },

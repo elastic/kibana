@@ -36,3 +36,7 @@ export function isAppReady(state) {
   const appReady = getAppReady(state);
   return appReady === true;
 }
+
+export function getHistoryInFlight(state) {
+  return get(state, 'transient.historyInFlight', false);
+}

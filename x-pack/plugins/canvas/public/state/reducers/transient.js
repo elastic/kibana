@@ -6,7 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
-import { restoreHistory } from '../actions/history';
+import { restoreHistory, historyInFlight } from '../actions/history';
 import * as actions from '../actions/transient';
 import { removeElements } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
@@ -16,6 +16,9 @@ export const transientReducer = handleActions(
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
     [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
+
+    [historyInFlight]: (transientState, { payload }) =>
+      set(transientState, 'historyInFlight', Boolean(payload)),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
       const { selectedElement } = transientState;

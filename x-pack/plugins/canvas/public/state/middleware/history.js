@@ -8,7 +8,7 @@ import { isEqual } from 'lodash';
 import { routes } from '../../apps';
 import { historyProvider } from '../../lib/history_provider';
 import { routerProvider } from '../../lib/router_provider';
-import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
+import { restoreHistory, undoHistory, redoHistory, historyInFlight } from '../actions/history';
 import { initializeWorkpad } from '../actions/workpad';
 import { isAppReady } from '../selectors/app';
 
@@ -63,7 +63,9 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     handlerState.pendingCount += 1;
 
     try {
+      dispatch(historyInFlight(true));
       await handleHistoryChanges(...args);
+      dispatch(historyInFlight(false));
     } catch (e) {
       // TODO: handle errors here
     } finally {
