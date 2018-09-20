@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-
-export function hideEmptyDevTools(Private) {
-  chrome.navLinks.decorate('kibana:dev_tools', {
-    hidden: !Private(DevToolsRegistryProvider).length
-  });
-}
-
-uiModules.get('kibana').run(hideEmptyDevTools);
+export { NavLinksService, NavLinksStartContract, NavLinks, NavLink } from './nav_links_service';

@@ -47,10 +47,8 @@ uiModules.get('kibana')
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
-chrome
-  .setRootController('kibana', function () {
-    chrome.showOnlyById('kibana:dashboard');
-  });
+chrome.navLinks.showOnly('kibana:dashboard');
+chrome.setRootController('kibana', function () {});
 
 uiModules.get('kibana').run(showAppRedirectNotification);
 

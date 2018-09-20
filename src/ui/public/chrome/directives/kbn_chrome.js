@@ -24,15 +24,10 @@ import $ from 'jquery';
 import './kbn_chrome.less';
 import { uiModules } from '../../modules';
 import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
-import {
   notify,
   GlobalBannerList,
   banners,
 } from '../../notify';
-import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -57,36 +52,14 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, $location, $http, Private) {
-          const getUnhashableStates = Private(getUnhashableStatesProvider);
-
+        controller($scope, $location) {
           // are we showing the embedded version of the chrome?
           if (Boolean($location.search().embed)) {
             internals.permanentlyHideChrome();
           }
 
-          const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
-
-          function updateSubUrls() {
-            const urlWithHashes = window.location.href;
-            const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-            internals.trackPossibleSubUrl(urlWithStates);
-          }
-
-          function onRouteChange($event) {
-            if (subUrlRouteFilter($event)) {
-              updateSubUrls();
-            }
-          }
-
-          $rootScope.$on('$routeChangeSuccess', onRouteChange);
-          $rootScope.$on('$routeUpdate', onRouteChange);
-          updateSubUrls(); // initialize sub urls
-
           // Notifications
           $scope.notifList = notify._notifs;
-
-          // Non-scope based code (e.g., React)
 
           // Banners
           ReactDOM.render(

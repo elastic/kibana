@@ -94,6 +94,14 @@ jest.mock('ui/chrome/api/injected_vars', () => {
   };
 });
 
+const mockNavLinksInit = jest.fn();
+jest.mock('ui/chrome/api/nav_links', () => {
+  mockLoadOrder.push('ui/chrome/api/nav_links');
+  return {
+    __newPlatformInit__: mockNavLinksInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -118,6 +126,7 @@ const basePathStartContract = {
 };
 
 const uiSettingsStartContract: any = {};
+const navLinksStartContract: any = {};
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -133,6 +142,7 @@ const defaultStartDeps = {
   loadingCount: loadingCountStartContract,
   basePath: basePathStartContract,
   uiSettings: uiSettingsStartContract,
+  navLinks: navLinksStartContract,
 };
 
 afterEach(() => {
@@ -222,6 +232,17 @@ describe('#start()', () => {
 
       expect(mockInjectedVarsInit).toHaveBeenCalledTimes(1);
       expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataStartContract);
+    });
+
+    it('passes navLinks service to ui/chrome/api/nav_links', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockNavLinksInit).toHaveBeenCalledTimes(1);
+      expect(mockNavLinksInit).toHaveBeenCalledWith(navLinksStartContract);
     });
 
     describe('useLegacyTestHarness = false', () => {

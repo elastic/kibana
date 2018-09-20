@@ -22,6 +22,7 @@ import { BasePathStartContract } from '../base_path';
 import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 import { LoadingCountStartContract } from '../loading_count';
+import { NavLinksStartContract } from '../nav_links';
 import { NotificationsStartContract } from '../notifications';
 import { UiSettingsClient } from '../ui_settings';
 
@@ -32,6 +33,7 @@ interface Deps {
   loadingCount: LoadingCountStartContract;
   basePath: BasePathStartContract;
   uiSettings: UiSettingsClient;
+  navLinks: NavLinksStartContract;
 }
 
 export interface LegacyPlatformParams {
@@ -57,6 +59,7 @@ export class LegacyPlatformService {
     loadingCount,
     basePath,
     uiSettings,
+    navLinks,
   }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
@@ -67,6 +70,7 @@ export class LegacyPlatformService {
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
     require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
+    require('ui/chrome/api/nav_links').__newPlatformInit__(navLinks);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

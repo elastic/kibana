@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should hide side editor if embed is set to true in url', async () => {
       const url = await remote.getCurrentUrl();
-      const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+      const embedUrl = url.split('/visualize/').pop().replace('?', '?embed=true&');
       await PageObjects.common.navigateToUrl('visualize', embedUrl);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const sideEditorExists = await PageObjects.visualize.getSideEditorExists();

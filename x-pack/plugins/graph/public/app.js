@@ -715,7 +715,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       .on('zoom', redraw));
 
 
-  const managementUrl = chrome.getNavLinkById('kibana:management').url;
+  const managementUrl = chrome.navLinks.getDefaultUrl('kibana:management');
   const url = `${managementUrl}/kibana/indices`;
 
   if ($scope.indices.length === 0) {

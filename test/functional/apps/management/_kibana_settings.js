@@ -18,11 +18,22 @@
  */
 
 import expect from 'expect.js';
+import Url from 'url';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const remote = getService('remote');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
+
+  function getStatesFromUrl(url) {
+    const { hash } = Url.parse(url);
+    if (!hash) {
+      throw new Error(`Expected url to include hash and app/global state: ${url}`);
+    }
+
+    const { _g: globalState, _a: appState } = Url.parse(hash.slice(1), true).query;
+    return { globalState, appState };
+  }
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
@@ -59,9 +70,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
         const currentUrl = await remote.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        const { globalState, appState } = getStatesFromUrl(currentUrl);
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
@@ -82,9 +91,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
         const currentUrl = await remote.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        const { globalState, appState } = getStatesFromUrl(currentUrl);
 
         // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
         // greater than 20 characters with the default state plus a time.

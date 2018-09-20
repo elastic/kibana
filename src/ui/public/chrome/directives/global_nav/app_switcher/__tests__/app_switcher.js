@@ -17,32 +17,38 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
+import chrome from 'ui/chrome';
 
 import { DomLocationProvider } from '../../../../../dom_location';
-import { constant, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import $ from 'jquery';
-import '../../../..';
 import '../app_switcher';
 
 describe('appSwitcher directive', function () {
   let env;
 
   beforeEach(ngMock.module('kibana'));
+  afterEach(() => {
+    chrome.navLinks.get$.restore();
+  });
 
   function setup(href, links) {
-    return ngMock.inject(function ($window, $rootScope, $compile, Private) {
+    return ngMock.inject(function ($rootScope, $compile, Private) {
+      sinon.stub(chrome.navLinks, 'get$').callsFake(() => (
+        links instanceof Rx.Observable ? links : Rx.of(cloneDeep(links))
+      ));
+
       const domLocation = Private(DomLocationProvider);
 
-      $rootScope.chrome = {
-        getNavLinks: constant(cloneDeep(links)),
-      };
-
+      const $el = $compile($('<app-switcher chrome="chrome">'))($rootScope);
       env = {
-        $scope: $rootScope,
-        $el: $compile($('<app-switcher chrome="chrome">'))($rootScope),
+        $el,
+        $scope: $el.scope(),
+        controller: $el.isolateScope().switcher,
         currentHref: href,
         location: domLocation
       };
@@ -66,14 +72,16 @@ describe('appSwitcher directive', function () {
       active: true,
       title: 'myLink',
       url: 'http://localhost:555/app/myApp',
-      lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
+      lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl',
+      linkToLastSubUrl: true,
     };
 
     const notMyLink = {
       active: false,
       title: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
-      lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl'
+      lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl',
+      linkToLastSubUrl: true,
     };
 
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
@@ -96,14 +104,16 @@ describe('appSwitcher directive', function () {
       active: false,
       title: 'myLink',
       url: 'http://localhost:555/app/myApp',
-      lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
+      lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl',
+      linkToLastSubUrl: true,
     };
 
     const notMyLink = {
       active: false,
       title: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
-      lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl'
+      lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl',
+      linkToLastSubUrl: true,
     };
 
     beforeEach(setup('http://localhost:5555/app/myApp/', [myLink, notMyLink]));
@@ -118,6 +128,22 @@ describe('appSwitcher directive', function () {
 
       expect($notMyLink.prop('href')).to.be(notMyLink.lastSubUrl);
       expect($notMyLink.prop('href')).to.not.be(notMyLink.url);
+    });
+  });
+
+  describe('when links have linkToLastSubUrl: false', function () {
+    beforeEach(setup('http://localhost:5555/app/myApp/', [{
+      active: false,
+      title: 'myLink',
+      url: 'http://localhost:555/app/myApp',
+      lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl',
+      linkToLastSubUrl: false,
+    }]));
+
+    it('links to the default url', function () {
+      const [link] = env.$el.findTestSubject('appLink');
+      expect(link.href).to.be('http://localhost:555/app/myApp');
+      expect(link.href).to.not.be('http://localhost:555/app/myApp#/lastSubUrl');
     });
   });
 
@@ -234,4 +260,35 @@ describe('appSwitcher directive', function () {
     });
   });
 
+  describe('navLinks update', () => {
+    it('applies navLink updates in a sync digest cycle', () => {
+      const navLinks$ = new Rx.Subject();
+      setup('http://localhost:555/app/foo', navLinks$);
+      const { controller } = env;
+
+      expect(controller.links).to.be(undefined);
+      navLinks$.next([]);
+      expect(controller.links).to.eql([]);
+    });
+
+    it('persists the $$hashKey on navLink updates', () => {
+      const navLinks$ = new Rx.Subject();
+      setup('http://localhost:555/app/myApp', navLinks$);
+      const { controller, $scope } = env;
+
+      navLinks$.next([{ id: 'foo' }]);
+      $scope.$digest();
+      const [link] = controller.links;
+      expect(link.id).to.be('foo');
+      expect(link.$$hashKey).to.be.ok();
+
+      navLinks$.next([{ id: 'foo', lastSubUrl: '#/foo/bar' }]);
+      $scope.$digest();
+
+      const [newLink] = controller.links;
+      expect(newLink.id).to.be(link.id);
+      expect(newLink.$$hashKey).to.be(link.$$hashKey);
+      expect(newLink.lastSubUrl).to.be('#/foo/bar');
+    });
+  });
 });

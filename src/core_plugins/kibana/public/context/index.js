@@ -66,7 +66,7 @@ function ContextAppRouteController(
   this.anchorType = $routeParams.type;
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = chrome.getNavLinkById('kibana:discover').lastSubUrl;
+  this.discoverUrl = chrome.navLinks.getLastUrl('kibana:discover') || chrome.navLinks.getDefaultUrl('kibana:discover');
   this.filters = _.cloneDeep(queryFilter.getFilters());
 }
 

@@ -366,14 +366,14 @@ function VisEditor(
               appId: kbnBaseUrl.slice('/app/'.length),
               appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
             });
+
             // Manually insert a new url so the back button will open the saved visualization.
             $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-            // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
-            // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
-            // url, not the unsaved one.
-            chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-            const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+            // We must tell core.navLinks to observe the new URL since we're changing it with history.pushState().
+            chrome.navLinks.checkCurrentUrl();
+
+            const lastDashboardAbsoluteUrl = chrome.navLinks.getLastUrl('kibana:dashboard');
             const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
             dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
             kbnUrl.change(dashboardParsedUrl.appPath);
@@ -383,7 +383,8 @@ function VisEditor(
             kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
           }
         }
-      }, (err) => {
+      })
+      .catch((err) => {
         toastNotifications.addDanger({
           title: `Error on saving '${savedVis.title}'`,
           text: err.message,

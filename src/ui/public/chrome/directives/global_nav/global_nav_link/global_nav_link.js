@@ -17,14 +17,15 @@
  * under the License.
  */
 
-
+import * as Url from 'url';
 import globalNavLinkTemplate from './global_nav_link.html';
 import './global_nav_link.less';
 import { uiModules } from '../../../../modules';
+import chrome from 'ui/chrome';
 
 const module = uiModules.get('kibana');
 
-module.directive('globalNavLink', chrome => {
+module.directive('globalNavLink', () => {
   return {
     restrict: 'E',
     replace: true,
@@ -49,6 +50,18 @@ module.directive('globalNavLink', chrome => {
           return chrome.addBasePath(scope.kbnRoute);
         }
       };
+
+      function resolveIconUrl(icon) {
+        if (!icon) {
+          return;
+        }
+
+        return Url.parse(icon).hostname ? icon : chrome.addBasePath('/' + icon);
+      }
+
+      scope.$watch('icon', (icon) => {
+        scope.absoluteIconUrl = resolveIconUrl(icon);
+      });
     }
   };
 });

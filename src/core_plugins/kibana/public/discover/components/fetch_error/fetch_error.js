@@ -38,7 +38,7 @@ const DiscoverFetchError = ({ fetchError }) => {
   let body;
 
   if (fetchError.lang === 'painless') {
-    const managementUrl = chrome.getNavLinkById('kibana:management').url;
+    const managementUrl = chrome.navLinks.getDefaultUrl('kibana:management');
     const url = `${managementUrl}/kibana/indices`;
 
     body = (
