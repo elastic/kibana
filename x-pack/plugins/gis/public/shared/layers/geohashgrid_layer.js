@@ -126,11 +126,12 @@ export class GeohashGridLayer extends ALayer {
         return;
       }
     }
-    const fetchState = {
+    const derivedPrecisionAndExtent = {
       precision: targetPrecision,
       extent: zoomAndExtent.extent
     };
-    return this._fetchNewData(startLoading, stopLoading, fetchState);
+    return this._fetchNewData(startLoading, stopLoading,
+      derivedPrecisionAndExtent);
   }
 
 

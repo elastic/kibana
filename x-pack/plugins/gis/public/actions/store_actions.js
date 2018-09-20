@@ -121,9 +121,9 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function startDataLoad(layerId, requestToken, initLoadState) {
+export function startDataLoad(layerId, requestToken, meta) {
   return ({
-    initLoadState,
+    meta,
     type: LAYER_DATA_LOAD_STARTED,
     layerId: layerId,
     requestToken: requestToken
