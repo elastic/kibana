@@ -24,12 +24,12 @@ import { getSortingParams } from './sorting_params';
 
 export function getSearchDsl(mappings, schema, options = {}) {
   const {
-    namespace,
     type,
     search,
     searchFields,
     sortField,
     sortOrder,
+    namespace,
   } = options;
 
   if (!type && sortField) {

@@ -30,6 +30,12 @@ describe('includedFields', () => {
     expect(fields).toContain('type');
   });
 
+  it('includes namespace', () => {
+    const fields = includedFields('config', 'foo');
+    expect(fields).toHaveLength(3);
+    expect(fields).toContain('namespace');
+  });
+
   it('accepts field as string', () => {
     const fields = includedFields('config', 'foo');
     expect(fields).toHaveLength(3);

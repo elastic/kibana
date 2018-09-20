@@ -319,7 +319,7 @@ export class Field extends PureComponent {
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, isOverridden } = setting;
+    const { name, value, type, options, isOverridden, ariaName } = setting;
 
     switch (type) {
       case 'boolean':
@@ -331,6 +331,7 @@ export class Field extends PureComponent {
             disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
+            aria-label={ariaName}
           />
         );
       case 'markdown':
@@ -338,6 +339,7 @@ export class Field extends PureComponent {
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
+              aria-label={ariaName}
               mode={type}
               theme="textmate"
               value={unsavedValue}
@@ -362,6 +364,7 @@ export class Field extends PureComponent {
         if (!isDefaultValue(setting) && !changeImage) {
           return (
             <EuiImage
+              aria-label={ariaName}
               allowFullScreen
               url={value}
               alt={name}
@@ -382,6 +385,7 @@ export class Field extends PureComponent {
       case 'select':
         return (
           <EuiSelect
+            aria-label={ariaName}
             value={unsavedValue}
             options={options.map((text) => {
               return { text, value: text };
@@ -396,6 +400,7 @@ export class Field extends PureComponent {
       case 'number':
         return (
           <EuiFieldNumber
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
@@ -407,6 +412,7 @@ export class Field extends PureComponent {
       default:
         return (
           <EuiFieldText
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
@@ -419,11 +425,7 @@ export class Field extends PureComponent {
   }
 
   renderLabel(setting) {
-    return (
-      <span aria-label={setting.ariaName}>
-        {setting.name}
-      </span>
-    );
+    return setting.name;
   }
 
   renderHelpText(setting) {
