@@ -81,10 +81,8 @@ export class TaskManager {
    * Initializes the task manager, starts the background polling, etc. After this,
    * middleware can no longer be added.
    */
-  public init = _.once(async (opts: TaskManagerOpts) => {
-    const { kbnServer, server, config } = opts;
+  public init = _.once(async ({ kbnServer, server, config }: TaskManagerOpts) => {
     const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
-    const maxWorkers = config.get('task_manager.max_workers');
 
     if (!server.plugins.elasticsearch) {
       logger.warning(
@@ -93,49 +91,25 @@ export class TaskManager {
       return;
     }
 
+    const { poller, store } = this.createPoller(logger, kbnServer, config, server);
+
     this.addMiddleware = () => {
       throw new Error('Cannot add middleware after the task manager is initialized.');
     };
 
-    logger.debug('Extracting task definitions');
-    const definitions = extractTaskDefinitions(
-      maxWorkers,
-      kbnServer.uiExports.taskDefinitions,
-      config.get('task_manager.override_num_workers')
-    );
-
-    logger.debug('Creating the store');
-    const store = new TaskStore({
-      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-      index: config.get('task_manager.index'),
-      maxAttempts: config.get('task_manager.max_attempts'),
-      supportedTypes: Object.keys(definitions),
-    });
-
-    logger.debug('Creating the pool');
-    const pool = new TaskPool({
-      logger,
-      maxWorkers,
-    });
-
-    logger.debug('Creating the poller');
-    const createRunner = (instance: ConcreteTaskInstance) =>
-      new TaskManagerRunner({
-        logger,
-        definition: definitions[instance.taskType],
-        kbnServer,
-        instance,
-        store,
-        beforeRun: this.middleware.beforeRun,
+    this.schedule = async (taskInstance: TaskInstance, options?: any) => {
+      const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+        ...options,
+        taskInstance,
       });
+      const result = await store.schedule(modifiedTask);
+      poller.attemptWork();
+      return result;
+    };
 
-    const poller = new TaskPoller({
-      logger,
-      pollInterval: config.get('task_manager.poll_interval'),
-      work() {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-      },
-    });
+    this.fetch = (...args) => store.fetch(...args);
+
+    this.remove = (...args) => store.remove(...args);
 
     server.plugins.elasticsearch.status.on('red', () => {
       logger.debug('Lost connection to Elasticsearch, stopping the poller.');
@@ -168,6 +142,47 @@ export class TaskManager {
     const prevMiddleWare = this.middleware;
     this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
   };
+
+  private createPoller(logger: TaskManagerLogger, kbnServer: any, config: any, server: any) {
+    const maxWorkers = config.get('task_manager.max_workers');
+
+    logger.debug('Extracting task definitions');
+    const definitions = extractTaskDefinitions(
+      maxWorkers,
+      kbnServer.uiExports.taskDefinitions,
+      config.get('task_manager.override_num_workers')
+    );
+    logger.debug('Creating the store');
+    const store = new TaskStore({
+      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      index: config.get('task_manager.index'),
+      maxAttempts: config.get('task_manager.max_attempts'),
+      supportedTypes: Object.keys(definitions),
+    });
+    logger.debug('Creating the pool');
+    const pool = new TaskPool({
+      logger,
+      maxWorkers,
+    });
+    logger.debug('Creating the poller');
+    const createRunner = (instance: ConcreteTaskInstance) =>
+      new TaskManagerRunner({
+        logger,
+        definition: definitions[instance.taskType],
+        kbnServer,
+        instance,
+        store,
+        beforeRun: this.middleware.beforeRun,
+      });
+    const poller = new TaskPoller({
+      logger,
+      pollInterval: config.get('task_manager.poll_interval'),
+      work() {
+        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
+      },
+    });
+    return { poller, store };
+  }
 }
 
 function unsupportedFunction(message: string) {
