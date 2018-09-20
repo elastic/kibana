@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 import { all } from 'lodash';
 import {
   EuiButton,
@@ -177,6 +178,18 @@ class IndexActionsContextMenuUi extends Component {
     items.forEach(item => {
       item['data-test-subj'] = 'indexTableContextMenuButton';
     });
+
+    if (oneIndexSelected) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.createRollupJobLabel',
+          defaultMessage: 'Create rollup job',
+        }),
+        icon: <EuiIcon type="gear" />,
+        href: chrome.addBasePath(`kibana#/management/elasticsearch/rollup_jobs/create?index-pattern=${indexNames[0]}`),
+      });
+    }
+
     const panelTree = {
       id: 0,
       title: intl.formatMessage({
