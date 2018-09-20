@@ -16,6 +16,8 @@ function wrapHistoryInstance(history) {
     onChange: [],
     prevLocation: {},
     changeUnlisten: null,
+    listenersPending: 0,
+    listenerChain: Promise.resolve(),
   };
 
   const locationFormat = (location, action, parser) => ({
@@ -118,7 +120,21 @@ function wrapHistoryInstance(history) {
     const prevLocationObj = locationFormat(prevLocation, action, wrappedHistory.parse);
 
     // execute all listeners
-    historyState.onChange.forEach(fn => fn.call(null, locationObj, prevLocationObj));
+    historyState.onChange.reduce((chain, fn) => {
+      historyState.listenersPending += 1;
+
+      return chain
+        .then(() => {
+          return fn.call(null, locationObj, prevLocationObj);
+        })
+        .then(() => {
+          historyState.listenersPending -= 1;
+        })
+        .catch(err => {
+          historyState.listenersPending -= 1;
+          throw err;
+        });
+    }, historyState.listenersPending === 0 ? Promise.resolve() : historyState.listenerChain);
 
     // track the updated location
     historyState.prevLocation = wrappedHistory.getLocation();
