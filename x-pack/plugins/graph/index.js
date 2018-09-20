@@ -23,8 +23,8 @@ export function graph(kibana) {
         icon: 'plugins/graph/icon.png',
         description: 'Graph exploration',
         main: 'plugins/graph/app',
-        styleSheetPath: `${__dirname}/public/index.scss`,
       },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],
       mappings
