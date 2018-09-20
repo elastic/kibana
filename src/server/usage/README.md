@@ -13,13 +13,14 @@ You, the feature or plugin developer, mainly need to worry about the first meani
 
 NOTE: To a lesser extent, there's also a need to update the telemetry payload of Kibana stats and telemetry cluster field mappings to include your fields. This part is typically handled not by you, the developer, but different maintainers of the telemetry cluster. Usually, this step just means talk to the Platform team and have them approve your data model or added fields.
 
-## Creating a Usage Collector
+## Creating and Registering Usage Collector
 
-A usage collector object is an instance of a class called `UsageCollector`. A factory function on `server.usage.collectorSet` object allows you to create an instance of this class. All you need to provide is a `type` for organizing your fields, and a `fetch` method for returning your usage data.
+A usage collector object is an instance of a class called `UsageCollector`. A factory function on `server.usage.collectorSet` object allows you to create an instance of this class. All you need to provide is a `type` for organizing your fields, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
 
 Example:
 
 ```js
+// create usage collector
 const myCollector = server.usage.collectorSet.makeUsageCollector({
   type: MY_USAGE_TYPE,
   fetch: async callCluster => {
@@ -35,6 +36,9 @@ const myCollector = server.usage.collectorSet.makeUsageCollector({
     };
   },
 });
+
+// register usage collector
+server.usage.collectorSet.register(myCollector);
 ```
 
 Some background: The `callCluster` that gets passed to the `fetch` method is created in a way that's a bit tricky, to support multiple contexts the `fetch` method could be called. Your `fetch` method could get called as a result of an HTTP API request: in this case, the `callCluster` function wraps `callWithRequest`, and the request headers are expected to have read privilege on the entire `.kibana` index. The use case for this is stats pulled from a Kibana Metricbeat module, where the Beat calls Kibana's stats API in Kibana to invoke collection.
@@ -43,13 +47,6 @@ The fetch method also might be called through an internal background task on the
 
 Note: there will be many cases where you won't need to use the `callCluster` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS.
 
-## Registering the Usage Collector
-
-After your `collector` object is created, you'll want to make the Telemetry service aware of it by registering it. This is one line of code:
-
-```js
-server.usage.collectorSet.register(myCollector);
-```
 
 Typically, a plugin will create the collector object and register it with the Telemetry service from the `init` method of the plugin definition, or a helper module called from `init`.
 
