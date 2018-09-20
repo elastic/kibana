@@ -40,6 +40,12 @@ export {
 } from './http_provider';
 
 export {
+  getOrdinalValue,
+  getDayName,
+  getMonthName,
+} from './humanized_numbers';
+
+export {
   serializeJob,
   deserializeJob,
   deserializeJobs,

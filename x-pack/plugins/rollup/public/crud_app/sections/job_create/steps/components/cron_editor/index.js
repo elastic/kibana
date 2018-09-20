@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldChooser } from './field_chooser';
 export { CronEditor } from './cron_editor';

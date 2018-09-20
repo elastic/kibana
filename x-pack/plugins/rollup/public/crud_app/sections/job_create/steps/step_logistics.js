@@ -28,6 +28,7 @@ import {
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { logisticalDetailsUrl } from '../../../services';
+import { CronEditor } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -310,6 +311,21 @@ export class StepLogisticsUi extends Component {
                   defaultMessage="Cron pattern"
                 />
               )}
+              fullWidth
+            >
+              <CronEditor
+                cronExpression={rollupCron}
+                onChange={rollupCron => onFieldsChange({ rollupCron })}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
+                  defaultMessage="Cron pattern"
+                />
+              )}
               error={errorRollupCron}
               isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
               helpText={(
@@ -363,7 +379,7 @@ export class StepLogisticsUi extends Component {
                 onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
-                min="0"
+                min={0}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
