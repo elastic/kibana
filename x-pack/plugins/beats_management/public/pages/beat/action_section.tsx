@@ -40,6 +40,7 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
                     first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
                   ).fromNow()}
                 </strong>
+                .
               </EuiText>
             </EuiFlexItem>
           )}
