@@ -24,7 +24,7 @@ let newPlatformChrome: ChromeStartContract;
 
 export function __newPlatformInit__(instance: ChromeStartContract) {
   if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/chrome is already initialized');
+    throw new Error('ui/chrome/api/controls is already initialized');
   }
 
   newPlatformChrome = instance;
@@ -46,7 +46,7 @@ export function initChromeControlsApi(chrome: { [key: string]: any }) {
   };
 
   /**
-   * Get the current visiblity state of the chrome. Note that this drives the UI so it
+   * Get the current visibility state of the chrome. Note that this drives the UI so it
    * might be incorrect in the moments just before the UI is updated.
    */
   chrome.getVisible = () => visible$.getValue();

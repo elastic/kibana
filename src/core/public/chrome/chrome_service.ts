@@ -48,8 +48,9 @@ export class ChromeService {
     return {
       /**
        * Set the brand configuration. Normally the `logo` property will be rendered as the
-       * CSS background for the home link in the chrome navigation, but when the page is renderd
-       * in a small window the `smallLogo` will be used and rendered at about 45px wide.
+       * CSS background for the home link in the chrome navigation, but when the page is
+       * rendered in a small window the `smallLogo` will be used and rendered at about
+       * 45px wide.
        *
        * example:
        *
@@ -83,7 +84,7 @@ export class ChromeService {
       },
 
       /**
-       * Get an observable of the current visiblity state of the chrome.
+       * Get an observable of the current visibility state of the chrome.
        */
       getIsVisible$: () =>
         isVisible$.pipe(

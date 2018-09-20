@@ -79,7 +79,7 @@ Array [
 });
 
 describe('getBrand', () => {
-  it('returns named properies from cached values emitted from newPlatformChrome', () => {
+  it('returns named properties from cached values emitted from newPlatformChrome', () => {
     const { chrome, brand$ } = setup();
     expect(chrome.getBrand('logo')).toBe('foo');
     expect(chrome.getBrand('smallLogo')).toBe('foo');
