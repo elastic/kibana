@@ -225,7 +225,7 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="charset"
+    label="Charset"
   >
     <EuiSuperSelect
       onChange={[Function]}
