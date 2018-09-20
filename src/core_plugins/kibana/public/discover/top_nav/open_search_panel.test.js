@@ -17,38 +17,17 @@
  * under the License.
  */
 
-import { DashboardAddPanel } from './add_panel';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { shallow } from 'enzyme';
 
-let isOpen = false;
+import {
+  OpenSearchPanel,
+} from './open_search_panel';
 
-export function showAddPanel(addNewPanel, addNewVis, visTypes) {
-  if (isOpen) {
-    return;
-  }
-
-  isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
-  const addNewVisWithCleanup = () => {
-    onClose();
-    addNewVis();
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <DashboardAddPanel
-      onClose={onClose}
-      visTypes={visTypes}
-      addNewPanel={addNewPanel}
-      addNewVis={addNewVisWithCleanup}
-    />
-  );
-  ReactDOM.render(element, container);
-}
+test('render', () => {
+  const component = shallow(<OpenSearchPanel
+    onClose={() => {}}
+    makeUrl={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
