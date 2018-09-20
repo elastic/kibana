@@ -128,6 +128,10 @@ export class TaskStore {
               properties,
             },
           },
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
+          },
         },
       });
     } catch (err) {
