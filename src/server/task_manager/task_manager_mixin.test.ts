@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskManager } from './task_manager';
+import { taskManagerMixin } from './task_manager_mixin';
 
-describe('TaskManager', () => {
+describe('taskManagerMixin', () => {
   let clock: sinon.SinonFakeTimers;
   const defaultConfig = {
     task_manager: {
@@ -39,14 +39,28 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
+  test('logs a warning if the elasticsearch plugin is disabled', async () => {
+    const { opts } = testOpts();
+    (opts.server.plugins as any).elasticsearch = undefined;
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+
+    sinon.assert.calledWith(
+      opts.server.log,
+      ['warning', 'task_manager'],
+      'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
+    );
+  });
+
   test('starts / stops the poller when es goes green / red', async () => {
-    const manager = new TaskManager();
     const { $test, opts } = testOpts();
-    const { store, poller } = (await manager.init(opts))!;
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { store, poller } = (opts.server as any).taskManager;
 
     store.init = sinon.spy(async () => undefined);
     poller.start = sinon.spy(async () => undefined);
     poller.stop = sinon.spy(async () => undefined);
+
+    $test.afterPluginsInit();
 
     await $test.events.green();
     sinon.assert.calledOnce(store.init as any);
@@ -64,61 +78,54 @@ describe('TaskManager', () => {
     sinon.assert.calledOnce(poller.stop as any);
   });
 
-  test('logs a warning if the elasticsearch plugin is disabled', async () => {
-    const manager = new TaskManager();
-    const { opts } = testOpts();
-    const plugins: any = opts.server.plugins;
-
-    plugins.elasticsearch = undefined;
-
-    await manager.init(opts);
-
-    sinon.assert.calledWith(
-      opts.server.log,
-      ['warning', 'task_manager'],
-      'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
-    );
-  });
-
   test('disallows schedule before init', async () => {
-    const manager = new TaskManager();
+    const { opts } = testOpts();
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { taskManager } = opts.server as any;
     const task = {
       taskType: 'foo',
       params: {},
     };
-    await expect(manager.schedule(task)).rejects.toThrow(/The task manager is still initializing/i);
+    await expect(taskManager.schedule(task)).rejects.toThrow(/The task manager is initializing/i);
   });
 
   test('disallows fetch before init', async () => {
-    const manager = new TaskManager();
-    await expect(manager.fetch({})).rejects.toThrow(/The task manager is still initializing/i);
+    const { opts } = testOpts();
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { taskManager } = opts.server as any;
+    await expect(taskManager.fetch({})).rejects.toThrow(/The task manager is initializing/i);
   });
 
   test('disallows remove before init', async () => {
-    const manager = new TaskManager();
-    await expect(manager.remove('23')).rejects.toThrow(/The task manager is still initializing/i);
+    const { opts } = testOpts();
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { taskManager } = opts.server as any;
+    await expect(taskManager.remove('23')).rejects.toThrow(/The task manager is initializing/i);
   });
 
   test('allows middleware registration before init', () => {
-    const manager = new TaskManager();
+    const { opts } = testOpts();
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { taskManager } = opts.server as any;
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
     };
-    expect(() => manager.addMiddleware(middleware)).not.toThrow();
+    expect(() => taskManager.addMiddleware(middleware)).not.toThrow();
   });
 
   test('disallows middleware registration after init', async () => {
-    const manager = new TaskManager();
+    const { $test, opts } = testOpts();
+    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    const { taskManager } = opts.server as any;
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
     };
-    const { opts } = testOpts();
 
-    await manager.init(opts);
+    $test.afterPluginsInit();
 
-    expect(() => manager.addMiddleware(middleware)).toThrow(
+    expect(() => taskManager.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
     );
   });
@@ -126,6 +133,7 @@ describe('TaskManager', () => {
   function testOpts() {
     const $test = {
       events: {} as any,
+      afterPluginsInit: _.noop,
     };
 
     const opts = {
@@ -136,9 +144,15 @@ describe('TaskManager', () => {
         uiExports: {
           taskDefinitions: {},
         },
+        afterPluginsInit(callback: any) {
+          $test.afterPluginsInit = callback;
+        },
       },
       server: {
         log: sinon.spy(),
+        decorate(...args: any[]) {
+          _.set(opts, args.slice(0, -1), _.last(args));
+        },
         plugins: {
           elasticsearch: {
             getCluster() {
