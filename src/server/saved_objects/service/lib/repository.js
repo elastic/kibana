@@ -500,6 +500,75 @@ export class SavedObjectsRepository {
     };
   }
 
+  /**
+   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {string} counterFieldName
+   * @param {object} [options={}]
+   * @property {object} [options.migrationVersion=undefined]
+   * @returns {promise}
+   */
+  async incrementCounter(type, id, counterFieldName, options = {}) {
+    const {
+      migrationVersion,
+      namespace,
+    } = options;
+
+    const time = this._getCurrentTime();
+
+
+    const migrated = this._migrator.migrateDocument({
+      id,
+      type,
+      attributes: { [counterFieldName]: 1 },
+      migrationVersion,
+      updated_at: time,
+    });
+
+    const raw = this._serializer.savedObjectToRaw(migrated);
+
+    const response = await this._writeToCluster('update', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      type: this._type,
+      index: this._index,
+      refresh: 'wait_for',
+      _source: true,
+      body: {
+        script: {
+          source: `
+              if (ctx._source[params.type][params.counterFieldName] == null) {
+                ctx._source[params.type][params.counterFieldName] = params.count;
+              }
+              else {
+                ctx._source[params.type][params.counterFieldName] += params.count;
+              }
+              ctx._source.updated_at = params.time;
+            `,
+          lang: 'painless',
+          params: {
+            count: 1,
+            time,
+            type,
+            counterFieldName,
+          },
+        },
+        upsert: raw._source,
+      },
+    });
+
+    return {
+      id,
+      type,
+      updated_at: time,
+      version: response._version,
+      attributes: response.get._source[type],
+    };
+
+
+  }
+
   async _writeToCluster(method, params) {
     try {
       await this._onBeforeWrite();

@@ -1252,6 +1252,52 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#incrementCounter', () => {
+    beforeEach(() => {
+    });
+
+    it('formats Elasticsearch response', async () => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'config',
+            ...mockTimestampFields,
+            config: {
+              buildNum: 8468,
+              defaultIndex: 'logstash-*',
+            },
+          },
+        },
+      }));
+
+
+      const response = await savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }
+      );
+
+      expect(response).toEqual({
+        type: 'config',
+        id: '6.0.0-alpha1',
+        ...mockTimestampFields,
+        version: 2,
+        attributes: {
+          buildNum: 8468,
+          defaultIndex: 'logstash-*'
+        }
+      });
+    });
+  });
+
   describe('onBeforeWrite', () => {
     it('blocks calls to callCluster of requests', async () => {
       onBeforeWrite.returns(delay(500));

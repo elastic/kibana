@@ -1032,6 +1032,141 @@ describe(`spaces disabled`, () => {
       });
     });
   });
+
+  describe('#incrementCounter', () => {
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => {
+          throw new Error('An actual error would happen here');
+        })
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockActions = createMockActions();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+
+      await expect(client.incrementCounter(type)).rejects.toThrowError(mockErrors.generalError);
+
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError when unauthorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => ({
+          hasAllRequested: false,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'incrementCounter')]: false,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+      const id = Symbol();
+      const counterFieldName = Symbol();
+      const options = Symbol();
+
+      await expect(client.incrementCounter(type, id, counterFieldName, options)).rejects.toThrowError(mockErrors.forbiddenError);
+
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'incrementCounter',
+        [type],
+        [mockActions.getSavedObjectAction(type, 'incrementCounter')],
+        {
+          type,
+          id,
+          counterFieldName,
+          options,
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`returns result of baseClient.incrementCounter when authorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = {
+        incrementCounter: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => ({
+          hasAllRequested: true,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'incrementCounter')]: true,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: mockBaseClient,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: null,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+      const id = Symbol();
+      const counterFieldName = Symbol();
+      const options = Symbol();
+
+      const result = await client.incrementCounter(type, id, counterFieldName, options);
+
+      expect(result).toBe(returnValue);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockBaseClient.incrementCounter).toHaveBeenCalledWith(type, id, counterFieldName, options);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'incrementCounter', [type], {
+        type,
+        id,
+        counterFieldName,
+        options,
+      });
+    });
+  });
+
 });
 
 describe(`spaces enabled`, () => {
@@ -2126,6 +2261,155 @@ describe(`spaces enabled`, () => {
         type,
         id,
         attributes,
+        options,
+      });
+    });
+  });
+
+  describe('#incrementCounter', () => {
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => {
+          throw new Error('An actual error would happen here');
+        })
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockActions = createMockActions();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
+      });
+
+      await expect(client.incrementCounter(type)).rejects.toThrowError(mockErrors.generalError);
+
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError when unauthorized`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => ({
+          hasAllRequested: false,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'incrementCounter')]: false,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
+      });
+      const id = Symbol();
+      const counterFieldName = Symbol();
+      const options = Symbol();
+
+      await expect(client.incrementCounter(type, id, counterFieldName, options)).rejects.toThrowError(mockErrors.forbiddenError);
+
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'incrementCounter',
+        [type],
+        [mockActions.getSavedObjectAction(type, 'incrementCounter')],
+        {
+          type,
+          id,
+          counterFieldName,
+          options,
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
+
+    test(`returns result of baseClient.incrementCounter when authorized`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = {
+        incrementCounter: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => ({
+          hasAllRequested: true,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'incrementCounter')]: true,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: mockBaseClient,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: null,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
+      });
+      const id = Symbol();
+      const counterFieldName = Symbol();
+      const options = Symbol();
+
+      const result = await client.incrementCounter(type, id, counterFieldName, options);
+
+      expect(result).toBe(returnValue);
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'incrementCounter')]);
+      expect(mockBaseClient.incrementCounter).toHaveBeenCalledWith(type, id, counterFieldName, options);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'incrementCounter', [type], {
+        type,
+        id,
+        counterFieldName,
         options,
       });
     });
