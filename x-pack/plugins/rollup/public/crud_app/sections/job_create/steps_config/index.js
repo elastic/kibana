@@ -37,7 +37,7 @@ export const stepIdToStepConfigMap = {
       id: '',
       indexPattern: '',
       rollupIndex: '',
-      rollupCron: '',
+      rollupCron: '0 0 * * 6', // Every week on Saturday, at 00:00
       rollupPageSize: '',
     },
     fieldsValidator: fields => {

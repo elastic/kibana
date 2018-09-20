@@ -27,7 +27,7 @@ import {
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl } from '../../../services';
+import { logisticalDetailsUrl, WEEK } from '../../../services';
 import { CronEditor } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -43,6 +43,35 @@ export class StepLogisticsUi extends Component {
     hasMatchingIndices: PropTypes.bool.isRequired,
     indexPatternAsyncErrors: PropTypes.array,
   }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isAdvancedCronVisible: false,
+      simpleRollupCron: props.fields.rollupCron,
+      cronUnit: WEEK,
+    };
+  }
+
+  onChangeUnit = (unit) => {
+    this.setState({ cronUnit: unit });
+  };
+
+  showAdvancedCron = () => {
+    this.setState({
+      isAdvancedCronVisible: true,
+      simpleRollupCron: this.props.fields.rollupCron,
+    });
+  };
+
+  hideAdvancedCron = () => {
+    const { onFieldsChange } = this.props;
+    const { simpleRollupCron } = this.state;
+    // Restore the last value of the simple cron editor.
+    onFieldsChange({ rollupCron: simpleRollupCron });
+    this.setState({ isAdvancedCronVisible: false });
+  };
 
   renderIndexPatternHelpText() {
     const {
@@ -106,6 +135,97 @@ export class StepLogisticsUi extends Component {
     );
   }
 
+  renderCronEditor() {
+    const {
+      fields,
+      onFieldsChange,
+      areStepErrorsVisible,
+      fieldErrors,
+    } = this.props;
+
+    const {
+      rollupCron,
+    } = fields;
+
+    const {
+      rollupCron: errorRollupCron,
+    } = fieldErrors;
+
+    const { isAdvancedCronVisible, cronUnit } = this.state;
+
+    if (isAdvancedCronVisible) {
+      return (
+        <Fragment>
+          <EuiFormRow
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
+                defaultMessage="Cron pattern"
+              />
+            )}
+            error={errorRollupCron}
+            isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
+            helpText={(
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
+                    defaultMessage="{link}"
+                    values={{ link: (
+                      <EuiLink href="https://en.wikipedia.org/wiki/Cron" target="_blank">
+                        <FormattedMessage
+                          id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
+                          defaultMessage="Learn more about cron syntax"
+                        />
+                      </EuiLink>
+                    ) }}
+                  />
+                </p>
+              </Fragment>
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              value={rollupCron}
+              onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
+              fullWidth
+            />
+          </EuiFormRow>
+
+          <EuiText size="s">
+            <EuiLink onClick={this.hideAdvancedCron}>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+                defaultMessage="Create basic interval"
+              />
+            </EuiLink>
+          </EuiText>
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        <CronEditor
+          cronExpression={rollupCron}
+          onChange={rollupCron => onFieldsChange({ rollupCron })}
+          unit={cronUnit}
+          onChangeUnit={this.onChangeUnit}
+        />
+
+        <EuiText size="s">
+          <EuiLink onClick={this.showAdvancedCron}>
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+              defaultMessage="Create advanced cron expression"
+            />
+          </EuiLink>
+        </EuiText >
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       fields,
@@ -120,7 +240,6 @@ export class StepLogisticsUi extends Component {
       id,
       indexPattern,
       rollupIndex,
-      rollupCron,
       rollupPageSize,
     } = fields;
 
@@ -128,7 +247,6 @@ export class StepLogisticsUi extends Component {
       id: errorId,
       indexPattern: errorIndexPattern,
       rollupIndex: errorRollupIndex,
-      rollupCron: errorRollupCron,
       rollupPageSize: errorRollupPageSize,
     } = fieldErrors;
 
@@ -304,54 +422,9 @@ export class StepLogisticsUi extends Component {
             )}
             fullWidth
           >
-            <CronEditor
-              cronExpression={rollupCron}
-              onChange={rollupCron => onFieldsChange({ rollupCron })}
-            />
+            {this.renderCronEditor()}
 
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
-                  defaultMessage="Cron pattern"
-                />
-              )}
-              error={errorRollupCron}
-              isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
-              helpText={(
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpExample.label"
-                      defaultMessage="Example cron: /30 * * * * ?"
-                    />
-                  </p>
-
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
-                      defaultMessage="{link}"
-                      values={{ link: (
-                        <EuiLink href="https://en.wikipedia.org/wiki/Cron" target="_blank">
-                          <FormattedMessage
-                            id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
-                            defaultMessage="Learn more about cron syntax"
-                          />
-                        </EuiLink>
-                      ) }}
-                    />
-                  </p>
-                </Fragment>
-              )}
-              fullWidth
-            >
-              <EuiFieldText
-                value={rollupCron}
-                onChange={e => onFieldsChange({ rollupCron: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
-                fullWidth
-              />
-            </EuiFormRow>
+            <EuiSpacer size="l" />
 
             <EuiFormRow
               label={(

@@ -14,6 +14,17 @@ export {
 } from './api';
 
 export {
+  cronExpressionToParts,
+  cronPartsToExpression,
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH,
+  YEAR,
+} from './cron';
+
+export {
   logisticalDetailsUrl,
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,

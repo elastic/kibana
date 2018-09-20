@@ -19,6 +19,14 @@ import {
   getOrdinalValue,
   getDayName,
   getMonthName,
+  cronExpressionToParts,
+  cronPartsToExpression,
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH,
+  YEAR,
 } from '../../../../../services';
 
 import { CronHourly } from './cron_hourly';
@@ -26,8 +34,6 @@ import { CronDaily } from './cron_daily';
 import { CronWeekly } from './cron_weekly';
 import { CronMonthly } from './cron_monthly';
 import { CronYearly } from './cron_yearly';
-
-import './cron_editor.less';
 
 function makeSequence(min, max) {
   const values = [];
@@ -52,22 +58,15 @@ const DAY_OPTIONS = makeSequence(0, 6).map(value => ({
   text: getDayName(value),
 }));
 
-const DATE_OPTIONS = makeSequence(0, 31).map(value => ({
+const DATE_OPTIONS = makeSequence(1, 31).map(value => ({
   value: value.toString(),
-  text: getOrdinalValue(value + 1),
+  text: getOrdinalValue(value),
 }));
 
-const MONTH_OPTIONS = makeSequence(0, 11).map(value => ({
+const MONTH_OPTIONS = makeSequence(1, 12).map(value => ({
   value: value.toString(),
-  text: getMonthName(value),
+  text: getMonthName(value - 1),
 }));
-
-const MINUTE = 'MINUTE';
-const HOUR = 'HOUR';
-const DAY = 'DAY';
-const WEEK = 'WEEK';
-const MONTH = 'MONTH';
-const YEAR = 'YEAR';
 
 const UNITS = [{
   value: MINUTE,
@@ -116,43 +115,128 @@ const unitToFieldsMap = {
   },
 };
 
+const unitToBaselineFieldsMap = {
+  [MINUTE]: {
+    minute: '*',
+    hour: '*',
+    date: '*',
+    month: '*',
+    day: '*',
+  },
+  [HOUR]: {
+    minute: '0',
+    hour: '*',
+    date: '*',
+    month: '*',
+    day: '*',
+  },
+  [DAY]: {
+    minute: '0',
+    hour: '0',
+    date: '*',
+    month: '*',
+    day: '*',
+  },
+  [WEEK]: {
+    minute: '0',
+    hour: '0',
+    date: '*',
+    month: '*',
+    day: '6',
+  },
+  [MONTH]: {
+    minute: '0',
+    hour: '0',
+    date: '1',
+    month: '*',
+    day: '*',
+  },
+  [YEAR]: {
+    minute: '0',
+    hour: '0',
+    date: '1',
+    month: '1',
+    day: '*',
+  },
+};
+
 export class CronEditor extends Component {
   static propTypes = {
+    unit: PropTypes.string,
     cronExpression: PropTypes.string,
+    onChange: PropTypes.func,
+    onChangeUnit: PropTypes.func,
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { cronExpression } = props;
+    return cronExpressionToParts(cronExpression);
   }
 
   constructor(props) {
     super(props);
 
+    const { cronExpression } = props;
+
+    const parsedCron = cronExpressionToParts(cronExpression);
+
     this.state = {
-      unit: WEEK,
-      minute: '0',
-      hour: '0',
-      day: '0',
-      date: '0',
-      month: '0',
+      ...parsedCron,
+      fieldToInheritableFlagMap: {},
     };
   }
 
-  onChangeUnit = (e) => {
-    this.setState({ unit: e.target.value });
+  onChangeUnit = unit => {
+    const { onChange, onChangeUnit } = this.props;
+    const { fieldToInheritableFlagMap } = this.state;
+
+    // Update fields which aren't editable with acceptable baseline values.
+    const editableFields = Object.keys(unitToFieldsMap[unit]);
+    const inheritedFields = editableFields.reduce((baselineFields, field) => {
+      if (fieldToInheritableFlagMap[field]) {
+        baselineFields[field] = this.state[field];
+      }
+      return baselineFields;
+    }, { ...unitToBaselineFieldsMap[unit] });
+
+    const newCronExpression = cronPartsToExpression(inheritedFields);
+    onChange(newCronExpression);
+
+    onChangeUnit(unit);
   };
 
-  onChangeFields = (fields) => {
-    const { unit } = this.state;
-    const editableFields = Object.keys(unitToFieldsMap[unit]);
+  onChangeFields = (fields, unit = this.props.unit) => {
+    const { onChange } = this.props;
 
-    const editedFields = editableFields.reduce((newFields, field) => {
-      newFields[field] = fields[field] || this.state[field];
-      return newFields;
+    const editableFields = Object.keys(unitToFieldsMap[unit]);
+    const newFieldToInheritableFlagMap = {};
+
+    const editedFields = editableFields.reduce((accumFields, field) => {
+      if (fields[field] !== undefined) {
+        accumFields[field] = fields[field];
+        // Once the user edits a field, we want to persist it across units.
+        newFieldToInheritableFlagMap[field] = true;
+      } else {
+        accumFields[field] = this.state[field];
+      }
+      return accumFields;
     }, {});
 
-    this.setState(editedFields);
+    const newCronExpression = cronPartsToExpression(editedFields);
+    onChange(newCronExpression);
+
+    this.setState(state => ({
+      fieldToInheritableFlagMap: {
+        ...state.fieldToInheritableFlagMap,
+        ...newFieldToInheritableFlagMap,
+      },
+    }));
   };
 
   renderForm() {
+    const { unit } = this.props;
+
     const {
-      unit,
       minute,
       hour,
       day,
@@ -231,7 +315,7 @@ export class CronEditor extends Component {
   }
 
   render() {
-    const { unit } = this.state;
+    const { unit } = this.props;
 
     return (
       <Fragment>
@@ -247,7 +331,7 @@ export class CronEditor extends Component {
           <EuiSelect
             options={UNITS}
             value={unit}
-            onChange={this.onChangeUnit}
+            onChange={e => this.onChangeUnit(e.target.value)}
             fullWidth
             prepend={(
               <EuiText size="xs">
