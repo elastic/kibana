@@ -54,6 +54,8 @@ async function getCcrStat(req, esIndexPattern, filters) {
     }
   };
 
+  // console.log('params', JSON.stringify(params));
+
   return await callWithRequest(req, 'search', params);
 }
 
@@ -121,8 +123,10 @@ export function ccrShardRoute(server) {
           getCcrStat(req, esIndexPattern, filters)
         ]);
 
-        const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats');
-        const oldestStat = get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats');
+        // console.log('ccrResponse', JSON.stringify(ccrResponse));
+
+        const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {});
+        const oldestStat = get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats', {});
 
         reply({
           metrics,

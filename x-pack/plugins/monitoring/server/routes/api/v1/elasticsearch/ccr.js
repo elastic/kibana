@@ -5,9 +5,153 @@
  */
 
 import Joi from 'joi';
-import { get } from 'lodash';
+import moment from 'moment';
+import { get, groupBy } from 'lodash';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+
+function getBucketScript(max, min) {
+  return {
+    bucket_script: {
+      buckets_path: {
+        max,
+        min,
+      },
+      script: 'params.max - params.min'
+    }
+  };
+}
+
+function buildRequest(req, config, esIndexPattern) {
+  const min = moment.utc(req.payload.timeRange.min).valueOf();
+  const max = moment.utc(req.payload.timeRange.max).valueOf();
+  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const aggs = {
+    ops_synced_max: {
+      max: {
+        field: "ccr_stats.number_of_operations_indexed"
+      }
+    },
+    ops_synced_min: {
+      min: {
+        field: "ccr_stats.number_of_operations_indexed"
+      }
+    },
+
+    last_fetch_time_max: {
+      max: {
+        field: "ccr_stats.time_since_last_fetch_millis"
+      }
+    },
+    last_fetch_time_min: {
+      min: {
+        field: "ccr_stats.time_since_last_fetch_millis"
+      }
+    },
+    lag_ops_leader_max: {
+      max: {
+        field: "ccr_stats.leader_max_seq_no"
+      }
+    },
+    lag_ops_leader_min: {
+      min: {
+        field: "ccr_stats.leader_max_seq_no"
+      }
+    },
+
+    lag_ops_global_max: {
+      max: {
+        field: "ccr_stats.follower_global_checkpoint"
+      }
+    },
+    lag_ops_global_min: {
+      min: {
+        field: "ccr_stats.follower_global_checkpoint"
+      }
+    },
+
+    last_fetch_time: getBucketScript('last_fetch_time_max', 'last_fetch_time_min'),
+    ops_synced: getBucketScript('ops_synced_max', 'ops_synced_min'),
+    lag_ops_leader: getBucketScript('lag_ops_leader_max', 'lag_ops_leader_min'),
+    lag_ops_global: getBucketScript('lag_ops_global_max', 'lag_ops_global_min'),
+    lag_ops: getBucketScript('lag_ops_leader', 'lag_ops_global'),
+  };
+
+  return {
+    index: esIndexPattern,
+    size: maxBucketSize,
+    filterPath: [
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.fetch_exceptions',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',
+      'aggregations.by_follower_index.buckets.key',
+      'aggregations.by_follower_index.buckets.leader_index.buckets.key',
+      'aggregations.by_follower_index.buckets.by_shard_id.buckets.key',
+      'aggregations.by_follower_index.buckets.by_shard_id.buckets.last_fetch_time.value',
+      'aggregations.by_follower_index.buckets.by_shard_id.buckets.ops_synced.value',
+      'aggregations.by_follower_index.buckets.by_shard_id.buckets.lag_ops.value',
+    ],
+    body: {
+      sort: [{ timestamp: { order: 'desc' } }],
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                type: {
+                  value: 'ccr_stats'
+                }
+              }
+            },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: min,
+                  lte: max,
+                }
+              }
+            }
+          ]
+        }
+      },
+      collapse: {
+        field: 'ccr_stats.follower_index',
+        inner_hits: {
+          name: 'by_shard',
+          sort: [{ timestamp: 'desc' }],
+          size: maxBucketSize,
+          collapse: {
+            field: 'ccr_stats.shard_id',
+          }
+        }
+      },
+      aggs: {
+        by_follower_index: {
+          terms: {
+            field: 'ccr_stats.follower_index',
+            size: maxBucketSize,
+          },
+          aggs: {
+            leader_index: {
+              terms: {
+                field: "ccr_stats.leader_index",
+                size: 1
+              }
+            },
+            by_shard_id: {
+              terms: {
+                field: "ccr_stats.shard_id",
+                size: 10
+              },
+              aggs,
+            }
+          }
+        }
+      }
+    }
+  };
+}
 
 export function ccrRoute(server) {
   server.route({
@@ -23,7 +167,7 @@ export function ccrRoute(server) {
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
-          }).optional()
+          }).required()
         })
       }
     },
@@ -34,103 +178,61 @@ export function ccrRoute(server) {
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const response = await callWithRequest(req, 'search', {
-          index: esIndexPattern,
-          size: config.get('xpack.monitoring.max_bucket_size'),
-          filterPath: 'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats',
-          body: {
-            sort: [{ timestamp: { order: 'desc' } }],
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      type: {
-                        value: 'ccr_stats'
-                      }
-                    }
-                  }
-                ]
-              }
-            },
-            collapse: {
-              field: 'ccr_stats.follower_index',
-              inner_hits: {
-                name: 'by_shard',
-                sort: [{ timestamp: 'desc' }],
-                collapse: {
-                  field: 'ccr_stats.shard_id',
-                }
-              }
-            },
-          }
-        });
-
+        const response = await callWithRequest(req, 'search', buildRequest(req, config, esIndexPattern));
 
         if (!response || Object.keys(response).length === 0) {
-          reply({
-            data: {
-              all: [],
-              shardStatsByFollowerIndex: {}
-            }
-          });
+          reply({ data: [] });
           return;
         }
 
-        const stats = get(response, 'hits.hits').reduce((accum, hit) => {
+        const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
           const innerHits = get(hit, 'inner_hits.by_shard.hits.hits');
-          accum.push(...innerHits.map(innerHit => get(innerHit, '_source.ccr_stats')));
-          return accum;
-        }, []);
+          const innerHitsSource = innerHits.map(innerHit => get(innerHit, '_source.ccr_stats'));
+          const grouped = groupBy(innerHitsSource, stat => `${stat.follower_index}:${stat.shard_id}`);
 
-        const data = stats.reduce((accum, _stat) => {
-          const { allByFollowerIndex, shardStatsByFollowerIndex } = accum;
+          return {
+            ...accum,
+            ...grouped
+          };
+        }, {});
 
-          let follows = _stat.leader_index;
-          if (_stat.leader_index.includes(':')) {
+        const buckets = get(response, 'aggregations.by_follower_index.buckets');
+        const data = buckets.reduce((accum, bucket) => {
+          const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
+          let follows = leaderIndex;
+          if (follows.includes(':')) {
             const followsSplit = follows.split(':');
             follows = `${followsSplit[1]} on ${followsSplit[0]}`;
           }
 
           const stat = {
-            id: _stat.follower_index,
-            index: _stat.follower_index,
+            id: bucket.key,
+            index: bucket.key,
             follows,
-            shardId: _stat.shard_id,
-            opsSynced: _stat.number_of_operations_indexed,
-            syncLagTime: _stat.time_since_last_fetch_millis,
-            syncLagOps: _stat.leader_max_seq_no - _stat.follower_global_checkpoint,
-            error: _stat.fetch_exceptions.length ? _stat.fetch_exceptions[0].exception.type : null
           };
 
-          const statByShardId = allByFollowerIndex[stat.id];
-          if (statByShardId) {
-            statByShardId.opsSynced += stat.opsSynced;
-            statByShardId.syncLagTime = Math.max(statByShardId.syncLagTime, stat.syncLagTime);
-            statByShardId.syncLagOps = Math.max(statByShardId.syncLagOps, stat.syncLagOps);
-            statByShardId.error = statByShardId.error || stat.error;
-          } else {
-            allByFollowerIndex[stat.id] = stat;
-          }
+          stat.shards = get(bucket, 'by_shard_id.buckets').reduce((accum, shardBucket) => {
+            const fullStat = get(fullStats[`${bucket.key}:${shardBucket.key}`], '[0]', {});
+            const shardStat = {
+              ...stat,
+              shardId: shardBucket.key,
+              error: fullStat.fetch_exceptions.length ? fullStat.fetch_exceptions[0].exception.type : null,
+              opsSynced: get(shardBucket, 'ops_synced.value'),
+              syncLagTime: get(shardBucket, 'last_fetch_time.value'),
+              syncLagOps: get(shardBucket, 'lag_ops.value'),
+            };
+            accum.push(shardStat);
+            return accum;
+          }, []);
 
-          const shardStats = shardStatsByFollowerIndex[_stat.follower_index];
-          if (shardStats) {
-            if (!shardStats[_stat.shard_id]) {
-              shardStats[_stat.shard_id] = stat;
-            }
-          } else {
-            shardStatsByFollowerIndex[_stat.follower_index] = { [_stat.shard_id]: stat };
-          }
+          stat.error = (stat.shards.find(shard => shard.error) || {}).error;
+          stat.opsSynced = stat.shards.reduce((sum, { opsSynced }) => sum + opsSynced, 0);
+          stat.syncLagTime = stat.shards.reduce((max, { syncLagTime }) => Math.max(max, syncLagTime), 0);
+          stat.syncLagOps = stat.shards.reduce((max, { syncLagOps }) => Math.max(max, syncLagOps), 0);
 
+          accum.push(stat);
           return accum;
-        }, {
-          allByFollowerIndex: {},
-          shardStatsByFollowerIndex: {},
-        });
-
-        data.all = Object.values(data.allByFollowerIndex);
-        data.all.sort((a, b) => a.index > b.index);
-        delete data.allByFollowerIndex;
+        }, []);
 
         reply({ data });
       } catch(err) {

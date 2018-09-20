@@ -24,9 +24,7 @@ export class Ccr extends Component {
     };
   }
 
-  toggleShard(index) {
-    const { data: { shardStatsByFollowerIndex } } = this.props;
-
+  toggleShards(index, shards) {
     const itemIdToExpandedRowMap = {
       ...this.state.itemIdToExpandedRowMap
     };
@@ -36,7 +34,7 @@ export class Ccr extends Component {
     } else {
       itemIdToExpandedRowMap[index] = (
         <EuiInMemoryTable
-          items={Object.values(shardStatsByFollowerIndex[index])}
+          items={shards}
           columns={[
             {
               field: 'shardId',
@@ -55,12 +53,12 @@ export class Ccr extends Component {
             },
             {
               field: 'opsSynced',
-              name: 'Ops synced'
+              name: 'Total ops synced'
             },
             {
               field: 'syncLagTime',
               name: 'Last fetch time (ms)',
-              render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')}</span>
+              render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')} ago</span>
             },
             {
               field: 'syncLagOps',
@@ -80,8 +78,8 @@ export class Ccr extends Component {
   }
 
   renderTable() {
-    const { data: { all } } = this.props;
-    const items = all;
+    const { data } = this.props;
+    const items = data;
 
     const pagination = {
       initialPageSize: 5,
@@ -103,10 +101,10 @@ export class Ccr extends Component {
             field: 'index',
             name: 'Index',
             sortable: true,
-            render: (index) => {
+            render: (index, { shards }) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
               return (
-                <EuiLink onClick={() => this.toggleShard(index)}>
+                <EuiLink onClick={() => this.toggleShards(index, shards)}>
                   {index}
                   &nbsp;
                   { expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" /> }
@@ -122,13 +120,13 @@ export class Ccr extends Component {
           {
             field: 'opsSynced',
             sortable: true,
-            name: 'Ops synced'
+            name: 'Total ops synced'
           },
           {
             field: 'syncLagTime',
             sortable: true,
             name: 'Last fetch time (ms)',
-            render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')}</span>
+            render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')} ago</span>
           },
           {
             field: 'syncLagOps',
