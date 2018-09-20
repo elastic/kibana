@@ -25,7 +25,7 @@ export const App = () => {
         <Route path={ROUTES.MAIN} component={Layout} />
         <Route path={ROUTES.ADMIN} component={Admin} />
         <Route path={ROUTES.SEARCH} component={Search} />
-        <Route path="/:resource/:org/:repo/:pathType(blob|tree)/:revision" component={Layout} />
+        <Route path={ROUTES.MAIN_ROOT} component={Layout} />
         <Route path={ROUTES.REPO} render={Empty} />
         <Route path="*" component={NotFound} />
       </Switch>

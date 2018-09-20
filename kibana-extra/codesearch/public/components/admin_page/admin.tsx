@@ -23,6 +23,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiProgress,
   EuiSearchBar,
   EuiSideNav,
   EuiTitle,
@@ -30,11 +31,14 @@ import {
 
 import { Link } from 'react-router-dom';
 
+import styled from 'styled-components';
 import { Repository } from '../../../model';
 import { RepoConfigs } from '../../../model/workspace';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
 import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
+import { RelativeContainer } from '../../styled_components/relative_container';
+import { InlineProgressContainer } from './inline_progress_container';
 
 enum Tabs {
   GitAddress,
@@ -51,6 +55,7 @@ interface Props {
   repoConfigs?: RepoConfigs;
   hasImportError: boolean;
   importError?: Error;
+  status: { [key: string]: any };
 }
 
 interface State {
@@ -67,11 +72,37 @@ interface RepositoryItemProps {
   indexRepo: () => void;
   initRepoCommand: () => void;
   hasInitCmd?: boolean;
+  status: any;
 }
+
+const Caption = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 16px;
+`;
+
+const Progress = props => (
+  <InlineProgressContainer>
+    <RelativeContainer>
+      <EuiProgress size="l" value={props.progress} max={100} />
+      <Caption>{props.children}</Caption>
+    </RelativeContainer>
+  </InlineProgressContainer>
+);
 
 const RepositoryItem = (props: RepositoryItemProps) => {
   const initRepoButton = (
     <EuiButtonIcon iconType="play" aria-label="run init command" onClick={props.initRepoCommand} />
+  );
+
+  const progress = props.status && (
+    <Progress progress={props.status.progress}>
+      Cloning...
+      {props.status.progress.toFixed(2)}%
+    </Progress>
   );
 
   return (
@@ -88,6 +119,7 @@ const RepositoryItem = (props: RepositoryItemProps) => {
           </div>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {progress}
       <EuiFlexItem grow={false}>
         <div>
           {props.hasInitCmd && initRepoButton}
@@ -223,7 +255,7 @@ class AdminPage extends React.PureComponent<Props, State> {
     const repos = this.filterRepos();
     const repositoriesCount = repos.length;
     const items = this.getSideNavItems();
-    const { hasImportError, importError } = this.props;
+    const { hasImportError, importError, status } = this.props;
 
     const errorCallOut = hasImportError &&
       importError && (
@@ -260,6 +292,7 @@ class AdminPage extends React.PureComponent<Props, State> {
         indexRepo={this.getIndexRepoHandler(repo.uri)}
         initRepoCommand={this.props.initRepoCommand.bind(this, repo.uri)}
         hasInitCmd={this.hasInitCmd(repo)}
+        status={status[repo.uri]}
       />
     ));
 
@@ -314,6 +347,7 @@ const mapStateToProps = (state: RootState) => ({
   repoConfigs: state.repository.repoConfigs,
   hasImportError: state.repository.hasImportError,
   importError: state.repository.importError,
+  status: state.status.status,
 });
 
 const mapDispatchToProps = {

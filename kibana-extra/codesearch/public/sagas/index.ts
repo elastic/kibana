@@ -18,7 +18,8 @@ import {
   watchIndexRepo,
   watchInitRepoCmd,
 } from './repository';
-import { watchLocationChange } from './route';
+import { watchLoadRepo, watchLocationChange } from './route';
+import { watchLoadRepoSuccess, watchPollingStatus } from './status';
 import { watchLoadStructure } from './structure';
 import { watchSymbolSearchQueryChanged } from './symbol_search';
 
@@ -38,4 +39,7 @@ export function* rootSaga() {
   yield fork(watchFetchRepoConfigs);
   yield fork(watchInitRepoCmd);
   yield fork(watchGotoRepo);
+  yield fork(watchPollingStatus);
+  yield fork(watchLoadRepoSuccess);
+  yield fork(watchLoadRepo);
 }

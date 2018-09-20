@@ -5,7 +5,7 @@
  */
 
 import queryString from 'query-string';
-import { call, put, select, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import {
   documentSearch,
@@ -23,6 +23,8 @@ import {
 } from '../actions';
 
 import { Action } from 'redux-actions';
+import { kfetch } from 'ui/kfetch';
+import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import * as ROUTES from '../components/routes';
 import { fileSelector, lastRequestPathSelector, refUrlSelector } from '../selectors';
 
@@ -63,6 +65,23 @@ function* handleFile(repoUri: string, file: string, revision: string) {
   );
 }
 
+function fetchRepo(repoUri) {
+  return kfetch({ pathname: `../api/cs/repo/${repoUri}` });
+}
+
+function* loadRepoSaga(action) {
+  try {
+    const repo = yield call(fetchRepo, action.payload);
+    yield put(loadRepoSuccess(repo));
+  } catch (e) {
+    yield put(loadRepoFailed(e));
+  }
+}
+
+export function* watchLoadRepo() {
+  yield takeEvery(String(loadRepo), loadRepoSaga);
+}
+
 function* handleLocationChange(action: Action<Match>) {
   // TODO: we need to find a better solution to integrate routing data into
   // reducer.
@@ -73,13 +92,14 @@ function* handleLocationChange(action: Action<Match>) {
     yield put(fetchRepoConfigs());
   } else if (ROUTES.REPO === path) {
     yield put(gotoRepo(url));
-  } else if (ROUTES.MAIN === path) {
+  } else if (ROUTES.MAIN === path || ROUTES.MAIN_ROOT === path) {
     const { resource, org, repo, path: file, pathType, revision, goto } = action.payload!.params;
     const repoUri = `${resource}/${org}/${repo}`;
     let position;
     if (goto) {
       position = parseGoto(goto);
     }
+    yield put(loadRepo(repoUri));
     if (file && pathType === ROUTES.PathTypes.blob) {
       yield call(handleFile, repoUri, file, revision);
       if (position) {

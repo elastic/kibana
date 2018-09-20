@@ -26,6 +26,7 @@ import {
   indexRepoSuccess,
   initRepoCommand,
 } from '../actions';
+import { loadStatus } from '../actions/status';
 import { history } from '../utils/url';
 
 function requestRepos(): any {
@@ -36,6 +37,9 @@ function* handleFetchRepos() {
   try {
     const repos = yield call(requestRepos);
     yield put(fetchReposSuccess(repos));
+    for (const repo of repos) {
+      yield put(loadStatus(repo.uri));
+    }
   } catch (err) {
     yield put(fetchReposFailed(err));
   }
@@ -107,7 +111,7 @@ function requestRepoInitCmd(repoUri: string) {
 function* handleGotoRepo(action: Action<string>) {
   const repoUri = action.payload as string;
   const repo = yield call(requestRepo, repoUri);
-  history.push(`${repoUri}/tree/${repo.defaultBranch}`);
+  history.push(`${repoUri}/tree/${repo.defaultBranch || 'master'}`);
 }
 
 function requestRepo(uri: string) {

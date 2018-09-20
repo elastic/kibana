@@ -7,9 +7,10 @@
 import { Uri } from 'monaco-editor';
 import pathToRegexp from 'path-to-regexp';
 import { Position } from 'vscode-languageserver-types';
-import { MAIN } from '../public/components/routes';
+import { MAIN, MAIN_ROOT } from '../public/components/routes';
 
-const re = pathToRegexp(MAIN);
+const mainRe = pathToRegexp(MAIN);
+const mainRootRe = pathToRegexp(MAIN_ROOT);
 
 export interface ParsedUrl {
   schema?: string;
@@ -56,9 +57,10 @@ export function parseGoto(goto: string): Position | undefined {
 
 export function parseLspUrl(url: Uri | string): CompleteParsedUrl {
   const { schema, uri } = parseSchema(url.toString());
-  const parsed = re.exec(uri);
-  if (parsed) {
-    const [resource, org, repo, pathType, revision, file, goto] = parsed.slice(1);
+  const mainParsed = mainRe.exec(uri);
+  const mainRootParsed = mainRootRe.exec(uri);
+  if (mainParsed) {
+    const [resource, org, repo, pathType, revision, file, goto] = mainParsed.slice(1);
     let position;
     if (goto) {
       position = parseGoto(goto);
@@ -72,8 +74,17 @@ export function parseLspUrl(url: Uri | string): CompleteParsedUrl {
       schema,
       position,
     };
+  } else if (mainRootParsed) {
+    const [resource, org, repo, pathType, revision] = mainRootParsed.slice(1);
+    return {
+      uri,
+      repoUri: `${resource}/${org}/${repo}`,
+      pathType,
+      revision,
+      schema,
+    };
   } else {
-    throw new Error('invald url ' + url);
+    throw new Error('invalid url ' + url);
   }
 }
 

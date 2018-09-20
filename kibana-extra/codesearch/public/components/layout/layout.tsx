@@ -39,9 +39,12 @@ import { NotFound } from './not_found';
 
 import { PathTypes } from '../routes';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
+import { CloneStatus } from './clone_status';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 import 'github-markdown-css/github-markdown.css';
+import { cloneProgressSelector, progressSelector } from '../../selectors';
+import { AlignCenterContainer } from '../../styled_components/align_center_container';
 
 enum Tabs {
   FILE_TREE = 'file-tree',
@@ -67,6 +70,7 @@ interface Props {
   isSymbolsLoading: boolean;
   isNotFound: boolean;
   file: FetchFileResponse;
+  progress?: number;
 }
 
 const DirectoryView = withRouter(props => {
@@ -252,7 +256,9 @@ export class LayoutPage extends React.Component<Props, State> {
   };
 
   public render() {
-    if (this.props.isNotFound) {
+    const { progress, isNotFound, cloneProgress } = this.props;
+    const shouldRenderProgress = progress !== null && progress < 100;
+    if (isNotFound) {
       return <NotFound />;
     }
     const { symbols, isSymbolsLoading } = this.props;
@@ -285,6 +291,40 @@ export class LayoutPage extends React.Component<Props, State> {
         </EuiFlexGroup>
       </EuiFlexItem>
     );
+
+    if (shouldRenderProgress) {
+      return (
+        <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
+          {this.state.showSearchBox && searchBox}
+          <EuiFlexItem grow={false} style={noMarginStyle}>
+            <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
+              <EuiFlexItem grow={false} style={noMarginStyle}>
+                <LayoutBreadcrumbs routeParams={this.props.match.params} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiButtonIcon iconType="node" aria-label="node" />
+                  <EuiButtonIcon iconType="gear" aria-label="config" />
+                  <EuiButtonIcon
+                    iconType="search"
+                    aria-label="Toggle Search Box"
+                    onClick={this.toggleSearchBox}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiSpacer size="xs" className="spacer" />
+          <EuiFlexItem className="codeMainContainer" style={noMarginStyle}>
+            <AlignCenterContainer>
+              <div>
+                <CloneStatus progress={progress} cloneProgress={cloneProgress} />
+              </div>
+            </AlignCenterContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
     return (
       <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
@@ -344,6 +384,8 @@ const mapStateToProps = (state: RootState) => ({
   isSymbolsLoading: state.symbolSearch.isLoading,
   commits: state.file.commits,
   file: state.file.file,
+  progress: progressSelector(state),
+  cloneProgress: cloneProgressSelector(state),
 });
 
 const mapDispatchToProps = {

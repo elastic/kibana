@@ -13,5 +13,8 @@ export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
   PathTypes.tree
 })/:revision/:path*:goto(!.*)?`;
 export const REPO = `/:resource/:org/:repo`;
+export const MAIN_ROOT = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
+  PathTypes.tree
+})/:revision`;
 export const ADMIN = '/admin';
 export const SEARCH = '/search';
