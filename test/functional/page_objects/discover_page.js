@@ -53,8 +53,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async saveSearch(searchName) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
-      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
-      await testSubjects.click('discoverSaveSearchButton');
+      await testSubjects.setValue('savedObjectTitle', searchName);
+      await testSubjects.click('confirmSaveSavedObjectButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
