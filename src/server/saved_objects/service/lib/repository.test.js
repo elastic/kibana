@@ -176,6 +176,8 @@ describe('SavedObjectsRepository', () => {
     }
   };
 
+  const schema = new SavedObjectsSchema({ globaltype: { isNamespaceAgnostic: true } });
+
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
@@ -183,12 +185,13 @@ describe('SavedObjectsRepository', () => {
       migrateDocument: sinon.spy((doc) => doc),
     };
 
-    const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({ globaltype: { isNamespaceAgnostic: true } }));
+    const serializer = new SavedObjectsSerializer(schema);
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
       migrator,
+      schema,
       serializer,
       onBeforeWrite
     });
@@ -695,7 +698,7 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
+    it('passes mappings, schema, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
       callAdminCluster.returns(namespacedSearchResults);
       const relevantOpts = {
         namespace: 'foo-namespace',
@@ -708,7 +711,7 @@ describe('SavedObjectsRepository', () => {
 
       await savedObjectsRepository.find(relevantOpts);
       sinon.assert.calledOnce(getSearchDsl);
-      sinon.assert.calledWithExactly(getSearchDsl, mappings, relevantOpts);
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, relevantOpts);
     });
 
     it('merges output of getSearchDsl into es request body', async () => {

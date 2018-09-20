@@ -33,6 +33,7 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
+      schema,
       serializer,
       migrator = { migrateDocument: (doc) => doc },
       onBeforeWrite = () => { },
@@ -51,6 +52,7 @@ export class SavedObjectsRepository {
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
+    this._schema = schema;
     this._serializer = serializer;
   }
 
@@ -283,7 +285,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         version: true,
-        ...getSearchDsl(this._mappings, {
+        ...getSearchDsl(this._mappings, this._schema, {
           search,
           searchFields,
           type,
