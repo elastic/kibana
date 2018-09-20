@@ -94,7 +94,7 @@ describe('getSearchDsl', () => {
     it('returns combination of getQueryParams and getSortingParams', () => {
       sandbox.stub(queryParamsNS, 'getQueryParams').returns({ a: 'a' });
       sandbox.stub(sortParamsNS, 'getSortingParams').returns({ b: 'b' });
-      expect(getSearchDsl(null, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
+      expect(getSearchDsl(null, null, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
   });
 });

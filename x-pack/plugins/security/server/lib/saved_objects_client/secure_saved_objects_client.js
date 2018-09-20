@@ -49,7 +49,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       type,
       'delete',
-      { type, id },
+      { type, id, options },
       repository => repository.delete(type, id, options),
     );
   }
@@ -68,7 +68,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       types,
       'bulk_get',
-      { objects },
+      { objects, options },
       repository => repository.bulkGet(objects, options)
     );
   }
@@ -77,7 +77,7 @@ export class SecureSavedObjectsClient {
     return await this._execute(
       type,
       'get',
-      { type, id },
+      { type, id, options },
       repository => repository.get(type, id, options)
     );
   }
