@@ -8,10 +8,11 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { fileDataVisualizerProvider } from '../models/file_data_visualizer';
+import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 
-function analyzeFiles(callWithRequest, data) {
+function analyzeFiles(callWithRequest, data, overrides) {
   const { analyzeFile } = fileDataVisualizerProvider(callWithRequest);
-  return analyzeFile(data);
+  return analyzeFile(data, overrides);
 }
 
 export function fileDataVisualizerRoutes(server, commonRouteConfig) {
@@ -21,12 +22,14 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       const data = request.payload;
-      return analyzeFiles(callWithRequest, data)
+
+      return analyzeFiles(callWithRequest, data, request.query)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },
     config: {
-      ...commonRouteConfig
+      ...commonRouteConfig,
+      payload: { maxBytes: MAX_BYTES },
     }
   });
 }

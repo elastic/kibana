@@ -37,8 +37,7 @@ uiRoutes
 import { FileDataVisualizerPage } from './file_datavisualizer';
 
 module.directive('fileDatavisualizerPage', function ($injector) {
-  const maxPayloadBytes = $injector.get('maxPayloadBytes');
   const reactDirective = $injector.get('reactDirective');
 
-  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { maxPayloadBytes });
+  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { });
 });

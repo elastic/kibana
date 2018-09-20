@@ -14,16 +14,26 @@ const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
 
 export function fileDataVisualizerProvider(callWithRequest) {
-  async function analyzeFile(data) {
+  async function analyzeFile(data, overrides) {
     let cached = false;
     let results = [];
+
     try {
-      results = await callWithRequest('ml.fileStructure', { body: data });
+      results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
       cached = await cacheData(data);
     } catch (error) {
-      throw Boom.badRequest(error);
+      console.error(error);
+      const err = (error.message !== undefined) ? error.message : error;
+      throw Boom.badRequest(err);
     }
+
+    const {
+      hasOverrides,
+      reducedOverrides
+    } = formatOverrides(overrides);
+
     return {
+      ...hasOverrides && { overrides: reducedOverrides },
       cached,
       results,
     };
@@ -51,29 +61,42 @@ export function fileDataVisualizerProvider(callWithRequest) {
   }
 
   async function deleteOutputFiles(outputPath) {
-    const files = await listDirs(outputPath);
+    const files = await readdir(outputPath);
     files.forEach((f) => {
       fs.unlinkSync(`${outputPath}/${f}`);
     });
   }
 
-  async function listDirs(dirName) {
-    const dirs = [];
-    return new Promise((resolve, reject) => {
-      readdir(dirName)
-        .then((fileNames) => {
-          fileNames.forEach((fileName) => {
-            dirs.push(fileName);
-          });
-          resolve(dirs);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
-
   return {
     analyzeFile
+  };
+}
+
+function formatOverrides(overrides) {
+  let hasOverrides = false;
+
+  const reducedOverrides = Object.keys(overrides).reduce((p, c) => {
+    if (overrides[c] !== '') {
+      p[c] = overrides[c];
+      hasOverrides = true;
+    }
+    return p;
+  }, {});
+
+  if (reducedOverrides.column_names !== undefined) {
+    reducedOverrides.column_names = reducedOverrides.column_names.split(',');
+  }
+
+  if (reducedOverrides.has_header_row !== undefined) {
+    reducedOverrides.has_header_row = (reducedOverrides.has_header_row === 'true');
+  }
+
+  if (reducedOverrides.should_trim_fields !== undefined) {
+    reducedOverrides.should_trim_fields = (reducedOverrides.should_trim_fields === 'true');
+  }
+
+  return  {
+    reducedOverrides,
+    hasOverrides,
   };
 }

@@ -20,6 +20,7 @@ export function MLJobEditor({
   width = '100%',
   mode = EDITOR_MODE.JSON,
   readOnly = false,
+  syntaxChecking = true,
   onChange = () => {}
 }) {
   return (
@@ -32,6 +33,7 @@ export function MLJobEditor({
       wrapEnabled={true}
       showPrintMargin={false}
       editorProps={{ $blockScrolling: true }}
+      setOptions={{ useWorker: syntaxChecking }}
       onChange={onChange}
     />
   );

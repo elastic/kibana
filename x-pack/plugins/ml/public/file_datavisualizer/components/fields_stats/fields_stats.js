@@ -15,15 +15,22 @@ export class FieldsStats extends Component {
   constructor(props) {
     super(props);
 
-    this.fields = createFields(this.props.results);
-    console.log(this.fields);
+    this.state = {
+      fields: []
+    };
+  }
+
+  componentDidMount() {
+    this.setState({
+      fields: createFields(this.props.results)
+    });
   }
 
   render() {
     return (
       <div className="fields-stats">
         {
-          this.fields.map(f => (
+          this.state.fields.map(f => (
             <FieldStatsCard
               field={f}
               key={f.name}
