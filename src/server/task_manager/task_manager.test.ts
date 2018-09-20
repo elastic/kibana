@@ -41,10 +41,34 @@ describe('TaskManager', () => {
 
   test('disallows multiple inits', async () => {
     const manager = new TaskManager();
-    const opts = testOpts();
+    const { opts } = testOpts();
 
-    await expect(manager.init(opts)).resolves.toBeUndefined();
+    await expect(manager.init(opts)).resolves.toBeDefined();
     await expect(manager.init(opts)).rejects.toThrow(/The task manager is already initialized/i);
+  });
+
+  test('starts / stops the poller when es goes green / red', async () => {
+    const manager = new TaskManager();
+    const { $test, opts } = testOpts();
+    const { store, poller } = await manager.init(opts);
+    store.init = sinon.spy(async () => undefined);
+    poller.start = sinon.spy(async () => undefined);
+    poller.stop = sinon.spy(async () => undefined);
+
+    await $test.events.green();
+    sinon.assert.calledOnce(store.init as any);
+    sinon.assert.calledOnce(poller.start as any);
+    sinon.assert.notCalled(poller.stop as any);
+
+    await $test.events.red();
+    sinon.assert.calledOnce(store.init as any);
+    sinon.assert.calledOnce(poller.start as any);
+    sinon.assert.calledOnce(poller.stop as any);
+
+    await $test.events.green();
+    sinon.assert.calledTwice(store.init as any);
+    sinon.assert.calledTwice(poller.start as any);
+    sinon.assert.calledOnce(poller.stop as any);
   });
 
   test('disallows schedule before init', async () => {
@@ -81,14 +105,21 @@ describe('TaskManager', () => {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
     };
-    await manager.init(testOpts());
+    const { opts } = testOpts();
+
+    await manager.init(opts);
+
     expect(() => manager.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
     );
   });
 
   function testOpts() {
-    return {
+    const $test = {
+      events: {} as any,
+    };
+
+    const opts = {
       config: {
         get: (path: string) => _.get(defaultConfig, path),
       },
@@ -101,10 +132,22 @@ describe('TaskManager', () => {
         log: _.noop,
         plugins: {
           elasticsearch: {
-            getCluster: () => ({ callWithInternalUser: _.noop }),
+            getCluster() {
+              return { callWithInternalUser: _.noop };
+            },
+            status: {
+              on(eventName: string, callback: () => any) {
+                $test.events[eventName] = callback;
+              },
+            },
           },
         },
       },
+    };
+
+    return {
+      $test,
+      opts,
     };
   }
 });
