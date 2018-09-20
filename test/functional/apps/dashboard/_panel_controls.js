@@ -154,6 +154,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.header.clickDashboard();
           await dashboardAddPanel.addSavedSearch('my search');
+          await PageObjects.dashboard.waitForRenderComplete();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(1);

@@ -24,7 +24,6 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
-  const find = getService('find');
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -92,13 +91,6 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
           }
         });
       }
-    }
-
-    async waitForEuiTableLoading() {
-      await retry.waitFor('dashboard add panel loading to complete', async () => {
-        const table = await find.byClassName('euiBasicTable');
-        return !((await table.getAttribute('class')).includes('loading'));
-      });
     }
 
     async closeAddPanel() {
@@ -179,9 +171,9 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async filterEmbeddableNames(name) {
       // The search input field may be disabled while the table is loading so wait for it
-      await this.waitForEuiTableLoading();
+      await PageObjects.common.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForEuiTableLoading();
     }
 
     async panelAddLinkExists(name) {
