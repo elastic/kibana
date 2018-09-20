@@ -5,17 +5,17 @@
  */
 
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest } from '../framework';
+import { InfraCapabilityAggregationBucket, InfraFrameworkRequest } from '../framework';
 
 export interface InfraCapabilitiesAdapter {
   getMetricCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string
-  ): Promise<any>;
+  ): Promise<InfraCapabilityAggregationBucket[]>;
   getLogCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string
-  ): Promise<any>;
+  ): Promise<InfraCapabilityAggregationBucket[]>;
 }

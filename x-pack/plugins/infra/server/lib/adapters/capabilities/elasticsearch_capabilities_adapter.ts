@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
-import { InfraCapabilitiesAdapter } from './adapter_types';
-
 import { InfraSourceConfiguration } from '../../sources';
+import {
+  InfraBackendFrameworkAdapter,
+  InfraCapabilityAggregationBucket,
+  InfraCapabilityAggregationResponse,
+  InfraFrameworkRequest,
+} from '../framework';
+import { InfraCapabilitiesAdapter } from './adapter_types';
 
 export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -19,7 +23,7 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string
-  ): Promise<any> {
+  ): Promise<InfraCapabilityAggregationBucket[]> {
     const metricQuery = {
       index: sourceConfiguration.metricAlias,
       body: {
@@ -48,14 +52,21 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       },
     };
 
-    return this.framework.callWithRequest<any>(req, 'search', metricQuery);
+    const response = await this.framework.callWithRequest<
+      any,
+      { metrics?: InfraCapabilityAggregationResponse }
+    >(req, 'search', metricQuery);
+
+    return response.aggregations && response.aggregations.metrics
+      ? response.aggregations.metrics.buckets
+      : [];
   }
 
   public async getLogCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string
-  ): Promise<any> {
+  ): Promise<InfraCapabilityAggregationBucket[]> {
     const logQuery = {
       index: sourceConfiguration.logAlias,
       body: {
@@ -84,6 +95,13 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       },
     };
 
-    return this.framework.callWithRequest<any>(req, 'search', logQuery);
+    const response = await this.framework.callWithRequest<
+      any,
+      { metrics?: InfraCapabilityAggregationResponse }
+    >(req, 'search', logQuery);
+
+    return response.aggregations && response.aggregations.metrics
+      ? response.aggregations.metrics.buckets
+      : [];
   }
 }
