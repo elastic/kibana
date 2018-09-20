@@ -312,7 +312,6 @@
     "jest-cli": "^23.5.0",
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
-    "jsdom": "9.9.1",
     "json5": "^1.0.1",
     "karma": "1.7.0",
     "karma-chrome-launcher": "2.1.1",
