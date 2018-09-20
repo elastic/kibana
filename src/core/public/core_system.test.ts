@@ -93,6 +93,7 @@ const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificat
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockUiSettingsContract);
+  this.stop = jest.fn();
 });
 jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
@@ -251,6 +252,17 @@ describe('#stop', () => {
     expect(chromeService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(chromeService.stop).toHaveBeenCalled();
+  });
+
+  it('calls uiSettings.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [uiSettings] = MockUiSettingsService.mock.instances;
+    expect(uiSettings.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(uiSettings.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', () => {

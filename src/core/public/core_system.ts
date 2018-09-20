@@ -129,6 +129,7 @@ export class CoreSystem {
     this.legacyPlatform.stop();
     this.notifications.stop();
     this.loadingCount.stop();
+    this.uiSettings.stop();
     this.chrome.stop();
     this.rootDomElement.textContent = '';
   }
