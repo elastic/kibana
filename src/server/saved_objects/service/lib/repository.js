@@ -99,11 +99,10 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      const savedObject = this._serializer.rawToSavedObject({
+      return this._rawToSavedObject({
         ...raw,
         ...response,
       });
-      return omit(savedObject, 'namespace');
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -313,10 +312,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const savedObject = this._serializer.rawToSavedObject(hit);
-        return omit(savedObject, 'namespace');
-      }),
+      saved_objects: response.hits.hits.map(hit => this._rawToSavedObject(hit)),
     };
   }
 
@@ -483,5 +479,14 @@ export class SavedObjectsRepository {
 
   _getCurrentTime() {
     return new Date().toISOString();
+  }
+
+  // The internal representation of the saved object that the serializer returns
+  // includes the namespace, and we use this for migrating documents. However, we don't
+  // want the namespcae to be returned from the repository, as the repository scopes each
+  // method transparently to the specified namespace.
+  _rawToSavedObject(raw) {
+    const savedObject = this._serializer.rawToSavedObject(raw);
+    return omit(savedObject, 'namespace');
   }
 }
