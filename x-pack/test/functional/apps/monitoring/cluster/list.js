@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
           expect(await clusterList.getClusterLogstashCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           expect(await clusterList.getClusterKibanaCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           if (cloud) {
-            // https://github.com/elastic/cloud/blob/master/scala-services/runner/src/main/resources/templates/allocator/kibana/config/kibana-6.yml#L80-L81
+            // Cloud sets 'xpack.monitoring.show_license_expiration: false' in kibana.yml
             expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be('Basic');
           } else {
             expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be('Basic\nExpires 29 Aug 30');
