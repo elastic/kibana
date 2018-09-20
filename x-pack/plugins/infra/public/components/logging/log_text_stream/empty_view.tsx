@@ -19,7 +19,7 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
       <EuiEmptyPrompt
         title={<h2>There are no log messages to display.</h2>}
         titleSize="m"
-        body={<p>Try adjusting your time or filter.</p>}
+        body={<p>Try adjusting your filter.</p>}
         actions={
           <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
             Check for new data
