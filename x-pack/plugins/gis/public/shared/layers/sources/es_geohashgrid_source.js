@@ -149,20 +149,27 @@ class GeohashableIndexPatternEditor extends React.Component {
       });
     };
 
+
+    let geoFieldSelect;
+    if (this.state.selectedIndexPattern) {
+      geoFieldSelect = (
+        <EuiSelect
+          options={pointOptions}
+          aria-label="Select geo_point field"
+          onChange={onPointFieldChange}
+        />
+      );
+    }
+
     return (
       <Fragment>
         <EuiSelect
           hasNoInitialSelection
           options={indexPatterns}
           onChange={onIndexPatternChange}
-          aria-label="Use aria labels when no actual label is in use"
+          aria-label="Select index-pattern"
         />
-        <EuiSelect
-          options={pointOptions}
-          aria-label="Use aria labels when no actual label is in use"
-          onChange={onPointFieldChange}
-          className={this.state.selectedIndexPattern ? '' : 'hidden'}
-        />
+        {geoFieldSelect}
         <EuiButton
           size="s"
           onClick={() => {
