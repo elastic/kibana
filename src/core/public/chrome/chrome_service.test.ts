@@ -93,7 +93,7 @@ Array [
     });
 
     it('always emits false if embed query string is in hash when started', async () => {
-      window.history.pushState(undefined, undefined, '#/home?a=b&embed=true');
+      window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
       const service = new ChromeService();
       const start = service.start();
@@ -164,6 +164,8 @@ Array [
         .toPromise();
 
       start.addApplicationClass('foo');
+      start.addApplicationClass('foo');
+      start.addApplicationClass('bar');
       start.addApplicationClass('bar');
       start.addApplicationClass('baz');
       start.removeApplicationClass('bar');
@@ -175,6 +177,13 @@ Array [
   Array [],
   Array [
     "foo",
+  ],
+  Array [
+    "foo",
+  ],
+  Array [
+    "foo",
+    "bar",
   ],
   Array [
     "foo",
