@@ -269,6 +269,10 @@ export class SavedObjectsRepository {
       namespace,
     } = options;
 
+    if (!type) {
+      throw new TypeError(`options.type must be a string or an array of strings`);
+    }
+
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
     }

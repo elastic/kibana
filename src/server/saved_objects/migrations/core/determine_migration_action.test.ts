@@ -63,7 +63,30 @@ describe('determineMigrationAction', () => {
       doc: {
         dynamic: 'strict',
         properties: {
-          hello: { dynamic: true, goober: 'pea' },
+          hello: { dynamic: 'true', goober: 'pea' },
+          world: { baz: 'bing' },
+        },
+      },
+    };
+
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.None);
+  });
+
+  test('requires no action if mappings differ only by equivalent coerced properties', () => {
+    const actual = {
+      doc: {
+        dynamic: 'strict',
+        properties: {
+          hello: { dynamic: 'false', baz: '2', foo: 'bar' },
+          world: { baz: 'bing' },
+        },
+      },
+    };
+    const expected = {
+      doc: {
+        dynamic: 'strict',
+        properties: {
+          hello: { dynamic: false, baz: 2, foo: 'bar' },
           world: { baz: 'bing' },
         },
       },
