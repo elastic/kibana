@@ -20,6 +20,7 @@ export const MAP_READY = 'MAP_READY';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
+export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -174,6 +175,14 @@ export function setMeta(metaJson) {
       type: SET_META,
       meta: metaJson
     });
+  };
+}
+
+export function setTimeFilters({ from, to }) {
+  return {
+    type: SET_TIME_FILTERS,
+    from,
+    to
   };
 }
 

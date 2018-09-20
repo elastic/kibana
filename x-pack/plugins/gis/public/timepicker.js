@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import {
   uiModules
 } from 'ui/modules';
@@ -13,6 +12,8 @@ import 'ui/autoload/all';
 import {
   timefilter
 } from 'ui/timefilter';
+import { getStore } from './store/store';
+import { setTimeFilters } from './actions/store_actions';
 
 
 // hack to wait for angular template to be ready
@@ -43,25 +44,16 @@ export function initTimepicker(resolve) {
       // Add APM feedback menu
       // TODO: move this somewhere else
       $scope.topNavMenu = [];
-      timefilter.setTime = (from, to) => {
-        timefilter.getTime().from = moment(from).toISOString();
-        timefilter.getTime().to = moment(to).toISOString();
-        $scope.$apply();
-      };
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
-
-      // TODO: Update redux with timepicker values
 
       Promise.all([waitForAngularReady]).then(resolve());
     });
 }
 
-export default (timefilter) => ranges => {
-  timefilter.setTime({
-    from: moment(ranges.xaxis.from).toISOString(),
-    to: moment(ranges.xaxis.to).toISOString(),
-    mode: 'absolute',
+getStore().then(store => {
+  timefilter.on('timeUpdate', () => {
+    const timeFilters = timefilter.getTime();
+    store.dispatch(setTimeFilters(timeFilters));
   });
-};
-
+});
