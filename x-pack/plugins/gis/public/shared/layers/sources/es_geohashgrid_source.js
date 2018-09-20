@@ -63,10 +63,10 @@ export class ESGeohashGridSource extends ASource {
       url += `?index_pattern=${encodeURIComponent(this._descriptor.esIndexPattern)}`;
       url += `&geo_point_field=${encodeURIComponent(this._descriptor.pointField)}`;
       url += `&precision=${precision}`;
-      url += `&minlon=${extent[0]}`;
-      url += `&maxlon=${extent[2]}`;
-      url += `&minlat=${extent[1]}`;
-      url += `&maxlat=${extent[3]}`;
+      url += `&minlon=${extent.min_lon}`;
+      url += `&maxlon=${extent.max_lon}`;
+      url += `&minlat=${extent.min_lat}`;
+      url += `&maxlat=${extent.max_lat}`;
       const data = await fetch(url);
       return data.json();
     } catch (e) {

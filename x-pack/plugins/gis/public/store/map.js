@@ -34,7 +34,10 @@ const INITIAL_STATE = {
   ready: false,
   mapState: {
     zoom: 4,
-    center: [-100.41, 32.82],
+    center: {
+      lon: -100.41,
+      lat: 32.82
+    },
     extent: null
   },
   selectedLayerId: null,
