@@ -2,7 +2,8 @@
  * 1. Anchor suggestions beneath input.
  * 2. Allow for option of positioning suggestions absolutely.
  */
- .timExpressionInput__container {
+
+.timExpressionInput__container {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column; /* 1 */
