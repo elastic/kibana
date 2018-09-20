@@ -28,6 +28,7 @@ import {
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   getRouterLinkProps,
+  extractQueryParams,
   validateIndexPattern,
   formatFields,
 } from '../../services';
@@ -66,6 +67,45 @@ export class JobCreateUi extends Component {
     createJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const {
+      history: {
+        location: {
+          search,
+        },
+      },
+    } = props;
+
+    const { stepsFields } = state;
+
+    const { 'index-pattern': indexPattern } = extractQueryParams(search);
+
+    // Seed fields with index pattern and reset URL.
+    if (indexPattern != null) {
+      props.history.replace({
+        'index-pattern': '',
+      });
+
+      const prevFields = stepsFields[STEP_LOGISTICS];
+
+      const newFields = {
+        ...prevFields,
+        indexPattern,
+      };
+
+      const newStepsFields = {
+        ...cloneDeep(stepsFields),
+        [STEP_LOGISTICS]: newFields,
+      };
+
+      return {
+        stepsFields: newStepsFields,
+      };
+    }
+
+    return null;
   }
 
   constructor(props) {
