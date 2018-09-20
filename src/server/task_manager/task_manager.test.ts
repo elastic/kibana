@@ -39,18 +39,11 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('disallows multiple inits', async () => {
-    const manager = new TaskManager();
-    const { opts } = testOpts();
-
-    await expect(manager.init(opts)).resolves.toBeDefined();
-    await expect(manager.init(opts)).rejects.toThrow(/The task manager is already initialized/i);
-  });
-
   test('starts / stops the poller when es goes green / red', async () => {
     const manager = new TaskManager();
     const { $test, opts } = testOpts();
-    const { store, poller } = await manager.init(opts);
+    const { store, poller } = (await manager.init(opts))!;
+
     store.init = sinon.spy(async () => undefined);
     poller.start = sinon.spy(async () => undefined);
     poller.stop = sinon.spy(async () => undefined);
@@ -69,6 +62,22 @@ describe('TaskManager', () => {
     sinon.assert.calledTwice(store.init as any);
     sinon.assert.calledTwice(poller.start as any);
     sinon.assert.calledOnce(poller.stop as any);
+  });
+
+  test('logs a warning if the elasticsearch plugin is disabled', async () => {
+    const manager = new TaskManager();
+    const { opts } = testOpts();
+    const plugins: any = opts.server.plugins;
+
+    plugins.elasticsearch = undefined;
+
+    await manager.init(opts);
+
+    sinon.assert.calledWith(
+      opts.server.log,
+      ['warning', 'task_manager'],
+      'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
+    );
   });
 
   test('disallows schedule before init', async () => {
@@ -129,7 +138,7 @@ describe('TaskManager', () => {
         },
       },
       server: {
-        log: _.noop,
+        log: sinon.spy(),
         plugins: {
           elasticsearch: {
             getCluster() {

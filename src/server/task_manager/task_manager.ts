@@ -27,6 +27,7 @@
  * Due to its coplexity, this is mostly tested by integration tests (see readme).
  */
 
+import _ from 'lodash';
 import { extractTaskDefinitions } from './lib/extract_task_definitions';
 import { fillPool } from './lib/fill_pool';
 import { TaskManagerLogger } from './lib/logger';
@@ -76,6 +77,82 @@ export class TaskManager {
    */
   public remove: RemoveFn = unsupportedFunction(UNINITIALIZED_ERROR);
 
+  /**
+   * Initializes the task manager, starts the background polling, etc. After this,
+   * middleware can no longer be added.
+   */
+  public init = _.once(async (opts: TaskManagerOpts) => {
+    const { kbnServer, server, config } = opts;
+    const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
+    const maxWorkers = config.get('task_manager.max_workers');
+
+    if (!server.plugins.elasticsearch) {
+      logger.warning(
+        'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
+      );
+      return;
+    }
+
+    this.addMiddleware = () => {
+      throw new Error('Cannot add middleware after the task manager is initialized.');
+    };
+
+    logger.debug('Extracting task definitions');
+    const definitions = extractTaskDefinitions(
+      maxWorkers,
+      kbnServer.uiExports.taskDefinitions,
+      config.get('task_manager.override_num_workers')
+    );
+
+    logger.debug('Creating the store');
+    const store = new TaskStore({
+      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      index: config.get('task_manager.index'),
+      maxAttempts: config.get('task_manager.max_attempts'),
+      supportedTypes: Object.keys(definitions),
+    });
+
+    logger.debug('Creating the pool');
+    const pool = new TaskPool({
+      logger,
+      maxWorkers,
+    });
+
+    logger.debug('Creating the poller');
+    const createRunner = (instance: ConcreteTaskInstance) =>
+      new TaskManagerRunner({
+        logger,
+        definition: definitions[instance.taskType],
+        kbnServer,
+        instance,
+        store,
+        beforeRun: this.middleware.beforeRun,
+      });
+
+    const poller = new TaskPoller({
+      logger,
+      pollInterval: config.get('task_manager.poll_interval'),
+      work() {
+        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
+      },
+    });
+
+    server.plugins.elasticsearch.status.on('red', () => {
+      logger.debug('Lost connection to Elasticsearch, stopping the poller.');
+      poller.stop();
+    });
+
+    server.plugins.elasticsearch.status.on('green', async () => {
+      logger.debug('Initializing store');
+      await store.init();
+      logger.debug('Starting poller');
+      await poller.start();
+      logger.info('Connected to Elasticsearch, and watching for tasks');
+    });
+
+    return { store, poller };
+  });
+
   // The middleware used to modify tasks before save and before run.
   private middleware: Middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
@@ -91,108 +168,10 @@ export class TaskManager {
     const prevMiddleWare = this.middleware;
     this.middleware = addMiddlewareToChain(prevMiddleWare, middleware);
   };
-
-  /**
-   * Initializes the task manager, starts the background polling, etc. After this,
-   * middleware can no longer be added.
-   */
-  public init = (opts: TaskManagerOpts) => {
-    this.init = unsupportedFunction('The task manager is already initialized.');
-
-    const { middleware } = this;
-
-    return initializeManager({ ...opts, middleware }).then(({ store, poller }) => {
-      this.addMiddleware = () => {
-        throw new Error('Cannot add middleware after the task manager is initialized.');
-      };
-
-      this.schedule = async (taskInstance: TaskInstance, options?: any) => {
-        const { taskInstance: modifiedTask } = await middleware.beforeSave({
-          ...options,
-          taskInstance,
-        });
-        const result = await store.schedule(modifiedTask);
-        poller.attemptWork();
-        return result;
-      };
-
-      this.fetch = (...args) => store.fetch(...args);
-      this.remove = (...args) => store.remove(...args);
-
-      return { store, poller };
-    });
-  };
 }
 
 function unsupportedFunction(message: string) {
   return async () => {
     throw new Error(message);
   };
-}
-
-/**
- * Glues together all of the different task manager modules, initializes the store,
- * starts the poller, etc.
- *
- * @param opts
- */
-async function initializeManager(opts: TaskManagerOpts & { middleware: Middleware }) {
-  const { middleware, kbnServer, server, config } = opts;
-  const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
-  const maxWorkers = config.get('task_manager.max_workers');
-
-  logger.debug('Extracting task definitions');
-  const definitions = extractTaskDefinitions(
-    maxWorkers,
-    kbnServer.uiExports.taskDefinitions,
-    config.get('task_manager.override_num_workers')
-  );
-
-  logger.debug('Creating the store');
-  const store = new TaskStore({
-    callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-    index: config.get('task_manager.index'),
-    maxAttempts: config.get('task_manager.max_attempts'),
-    supportedTypes: Object.keys(definitions),
-  });
-
-  logger.debug('Creating the pool');
-  const pool = new TaskPool({
-    logger,
-    maxWorkers,
-  });
-
-  logger.debug('Creating the poller');
-  const createRunner = (instance: ConcreteTaskInstance) =>
-    new TaskManagerRunner({
-      logger,
-      definition: definitions[instance.taskType],
-      kbnServer,
-      instance,
-      store,
-      beforeRun: middleware.beforeRun,
-    });
-
-  const poller = new TaskPoller({
-    logger,
-    pollInterval: config.get('task_manager.poll_interval'),
-    work() {
-      return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-    },
-  });
-
-  server.plugins.elasticsearch.status.on('red', () => {
-    logger.debug('Lost connection to Elasticsearch, stopping the poller.');
-    poller.stop();
-  });
-
-  server.plugins.elasticsearch.status.on('green', async () => {
-    logger.debug('Initializing store');
-    await store.init();
-    logger.debug('Starting poller');
-    await poller.start();
-    logger.info('Connected to Elasticsearch, and watching for tasks');
-  });
-
-  return { store, poller };
 }
