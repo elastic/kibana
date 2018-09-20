@@ -17,29 +17,32 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
-import './k7_global_nav';
+import React, { Component } from 'react';
 
-export enum NavControlSide {
-  Left = 'left',
-  Right = 'right',
+import {
+  // @ts-ignore
+  EuiHeaderSectionItem,
+} from '@elastic/eui';
+
+import { NavControl } from '../';
+import { HeaderNavControl } from './header_nav_control';
+
+interface Props {
+  navControls: NavControl[];
 }
 
-export interface NavControl {
-  name: string;
-  order: number;
-  side: NavControlSide;
-  render: (targetDomElement: HTMLDivElement) => (() => void) | void;
-}
+export class HeaderNavControls extends Component<Props> {
+  public render() {
+    const { navControls } = this.props;
 
-export interface NavLink {
-  title: string;
-  url: string;
-  id: string;
-  k7IconType: IconType;
-}
+    if (!navControls) {
+      return null;
+    }
 
-export interface Breadcrumb {
-  text: string;
-  href?: string;
+    return navControls.map(navControl => (
+      <EuiHeaderSectionItem key={navControl.name}>
+        <HeaderNavControl navControl={navControl} />
+      </EuiHeaderSectionItem>
+    ));
+  }
 }

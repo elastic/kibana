@@ -22,12 +22,13 @@ import { uiModules } from '../../../modules';
 import { Header } from './components/header';
 import './k7_global_nav.less';
 import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import { BreadcrumbsObservable } from './';
 
 const module = uiModules.get('kibana');
 
-module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
-  const navLinks = chrome.getNavLinks();
+module.directive('k7GlobalNav', (reactDirective, chrome, Private, breadcrumbState) => {
   const navControls = Private(chromeK7NavControlsRegistry);
+  const navLinks = chrome.getNavLinks();
 
   return reactDirective(Header, [
     // scope accepted by directive, passed in as React props
@@ -37,6 +38,7 @@ module.directive('k7GlobalNav', (reactDirective, chrome, Private) => {
   {},
   // angular injected React props
   {
+    breadcrumbs: breadcrumbState.observable,
     navLinks,
     navControls
   });

@@ -18,13 +18,12 @@
  */
 
 import React, { Component } from 'react';
+import { Observable } from 'rxjs';
 
 import {
   // TODO: add type annotations
   // @ts-ignore
   EuiHeader,
-  // @ts-ignore
-  EuiHeaderBreadcrumbs,
   // @ts-ignore
   EuiHeaderLogo,
   // @ts-ignore
@@ -34,12 +33,14 @@ import {
 } from '@elastic/eui';
 
 import { HeaderAppMenu } from './header_app_menu';
-import { HeaderNavControl } from './header_nav_control';
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderNavControls } from './header_nav_controls';
 
 import { ChromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
-import { NavControl, NavControlSide, NavLink } from '../';
+import { Breadcrumb, NavControlSide, NavLink } from '../';
 
 interface Props {
+  breadcrumbs: Observable<Breadcrumb[]>;
   navLinks: NavLink[];
   navControls: ChromeK7NavControlsRegistry;
   isVisible: boolean;
@@ -51,35 +52,8 @@ export class Header extends Component<Props> {
     return <EuiHeaderLogo iconType="logoKibana" href="/" aria-label="Go to home page" />;
   }
 
-  public renderBreadcrumbs() {
-    const { appTitle } = this.props;
-
-    if (!appTitle) {
-      return null;
-    }
-
-    const breadcrumbs = [
-      {
-        text: appTitle,
-      },
-    ];
-
-    return <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
-  }
-
-  public renderControls(navControls: NavControl[]) {
-    return (
-      navControls &&
-      navControls.map(navControl => (
-        <EuiHeaderSectionItem key={navControl.name}>
-          <HeaderNavControl navControl={navControl} />
-        </EuiHeaderSectionItem>
-      ))
-    );
-  }
-
   public render() {
-    const { navControls, navLinks, isVisible } = this.props;
+    const { appTitle, breadcrumbs, navControls, navLinks, isVisible } = this.props;
 
     if (!isVisible) {
       return null;
@@ -93,13 +67,13 @@ export class Header extends Component<Props> {
         <EuiHeaderSection>
           <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
 
-          {leftNavControls && this.renderControls(leftNavControls.inOrder)}
+          <HeaderNavControls navControls={leftNavControls} />
 
-          {this.renderBreadcrumbs()}
+          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs={breadcrumbs} />
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">
-          {rightNavControls && this.renderControls(rightNavControls.inOrder)}
+          <HeaderNavControls navControls={rightNavControls} />
 
           <EuiHeaderSectionItem>
             <HeaderAppMenu navLinks={navLinks} />

@@ -81,7 +81,7 @@ function getBeatsBreadcrumbs(mainInstance) {
   return breadcrumbs;
 }
 
-export function breadcrumbsProvider() {
+export function breadcrumbsProvider(breadcrumbState) {
   return function createBreadcrumbs(clusterName, mainInstance) {
     let breadcrumbs = [ createCrumb('#/home', 'Clusters', 'breadcrumbClusters') ];
 
@@ -101,6 +101,8 @@ export function breadcrumbsProvider() {
     if (mainInstance.inBeats) {
       breadcrumbs = breadcrumbs.concat(getBeatsBreadcrumbs(mainInstance));
     }
+
+    breadcrumbState.set(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
     return breadcrumbs;
   };

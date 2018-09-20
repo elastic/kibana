@@ -47,7 +47,7 @@ module.directive('breadCrumbs', function () {
       useLinks: '='
     },
     template: breadCrumbsTemplate,
-    controller: function ($scope) {
+    controller: function ($scope, breadcrumbState) {
 
       function omitPagesFilter(crumb) {
         return (
@@ -70,6 +70,15 @@ module.directive('breadCrumbs', function () {
             .filter(omitPagesFilter)
             .filter(omitCurrentPageFilter)
         );
+
+        const newBreadcrumbs = $scope.breadcrumbs
+          .map(b => ({ text: b.display, href: b.href }));
+
+        if ($scope.pageTitle) {
+          newBreadcrumbs.push({ text: $scope.pageTitle });
+        }
+
+        breadcrumbState.set(newBreadcrumbs);
       });
     }
   };
