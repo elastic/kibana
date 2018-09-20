@@ -204,7 +204,7 @@ describe('saved object conversion', () => {
     test('it is complimentary with savedObjectToRaw', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
-        _id: 'foo:bar',
+        _id: 'foo-namespace:foo:bar',
         _type: ROOT_TYPE,
         _version: 24,
         _source: {
@@ -217,6 +217,7 @@ describe('saved object conversion', () => {
             foo: '1.2.3',
             bar: '9.8.7',
           },
+          namespace: 'foo-namespace',
           updated_at: new Date(),
         },
       };
