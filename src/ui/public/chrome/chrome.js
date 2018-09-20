@@ -72,7 +72,7 @@ initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
 initChromeControlsApi(chrome);
 templateApi(chrome, internals);
-initChromeThemeApi(chrome, internals);
+initChromeThemeApi(chrome);
 translationsApi(chrome, internals);
 
 const waitForBootstrap = new Promise(resolve => {
