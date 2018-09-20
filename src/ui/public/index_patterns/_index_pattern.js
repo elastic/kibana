@@ -225,8 +225,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       this.getComputedFields = getComputedFields.bind(this);
 
       this.flattenHit = flattenHit(this);
-      const format = fieldformats.getDefaultInstance('string');
-      this.formatHit = formatHit(this, format);
+      this.formatHit = formatHit(this, fieldformats.getDefaultInstance('string'));
       this.formatField = this.formatHit.formatField;
     }
 
