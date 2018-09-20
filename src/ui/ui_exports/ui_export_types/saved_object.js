@@ -35,7 +35,7 @@ export const mappings = wrap(
 // See saved_objects/migrations for more details.
 export const migrations = wrap(alias('savedObjectMigrations'), uniqueKeys(), mergeAtType);
 
-export const schemas = wrap(alias('savedObjectSchemas'), uniqueKeys(), mergeAtType);
+export const savedObjectSchemas = wrap(uniqueKeys(), mergeAtType);
 
 // Combines the `validations` property of each plugin,
 // ensuring that properties are unique across plugins.
