@@ -72,7 +72,7 @@
   border-radius: 50%;
   font-size: $euiFontSizeXS;
   margin: 2px $euiSizeS 0 $euiSizeXS;
-  @include size(26px) // same as svg
+  @include size(26px); // same as svg
 
   &:hover:not(:disabled) {
     background: shadeOrTint($euiColorPrimary, 10%, 10%);
