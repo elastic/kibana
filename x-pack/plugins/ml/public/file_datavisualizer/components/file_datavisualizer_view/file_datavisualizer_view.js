@@ -119,7 +119,7 @@ export class FileDataVisualizerView extends Component {
         // check to see if the settings from the server which haven't been overridden have changed.
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
-        // if any have change, update the originalSettings value
+        // if any have changed, update the originalSettings value
         for (const o in serverSettings) {
           if (serverSettings.hasOwnProperty(o)) {
             const value = serverSettings[o];

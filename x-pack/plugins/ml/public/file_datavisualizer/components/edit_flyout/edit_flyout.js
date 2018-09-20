@@ -54,7 +54,7 @@ export class EditFlyout extends Component {
     this.setState({ isFlyoutVisible: true });
   }
 
-  apply = () => {
+  applyAndClose = () => {
     this.applyOverrides();
     this.closeFlyout();
   }
@@ -67,75 +67,72 @@ export class EditFlyout extends Component {
   }
 
   render() {
-    let flyout;
+    const { isFlyoutVisible } = this.state;
+    const {
+      setOverrides,
+      overrides,
+      originalSettings,
+      fields,
+    } = this.props;
 
-    if (this.state.isFlyoutVisible) {
-      const {
-        setOverrides,
-        overrides,
-        originalSettings,
-        fields,
-      } = this.props;
-
-      flyout = (
-        <EuiFlyout
-          // ownFocus
-          onClose={this.closeFlyout}
-          size="m"
-        >
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>
-                Override settings
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-
-            <Overrides
-              setOverrides={setOverrides}
-              overrides={overrides}
-              originalSettings={originalSettings}
-              setApplyOverrides={this.setApplyOverrides}
-              fields={fields}
-            />
-
-            {/* <EuiTabbedContent
-              tabs={tabs}
-              initialSelectedTab={tabs[0]}
-              onTabClick={() => { }}
-            /> */}
-
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                >
-                  Close
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={this.apply}
-                  fill
-                  // isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
-                >
-                  Apply
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      );
-    }
     return (
-      <div>
-        {flyout}
-      </div>
+      <React.Fragment>
+        { isFlyoutVisible &&
+
+          <EuiFlyout
+            // ownFocus
+            onClose={this.closeFlyout}
+            size="m"
+          >
+            <EuiFlyoutHeader>
+              <EuiTitle>
+                <h2>
+                  Override settings
+                </h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+
+              <Overrides
+                setOverrides={setOverrides}
+                overrides={overrides}
+                originalSettings={originalSettings}
+                setApplyOverrides={this.setApplyOverrides}
+                fields={fields}
+              />
+
+              {/* <EuiTabbedContent
+                tabs={tabs}
+                initialSelectedTab={tabs[0]}
+                onTabClick={() => { }}
+              /> */}
+
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    onClick={this.closeFlyout}
+                    flush="left"
+                  >
+                    Close
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={this.applyAndClose}
+                    fill
+                    // isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
+                  >
+                    Apply
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
+        }
+      </React.Fragment>
     );
   }
 }

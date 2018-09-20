@@ -31,8 +31,11 @@ export class Overrides extends Component {
   constructor(props) {
     super(props);
 
-    this.originalSettings = this.props.originalSettings;
-    this.overrides = this.props.overrides;
+    this.state = {};
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { originalSettings } = props;
 
     const {
       charset,
@@ -45,35 +48,29 @@ export class Overrides extends Component {
       grokPattern,
       timestampField,
       timestampFormat,
-    } = this.overrides;
+    } = props.overrides;
 
     const {
       delimiter: d,
       customDelimiter: customD
-    } = convertDelimiter((delimiter === undefined) ? this.originalSettings.delimiter : delimiter);
+    } = convertDelimiter((delimiter === undefined) ? originalSettings.delimiter : delimiter);
 
-    const tempColumnNames = (columnNames === undefined && this.originalSettings.columnNames !== undefined) ?
-      [...this.originalSettings.columnNames] : columnNames;
+    const tempColumnNames = (columnNames === undefined && originalSettings.columnNames !== undefined) ?
+      [...originalSettings.columnNames] : columnNames;
 
-    this.state = {
-      charset: (charset === undefined) ? this.originalSettings.charset : charset,
-      format: (format === undefined) ? this.originalSettings.format : format,
-      hasHeaderRow: (hasHeaderRow === undefined) ? this.originalSettings.hasHeaderRow : hasHeaderRow,
+    return {
+      charset: (charset === undefined) ? originalSettings.charset : charset,
+      format: (format === undefined) ? originalSettings.format : format,
+      hasHeaderRow: (hasHeaderRow === undefined) ? originalSettings.hasHeaderRow : hasHeaderRow,
       columnNames: tempColumnNames,
       delimiter: d,
-      customDelimiter: customD,
-      quote: (quote === undefined) ? this.originalSettings.quote : quote,
-      shouldTrimFields: (shouldTrimFields === undefined) ? this.originalSettings.shouldTrimFields : shouldTrimFields,
-      grokPattern: (grokPattern === undefined) ? this.originalSettings.grokPattern : grokPattern,
-      timestampFormat: (timestampFormat === undefined) ? this.originalSettings.timestampFormat : timestampFormat,
-      timestampField: (timestampField === undefined) ? this.originalSettings.timestampField : timestampField,
+      customDelimiter: (customD === undefined) ? '' : customD,
+      quote: (quote === undefined) ? originalSettings.quote : quote,
+      shouldTrimFields: (shouldTrimFields === undefined) ? originalSettings.shouldTrimFields : shouldTrimFields,
+      grokPattern: (grokPattern === undefined) ? originalSettings.grokPattern : grokPattern,
+      timestampFormat: (timestampFormat === undefined) ? originalSettings.timestampFormat : timestampFormat,
+      timestampField: (timestampField === undefined) ? originalSettings.timestampField : timestampField,
     };
-
-    this.fields = this.props.fields;
-    this.fieldOptions = this.fields.map(f => ({ value: f, inputDisplay: f }));
-    this.originalColumnNames = (this.state.columnNames !== undefined) ? [...this.state.columnNames] : [];
-
-    console.log('Overrides constructor', this.state);
   }
 
   componentDidMount() {
@@ -140,6 +137,7 @@ export class Overrides extends Component {
 
 
   render() {
+    const { fields } = this.props;
     const {
       timestampFormat,
       timestampField,
@@ -152,6 +150,9 @@ export class Overrides extends Component {
       charset,
       columnNames,
     } = this.state;
+
+    const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
+    const originalColumnNames = (columnNames !== undefined) ? [...columnNames] : [];
 
     return (
 
@@ -221,7 +222,7 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         <EuiFormRow
-          label="Time stamp format"
+          label="Timestamp format"
         >
           <EuiSuperSelect
             options={timestampFormatOptions}
@@ -234,7 +235,7 @@ export class Overrides extends Component {
           label="Time field"
         >
           <EuiSuperSelect
-            options={this.fieldOptions}
+            options={fieldOptions}
             valueOfSelected={timestampField}
             onChange={this.onTimestampFieldChange}
           />
@@ -259,7 +260,7 @@ export class Overrides extends Component {
             </EuiTitle>
 
             {
-              this.originalColumnNames.map((f, i) => (
+              originalColumnNames.map((f, i) => (
                 <EuiFormRow
                   label={f}
                   key={f}
@@ -280,42 +281,40 @@ export class Overrides extends Component {
   }
 }
 
+// Some delimiter characters cannot be used as items in select list.
+// so show a textual description of the character instead.
 function convertDelimiter(d) {
   switch (d) {
     case ',':
       return {
         delimiter: 'comma',
-        customDelimiter: ''
       };
     case '\t':
       return {
         delimiter: 'tab',
-        customDelimiter: ''
       };
     case ';':
       return {
         delimiter: 'semicolon',
-        customDelimiter: ''
       };
     case '|':
       return {
         delimiter: 'pipe',
-        customDelimiter: ''
       };
     case ' ':
       return {
         delimiter: 'space',
-        customDelimiter: ''
       };
 
     default:
       return {
-        delimiter: undefined,
-        customDelimiter: ''
+        delimiter: 'other',
+        customDelimiter: d,
       };
   }
 }
 
+// Convert the delimiter textual descriptions back to their real characters.
 function convertDelimiterBack({ delimiter, customDelimiter }) {
   switch (delimiter) {
     case 'comma':
