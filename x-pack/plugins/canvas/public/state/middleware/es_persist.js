@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { getWorkpad, getWorkpadPersisted } from '../selectors/workpad';
+import { getWorkpad, getWorkpadPersisted, isWorkpadLoaded } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
 import { setWorkpad } from '../actions/workpad';
 import { setAssets, resetAssets } from '../actions/assets';
@@ -43,10 +43,14 @@ export const esPersistMiddleware = ({ getState }) => {
     next(action);
     const newState = getState();
 
+    // if there is no workpad loaded, do nothing
+    if (!isWorkpadLoaded(newState)) return;
+
     // if the workpad changed, save it to elasticsearch
     if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {
       const persistedWorkpad = getWorkpadPersisted(getState());
       return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
+        // TODO make this part of the existing handling in the update method of the workpad service
         if (err.response.status === 400) {
           return notify.error(err.response, {
             title: `Couldn't save your changes to Elasticsearch`,

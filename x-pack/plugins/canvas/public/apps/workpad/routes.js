@@ -10,7 +10,7 @@ import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { gotoPage } from '../../state/actions/pages';
-import { getWorkpad } from '../../state/selectors/workpad';
+import { getWorkpad, isWorkpadLoaded } from '../../state/selectors/workpad';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -40,8 +40,7 @@ export const routes = [
         path: '/:id(/page/:page)',
         action: (dispatch, getState) => async ({ params, router }) => {
           // load workpad if given a new id via url param
-          const currentWorkpad = getWorkpad(getState());
-          if (params.id !== currentWorkpad.id) {
+          if (!isWorkpadLoaded(getState()) || params.id !== getWorkpad(getState()).id) {
             try {
               const fetchedWorkpad = await workpadService.get(params.id);
 
@@ -54,7 +53,7 @@ export const routes = [
             }
           }
 
-          // fetch the workpad again, to get changes
+          // fetch the workpad again, to get changes from state
           const workpad = getWorkpad(getState());
           const pageNumber = parseInt(params.page, 10);
 

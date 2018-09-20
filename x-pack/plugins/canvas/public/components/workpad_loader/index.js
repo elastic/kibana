@@ -14,9 +14,13 @@ import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { WorkpadLoader as Component } from './workpad_loader';
 
-const mapStateToProps = state => ({
-  workpadId: getWorkpad(state).id,
-});
+const mapStateToProps = state => {
+  const workpad = getWorkpad(state);
+
+  return {
+    workpadId: workpad ? workpad.id : null,
+  };
+};
 
 export const WorkpadLoader = compose(
   getContext({

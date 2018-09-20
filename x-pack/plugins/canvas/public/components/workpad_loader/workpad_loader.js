@@ -34,7 +34,6 @@ const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
-    workpadId: PropTypes.string.isRequired,
     createWorkpad: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
@@ -42,6 +41,7 @@ export class WorkpadLoader extends React.PureComponent {
     removeWorkpads: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     workpads: PropTypes.object,
+    workpadId: PropTypes.string, // will be null if there is not yet a workpad loaded
   };
 
   state = {

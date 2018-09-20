@@ -9,7 +9,7 @@ import { compose, branch, renderComponent } from 'recompose';
 import { initializeWorkpad } from '../../../state/actions/workpad';
 import { selectElement } from '../../../state/actions/transient';
 import { getEditing, getAppReady } from '../../../state/selectors/app';
-import { getWorkpad } from '../../../state/selectors/workpad';
+import { getWorkpad, isWorkpadLoaded } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
 
@@ -20,6 +20,7 @@ const mapStateToProps = state => {
     editing: getEditing(state),
     appReady: typeof appReady === 'object' ? appReady : { ready: appReady },
     workpad: getWorkpad(state),
+    workpadLoaded: isWorkpadLoaded(state),
   };
 };
 
@@ -33,7 +34,7 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-const branches = [branch(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
+const branches = [branch(({ workpadLoaded }) => !workpadLoaded, renderComponent(LoadWorkpad))];
 
 export const WorkpadApp = compose(
   connect(

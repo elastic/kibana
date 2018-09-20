@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
   const state = {
@@ -27,7 +26,7 @@ export const getInitialState = path => {
     },
     persistent: {
       schemaVersion: 1,
-      workpad: getDefaultWorkpad(),
+      workpad: null,
     },
   };
 

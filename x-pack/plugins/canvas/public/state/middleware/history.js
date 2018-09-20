@@ -11,6 +11,7 @@ import { routerProvider } from '../../lib/router_provider';
 import { restoreHistory, undoHistory, redoHistory, historyInFlight } from '../actions/history';
 import { initializeWorkpad } from '../actions/workpad';
 import { isAppReady } from '../selectors/app';
+import { isWorkpadLoaded } from '../selectors/workpad';
 
 export const historyMiddleware = ({ dispatch, getState }) => {
   // iterate over routes, injecting redux to action handlers
@@ -86,8 +87,14 @@ export const historyMiddleware = ({ dispatch, getState }) => {
       case restoreHistory.toString():
         // skip state compare, simply execute the action
         next(action);
-        // TODO: we shouldn't need to reset the entire workpad for undo/redo
-        dispatch(initializeWorkpad());
+
+        // only dispatch initializeWorkpad if a workpad is loaded
+        if (isWorkpadLoaded(getState())) {
+          // TODO: we shouldn't need to reset the entire workpad for undo/redo
+          dispatch(initializeWorkpad());
+        }
+
+        // if handling history action, stop here
         return;
     }
 

@@ -27,6 +27,11 @@ export function getWorkpadPersisted(state) {
     assets: getAssets(state),
   };
 }
+
+export function isWorkpadLoaded(state) {
+  return get(state, workpadRoot) !== null;
+}
+
 export function getWorkpadInfo(state) {
   return omit(getWorkpad(state), ['pages']);
 }
