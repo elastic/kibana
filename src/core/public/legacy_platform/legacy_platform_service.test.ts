@@ -272,6 +272,17 @@ describe('#start()', () => {
       expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
+    it('passes chrome service to ui/chrome/api/global_nav_state', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockGlobalNavStateInit).toHaveBeenCalledTimes(1);
+      expect(mockGlobalNavStateInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
     describe('useLegacyTestHarness = false', () => {
       it('passes the targetDomElement to ui/chrome', () => {
         const legacyPlatform = new LegacyPlatformService({
