@@ -189,7 +189,6 @@ describe('SavedObjectsRepository', () => {
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
-      schema,
       callCluster: callAdminCluster,
       migrator,
       schema,
