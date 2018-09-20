@@ -18,6 +18,7 @@ describe('Overrides', () => {
       overrides: {},
       defaultSettings: {},
       setApplyOverrides: () => {},
+      fields: [],
     };
 
     const component = shallow(
