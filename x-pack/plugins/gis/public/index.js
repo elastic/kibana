@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
+import './kibana_services';
 
 import './vendor/jquery_ui_sortable.js';
 import './vendor/jquery_ui_sortable.css';
+
+// import the uiExports that we want to "use"
+import 'uiExports/fieldFormats';
+import 'uiExports/search';
 
 import chrome from 'ui/chrome';
 import React from 'react';
