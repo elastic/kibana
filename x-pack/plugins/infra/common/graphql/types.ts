@@ -817,6 +817,8 @@ export namespace SourceQuery {
   export type Status = {
     __typename?: 'InfraSourceStatus';
     indexFields: IndexFields[];
+    logIndicesExist: boolean;
+    metricIndicesExist: boolean;
   };
 
   export type IndexFields = {
