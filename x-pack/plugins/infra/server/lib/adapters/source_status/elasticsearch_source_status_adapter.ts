@@ -41,6 +41,10 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
       name: aliasName,
     });
   }
+
+  public async hasIndices(request: InfraFrameworkRequest, indexNames: string) {
+    return (await this.getIndexNames(request, indexNames)).length > 0;
+  }
 }
 
 const withDefaultIfNotFound = <DefaultValue>(defaultValue: DefaultValue) => (

@@ -24,6 +24,10 @@ export const sourceStatusSchema = gql`
     metricAliasExists: Boolean!
     "Whether the configured log alias exists"
     logAliasExists: Boolean!
+    "Whether the configured alias or wildcard pattern resolve to any metric indices"
+    metricIndicesExist: Boolean!
+    "Whether the configured alias or wildcard pattern resolve to any log indices"
+    logIndicesExist: Boolean!
     "The list of indices in the metric alias"
     metricIndices: [String!]!
     "The list of indices in the log alias"
