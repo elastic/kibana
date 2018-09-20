@@ -17,10 +17,10 @@ export default function({ getService }: TestInvoker) {
     const {
       createExpectEmpty,
       createExpectRbacForbidden,
-      createExpectResults,
       createExpectLegacyForbidden,
       createExpectVisualizationResults,
       expectNotSpaceAwareResults,
+      expectTypeRequired,
       findTest,
     } = findTestSuiteFactory(esArchiver, supertest);
 
@@ -95,9 +95,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(1, 20, 0),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -134,9 +134,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(1, 20, 0),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -173,9 +173,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(1, 20, 0),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -212,9 +212,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(1, 20, 0),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -251,9 +251,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('wigwags'),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -290,9 +290,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(1, 20, 0),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -329,9 +329,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('wigwags'),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 200,
-          response: createExpectResults(),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
