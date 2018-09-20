@@ -31,7 +31,7 @@ function RootController($scope: any, $element: any, $http: any) {
   // render react to DOM
   render(
     <Provider store={store}>
-      <App title="Code Search" httpClient={$http} />
+      <App />
     </Provider>,
     domNode
   );

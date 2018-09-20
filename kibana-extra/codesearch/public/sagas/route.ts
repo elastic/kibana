@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOCATION_CHANGE } from 'connected-react-router';
 import queryString from 'query-string';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
-import { parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
+import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import {
   documentSearch,
   fetchFile,
@@ -18,9 +17,12 @@ import {
   findReferences,
   gotoRepo,
   loadStructure,
+  Match,
   revealPosition,
+  routeChange,
 } from '../actions';
 
+import { Action } from 'redux-actions';
 import * as ROUTES from '../components/routes';
 import { fileSelector, lastRequestPathSelector, refUrlSelector } from '../selectors';
 
@@ -61,18 +63,23 @@ function* handleFile(repoUri: string, file: string, revision: string) {
   );
 }
 
-function* handleLocationChange(action: any) {
+function* handleLocationChange(action: Action<Match>) {
   // TODO: we need to find a better solution to integrate routing data into
   // reducer.
-  const { pathname, search } = action.payload.location;
-  const queryParams = queryString.parse(search);
-  if (ROUTES.adminRegex.test(pathname)) {
+  const { path, location, url } = action.payload!;
+  const queryParams = queryString.parse(location.search);
+  if (ROUTES.ADMIN === path) {
     yield put(fetchRepos());
     yield put(fetchRepoConfigs());
-  } else if (ROUTES.repoRegex.test(pathname)) {
-    yield put(gotoRepo(pathname));
-  } else if (ROUTES.mainRegex.test(pathname)) {
-    const { file, pathType, repoUri, revision, position } = parseLspUrl(pathname);
+  } else if (ROUTES.REPO === path) {
+    yield put(gotoRepo(url));
+  } else if (ROUTES.MAIN === path) {
+    const { resource, org, repo, path: file, pathType, revision, goto } = action.payload!.params;
+    const repoUri = `${resource}/${org}/${repo}`;
+    let position;
+    if (goto) {
+      position = parseGoto(goto);
+    }
     if (file && pathType === ROUTES.PathTypes.blob) {
       yield call(handleFile, repoUri, file, revision);
       if (position) {
@@ -101,7 +108,7 @@ function* handleLocationChange(action: any) {
         yield put(loadStructure(uri!));
       }
     }
-  } else if (ROUTES.searchRegex.test(pathname)) {
+  } else if (ROUTES.SEARCH === path) {
     const { q, p, langs, repos } = queryParams;
     yield put(
       documentSearch({
@@ -115,5 +122,5 @@ function* handleLocationChange(action: any) {
 }
 
 export function* watchLocationChange() {
-  yield takeLatest(LOCATION_CHANGE, handleLocationChange);
+  yield takeLatest(String(routeChange), handleLocationChange);
 }

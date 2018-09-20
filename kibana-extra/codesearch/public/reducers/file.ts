@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOCATION_CHANGE } from 'connected-react-router';
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 import { FileTree, FileTreeItemType } from '../../model';
@@ -24,6 +23,7 @@ import {
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
   openTreePath,
+  routeChange,
   setNotFound,
 } from '../actions';
 
@@ -146,7 +146,7 @@ export const file = handleActions(
       produce<FileState>(state, draft => {
         draft.isNotFound = action.payload;
       }),
-    [LOCATION_CHANGE]: (state: FileState, action: any) =>
+    [String(routeChange)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.isNotFound = false;
       }),
