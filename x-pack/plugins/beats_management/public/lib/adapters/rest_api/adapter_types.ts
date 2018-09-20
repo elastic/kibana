@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FlatObject } from '../../../app';
 
 export interface RestAPIAdapter {
-  get<ResponseData>(url: string): Promise<ResponseData>;
+  get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData>;
   post<ResponseData>(url: string, body?: { [key: string]: any }): Promise<ResponseData>;
   delete<T>(url: string): Promise<T>;
   put<ResponseData>(url: string, body?: any): Promise<ResponseData>;

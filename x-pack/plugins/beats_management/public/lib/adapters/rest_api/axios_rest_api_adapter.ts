@@ -5,14 +5,15 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { FlatObject } from '../../../app';
 import { RestAPIAdapter } from './adapter_types';
 let globalAPI: AxiosInstance;
 
 export class AxiosRestAPIAdapter implements RestAPIAdapter {
   constructor(private readonly xsrfToken: string, private readonly basePath: string) {}
 
-  public async get<ResponseData>(url: string): Promise<ResponseData> {
-    return await this.REST.get(url).then(resp => resp.data);
+  public async get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData> {
+    return await this.REST.get(url, query ? { params: query } : {}).then(resp => resp.data);
   }
 
   public async post<ResponseData>(

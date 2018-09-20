@@ -131,14 +131,35 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     return omit<CMBeat, {}>(_get<CMBeat>(beats[0], '_source.beat'), ['access_token']);
   }
 
-  public async getAll(user: FrameworkUser) {
+  public async getAll(user: FrameworkUser, ESQuery?: any) {
     const params = {
       index: INDEX_NAMES.BEATS,
-      q: 'type:beat',
       size: 10000,
       type: '_doc',
+      body: {
+        query: {
+          match: {
+            type: 'beat',
+          },
+        },
+      },
     };
-    const response = await this.database.search(user, params);
+
+    if (ESQuery) {
+      params.body.query = {
+        ...params.body.query,
+        ...ESQuery,
+      };
+    }
+    let response;
+    try {
+      response = await this.database.search(user, params);
+    } catch (e) {
+      // TODO something
+    }
+    if (!response) {
+      return [];
+    }
     const beats = _get<any>(response, 'hits.hits', []);
 
     return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));

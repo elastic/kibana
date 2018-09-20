@@ -54,7 +54,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
           {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
             <Table
               isLoadingSuggestions={isLoadingSuggestions}
-              isKueryValid={true} // todo check if query converts to es query correctly
+              isKueryValid={this.props.libs.elasticsearch.isKueryValid(
+                this.props.urlState.beatsKBar
+              )} // todo check if query converts to es query correctly
               loadSuggestions={loadSuggestions}
               kueryValue={this.props.urlState.beatsKBar}
               onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
@@ -124,7 +126,14 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   };
 
   private async loadBeats() {
-    const beats = await this.props.libs.beats.getAll();
+    let query;
+    if (this.props.urlState.beatsKBar) {
+      query = await this.props.libs.elasticsearch.convertKueryToEsQuery(
+        this.props.urlState.beatsKBar
+      );
+    }
+
+    const beats = await this.props.libs.beats.getAll(query);
     this.setState({
       beats,
     });

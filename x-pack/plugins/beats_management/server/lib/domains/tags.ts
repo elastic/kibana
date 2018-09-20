@@ -15,8 +15,8 @@ import { CMTagsAdapter } from '../adapters/tags/adapter_types';
 export class CMTagsDomain {
   constructor(private readonly adapter: CMTagsAdapter) {}
 
-  public async getAll(user: FrameworkUser) {
-    return await this.adapter.getAll(user);
+  public async getAll(user: FrameworkUser, ESQuery?: any) {
+    return await this.adapter.getAll(user, ESQuery);
   }
 
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {

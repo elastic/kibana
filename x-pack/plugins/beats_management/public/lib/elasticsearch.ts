@@ -15,6 +15,7 @@ interface HiddenFields {
 export class ElasticsearchLib {
   private readonly hiddenFields: HiddenFields[] = [
     { op: 'startsWith', value: 'enrollment_token' },
+    { op: 'is', value: 'beat.active' },
     { op: 'is', value: 'beat.enrollment_token' },
     { op: 'is', value: 'beat.access_token' },
     { op: 'is', value: 'beat.ephemeral_id' },
@@ -23,6 +24,9 @@ export class ElasticsearchLib {
 
   constructor(private readonly adapter: ElasticsearchAdapter) {}
 
+  public isKueryValid(kuery: string): boolean {
+    return this.adapter.isKueryValid(kuery);
+  }
   public async convertKueryToEsQuery(kuery: string): Promise<string> {
     return await this.adapter.convertKueryToEsQuery(kuery);
   }

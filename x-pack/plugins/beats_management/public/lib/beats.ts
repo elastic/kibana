@@ -35,8 +35,8 @@ export class BeatsLib {
     return await this.mergeInTags(beats);
   }
 
-  public async getAll(): Promise<CMPopulatedBeat[]> {
-    const beats = await this.adapter.getAll();
+  public async getAll(ESQuery?: any): Promise<CMPopulatedBeat[]> {
+    const beats = await this.adapter.getAll(ESQuery);
     return await this.mergeInTags(beats);
   }
 

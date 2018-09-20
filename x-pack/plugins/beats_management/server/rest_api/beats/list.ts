@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Joi from 'joi';
 import { CMBeat } from '../../../common/domain_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/lib';
@@ -12,6 +13,16 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agents/{listByAndValue*}',
+  validate: {
+    headers: Joi.object({
+      'kbn-beats-enrollment-token': Joi.string().required(),
+    }).options({
+      allowUnknown: true,
+    }),
+    query: Joi.object({
+      ESQuery: Joi.string(),
+    }),
+  },
   licenseRequired: true,
   handler: async (request: FrameworkRequest, reply: any) => {
     const listByAndValueParts = request.params.listByAndValue
@@ -27,13 +38,17 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
 
     try {
       let beats: CMBeat[];
+
       switch (listBy) {
         case 'tag':
           beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
           break;
 
         default:
-          beats = await libs.beats.getAll(request.user);
+          beats = await libs.beats.getAll(
+            request.user
+            // request.query ? JSON.parse(request.query.ESQuery) : undefined
+          );
 
           break;
       }

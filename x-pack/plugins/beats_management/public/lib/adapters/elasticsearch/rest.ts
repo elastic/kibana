@@ -15,7 +15,19 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
   constructor(private readonly api: RestAPIAdapter, private readonly indexPatternName: string) {}
 
+  public isKueryValid(kuery: string): boolean {
+    try {
+      fromKueryExpression(kuery);
+    } catch (err) {
+      return false;
+    }
+
+    return true;
+  }
   public async convertKueryToEsQuery(kuery: string): Promise<string> {
+    if (!this.isKueryValid(kuery)) {
+      return '';
+    }
     const ast = fromKueryExpression(kuery);
     const indexPattern = await this.getIndexPattern();
     return toElasticsearchQuery(ast, indexPattern);

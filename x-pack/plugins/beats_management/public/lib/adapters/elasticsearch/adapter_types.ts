@@ -8,4 +8,5 @@ import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 export interface ElasticsearchAdapter {
   convertKueryToEsQuery: (kuery: string) => Promise<string>;
   getSuggestions: (kuery: string, selectionStart: any) => Promise<AutocompleteSuggestion[]>;
+  isKueryValid(kuery: string): boolean;
 }
