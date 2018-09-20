@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiLink,
   EuiPage,
   EuiPageBody,
@@ -35,7 +35,7 @@ export class Ccr extends Component {
       delete itemIdToExpandedRowMap[index];
     } else {
       itemIdToExpandedRowMap[index] = (
-        <EuiBasicTable
+        <EuiInMemoryTable
           items={Object.values(shardStatsByFollowerIndex[index])}
           columns={[
             {
@@ -71,6 +71,8 @@ export class Ccr extends Component {
               name: 'Error',
             }
           ]}
+          sorting={true}
+          pagination={true}
         />
       );
     }
@@ -81,12 +83,26 @@ export class Ccr extends Component {
     const { data: { all } } = this.props;
     const items = all;
 
+    const pagination = {
+      initialPageSize: 5,
+      pageSizeOptions: [5, 10, 20]
+    };
+
+    const sorting = {
+      sort: {
+        field: 'index',
+        direction: 'asc',
+      },
+    };
+
+
     return (
-      <EuiBasicTable
+      <EuiInMemoryTable
         columns={[
           {
             field: 'index',
             name: 'Index',
+            sortable: true,
             render: (index) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
               return (
@@ -100,27 +116,34 @@ export class Ccr extends Component {
           },
           {
             field: 'follows',
+            sortable: true,
             name: 'Follows'
           },
           {
             field: 'opsSynced',
+            sortable: true,
             name: 'Ops synced'
           },
           {
             field: 'syncLagTime',
+            sortable: true,
             name: 'Last fetch time (ms)',
             render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')}</span>
           },
           {
             field: 'syncLagOps',
+            sortable: true,
             name: 'Sync Lag (ops)'
           },
           {
             field: 'error',
+            sortable: true,
             name: 'Error'
           }
         ]}
         items={items}
+        pagination={pagination}
+        sorting={sorting}
         itemId="id"
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
       />
