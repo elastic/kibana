@@ -213,35 +213,6 @@ export class PipelineEditor extends React.Component {
           verticalPosition="center"
           horizontalPosition="center"
         >
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="btnSavePipeline"
-                fill
-                isDisabled={this.isSaveDisabled()}
-                onClick={this.onPipelineSave}
-              >
-                Create and deploy
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="btnCancel" onClick={this.onClose}>
-                Cancel
-              </EuiButton>
-            </EuiFlexItem>
-            {!this.props.isNewPipeline && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  data-test-subj="btnDeletePipeline"
-                  onClick={this.showConfirmDeleteModal}
-                >
-                  Delete pipeline
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
           <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
             {this.props.isNewPipeline && (
               <EuiFormRow fullWidth label="Pipeline ID">
@@ -359,6 +330,35 @@ export class PipelineEditor extends React.Component {
               </FlexItemSetting>
             </EuiFlexGroup>
           </EuiForm>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="btnSavePipeline"
+                fill
+                isDisabled={this.isSaveDisabled()}
+                onClick={this.onPipelineSave}
+              >
+                Create and deploy
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton data-test-subj="btnCancel" onClick={this.onClose}>
+                Cancel
+              </EuiButton>
+            </EuiFlexItem>
+            {!this.props.isNewPipeline && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="danger"
+                  data-test-subj="btnDeletePipeline"
+                  onClick={this.showConfirmDeleteModal}
+                >
+                  Delete pipeline
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiPageContent>
         {this.state.showConfirmDeleteModal && (
           <ConfirmDeletePipelineModal
