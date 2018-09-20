@@ -26,7 +26,6 @@ import { GISApp } from './components/gis_app';
 import 'ui/vis/map/service_settings';
 
 chrome.setRootTemplate(template);
-initTimepicker(init);
 
 async function init() {
   const root = document.getElementById('react-gis-root');
@@ -36,3 +35,7 @@ async function init() {
     </Provider>,
     root));
 }
+
+new Promise(initTimepicker).then(() => {
+  init();
+});

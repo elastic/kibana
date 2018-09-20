@@ -26,7 +26,7 @@ const waitForAngularReady = new Promise(resolve => {
   }, 10);
 });
 
-export function initTimepicker(callback) {
+export function initTimepicker(resolve) {
   // default the timepicker to the last 24 hours
   chrome.getUiSettingsClient().overrideLocalDefault(
     'timepicker:timeDefaults',
@@ -53,6 +53,15 @@ export function initTimepicker(callback) {
 
       // TODO: Update redux with timepicker values
 
-      Promise.all([waitForAngularReady]).then(callback);
+      Promise.all([waitForAngularReady]).then(resolve());
     });
 }
+
+export default (timefilter) => ranges => {
+  timefilter.setTime({
+    from: moment(ranges.xaxis.from).toISOString(),
+    to: moment(ranges.xaxis.to).toISOString(),
+    mode: 'absolute',
+  });
+};
+
