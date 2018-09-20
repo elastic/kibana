@@ -35,7 +35,7 @@ const INITIAL_STATE = {
   mapState: {
     zoom: 4,
     center: {
-      lng: -100.41,
+      lon: -100.41,
       lat: 32.82
     },
     extent: null

@@ -87,7 +87,7 @@ const getSelectedLayerId = ({ map }) => {
 const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
 export const getMapExtent = ({ map }) => map.mapState.exent ?
-  map.mapState.extent : [];
+  map.mapState.extent : {};
 
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;

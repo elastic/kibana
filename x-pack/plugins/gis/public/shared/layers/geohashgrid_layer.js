@@ -118,8 +118,20 @@ export class GeohashGridLayer extends ALayer {
 
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(zoomAndExtent.zoom)];
     if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
-      const dataExtent = turf.bboxPolygon(this._descriptor.dataMeta.extent);
-      const mapStateExtent = turf.bboxPolygon(zoomAndExtent.extent);
+
+      const dataExtent = turf.bboxPolygon([
+        this._descriptor.dataMeta.extent.min_lon,
+        this._descriptor.dataMeta.extent.min_lat,
+        this._descriptor.dataMeta.extent.max_lon,
+        this._descriptor.dataMeta.extent.max_lat,
+      ]);
+      const mapStateExtent = turf.bboxPolygon([
+        zoomAndExtent.extent.min_lon,
+        zoomAndExtent.extent.min_lat,
+        zoomAndExtent.extent.max_lon,
+        zoomAndExtent.extent.max_lat
+      ]);
+
       const isContained = turfBooleanContains(dataExtent, mapStateExtent);
       const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
       if (samePrecision && isContained) {
@@ -138,14 +150,14 @@ export class GeohashGridLayer extends ALayer {
   async _fetchNewData(startLoading, stopLoading, zoomAndExtent) {
     const { precision, extent } = zoomAndExtent;
     const scaleFactor = 0.5;
-    const width = extent[2] - extent[0];
-    const height = extent[3] - extent[1];
-    const expandExtent = [
-      extent[0] - width * scaleFactor,
-      extent[1] - height * scaleFactor,
-      extent[2] + width * scaleFactor,
-      extent[3] + height * scaleFactor
-    ];
+    const width = extent.max_lon - extent.min_lon;
+    const height = extent.max_lat - extent.min_lat;
+    const expandExtent = {
+      min_lon: extent.min_lon - width * scaleFactor,
+      min_lat: extent.min_lat - height * scaleFactor,
+      max_lon: extent.max_lon + width * scaleFactor,
+      max_lat: extent.max_lat + height * scaleFactor
+    };
 
     startLoading({
       precision,
