@@ -17,34 +17,17 @@
  * under the License.
  */
 
-import { DashboardSaveModal } from './save_modal';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { shallow } from 'enzyme';
 
-export function showSaveModal({ onSave, title, description, timeRestore, showCopyOnSave }) {
-  const container = document.createElement('div');
-  const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-  };
+import {
+  OpenSearchPanel,
+} from './open_search_panel';
 
-  const onSaveConfirmed = (...args) => {
-    onSave(...args).then(({ id, error }) => {
-      if (id || error) {
-        closeModal();
-      }
-    });
-  };
-  document.body.appendChild(container);
-  const element = (
-    <DashboardSaveModal
-      onSave={onSaveConfirmed}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      timeRestore={timeRestore}
-      showCopyOnSave={showCopyOnSave}
-    />
-  );
-  ReactDOM.render(element, container);
-}
+test('render', () => {
+  const component = shallow(<OpenSearchPanel
+    onClose={() => {}}
+    makeUrl={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});

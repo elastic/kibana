@@ -292,7 +292,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await testSubjects.setValue('dashboardTitle', dashName);
+      await testSubjects.setValue('savedObjectTitle', dashName);
     }
 
     /**
@@ -320,7 +320,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async waitForSaveModalToClose() {
       log.debug('Waiting for dashboard save modal to close');
       await retry.try(async () => {
-        if (await testSubjects.exists('dashboardSaveModal')) {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
           throw new Error('dashboard save still open');
         }
       });
@@ -342,7 +342,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickSave() {
       await retry.try(async () => {
         log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
+        return await testSubjects.click('confirmSaveSavedObjectButton');
       });
     }
 
@@ -357,7 +357,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       log.debug('entering new title');
-      await testSubjects.setValue('dashboardTitle', dashboardTitle);
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
