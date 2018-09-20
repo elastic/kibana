@@ -49,7 +49,6 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 
 export class Waffle extends React.Component<Props, {}> {
   public render() {
-    const bounds = calculateBoundsFromMap(this.props.map);
     if (this.props.loading) {
       return (
         <WaffleLoadingContainer>
@@ -67,7 +66,7 @@ export class Waffle extends React.Component<Props, {}> {
         />
       );
     }
-
+    const bounds = calculateBoundsFromMap(this.props.map);
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {

@@ -72,7 +72,7 @@ declare module '@elastic/eui' {
   export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
 
   type EuiFilterButtonProps = CommonProps & {
-    color?: IconColor;
+    color?: ButtonColor;
     href?: string;
     iconSide?: ButtonIconSide;
     iconType?: IconType;
