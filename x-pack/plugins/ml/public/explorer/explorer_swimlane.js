@@ -181,7 +181,7 @@ export class ExplorerSwimlane extends React.Component {
     }
   }
 
-  selectCell(cellsToSelect, laneLabels, times, bucketScore, checkEqualSelection = false) {
+  selectCell(cellsToSelect, lanes, times, bucketScore, checkEqualSelection = false) {
     const {
       selection,
       mlExplorerDashboardService,
@@ -208,8 +208,8 @@ export class ExplorerSwimlane extends React.Component {
 
     const newSelection = {
       selectedType: swimlaneType,
-      selectedLanes: laneLabels,
-      selectedTimes: times
+      selectedLanes: lanes,
+      selectedTimes: d3.extent(times)
     };
 
     if ((checkEqualSelection && _.isEqual(oldSelection, newSelection))) {
@@ -223,11 +223,10 @@ export class ExplorerSwimlane extends React.Component {
 
     mlExplorerDashboardService.swimlaneCellClick.changed({
       fieldName: swimlaneData.fieldName,
-      laneLabels,
-      time: d3.extent(times),
-      interval: swimlaneData.interval,
-      score: bucketScore,
-      selection: newSelection
+      lanes,
+      times: d3.extent(times),
+      type: swimlaneType,
+      score: bucketScore
     });
   }
 
