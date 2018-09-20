@@ -34,6 +34,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         "name": "",
         "render": [Function],
         "sortable": false,
+        "width": "100px",
       },
     ]
   }
@@ -72,7 +73,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         Object {
           "field": "id",
           "multiSelect": false,
-          "name": "Id",
+          "name": "Filter by ID",
           "options": Array [
             Object {
               "name": "testPipeline",
@@ -83,30 +84,18 @@ exports[`PipelinesTable component renders component as expected 1`] = `
           "type": "field_value_selection",
         },
       ],
-      "toolsRight": Array [
-        <EuiButton
-          color="primary"
-          data-test-subj="btnAdd"
-          fill={true}
-          iconSide="left"
-          isDisabled={false}
-          onClick={[MockFunction]}
-          type="button"
-        >
-          Create pipeline
-        </EuiButton>,
-        <EuiButton
-          color="danger"
-          data-test-subj="btnDeletePipeline"
-          fill={false}
-          iconSide="left"
-          isDisabled={true}
-          onClick={[MockFunction]}
-          type="button"
-        >
-          Delete
-        </EuiButton>,
-      ],
+      "toolsLeft": null,
+      "toolsRight": <EuiButton
+        color="primary"
+        data-test-subj="btnAdd"
+        fill={true}
+        iconSide="left"
+        isDisabled={false}
+        onClick={[MockFunction]}
+        type="button"
+      >
+        Create pipeline
+      </EuiButton>,
     }
   }
   selection={
