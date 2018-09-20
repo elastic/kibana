@@ -16,6 +16,10 @@ export function routerProvider(routes) {
 
   const baseRouter = createRouter(routes);
   const history = historyProvider(getWindow());
+  const changeHandlerState = {
+    chain: Promise.resolve(),
+    count: 0,
+  };
   let componentListener = null;
 
   const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
@@ -64,7 +68,21 @@ export function routerProvider(routes) {
           return;
         }
 
-        fn({ ...match, location });
+        // create new handler chain, or re-use the existing one if there are pending handlers
+        const newChain =
+          changeHandlerState.count === 0 ? Promise.resolve() : changeHandlerState.chain;
+        changeHandlerState.count += 1;
+
+        // append to the new chain, and update the count once resolved
+        changeHandlerState.chain = newChain
+          .then(() => fn({ ...match, location }))
+          .then(() => {
+            changeHandlerState.count -= 1;
+          })
+          .catch(err => {
+            changeHandlerState.count -= 1;
+            throw err;
+          });
       };
 
       // on path changes, fire the path change handler
