@@ -7,10 +7,9 @@
 
 
 /*
- * AngularJS directive for rendering Explorer dashboard swimlanes.
+ * AngularJS directive wrapper for rendering Anomaly Explorer's ExplorerSwimlane React component.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -22,24 +21,18 @@ const module = uiModules.get('apps/ml');
 module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService) {
 
   function link(scope, element) {
-    let previousProps = null;
-    // Re-render the swimlane whenever the underlying data changes.
     function swimlaneDataChangeListener(props) {
-      if (props.swimlaneType !== scope.swimlaneType) {
+      if (
+        props.swimlaneType !== scope.swimlaneType ||
+        props.swimlaneData === undefined
+      ) {
         return;
       }
 
-      if (props.swimlaneData === undefined) {
-        return;
-      }
-
-      if (_.isEqual(props, previousProps) === false) {
-        ReactDOM.render(
-          React.createElement(ExplorerSwimlane, props),
-          element[0]
-        );
-        previousProps = props;
-      }
+      ReactDOM.render(
+        React.createElement(ExplorerSwimlane, props),
+        element[0]
+      );
     }
     mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
 

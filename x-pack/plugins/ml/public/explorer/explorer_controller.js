@@ -301,9 +301,10 @@ module.controller('MlExplorerController', function (
 
   function clearSwimlaneSelectionFromAppState() {
     delete $scope.appState.mlExplorerSwimlane.selectedType;
-    delete $scope.appState.mlExplorerSwimlane.selectedLane;
-    delete $scope.appState.mlExplorerSwimlane.selectedTime;
+    delete $scope.appState.mlExplorerSwimlane.selectedLanes;
+    delete $scope.appState.mlExplorerSwimlane.selectedTimes;
     delete $scope.appState.mlExplorerSwimlane.selectedInterval;
+    $scope.appState.save();
   }
 
   function getSwimlaneData(swimlaneType) {
@@ -328,7 +329,7 @@ module.controller('MlExplorerController', function (
       swimlaneData,
       swimlaneType,
       mlExplorerDashboardService,
-      appState: $scope.appState
+      selection: $scope.appState.mlExplorerSwimlane
     };
   }
 
@@ -432,6 +433,11 @@ module.controller('MlExplorerController', function (
       clearSelectedAnomalies();
       previousListenerData = null;
     } else {
+      $scope.appState.mlExplorerSwimlane.selectedType = cellData.selection.selectedType;
+      $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.selection.selectedLanes;
+      $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.selection.selectedTimes;
+      $scope.appState.save();
+
       const timerange = getSelectionTimeRange(cellData);
       $scope.cellData = cellData;
 
@@ -461,6 +467,8 @@ module.controller('MlExplorerController', function (
 
         // pass influencers on to loadDataForCharts(),
         // it will take care of calling loadTopInfluencers() in this case.
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
         loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs, influencers);
         loadAnomaliesTableData();
       } else {
@@ -992,13 +1000,20 @@ module.controller('MlExplorerController', function (
     const bounds = timefilter.getActiveBounds();
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
+
+    clearSwimlaneSelectionFromAppState();
+    if ($scope.overallSwimlaneData !== undefined) {
+      mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
+    }
+    if ($scope.viewBySwimlaneData !== undefined) {
+      mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
+    }
     mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, earliestMs, latestMs);
     // Load all top influencers right away because the filtering
     // done in loadDataForCharts() isn't neccessary here.
     loadTopInfluencers(jobIds, earliestMs, latestMs);
     loadDataForCharts(jobIds, earliestMs, latestMs);
     loadAnomaliesTableData();
-    clearSwimlaneSelectionFromAppState();
   }
 
   function calculateSwimlaneBucketInterval() {
