@@ -502,8 +502,6 @@ module.controller('MlExplorerController', function (
           $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
         }
 
-        // pass influencers on to loadDataForCharts(),
-        // it will take care of calling loadTopInfluencers() in this case.
         mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
         mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
 
@@ -511,6 +509,8 @@ module.controller('MlExplorerController', function (
           loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs);
           loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs);
         } else {
+          // pass influencers on to loadDataForCharts(),
+          // it will take care of calling loadTopInfluencers() in this case.
           loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs, influencers);
         }
         loadAnomaliesTableData();

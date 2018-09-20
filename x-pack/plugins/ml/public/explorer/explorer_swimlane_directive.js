@@ -18,13 +18,15 @@ import { ExplorerSwimlane } from './explorer_swimlane';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService) {
+module.directive('mlExplorerSwimlane', function (mlExplorerDashboardService) {
 
   function link(scope, element) {
     function swimlaneDataChangeListener(props) {
       if (
         props.swimlaneType !== scope.swimlaneType ||
-        props.swimlaneData === undefined
+        props.swimlaneData === undefined ||
+        props.startTime === undefined ||
+        props.endTime === undefined
       ) {
         return;
       }
