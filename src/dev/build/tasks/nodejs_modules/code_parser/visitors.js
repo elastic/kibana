@@ -19,16 +19,15 @@
 
 export function dependenciesVisitorsGenerator(dependenciesAcc) {
   return (() => {
-    // Visitors to traverse and found dependencies
-    // raw values on require + require.resolve
+    // This was built based on two main tools: an ast explorer and the
+    // main docs for the Esprima
+    //
+    // https://astexplorer.net
+    // https://esprima.readthedocs.io/en/latest/syntax-tree-format.html
     return {
+      // Visitors to traverse and found dependencies
+      // raw values on require + require.resolve
       CallExpression: ({ node }) => {
-        // This was built based on two main tools: an ast explorer and the
-        // main docs for the Esprima
-        //
-        // https://astexplorer.net
-        // https://esprima.readthedocs.io/en/latest/syntax-tree-format.html
-
         // AST check for require expressions
         const isRequire = (node) => {
           return node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require';
@@ -55,6 +54,20 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           if (reqArg.type === 'StringLiteral') {
             dependenciesAcc.push(reqArg.value);
           }
+        }
+      },
+      // Visitors to traverse and found dependencies
+      // raw values on import
+      ImportDeclaration: ({ node }) => {
+        // AST check for supported import expressions
+        const isImport = (node) => {
+          return node.type === 'ImportDeclaration' && node.source && node.source.type === 'StringLiteral';
+        };
+
+        // Get string values from import expressions
+        if (isImport(node)) {
+          const importSource = node.source;
+          dependenciesAcc.push(importSource.value);
         }
       }
     };
