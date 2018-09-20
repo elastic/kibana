@@ -68,7 +68,7 @@ const getMbMapAndSyncWithMapState = createSelector(
     if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
       mbMap.setZoom(mapState.zoom);
     }
-    if (mapState.center && !_.isEqual(mapState.center, [center.lng, center.lat])) {
+    if (mapState.center && !_.isEqual(mapState.center, { lng: center.lng, lat: center.lat })) {
       mbMap.setCenter(mapState.center);
     }
 

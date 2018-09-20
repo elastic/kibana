@@ -21,7 +21,10 @@ export class MBMapContainer extends React.Component {
     const bounds = this._mbMap.getBounds();
     return {
       zoom: zoom,
-      center: [center.lng, center.lat],
+      center: {
+        lng: center.lng,
+        lat: center.lat
+      },
       extent: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
     };
   }
