@@ -617,7 +617,7 @@ const getUpstreams = (shapes, shape) =>
 const snappedA = shape => shape.a + (shape.snapResizeVector ? shape.snapResizeVector[0] : 0);
 const snappedB = shape => shape.b + (shape.snapResizeVector ? shape.snapResizeVector[1] : 0);
 
-const shapeCascadeTransforms = shapes => shape => {
+const cascadeTransforms = (shapes, shape) => {
   const upstreams = getUpstreams(shapes, shape);
   const upstreamTransforms = upstreams.map(shape => {
     return shape.snapDeltaMatrix
@@ -625,16 +625,19 @@ const shapeCascadeTransforms = shapes => shape => {
       : shape.localTransformMatrix;
   });
   const cascadedTransforms = matrix.reduceTransforms(upstreamTransforms);
+  return cascadedTransforms;
+};
 
+const shapeCascadeProperties = shapes => shape => {
   return {
     ...shape,
-    transformMatrix: cascadedTransforms,
+    transformMatrix: cascadeTransforms(shapes, shape),
     width: 2 * snappedA(shape),
     height: 2 * snappedB(shape),
   };
 };
 
-const cascadeTransforms = shapes => shapes.map(shapeCascadeTransforms(shapes));
+const cascadeProperties = shapes => shapes.map(shapeCascadeProperties(shapes));
 
 const nextShapes = select((preexistingShapes, restated) => {
   if (restated && restated.newShapes) return restated.newShapes;
@@ -729,13 +732,6 @@ const alignmentGuides = (shapes, guidedShapes, draggedShape) => {
   }
   return Object.values(result);
 };
-
-/* upcoming functionality
-const draggedShapes = select(
-  (shapes, selectedShapeIds, mouseIsDown) =>
-    mouseIsDown ? shapes.filter(shape => selectedShapeIds.indexOf(shape.id) !== -1) : []
-)(nextShapes, selectedShapeIds, mouseIsDown);
-*/
 
 const isHorizontal = constraint => constraint.dimension === 'horizontal';
 const isVertical = constraint => constraint.dimension === 'vertical';
@@ -1027,6 +1023,32 @@ const resizeShapeSnap = (
   }
 };
 
+const shapeSnapper = (
+  draggedShape,
+  horizontalConstraint,
+  verticalConstraint,
+  draggedElement,
+  symmetricManipulation
+) => {
+  if (!draggedShape) return identity;
+  switch (draggedShape.subtype) {
+    case config.resizeHandleName:
+      return resizeShapeSnap(
+        horizontalConstraint,
+        verticalConstraint,
+        draggedElement,
+        symmetricManipulation,
+        draggedShape.horizontalPosition,
+        draggedShape.verticalPosition
+      );
+    case config.adHocGroupName:
+    case undefined:
+      return translateShapeSnap(horizontalConstraint, verticalConstraint, draggedElement);
+    default:
+      return identity;
+  }
+};
+
 const snappedShapes = select(
   (
     shapes,
@@ -1042,19 +1064,13 @@ const snappedShapes = select(
     const constrained = config.snapConstraint && !relaxed;
     const horizontalConstraint = constrained && directionalConstraint(constraints, isHorizontal);
     const verticalConstraint = constrained && directionalConstraint(constraints, isVertical);
-    const snapper = draggedShape
-      ? {
-          [config.resizeHandleName]: resizeShapeSnap(
-            horizontalConstraint,
-            verticalConstraint,
-            draggedElement,
-            symmetricManipulation,
-            draggedShape.horizontalPosition,
-            draggedShape.verticalPosition
-          ),
-          [undefined]: translateShapeSnap(horizontalConstraint, verticalConstraint, draggedElement),
-        }[draggedShape.subtype] || (shape => shape)
-      : crystallizeConstraint;
+    const snapper = shapeSnapper(
+      draggedShape,
+      horizontalConstraint,
+      verticalConstraint,
+      draggedElement,
+      symmetricManipulation
+    );
     return contentShapes.map(snapper);
   }
 )(
@@ -1304,7 +1320,7 @@ const annotatedShapes = select(
   }
 )(grouping, alignmentGuideAnnotations, hoverAnnotations, rotationAnnotations, resizeAnnotations);
 
-const globalTransformShapes = select(cascadeTransforms)(annotatedShapes);
+const globalTransformShapes = select(cascadeProperties)(annotatedShapes);
 
 const bidirectionalCursors = {
   '0': 'ns-resize',
