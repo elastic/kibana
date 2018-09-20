@@ -1,8 +1,8 @@
-.inspector-table__filter {
+.insDataTableFormat__filter {
   opacity: 0;
 }
 
-tr:hover .inspector-table__filter,
-.inspector-table__filter:focus {
+.insDataTableFormat__table tr:hover .insDataTableFormat__filter,
+.insDataTableFormat__filter:focus {
   opacity: 1;
 }
