@@ -66,7 +66,7 @@ export function savedObjectsMixin(kbnServer, server) {
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server, serializer, migrator));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
