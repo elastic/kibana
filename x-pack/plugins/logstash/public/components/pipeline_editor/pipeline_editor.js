@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../common/constants/tooltips';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFieldNumber,
@@ -230,13 +231,13 @@ export class PipelineEditor extends React.Component {
             </EuiFlexItem>
             {!this.props.isNewPipeline && (
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiButtonEmpty
                   color="danger"
                   data-test-subj="btnDeletePipeline"
                   onClick={this.showConfirmDeleteModal}
                 >
                   Delete pipeline
-                </EuiButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
