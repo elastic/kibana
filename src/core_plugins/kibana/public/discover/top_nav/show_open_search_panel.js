@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { OpenSearchPanel } from './open_search_panel';
 
 let isOpen = false;
 
-export function showAddPanel(addNewPanel, addNewVis, visTypes) {
+export function showOpenSearchPanel({ makeUrl }) {
   if (isOpen) {
     return;
   }
@@ -36,18 +36,11 @@ export function showAddPanel(addNewPanel, addNewVis, visTypes) {
     isOpen = false;
   };
 
-  const addNewVisWithCleanup = () => {
-    onClose();
-    addNewVis();
-  };
-
   document.body.appendChild(container);
   const element = (
-    <DashboardAddPanel
+    <OpenSearchPanel
       onClose={onClose}
-      visTypes={visTypes}
-      addNewPanel={addNewPanel}
-      addNewVis={addNewVisWithCleanup}
+      makeUrl={makeUrl}
     />
   );
   ReactDOM.render(element, container);
