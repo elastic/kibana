@@ -29,7 +29,7 @@
 
 import { extractTaskDefinitions } from './lib/extract_task_definitions';
 import { fillPool } from './lib/fill_pool';
-import { Logger, TaskManagerLogger } from './lib/logger';
+import { TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
 import { TaskPoller } from './task_poller';
@@ -38,20 +38,11 @@ import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, TaskStore } from './task_store';
 
 export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
-  const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
-
-  if (!server.plugins.elasticsearch) {
-    logger.warning(
-      'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
-    );
-    return;
-  }
-
-  const taskManager = new TaskManager(logger, kbnServer, server, config);
+  const taskManager = new TaskManager();
 
   server.decorate('server', 'taskManager', taskManager);
 
-  kbnServer.afterPluginsInit(() => taskManager.init(server));
+  kbnServer.afterPluginsInit(() => taskManager.init(kbnServer, server, config));
 }
 
 /**
@@ -59,23 +50,31 @@ export async function taskManagerMixin(kbnServer: any, server: any, config: any)
  */
 class TaskManager {
   private isInitialized = false;
-  private store: TaskStore;
-  private poller: TaskPoller;
-  private logger: Logger;
+  private store?: TaskStore;
+  private poller?: TaskPoller;
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
   };
 
   /**
-   * Constructs a new instance of the TaskManager.
-   *
-   * @param logger
-   * @param kbnServer
-   * @param server
-   * @param config
+   * Initializes the task manager, preventing any further addition of middleware,
+   * enabling the task manipulation methods, and beginning the background polling
+   * mechanism. We can't do this in a constructor due to the fact that the constructor
+   * is called before the elasticsearch plugin is available.
    */
-  constructor(logger: Logger, kbnServer: any, server: any, config: any) {
+  public init(kbnServer: any, server: any, config: any) {
+    this.assertUninitialized('initialize');
+
+    const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
+
+    if (!server.plugins.elasticsearch) {
+      logger.warning(
+        'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
+      );
+      return;
+    }
+
     const maxWorkers = config.get('task_manager.max_workers');
     const definitions = extractTaskDefinitions(
       maxWorkers,
@@ -109,34 +108,22 @@ class TaskManager {
       },
     });
 
-    this.logger = logger;
-    this.store = store;
-    this.poller = poller;
-  }
-
-  /**
-   * Initializes the task manager, preventing any further addition of middleware,
-   * enabling the task manipulation methods, and beginning the background polling
-   * mechanism.
-   *
-   * @param server
-   */
-  public init(server: any) {
-    this.assertUninitialized('initialize');
-    this.isInitialized = true;
-
     server.plugins.elasticsearch.status.on('red', () => {
-      this.logger.debug('Lost connection to Elasticsearch, stopping the poller.');
-      this.poller.stop();
+      logger.debug('Lost connection to Elasticsearch, stopping the poller.');
+      poller.stop();
     });
 
     server.plugins.elasticsearch.status.on('green', async () => {
-      this.logger.debug('Initializing store');
-      await this.store.init();
-      this.logger.debug('Starting poller');
-      await this.poller.start();
-      this.logger.info('Connected to Elasticsearch, and watching for tasks');
+      logger.debug('Initializing store');
+      await store.init();
+      logger.debug('Starting poller');
+      await poller.start();
+      logger.info('Connected to Elasticsearch, and watching for tasks');
     });
+
+    this.store = store;
+    this.poller = poller;
+    this.isInitialized = true;
   }
 
   /**
@@ -161,8 +148,8 @@ class TaskManager {
       ...options,
       taskInstance,
     });
-    const result = await this.store.schedule(modifiedTask);
-    this.poller.attemptWork();
+    const result = await this.store!.schedule(modifiedTask);
+    this.poller!.attemptWork();
     return result;
   }
 
@@ -173,7 +160,7 @@ class TaskManager {
    */
   public async fetch(opts: FetchOpts) {
     this.assertInitialized();
-    return this.store.fetch(opts);
+    return this.store!.fetch(opts);
   }
 
   /**
@@ -184,7 +171,7 @@ class TaskManager {
    */
   public async remove(id: string) {
     this.assertInitialized();
-    return this.store.remove(id);
+    return this.store!.remove(id);
   }
 
   private assertUninitialized(message: string) {

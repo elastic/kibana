@@ -40,9 +40,10 @@ describe('taskManagerMixin', () => {
   afterEach(() => clock.restore());
 
   test('logs a warning if the elasticsearch plugin is disabled', async () => {
-    const { opts } = testOpts();
+    const { $test, opts } = testOpts();
     (opts.server.plugins as any).elasticsearch = undefined;
     taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    $test.afterPluginsInit();
 
     sinon.assert.calledWith(
       opts.server.log,
@@ -54,13 +55,13 @@ describe('taskManagerMixin', () => {
   test('starts / stops the poller when es goes green / red', async () => {
     const { $test, opts } = testOpts();
     taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    $test.afterPluginsInit();
+
     const { store, poller } = (opts.server as any).taskManager;
 
     store.init = sinon.spy(async () => undefined);
     poller.start = sinon.spy(async () => undefined);
     poller.stop = sinon.spy(async () => undefined);
-
-    $test.afterPluginsInit();
 
     await $test.events.green();
     sinon.assert.calledOnce(store.init as any);
