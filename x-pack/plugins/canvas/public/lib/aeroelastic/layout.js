@@ -1023,32 +1023,6 @@ const resizeShapeSnap = (
   }
 };
 
-const shapeSnapper = (
-  draggedShape,
-  horizontalConstraint,
-  verticalConstraint,
-  draggedElement,
-  symmetricManipulation
-) => {
-  if (!draggedShape) return identity;
-  switch (draggedShape.subtype) {
-    case config.resizeHandleName:
-      return resizeShapeSnap(
-        horizontalConstraint,
-        verticalConstraint,
-        draggedElement,
-        symmetricManipulation,
-        draggedShape.horizontalPosition,
-        draggedShape.verticalPosition
-      );
-    case config.adHocGroupName:
-    case undefined:
-      return translateShapeSnap(horizontalConstraint, verticalConstraint, draggedElement);
-    default:
-      return identity;
-  }
-};
-
 const snappedShapes = select(
   (
     shapes,
@@ -1059,18 +1033,30 @@ const snappedShapes = select(
     symmetricManipulation
   ) => {
     const contentShapes = shapes.filter(shape => shape.type !== 'annotation');
+    const subtype = draggedShape && draggedShape.subtype;
+    // snapping doesn't come into play if there's no dragging, or it's not a resize drag or translate drag on a
+    // leaf element or a group element:
+    if (
+      !draggedShape ||
+      (subtype && [config.resizeHandleName, config.adHocGroupName].indexOf(subtype) === -1)
+    )
+      return contentShapes;
     const constraints = alignmentGuideAnnotations; // fixme split concept of snap constraints and their annotations
     const relaxed = alterSnapGesture.indexOf('relax') !== -1;
     const constrained = config.snapConstraint && !relaxed;
     const horizontalConstraint = constrained && directionalConstraint(constraints, isHorizontal);
     const verticalConstraint = constrained && directionalConstraint(constraints, isVertical);
-    const snapper = shapeSnapper(
-      draggedShape,
-      horizontalConstraint,
-      verticalConstraint,
-      draggedElement,
-      symmetricManipulation
-    );
+    const snapper =
+      subtype === config.resizeHandleName
+        ? resizeShapeSnap(
+            horizontalConstraint,
+            verticalConstraint,
+            draggedElement,
+            symmetricManipulation,
+            draggedShape.horizontalPosition,
+            draggedShape.verticalPosition
+          )
+        : translateShapeSnap(horizontalConstraint, verticalConstraint, draggedElement); // leaf element or ad-hoc group
     return contentShapes.map(snapper);
   }
 )(
