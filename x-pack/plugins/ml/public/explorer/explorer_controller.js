@@ -600,10 +600,9 @@ module.controller('MlExplorerController', function (
   // and avoid race conditions ending up with the wrong charts.
   let requestCount = 0;
   function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = []) {
-    // Just skip doing the request when this function is called without
-    // the minimum required data.
+    // Just skip doing the request when this function
+    // is called without the minimum required data.
     if ($scope.cellData === undefined && influencers.length === 0) {
-      mlExplorerDashboardService.anomalyDataChange.changed([], earliestMs, latestMs);
       return;
     }
 
@@ -629,6 +628,14 @@ module.controller('MlExplorerController', function (
               $scope.anomalyChartRecords, earliestMs, latestMs
             );
           }
+        }
+
+        // While the charts were loaded, other events could reset cellData,
+        // so check if it's still present. This can happen if a cell selection
+        // gets restored from URL/AppState and we find out it's not applicable
+        // to the view by swimlanes currently on display.
+        if ($scope.cellData === undefined) {
+          return;
         }
 
         if (influencers.length > 0) {
@@ -878,6 +885,23 @@ module.controller('MlExplorerController', function (
     function finish(resp) {
       if (resp !== undefined) {
         $scope.viewBySwimlaneData = processViewByResults(resp.results, fieldValues);
+
+        // do a sanity check against cellData. I can happen that a previously
+        // selected lane loaded via URL/AppState is not be available anymore.
+        if (
+          $scope.cellData !== undefined &&
+          $scope.cellData.type === SWIMLANE_TYPE.VIEW_BY
+        ) {
+          let selectionExists = false;
+          $scope.cellData.lanes.forEach((lane) => {
+            if ($scope.viewBySwimlaneData.laneLabels.indexOf(lane) > -1) {
+              selectionExists = true;
+            }
+          });
+          if (selectionExists === false) {
+            clearSelectedAnomalies();
+          }
+        }
       }
 
       skipCellClicks = false;
@@ -901,40 +925,40 @@ module.controller('MlExplorerController', function (
       $scope.swimlaneViewByFieldName === null
     ) {
       finish();
+      return;
+    }
+
+    // Ensure the search bounds align to the bucketing interval used in the swimlane so
+    // that the first and last buckets are complete.
+    const bounds = timefilter.getActiveBounds();
+    const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
+    const selectedJobIds = $scope.getSelectedJobIds();
+    const limit = mlSelectLimitService.state.get('limit');
+    const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
+
+    // load scores by influencer/jobId value and time.
+    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+    // which wouldn't be the case if e.g. '1M' was used.
+    const interval = $scope.swimlaneBucketInterval.asSeconds() + 's';
+    if ($scope.swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+      mlResultsService.getInfluencerValueMaxScoreByTime(
+        selectedJobIds,
+        $scope.swimlaneViewByFieldName,
+        fieldValues,
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        interval,
+        swimlaneLimit
+      ).then(finish);
     } else {
-      // Ensure the search bounds align to the bucketing interval used in the swimlane so
-      // that the first and last buckets are complete.
-      const bounds = timefilter.getActiveBounds();
-      const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
-      const selectedJobIds = $scope.getSelectedJobIds();
-      const limit = mlSelectLimitService.state.get('limit');
-      const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
-
-      // load scores by influencer/jobId value and time.
-      // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-      // which wouldn't be the case if e.g. '1M' was used.
-      const interval = $scope.swimlaneBucketInterval.asSeconds() + 's';
-      if ($scope.swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
-        mlResultsService.getInfluencerValueMaxScoreByTime(
-          selectedJobIds,
-          $scope.swimlaneViewByFieldName,
-          fieldValues,
-          searchBounds.min.valueOf(),
-          searchBounds.max.valueOf(),
-          interval,
-          swimlaneLimit
-        ).then(finish);
-      } else {
-        const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
-        mlResultsService.getScoresByBucket(
-          jobIds,
-          searchBounds.min.valueOf(),
-          searchBounds.max.valueOf(),
-          interval,
-          swimlaneLimit
-        ).then(finish);
-
-      }
+      const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
+      mlResultsService.getScoresByBucket(
+        jobIds,
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        interval,
+        swimlaneLimit
+      ).then(finish);
     }
   }
 
