@@ -54,9 +54,11 @@ export interface TableType {
 export const BeatsTableType: TableType = {
   columnDefinitions: [
     {
-      field: 'id',
+      field: 'name',
       name: 'Beat name',
-      render: (id: string) => <ConnectedLink path={`/beat/${id}`}>{id}</ConnectedLink>,
+      render: (name: string, beat: CMPopulatedBeat) => (
+        <ConnectedLink path={`/beat/${beat.id}`}>{name}</ConnectedLink>
+      ),
       sortable: true,
     },
     {

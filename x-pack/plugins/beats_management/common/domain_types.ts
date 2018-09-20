@@ -72,6 +72,7 @@ export interface CMBeat {
   tags?: string[];
   central_configuration_yml?: string;
   metadata?: {};
+  name?: string;
 }
 
 export interface CMPopulatedBeat extends CMBeat {
