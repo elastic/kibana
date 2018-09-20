@@ -27,7 +27,7 @@ require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
 require('ui/tooltip');
 require('ui/autoload/styles');
 
-require('./css/sense.less');
+// require('./css/sense.less');
 require('./src/controllers/sense_controller');
 require('./src/directives/sense_history');
 require('./src/directives/sense_settings');

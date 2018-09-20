@@ -1,10 +1,8 @@
 @import 'ui/public/styles/styling_constants';
 
 // Outer (non-Kibana/public) components
+@import '../../console/public/index';
 @import '../../inspector_views/public/index';
-
-// Discover styles
-@import './discover/index';
 
 // Context styles
 @import './context/index';

@@ -37,14 +37,14 @@ describe('Editor', () => {
     // Set up our document body
     document.body.innerHTML =
       `<div>
-        <div id="editor" />
-        <div id="editor_actions" />
+        <div id="ConAppEditor" />
+        <div id="ConAppEditorActions" />
         <div id="copy_as_curl" />
       </div>`;
 
     input = initializeInput(
-      $('#editor'),
-      $('#editor_actions'),
+      $('#ConAppEditor'),
+      $('#ConAppEditorActions'),
       $('#copy_as_curl'),
       null
     );
