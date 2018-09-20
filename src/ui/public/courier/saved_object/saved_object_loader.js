@@ -67,7 +67,9 @@ export class SavedObjectLoader {
 
     return Promise.all(deletions).then(() => {
       if (this.chrome) {
-        this.chrome.untrackNavLinksForDeletedSavedObjects(ids);
+        this.chrome.navLinks.filterLastUrls(lastUrl => (
+          !ids.some(id => lastUrl.includes(id))
+        ));
       }
     });
   }

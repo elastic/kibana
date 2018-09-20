@@ -9,6 +9,7 @@ Array [
   "ui/chrome/api/base_path",
   "ui/chrome/api/ui_settings",
   "ui/chrome/api/injected_vars",
+  "ui/chrome/api/nav_links",
   "ui/chrome",
   "legacy files",
 ]
@@ -23,6 +24,7 @@ Array [
   "ui/chrome/api/base_path",
   "ui/chrome/api/ui_settings",
   "ui/chrome/api/injected_vars",
+  "ui/chrome/api/nav_links",
   "ui/test_harness",
   "legacy files",
 ]

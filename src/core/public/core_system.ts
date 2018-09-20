@@ -24,6 +24,7 @@ import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
+import { NavLinksService } from './nav_links';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -48,6 +49,7 @@ export class CoreSystem {
   private readonly loadingCount: LoadingCountService;
   private readonly uiSettings: UiSettingsService;
   private readonly basePath: BasePathService;
+  private readonly navLinks: NavLinksService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -78,6 +80,7 @@ export class CoreSystem {
     this.loadingCount = new LoadingCountService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.navLinks = new NavLinksService();
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -100,6 +103,7 @@ export class CoreSystem {
       const fatalErrors = this.fatalErrors.start();
       const loadingCount = this.loadingCount.start({ fatalErrors });
       const basePath = this.basePath.start({ injectedMetadata });
+      const navLinks = this.navLinks.start({ injectedMetadata, basePath });
       const uiSettings = this.uiSettings.start({
         notifications,
         loadingCount,
@@ -112,6 +116,7 @@ export class CoreSystem {
         notifications,
         loadingCount,
         basePath,
+        navLinks,
         uiSettings,
       });
     } catch (error) {
@@ -123,6 +128,7 @@ export class CoreSystem {
     this.legacyPlatform.stop();
     this.notifications.stop();
     this.loadingCount.stop();
+    this.navLinks.stop();
     this.rootDomElement.textContent = '';
   }
 }

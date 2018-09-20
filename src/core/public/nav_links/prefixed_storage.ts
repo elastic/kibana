@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
+export class PrefixedStorage {
+  constructor(private readonly browserStorage: Storage, private readonly prefix: string) {}
 
-export function hideEmptyDevTools(Private) {
-  chrome.navLinks.decorate('kibana:dev_tools', {
-    hidden: !Private(DevToolsRegistryProvider).length
-  });
+  public get(id: string) {
+    const value = this.browserStorage.getItem(this.getKey(id));
+    return value === null ? undefined : value;
+  }
+
+  public set(id: string, value: string) {
+    this.browserStorage.setItem(this.getKey(id), value);
+  }
+
+  public delete(id: string) {
+    this.browserStorage.removeItem(this.getKey(id));
+  }
+
+  private getKey(id: string) {
+    return `${this.prefix}:${id}`;
+  }
 }
-
-uiModules.get('kibana').run(hideEmptyDevTools);

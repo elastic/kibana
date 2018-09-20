@@ -150,3 +150,30 @@ describe('start.getInjectedVars()', () => {
     );
   });
 });
+
+describe('start.getNavLinks()', () => {
+  it('returns the navLinks from the injected vars, readonly', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        navLinks: [{ id: 1 }, { id: 2 }],
+      },
+    } as any).start();
+
+    const nav: any = start.getNavLinks();
+    expect(nav).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": 1,
+  },
+  Object {
+    "id": 2,
+  },
+]
+`);
+    expect(() => {
+      nav[0].id = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'id' of object '#<Object>'"`
+    );
+  });
+});

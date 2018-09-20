@@ -47,6 +47,7 @@ new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
+    navLinks: [],
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,

@@ -17,11 +17,14 @@
  * under the License.
  */
 
+// tslint:disable no-unused-expression
+
 import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
+import { NavLinksService } from './nav_links';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -97,6 +100,15 @@ jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
 }));
 
+const mockNavLinksContract = {};
+const MockNavLinksService = jest.fn<NavLinksService>(function(this: any) {
+  this.start = jest.fn().mockReturnValue(mockNavLinksContract);
+  this.stop = jest.fn();
+});
+jest.mock('./nav_links', () => ({
+  NavLinksService: MockNavLinksService,
+}));
+
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -112,7 +124,6 @@ beforeEach(() => {
 
 describe('constructor', () => {
   it('creates instances of services', () => {
-    // tslint:disable no-unused-expression
     new CoreSystem({
       ...defaultCoreSystemParams,
     });
@@ -124,12 +135,12 @@ describe('constructor', () => {
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
     expect(MockBasePathService).toHaveBeenCalledTimes(1);
     expect(MockUiSettingsService).toHaveBeenCalledTimes(1);
+    expect(MockNavLinksService).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
     const injectedMetadata = { injectedMetadata: true } as any;
 
-    // tslint:disable no-unused-expression
     new CoreSystem({
       ...defaultCoreSystemParams,
       injectedMetadata,
@@ -145,7 +156,6 @@ describe('constructor', () => {
     const requireLegacyFiles = { requireLegacyFiles: true } as any;
     const useLegacyTestHarness = { useLegacyTestHarness: true } as any;
 
-    // tslint:disable no-unused-expression
     new CoreSystem({
       ...defaultCoreSystemParams,
       requireLegacyFiles,
@@ -161,7 +171,6 @@ describe('constructor', () => {
   });
 
   it('passes a dom element to NotificationsService', () => {
-    // tslint:disable no-unused-expression
     new CoreSystem({
       ...defaultCoreSystemParams,
     });
@@ -229,6 +238,17 @@ describe('#stop', () => {
     expect(loadingCountService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(loadingCountService.stop).toHaveBeenCalled();
+  });
+
+  it('calls navLinks.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [navLinksService] = MockNavLinksService.mock.instances;
+    expect(navLinksService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(navLinksService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', () => {
@@ -311,6 +331,16 @@ describe('#start()', () => {
     const [mockInstance] = MockNotificationsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('calls navLinks#start()', () => {
+    startCore();
+    const [mockInstance] = MockNavLinksService.mock.instances;
+    expect(mockInstance.start).toHaveBeenCalledTimes(1);
+    expect(mockInstance.start).toHaveBeenCalledWith({
+      injectedMetadata: mockInjectedMetadataStartContract,
+      basePath: mockBasePathStartContract,
+    });
   });
 });
 

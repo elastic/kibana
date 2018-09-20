@@ -12,14 +12,9 @@ import { uiModules } from 'ui/modules';
 
 uiModules.get('xpack/ml').run((Private) => {
   const xpackInfo = Private(XPackInfoProvider);
-  if (!chrome.navLinkExists('ml')) return;
 
-  const navLink = chrome.getNavLinkById('ml');
-  // hide by default, only show once the xpackInfo is initialized
-  navLink.hidden = true;
-  const showAppLink = xpackInfo.get('features.ml.showLinks', false);
-  navLink.hidden = !showAppLink;
-  if (showAppLink) {
-    navLink.disabled = !xpackInfo.get('features.ml.isAvailable', false);
-  }
+  chrome.navLinks.decorate('ml', {
+    hidden: !xpackInfo.get('features.ml.showLinks', false),
+    disabled: !xpackInfo.get('features.ml.isAvailable', false)
+  });
 });

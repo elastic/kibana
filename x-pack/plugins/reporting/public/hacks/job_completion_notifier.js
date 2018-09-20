@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { take } from 'rxjs/operators';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
@@ -54,10 +55,12 @@ uiModules.get('kibana')
 
       let seeReportLink;
 
-      // In-case the license expired/changed between the time they queued the job and the time that
-      // the job completes, that way we don't give the user a toast to download their report if they can't.
-      if (chrome.navLinkExists('kibana:management')) {
-        const managementUrl = chrome.getNavLinkById('kibana:management').url;
+      // In certain scenarios (like dashboard only mode) the management app is not accessible, which
+      // we detect by checking that the navLink exists and is not hidden
+      const navLinks = await chrome.navLinks.get$().pipe(take(1)).toPromise();
+      const managementLink = navLinks.find(link => link.id === 'kibana:management');
+      if (managementLink && !managementLink.hidden) {
+        const managementUrl = managementLink.url;
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>

@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { DomLocationProvider } from '../../../../dom_location';
 import { parse } from 'url';
+
+import { cloneDeep } from 'lodash';
+
+import chrome from 'ui/chrome';
+import { subscribe } from 'ui/utils/subscribe';
+
+import { DomLocationProvider } from '../../../../dom_location';
 import { uiModules } from '../../../../modules';
 import appSwitcherTemplate from './app_switcher.html';
 
@@ -70,11 +76,25 @@ uiModules
       template: appSwitcherTemplate,
       controllerAs: 'switcher',
       controller($scope, appSwitcherEnsureNavigation, globalNavState) {
-        if (!$scope.chrome || !$scope.chrome.getNavLinks) {
-          throw new TypeError('appSwitcher directive requires the "chrome" config-object');
-        }
+        subscribe($scope, chrome.navLinks.get$(), {
+          next: (newLinks) => {
+            if (!this.links) {
+              this.links = cloneDeep(newLinks);
+              return;
+            }
 
-        this.links = $scope.chrome.getNavLinks();
+            const oldLinksById = this.links.reduce((acc, link) => ({
+              ...acc,
+              [link.id]: link
+            }), {});
+
+            // merge the newLinks with the oldLinks to persist mutations done by angular
+            this.links = newLinks.map(newLink => ({
+              ...oldLinksById[newLink.id],
+              ...newLink,
+            }));
+          }
+        });
 
         // links don't cause full-navigation events in certain scenarios
         // so we force them when needed

@@ -11,16 +11,10 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 uiModules.get('xpack/graph').run((Private) => {
   const xpackInfo = Private(XPackInfoProvider);
-  if (!chrome.navLinkExists('graph')) {
-    return;
-  }
 
-  const navLink = chrome.getNavLinkById('graph');
-  navLink.hidden = true;
-  const showAppLink = xpackInfo.get('features.graph.showAppLink', false);
-  navLink.hidden = !showAppLink;
-  if (showAppLink) {
-    navLink.disabled = !xpackInfo.get('features.graph.enableAppLink', false);
-    navLink.tooltip = xpackInfo.get('features.graph.message');
-  }
+  chrome.navLinks.decorate('graph', {
+    hidden: !xpackInfo.get('features.graph.showAppLink', false),
+    disabled: !xpackInfo.get('features.graph.enableAppLink', false),
+    tooltip: xpackInfo.get('features.graph.message'),
+  });
 });

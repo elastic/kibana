@@ -26,6 +26,19 @@ export interface InjectedMetadataParams {
     version: string;
     buildNumber: number;
     basePath: string;
+    navLinks: Array<{
+      id: string;
+      title: string;
+      order: number;
+      url: string;
+      subUrlBase: string;
+      linkToLastSubUrl: boolean;
+      icon?: string;
+      description?: string;
+      disabled?: boolean;
+      tooltip?: string;
+      hidden?: boolean;
+    }>;
     vars: {
       [key: string]: unknown;
     };
@@ -33,7 +46,6 @@ export interface InjectedMetadataParams {
       app: unknown;
       translations: unknown;
       bundleId: string;
-      nav: unknown;
       version: string;
       branch: string;
       buildNum: number;
@@ -80,6 +92,15 @@ export class InjectedMetadataService {
 
       getInjectedVars: () => {
         return this.state.vars;
+      },
+
+      /**
+       * Returns the navLinks that were included in the injectedMetadata. Use navLinks.get$() to
+       * access the complete list of navLinks that reflect the correct application state
+       * @internal
+       */
+      getNavLinks: () => {
+        return this.state.navLinks;
       },
     };
   }
