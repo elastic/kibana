@@ -24,7 +24,7 @@ export class Router extends React.PureComponent {
     onRouteChange: PropTypes.func,
   };
 
-  static state = {
+  state = {
     router: {},
     activeComponent: CanvasLoading,
   };
@@ -38,11 +38,11 @@ export class Router extends React.PureComponent {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
+    let firstLoad = true;
 
     // when the component in the route changes, render it
     router.onPathChange(route => {
       const { pathname } = route.location;
-      const firstLoad = !this.state;
       const { component } = route.meta;
 
       if (!component) {
@@ -55,6 +55,7 @@ export class Router extends React.PureComponent {
 
       // if this is the first load, execute the route
       if (firstLoad) {
+        firstLoad = false;
         router
           .execute()
           .then(() => onLoad())
