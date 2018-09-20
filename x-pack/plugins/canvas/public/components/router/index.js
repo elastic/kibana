@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Router } from './router';
+import { connect } from 'react-redux';
+import { getHistoryInFlight } from '../../state/selectors/app';
+import { Router as Component } from './router';
+
+const mapStateToProps = state => ({
+  historyInFlight: getHistoryInFlight(state),
+});
+
+export const Router = connect(mapStateToProps)(Component);

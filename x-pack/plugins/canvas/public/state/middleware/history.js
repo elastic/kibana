@@ -63,14 +63,14 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     handlerState.pendingCount += 1;
 
     try {
+      // execute the route's action
       dispatch(historyInFlight(true));
       await handleHistoryChanges(...args);
-      dispatch(historyInFlight(false));
     } catch (e) {
       // TODO: handle errors here
     } finally {
-      // restore default history method
-      handlerState.pendingCount -= 1;
+      // update pendingCount, dispatch inFlight end when no more are pending
+      if (--handlerState.pendingCount === 0) dispatch(historyInFlight(false));
     }
   });
 

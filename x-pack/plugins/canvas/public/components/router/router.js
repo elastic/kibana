@@ -20,6 +20,7 @@ export class Router extends React.PureComponent {
     onLoad: PropTypes.func.isRequired,
     onError: PropTypes.func.isRequired,
     routes: PropTypes.array.isRequired,
+    historyInFlight: PropTypes.bool.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
   };
@@ -38,10 +39,10 @@ export class Router extends React.PureComponent {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
-    let firstLoad = true;
 
     // when the component in the route changes, render it
-    router.onPathChange(route => {
+    router.onPathChange(async route => {
+      const firstLoad = !this.activeComponent;
       const { pathname } = route.location;
       const { component } = route.meta;
 
@@ -53,23 +54,44 @@ export class Router extends React.PureComponent {
         return;
       }
 
-      // if this is the first load, execute the route
+      // call action the first time, the history middleware will handle it afterwards
       if (firstLoad) {
-        firstLoad = false;
-        router
-          .execute()
-          .then(() => onLoad())
-          .catch(err => onError(err));
+        try {
+          await router.execute();
+          this.setState({ activeComponent: component });
+          onLoad(); // notify consumer that the route is rendered
+        } catch (err) {
+          onError(err);
+          return; // stop the rest of the handler from executing
+        }
       }
 
       // notify upstream handler of route change
       onRouteChange && onRouteChange(pathname);
 
-      this.setState({ activeComponent: component });
+      // keep track of active component while waiting for in-flight history to resolve
+      this.activeComponent = component;
+
+      // attempt to render the new component
+      this.renderActiveComponent();
     });
 
     this.setState({ router });
   }
+
+  componentWillReceiveProps({ historyInFlight }) {
+    // attempt to render active component when history in-flight changes
+    if (historyInFlight !== this.props.historyInFlight) this.renderActiveComponent();
+  }
+
+  renderActiveComponent = () => {
+    if (this.props.historyInFlight) return;
+    this.setState(state => {
+      // update the active component, but only if it has changed (avoid needless re-renders)
+      if (state.activeComponent !== this.activeComponent)
+        return { activeComponent: this.activeComponent };
+    });
+  };
 
   render() {
     // show loading
