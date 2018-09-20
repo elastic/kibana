@@ -212,4 +212,19 @@ describe('stop', () => {
     service.stop();
     await promise;
   });
+
+  it('completes immediately if service already stopped', async () => {
+    const service = new ChromeService();
+    const start = service.start();
+    service.stop();
+
+    await expect(
+      Rx.combineLatest(
+        start.getBrand$(),
+        start.getApplicationClasses$(),
+        start.getIsCollapsed$(),
+        start.getIsVisible$()
+      ).toPromise()
+    ).resolves.toBe(undefined);
+  });
 });
