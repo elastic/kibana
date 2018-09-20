@@ -938,25 +938,29 @@ function resizeAnnotationsFunction({ shapes, selectedShapes }) {
 // stark contrast with the concept of StickyLines - whose central idea is that constraints remain applied until explicitly
 // broken.
 const crystallizeConstraint = shape => {
-  return {
-    ...shape,
-    snapDeltaMatrix: null,
-    snapResizeVector: null,
-    localTransformMatrix: shape.snapDeltaMatrix
-      ? matrix.multiply(shape.localTransformMatrix, shape.snapDeltaMatrix)
-      : shape.localTransformMatrix,
-    a: snappedA(shape),
-    b: snappedB(shape),
-  };
+  const result = { ...shape };
+  if (shape.snapDeltaMatrix) {
+    result.localTransformMatrix = matrix.multiply(
+      shape.localTransformMatrix,
+      shape.snapDeltaMatrix
+    );
+    result.snapDeltaMatrix = null;
+  }
+  if (shape.snapResizeVector) {
+    result.a = snappedA(shape);
+    result.b = snappedB(shape);
+    result.snapResizeVector = null;
+  }
+  return result;
 };
 
 const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedElement) => shape => {
-  const constrainedShape = draggedElement && shape.id === draggedElement.id;
   const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
   const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
   const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
   const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
   if (constrainedX || constrainedY) {
+    if (!snapOffsetX && !snapOffsetY) return shape;
     const snapOffset = matrix.translateComponent(
       matrix.multiply(
         matrix.rotateZ((matrix.matrixToAngle(draggedElement.localTransformMatrix) / 180) * Math.PI),
@@ -967,13 +971,10 @@ const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedEle
       ...shape,
       snapDeltaMatrix: snapOffset,
     };
-  } else if (constrainedShape) {
-    return {
-      ...shape,
-      snapDeltaMatrix: null,
-    };
-  } else {
+  } else if (shape.snapDeltaMatrix || shape.snapResizeVector) {
     return crystallizeConstraint(shape);
+  } else {
+    return shape;
   }
 };
 
@@ -1036,10 +1037,7 @@ const snappedShapes = select(
     const subtype = draggedShape && draggedShape.subtype;
     // snapping doesn't come into play if there's no dragging, or it's not a resize drag or translate drag on a
     // leaf element or a group element:
-    if (
-      !draggedShape ||
-      (subtype && [config.resizeHandleName, config.adHocGroupName].indexOf(subtype) === -1)
-    )
+    if (subtype && [config.resizeHandleName, config.adHocGroupName].indexOf(subtype) === -1)
       return contentShapes;
     const constraints = alignmentGuideAnnotations; // fixme split concept of snap constraints and their annotations
     const relaxed = alterSnapGesture.indexOf('relax') !== -1;
