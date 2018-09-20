@@ -75,25 +75,19 @@ function createStyleInstance(styleDescriptor) {
 export const getMapState = ({ map }) => map && map.mapState;
 
 
-const getSelectedLayerId = createSelector(({ map }) => {
+const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
-}, x => x);
+};
 
-const getLayerListRaw = createSelector(({ map }) => {
-  return map.layerList ?  map.layerList : [];
-}, x => x);
+const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
-export const getMapExtent = createSelector(({ map }) => {
-  return map.mapState && map.mapState.exent ?  map.mapState.extent : null;
-}, x => x);
+export const getMapExtent = ({ map }) => map.mapState.exent ?
+  map.mapState.extent : [];
 
-export const getMapZoom = createSelector(({ map }) => {
-  return map.mapState.zoom && map.mapState.zoom ?  map.mapState.zoom : 0;
-}, x => x);
+export const getMapZoom = ({ map }) => map.mapState.zoom ?
+  map.mapState.zoom : 0;
 
-export function getMetadata({ config }) {
-  return config && config.meta;
-}
+export const getMetadata = ({ config }) => config && config.meta;
 
 export const getDataSources = createSelector(
   getMetadata,
