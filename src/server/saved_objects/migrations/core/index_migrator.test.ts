@@ -305,7 +305,7 @@ function defaultOpts() {
       migrationVersion: {},
       migrate: _.identity,
     },
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema({})),
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
   };
 }
 

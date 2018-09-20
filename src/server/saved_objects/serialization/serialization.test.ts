@@ -24,7 +24,7 @@ import { SavedObjectsSchema } from '../schema';
 describe('saved object conversion', () => {
   describe('#rawToSavedObject', () => {
     test('it copies the _source.type property to type', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -35,7 +35,7 @@ describe('saved object conversion', () => {
     });
 
     test('if specified it copies the _source.migrationVersion property to migrationVersion', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -53,7 +53,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if _source.migrationVersion is unspecified it doesn't set migrationVersion`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -65,7 +65,7 @@ describe('saved object conversion', () => {
 
     test('it converts the id and type properties, and retains migrationVersion', () => {
       const now = new Date();
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
         _type: ROOT_TYPE,
@@ -101,7 +101,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if version is unspecified it doesn't set version`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -113,7 +113,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if specified it copies _version to version`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _version: 4,
@@ -126,7 +126,7 @@ describe('saved object conversion', () => {
     });
 
     test('if specified it copies the _source.updated_at property to updated_at', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const now = Date();
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
@@ -139,7 +139,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if _source.updated_at is unspecified it doesn't set updated_at`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -150,7 +150,7 @@ describe('saved object conversion', () => {
     });
 
     test('it does not pass unknown properties through', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
@@ -172,7 +172,7 @@ describe('saved object conversion', () => {
     });
 
     test('it does not create attributes if [type] is missing', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _type: ROOT_TYPE,
@@ -187,7 +187,7 @@ describe('saved object conversion', () => {
     });
 
     test('it fails for documents which do not specify a type', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       expect(() =>
         serializer.rawToSavedObject({
           _id: 'universe',
@@ -202,7 +202,7 @@ describe('saved object conversion', () => {
     });
 
     test('it is complimentary with savedObjectToRaw', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
         _id: 'foo:bar',
         _type: ROOT_TYPE,
@@ -227,7 +227,7 @@ describe('saved object conversion', () => {
     });
 
     test('it handles unprefixed ids', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
         _source: {
@@ -240,7 +240,7 @@ describe('saved object conversion', () => {
 
     describe('namespaced type without a namespace', () => {
       test(`removes type prefix from _id`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'foo:bar',
           _source: {
@@ -252,7 +252,7 @@ describe('saved object conversion', () => {
       });
 
       test(`if prefixed by random prefix and type it copies _id to id`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'random:foo:bar',
           _source: {
@@ -264,7 +264,7 @@ describe('saved object conversion', () => {
       });
 
       test(`doesn't specify namespace`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'foo:bar',
           _source: {
@@ -278,7 +278,7 @@ describe('saved object conversion', () => {
 
     describe('namespaced type with a namespace', () => {
       test(`removes type and namespace prefix from _id`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'baz:foo:bar',
           _source: {
@@ -291,7 +291,7 @@ describe('saved object conversion', () => {
       });
 
       test(`if prefixed by only type it copies _id to id`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'foo:bar',
           _source: {
@@ -304,7 +304,7 @@ describe('saved object conversion', () => {
       });
 
       test(`if prefixed by random prefix and type it copies _id to id`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'random:foo:bar',
           _source: {
@@ -317,7 +317,7 @@ describe('saved object conversion', () => {
       });
 
       test(`copies _source.namespace to namespace`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.rawToSavedObject({
           _id: 'baz:foo:bar',
           _source: {
@@ -380,7 +380,7 @@ describe('saved object conversion', () => {
 
   describe('#savedObjectToRaw', () => {
     test('it copies the type property to _source.type and uses the ROOT_TYPE as _type', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: 'foo',
         attributes: {},
@@ -391,7 +391,7 @@ describe('saved object conversion', () => {
     });
 
     test('if specified it copies the updated_at property to _source.updated_at', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const now = new Date();
       const actual = serializer.savedObjectToRaw({
         type: '',
@@ -403,7 +403,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if unspecified it doesn't add updated_at property to _source`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
@@ -413,7 +413,7 @@ describe('saved object conversion', () => {
     });
 
     test('it copies the migrationVersion property to _source.migrationVersion', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
@@ -430,7 +430,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if unspecified it doesn't add migrationVersion property to _source`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
@@ -440,7 +440,7 @@ describe('saved object conversion', () => {
     });
 
     test('it copies the version property to _version', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
@@ -451,7 +451,7 @@ describe('saved object conversion', () => {
     });
 
     test(`if unspecified it doesn't add _version property`, () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
@@ -461,7 +461,7 @@ describe('saved object conversion', () => {
     });
 
     test('it copies attributes to _source[type]', () => {
-      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: 'foo',
         attributes: {
@@ -478,7 +478,7 @@ describe('saved object conversion', () => {
 
     describe('namespaced type without a namespace', () => {
       test('generates an id prefixed with type, if no id is specified', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const v1 = serializer.savedObjectToRaw({
           type: 'foo',
           attributes: {
@@ -498,7 +498,7 @@ describe('saved object conversion', () => {
       });
 
       test(`doesn't specify _source.namespace`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.savedObjectToRaw({
           type: '',
           attributes: {},
@@ -510,7 +510,7 @@ describe('saved object conversion', () => {
 
     describe('namespaced type with a namespace', () => {
       test('generates an id prefixed with namespace and type, if no id is specified', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const v1 = serializer.savedObjectToRaw({
           type: 'foo',
           namespace: 'bar',
@@ -532,7 +532,7 @@ describe('saved object conversion', () => {
       });
 
       test(`it copies namespace to _source.namespace`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const actual = serializer.savedObjectToRaw({
           type: 'foo',
           attributes: {},
@@ -586,7 +586,7 @@ describe('saved object conversion', () => {
   describe('#isRawSavedObject', () => {
     describe('namespaced type without a namespace', () => {
       test('is true if the id is prefixed and the type matches', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -599,7 +599,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the id is not prefixed', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'world',
@@ -612,7 +612,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the type attribute is missing', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -624,7 +624,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the type attribute does not match the id', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -638,7 +638,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if there is no [type] attribute', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -653,7 +653,7 @@ describe('saved object conversion', () => {
 
     describe('namespaced type with a namespace', () => {
       test('is true if the id is prefixed with type and namespace and the type matches', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:hello:world',
@@ -667,7 +667,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the id is not prefixed by anything', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'world',
@@ -681,7 +681,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the id is prefixed only with type and the type matches', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -695,7 +695,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the id is prefixed only with namespace and the namespace matches', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:world',
@@ -709,7 +709,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the type attribute is missing', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:hello:world',
@@ -722,7 +722,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the type attribute does not match the id', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:hello:world',
@@ -737,7 +737,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if the namespace attribute does not match the id', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'bar:jam:world',
@@ -752,7 +752,7 @@ describe('saved object conversion', () => {
       });
 
       test('is false if there is no [type] attribute', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
           serializer.isRawSavedObject({
             _id: 'hello:world',
@@ -868,13 +868,13 @@ describe('saved object conversion', () => {
   describe('#generateRawId', () => {
     describe('namespaced type without a namespace', () => {
       test('generates an id if none is specified', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const id = serializer.generateRawId('', 'goodbye');
         expect(id).toMatch(/goodbye\:[\w-]+$/);
       });
 
       test('uses the id that is specified', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const id = serializer.generateRawId('', 'hello', 'world');
         expect(id).toMatch('hello:world');
       });
@@ -882,13 +882,13 @@ describe('saved object conversion', () => {
 
     describe('namespaced type with a namespace', () => {
       test('generates an id if none is specified and prefixes namespace', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const id = serializer.generateRawId('foo', 'goodbye');
         expect(id).toMatch(/foo:goodbye\:[\w-]+$/);
       });
 
       test('uses the id that is specified and prefixes the namespace', () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const id = serializer.generateRawId('foo', 'hello', 'world');
         expect(id).toMatch('foo:hello:world');
       });
@@ -904,7 +904,7 @@ describe('saved object conversion', () => {
       });
 
       test(`uses the id that is specified and doesn't prefix the namespace`, () => {
-        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema({}));
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         const id = serializer.generateRawId('foo', 'hello', 'world');
         expect(id).toMatch('hello:world');
       });

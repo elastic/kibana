@@ -26,12 +26,18 @@ export interface UIExportsSavedObjectsSchema {
 }
 
 export class SavedObjectsSchema {
-  private readonly schema: UIExportsSavedObjectsSchema;
-  constructor(uiExportsSchema: UIExportsSavedObjectsSchema) {
+  private readonly schema?: UIExportsSavedObjectsSchema;
+  constructor(uiExportsSchema?: UIExportsSavedObjectsSchema) {
     this.schema = uiExportsSchema;
   }
 
   public isNamespaceAgnostic(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and no types are namespace agnostic
+    if (!this.schema) {
+      return false;
+    }
+
     const typeSchema = this.schema[type];
     if (!typeSchema) {
       return false;
