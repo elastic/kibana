@@ -283,6 +283,12 @@ function createUrlOverrides(overrides, originalSettings) {
     }
   }
 
+  if (formattedOverrides.format === '' && originalSettings.format === 'semi_structured_text') {
+    if (formattedOverrides.grok_pattern !== '') {
+      formattedOverrides.format = originalSettings.format;
+    }
+  }
+
   if (formattedOverrides.format === 'json' || originalSettings.format === 'json') {
     formattedOverrides.should_trim_fields = '';
     formattedOverrides.has_header_row = '';
@@ -291,6 +297,10 @@ function createUrlOverrides(overrides, originalSettings) {
     formattedOverrides.column_names = '';
   }
 
+  // escape grok pattern as it can contain bad characters
+  if (formattedOverrides.grok_pattern !== '') {
+    formattedOverrides.grok_pattern  = encodeURIComponent(formattedOverrides.grok_pattern);
+  }
   return formattedOverrides;
 }
 

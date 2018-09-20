@@ -17,6 +17,7 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiTitle,
+  EuiTextArea,
 } from '@elastic/eui';
 
 import {
@@ -135,6 +136,10 @@ export class Overrides extends Component {
     this.setState({ columnNames });
   }
 
+  grokPatternChange = (e) => {
+    this.setState({ grokPattern: e.target.value });
+  }
+
 
   render() {
     const { fields } = this.props;
@@ -149,6 +154,7 @@ export class Overrides extends Component {
       shouldTrimFields,
       charset,
       columnNames,
+      grokPattern,
     } = this.state;
 
     const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
@@ -221,6 +227,20 @@ export class Overrides extends Component {
 
           </React.Fragment>
         }
+        {
+          (this.state.format === 'semi_structured_text') &&
+          <React.Fragment>
+            <EuiFormRow
+              label="Grok pattern"
+            >
+              <EuiTextArea
+                placeholder={grokPattern}
+                value={grokPattern}
+                onChange={this.grokPatternChange}
+              />
+            </EuiFormRow>
+          </React.Fragment>
+        }
         <EuiFormRow
           label="Timestamp format"
         >
@@ -242,7 +262,7 @@ export class Overrides extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          label="charset"
+          label="Charset"
         >
           <EuiSuperSelect
             options={charsetOptions}
