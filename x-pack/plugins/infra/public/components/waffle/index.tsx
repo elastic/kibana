@@ -57,7 +57,6 @@ export class Waffle extends React.Component<Props, {}> {
     } else if (!loading && map && map.length === 0) {
       return (
         <EuiEmptyPrompt
-          iconType="grid"
           title={<h2>There is no data to display.</h2>}
           titleSize="m"
           body={<p>Try adjusting your time or filter.</p>}
