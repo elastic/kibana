@@ -19,15 +19,14 @@
 
 import Joi from 'joi';
 
-export const dataSetSchema = {
+const dataIndexSchema = Joi.object({
   id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
-  name: Joi.string().required(),
-  description: Joi.string().required(),
-  previewImagePath: Joi.string().required(),
-  overviewDashboard: Joi.string().required(), // saved object id of main dashboard for sample data set
-  defaultIndex: Joi.string().required(), // saved object id of default index-pattern for sample data set
-  dataPath: Joi.string().required(), // path to newline delimented JSON file containing data relative to KIBANA_HOME
-  fields: Joi.object().required(), // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
+
+  // path to newline delimented JSON file containing data relative to KIBANA_HOME
+  dataPath: Joi.string().required(),
+
+  // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
+  fields: Joi.object().required(),
 
   // times fields that will be updated relative to now when data is installed
   timeFields: Joi.array().items(Joi.string()).required(),
@@ -43,8 +42,22 @@ export const dataSetSchema = {
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
+});
+
+export const sampleDataSchema = {
+  id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
+  name: Joi.string().required(),
+  description: Joi.string().required(),
+  previewImagePath: Joi.string().required(),
+
+  // saved object id of main dashboard for sample data set
+  overviewDashboard: Joi.string().required(),
+
+  // saved object id of default index-pattern for sample data set
+  defaultIndex: Joi.string().required(),
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
   savedObjects: Joi.array().items(Joi.object()).required(),
+  dataIndices: Joi.array().items(dataIndexSchema).required(),
 };

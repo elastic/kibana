@@ -1,41 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="400px" height="373px" viewBox="0 0 400 373" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: sketchtool 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
-    <title>7901612E-113D-4EE2-89F8-C5AEAD9876B6</title>
-    <desc>Created with sketchtool.</desc>
-    <defs>
-        <linearGradient x1="10.7931708%" y1="50%" x2="100%" y2="50%" id="linearGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="0%"></stop>
-            <stop stop-color="#E2E2E2" stop-opacity="0" offset="100%"></stop>
-        </linearGradient>
-        <radialGradient cx="0%" cy="0%" fx="0%" fy="0%" r="146.629187%" gradientTransform="translate(0.000000,0.000000),scale(0.932500,1.000000),rotate(42.999538),translate(-0.000000,-0.000000)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0.2" offset="100%"></stop>
-        </radialGradient>
-        <polygon id="path-3" points="400 373 0 0 400 4.61930179e-14"></polygon>
-        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="linearGradient-4">
-            <stop stop-color="#FFFFFF" stop-opacity="0.6" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0" offset="100%"></stop>
-        </linearGradient>
-        <radialGradient cx="0%" cy="0%" fx="0%" fy="0%" r="146.09634%" gradientTransform="translate(0.000000,0.000000),scale(0.938889,1.000000),rotate(43.194713),translate(-0.000000,-0.000000)" id="radialGradient-5">
-            <stop stop-color="#FFFFFF" stop-opacity="0.15" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0.5" offset="100%"></stop>
-        </radialGradient>
-        <polygon id="path-6" points="400 169 220 0 400 2.09292762e-14"></polygon>
-    </defs>
-    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="background/full/branded-alt" transform="translate(-1040.000000, 0.000000)">
-            <g id="bg-top-branded" transform="translate(1040.000000, 0.000000)">
-                <g id="shape" opacity="0.1">
-                    <use fill="url(#linearGradient-1)" xlink:href="#path-3"></use>
-                    <use fill="url(#radialGradient-2)" style="mix-blend-mode: overlay;" xlink:href="#path-3"></use>
-                </g>
-                <g id="shape" opacity="0.85">
-                    <use fill="#F5F5F5" xlink:href="#path-6"></use>
-                    <use fill="url(#linearGradient-4)" style="mix-blend-mode: overlay;" xlink:href="#path-6"></use>
-                    <use fill="url(#radialGradient-5)" style="mix-blend-mode: overlay;" xlink:href="#path-6"></use>
-                </g>
-            </g>
-        </g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="373" viewBox="0 0 400 373">
+  <defs>
+    <linearGradient id="bg_top_branded-a" x1="10.793%" y1="50%" y2="50%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#E2E2E2" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="bg_top_branded-c" cx="0%" cy="0%" r="146.629%" fx="0%" fy="0%" gradientTransform="matrix(.68199 .682 -.63596 .73135 0 0)">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".5"/>
+      <stop offset="100%" stop-opacity=".2"/>
+    </radialGradient>
+    <polygon id="bg_top_branded-b" points="400 373 0 0 400 0"/>
+    <linearGradient id="bg_top_branded-e" x1="0%" y1="35.11%" y2="0%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".6"/>
+      <stop offset="100%" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="bg_top_branded-f" cy="0%" r="146.096%" fx="50%" fy="0%" gradientTransform="matrix(-.68448 .68448 -.64265 -.72903 .842 -.342)">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".7"/>
+      <stop offset="100%"/>
+    </radialGradient>
+    <polygon id="bg_top_branded-d" points="400 169 220 0 400 0"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <g opacity=".1">
+      <use fill="url(#bg_top_branded-a)" xlink:href="#bg_top_branded-b"/>
+      <use fill="url(#bg_top_branded-c)" xlink:href="#bg_top_branded-b" style="mix-blend-mode:overlay"/>
     </g>
+    <g opacity=".05">
+      <use fill="#F5F5F5" xlink:href="#bg_top_branded-d"/>
+      <use fill="url(#bg_top_branded-e)" xlink:href="#bg_top_branded-d" style="mix-blend-mode:overlay"/>
+      <use fill="url(#bg_top_branded-f)" xlink:href="#bg_top_branded-d" style="mix-blend-mode:darken"/>
+    </g>
+  </g>
 </svg>

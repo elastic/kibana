@@ -1,6 +1,5 @@
-<div ng-show="add.form" class="vis-editor-agg-add-schemas">
+<div ng-show="add.form">
   <label>Select {{ groupName }} type</label>
-  <div class="euiSpacer euiSpacer--s"></div>
   <ul class="form-group list-group list-group-menu">
     <li
       tabindex="0"
@@ -16,11 +15,13 @@
   </ul>
 </div>
 
+<div class="euiSpacer euiSpacer--s"></div>
+
 <div
   ng-if="stats.max > stats.count"
   ng-init="add.form = stats.count < 1 ? !add.form : add.form"
   ng-click="add.form = !add.form"
-  class="vis-editor-agg-wide-btn">
+  class="eui-textCenter">
 
   <div ng-if="!add.form">
     <button

@@ -32,8 +32,8 @@ export function getSearchDsl(mappings, schema, options = {}) {
     namespace,
   } = options;
 
-  if (!type && sortField) {
-    throw Boom.notAcceptable('Cannot sort without filtering by type');
+  if (!type) {
+    throw Boom.notAcceptable('type must be specified');
   }
 
   if (sortOrder && !sortField) {
