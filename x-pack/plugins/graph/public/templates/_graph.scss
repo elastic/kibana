@@ -1,3 +1,11 @@
+@mixin gphSvgText() {
+  font-family: $euiFontFamily;
+  font-size: $euiSizeS;
+  line-height: $euiSizeM;
+  fill: $euiColorDarkShade;
+  color: $euiColorDarkShade;
+}
+
 /**
  * THE SVG Graph
  * 1. Calculated px values come from the open/closed state of the global nav sidebar

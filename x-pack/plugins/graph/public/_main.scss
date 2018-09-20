@@ -1,25 +1,4 @@
 /**
- * Lists
- */
-
-.gphStripedList {
-  max-height: $euiSize * 10;
-  overflow-y: auto;
-}
-
-.gphStripedList__item {
-  border: none;
-
-  &:nth-child(even) {
-    background-color: $euiColorLightestShade;
-  }
-
-  &:nth-child(odd) {
-    background-color: $euiColorEmptyShade;
-  }
-}
-
-/**
  * Nodes
  */
 
@@ -35,12 +14,12 @@
   // part of the data object since they are named the same
   &.selectedNode {
     stroke-width: $euiSizeXS;
-    stroke: $gphNodeColor--selected;
+    stroke: transparentize($euiColorPrimary, .25);
   }
 }
 
 .gphNode__text {
-  fill: $euiColorEmptyShade;
+  fill: $euiColorDarkestShade;
 
   &--lowOpacity{
     fill-opacity: 0.5;
@@ -93,8 +72,7 @@
   border-radius: 50%;
   font-size: $euiFontSizeXS;
   margin: 2px $euiSizeS 0 $euiSizeXS;
-  height: $gphVertexFieldButtonSize;
-  width: $gphVertexFieldButtonSize;
+  @include size(26px) // same as svg
 
   &:hover:not(:disabled) {
     background: shadeOrTint($euiColorPrimary, 10%, 10%);

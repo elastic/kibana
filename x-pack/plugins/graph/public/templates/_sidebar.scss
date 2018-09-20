@@ -42,14 +42,14 @@
  * Selection List
  */
 
-.grphSelectionList {
+.gphSelectionList {
   height: $euiSizeL * 10;
   background-color: $euiColorLightestShade;
   overflow: auto;
   margin-bottom: 0;
 }
 
-.grphSelectionList__fieldLine {
+.gphSelectionList__field {
   line-height: $euiLineHeight;
   margin: $euiSizeXS 0;
   cursor: pointer;
@@ -59,7 +59,7 @@
   }
 }
 
-.grphSelectionList__fieldLine--selected {
+.gphSelectionList__field--selected {
   background: $euiColorLightShade;
 }
 

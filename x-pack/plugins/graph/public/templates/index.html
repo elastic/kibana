@@ -53,7 +53,7 @@
       <div class="container-fluid">
         <label>Add a field source for vertices</label>
         <form>
-          <div class="input-group form-group finder-form " style="width:100%">
+          <div class="input-group form-group" style="width:100%">
             <span class="input-group-addon">
               <span class="kuiIcon fa-search"></span>
             </span>
@@ -151,7 +151,7 @@
 
       </div>
 
-      <div class="config-close remove" ng-click="kbnTopNav.close()">
+      <div class="kuiLocalDropdownCloseButton" aria-label="close" ng-click="kbnTopNav.close()">
         <span class="kuiIcon fa-chevron-circle-up"></span>
       </div>
 
@@ -300,16 +300,16 @@
           </button>
         </div>
 
-        <div class="grphSelectionList">
+        <div class="gphSelectionList">
           <p ng-if="workspace.selectedNodes.length === 0" class="help-block">No selections. Click on vertices to add</p>
 
-          <div ng-repeat="n in workspace.selectedNodes" class="grphSelectionList__fieldLine" ng-class="{'grphSelectionList__fieldLine--selected': isSelectedSelected(n)}"
+          <div ng-repeat="n in workspace.selectedNodes" class="gphSelectionList__field" ng-class="{'gphSelectionList__field--selected': isSelectedSelected(n)}"
             ng-click="selectSelected(n)">
             <svg width="24" height="24">
-              <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-class="{selectedNode:n.isSelected}" ng-attr-style="fill:{{n.color}}"
+              <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{n.color}}"
                 ng-click="workspace.deselectNode(n)" />
 
-              <text ng-if="n.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16" ng-click="workspace.deselectNode(n)">{{n.icon.code}}</text>
+              <text ng-if="n.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="17" ng-click="workspace.deselectNode(n)">{{n.icon.code}}</text>
             </svg>
             <span>{{n.label}}</span>
             <span ng-if="n.numChildren>0"> (+{{n.numChildren}})</span>
