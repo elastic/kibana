@@ -180,7 +180,6 @@ export class UiSettingsService {
     } = this._savedObjectsClient.errors;
 
     const isIgnorableError = error => (
-      isNotFoundError(error) ||
       isForbiddenError(error) ||
       isEsUnavailableError(error) ||
       (ignore401Errors && isNotAuthorizedError(error))
@@ -190,6 +189,15 @@ export class UiSettingsService {
       const resp = await this._savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
+      if (isNotFoundError(error)) {
+        await createOrUpgradeSavedConfig({
+          savedObjectsClient: this._savedObjectsClient,
+          version: this._id,
+          buildNum: this._buildNum,
+          log: this._log,
+        });
+        return await this._read(options);
+      }
       if (isIgnorableError(error)) {
         return {};
       }
