@@ -52,8 +52,8 @@ describe('setBrand', () => {
     const { chrome } = setup();
 
     chrome.setBrand({
-      logo: 'foo',
-      smallLogo: 'bar',
+      logo: 'foo.svg',
+      smallLogo: 'smallFoo.svg',
     });
 
     chrome.setBrand({
@@ -64,8 +64,8 @@ describe('setBrand', () => {
 Array [
   Array [
     Object {
-      "logo": "foo",
-      "smallLogo": "bar",
+      "logo": "foo.svg",
+      "smallLogo": "smallFoo.svg",
     },
   ],
   Array [
@@ -86,12 +86,12 @@ describe('getBrand', () => {
     expect(chrome.getBrand()).toBe(undefined);
 
     brand$.next({
-      logo: 'bar',
-      smallLogo: 'bar',
+      logo: 'bar.svg',
+      smallLogo: 'smallBar.svg',
     });
 
-    expect(chrome.getBrand('logo')).toBe('bar');
-    expect(chrome.getBrand('smallLogo')).toBe('bar');
+    expect(chrome.getBrand('logo')).toBe('bar.svg');
+    expect(chrome.getBrand('smallLogo')).toBe('smallBar.svg');
     expect(chrome.getBrand()).toBe(undefined);
   });
 });
