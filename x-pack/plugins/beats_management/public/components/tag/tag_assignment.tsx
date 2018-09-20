@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { TagBadge } from './tag_badge';
 
 interface TagAssignmentProps {
   selectedBeats: CMPopulatedBeat[];
@@ -34,7 +36,7 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
       removeTagsFromBeats,
       selectedBeats,
       tag,
-      tag: { id, color },
+      tag: { id },
     } = this.props;
 
     const hasMatches = selectedBeats.some(({ tags }: CMPopulatedBeat) =>
@@ -42,16 +44,16 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
     );
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" key={`${id}-${hasMatches ? 'matched' : 'unmatched'}`}>
         {this.state.isFetchingTags && (
           <EuiFlexItem>
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
         )}
-        <EuiFlexItem key={`${id}-${hasMatches ? 'matched' : 'unmatched'}`}>
-          <EuiBadge
-            color={color}
+        <EuiFlexItem>
+          <TagBadge
             iconType={hasMatches ? 'cross' : undefined}
+            maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
             onClick={() => {
               this.setState({ isFetchingTags: true });
               hasMatches
@@ -60,9 +62,8 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
               this.setState({ isFetchingTags: false });
             }}
             onClickAriaLabel={id}
-          >
-            {id}
-          </EuiBadge>
+            tag={tag}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

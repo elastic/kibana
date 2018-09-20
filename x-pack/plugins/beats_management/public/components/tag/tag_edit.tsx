@@ -30,6 +30,7 @@ import { ConfigList } from '../config_list';
 import { Table } from '../table';
 import { BeatsTableType } from '../table';
 import { ConfigView } from './config_view';
+import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
   mode: 'edit' | 'create';
@@ -71,9 +72,10 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </p>
             </EuiText>
             <div>
-              <EuiBadge color={tag.color ? tag.color : '#FF0'}>
+              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
+              {/* <EuiBadge color={tag.color ? tag.color : '#FF0'}>
                 {tag.id ? tag.id : 'Tag name'}
-              </EuiBadge>
+              </EuiBadge> */}
             </div>
           </EuiFlexItem>
           <EuiFlexItem>

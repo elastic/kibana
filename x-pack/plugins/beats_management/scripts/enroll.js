@@ -22,6 +22,7 @@ const enroll = async token => {
       body: JSON.stringify({
         type: 'filebeat',
         host_name: `${chance.word()}.bar.com`,
+        name: chance.word(),
         version: '6.3.0',
       }),
     },

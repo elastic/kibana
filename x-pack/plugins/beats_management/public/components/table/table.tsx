@@ -19,7 +19,7 @@ interface TableProps {
   assignmentOptions?: any[] | null;
   assignmentTitle?: string | null;
   items: any[];
-  renderAssignmentOptions?: (item: any) => any;
+  renderAssignmentOptions?: (item: any, key: string) => any;
   showAssignmentOptions: boolean;
   type: TableType;
 

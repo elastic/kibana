@@ -5,6 +5,8 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import { sortBy } from 'lodash';
+import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
@@ -30,6 +32,7 @@ interface BeatsPageState {
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = BeatsActionArea;
+  private mounted: boolean = false;
   constructor(props: BeatsPageProps) {
     super(props);
 
@@ -39,11 +42,17 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       tableRef: React.createRef(),
       tags: null,
     };
-
+  }
+  public componentDidMount() {
+    this.mounted = true;
     this.loadBeats();
   }
-  public componentDidUpdate(prevProps: BeatsPageProps) {
-    if (this.props.location.pathname !== prevProps.location.pathname) {
+
+  public componentWillUnmount() {
+    this.mounted = false;
+  }
+  public componentDidUpdate(prevProps: any) {
+    if (this.props.location !== prevProps.location) {
       this.loadBeats();
     }
   }
@@ -66,7 +75,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
               actionHandler={this.handleBeatsActions}
               assignmentOptions={this.state.tags}
               assignmentTitle="Set tags"
-              items={this.state.beats.sort(this.sortBeats) || []}
+              items={sortBy(this.state.beats, 'id') || []}
               ref={this.state.tableRef}
               showAssignmentOptions={true}
               renderAssignmentOptions={this.renderTagAssignment}
@@ -74,6 +83,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
             />
           )}
         </WithKueryAutocompletion>
+
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}
@@ -83,11 +93,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     );
   }
 
-  private sortBeats = (a: CMPopulatedBeat, b: CMPopulatedBeat) => (a.id < b.id ? 0 : 1);
-
-  private renderTagAssignment = (tag: BeatTag) => (
+  private renderTagAssignment = (tag: BeatTag, key: string) => (
     <TagAssignment
       assignTagsToBeats={this.assignTagsToBeats}
+      key={key}
       removeTagsFromBeats={this.removeTagsFromBeats}
       selectedBeats={this.getSelectedBeats()}
       tag={tag}
@@ -134,9 +143,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     }
 
     const beats = await this.props.libs.beats.getAll(query);
-    this.setState({
-      beats,
-    });
+    if (this.mounted) {
+      this.setState({
+        beats,
+      });
+    }
   }
 
   // todo: add reference to ES filter endpoint
@@ -146,7 +157,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
-
     this.setState({
       tags,
     });
@@ -184,9 +194,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         : `${assignments.length} beats`;
     this.setState({
       notifications: this.state.notifications.concat({
-        title: `Tag ${actionName}`,
         color: 'success',
+        id: `tag-${moment.now()}`,
         text: <p>{`${actionName} tag "${tag}" ${preposition} ${beatMessage}.`}</p>,
+        title: `Tag ${actionName}`,
       }),
     });
   };

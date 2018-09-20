@@ -12,7 +12,7 @@ import { ControlDefinitions } from './table_type_configs';
 interface ControlBarProps {
   assignmentOptions: any[] | null;
   assignmentTitle: string | null;
-  renderAssignmentOptions?: (item: any) => any;
+  renderAssignmentOptions?: (item: any, key: string) => any;
 
   showAssignmentOptions: boolean;
   controlDefinitions: ControlDefinitions;
