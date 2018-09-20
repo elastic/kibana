@@ -197,7 +197,7 @@ export class CustomUrlEditor extends Component {
           <h4>Create new custom URL</h4>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiForm className="edit-url-form">
+        <EuiForm className="ml-edit-url-form">
           <EuiFormRow
             label="Label"
             className="url-label"

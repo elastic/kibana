@@ -13,7 +13,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
@@ -174,7 +174,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
@@ -369,7 +369,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
@@ -560,7 +560,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
@@ -725,7 +725,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
@@ -812,7 +812,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     size="m"
   />
   <EuiForm
-    className="edit-url-form"
+    className="ml-edit-url-form"
   >
     <EuiFormRow
       className="url-label"
