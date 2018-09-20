@@ -72,7 +72,7 @@ test(`#find`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const options = {};
+  const options = { type: 'foo' };
   const result = await client.find(options);
 
   expect(mockRepository.find).toHaveBeenCalledWith(options);
