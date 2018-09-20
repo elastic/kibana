@@ -39,22 +39,12 @@ test('load log data', async () => {
   expect(count).toBe(14005);
 });
 
-test('load ecommerce data', done => {
+test('load ecommerce data', async () => {
   let myDocsCount = 0;
   const bulkInsertMock = (docs) => {
     myDocsCount += docs.length;
   };
-<<<<<<< HEAD
-<<<<<<< HEAD
-  loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock, async (err, count) => {
-=======
-  loadData('./src/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock, async (err, count) => {
->>>>>>> added saved objects, new screenshot
-=======
-  loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock, async (err, count) => {
->>>>>>> fix test
-    expect(myDocsCount).toBe(4675);
-    expect(count).toBe(4675);
-    done();
-  });
+  const count = await loadData('./src/server/sample_data/data_sets/ecommerce/ecommerce.json.gz', bulkInsertMock);
+  expect(myDocsCount).toBe(4675);
+  expect(count).toBe(4675);
 });
