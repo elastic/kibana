@@ -187,12 +187,32 @@ export function FindProvider({ getService }) {
       return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
     }
 
+    async clickWhenNotDisabled(element, options = { doubleClick: false }) {
+      log.debug(`clickWhenNotDisabled`);
+      // Don't wrap this code in a retry, or stale element checks may get caught here and the element
+      // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
+      // it's gone.
+      await remote.moveMouseTo(element);
+
+      const clickIfNotDisabled = async (element, resolve) => {
+        const disabled = await element.getProperty('disabled');
+        if (disabled) {
+          log.debug('Element is disabled, try again');
+          setTimeout(() => clickIfNotDisabled(element, resolve), 250);
+        } else {
+          options.doubleClick ? await remote.doubleClick() : await element.click();
+          resolve();
+        }
+      };
+
+      await new Promise(resolve => clickIfNotDisabled(element, resolve));
+    }
+
     async clickByPartialLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`clickByPartialLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
+        await this.clickWhenNotDisabled(element);
       });
     }
 
@@ -200,8 +220,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
+        await this.clickWhenNotDisabled(element);
       });
     }
 
@@ -224,7 +243,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByButtonText(${buttonText})`);
       await retry.try(async () => {
         const button = await this.byButtonText(buttonText, element, timeout);
-        await button.click();
+        await this.clickWhenNotDisabled(button);
       });
     }
 
@@ -232,23 +251,29 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
+        await this.clickWhenNotDisabled(element);
       });
     }
+
+    async doubleClickByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug(`clickByCssSelector(${selector})`);
+      await retry.try(async () => {
+        const element = await this.byCssSelector(selector, timeout);
+        await this.clickWhenNotDisabled(element, { doubleClick: true });
+      });
+    }
+
     async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`clickByDisplayedLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.findDisplayedByLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
+        await this.clickWhenNotDisabled(element);
       });
     }
     async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
       await retry.try(async () => {
         const element = await this.findDisplayedByCssSelector(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
+        await this.clickWhenNotDisabled(element);
       });
     }
   }

@@ -65,22 +65,13 @@ export function TestSubjectsProvider({ getService }) {
 
     async click(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
-      });
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async doubleClick(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await remote.doubleClick();
-      });
+      await find.doubleClickByCssSelector(testSubjSelector(selector), timeout);
     }
-
 
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);

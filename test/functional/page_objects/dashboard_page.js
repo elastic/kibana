@@ -134,16 +134,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
     }
 
+    async dashboardBreadcrumbLinkExists() {
+      log.debug('dashboardBreadcrumbLinkExists');
+      return await find.existsByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
+    }
+
     async gotoDashboardLandingPage() {
       log.debug('gotoDashboardLandingPage');
-      const onPage = await this.onDashboardLandingPage();
-      if (!onPage) {
-        await retry.try(async () => {
-          await this.clickDashboardBreadcrumbLink();
+      await retry.try(async () => {
+        const onPage = await this.onDashboardLandingPage();
+        if (!onPage) {
+          const breadCrumbLinkExists = await this.dashboardBreadcrumbLinkExists();
+          if (breadCrumbLinkExists) {
+            await this.clickDashboardBreadcrumbLink();
+          }
           const onDashboardLandingPage = await this.onDashboardLandingPage();
           if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
-        });
-      }
+        }
+      });
     }
 
     async clickClone() {
@@ -167,6 +175,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async setClonedDashboardTitle(title) {
       await testSubjects.setValue('clonedDashboardTitle', title);
+    }
+
+    async expectDuplicateTitleWarningDisplayed() {
+      await testSubjects.existOrFail('titleDupicateWarnMsg');
     }
 
     async isDuplicateTitleWarningDisplayed() {
@@ -197,14 +209,21 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
-      const exists = await testSubjects.exists('newDashboardLink');
-      if (exists) {
-        return await testSubjects.click('newDashboardLink');
-      }
+      await retry.try(async () => {
+        // newDashboardLink button is only visible when dashboard listing table is displayed (at least one dashboard).
+        const exists = await testSubjects.exists('newDashboardLink');
+        if (exists) {
+          return await testSubjects.click('newDashboardLink');
+        }
 
-      // no dashboards exist, click createDashboardPromptButton to create new dashboard
-      return await this.clickCreateDashboardPrompt();
+        const promptExists = await this.getCreateDashboardPromptExists();
+        if (promptExists) {
+          // no dashboards exist, click createDashboardPromptButton to create new dashboard
+          await this.clickCreateDashboardPrompt();
+        } else {
+          throw new Error('No create button exists in the DOM yet, may still be rendering');
+        }
+      });
     }
 
     async clickCreateDashboardPrompt() {
@@ -303,6 +322,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
      */
     async saveDashboard(dashName, saveOptions = {}) {
+      log.debug(`DashboardPage.saveDashboard(${dashName}, ${JSON.stringify(saveOptions)}`);
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
@@ -340,10 +360,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.click('confirmSaveDashboardButton');
     }
 
     /**
@@ -371,6 +389,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async selectDashboard(dashName) {
+      log.debug(`selectDashboard(${dashName})`);
       await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
     }
 
@@ -405,7 +424,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await PageObjects.common.pressEnterKey();
       });
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForEuiTableLoading();
     }
 
     async getCountOfDashboardsInListingTable() {
@@ -425,19 +444,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     // entry, or at least to a single page of results
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
-
       await this.gotoDashboardLandingPage();
-
-      await retry.try(async () => {
-        await this.searchForDashboardWithName(dashName);
-        await this.selectDashboard(dashName);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const onDashboardLandingPage = await this.onDashboardLandingPage();
-        if (onDashboardLandingPage) {
-          throw new Error('Failed to open the dashboard up');
-        }
-      });
+      await this.searchForDashboardWithName(dashName);
+      await this.selectDashboard(dashName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getPanelTitles() {

@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
-
+      await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.dashboard.switchToEditMode();
 
       await PageObjects.visualize.openLegendOptionColors('Count');
@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
+      await PageObjects.dashboard.waitForRenderComplete();
       const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist('#EA6460');
 
       expect(colorChoiceRetained).to.be(true);
