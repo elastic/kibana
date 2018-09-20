@@ -8,6 +8,9 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryUri } from '../../../model';
 
 export const SymbolSchema = {
+  qname: {
+    type: 'keyword',
+  },
   symbolInformation: {
     properties: {
       name: {

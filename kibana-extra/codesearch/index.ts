@@ -14,7 +14,7 @@ import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
 import { CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './server/queue';
 import { fileRoute } from './server/routes/file';
-import { lspRoute } from './server/routes/lsp';
+import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
 import { repositoryRoute } from './server/routes/repository';
 import {
@@ -132,6 +132,7 @@ export default (kibana: any) =>
       fileRoute(server, serverOptions);
       workspaceRoute(server, serverOptions, objectsClient);
       monacoRoute(server);
+      symbolByQnameRoute(server, symbolSearchClient);
 
       lspService.launchServers().then(() => {
         // register lsp route after language server launched

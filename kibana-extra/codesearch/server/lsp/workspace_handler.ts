@@ -120,6 +120,7 @@ export class WorkspaceHandler {
         return response;
       }
       case 'textDocument/full': {
+        // unify the result of full as a array.
         const result = Array.isArray(response.result)
           ? (response.result as Full[])
           : [response.result as Full];
@@ -142,6 +143,7 @@ export class WorkspaceHandler {
             }
           }
         }
+        response.result = result;
         return response;
       }
       case 'textDocument/references': {

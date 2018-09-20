@@ -17,6 +17,23 @@ export class SymbolSearchClient extends AbstractSearchClient {
     super(client, log);
   }
 
+  public async findByQname(qname: string): Promise<SymbolSearchResult> {
+    const [from, size] = [0, 1];
+    const rawRes = await this.client.search({
+      index: `${SymbolIndexNamePrefix}*`,
+      body: {
+        from,
+        size,
+        query: {
+          term: {
+            qname,
+          },
+        },
+      },
+    });
+    return this.handleResults(rawRes);
+  }
+
   public async search(req: SymbolSearchRequest): Promise<SymbolSearchResult> {
     const resultsPerPage = this.getResultsPerPage(req);
     const from = (req.page - 1) * resultsPerPage;
@@ -54,6 +71,10 @@ export class SymbolSearchClient extends AbstractSearchClient {
       },
     });
 
+    return this.handleResults(rawRes);
+  }
+
+  private handleResults(rawRes: any) {
     const hits: any[] = rawRes.hits.hits;
     const symbols: DetailSymbolInformation[] = hits.map(hit => {
       const symbol: DetailSymbolInformation = hit._source;

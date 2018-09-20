@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { ResponseError } from 'vscode-jsonrpc';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
+import { SymbolSearchClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { promiseTimeout } from '../utils/timeout';
 
@@ -53,6 +55,21 @@ export function lspRoute(server: Server, lspService: LspService, serverOptions: 
       payload: {
         allow: 'application/json',
       },
+    },
+  });
+}
+
+export function symbolByQnameRoute(server: Server, symbolSearchClient: SymbolSearchClient) {
+  server.route({
+    path: '/api/lsp/symbol/{qname}',
+    method: 'GET',
+    async handler(req, reply) {
+      try {
+        const res = await symbolSearchClient.findByQname(req.params.qname);
+        reply(res);
+      } catch (error) {
+        reply(Boom.internal(`Search Exception ${error}`));
+      }
     },
   });
 }
