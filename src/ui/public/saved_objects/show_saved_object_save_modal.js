@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import { DashboardSaveModal } from './save_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showSaveModal({ onSave, title, description, timeRestore, showCopyOnSave }) {
+export function showSaveModal(saveModal) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
+
+  const onSave = saveModal.props.onSave;
 
   const onSaveConfirmed = (...args) => {
     onSave(...args).then(({ id, error }) => {
@@ -36,15 +37,12 @@ export function showSaveModal({ onSave, title, description, timeRestore, showCop
     });
   };
   document.body.appendChild(container);
-  const element = (
-    <DashboardSaveModal
-      onSave={onSaveConfirmed}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      timeRestore={timeRestore}
-      showCopyOnSave={showCopyOnSave}
-    />
+  const element = React.cloneElement(
+    saveModal,
+    {
+      onSave: onSaveConfirmed,
+      onClose: closeModal
+    }
   );
   ReactDOM.render(element, container);
 }
