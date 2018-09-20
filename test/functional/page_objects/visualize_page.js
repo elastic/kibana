@@ -1134,7 +1134,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('.vis-editor-agg-error');
+      const error = await find.byCssSelector('.visEditorAggParam__error');
       const errorMessage = await error.getProperty('innerText');
       log.debug(errorMessage);
       return errorMessage;

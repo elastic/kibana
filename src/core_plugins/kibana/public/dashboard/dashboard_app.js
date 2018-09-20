@@ -377,10 +377,7 @@ app.directive('dashboardApp', function ($injector) {
           $scope.$apply();
         };
 
-        const isLabsEnabled = config.get('visualize:enableLabs');
-        const listingLimit = config.get('savedObjects:listingLimit');
-
-        showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({

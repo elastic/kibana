@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const donut = () => ({
   name: 'donut',
-  displayName: 'Donut Chart',
+  displayName: 'Donut chart',
   help: 'A customizable donut chart',
   image: header,
   expression: `filters

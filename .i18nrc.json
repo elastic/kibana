@@ -3,6 +3,7 @@
     "common.ui": "src/ui",
     "inputControl":"src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
+    "markdownVis": "src/core_plugins/markdown_vis",
     "statusPage": "src/core_plugins/status_page",
     "xpack.idxMgmt": "x-pack/plugins/index_management"
   },

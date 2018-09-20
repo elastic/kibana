@@ -59,6 +59,7 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -229,8 +230,14 @@ function discoverController(
   }, {
     key: 'open',
     description: 'Open Saved Search',
-    template: require('plugins/kibana/discover/partials/load_search.html'),
     testId: 'discoverOpenButton',
+    run: () => {
+      showOpenSearchPanel({
+        makeUrl: (searchId) => {
+          return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
+        }
+      });
+    }
   }, {
     key: 'share',
     description: 'Share Search',
