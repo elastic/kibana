@@ -30,20 +30,19 @@ export class MBMapContainer extends React.Component {
     console.warn('Should tear down all resources of this component, including this._mbMap');
   }
 
-  componentDidMount() {
-    this._mbMap = createGlobalMbMapInstance(this.refs.mapContainer);
+  async _initializeMap() {
+    this._mbMap = await createGlobalMbMapInstance(this.refs.mapContainer);
     this.assignSizeWatch();
     this._mbMap.on('moveend', () => {
       const newMapState = this._getMapState();
       this.props.extentChanged(newMapState);
     });
-    this._mbMap.on('load', () => {
-      //todo: under consideration if we need this
-      const newMapState = this._getMapState();
-      this.props.extentChanged(newMapState);
-    });
     const newMapState = this._getMapState();
     this.props.initialize(newMapState);
+  }
+
+  componentDidMount() {
+    this._initializeMap();
   }
 
   assignSizeWatch() {

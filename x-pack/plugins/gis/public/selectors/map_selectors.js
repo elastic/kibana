@@ -74,6 +74,8 @@ function createStyleInstance(styleDescriptor) {
 
 export const getMapState = ({ map }) => map && map.mapState;
 
+export const getMapReady = ({ map }) => map && map.ready;
+
 
 const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;

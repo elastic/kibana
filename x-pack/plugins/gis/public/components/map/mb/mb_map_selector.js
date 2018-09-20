@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { getLayerList, getMapState } from "../../../selectors/map_selectors";
+import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
 import { getMbMap } from './global_mb_map';
 import _ from 'lodash';
 
@@ -54,13 +54,15 @@ function syncLayerOrder(mbMap, layerList) {
 
 // Selectors
 const getMbMapAndSyncWithMapState = createSelector(
+  getMapReady,
   getMapState,
-  (mapState) => {
+  (mapReady, mapState) => {
 
-    const mbMap = getMbMap();
-    if (!mbMap) {
+    if (!mapReady) {
       return;
     }
+
+    const mbMap = getMbMap();
     const center = mbMap.getCenter();
     const zoom = mbMap.getZoom();
     if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
@@ -75,10 +77,11 @@ const getMbMapAndSyncWithMapState = createSelector(
 );
 
 export const syncMBState = createSelector(
+  getMapReady,
   getMbMapAndSyncWithMapState,
   getLayerList,
-  (mbMap, layerList) => {
-    if (!mbMap) {
+  (mapReady, mbMap, layerList) => {
+    if (!mapReady) {
       return;
     }
     removeOrphanedSourcesAndLayers(mbMap, layerList);
