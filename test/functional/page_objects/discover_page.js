@@ -25,6 +25,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
   const getRemote = () => (
@@ -71,15 +72,29 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await Promise.all(headerElements.map(el => el.getVisibleText()));
     }
 
-    async openSavedSearch() {
+    async openLoadSavedSearchPanel() {
+      const isOpen = await testSubjects.exists('loadSearchForm');
+      if (isOpen) {
+        return;
+      }
+
       // We need this try loop here because previous actions in Discover like
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
       await retry.try(async () => {
         await this.clickLoadSavedSearchButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const loadIsOpen = await testSubjects.exists('loadSearchForm');
-        expect(loadIsOpen).to.be(true);
+        const isOpen = await testSubjects.exists('loadSearchForm');
+        expect(isOpen).to.be(true);
       });
+    }
+
+    async closeLoadSaveSearchPanel() {
+      const isOpen = await testSubjects.exists('loadSearchForm');
+      if (!isOpen) {
+        return;
+      }
+
+      await flyout.close('loadSearchForm');
     }
 
     async hasSavedSearch(searchName) {
@@ -88,7 +103,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async loadSavedSearch(searchName) {
-      await this.clickLoadSavedSearchButton();
+      await this.openLoadSavedSearchPanel();
       const searchLink = await find.byPartialLinkText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
