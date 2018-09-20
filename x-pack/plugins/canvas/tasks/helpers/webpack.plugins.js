@@ -47,8 +47,10 @@ module.exports = {
       });
 
       this.plugin('done', function(stats) {
-        if (stats.compilation.errors && stats.compilation.errors.length && !isWatch)
-          throw stats.compilation.errors[0];
+        if (stats.compilation.errors && stats.compilation.errors.length) {
+          if (isWatch) console.error(stats.compilation.errors[0]);
+          else throw stats.compilation.errors[0];
+        }
       });
     },
   ],

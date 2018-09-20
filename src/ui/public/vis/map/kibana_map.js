@@ -675,7 +675,7 @@ export class KibanaMap extends EventEmitter {
 
 function getAttributionArray(attribution) {
   const attributionString = attribution || '';
-  let attributions = attributionString.split('|');
+  let attributions = attributionString.split(/\s*\|\s*/);
   if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
     attributions = attributions[0].split(',');
   }
