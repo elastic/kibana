@@ -761,6 +761,7 @@ describe('SavedObjectsRepository', () => {
       const count = namespacedSearchResults.hits.hits.length;
 
       const response = await savedObjectsRepository.find({
+        type: 'foo',
         namespace: 'foo-namespace',
       });
 
