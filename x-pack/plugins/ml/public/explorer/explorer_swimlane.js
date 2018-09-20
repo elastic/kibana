@@ -221,13 +221,14 @@ export class ExplorerSwimlane extends React.Component {
       return;
     }
 
-    mlExplorerDashboardService.swimlaneCellClick.changed({
+    const cellData = {
       fieldName: swimlaneData.fieldName,
       lanes,
       times: d3.extent(times),
       type: swimlaneType,
       score: bucketScore
-    });
+    };
+    mlExplorerDashboardService.swimlaneCellClick.changed(cellData);
   }
 
   highlightSelection(cellsToSelect, laneLabels, times) {

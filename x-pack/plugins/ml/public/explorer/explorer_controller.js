@@ -479,7 +479,8 @@ module.controller('MlExplorerController', function (
       $scope.cellData = cellData;
 
       if (cellData.score > 0) {
-        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.laneLabels : $scope.getSelectedJobIds();
+        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.lanes : $scope.getSelectedJobIds();
+
         const influencers = getSelectionInfluencers(cellData);
 
         const listenerData = {
@@ -874,7 +875,11 @@ module.controller('MlExplorerController', function (
     skipCellClicks = true;
     // finish() function, called after each data set has been loaded and processed.
     // The last one to call it will trigger the page render.
-    function finish() {
+    function finish(resp) {
+      if (resp !== undefined) {
+        $scope.viewBySwimlaneData = processViewByResults(resp.results, fieldValues);
+      }
+
       skipCellClicks = false;
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);
       if (swimlaneCellClickListenerQueue.length > 0) {
@@ -918,10 +923,7 @@ module.controller('MlExplorerController', function (
           searchBounds.max.valueOf(),
           interval,
           swimlaneLimit
-        ).then((resp) => {
-          processViewByResults(resp.results, fieldValues);
-          finish();
-        });
+        ).then(finish);
       } else {
         const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
         mlResultsService.getScoresByBucket(
@@ -930,10 +932,7 @@ module.controller('MlExplorerController', function (
           searchBounds.max.valueOf(),
           interval,
           swimlaneLimit
-        ).then((resp) => {
-          processViewByResults(resp.results, fieldValues);
-          finish();
-        });
+        ).then(finish);
 
       }
     }
@@ -1158,7 +1157,8 @@ module.controller('MlExplorerController', function (
     const dataset = {
       fieldName: $scope.swimlaneViewByFieldName,
       points: [],
-      interval: $scope.swimlaneBucketInterval.asSeconds() };
+      interval: $scope.swimlaneBucketInterval.asSeconds()
+    };
 
     // Set the earliest and latest to be the same as the overall swimlane.
     dataset.earliest = $scope.overallSwimlaneData.earliest;
@@ -1206,7 +1206,7 @@ module.controller('MlExplorerController', function (
       });
     }
 
-    $scope.viewBySwimlaneData = dataset;
+    return dataset;
   }
 
 });
