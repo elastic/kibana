@@ -148,13 +148,13 @@ module.controller('MlExplorerController', function (
   $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
 
 
-  let chartsInitialized = false;
+  let isChartsContainerInitialized = false;
   let chartsCallback = () => {};
   function initializeAfterChartsContainerDone() {
-    if (chartsInitialized === false) {
+    if (isChartsContainerInitialized === false) {
       chartsCallback();
     }
-    chartsInitialized = true;
+    isChartsContainerInitialized = true;
   }
 
   $scope.initializeVis = function () {
@@ -540,8 +540,7 @@ module.controller('MlExplorerController', function (
   const checkboxShowChartsListener = function () {
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
     if (showCharts && $scope.cellData !== undefined) {
-      // passing true as the second argument skips click event filtering
-      swimlaneCellClickListener($scope.cellData, true);
+      updateExplorer();
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
       mlExplorerDashboardService.anomalyDataChange.changed(
@@ -1062,7 +1061,7 @@ module.controller('MlExplorerController', function (
       loadAnomaliesTableData();
     }
 
-    if (chartsInitialized) {
+    if (isChartsContainerInitialized) {
       finish();
     } else {
       chartsCallback = finish;
