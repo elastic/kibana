@@ -1,0 +1,8 @@
+.inspector-table__filter {
+  opacity: 0;
+}
+
+tr:hover .inspector-table__filter,
+.inspector-table__filter:focus {
+  opacity: 1;
+}
