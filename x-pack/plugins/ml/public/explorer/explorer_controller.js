@@ -934,7 +934,7 @@ module.controller('MlExplorerController', function (
     const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
     const selectedJobIds = $scope.getSelectedJobIds();
     const limit = mlSelectLimitService.state.get('limit');
-    const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
+    const swimlaneLimit = (limit === undefined) ? 10 : limit;
 
     // load scores by influencer/jobId value and time.
     // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -965,7 +965,7 @@ module.controller('MlExplorerController', function (
   function loadViewBySwimlaneForSelectedTime(earliestMs, latestMs) {
     const selectedJobIds = $scope.getSelectedJobIds();
     const limit = mlSelectLimitService.state.get('limit');
-    const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
+    const swimlaneLimit = (limit === undefined) ? 10 : limit;
 
     // Find the top field values for the selected time, and then load the 'view by'
     // swimlane over the full time range for those specific field values.

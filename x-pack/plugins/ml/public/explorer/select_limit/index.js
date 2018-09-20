@@ -6,4 +6,4 @@
 
 
 
-import './select_limit.js';
+import './select_limit_directive.js';
