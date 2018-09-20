@@ -20,6 +20,7 @@ import { waffleNodesQuery } from './waffle_nodes.gql_query';
 interface WithWaffleNodesArgs {
   nodes: InfraWaffleMapGroup[];
   loading: boolean;
+  refetch: () => void;
 }
 
 interface WithWaffleNodesProps {
@@ -50,13 +51,14 @@ export const WithWaffleNodes = ({
       filterQuery,
     }}
   >
-    {({ data, loading }) =>
+    {({ data, loading, refetch }) =>
       children({
         loading,
         nodes:
           data && data.source && data.source.map && data.source.map.nodes
             ? nodesToWaffleMap(data.source.map.nodes)
             : [],
+        refetch,
       })
     }
   </Query>

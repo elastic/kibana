@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiEmptyPrompt, EuiLoadingChart } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -19,6 +19,7 @@ import {
 } from '../../lib/lib';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
+import { InfraLoading } from '../loading';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
@@ -28,6 +29,7 @@ interface Props {
   options: InfraWaffleMapOptions;
   map: InfraWaffleData;
   loading: boolean;
+  reload: () => void;
 }
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
@@ -49,28 +51,28 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 
 export class Waffle extends React.Component<Props, {}> {
   public render() {
-    if (this.props.loading) {
-      return (
-        <WaffleLoadingContainer>
-          <EuiLoadingChart size="xl" mono />
-        </WaffleLoadingContainer>
-      );
-    } else if (!this.props.loading && this.props.map && this.props.map.length === 0) {
+    const { loading, map, reload } = this.props;
+    if (loading) {
+      return <InfraLoading height="100%" width="100%" text="Loading data" />;
+    } else if (!loading && map && map.length === 0) {
       return (
         <EuiEmptyPrompt
           iconType="grid"
-          title={<h2>Map not availabe</h2>}
+          title={<h2>There is no data to display.</h2>}
           titleSize="m"
-          body={<p>Unable to find data</p>}
-          actions={<br />}
+          body={<p>Try adjusting your time or filter.</p>}
+          actions={
+            <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
+              Check for new data
+            </EuiButton>
+          }
         />
       );
     }
-    const bounds = calculateBoundsFromMap(this.props.map);
+    const bounds = calculateBoundsFromMap(map);
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
-          const { map } = this.props;
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
             <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
@@ -148,12 +150,4 @@ const WaffleMapInnerContainer = styled.div`
   justify-content: center;
   align-content: flex-start;
   padding: 10px;
-`;
-
-const WaffleLoadingContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 `;
