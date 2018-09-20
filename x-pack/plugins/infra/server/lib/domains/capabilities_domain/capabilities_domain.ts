@@ -14,10 +14,25 @@ export class InfraCapabilitiesDomain {
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  public async getCapabilities(req: InfraFrameworkRequest, sourceId: string, nodeName: string) {
+  public async getCapabilities(
+    req: InfraFrameworkRequest,
+    sourceId: string,
+    nodeName: string,
+    nodeType: string
+  ) {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
-    const metricsPromise = this.adapter.getMetricCapabilities(req, sourceConfiguration, nodeName);
-    const logsPromise = this.adapter.getLogCapabilities(req, sourceConfiguration, nodeName);
+    const metricsPromise = this.adapter.getMetricCapabilities(
+      req,
+      sourceConfiguration,
+      nodeName,
+      nodeType
+    );
+    const logsPromise = this.adapter.getLogCapabilities(
+      req,
+      sourceConfiguration,
+      nodeName,
+      nodeType
+    );
 
     const metrics = await metricsPromise;
     const logs = await logsPromise;
@@ -46,7 +61,7 @@ const pickCapabilities = (buckets: InfraCapabilityAggregationBucket[]): string[]
           return [];
         }
       })
-      .reduce((a: string[], b: string[]) => a.concat(b));
+      .reduce((a: string[], b: string[]) => a.concat(b), []);
     return capabilities;
   } else {
     return [];

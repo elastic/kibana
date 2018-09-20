@@ -161,6 +161,7 @@ export namespace InfraSourceResolvers {
   >;
   export interface CapabilitiesByNodeArgs {
     nodeName: string;
+    nodeType: NodeType;
   }
 
   export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
@@ -451,6 +452,7 @@ export interface SourceQueryArgs {
 }
 export interface CapabilitiesByNodeInfraSourceArgs {
   nodeName: string;
+  nodeType: NodeType;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
@@ -489,6 +491,12 @@ export enum InfraIndexType {
   ANY = 'ANY',
   LOGS = 'LOGS',
   METRICS = 'METRICS',
+}
+
+export enum NodeType {
+  host = 'host',
+  container = 'container',
+  pod = 'pod',
 }
 
 export enum InfraPathType {

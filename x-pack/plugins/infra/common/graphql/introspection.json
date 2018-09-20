@@ -123,6 +123,16 @@
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "nodeType",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "ENUM", "name": "NodeType", "ofType": null }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -649,6 +659,30 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "NodeType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "host",
+            "description": "Fixed set of possible node types",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "container",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "pod", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {

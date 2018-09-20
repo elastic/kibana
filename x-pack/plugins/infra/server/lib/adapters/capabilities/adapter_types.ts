@@ -11,11 +11,13 @@ export interface InfraCapabilitiesAdapter {
   getMetricCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string
+    nodeName: string,
+    nodeType: string
   ): Promise<InfraCapabilityAggregationBucket[]>;
   getLogCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string
+    nodeName: string,
+    nodeType: string
   ): Promise<InfraCapabilityAggregationBucket[]>;
 }

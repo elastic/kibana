@@ -22,14 +22,16 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
   public async getMetricCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string
+    nodeName: string,
+    nodeType: 'host' | 'container' | 'pod'
   ): Promise<InfraCapabilityAggregationBucket[]> {
+    const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const metricQuery = {
       index: sourceConfiguration.metricAlias,
       body: {
         query: {
           match: {
-            ['host.name']: nodeName,
+            [idFieldName]: nodeName,
           },
         },
         size: 0,
@@ -65,14 +67,16 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
   public async getLogCapabilities(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string
+    nodeName: string,
+    nodeType: 'host' | 'container' | 'pod'
   ): Promise<InfraCapabilityAggregationBucket[]> {
+    const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const logQuery = {
       index: sourceConfiguration.logAlias,
       body: {
         query: {
           match: {
-            ['host.name']: nodeName,
+            [idFieldName]: nodeName,
           },
         },
         size: 0,
@@ -105,3 +109,14 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       : [];
   }
 }
+
+const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType: string) => {
+  switch (nodeType) {
+    case 'host':
+      return sourceConfiguration.fields.hostname;
+    case 'container':
+      return sourceConfiguration.fields.container;
+    default:
+      return sourceConfiguration.fields.pod;
+  }
+};
