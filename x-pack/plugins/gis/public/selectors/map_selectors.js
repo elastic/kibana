@@ -15,6 +15,7 @@ import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
+import { ESSearchSource } from '../shared/layers/sources/es_search_source';
 import { FillAndOutlineStyle } from '../shared/layers/styles/fill_and_outline_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 
@@ -50,6 +51,8 @@ function createSourceInstance(sourceDescriptor, dataSources) {
       return new KibanaRegionmapSource(sourceDescriptor, regions);
     case ESGeohashGridSource.type:
       return new ESGeohashGridSource(sourceDescriptor);
+    case ESSearchSource.type:
+      return new ESSearchSource(sourceDescriptor);
     default:
       throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
@@ -73,6 +76,8 @@ function createStyleInstance(styleDescriptor) {
 }
 
 export const getMapState = ({ map }) => map && map.mapState;
+
+export const getMapReady = ({ map }) => map && map.ready;
 
 
 const getSelectedLayerId = ({ map }) => {

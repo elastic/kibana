@@ -7,7 +7,7 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,   MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -31,6 +31,7 @@ const updateLayerInList = (state, id, attribute, newValue) => {
 };
 
 const INITIAL_STATE = {
+  ready: false,
   mapState: {
     zoom: 4,
     center: [-100.41, 32.82],
@@ -49,6 +50,8 @@ export function map(state = INITIAL_STATE, action) {
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
+    case MAP_READY:
+      return { ...state, ready: true };
     case MAP_EXTENT_CHANGED:
       const newMapState = {
         center: action.mapState.center,

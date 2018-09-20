@@ -10,6 +10,7 @@ import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
 import { KibanaTilemapSource } from '../../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
+import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
 import {
   EuiAccordion,
   EuiText,
@@ -56,6 +57,7 @@ export class AddLayerPanel extends React.Component {
     const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
     const regionmapEditor = KibanaRegionmapSource.renderEditor(editorProperties);
     const heatmapEditor = ESGeohashGridSource.renderEditor(editorProperties);
+    const esSearchEditor = ESSearchSource.renderEditor(editorProperties);
     const tilemapEditor = KibanaTilemapSource.renderEditor(editorProperties);
 
     return (
@@ -78,37 +80,43 @@ export class AddLayerPanel extends React.Component {
           <div>
             <EuiSpacer size="l"/>
             <EuiAccordion
-              id="accordion2"
+              id="ems"
               buttonContent="From Elastic Maps Service"
               paddingSize="l"
             >
               {emsFileEditor}
             </EuiAccordion>
-          </div>
-          <div>
+
             <EuiSpacer size="l"/>
             <EuiAccordion
-              id="accordion2"
+              id="xyz"
               buttonContent="Tilemap service with XYZ url"
               paddingSize="l"
             >
               {xyzTmsEditor}
             </EuiAccordion>
-          </div>
-          <div>
+
             <EuiSpacer size="l"/>
             <EuiAccordion
-              id="accordion2"
-              buttonContent="Elasticsearch"
+              id="es_geohash_grid"
+              buttonContent="Elasticsearch GeoHash grid Aggregation"
               paddingSize="l"
             >
               {heatmapEditor}
             </EuiAccordion>
-          </div>
-          <div>
+
             <EuiSpacer size="l"/>
             <EuiAccordion
-              id="accordion2"
+              id="es_search"
+              buttonContent="Elasticsearch documents"
+              paddingSize="l"
+            >
+              {esSearchEditor}
+            </EuiAccordion>
+
+            <EuiSpacer size="l"/>
+            <EuiAccordion
+              id="kibana_config"
               buttonContent="From Kibana Config"
               paddingSize="l"
             >

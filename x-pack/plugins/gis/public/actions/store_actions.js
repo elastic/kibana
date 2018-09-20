@@ -16,6 +16,7 @@ export const CLEAR_TEMPORARY_LAYERS = 'CLEAR_TEMPORARY_LAYERS';
 export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
+export const MAP_READY = 'MAP_READY';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
@@ -103,10 +104,14 @@ export function clearTemporaryLayers() {
   };
 }
 
+export function mapReady() {
+  return {
+    type: MAP_READY
+  };
+}
+
 export function mapExtentChanged(newMapConstants) {
   const tokenString = 'data_request_sync_extentchange';
-
-
   return async (dispatch, getState) => {
     dispatch({
       type: MAP_EXTENT_CHANGED,

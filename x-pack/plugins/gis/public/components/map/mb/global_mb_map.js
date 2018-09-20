@@ -8,26 +8,27 @@ import mapboxgl from 'mapbox-gl';
 
 let MB_MAP = null;
 
-export function createGlobalMbMapInstance(node) {
-  MB_MAP = new mapboxgl.Map({
-    container: node,
-    style: {
-      version: 8,
-      sources: {},
-      layers: [],
-    },
+export async function createGlobalMbMapInstance(node) {
+  return new Promise((resolve) => {
+    MB_MAP = new mapboxgl.Map({
+      container: node,
+      style: {
+        version: 8,
+        sources: {},
+        layers: [],
+      },
+    });
+    MB_MAP.dragRotate.disable();
+    MB_MAP.touchZoomRotate.disableRotation();
+    MB_MAP.on('load', () => {
+      resolve(MB_MAP);
+    });
   });
-  MB_MAP.dragRotate.disable();
-  MB_MAP.touchZoomRotate.disableRotation();
-  return MB_MAP;
 }
 
 /**
  * this is to provide access to the raw map component in the selector
  */
 export function getMbMap() {
-  if (MB_MAP && !MB_MAP.isStyleLoaded()) {
-    return;
-  }
   return MB_MAP;
 }
