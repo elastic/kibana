@@ -11,6 +11,8 @@ export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
 
+  static typeDisplayName = 'TMS';
+
   static createDescriptor(serviceId) {
     return {
       type: EMSTMSSource.type,

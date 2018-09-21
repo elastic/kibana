@@ -19,6 +19,8 @@ export class ESGeohashGridSource extends ASource {
 
   static type = 'ES_GEOHASH_GRID';
 
+  static typeDisplayName = 'Elasticsearch geoHash grid';
+
   static createDescriptor({ esIndexPattern, pointField }) {
     return {
       type: ESGeohashGridSource.type,
