@@ -303,5 +303,5 @@ Integration tests can be run like so:
 
 ```
 node scripts/functional_tests_server.js --config test/plugin_functional/config.js
-node scripts/functional_test_runner --config test/api_integration/config.js --grep task_manager
+node scripts/functional_test_runner --config test/plugin_functional/config.js --grep task_manager
 ```

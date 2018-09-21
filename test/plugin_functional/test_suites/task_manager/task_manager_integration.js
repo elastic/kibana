@@ -19,12 +19,15 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
+import url from 'url';
+import supertestAsPromised from 'supertest-as-promised';
 
 export default function ({ getService }) {
   const es = getService('es');
-  const supertest = getService('supertest');
   const retry = getService('retry');
+  const config = getService('config');
   const testHistoryIndex = '.task_manager_test_result';
+  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('running tasks', () => {
     beforeEach(() => supertest.delete('/api/sample_tasks')
