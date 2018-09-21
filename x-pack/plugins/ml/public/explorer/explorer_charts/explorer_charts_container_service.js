@@ -81,7 +81,7 @@ export function explorerChartsContainerServiceFactory(
       latestMs,
       chartWidth,
       recordsToPlot,
-      data.timeFieldNam
+      data.timeFieldName
     );
     data.tooManyBuckets = tooManyBuckets;
 

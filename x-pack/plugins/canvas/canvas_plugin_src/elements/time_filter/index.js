@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const timeFilter = () => ({
   name: 'time_filter',
-  displayName: 'Time Filter',
+  displayName: 'Time filter',
   help: 'Set a time window',
   image: header,
   height: 50,

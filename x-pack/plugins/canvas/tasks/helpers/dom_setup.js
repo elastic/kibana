@@ -15,6 +15,7 @@ const { window } = new JSDOM('', {
   url: `http://localhost:5601/${basename}`,
   pretendToBeVisual: true,
 });
+
 global.window = window;
 global.document = window.document;
 global.navigator = window.navigator;

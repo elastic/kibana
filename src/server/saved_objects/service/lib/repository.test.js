@@ -385,7 +385,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#delete', () => {
-    it('throws notFound when ES is unable to find the document',  async () => {
+    it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
       callAdminCluster.returns(Promise.resolve({
@@ -394,7 +394,7 @@ describe('SavedObjectsRepository', () => {
 
       try {
         await savedObjectsRepository.delete('index-pattern', 'logstash-*');
-      } catch(e) {
+      } catch (e) {
         expect(e.output.statusCode).toEqual(404);
       }
     });
@@ -423,9 +423,15 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns(searchResults);
     });
 
+    it('requires type to be defined', async () => {
+      await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
+    });
+
     it('requires searchFields be an array if defined', async () => {
       try {
-        await savedObjectsRepository.find({ searchFields: 'string' });
+        await savedObjectsRepository.find({ type: 'foo', searchFields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -436,7 +442,7 @@ describe('SavedObjectsRepository', () => {
 
     it('requires fields be an array if defined', async () => {
       try {
-        await savedObjectsRepository.find({ fields: 'string' });
+        await savedObjectsRepository.find({ type: 'foo', fields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -461,7 +467,7 @@ describe('SavedObjectsRepository', () => {
 
     it('merges output of getSearchDsl into es request body', async () => {
       getSearchDsl.returns({ query: 1, aggregations: 2 });
-      await savedObjectsRepository.find();
+      await savedObjectsRepository.find({ type: 'foo' });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
@@ -475,7 +481,7 @@ describe('SavedObjectsRepository', () => {
     it('formats Elasticsearch response', async () => {
       const count = searchResults.hits.hits.length;
 
-      const response = await savedObjectsRepository.find();
+      const response = await savedObjectsRepository.find({ type: 'foo' });
 
       expect(response.total).toBe(count);
       expect(response.saved_objects).toHaveLength(count);
@@ -492,7 +498,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('accepts per_page/page', async () => {
-      await savedObjectsRepository.find({ perPage: 10, page: 6 });
+      await savedObjectsRepository.find({ type: 'foo', perPage: 10, page: 6 });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -504,12 +510,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('can filter by fields', async () => {
-      await savedObjectsRepository.find({ fields: ['title'] });
+      await savedObjectsRepository.find({ type: 'foo', fields: ['title'] });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         _source: [
-          '*.title', 'type', 'title'
+          'foo.title', 'type', 'title'
         ]
       }));
 

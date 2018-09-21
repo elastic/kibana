@@ -8,6 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { setTelemetryOptInService, setTelemetryEnabled, setHttpClient, TelemetryOptInProvider } from './lib/telemetry';
+
 
 import App from './app';
 import { BASE_PATH } from "../common/constants/base_path";
@@ -49,7 +51,14 @@ const manageAngularLifecycle = ($scope, $route, elem) => {
     elem && unmountComponentAtNode(elem);
   });
 };
-
+const initializeTelemetry = ($injector) => {
+  const telemetryEnabled = $injector.get('telemetryEnabled');
+  const Private = $injector.get('Private');
+  const telemetryOptInProvider = Private(TelemetryOptInProvider);
+  setTelemetryOptInService(telemetryOptInProvider);
+  setTelemetryEnabled(telemetryEnabled);
+  setHttpClient($injector.get('$http'));
+};
 routes
   .when(`${BASE_PATH}:view?`, {
     template: template,
@@ -57,6 +66,7 @@ routes
     controller: class LicenseManagementController {
 
       constructor($injector, $window, $rootScope, $scope, $route, kbnUrl) {
+        initializeTelemetry($injector);
         let autoLogout = null;
         /* if security is disabled, there will be no autoLogout service,
          so just substitute noop function in that case */
