@@ -5,7 +5,6 @@
  */
 
 import { flatten } from 'lodash';
-import moment from 'moment';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -33,8 +32,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];
     const timerange = {
-      min: moment.utc(options.timerange.from).toISOString(),
-      max: moment.utc(options.timerange.to).toISOString(),
+      min: options.timerange.from,
+      max: options.timerange.to,
     };
 
     const search = <Aggregation>(searchOptions: object) =>

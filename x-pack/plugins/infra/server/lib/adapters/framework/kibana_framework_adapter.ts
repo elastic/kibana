@@ -100,7 +100,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   public async makeTSVBRequest(
     req: InfraFrameworkRequest<Request>,
     model: InfraMetricModel,
-    timerange: { min: string; max: string },
+    timerange: { min: number; max: number },
     filters: any[]
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];

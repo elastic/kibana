@@ -55,7 +55,7 @@ export interface InfraBackendFrameworkAdapter {
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
-    timerange: { min: string; max: string },
+    timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
 }
