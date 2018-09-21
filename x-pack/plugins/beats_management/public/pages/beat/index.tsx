@@ -59,11 +59,13 @@ export class BeatDetailsPage extends React.PureComponent<
   public render() {
     const { beat } = this.state;
     let id;
+    let name;
 
     if (beat) {
       id = beat.id;
+      name = beat.name;
     }
-    const title = this.state.isLoading ? 'Loading' : `Beat: ${id}`;
+    const title = this.state.isLoading ? 'Loading' : `Beat: ${name || id}`;
     const tabs = [
       {
         id: `/beat/${id}`,
