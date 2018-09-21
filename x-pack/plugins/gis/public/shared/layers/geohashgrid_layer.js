@@ -73,13 +73,7 @@ export class GeohashGridLayer extends ALayer {
         id: heatmapLayerId,
         type: 'heatmap',
         source: this.getId(),
-        paint: {//needs tweaking
-          "heatmap-radius": 64,
-          "heatmap-weight": {
-            "type": "identity",
-            "property": "__kbn_heatmap_weight__"
-          }
-        }
+        paint: {}
       });
     }
 
@@ -90,18 +84,20 @@ export class GeohashGridLayer extends ALayer {
       return;
     }
 
+    const scaledPropertyName = '__kbn_heatmap_weight__';
     if (this._descriptor.data !== mbSourceAfter._data) {
       let max = 0;
       for (let i = 0; i < this._descriptor.data.features.length; i++) {
         max = Math.max(this._descriptor.data.features[i].properties.doc_count, max);
       }
       for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        this._descriptor.data.features[i].properties.__kbn_heatmap_weight__ = this._descriptor.data.features[i].properties.doc_count / max;
+        this._descriptor.data.features[i].properties[scaledPropertyName] = this._descriptor.data.features[i].properties.doc_count / max;
       }
       mbSourceAfter.setData(this._descriptor.data);
     }
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    this._style.setMBPaintProperties(mbMap, heatmapLayerId, scaledPropertyName);
 
   }
 

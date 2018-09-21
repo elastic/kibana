@@ -31,4 +31,13 @@ export class HeatmapStyle {
   static renderEditor({}) {
     return (<div>Here be heatmap style editor.</div>);
   }
+
+  setMBPaintProperties(mbMap, pointLayerID, property) {
+    mbMap.setPaintProperty(pointLayerID, 'heatmap-radius', 64);
+    mbMap.setPaintProperty(pointLayerID, 'heatmap-weight', {
+      "type": 'identity',
+      "property": property
+    });
+  }
+
 }
