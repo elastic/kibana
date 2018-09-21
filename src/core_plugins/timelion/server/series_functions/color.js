@@ -52,7 +52,7 @@ export default new Chainable('color', {
     return alter(args, function (eachSeries) {
       if (gradient) {
         eachSeries.color = gradient[i++].toHexString();
-      } else if (colors.length === 1) {
+      } else if (colors.length === 1 || gradientStops === 1) {
         eachSeries.color = colors[0];
       } else {
         throw new Error('color not provided');
