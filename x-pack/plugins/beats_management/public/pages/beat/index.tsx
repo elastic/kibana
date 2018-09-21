@@ -33,6 +33,7 @@ interface BeatDetailsPageProps {
 
 interface BeatDetailsPageState {
   beat: CMPopulatedBeat | undefined;
+  beatId: string;
   isLoading: boolean;
 }
 
@@ -45,6 +46,7 @@ export class BeatDetailsPage extends React.PureComponent<
 
     this.state = {
       beat: undefined,
+      beatId: this.props.match.params.beatId,
       isLoading: true,
     };
     this.loadBeat();
@@ -106,7 +108,7 @@ export class BeatDetailsPage extends React.PureComponent<
             path="/beat/:beatId/tags"
             render={(props: any) => (
               <BeatTagsPage
-                beat={this.state.beat}
+                beatId={this.state.beatId}
                 libs={this.props.libs}
                 refreshBeat={() => this.loadBeat()}
                 {...props}
