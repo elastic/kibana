@@ -13,12 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
+import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../../components/connected_link';
 import { TagBadge } from '../../components/tag';
+import { supportedConfigs } from '../../config_schemas';
 
 interface BeatDetailPageProps {
   beat: CMPopulatedBeat | undefined;
@@ -32,22 +33,29 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
   const configurationBlocks = flatten(
     beat.full_tags.map((tag: BeatTag) => {
       return tag.configuration_blocks.map(configuration => ({
-        ...configuration,
         // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
         module: configuration.configs[0].module || null,
         tagId: tag.id,
         tagColor: tag.color,
         ...beat,
+        ...configuration,
+        displayValue: get(
+          supportedConfigs.find(config => config.value === configuration.type),
+          'text',
+          null
+        ),
       }));
     })
   );
 
   const columns = [
     {
-      field: 'type',
+      field: 'displayValue',
       name: 'Type',
       sortable: true,
-      render: (type: string) => <EuiLink href="#">{type}</EuiLink>,
+      render: (value: string | null, configuration: any) => (
+        <EuiLink href="#">{value || configuration.type}</EuiLink>
+      ),
     },
     {
       field: 'module',
