@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { values } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
 
@@ -16,14 +15,11 @@ export const progress = () => ({
   args: [
     {
       name: 'shape',
-      displayName: 'Shape',
-      help: 'Shape of the element, e.g. gauge, bar, etc ',
-      argType: 'select',
+      displayName: 'Select a Shape',
+      argType: 'shape',
+      help: 'A basic shape',
       options: {
-        choices: values(shapes).map(({ name, displayName }) => ({
-          value: name,
-          name: displayName,
-        })),
+        shapes,
       },
     },
     {
