@@ -217,27 +217,18 @@ export async function deleteIndex(callCluster: CallCluster, index: string) {
  * @param {FullIndexInfo} info - Information about the mappings and name of the new index
  * @param {string} alias - The name of the index being converted to an alias
  */
-export async function convertToAlias(callCluster: CallCluster, info: FullIndexInfo, alias: string) {
-  // Reindexing a relatively large (~10K docs) index takes around 40 seconds or so
-  // on a relatively fast SSD. So, we need to override the default timeout 10 minutes
-  // should be ample time for any index that migrations is designed to handle. We may
-  // want to make this a configurable knob at some point.
-  const requestTimeout = 10 * 60 * 1000;
-
+export async function convertToAlias(
+  callCluster: CallCluster,
+  info: FullIndexInfo,
+  alias: string,
+  batchSize: number
+) {
   await callCluster('indices.create', {
     body: { mappings: info.mappings },
     index: info.indexName,
   });
 
-  await callCluster('reindex', {
-    requestTimeout,
-    body: {
-      dest: { index: info.indexName },
-      source: { index: alias },
-    },
-    refresh: true,
-    waitForCompletion: true,
-  });
+  await reindex(callCluster, alias, info.indexName, batchSize);
 
   await claimAlias(callCluster, info.indexName, alias, [{ remove_index: { index: alias } }]);
 }
@@ -290,4 +281,33 @@ async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
     );
   }
   return indexInfo;
+}
+
+/**
+ * Reindexes from source to dest, polling for the reindex completion.
+ */
+async function reindex(callCluster: CallCluster, source: string, dest: string, batchSize: number) {
+  // We poll instead of having the request wait for completion, as for large indices,
+  // the request times out on the Elasticsearch side of things. We have a relatively tight
+  // polling interval, as the request is fairly efficent, and we don't
+  // want to block index migrations for too long on this.
+  const pollInterval = 250;
+  const { task } = await callCluster('reindex', {
+    body: {
+      dest: { index: dest },
+      source: { index: source, size: batchSize },
+    },
+    refresh: true,
+    waitForCompletion: false,
+  });
+
+  let completed = false;
+
+  while (!completed) {
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    completed = await callCluster('tasks.get', {
+      taskId: task,
+    }).then(result => result.completed);
+  }
 }
