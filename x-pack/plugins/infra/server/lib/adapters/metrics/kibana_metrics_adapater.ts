@@ -23,8 +23,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     req: InfraFrameworkRequest,
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]> {
-    const search = <Aggregation>(searchOptions: object) =>
-      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
     const fields = {
       [InfraNodeType.host]: options.sourceConfiguration.fields.hostname,
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
@@ -38,15 +36,20 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       min: moment.utc(options.timerange.from).toISOString(),
       max: moment.utc(options.timerange.to).toISOString(),
     };
+
+    const search = <Aggregation>(searchOptions: object) =>
+      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
+
+    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
+    if (!validNode) {
+      throw new Error(`${options.nodeId} does not exist.`);
+    }
+
     const requests = options.metrics.map(metricId => {
       const model = metricModels[metricId](timeField, indexPattern, interval);
       const filters = [{ match: { [nodeField]: options.nodeId } }];
       return this.framework.makeTSVBRequest(req, model, timerange, filters);
     });
-    const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
-    if (!validNode) {
-      throw new Error(`${options.nodeId} does not exist.`);
-    }
     return Promise.all(requests)
       .then(results => {
         return results.map(result => {
