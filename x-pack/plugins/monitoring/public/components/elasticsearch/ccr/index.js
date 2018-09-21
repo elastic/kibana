@@ -53,7 +53,7 @@ export class Ccr extends Component {
             },
             {
               field: 'opsSynced',
-              name: 'Total ops synced'
+              name: 'Ops synced'
             },
             {
               field: 'syncLagTime',
@@ -120,7 +120,7 @@ export class Ccr extends Component {
           {
             field: 'opsSynced',
             sortable: true,
-            name: 'Total ops synced'
+            name: 'Ops synced'
           },
           {
             field: 'syncLagTime',
