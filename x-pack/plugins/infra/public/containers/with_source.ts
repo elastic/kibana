@@ -11,6 +11,8 @@ import { asChildFunctionRenderer } from '../utils/typed_react';
 
 export const withSource = connect((state: State) => ({
   configuredFields: sourceSelectors.selectSourceFields(state),
+  logIndicesExist: sourceSelectors.selectSourceLogIndicesExist(state),
+  metricIndicesExist: sourceSelectors.selectSourceMetricIndicesExist(state),
 }));
 
 export const WithSource = asChildFunctionRenderer(withSource);

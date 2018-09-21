@@ -14,19 +14,23 @@ import { ColumnarPage, PageContent } from '../components/page';
 import { Waffle } from '../components/waffle';
 import { WaffleTimeControls } from '../components/waffle/waffle_time_controls';
 
+import { EmptyPage } from '../components/empty_page';
 import {
   WithWaffleFilter,
   WithWaffleFilterUrlState,
 } from '../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../containers/waffle/with_waffle_nodes';
 import { WithWaffleTime, WithWaffleTimeUrlState } from '../containers/waffle/with_waffle_time';
+import { WithKibanaChrome } from '../containers/with_kibana_chrome';
 import { WithKueryAutocompletion } from '../containers/with_kuery_autocompletion';
 import { WithOptions } from '../containers/with_options';
+import { WithSource } from '../containers/with_source';
 
 export class HomePage extends React.PureComponent {
   public render() {
     return (
       <ColumnarPage>
+<<<<<<< HEAD
         <WithWaffleTimeUrlState />
         <WithWaffleFilterUrlState />
         <Header />
@@ -98,16 +102,101 @@ export class HomePage extends React.PureComponent {
                             loading={loading}
                             options={wafflemap}
                             reload={refetch}
+=======
+        <WithSource>
+          {({ metricIndicesExist }) =>
+            false ? (
+              <>
+                <WithWaffleTimeUrlState />
+                <WithWaffleFilterUrlState />
+                <Header />
+                <Toolbar>
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+                    <EuiFlexItem>
+                      <WithKueryAutocompletion>
+                        {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                          <WithWaffleFilter>
+                            {({
+                              applyFilterQueryFromKueryExpression,
+                              filterQueryDraft,
+                              isFilterQueryDraftValid,
+                              setFilterQueryDraftFromKueryExpression,
+                            }) => (
+                              <AutocompleteField
+                                isLoadingSuggestions={isLoadingSuggestions}
+                                isValid={isFilterQueryDraftValid}
+                                loadSuggestions={loadSuggestions}
+                                onChange={setFilterQueryDraftFromKueryExpression}
+                                onSubmit={applyFilterQueryFromKueryExpression}
+                                placeholder="Search for infrastructure data... (e.g. host.name:host-1)"
+                                suggestions={suggestions}
+                                value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                              />
+                            )}
+                          </WithWaffleFilter>
+                        )}
+                      </WithKueryAutocompletion>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <WithWaffleTime resetOnUnmount>
+                        {({
+                          currentTime,
+                          isAutoReloading,
+                          jumpToTime,
+                          startAutoReload,
+                          stopAutoReload,
+                        }) => (
+                          <WaffleTimeControls
+                            currentTime={currentTime}
+                            isLiveStreaming={isAutoReloading}
+                            onChangeTime={jumpToTime}
+                            startLiveStreaming={startAutoReload}
+                            stopLiveStreaming={stopAutoReload}
+>>>>>>> Crudely handle the "no indices" state on the HomePage
                           />
                         )}
-                      </WithWaffleNodes>
+                      </WithWaffleTime>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Toolbar>
+                <PageContent>
+                  <WithOptions>
+                    {({ wafflemap }) => (
+                      <WithWaffleFilter>
+                        {({ filterQueryAsJson }) => (
+                          <WithWaffleTime>
+                            {({ currentTimeRange }) => (
+                              <WithWaffleNodes
+                                filterQuery={filterQueryAsJson}
+                                metrics={wafflemap.metrics}
+                                path={wafflemap.path}
+                                sourceId={wafflemap.sourceId}
+                                timerange={currentTimeRange}
+                              >
+                                {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}
+                              </WithWaffleNodes>
+                            )}
+                          </WithWaffleTime>
+                        )}
+                      </WithWaffleFilter>
                     )}
-                  </WithWaffleTime>
+                  </WithOptions>
+                </PageContent>
+              </>
+            ) : (
+              <WithKibanaChrome>
+                {({ basePath }) => (
+                  <EmptyPage
+                    title="You have no metric indices."
+                    message="..."
+                    actionLabel="Add metric data"
+                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                  />
                 )}
-              </WithWaffleFilter>
-            )}
-          </WithOptions>
-        </PageContent>
+              </WithKibanaChrome>
+            )
+          }
+        </WithSource>
       </ColumnarPage>
     );
   }
