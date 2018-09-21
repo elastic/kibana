@@ -10,8 +10,8 @@ import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { YamlConfigSchema } from '../../../lib/lib';
+import { FormsyEuiFieldText, FormsyEuiPasswordText } from '../../inputs';
 import { FormsyEuiCodeEditor } from '../../inputs/code_editor';
-import { FormsyEuiFieldText } from '../../inputs/input';
 import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
 import { FormsyEuiSelect } from '../../inputs/select';
 
@@ -131,6 +131,8 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     required={schema.required}
                   />
                 );
+              case 'password':
+                return <FormsyEuiPasswordText />;
               case 'multi-input':
                 return (
                   <FormsyEuiMultiFieldText
