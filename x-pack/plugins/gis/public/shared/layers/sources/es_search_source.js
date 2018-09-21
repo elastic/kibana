@@ -8,6 +8,11 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
+import {
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
+
 import { ASource } from './source';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
@@ -19,7 +24,6 @@ import {
 import { VectorLayer } from '../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-
 
 const DEFAULT_LIMIT = 256;
 
@@ -130,6 +134,7 @@ class Editor extends React.Component {
       indexPatternId: '',
       geoField: '',
       selectedFields: [],
+      limit: DEFAULT_LIMIT,
     };
   }
 
@@ -191,16 +196,24 @@ class Editor extends React.Component {
     }, this.previewLayer);
   };
 
+  onLimitChange = e => {
+    const sanitizedValue = parseInt(e.target.value, 10);
+    this.setState({
+      limit: isNaN(sanitizedValue) ? '' : sanitizedValue,
+    }, this.previewLayer);
+  }
+
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
+      limit
     } = this.state;
     if (indexPatternId && geoField) {
       this.props.onSelect({
         indexPatternId,
         geoField,
-        limit: DEFAULT_LIMIT
+        limit: limit ? limit : DEFAULT_LIMIT,
       });
     }
   }
@@ -209,14 +222,15 @@ class Editor extends React.Component {
     return ['geo_point', 'geo_shape'].includes(field.type);
   }
 
-  render() {
+  _renderGeoSelect() {
+    if (!this.state.indexPatternId) {
+      return;
+    }
+
     return (
-      <Fragment>
-        <IndexPatternSelect
-          indexPatternId={this.state.indexPatternId}
-          onChange={this.onIndexPatternSelect}
-          placeholder="Select index pattern"
-        />
+      <EuiFormRow
+        label="Geospatial field"
+      >
         <SingleFieldSelect
           placeholder="Select geo field"
           value={this.state.geoField}
@@ -224,6 +238,38 @@ class Editor extends React.Component {
           filterField={this.filterGeoField}
           fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
+      </EuiFormRow>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+
+        <EuiFormRow
+          label="Limit"
+          helpText="Maximum documents retrieved from elasticsearch."
+        >
+          <EuiFieldNumber
+            placeholder="10"
+            value={this.state.limit}
+            onChange={this.onLimitChange}
+            aria-label="Limit"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label="Index pattern"
+        >
+          <IndexPatternSelect
+            indexPatternId={this.state.indexPatternId}
+            onChange={this.onIndexPatternSelect}
+            placeholder="Select index pattern"
+          />
+        </EuiFormRow>
+
+        {this._renderGeoSelect()}
+
       </Fragment>
     );
   }

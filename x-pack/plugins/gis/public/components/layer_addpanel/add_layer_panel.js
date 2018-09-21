@@ -211,7 +211,7 @@ export class AddLayerPanel extends React.Component {
 
   _renderFlyout() {
     return (
-      <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
+      <EuiFlyout onClose={this.props.closeFlyout} size="s">
         <EuiFlyoutHeader>
           <EuiTitle size="l">
             <h2>Add layer</h2>
