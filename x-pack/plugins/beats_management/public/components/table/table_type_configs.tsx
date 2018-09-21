@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { flatten, sortBy, uniq } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { first, flatten, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
@@ -90,9 +89,14 @@ export const BeatsTableType: TableType = {
     },
     {
       // TODO: update to use actual metadata field
-      field: 'last_updated',
+      field: 'full_tags',
       name: 'Last config update',
-      render: (value: Date) => <div>{moment(value).fromNow()}</div>,
+      render: (tags: BeatTag[]) =>
+        tags.length ? (
+          <span>
+            {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
+          </span>
+        ) : null,
       sortable: true,
     },
   ],
