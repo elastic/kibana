@@ -268,7 +268,7 @@ export async function loadMapResources(dispatch) {
           "format": "geojson" },
         "visible": true,
         "temporary": false,
-        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+        "style": { "type": "VECTOR", "color": "#e6194b" },
         "type": "VECTOR"
       },
       {

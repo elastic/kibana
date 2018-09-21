@@ -5,7 +5,7 @@
  */
 
 import { ALayer } from './layer';
-import { FillAndOutlineStyle } from './styles/fill_and_outline_style';
+import { VectorStyle } from './styles/vector_style';
 
 export class VectorLayer extends ALayer {
 
@@ -28,13 +28,12 @@ export class VectorLayer extends ALayer {
     return () => {
       defaultColorIndex = defaultColorIndex >= defaultColors.length
         ? 0 : defaultColorIndex;
-      return FillAndOutlineStyle.createDescriptor(defaultColors[defaultColorIndex++]);
+      return VectorStyle.createDescriptor(defaultColors[defaultColorIndex++]);
     };
   })();
 
   getSupportedStyles() {
-    //todo: this should be data-dependent (e.g. point data will not have FillAndOutlineStyle)
-    return [FillAndOutlineStyle];
+    return [VectorStyle];
   }
 
   isLayerLoading() {
@@ -59,6 +58,7 @@ export class VectorLayer extends ALayer {
 
     const fillLayerId = this.getId() +  '_fill';
     const strokeLayerId = this.getId() +  '_line';
+    const pointLayerId = this.getId() +  '_circle';
 
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
@@ -86,11 +86,29 @@ export class VectorLayer extends ALayer {
     if (this._descriptor.data !== mbSourceAfter._data) {
       mbSourceAfter.setData(this._descriptor.data);
     }
-    this._style.setMBPaintProperties(mbMap, fillLayerId, strokeLayerId, this.isTemporary());
 
+    let isPointsOnly = true;
+    if (this._descriptor.data) {
+      for (let i = 0; i < this._descriptor.data.features.length; i++) {
+        if (this._descriptor.data.features[i].geometry.type !== 'Point') {
+          isPointsOnly = false;
+          break;
+        }
+      }
+    } else {
+      isPointsOnly = false;
+    }
 
+    if (isPointsOnly) {
+      //todo: hack, but want to get some quick visual indication for points data
+      //cannot map single kibana layer to single mapbox source
+      this._style.addMbPointsLayerAndSetMBPaintProperties(mbMap, this.getId(), pointLayerId, this.isTemporary());
+    } else {
+      this._style.setMBPaintProperties(mbMap, fillLayerId, strokeLayerId, this.isTemporary());
+    }
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
   }
 
 }

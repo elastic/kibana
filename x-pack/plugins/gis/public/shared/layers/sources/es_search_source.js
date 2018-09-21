@@ -20,6 +20,9 @@ import { VectorLayer } from '../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
+
+const DEFAULT_LIMIT = 256;
+
 export class ESSearchSource extends ASource {
 
   static type = 'ES_SEARCH';
@@ -96,6 +99,7 @@ export class ESSearchSource extends ASource {
       return { type: 'FeatureCollection', features: [] };
     }
 
+    console.log('get geojson', geoJson);
     return geoJson;
   }
 
@@ -196,7 +200,7 @@ class Editor extends React.Component {
       this.props.onSelect({
         indexPatternId,
         geoField,
-        limit: 10,
+        limit: DEFAULT_LIMIT
       });
     }
   }
