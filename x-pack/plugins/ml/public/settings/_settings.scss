@@ -1,0 +1,20 @@
+.disabled {
+  color: $euiColorMediumShade;
+  cursor: pointer;
+}
+
+ml-settings {
+  .management-panel {
+    .management-panel__link {
+      font-size: $euiFontSizeM;
+      line-height: $euiSizeXL;
+      margin-left: $euiSizeXS;
+    }
+
+    .disabled {
+      color: $euiColorMediumShade;
+    }
+  }
+}
+
+

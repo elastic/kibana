@@ -1,0 +1,88 @@
+.edit-job-modal {
+  font-size: $euiFontSizeS;
+  padding: $euiSizeL;
+
+  // SASSTODO: Use a proper selector
+  h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-bottom: $euiSizeS;
+
+    // SASSTODO: Use a proper selector
+    span[ml-info-icon] {
+      font-size: $euiFontSizeS;
+    }
+ 	}
+
+  .tab_contents{
+    padding-top: $euiFontSizeL;
+
+    .detector_field_form {
+      background-color: $euiColorEmptyShade;
+      border: none;
+
+      // SASSTODO: Use a proper selector
+       & > div.field-cols {
+        flex: 1 1 1%;
+        margin-right: $euiSizeXS;
+      }
+    }
+
+    .custom-url {
+      display: flex;
+      position: relative;
+
+      // SASSTODO: Proper calcs
+      button.remove-button {
+        top: 19px;
+        position: absolute;
+        right: 6px;
+      }
+
+      .field-cols {
+        flex: 1 1 1%;
+      }
+
+      .form-group {
+        margin-right: $euiSizeXS;
+      }
+
+      // SASSTODO: Proper calcs
+      .time-input {
+        width: 90px;
+      }
+
+      // SASSTODO: Proper calcs, proper selector
+      textarea {
+        height: 60px;
+      }
+    }
+
+    // SASSTODO: Proper calcs
+    .custom-url {
+      padding-right: 60px;
+
+      button.test-url-button {
+        top: 19px;
+        position: absolute;
+        right: 36px;
+      }
+    }
+
+    .custom-url-editor {
+      border: $euiBorderColor;
+      border-radius: $euiBorderRadius;
+      padding: $euiSize;
+    }
+
+    div.validation-error {
+      color: $euiColorDanger;
+      font-size: $euiFontSizeXS;
+    }
+
+    // SASSTODO: Proper selector
+    small {
+      font-style: italic;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+.delete-job-modal {
+  padding: $euiSizeL;
+  cursor: auto;
+
+  // SASSTODO: Replace with proper selector
+  h3 {
+    margin-top: 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-item-list {
+    margin-bottom: $euiSize;
+
+    .status-item {
+      padding-top: $euiSizeS;
+      font-weight: $euiFontWeightBold;
+    }
+  }
+
+  .validation-error {
+    color: $euiColorDanger;
+    font-size: $euiFontSizeXS;
+  }
+}
