@@ -69,6 +69,10 @@ export {
 } from './ui_nav_links';
 
 export {
+  styleSheetPaths
+} from './style_sheet_paths';
+
+export {
   uiSettingDefaults,
 } from './ui_settings';
 
