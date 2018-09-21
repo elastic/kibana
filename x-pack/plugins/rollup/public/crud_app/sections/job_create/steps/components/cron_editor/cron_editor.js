@@ -322,8 +322,8 @@ export class CronEditor extends Component {
         <EuiFormRow
           label={(
             <FormattedMessage
-              id="xpack.rollupJobs.cronEditor.fieldInterval.label"
-              defaultMessage="Interval"
+              id="xpack.rollupJobs.cronEditor.fieldFrequency.label"
+              defaultMessage="Frequency"
             />
           )}
           fullWidth
