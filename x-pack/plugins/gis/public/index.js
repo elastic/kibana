@@ -22,15 +22,15 @@ import { getStore } from './store/store';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
-import { initTimepicker } from './timepicker';
+import { initGisApp } from './init_gis_app';
 
 import './style/main.less';
 
-import template from './templates/index.html';
+import gisAppTemplate from './gis_app.html';
 import { GISApp } from './components/gis_app';
 import 'ui/vis/map/service_settings';
 
-chrome.setRootTemplate(template);
+chrome.setRootTemplate(gisAppTemplate);
 
 async function init(store) {
   const root = document.getElementById('react-gis-root');
@@ -41,6 +41,6 @@ async function init(store) {
     root);
 }
 
-new Promise(initTimepicker)
+new Promise(initGisApp)
   .then(getStore)
   .then(store => init(store));

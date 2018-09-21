@@ -28,7 +28,7 @@ const waitForAngularReady = new Promise(resolve => {
   }, 10);
 });
 
-export function initTimepicker(resolve) {
+export function initGisApp(resolve) {
   // default the timepicker to the last 24 hours
   chrome.getUiSettingsClient().overrideLocalDefault(
     'timepicker:timeDefaults',
