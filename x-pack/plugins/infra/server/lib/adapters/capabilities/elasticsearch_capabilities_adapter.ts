@@ -30,8 +30,10 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       index: sourceConfiguration.metricAlias,
       body: {
         query: {
-          match: {
-            [idFieldName]: nodeName,
+          bool: {
+            filter: {
+              term: { [idFieldName]: nodeName },
+            },
           },
         },
         size: 0,
@@ -75,8 +77,10 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       index: sourceConfiguration.logAlias,
       body: {
         query: {
-          match: {
-            [idFieldName]: nodeName,
+          bool: {
+            filter: {
+              term: { [idFieldName]: nodeName },
+            },
           },
         },
         size: 0,
