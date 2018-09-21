@@ -190,12 +190,16 @@ export class UiSettingsService {
       return resp.attributes;
     } catch (error) {
       if (isNotFoundError(error)) {
-        await createOrUpgradeSavedConfig({
-          savedObjectsClient: this._savedObjectsClient,
-          version: this._id,
-          buildNum: this._buildNum,
-          log: this._log,
-        });
+        try {
+          await createOrUpgradeSavedConfig({
+            savedObjectsClient: this._savedObjectsClient,
+            version: this._id,
+            buildNum: this._buildNum,
+            log: this._log,
+          });
+        } catch (e) {
+          return {};
+        }
         return await this._read(options);
       }
       if (isIgnorableError(error)) {
