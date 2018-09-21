@@ -10,11 +10,9 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import 'plugins/reporting/views/management/jobs';
 
-import { i18n } from '@kbn/i18n';
-
 routes.defaults(/\/management/, {
   resolve: {
-    reportingManagementSection: function (Private) {
+    reportingManagementSection: function (Private, i18n) {
       const xpackInfo = Private(XPackInfoProvider);
       const kibanaManagementSection = management.getSection('kibana');
       const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
@@ -34,7 +32,7 @@ routes.defaults(/\/management/, {
 
         return kibanaManagementSection.register('reporting', {
           order: 15,
-          display: i18n.translate('xpack.reporting.views.management.reportingTitle', {
+          display: i18n('xpack.reporting.views.management.reportingTitle', {
             defaultMessage: 'Reporting'
           }),
           url,

@@ -26,8 +26,8 @@ function executeJobFn(server) {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
     } catch (e) {
       throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.server.executeJob.failedToDecryptErrorMessage', {
-        // eslint-disable-next-line max-len
-        defaultMessage: 'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report.'
+        defaultMessage: 'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and \
+re-generate this report.'
       }));
     }
 

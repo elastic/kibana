@@ -53,7 +53,9 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
             <FormattedMessage
               id="xpack.reporting.components.screenCapturePanelContent.optimizeForPrintingDescription"
               defaultMessage="Optimize for printing"
-            />
+            >
+              {(text: string) => text}
+            </FormattedMessage>
           }
           checked={this.state.usePrintLayout}
           onChange={this.handlePrintLayoutChange}
