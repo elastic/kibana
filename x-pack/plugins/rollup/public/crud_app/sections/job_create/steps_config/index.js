@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { WEEK } from '../../../services';
+
 import { validateId } from './validate_id';
 import { validateIndexPattern } from './validate_index_pattern';
 import { validateRollupIndex } from './validate_rollup_index';
@@ -40,6 +42,9 @@ export const stepIdToStepConfigMap = {
       rollupCron: '0 0 * * 6', // Every week on Saturday, at 00:00
       rollupPageSize: '',
       rollupDelay: '1d',
+      cronFrequency: WEEK,
+      isAdvancedCronVisible: false,
+      fieldToPreferredValueMap: {},
     },
     fieldsValidator: fields => {
       const {

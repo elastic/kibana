@@ -88,7 +88,7 @@ const UNITS = [{
   text: 'year',
 }];
 
-const unitToFieldsMap = {
+const frequencyToFieldsMap = {
   [MINUTE]: {},
   [HOUR]: {
     minute: true,
@@ -115,7 +115,7 @@ const unitToFieldsMap = {
   },
 };
 
-const unitToBaselineFieldsMap = {
+const frequencyToBaselineFieldsMap = {
   [MINUTE]: {
     minute: '*',
     hour: '*',
@@ -162,10 +162,10 @@ const unitToBaselineFieldsMap = {
 
 export class CronEditor extends Component {
   static propTypes = {
-    unit: PropTypes.string,
-    cronExpression: PropTypes.string,
-    onChange: PropTypes.func,
-    onChangeUnit: PropTypes.func,
+    fieldToPreferredValueMap: PropTypes.object.isRequired,
+    frequency: PropTypes.string.isRequired,
+    cronExpression: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
   }
 
   static getDerivedStateFromProps(props) {
@@ -182,40 +182,42 @@ export class CronEditor extends Component {
 
     this.state = {
       ...parsedCron,
-      fieldToInheritableFlagMap: {},
     };
   }
 
-  onChangeUnit = unit => {
-    const { onChange, onChangeUnit } = this.props;
-    const { fieldToInheritableFlagMap } = this.state;
+  onChangeFrequency = frequency => {
+    const { onChange, fieldToPreferredValueMap } = this.props;
 
     // Update fields which aren't editable with acceptable baseline values.
-    const editableFields = Object.keys(unitToFieldsMap[unit]);
+    const editableFields = Object.keys(frequencyToFieldsMap[frequency]);
     const inheritedFields = editableFields.reduce((baselineFields, field) => {
-      if (fieldToInheritableFlagMap[field]) {
-        baselineFields[field] = this.state[field];
+      if (fieldToPreferredValueMap[field] != null) {
+        baselineFields[field] = fieldToPreferredValueMap[field];
       }
       return baselineFields;
-    }, { ...unitToBaselineFieldsMap[unit] });
+    }, { ...frequencyToBaselineFieldsMap[frequency] });
 
     const newCronExpression = cronPartsToExpression(inheritedFields);
-    onChange(newCronExpression);
 
-    onChangeUnit(unit);
+    onChange({
+      frequency,
+      cronExpression: newCronExpression,
+      fieldToPreferredValueMap,
+    });
   };
 
-  onChangeFields = (fields, unit = this.props.unit) => {
-    const { onChange } = this.props;
+  onChangeFields = fields => {
+    const { onChange, frequency, fieldToPreferredValueMap } = this.props;
 
-    const editableFields = Object.keys(unitToFieldsMap[unit]);
-    const newFieldToInheritableFlagMap = {};
+    const editableFields = Object.keys(frequencyToFieldsMap[frequency]);
+    const newFieldToPreferredValueMap = {};
 
     const editedFields = editableFields.reduce((accumFields, field) => {
       if (fields[field] !== undefined) {
         accumFields[field] = fields[field];
-        // Once the user edits a field, we want to persist it across units.
-        newFieldToInheritableFlagMap[field] = true;
+        // Once the user touches a field, we want to persist its value as the user changes
+        // the cron frequency.
+        newFieldToPreferredValueMap[field] = fields[field];
       } else {
         accumFields[field] = this.state[field];
       }
@@ -223,18 +225,19 @@ export class CronEditor extends Component {
     }, {});
 
     const newCronExpression = cronPartsToExpression(editedFields);
-    onChange(newCronExpression);
 
-    this.setState(state => ({
-      fieldToInheritableFlagMap: {
-        ...state.fieldToInheritableFlagMap,
-        ...newFieldToInheritableFlagMap,
-      },
-    }));
+    onChange({
+      frequency,
+      cronExpression: newCronExpression,
+      fieldToPreferredValueMap: {
+        ...fieldToPreferredValueMap,
+        ...newFieldToPreferredValueMap,
+      }
+    });
   };
 
   renderForm() {
-    const { unit } = this.props;
+    const { frequency } = this.props;
 
     const {
       minute,
@@ -244,7 +247,7 @@ export class CronEditor extends Component {
       month,
     } = this.state;
 
-    switch (unit) {
+    switch (frequency) {
       case MINUTE:
         return;
 
@@ -315,7 +318,7 @@ export class CronEditor extends Component {
   }
 
   render() {
-    const { unit } = this.props;
+    const { frequency } = this.props;
 
     return (
       <Fragment>
@@ -330,8 +333,8 @@ export class CronEditor extends Component {
         >
           <EuiSelect
             options={UNITS}
-            value={unit}
-            onChange={e => this.onChangeUnit(e.target.value)}
+            value={frequency}
+            onChange={e => this.onChangeFrequency(e.target.value)}
             fullWidth
             prepend={(
               <EuiText size="xs">

@@ -27,7 +27,7 @@ import {
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl, WEEK } from '../../../services';
+import { logisticalDetailsUrl } from '../../../services';
 import { CronEditor } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -48,29 +48,29 @@ export class StepLogisticsUi extends Component {
     super(props);
 
     this.state = {
-      isAdvancedCronVisible: false,
       simpleRollupCron: props.fields.rollupCron,
-      cronUnit: WEEK,
     };
   }
 
-  onChangeUnit = (unit) => {
-    this.setState({ cronUnit: unit });
-  };
-
   showAdvancedCron = () => {
+    const { onFieldsChange } = this.props;
     this.setState({
-      isAdvancedCronVisible: true,
       simpleRollupCron: this.props.fields.rollupCron,
+    });
+    onFieldsChange({
+      isAdvancedCronVisible: true,
     });
   };
 
   hideAdvancedCron = () => {
     const { onFieldsChange } = this.props;
     const { simpleRollupCron } = this.state;
-    // Restore the last value of the simple cron editor.
-    onFieldsChange({ rollupCron: simpleRollupCron });
-    this.setState({ isAdvancedCronVisible: false });
+    onFieldsChange({
+      isAdvancedCronVisible: false,
+      // Restore the last value of the simple cron editor.
+      rollupCron: simpleRollupCron,
+    });
+    // hideAdvancedCron();
   };
 
   renderIndexPatternHelpText() {
@@ -145,13 +145,14 @@ export class StepLogisticsUi extends Component {
 
     const {
       rollupCron,
+      cronFrequency,
+      isAdvancedCronVisible,
+      fieldToPreferredValueMap,
     } = fields;
 
     const {
       rollupCron: errorRollupCron,
     } = fieldErrors;
-
-    const { isAdvancedCronVisible, cronUnit } = this.state;
 
     if (isAdvancedCronVisible) {
       return (
@@ -208,10 +209,18 @@ export class StepLogisticsUi extends Component {
     return (
       <Fragment>
         <CronEditor
+          fieldToPreferredValueMap={fieldToPreferredValueMap}
           cronExpression={rollupCron}
-          onChange={rollupCron => onFieldsChange({ rollupCron })}
-          unit={cronUnit}
-          onChangeUnit={this.onChangeUnit}
+          frequency={cronFrequency}
+          onChange={({
+            cronExpression,
+            frequency,
+            fieldToPreferredValueMap,
+          }) => onFieldsChange({
+            rollupCron: cronExpression,
+            cronFrequency: frequency,
+            fieldToPreferredValueMap,
+          })}
         />
 
         <EuiText size="s">
