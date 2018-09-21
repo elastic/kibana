@@ -34,7 +34,7 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: 'Password successfully updated.',
+          title: 'Updated password',
           'data-test-subj': 'passwordUpdateSuccess',
         }))
         .then(onSuccess)

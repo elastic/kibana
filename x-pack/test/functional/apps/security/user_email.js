@@ -9,7 +9,6 @@ import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
-  const config = getService('config');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
@@ -18,21 +17,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
-    });
-
-    it('should show the default elastic and kibana users', async function () {
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
-      log.info('actualUsers = %j', users);
-      log.info('config = %j', config.get('servers.elasticsearch.hostname'));
-      if (config.get('servers.elasticsearch.hostname') === 'localhost') {
-        expect(users.elastic.roles).to.eql(['superuser']);
-        expect(users.elastic.reserved).to.be(true);
-        expect(users.kibana.roles).to.eql(['kibana_system']);
-        expect(users.kibana.reserved).to.be(true);
-      } else {
-        expect(users.anonymous.roles).to.eql(['anonymous']);
-        expect(users.anonymous.reserved).to.be(true);
-      }
     });
 
     it('should add new user', async function () {
