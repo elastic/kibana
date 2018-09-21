@@ -21,6 +21,7 @@ export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
+export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -146,9 +147,8 @@ export function endDataLoad(layerId, requestToken, data) {
   });
 }
 
-export function addLayerFromSource(source, layerOptions = {}, position) {
+export function addPreviewLayer(layer, position) {
   const tokenString = 'data_request';
-  const layer = source.createDefaultLayer(layerOptions);
   const layerDescriptor = layer.toLayerDescriptor();
 
   return async (dispatch, getState) => {
@@ -157,6 +157,14 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
     const { startLoading, stopLoading } =
       getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
     layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
+  };
+}
+
+export function updateLayerLabel(id, newLabel) {
+  return {
+    type: UPDATE_LAYER_LABEL,
+    id,
+    newLabel
   };
 }
 

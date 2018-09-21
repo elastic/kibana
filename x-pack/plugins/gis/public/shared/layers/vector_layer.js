@@ -46,7 +46,10 @@ export class VectorLayer extends ALayer {
       return;
     }
     startLoading();
-    const data = await this._source.getGeoJson();
+    const data = await this._source.getGeoJson({
+      layerId: this._descriptor.id,
+      layerName: this._descriptor.label,
+    });
     stopLoading(data);
   }
 

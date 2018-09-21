@@ -26,11 +26,40 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiTextColor,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 
 export class AddLayerPanel extends React.Component {
 
-  _addToMapBtn() {
+  constructor() {
+    super();
+
+    this.state = {
+      label: '',
+    };
+  }
+
+  _previewLayer = (source) => {
+    this.layer = source.createDefaultLayer({
+      temporary: true,
+      label: this.state.label,
+    });
+    this.props.previewLayer(this.layer);
+  }
+
+  _onLabelChange = (event) => {
+    this.setState({
+      label: event.target.value,
+    });
+
+    if (this.layer) {
+      this.props.updateLayerLabel(this.layer.getId(), event.target.value);
+    }
+  }
+
+  _renderAddToMapBtn() {
     const { layerLoading, temporaryLayers, addAction } = this.props;
     const addToMapBtnText = 'Add to map';
     return (
@@ -47,10 +76,9 @@ export class AddLayerPanel extends React.Component {
     );
   }
 
-  _renderFlyout() {
-
+  _renderAddLayerForm() {
     const editorProperties = {
-      onPreviewSource: this.props.previewSource,
+      onPreviewSource: this._previewLayer,
       dataSourcesMeta: this.props.dataSourcesMeta
     };
     const xyzTmsEditor = XYZTMSSource.renderEditor(editorProperties);
@@ -60,6 +88,68 @@ export class AddLayerPanel extends React.Component {
     const esSearchEditor = ESSearchSource.renderEditor(editorProperties);
     const tilemapEditor = KibanaTilemapSource.renderEditor(editorProperties);
 
+    return (
+      <EuiForm>
+        <EuiFormRow
+          label="Display name"
+        >
+          <EuiFieldText
+            value={this.state.label}
+            onChange={this._onLabelChange}
+            aria-label="layer display name"
+          />
+        </EuiFormRow>
+
+        <EuiAccordion
+          id="ems"
+          buttonContent="From Elastic Maps Service"
+          paddingSize="l"
+        >
+          {emsFileEditor}
+        </EuiAccordion>
+
+        <EuiSpacer size="l"/>
+        <EuiAccordion
+          id="xyz"
+          buttonContent="Tilemap service with XYZ url"
+          paddingSize="l"
+        >
+          {xyzTmsEditor}
+        </EuiAccordion>
+
+        <EuiSpacer size="l"/>
+        <EuiAccordion
+          id="es_geohash_grid"
+          buttonContent="Elasticsearch GeoHash grid Aggregation"
+          paddingSize="l"
+        >
+          {heatmapEditor}
+        </EuiAccordion>
+
+        <EuiSpacer size="l"/>
+        <EuiAccordion
+          id="es_search"
+          buttonContent="Elasticsearch documents"
+          paddingSize="l"
+        >
+          {esSearchEditor}
+        </EuiAccordion>
+
+        <EuiSpacer size="l"/>
+        <EuiAccordion
+          id="kibana_config"
+          buttonContent="From Kibana Config"
+          paddingSize="l"
+        >
+          {regionmapEditor}
+          <EuiSpacer size="l"/>
+          {tilemapEditor}
+        </EuiAccordion>
+      </EuiForm>
+    );
+  }
+
+  _renderFlyout() {
     return (
       <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
         <EuiFlyoutHeader>
@@ -76,55 +166,8 @@ export class AddLayerPanel extends React.Component {
           <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody style={{ paddingTop: 0 }}>
-          <div>
-            <EuiSpacer size="l"/>
-            <EuiAccordion
-              id="ems"
-              buttonContent="From Elastic Maps Service"
-              paddingSize="l"
-            >
-              {emsFileEditor}
-            </EuiAccordion>
-
-            <EuiSpacer size="l"/>
-            <EuiAccordion
-              id="xyz"
-              buttonContent="Tilemap service with XYZ url"
-              paddingSize="l"
-            >
-              {xyzTmsEditor}
-            </EuiAccordion>
-
-            <EuiSpacer size="l"/>
-            <EuiAccordion
-              id="es_geohash_grid"
-              buttonContent="Elasticsearch GeoHash grid Aggregation"
-              paddingSize="l"
-            >
-              {heatmapEditor}
-            </EuiAccordion>
-
-            <EuiSpacer size="l"/>
-            <EuiAccordion
-              id="es_search"
-              buttonContent="Elasticsearch documents"
-              paddingSize="l"
-            >
-              {esSearchEditor}
-            </EuiAccordion>
-
-            <EuiSpacer size="l"/>
-            <EuiAccordion
-              id="kibana_config"
-              buttonContent="From Kibana Config"
-              paddingSize="l"
-            >
-              {regionmapEditor}
-              <EuiSpacer size="l"/>
-              {tilemapEditor}
-            </EuiAccordion>
-          </div>
+        <EuiFlyoutBody>
+          {this._renderAddLayerForm()}
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
@@ -138,7 +181,7 @@ export class AddLayerPanel extends React.Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {this._addToMapBtn()}
+              {this._renderAddToMapBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

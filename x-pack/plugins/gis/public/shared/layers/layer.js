@@ -17,6 +17,7 @@ export class ALayer {
     layerDescriptor.dataMeta = options.dataMeta || {};
     layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
+    layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
@@ -26,11 +27,19 @@ export class ALayer {
   }
 
   getDisplayName() {
+    if (this._descriptor.label) {
+      return this._descriptor.label;
+    }
+
     return this._source.getDisplayName() || `Layer ${this._descriptor.id}`;
   }
 
   getId() {
     return this._descriptor.id;
+  }
+
+  getSource() {
+    return this._source;
   }
 
   isVisible() {
