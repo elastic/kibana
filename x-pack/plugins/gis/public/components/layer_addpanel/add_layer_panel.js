@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
@@ -12,7 +12,6 @@ import { KibanaTilemapSource } from '../../shared/layers/sources/kibana_tilemap_
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
 import {
-  EuiAccordion,
   EuiText,
   EuiSpacer,
   EuiButton,
@@ -29,6 +28,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
+  EuiSuperSelect,
 } from '@elastic/eui';
 
 export class AddLayerPanel extends React.Component {
@@ -38,6 +38,7 @@ export class AddLayerPanel extends React.Component {
 
     this.state = {
       label: '',
+      sourceType: '',
     };
   }
 
@@ -59,6 +60,16 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
+  _onSourceTypeChange = (sourceType) => {
+    this.setState({
+      sourceType,
+    });
+
+    if (this.layer) {
+      this.props.removeLayer(this.layer.getId());
+    }
+  }
+
   _renderAddToMapBtn() {
     const { layerLoading, temporaryLayers, addAction } = this.props;
     const addToMapBtnText = 'Add to map';
@@ -76,22 +87,112 @@ export class AddLayerPanel extends React.Component {
     );
   }
 
-  _renderAddLayerForm() {
+  _renderSourceSelect() {
+    this.sourceOptions = [
+      {
+        value: EMSFileSource.type,
+        inputDisplay: EMSFileSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{EMSFileSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">Political boundry vectors such as world countries and country regions.</p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
+        value: XYZTMSSource.type,
+        inputDisplay: XYZTMSSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{XYZTMSSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">Tile Map Service with XYZ url.</p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
+        value: ESGeohashGridSource.type,
+        inputDisplay: ESGeohashGridSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{ESGeohashGridSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Elasticsearch GeoHash grid aggregation groups documents into buckets that represent cells in a grid.
+                Use this source with large indices and high zoom levels.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
+        value: ESSearchSource.type,
+        inputDisplay: ESSearchSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{ESSearchSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Vectors created from elasticsearch documents.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
+      }
+    ];
+
+    return (
+      <EuiFormRow
+        label="Source"
+      >
+        <EuiSuperSelect
+          itemClassName="sourceSelectItem"
+          options={this.sourceOptions}
+          valueOfSelected={this.state.sourceType}
+          onChange={this._onSourceTypeChange}
+          itemLayoutAlign="top"
+          hasDividers
+        />
+      </EuiFormRow>
+    );
+  }
+
+  _renderSourceEditor() {
+    if (!this.state.sourceType) {
+      return;
+    }
+
     const editorProperties = {
       onPreviewSource: this._previewLayer,
       dataSourcesMeta: this.props.dataSourcesMeta
     };
-    const xyzTmsEditor = XYZTMSSource.renderEditor(editorProperties);
-    const emsFileEditor = EMSFileSource.renderEditor(editorProperties);
-    const regionmapEditor = KibanaRegionmapSource.renderEditor(editorProperties);
-    const heatmapEditor = ESGeohashGridSource.renderEditor(editorProperties);
-    const esSearchEditor = ESSearchSource.renderEditor(editorProperties);
-    const tilemapEditor = KibanaTilemapSource.renderEditor(editorProperties);
 
+    switch(this.state.sourceType) {
+      case EMSFileSource.type:
+        return EMSFileSource.renderEditor(editorProperties);
+      case XYZTMSSource.type:
+        return XYZTMSSource.renderEditor(editorProperties);
+      case ESGeohashGridSource.type:
+        return ESGeohashGridSource.renderEditor(editorProperties);
+      case ESSearchSource.type:
+        return ESSearchSource.renderEditor(editorProperties);
+      default:
+        throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+    }
+  }
+
+  _renderAddLayerForm() {
     return (
       <EuiForm>
         <EuiFormRow
-          label="Display name"
+          label="Label"
         >
           <EuiFieldText
             value={this.state.label}
@@ -100,51 +201,10 @@ export class AddLayerPanel extends React.Component {
           />
         </EuiFormRow>
 
-        <EuiAccordion
-          id="ems"
-          buttonContent="From Elastic Maps Service"
-          paddingSize="l"
-        >
-          {emsFileEditor}
-        </EuiAccordion>
+        {this._renderSourceSelect()}
 
-        <EuiSpacer size="l"/>
-        <EuiAccordion
-          id="xyz"
-          buttonContent="Tilemap service with XYZ url"
-          paddingSize="l"
-        >
-          {xyzTmsEditor}
-        </EuiAccordion>
+        {this._renderSourceEditor()}
 
-        <EuiSpacer size="l"/>
-        <EuiAccordion
-          id="es_geohash_grid"
-          buttonContent="Elasticsearch GeoHash grid Aggregation"
-          paddingSize="l"
-        >
-          {heatmapEditor}
-        </EuiAccordion>
-
-        <EuiSpacer size="l"/>
-        <EuiAccordion
-          id="es_search"
-          buttonContent="Elasticsearch documents"
-          paddingSize="l"
-        >
-          {esSearchEditor}
-        </EuiAccordion>
-
-        <EuiSpacer size="l"/>
-        <EuiAccordion
-          id="kibana_config"
-          buttonContent="From Kibana Config"
-          paddingSize="l"
-        >
-          {regionmapEditor}
-          <EuiSpacer size="l"/>
-          {tilemapEditor}
-        </EuiAccordion>
       </EuiForm>
     );
   }

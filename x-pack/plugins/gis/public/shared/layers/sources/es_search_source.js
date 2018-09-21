@@ -23,6 +23,7 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 export class ESSearchSource extends ASource {
 
   static type = 'ES_SEARCH';
+  static typeDisplayName = 'Elasticsearch documents';
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {

@@ -18,6 +18,8 @@ export class XYZTMSSource extends TMSSource {
 
   static type = 'EMS_XYZ';
 
+  static typeDisplayName = 'TMS XYZ';
+
   static createDescriptor(urlTemplate) {
     return {
       type: XYZTMSSource.type,
