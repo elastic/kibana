@@ -169,8 +169,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('titleDupicateWarnMsg');
+    /**
+     * Asserts that the duplicate title warning is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectDuplicateTitleWarningDisplayed({ displayed }) {
+      if (displayed) {
+        await testSubjects.existOrFail('titleDupicateWarnMsg');
+      } else {
+        await testSubjects.missingOrFail('titleDupicateWarnMsg');
+      }
     }
 
     async switchToEditMode() {
