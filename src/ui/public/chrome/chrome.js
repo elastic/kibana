@@ -83,6 +83,9 @@ const waitForBootstrap = new Promise(resolve => {
     require('uiExports/chromeNavControls');
     require('uiExports/hacks');
 
+    // sets attribute on body for stylesheet sandboxing
+    document.body.setAttribute('id', `${internals.app.id}-app`);
+
     chrome.setupAngular();
     targetDomElement.setAttribute('id', 'kibana-body');
     targetDomElement.setAttribute('kbn-chrome', 'true');
