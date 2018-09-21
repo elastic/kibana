@@ -37,7 +37,6 @@ export function serializeJob(jobConfig) {
     rollup_index: rollupIndex,
     cron: rollupCron,
     page_size: rollupPageSize,
-    metrics,
     groups: {
       date_histogram: removeUndefinedValues({
         interval: dateHistogramInterval,

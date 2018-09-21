@@ -122,6 +122,7 @@ const frequencyToBaselineFieldsMap = {
     date: '*',
     month: '*',
     day: '*',
+    year: '?',
   },
   [HOUR]: {
     minute: '0',
@@ -129,6 +130,7 @@ const frequencyToBaselineFieldsMap = {
     date: '*',
     month: '*',
     day: '*',
+    year: '?',
   },
   [DAY]: {
     minute: '0',
@@ -136,6 +138,7 @@ const frequencyToBaselineFieldsMap = {
     date: '*',
     month: '*',
     day: '*',
+    year: '?',
   },
   [WEEK]: {
     minute: '0',
@@ -143,6 +146,7 @@ const frequencyToBaselineFieldsMap = {
     date: '*',
     month: '*',
     day: '6',
+    year: '?',
   },
   [MONTH]: {
     minute: '0',
@@ -150,6 +154,7 @@ const frequencyToBaselineFieldsMap = {
     date: '1',
     month: '*',
     day: '*',
+    year: '?',
   },
   [YEAR]: {
     minute: '0',
@@ -157,6 +162,7 @@ const frequencyToBaselineFieldsMap = {
     date: '1',
     month: '1',
     day: '*',
+    year: '?',
   },
 };
 
@@ -222,7 +228,7 @@ export class CronEditor extends Component {
         accumFields[field] = this.state[field];
       }
       return accumFields;
-    }, {});
+    }, { ...frequencyToBaselineFieldsMap[frequency] });
 
     const newCronExpression = cronPartsToExpression(editedFields);
 

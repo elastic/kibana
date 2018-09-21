@@ -46,12 +46,12 @@ export function cronExpressionToParts(expression) {
 }
 
 export function cronPartsToExpression({
-  minute = '*',
-  hour = '*',
-  day = '*',
-  date = '*',
-  month = '*',
+  minute,
+  hour,
+  day,
+  date,
+  month,
+  year,
 }) {
-  // The API requires the ? at the end.
-  return `${minute} ${hour} ${date} ${month} ${day} ?`;
+  return `${minute} ${hour} ${date} ${month} ${day} ${year}`;
 }
