@@ -162,13 +162,11 @@ export class SpacesClient {
     await repository.delete('space', id);
 
     // Delete all saved objects that belonged to the deleted space.
-    // This is intentionally not awaited, because this is a background operation
-    // which the user/UI should not wait for
     const typesToDelete = this.savedObjectTypes.filter(
       (type: string) => !this.schema.isNamespaceAgnostic(type)
     );
 
-    repository.deleteByQuery({ namespace: id, type: typesToDelete });
+    await repository.deleteByQuery({ namespace: id, type: typesToDelete });
   }
 
   private useRbac(): boolean {

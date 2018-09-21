@@ -224,6 +224,17 @@ export class SavedObjectsRepository {
     );
   }
 
+  /**
+   * Deletes all matching objects, using the same query builder as #find, with fewer options.
+   *
+   * @param {object} [options={}]
+   * @property {(string|Array<string>)} [options.type]
+   * @property {string} [options.search]
+   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @property {string} [options.namespace]
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
   async deleteByQuery(options = {}) {
     const {
       type,
@@ -239,8 +250,9 @@ export class SavedObjectsRepository {
     const esOptions = {
       index: this._index,
       ignore: [404],
+      refresh: 'wait_for',
       body: {
-        version: true,
+        conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._schema, {
           namespace,
           search,
