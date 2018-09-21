@@ -23,7 +23,7 @@ export default function (kibana) {
       inspectorViews: [
         'plugins/inspector_views/register_views',
       ],
-      //styleSheetPath: `${__dirname}/public/index.scss`,
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     }
   });
 }

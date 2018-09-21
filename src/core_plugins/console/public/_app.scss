@@ -5,7 +5,8 @@
   padding: $euiSizeS;
   background-color: $euiColorLightestShade;
   // Make sure the editor actions don't create scrollbars on this container
-  overflow: visible;
+  // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
+  // overflow: hidden;
 }
 
 .conApp__editor {

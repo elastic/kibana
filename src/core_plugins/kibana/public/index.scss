@@ -1,9 +1,5 @@
 @import 'ui/public/styles/styling_constants';
 
-// Outer (non-Kibana/public) components
-@import '../../console/public/index';
-@import '../../inspector_views/public/index';
-
 // Context styles
 @import './context/index';
 
@@ -19,11 +15,6 @@
 // Visualize styles
 @import './visualize/index';
 @import 'ui/public/vis/index';
-
-// Also import Timelion in case of embedding chart into dashboard
-// SASSTODO: Remove once the pipeline imports all compiled CSS files always
-@import '../../timelion/public/directives/index';
-@import '../../timelion/public/vis/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
