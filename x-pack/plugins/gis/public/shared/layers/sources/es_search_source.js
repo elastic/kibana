@@ -8,7 +8,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
-import { ASource } from './source';
+import { VectorSource } from './source';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
 import {
@@ -19,8 +19,9 @@ import {
 import { VectorLayer } from '../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { timefilter } from '../../../../../../../src/ui/public/timefilter/timefilter';
 
-export class ESSearchSource extends ASource {
+export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
 
@@ -56,7 +57,7 @@ export class ESSearchSource extends ASource {
     );
   }
 
-  async getGeoJson({ layerId, layerName }) {
+  async getGeoJson({ layerId, layerName }, searchFilters) {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -70,6 +71,9 @@ export class ESSearchSource extends ASource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
+      searchSource.setField('filter', () => {
+        return timefilter.createFilter(indexPattern, searchFilters.timefilter);
+      });
       inspectorAdapters.requests.resetRequest(layerId);
       const inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -111,6 +115,12 @@ export class ESSearchSource extends ASource {
   getDisplayName() {
     return this._descriptor.indexPatternId;
   }
+
+  async isTimeAware() {
+    console.warn('TODO: Determine dynamically');
+    return true;
+  }
+
 }
 
 class Editor extends React.Component {

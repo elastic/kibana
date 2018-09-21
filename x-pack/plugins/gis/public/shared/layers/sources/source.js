@@ -78,5 +78,8 @@ export class VectorSource extends ASource {
     return jsonFeatures;
   }
 
+  async isTimeAware() {
+    throw new Error('Should implement');
+  }
 
 }

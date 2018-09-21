@@ -102,4 +102,8 @@ export class EMSFileSource extends VectorSource {
     return this._descriptor.name;
   }
 
+  async isTimeAware() {
+    return false;
+  }
+
 }
