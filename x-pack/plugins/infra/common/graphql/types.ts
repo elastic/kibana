@@ -198,8 +198,8 @@ export namespace InfraSourceResolvers {
 
   export type MetricsResolver = Resolver<InfraMetricData[], MetricsArgs>;
   export interface MetricsArgs {
-    id: string;
-    type: InfraNodeType;
+    nodeId: string;
+    nodeType: InfraNodeType;
     timerange: InfraTimerangeInput;
     metrics: InfraMetric[];
   }
@@ -503,8 +503,8 @@ export interface MapInfraSourceArgs {
   filterQuery?: string | null;
 }
 export interface MetricsInfraSourceArgs {
-  id: string;
-  type: InfraNodeType;
+  nodeId: string;
+  nodeType: InfraNodeType;
   timerange: InfraTimerangeInput;
   metrics: InfraMetric[];
 }
@@ -574,7 +574,6 @@ export enum InfraMetric {
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
-  podDiskUsage = 'podDiskUsage',
   podLogUsage = 'podLogUsage',
   podNetworkTraffic = 'podNetworkTraffic',
   containerOverview = 'containerOverview',
@@ -582,7 +581,6 @@ export enum InfraMetric {
   containerCpuUsage = 'containerCpuUsage',
   containerDiskIOOps = 'containerDiskIOOps',
   containerDiskIOBytes = 'containerDiskIOBytes',
-  containerHealth = 'containerHealth',
   containerMemory = 'containerMemory',
   containerNetworkTraffic = 'containerNetworkTraffic',
 }
@@ -603,7 +601,7 @@ export namespace MetricsQuery {
     timerange: InfraTimerangeInput;
     metrics: InfraMetric[];
     nodeId: string;
-    type: InfraNodeType;
+    nodeType: InfraNodeType;
   };
 
   export type Query = {

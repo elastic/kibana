@@ -50,8 +50,8 @@ export const metricsSchema: any = gql`
 
   extend type InfraSource {
     metrics(
-      id: ID!
-      type: InfraNodeType!
+      nodeId: ID!
+      nodeType: InfraNodeType!
       timerange: InfraTimerangeInput!
       metrics: [InfraMetric!]!
     ): [InfraMetricData!]!

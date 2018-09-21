@@ -20,7 +20,6 @@ import { hostNetworkTraffic } from './host/host_network_traffic';
 import { hostSystemOverview } from './host/host_system_overview';
 
 import { podCpuUsage } from './pod/pod_cpu_usage';
-import { podDiskUsage } from './pod/pod_disk_usage';
 import { podLogUsage } from './pod/pod_log_usage';
 import { podMemoryUsage } from './pod/pod_memory_usage';
 import { podNetworkTraffic } from './pod/pod_network_traffic';
@@ -54,7 +53,6 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.podOverview]: podOverview,
   [InfraMetric.podCpuUsage]: podCpuUsage,
   [InfraMetric.podMemoryUsage]: podMemoryUsage,
-  [InfraMetric.podDiskUsage]: podDiskUsage,
   [InfraMetric.podLogUsage]: podLogUsage,
   [InfraMetric.podNetworkTraffic]: podNetworkTraffic,
 

@@ -52,7 +52,7 @@ export const WithMetrics = ({
       variables={{
         sourceId,
         metrics,
-        type: nodeType,
+        nodeType,
         nodeId,
         timerange,
       }}

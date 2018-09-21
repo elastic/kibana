@@ -287,7 +287,7 @@
             "description": "",
             "args": [
               {
-                "name": "id",
+                "name": "nodeId",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -297,7 +297,7 @@
                 "defaultValue": null
               },
               {
-                "name": "type",
+                "name": "nodeType",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -1719,12 +1719,6 @@
             "deprecationReason": null
           },
           {
-            "name": "podDiskUsage",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "podLogUsage",
             "description": "",
             "isDeprecated": false,
@@ -1762,12 +1756,6 @@
           },
           {
             "name": "containerDiskIOBytes",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "containerHealth",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

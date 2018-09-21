@@ -30,8 +30,8 @@ export const createMetricResolvers = (
   InfraSource: {
     async metrics(source, args, { req }) {
       const options = {
-        nodeId: args.id,
-        nodeType: args.type,
+        nodeId: args.nodeId,
+        nodeType: args.nodeType,
         timerange: args.timerange,
         metrics: args.metrics,
         sourceConfiguration: source.configuration,

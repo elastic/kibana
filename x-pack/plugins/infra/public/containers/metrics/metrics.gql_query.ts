@@ -12,11 +12,11 @@ export const metricsQuery = gql`
     $timerange: InfraTimerangeInput!
     $metrics: [InfraMetric!]!
     $nodeId: ID!
-    $type: InfraNodeType!
+    $nodeType: InfraNodeType!
   ) {
     source(id: $sourceId) {
       id
-      metrics(id: $nodeId, timerange: $timerange, metrics: $metrics, type: $type) {
+      metrics(nodeId: $nodeId, timerange: $timerange, metrics: $metrics, nodeType: $nodeType) {
         id
         series {
           id
