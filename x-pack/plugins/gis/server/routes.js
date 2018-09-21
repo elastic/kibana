@@ -48,6 +48,8 @@ export function initRoutes(server) {
        */
       const indexPattern = request.query.index_pattern;
       const geoPointField = request.query.geo_point_field;
+      const gteTime = request.query.from;
+      const lteTime = request.query.to;
       let precision = parseInt(request.query.precision);
       if (isNaN(precision)) {
         precision = 1;
@@ -105,6 +107,20 @@ export function initRoutes(server) {
                 }
               }
             },
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "range": {
+                      "utc_time": {
+                        "gte": gteTime,
+                        "lte": lteTime
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           }
         });
 
