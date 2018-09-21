@@ -10,6 +10,7 @@ import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
 import { InfraMetricModel } from '../metrics/adapter_types';
 
 export * from '../../../../common/graphql/typed_resolvers';
+import { JsonObject } from '../../../../common/typed_json';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -55,7 +56,7 @@ export interface InfraBackendFrameworkAdapter {
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
     timerange: { min: string; max: string },
-    filters: any[]
+    filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
 }
 
