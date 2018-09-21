@@ -17,8 +17,8 @@ export function GraphPageProvider({ getService, getPageObjects }) {
   class GraphPage {
 
     async selectIndexPattern(pattern) {
-      await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('.indexDropDown').click();
-      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.indexDropDown > option[label="' + pattern + '"]').click();
+      await remote.setFindTimeout(defaultFindTimeout).findDisplayedByCssSelector('.gphIndexSelect').click();
+      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.gphIndexSelect > option[label="' + pattern + '"]').click();
     }
 
     async clickAddField() {
@@ -51,7 +51,7 @@ export function GraphPageProvider({ getService, getPageObjects }) {
 
     async getGraphCircleText() {
       const chartTypes = await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('text.nodeSvgText');
+        .findAllByCssSelector('text.gphNode__label');
 
       async function getCircleText(circle) {
         return circle.getVisibleText();
