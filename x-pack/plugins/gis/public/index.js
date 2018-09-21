@@ -11,6 +11,7 @@ import './vendor/jquery_ui_sortable.css';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
+import 'uiExports/inspectorViews';
 import 'uiExports/search';
 
 import chrome from 'ui/chrome';

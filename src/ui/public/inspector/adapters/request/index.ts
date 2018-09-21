@@ -20,3 +20,5 @@
 export { RequestStatus } from './types';
 
 export { RequestAdapter } from './request_adapter';
+
+export { MappedRequestAdapter } from './mapped_request_adapter';
