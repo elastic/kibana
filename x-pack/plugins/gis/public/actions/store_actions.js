@@ -52,12 +52,12 @@ export function replaceLayerList(newLayerList) {
 
     const state = getState();
     const layerList = getLayerList(state);
-    const zoomAndExtent = getZoomAndExtent(state);
+    const dataFilters = getDataFilters(state);
 
     layerList.forEach(layer => {
       const { startLoading, stopLoading } =
         getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncDataToMapState(startLoading, stopLoading, zoomAndExtent);
+      layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
 
     });
   };
@@ -116,15 +116,23 @@ export function mapReady() {
 export function mapExtentChanged(newMapConstants) {
   const tokenString = 'data_request_sync_extentchange';
   return async (dispatch, getState) => {
+    const state = getState();
+    const dataFilters = getDataFilters(state);
+
     dispatch({
       type: MAP_EXTENT_CHANGED,
-      mapState: newMapConstants
+      mapState: {
+        ...dataFilters,
+        ...newMapConstants
+      }
     });
 
-    const layerList = getLayerList(getState());
+    const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncDataToMapState(startLoading, stopLoading, newMapConstants);
+      const { startLoading, stopLoading } = getLayerLoadingFunctions(
+        dispatch, layer.getId(), tokenString);
+      layer.syncDataToMapState(startLoading, stopLoading,
+        { ...dataFilters, ...newMapConstants });
     });
   };
 }
@@ -154,13 +162,10 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
 
   return async (dispatch, getState) => {
     await dispatch(addLayer(layerDescriptor, position));
-    const zoomAndExtent = getZoomAndExtent(getState());
+    const dataFilters = getDataFilters(getState());
     const { startLoading, stopLoading } =
       getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-
-
-
-    layer.syncDataToMapState(startLoading, stopLoading, zoomAndExtent);
+    layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
   };
 }
 
@@ -180,13 +185,27 @@ export function setMeta(metaJson) {
   };
 }
 
-export function setTimeFilters({ from, to }) {
-  return {
-    type: SET_TIME_FILTERS,
-    from,
-    to
+export function setTimeFilters(timeFilters) {
+  const tokenString = 'data_request_sync_timechange';
+  return async (dispatch, getState) => {
+    dispatch({
+      type: SET_TIME_FILTERS,
+      ...timeFilters
+    });
+    const state = getState();
+    const dataFilters = getDataFilters(state);
+
+    const layerList = getLayerList(getState());
+    layerList.forEach(layer => {
+      const { startLoading, stopLoading } = getLayerLoadingFunctions(
+        dispatch, layer.getId(), tokenString);
+      // State should be up-to-date, but just in case, pass timefilters explicitly
+      layer.syncDataToMapState(startLoading, stopLoading,
+        { ...dataFilters, timeFilters: { ...timeFilters } });
+    });
   };
 }
+
 
 export async function loadMapResources(dispatch) {
 

@@ -57,7 +57,7 @@ export class ESGeohashGridSource extends ASource {
     );
   }
 
-  async getGeoJsonPointsWithTotalCount(precision, extent) {
+  async getGeoJsonPointsWithTotalCount(precision, extent, timeFilters) {
     try {
       let url = `../${GIS_API_PATH}/data/geohash_grid`;
       url += `?index_pattern=${encodeURIComponent(this._descriptor.esIndexPattern)}`;
@@ -67,6 +67,9 @@ export class ESGeohashGridSource extends ASource {
       url += `&maxlon=${extent.max_lon}`;
       url += `&minlat=${extent.min_lat}`;
       url += `&maxlat=${extent.max_lat}`;
+      url += `&from=${timeFilters.from}`;
+      url += `&to=${timeFilters.to}`;
+
       const data = await fetch(url);
       return data.json();
     } catch (e) {

@@ -6,8 +6,8 @@
 
 import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import turf from 'turf';
-import turfBooleanContains from '@turf/boolean-contains';
+// import turf from 'turf';
+// import turfBooleanContains from '@turf/boolean-contains';
 
 const ZOOM_TO_PRECISION = {
   "0": 1,
@@ -110,45 +110,44 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(startLoading, stopLoading, zoomAndExtent) {
+  async syncDataToMapState(startLoading, stopLoading, dataFilters) {
 
-    if (!zoomAndExtent.extent) {
+    if (!dataFilters.extent) {
       return;
     }
+    const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)];
+    // TODO: Re-evaluate function and likely separate sync data ops
+    // if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
 
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(zoomAndExtent.zoom)];
-    if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
+    //   const dataExtent = turf.bboxPolygon([
+    //     this._descriptor.dataMeta.extent.min_lon,
+    //     this._descriptor.dataMeta.extent.min_lat,
+    //     this._descriptor.dataMeta.extent.max_lon,
+    //     this._descriptor.dataMeta.extent.max_lat,
+    //   ]);
+    //   const mapStateExtent = turf.bboxPolygon([
+    //     dataFilters.extent.min_lon,
+    //     dataFilters.extent.min_lat,
+    //     dataFilters.extent.max_lon,
+    //     dataFilters.extent.max_lat
+    //   ]);
 
-      const dataExtent = turf.bboxPolygon([
-        this._descriptor.dataMeta.extent.min_lon,
-        this._descriptor.dataMeta.extent.min_lat,
-        this._descriptor.dataMeta.extent.max_lon,
-        this._descriptor.dataMeta.extent.max_lat,
-      ]);
-      const mapStateExtent = turf.bboxPolygon([
-        zoomAndExtent.extent.min_lon,
-        zoomAndExtent.extent.min_lat,
-        zoomAndExtent.extent.max_lon,
-        zoomAndExtent.extent.max_lat
-      ]);
-
-      const isContained = turfBooleanContains(dataExtent, mapStateExtent);
-      const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
-      if (samePrecision && isContained) {
-        return;
-      }
-    }
-    const derivedPrecisionAndExtent = {
-      precision: targetPrecision,
-      extent: zoomAndExtent.extent
+    //   const isContained = turfBooleanContains(dataExtent, mapStateExtent);
+    //   const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
+    //   if (samePrecision && isContained) {
+    //     return;
+    //   }
+    // }
+    const updatedFilters = {
+      ...dataFilters,
+      precision: targetPrecision
     };
-    return this._fetchNewData(startLoading, stopLoading,
-      derivedPrecisionAndExtent);
+    return this._fetchNewData(startLoading, stopLoading, updatedFilters);
   }
 
 
-  async _fetchNewData(startLoading, stopLoading, zoomAndExtent) {
-    const { precision, extent } = zoomAndExtent;
+  async _fetchNewData(startLoading, stopLoading, fetchDataFilters) {
+    const { precision, extent, timeFilters } = fetchDataFilters;
     const scaleFactor = 0.5;
     const width = extent.max_lon - extent.min_lon;
     const height = extent.max_lat - extent.min_lat;
@@ -161,9 +160,11 @@ export class GeohashGridLayer extends ALayer {
 
     startLoading({
       precision,
+      timeFilters,
       extent: expandExtent
     });
-    const data = await this._source.getGeoJsonPointsWithTotalCount(precision, expandExtent);
+    const data = await this._source.getGeoJsonPointsWithTotalCount(
+      precision, expandExtent, timeFilters);
     stopLoading(data);
   }
 
