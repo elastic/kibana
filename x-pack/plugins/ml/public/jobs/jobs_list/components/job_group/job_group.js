@@ -8,8 +8,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import './styles/main.less';
-
 const COLORS = [
   '#00B3A4', // euiColorVis0
   '#3185FC', // euiColorVis1

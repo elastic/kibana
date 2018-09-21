@@ -1,0 +1,80 @@
+// These are hacks that are near ML's root. Unsure if they still need to be here.
+
+.ml-icon-severity-critical,
+.ml-icon-severity-major,
+.ml-icon-severity-minor,
+.ml-icon-severity-warning,
+.ml-icon-severity-unknown {
+  text-shadow: 1px 1px 1px $euiColorLightestShade;
+}
+
+.ml-icon-severity-critical {
+  color: #fe5050;
+}
+
+.ml-icon-severity-major {
+  color: #fba740;
+}
+
+.ml-icon-severity-minor {
+  color: #fdec25;
+}
+
+.ml-icon-severity-warning {
+  color: #8bc8fb;
+}
+
+.ml-icon-severity-unknown {
+  color: #c0c0c0;
+}
+
+.tab-jobs,
+.edit-job-modal,
+.create-watch-modal {
+  label {
+    display: inline-block;
+  }
+
+  .validation-error {
+    margin-top: $euiSizeXS;
+  }
+}
+
+.button-wrapper {
+  display: inline;
+}
+
+.button-wrapper.disabled .kuiButton[disabled] {
+  pointer-events: none;
+}
+
+.button-wrapper.disabled {
+  cursor: not-allowed;
+}
+
+.ui-select-match {
+  .btn-default[disabled],
+  .btn-default[disabled]:hover,
+  .btn-default[disabled]:focus {
+    background-color: $euiColorLightShade;
+    border-color: $euiColorLightShade;
+    opacity: 1;
+
+    .ui-select-placeholder {
+      color: $euiColorDarkShade;
+    }
+  }
+ }
+
+ .ui-select-container input[type="search"] {
+   padding-left: $euiSize;
+   padding-top: $euiSizeXS;
+  }
+
+.ui-select-container input[type="search"]::placeholder {
+  color: $euiColorDarkShade;
+}
+
+.ui-select-container input[type="search"]:focus {
+  box-shadow: none;
+}

@@ -5,7 +5,6 @@
  */
 
 
-import './styles/main.less';
 import { NewJobButton } from './components/new_job_button';
 import { JobsListView } from './components/jobs_list_view';
 import { JobStatsBar } from './components/jobs_stats_bar';

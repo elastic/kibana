@@ -1,0 +1,44 @@
+ml-forecasts-table {
+  // SASSTODO: Dangerous EUI overwrites
+  .euiTable {
+    // Remove this whole block when Jobs List is all EUI.
+    font-size: $euiFontSizeXS;
+ 
+     th {
+       span {
+         font-size: $euiFontSizeXS;
+         font-family: $euiFontFamily;
+         font-weight: $euiFontWeightBold;
+       }
+ 
+     }
+ 
+     tr {
+       td {
+         .euiTableCellContent {
+           padding-top: $euiSizeXS;
+           padding-bottom: $euiSizeXS;
+         }
+       }
+     }
+   }
+ 
+   // SASSTODO: Proper calcs
+   table tr th:last-child,
+   table tr td:last-child {
+     width: 60px;
+   }
+ 
+ 
+   // SASSTODO: Proper calcs
+   .view-forecast-btn {
+     width: 35px;
+     min-width: 35px;
+     height: $euiSizeXL;
+ 
+     .euiButton__content {
+       padding: 0px 8px;
+     }
+   }
+ }
+ 

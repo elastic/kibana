@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './expanded_row_directive';
 import './forecasts_table';
 import './tabs/tab_controller';

@@ -6,6 +6,5 @@
 
 
 
-import './styles/main.less';
 import './import_events_service';
 import './import_events_modal_controller';

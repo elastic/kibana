@@ -24,7 +24,6 @@ import {
 
 import { cloneDeep } from 'lodash';
 
-import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';

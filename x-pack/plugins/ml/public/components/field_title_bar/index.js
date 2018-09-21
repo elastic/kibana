@@ -7,4 +7,3 @@
 
 
 import './field_title_bar_directive';
-import './styles/main.less';

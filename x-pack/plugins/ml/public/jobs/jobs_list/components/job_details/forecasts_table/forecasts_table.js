@@ -22,7 +22,6 @@ import {
   EuiLink,
   EuiLoadingSpinner
 } from '@elastic/eui';
-import './styles/main.less';
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 

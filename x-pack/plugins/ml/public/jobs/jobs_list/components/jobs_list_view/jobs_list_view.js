@@ -5,7 +5,6 @@
  */
 
 
-import './styles/main.less';
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';

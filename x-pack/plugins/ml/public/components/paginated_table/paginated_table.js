@@ -13,7 +13,6 @@
 
 import './row';
 
-import './styles/main.less';
 import 'ui/directives/paginate';
 import 'ui/styles/pagination.less';
 import _ from 'lodash';

@@ -1,0 +1,19 @@
+.events-list {
+  .actions-col {
+    width: 90px;
+    min-width: 90px;
+  }
+  .asterisk {
+    color: $euiColorDanger;
+    font-weight: bold;
+    cursor: default;
+  }
+
+  .footer-cell {
+    border-top: $euiBorderThin;
+    padding: $euiSizeS;
+    font-size: $euiFontSizeS;
+    font-style: italic;
+    text-align: right;
+  }
+}

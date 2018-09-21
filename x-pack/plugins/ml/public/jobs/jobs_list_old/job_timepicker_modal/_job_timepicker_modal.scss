@@ -1,0 +1,94 @@
+.job-timepicker-modal {
+  font-size: $euiFontSizeS;
+  padding: $euiSizeL;
+  cursor: auto;
+
+  // SASSTODO: Proper selector
+  h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // SASSTODO: Proper calc
+  .date_container {
+    width: 200px;
+    display: inline-block;
+  }
+
+  .ml-timepicker-contents {
+    margin-top: $euiSizeXS;
+
+    // SASSTODO: Variabilize this coloring, replace with an EUI button
+    .btn-info.active, .kuiButton--primary.active {
+      color: $euiColorEmptyShade;
+      background-color: #154751;
+      border-color: #134049;
+
+      // SASSTODO: Proper selector
+      span {
+        color: $euiColorEmptyShade;
+      }
+    }
+
+    .btn-default, .kuiButton--basic {
+      background: transparent;
+      color: $euiColorDarkShade;
+      border: 0px;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    // SASSTODO: Proper selector
+    [ml-time-input] {
+      text-align: center;
+    }
+
+    // SASSTODO: Proper selector
+    label {
+      display: block;
+    }
+  }
+
+  .ml-timepicker-modes {
+    text-transform: capitalize;
+  }
+
+  // SASSTODO: Needs proper calcs throughout 
+  .ml-timepicker-section {
+    float: left;
+    padding: 0px $euiSize;
+    min-width: 294px;
+    width: 294px;
+    border-left: 1px solid $euiColorEmptyShade;
+    border-right: 1px solid $euiColorEmptyShade;
+
+    .ml-timepicker {
+      padding: 13px;
+      padding-top: none;
+      border: $euiBorderThick;
+      border-radius: $euiBorderRadius;
+      border-radius: $euiBorderRadius;
+      border-top-left-radius: 0px;
+      border-top-right-radius: 0px;
+      border-top: none;
+
+      .btn, .kuiButton {
+        padding-left: $euiSizeS;
+        padding-right: $euiSizeS;
+      }
+    }
+
+    .ml-timepicker-radio-bottom {
+      border-bottom-left-radius: 0px;
+      border-bottom-right-radius: 0px;
+    }
+  }
+
+  .ml-timepicker-left-border {
+    border-left: $euiBorderThin;
+  }
+
+  .ml-timepicker-right-border {
+    border-right: $euiBorderThin;
+  }
+}

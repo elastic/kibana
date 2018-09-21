@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './jobs_list_controller';
 import './edit_job_modal';
 import './job_timepicker_modal';

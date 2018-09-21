@@ -1,0 +1,147 @@
+ml-config-jobs {
+  font-size: $euiFontSizeS;
+
+  // SASSTODO: Make real selection
+  header {
+    margin: $euiSize 0;
+  }
+
+  .jobs-container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: $euiSize;
+    padding-right: $euiSize;
+
+    .euiCallOut--warning {
+      .fa-exclamation-triangle {
+        color: $euiColorWarning;
+      }
+    }
+  }
+
+  .jobs-stats-bar {
+
+    padding: $euiSize;
+    background-color: $euiColorLightestShade;
+
+    .stat {
+      margin-right: 10px;
+      .stat-value {
+        font-weight: bold
+      }
+    }
+  }
+
+  ml-paginated-table {
+
+    .job-system-info, .job-info, .job-warning, .job-error {
+      text-shadow: 1px 1px 1px $euiColorLightShade;
+      font-size: $euiFontSizeM;
+    }
+
+    .job-warning-small {
+      font-size: inherit;
+      margin-left: $euiSizeXS / 2;
+    }
+
+    .job-system-info {
+      color: $euiColorDarkShade;
+    }
+    .job-info {
+      color: $euiColorPrimary;
+    }
+    .job-warning {
+      color: $euiColorWarning;
+    }
+    .job-error {
+      color: $euiColorDanger;
+    }
+
+    // SASSTODO: Proper calc
+    .col-bucketspan {
+      width: 120px;
+    }
+
+    .col-info {
+      width: $euiSizeL;
+    }
+
+    // SASSTODO: Proper calc
+    .col-action {
+      width: 175px;
+    }
+    .actions {
+      white-space: nowrap;
+    }
+
+    .col-align-right {
+      text-align: right;
+      padding-right: $euiSizeL;
+    }
+
+    th.col-align-right {
+      padding-right: $euiSizeL !important;
+    }
+
+    // SASSTODO: Proper selector
+    i.job-tab-icon {
+      margin-left: $euiSizeXS;
+    }
+  }
+
+  // SASSTODO: Variabilize
+  .ml-mark {
+    background-color: #fce571;
+  }
+
+  .no-jobs-warning {
+    text-align: center;
+    font-size: $euiFontSizeM;
+  }
+
+  // SASSTODO: Proper calc
+  .jobs-count {
+    margin-top: -50px;
+  }
+
+  .ml-pre, .job-audit-list-container {
+    max-height: 500px; // SASSTODO: Proper calc
+    overflow: auto;
+    padding: $euiSizeS $euiSize;
+    font-size: $euiSizeXS;
+    line-height: 1.42857143; // SASSTODO: Huh?
+    color: $euiColorDarkShade;
+    background-color: $euiColorEmptyShade;
+    background-image: none;
+    border: $euiBorderThick;
+    border-radius: $euiBorderRadius;
+  }
+
+    // SASSTODO: Replace with EUI breakpoints
+  .ml-pre {
+    display: block;
+    unicode-bidi: embed;
+    font-family: monospace;
+    white-space: pre;
+
+    @media (min-width: 830px) {
+      max-width: 650px;
+    }
+    @media (min-width: 1030px) {
+      max-width: 850px;
+    }
+    @media (min-width: 1230px) {
+      max-width: 1050px;
+    }
+    @media (min-width: 1430px) {
+      max-width: 1250px;
+    }
+    @media (min-width: 1630px) {
+      max-width: 1450px;
+    }
+    @media (min-width: 1830px) {
+      max-width: 1550px;
+    }
+  }
+}

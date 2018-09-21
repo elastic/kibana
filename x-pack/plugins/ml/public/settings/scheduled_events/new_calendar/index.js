@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './create_calendar_controller';

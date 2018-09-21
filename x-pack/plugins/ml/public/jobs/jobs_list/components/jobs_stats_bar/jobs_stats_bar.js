@@ -5,7 +5,6 @@
  */
 
 
-import './styles/main.less';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 
 import PropTypes from 'prop-types';

@@ -7,4 +7,3 @@
 
 
 import './forecasts_table_directive';
-import './styles/main.less';

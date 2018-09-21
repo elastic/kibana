@@ -1,0 +1,106 @@
+.ml-influencers-list {
+  line-height: 1.45; // SASSTODO: Calc proper value
+
+  .field-label {
+    font-size: $euiFontSizeXS;
+    text-align: left;
+
+    .field-value {
+      max-width: calc(100% - 34px); // SASSTODO: Calc proper value
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+  }
+
+  .progress {
+    display:inline-block;
+    width: calc(100% - 34px); // SASSTODO: Calc porper value
+    height: 22px;
+    min-width: 70px;
+    margin-bottom: 0px;
+    color: $euiColorDarkShade;
+    background-color : transparent;
+
+    .progress-bar-holder {
+      width: calc(100% - 28px); // SASSTODO: Calc porper value
+    }
+
+    .progress-bar {
+      height: $euiSizeXS / 2;
+      margin-top: $euiSizeS;
+      text-align: right;
+      line-height: 18px; // SASSTODO: Calc porper value
+      display: inline-block;
+      transition: none;
+    }
+  }
+
+  // SASSTODO: This range of color is too large, needs to be rewritten and variablized
+  .progress.critical {
+    .progress-bar {
+      background-color: #fe5050;
+    }
+    .score-label {
+      border-color: #fe5050;
+    }
+  }
+
+  .progress.major {
+    .progress-bar {
+      background-color: #fba740;
+    }
+    .score-label {
+      border-color: #fba740;
+    }
+  }
+
+  .progress.minor {
+    .progress-bar {
+      background-color: #ffdd00;
+    }
+    .score-label {
+      border-color: #ffdd00;
+    }
+  }
+
+  .progress.warning {
+    .progress-bar {
+      background-color: #8bc8fb;
+    }
+    .score-label {
+      border-color: #8bc8fb;
+    }
+  }
+
+  .score-label {
+    text-align: center;
+    line-height: 14px;
+    white-space: nowrap;
+    font-size: 12px;
+    display: inline;
+    margin-left: 4px;
+  }
+
+  .total-score-label {
+    width: 32px;
+    vertical-align: top;
+    text-align: center;
+    color: #555;
+    font-size: 11px;
+    line-height: 14px;
+    border-radius: 4px;
+    padding: 2px;
+    margin-top: 1px;
+    display: inline-block;
+    border: 1px solid #bbbbbb;
+  }
+}
+
+  // SASSTODO: Can .eui-textBreakAll
+.ml-influencers-list-tooltip {
+  word-break: break-all;
+}
+

@@ -6,6 +6,5 @@
 
 
 
-import './styles/main.less';
 import './create_watch_modal_controller';
 import 'plugins/ml/jobs/new_job/simple/components/watcher';

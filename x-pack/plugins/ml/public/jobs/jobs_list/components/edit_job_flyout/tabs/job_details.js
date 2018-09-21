@@ -18,7 +18,6 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-import '../styles/main.less';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 export class JobDetails extends Component {

@@ -6,6 +6,5 @@
 
 
 
-import './styles/main.less';
 import './post_save_options_directive.js';
 import 'plugins/ml/jobs/new_job/simple/components/watcher';

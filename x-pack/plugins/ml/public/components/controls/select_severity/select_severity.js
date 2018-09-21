@@ -19,8 +19,6 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
 
 const OPTIONS = [

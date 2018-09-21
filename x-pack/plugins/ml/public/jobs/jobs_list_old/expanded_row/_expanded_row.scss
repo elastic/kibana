@@ -1,0 +1,127 @@
+ml-job-list-expanded-row {
+  // SASSTODO: Proper selector
+  & > div {
+    padding: $euiSizeS;
+  }
+
+  // SASSTODO: Remove KUI
+  .kuiButton {
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeS;
+  }
+
+  .tab_contents {
+    border: $euiBorderThin;
+    border-top: none;
+    padding: $euiSizeS;
+    border-bottom-right-radius: $euiBorderRadius;
+    border-bottom-left-radius: $euiBorderRadius;
+
+  // SASSTODO: Proper calc
+    .json-textarea {
+      height: 500px;
+    }
+  }
+
+  .job-audit-list-container {
+  // SASSTODO: Proper selectors
+    table {
+      td,th {
+        padding: $euiSizeXS / 2;
+        padding-right: $euiSizeS;
+      }
+    }
+  }
+
+  ml-job-item {
+    .ml_job_row {
+      border-bottom: $euiBorderThin;
+
+      // SASSTODO: Proper selectors
+      & > div {
+        padding: $euiSizeXS;
+      }
+
+      // SASSTODO: Proper selectors
+      & > div:nth-child(1) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      // SASSTODO: Proper selectors
+      & > div:nth-child(2) {
+        word-break: break-all;
+      }
+    }
+  }
+
+      // SASSTODO: Proper selectors
+  .col-md-6:nth-child(1) {
+    padding-right: $euiSizeS;
+  }
+
+  // SASSTODO: Proper selectors
+  .col-md-6:nth-child(2) {
+    padding-left: $euiSizeS;
+  }
+
+  .ml_sub_heading {
+    font-weight: $euiFontWeightBold;
+    padding-left: $euiSizeXS;
+  }
+
+  .ml_job_section_container {
+    overflow: auto;
+    padding: $euiSizeXS $euiSize;
+    background-color: $euiColorLightestShade;
+    border: $euiBorderColor;
+    border-radius: $euiBorderRadius;
+    margin: $euiSizeXS;
+
+    // SASSTODO: Proper selectors
+    & > div {
+      margin-left: $euiSize;
+      margin-right: $euiSize;
+    }
+
+    .button-wrapper {
+      margin-left: -$euiSizeXL;
+      padding-left: $euiSizeXL;
+    }
+
+    // SASSTODO: Dangerous EUI overwrites
+    table.euiTable {
+      background-color: transparent;
+
+      .euiTableRow:first-child {
+        .euiTableRowCell {
+          border-top: 0px;
+        }
+      }
+
+      .euiTableRow:last-child {
+        .euiTableRowCell {
+          border-bottom: 0px;
+        }
+      }
+
+      tr.euiTableRow {
+        .euiTableRowCell {
+          background-color: transparent;
+          vertical-align: top;
+          border-bottom: 1px solid $euiColorLightestShade;
+
+          .euiTableCellContent__text {
+            word-wrap: break-word;
+          }
+        }
+      }
+    }
+  }
+
+  ml-job-item:last-child {
+    .ml_job_row {
+      border-bottom: none;
+    }
+  }
+}

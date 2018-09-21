@@ -13,7 +13,6 @@ import React, {
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
-import './styles/main.less';
 
 export class MultiJobActions extends Component {
   constructor(props) {

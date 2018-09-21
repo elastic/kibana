@@ -18,7 +18,6 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import '../styles/main.less';
 import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/util/job_utils';
 import { newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';

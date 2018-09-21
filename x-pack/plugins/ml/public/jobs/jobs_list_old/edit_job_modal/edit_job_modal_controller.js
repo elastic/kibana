@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 import 'plugins/ml/jobs/new_job/advanced/detectors_list_directive';
-import './styles/main.less';
 import angular from 'angular';
 import numeral from '@elastic/numeral';
 

@@ -13,8 +13,6 @@ import React, {
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
 
-import './styles/main.less';
-
 import {
   EuiSearchBar,
 } from '@elastic/eui';

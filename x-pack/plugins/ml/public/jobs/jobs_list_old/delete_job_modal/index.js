@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './delete_job_modal_controller';

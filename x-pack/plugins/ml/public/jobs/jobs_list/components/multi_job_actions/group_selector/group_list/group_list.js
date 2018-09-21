@@ -14,8 +14,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import { JobGroup } from '../../../job_group';
 
 function Check({ group, selectedGroups }) {

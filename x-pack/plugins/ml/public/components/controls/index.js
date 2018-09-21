@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './checkbox_showcharts';
 import './controls_select';
 import './select_interval';

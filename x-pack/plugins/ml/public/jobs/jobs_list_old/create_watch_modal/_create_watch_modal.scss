@@ -1,0 +1,14 @@
+.create-watch-modal {
+  font-size: $euiFontSizeS;
+  padding: $euiSizeL;
+  cursor: auto;
+
+  // SASSTODO: Replace with proper selector
+  h3 {
+    margin-top: 0px;
+  }
+
+  .create-watch {
+    padding-bottom: 0px;
+  }
+}

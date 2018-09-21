@@ -8,4 +8,3 @@
 
 import './data_recognizer_directive';
 import './data_recognizer';
-import './styles/main.less';

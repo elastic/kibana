@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './calendars_list_controller';

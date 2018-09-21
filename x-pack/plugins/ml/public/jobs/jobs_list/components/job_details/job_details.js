@@ -15,8 +15,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
