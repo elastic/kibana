@@ -444,18 +444,8 @@ module.controller('MlExplorerController', function (
   // those coming via AppState when a selection is part of the URL.
   const swimlaneCellClickListenerQueue = [];
 
-  // swimlaneCellClickListener could trigger multiple times with the same data.
-  // we track the previous click data here to be able to compare it and filter
-  // consecutive calls with the same data.
-  let previousListenerData = null;
-
-  // Listener for click events in the swimlane and load corresponding anomaly data.
-  // Empty cellData is passed on clicking outside a cell with score > 0.
-  // The reset argument is useful when we intentionally want to reset state comparison
-  // of click events and want to pass through.
-  // For example, toggling showCharts isn't considered in the comparison
-  // and would therefor fail to update properly.
-  const swimlaneCellClickListener = function (cellData, skipComparison = false) {
+  // Listener for click events in the swimlane to load corresponding anomaly data.
+  const swimlaneCellClickListener = function (cellData) {
     if (skipCellClicks === true) {
       swimlaneCellClickListenerQueue.push(cellData);
       return;
@@ -468,52 +458,16 @@ module.controller('MlExplorerController', function (
         loadViewBySwimlane([]);
       }
       clearSelectedAnomalies();
-      previousListenerData = null;
     } else {
-      $scope.appState.mlExplorerSwimlane.selectedType = cellData.type;
-      $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.lanes;
-      $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.times;
-      $scope.appState.save();
-
-      const timerange = getSelectionTimeRange(cellData);
-      $scope.cellData = cellData;
-
       if (cellData.score > 0) {
-        const jobIds = (cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.lanes : $scope.getSelectedJobIds();
+        $scope.appState.mlExplorerSwimlane.selectedType = cellData.type;
+        $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.lanes;
+        $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.times;
+        $scope.appState.save();
 
-        const influencers = getSelectionInfluencers(cellData);
+        $scope.cellData = cellData;
 
-        const listenerData = {
-          jobIds,
-          influencers,
-          start: timerange.earliestMs,
-          end: timerange.latestMs,
-          cellData
-        };
-        if (_.isEqual(listenerData, previousListenerData) && skipComparison === false) {
-          return;
-        }
-        previousListenerData = listenerData;
-
-        if (cellData.fieldName === undefined) {
-          // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-          // to show the top 'view by' values for the selected time.
-          loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-          $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
-        }
-
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-
-        if (influencers.length === 0) {
-          loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs);
-          loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs);
-        } else {
-          // pass influencers on to loadDataForCharts(),
-          // it will take care of calling loadTopInfluencers() in this case.
-          loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs, influencers);
-        }
-        loadAnomaliesTableData();
+        updateExplorer();
       } else {
         // Multiple cells are selected, all with a score of 0 - clear all anomalies.
         $scope.$evalAsync(() => {
@@ -528,6 +482,7 @@ module.controller('MlExplorerController', function (
           };
         });
 
+        const timerange = getSelectionTimeRange(cellData);
         mlExplorerDashboardService.anomalyDataChange.changed(
           [],
           timerange.earliestMs,
@@ -1058,23 +1013,30 @@ module.controller('MlExplorerController', function (
 
   function updateExplorer() {
     const cellData = $scope.cellData;
-    const timerange = getSelectionTimeRange(cellData);
-
-    if ($scope.overallSwimlaneData !== undefined) {
-      mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-    }
-    if ($scope.viewBySwimlaneData !== undefined) {
-      mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-    }
-    mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
 
     const jobIds = (cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.laneLabels : $scope.getSelectedJobIds();
+    const timerange = getSelectionTimeRange(cellData);
     const influencers = getSelectionInfluencers(cellData);
 
     // The following is to avoid running into a race condition where loading a swimlane selection from URL/AppState
     // would fail because the Explorer Charts Container's directive wasn't linked yet and not being subscribed
     // to the anomalyDataChange listener used in loadDataForCharts().
     function finish() {
+      if ($scope.overallSwimlaneData !== undefined) {
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
+      }
+      if ($scope.viewBySwimlaneData !== undefined) {
+        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
+      }
+      mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords || [], timerange.earliestMs, timerange.latestMs);
+
+      if (cellData !== undefined && cellData.fieldName === undefined) {
+        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
+        // to show the top 'view by' values for the selected time.
+        loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
+        $scope.viewByLoadedForTimeFormatted = moment(timerange.earliestMs).format('MMMM Do YYYY, HH:mm');
+      }
+
       if (influencers.length === 0) {
         loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs);
         loadDataForCharts(jobIds, timerange.earliestMs, timerange.latestMs);
