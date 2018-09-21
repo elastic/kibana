@@ -55,7 +55,7 @@ const HOUR_OPTIONS = makeSequence(0, 23).map(value => ({
 
 const DAY_OPTIONS = makeSequence(1, 7).map(value => ({
   value: value.toString(),
-  text: getDayName(value),
+  text: getDayName(value - 1),
 }));
 
 const DATE_OPTIONS = makeSequence(1, 31).map(value => ({
@@ -146,7 +146,7 @@ const frequencyToBaselineFieldsMap = {
     hour: '0',
     date: '*',
     month: '*',
-    day: '6',
+    day: '7',
   },
   [MONTH]: {
     second: '0',
