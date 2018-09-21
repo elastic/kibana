@@ -13,9 +13,23 @@ export const progress = () => ({
   help: 'Reveal a percentage of an element',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const { shape, value, max, valueColor, barColor, weight, label, labelPosition, font } = config;
+    const {
+      shape,
+      value,
+      max,
+      valueColor,
+      barColor,
+      valueWeight,
+      barWeight,
+      label,
+      labelPosition,
+      font,
+    } = config;
     const percent = value / max;
     const shapeDef = shapes[shape];
+    const offset = Math.max(valueWeight, barWeight);
+
+    console.log({ valueWeight, barWeight });
 
     if (shapeDef) {
       const parser = new DOMParser();
@@ -29,10 +43,10 @@ export const progress = () => ({
         .map(v => parseInt(v, 10));
       let [minX, minY] = initialViewBox;
       const [, , width, height] = initialViewBox;
-      if (shape !== 'horizontalBar') minX -= weight / 2;
-      if (shape !== 'verticalBar') minY -= weight / 2;
-      let offsetWidth = width + weight;
-      let offsetHeight = height + weight;
+      if (shape !== 'horizontalBar') minX -= offset / 2;
+      if (shape !== 'verticalBar') minY -= offset / 2;
+      let offsetWidth = width + offset;
+      let offsetHeight = height + offset;
 
       shapeSvg.setAttribute('className', 'canvasProgress');
       shapeSvg.setAttribute('width', domNode.offsetWidth);
@@ -45,11 +59,12 @@ export const progress = () => ({
       bar.setAttribute('className', 'canvasProgress__background');
       bar.setAttribute('fill', 'none');
       bar.setAttribute('stroke', barColor);
-      bar.setAttribute('stroke-width', `${weight}px`);
+      bar.setAttribute('stroke-width', `${barWeight}px`);
 
       const value = bar.cloneNode(true);
       value.setAttribute('className', 'canvasProgress__value');
       value.setAttribute('stroke', valueColor);
+      value.setAttribute('stroke-width', `${valueWeight}px`);
 
       const length = value.getTotalLength();
       const to = length * (1 - percent);
@@ -94,7 +109,7 @@ export const progress = () => ({
             textAnchor = 'middle';
             dominantBaseline = 'text-after-edge';
             labelX = width / 2;
-            labelY = shape === 'verticalBar' ? 0 : -weight / 2;
+            labelY = shape === 'verticalBar' ? 0 : -offset / 2;
             minY -= labelHeight;
             offsetHeight += labelHeight;
 
@@ -107,7 +122,7 @@ export const progress = () => ({
             textAnchor = 'middle';
             dominantBaseline = 'text-before-edge';
             labelX = width / 2;
-            labelY = shape === 'verticalBar' ? height : height + weight / 2;
+            labelY = shape === 'verticalBar' ? height : height + offset / 2;
             offsetHeight += labelHeight;
 
             if (labelWidth > offsetWidth) {
@@ -118,7 +133,7 @@ export const progress = () => ({
           case 'left':
             textAnchor = 'end';
             dominantBaseline = 'central';
-            labelX = shape === 'horizontalBar' ? 0 : -weight / 2;
+            labelX = shape === 'horizontalBar' ? 0 : -offset / 2;
             labelY = height / 2;
             minX -= labelWidth;
             offsetWidth += labelWidth;
@@ -131,7 +146,7 @@ export const progress = () => ({
           case 'right':
             textAnchor = 'start';
             dominantBaseline = 'central';
-            labelX = shape === 'horizontalBar' ? width : width + weight / 2;
+            labelX = shape === 'horizontalBar' ? width : width + offset / 2;
             labelY = labelY = height / 2;
             offsetWidth += labelWidth;
 

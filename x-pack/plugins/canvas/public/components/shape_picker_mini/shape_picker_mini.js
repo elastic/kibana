@@ -30,7 +30,7 @@ export const ShapePickerMini = ({ shapes, onChange, value, anchorPosition }) => 
 };
 
 ShapePickerMini.propTypes = {
-  shapes: PropTypes.array.isRequired,
+  shapes: PropTypes.object.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,
   anchorPosition: PropTypes.string,

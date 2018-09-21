@@ -40,9 +40,14 @@ export const progress = () => ({
       help: 'Color of the background bar',
       default: `#f0f0f0`,
     },
-    weight: {
+    valueWeight: {
       type: ['number'],
-      help: 'Thickness of the bar in pixels',
+      help: 'Thickness of the progress bar',
+      default: 20,
+    },
+    barWeight: {
+      type: ['number'],
+      help: 'Thickness of the background bar',
       default: 20,
     },
     label: {

@@ -26,6 +26,6 @@ export const ShapePicker = ({ shapes, onChange }) => {
 };
 
 ShapePicker.propTypes = {
-  shapes: PropTypes.array.isRequired,
+  shapes: PropTypes.object.isRequired,
   onChange: PropTypes.func,
 };
