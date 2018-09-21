@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Apm', () => {
+  describe('APM', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));
     loadTestFile(require.resolve('./instance'));

@@ -37,7 +37,7 @@ uiRoutes.when('/apm/instances/:uuid', {
       });
 
       super({
-        title: `Apm - Instance`,
+        title: `APM - Instance`,
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',
@@ -46,7 +46,7 @@ uiRoutes.when('/apm/instances/:uuid', {
       });
 
       $scope.$watch(() => this.data, data => {
-        title($scope.cluster, `Apm - ${get(data, 'apmSummary.name')}`);
+        title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
         this.renderReact(data);
       });
     }

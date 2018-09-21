@@ -29,7 +29,7 @@ uiRoutes.when('/apm', {
       });
 
       super({
-        title: 'Apm',
+        title: 'APM',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},
         reactNodeId: 'apmOverviewReact',

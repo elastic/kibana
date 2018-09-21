@@ -32,7 +32,7 @@ export function ApmPanel(props) {
   const goToInstances = () => props.changeUrl('apm/instances');
 
   return (
-    <ClusterItemContainer {...props} url="apm" title="Apm">
+    <ClusterItemContainer {...props} url="apm" title="APM">
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
@@ -40,7 +40,7 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToApm}
-                  aria-label="Apm Overview"
+                  aria-label="APM Overview"
                   data-test-subj="apmOverview"
                 >
                   Overview

@@ -29,7 +29,7 @@ uiRoutes.when('/apm/instances', {
       });
 
       super({
-        title: 'Apm - Instances',
+        title: 'APM - Instances',
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},

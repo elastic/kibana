@@ -85,11 +85,11 @@ function getBeatsBreadcrumbs(mainInstance) {
 function getApmBreadcrumbs(mainInstance) {
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/apm', 'Apm'));
+    breadcrumbs.push(createCrumb('#/apm', 'APM'));
     breadcrumbs.push(createCrumb('#/apm/instances', 'Instances'));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, 'Apm'));
+    breadcrumbs.push(createCrumb(null, 'APM'));
   }
   return breadcrumbs;
 }
