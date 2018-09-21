@@ -35,7 +35,7 @@
 }
 
 /**
- * .dshLayout-withMargins only affects the panel styles themselves, see ../panel
+ * .dshLayout-withoutMargins only affects the panel styles themselves, see ../panel
  */
 
 /**
@@ -83,6 +83,7 @@
   }
 
   &.react-draggable-dragging {
+    transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
     @include euiBottomShadowLarge;
     border-radius: $euiBorderRadius; // keeps shadow within bounds
   }

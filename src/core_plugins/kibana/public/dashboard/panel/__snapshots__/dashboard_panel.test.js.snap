@@ -2,7 +2,7 @@
 
 exports[`DashboardPanel matches snapshot 1`] = `
 <div
-  class="euiPanel dshPanel dshPanel__panel dshPanel__panel--editing"
+  class="euiPanel dshPanel dshPanel--editing"
   data-test-subj="dashboardPanel"
 >
   <div
