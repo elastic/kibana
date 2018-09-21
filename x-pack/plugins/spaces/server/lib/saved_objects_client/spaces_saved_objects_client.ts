@@ -58,11 +58,20 @@ const throwErrorIfTypesContainsSpace = (types: string[]) => {
   }
 };
 
+const assertValidSpace = async (request: any, spacesService: SpacesService, errors: any) => {
+  try {
+    await spacesService.getActiveSpace(request);
+  } catch (error) {
+    throw errors.createGenericNotFoundError();
+  }
+};
+
 export class SpacesSavedObjectsClient implements SavedObjectsClient {
   public readonly errors: any;
   private readonly client: SavedObjectsClient;
   private readonly spaceId: string;
   private readonly types: string[];
+  private throwErrorIfInvalidSpace: () => Promise<void>;
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, types } = options;
@@ -71,6 +80,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     this.client = baseClient;
     this.spaceId = spacesService.getSpaceId(request);
     this.types = types;
+    this.throwErrorIfInvalidSpace = async () =>
+      assertValidSpace(request, spacesService, this.errors);
   }
 
   /**
@@ -87,6 +98,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
   public async create(type: string, attributes = {}, options: CreateOptions = {}) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
+    await this.throwErrorIfInvalidSpace();
 
     return await this.client.create(type, attributes, {
       ...options,
@@ -106,6 +118,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
   public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions = {}) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
     throwErrorIfNamespaceSpecified(options);
+    await this.throwErrorIfInvalidSpace();
 
     return await this.client.bulkCreate(objects, {
       ...options,

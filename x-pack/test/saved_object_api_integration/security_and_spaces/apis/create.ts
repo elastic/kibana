@@ -10,7 +10,7 @@ import { TestInvoker } from '../../common/lib/types';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
 // tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function createSavedObjectsTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -19,6 +19,7 @@ export default function({ getService }: TestInvoker) {
     createTest,
     createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
+    expectNotFound,
     expectNotSpaceAwareResults,
     expectNotSpaceAwareRbacForbidden,
     expectSpaceAwareRbacForbidden,
@@ -64,12 +65,12 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
-            statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            statusCode: 404,
+            response: expectNotFound,
           },
           notSpaceAware: {
-            statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            statusCode: 404,
+            response: expectNotFound,
           },
         },
       });
@@ -256,6 +257,165 @@ export default function({ getService }: TestInvoker) {
           },
         }
       );
+    });
+
+    // Invalid space scenario
+    [
+      {
+        spaceId: 'not-a-space',
+        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
+        superuser: AUTHENTICATION.SUPERUSER,
+        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+      },
+    ].forEach(scenario => {
+      createTest(`${scenario.notAKibanaUser.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.notAKibanaUser.USERNAME,
+          password: scenario.notAKibanaUser.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.superuser.USERNAME,
+          password: scenario.superuser.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithLegacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithLegacyAll.USERNAME,
+          password: scenario.userWithLegacyAll.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithLegacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithLegacyRead.USERNAME,
+          password: scenario.userWithLegacyRead.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithDualAll.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithDualAll.USERNAME,
+          password: scenario.userWithDualAll.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithDualRead.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithDualRead.USERNAME,
+          password: scenario.userWithDualRead.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 403,
+            response: expectSpaceAwareRbacForbidden,
+          },
+          notSpaceAware: {
+            statusCode: 403,
+            response: expectNotSpaceAwareRbacForbidden,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithAllGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithAllGlobally.USERNAME,
+          password: scenario.userWithAllGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+          notSpaceAware: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      createTest(`${scenario.userWithReadGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithReadGlobally.USERNAME,
+          password: scenario.userWithReadGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 403,
+            response: expectSpaceAwareRbacForbidden,
+          },
+          notSpaceAware: {
+            statusCode: 403,
+            response: expectNotSpaceAwareRbacForbidden,
+          },
+        },
+      });
     });
   });
 }

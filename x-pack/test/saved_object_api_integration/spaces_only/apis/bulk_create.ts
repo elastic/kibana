@@ -9,12 +9,12 @@ import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
 // tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function bulkCreateTestSuite({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { bulkCreateTest, createExpectResults } = bulkCreateTestSuiteFactory(
+  const { bulkCreateTest, createExpectResults, expectNotFound } = bulkCreateTestSuiteFactory(
     es,
     esArchiver,
     supertest
@@ -37,6 +37,16 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+      },
+    });
+
+    bulkCreateTest('in a non-existent space', {
+      ...SPACES.NON_EXISTENT,
+      tests: {
+        default: {
+          statusCode: 404,
+          response: expectNotFound,
         },
       },
     });

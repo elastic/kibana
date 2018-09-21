@@ -12,7 +12,24 @@ const createRequest = (spaceId?: string, serverBasePath = '') => ({
     spaceId && spaceId !== DEFAULT_SPACE_ID ? `${serverBasePath}/s/${spaceId}` : serverBasePath,
 });
 
-const createMockServer = (config: any) => {
+const createMockServer = (config: any, simulateInvalidSpace = false) => {
+  const spacesClient = {
+    getScopedClient: (request: any) => {
+      return {
+        get: async (spaceId: string) => {
+          if (simulateInvalidSpace) {
+            throw new Error('Not Found!');
+          }
+
+          return {
+            id: spaceId,
+            name: `test space ${spaceId}`,
+          };
+        },
+      };
+    },
+  };
+
   return {
     config: jest.fn(() => {
       return {
@@ -21,34 +38,90 @@ const createMockServer = (config: any) => {
         }),
       };
     }),
+    plugins: {
+      spaces: {
+        spacesClient,
+      },
+    },
   };
 };
 
-test('returns the default space ID', () => {
-  const server = createMockServer({
-    'server.basePath': '',
+describe('getSpaceId', () => {
+  test('returns the default space ID', () => {
+    const server = createMockServer({
+      'server.basePath': '',
+    });
+
+    const service = createSpacesService(server);
+    expect(service.getSpaceId(createRequest())).toEqual(DEFAULT_SPACE_ID);
   });
 
-  const service = createSpacesService(server);
-  expect(service.getSpaceId(createRequest())).toEqual(DEFAULT_SPACE_ID);
+  test('returns the id for the current space', () => {
+    const request = createRequest('my-space-context');
+    const server = createMockServer({
+      'server.basePath': '',
+    });
+
+    const service = createSpacesService(server);
+    expect(service.getSpaceId(request)).toEqual('my-space-context');
+  });
+
+  test(`returns the id for the current space when a server basepath is defined`, () => {
+    const request = createRequest('my-space-context', '/foo');
+    const server = createMockServer({
+      'server.basePath': '/foo',
+    });
+
+    const service = createSpacesService(server);
+    expect(service.getSpaceId(request)).toEqual('my-space-context');
+  });
 });
 
-test('returns the id for the current space', () => {
-  const request = createRequest('my-space-context');
-  const server = createMockServer({
-    'server.basePath': '',
+describe('getActiveSpace', () => {
+  test('returns the current space', async () => {
+    const request = createRequest('my-space-context');
+    const server = createMockServer({
+      'server.basePath': '',
+    });
+
+    const service = createSpacesService(server);
+    expect(await service.getActiveSpace(request)).toEqual({
+      id: 'my-space-context',
+      name: 'test space my-space-context',
+    });
   });
 
-  const service = createSpacesService(server);
-  expect(service.getSpaceId(request)).toEqual('my-space-context');
-});
+  test('throws when the current space cannot be found', async () => {
+    const request = createRequest('my-space-context');
+    const server = createMockServer(
+      {
+        'server.basePath': '',
+      },
+      true
+    );
 
-test(`returns the id for the current space when a server basepath is defined`, () => {
-  const request = createRequest('my-space-context', '/foo');
-  const server = createMockServer({
-    'server.basePath': '/foo',
+    const service = createSpacesService(server);
+    expect(service.getActiveSpace(request)).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  const service = createSpacesService(server);
-  expect(service.getSpaceId(request)).toEqual('my-space-context');
+  test('caches subsequent calls to getActiveSpace within the same request', () => {
+    const request = createRequest('my-space-context');
+    const anotherRequest = createRequest('my-space-context');
+    const server = createMockServer({
+      'server.basePath': '',
+    });
+
+    const service = createSpacesService(server);
+
+    const call1 = service.getActiveSpace(request);
+    const call2 = service.getActiveSpace(request);
+
+    const anotherRequestCall1 = service.getActiveSpace(anotherRequest);
+    const anotherRequestCall2 = service.getActiveSpace(anotherRequest);
+
+    expect(call1).toBe(call2);
+    expect(anotherRequestCall1).toBe(anotherRequestCall2);
+
+    expect(call1).not.toBe(anotherRequestCall1);
+  });
 });

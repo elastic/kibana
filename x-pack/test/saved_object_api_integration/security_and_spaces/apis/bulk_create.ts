@@ -10,19 +10,21 @@ import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
 // tslint:disable:no-default-export
-export default function({ getService }: TestInvoker) {
+export default function bulkCreateTestSuite({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const {
     bulkCreateTest,
+    expectNotFound,
     createExpectLegacyForbidden,
     createExpectResults,
     expectRbacForbidden,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
+    // Valid space scenarios
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -62,8 +64,8 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            statusCode: 404,
+            response: expectNotFound,
           },
         },
       });
@@ -218,6 +220,145 @@ export default function({ getService }: TestInvoker) {
           auth: {
             username: scenario.userWithAllAtOtherSpace.USERNAME,
             password: scenario.userWithAllAtOtherSpace.PASSWORD,
+          },
+          spaceId: scenario.spaceId,
+          tests: {
+            default: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+          },
+        }
+      );
+    });
+
+    // Invalid space scenarios
+    [
+      {
+        spaceId: 'not-a-space',
+        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
+        superuser: AUTHENTICATION.SUPERUSER,
+        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+      },
+    ].forEach(scenario => {
+      bulkCreateTest(`${scenario.notAKibanaUser.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.notAKibanaUser.USERNAME,
+          password: scenario.notAKibanaUser.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      bulkCreateTest(`${scenario.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.superuser.USERNAME,
+          password: scenario.superuser.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      bulkCreateTest(
+        `${scenario.userWithLegacyAll.USERNAME} within the ${scenario.spaceId} space`,
+        {
+          auth: {
+            username: scenario.userWithLegacyAll.USERNAME,
+            password: scenario.userWithLegacyAll.PASSWORD,
+          },
+          spaceId: scenario.spaceId,
+          tests: {
+            default: {
+              statusCode: 404,
+              response: expectNotFound,
+            },
+          },
+        }
+      );
+
+      bulkCreateTest(
+        `${scenario.userWithLegacyRead.USERNAME} within the ${scenario.spaceId} space`,
+        {
+          auth: {
+            username: scenario.userWithLegacyRead.USERNAME,
+            password: scenario.userWithLegacyRead.PASSWORD,
+          },
+          spaceId: scenario.spaceId,
+          tests: {
+            default: {
+              statusCode: 404,
+              response: expectNotFound,
+            },
+          },
+        }
+      );
+
+      bulkCreateTest(`${scenario.userWithDualAll.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithDualAll.USERNAME,
+          password: scenario.userWithDualAll.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      bulkCreateTest(`${scenario.userWithDualRead.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.userWithDualRead.USERNAME,
+          password: scenario.userWithDualRead.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      bulkCreateTest(
+        `${scenario.userWithAllGlobally.USERNAME} within the ${scenario.spaceId} space`,
+        {
+          auth: {
+            username: scenario.userWithAllGlobally.USERNAME,
+            password: scenario.userWithAllGlobally.PASSWORD,
+          },
+          spaceId: scenario.spaceId,
+          tests: {
+            default: {
+              statusCode: 404,
+              response: expectNotFound,
+            },
+          },
+        }
+      );
+
+      bulkCreateTest(
+        `${scenario.userWithReadGlobally.USERNAME} within the ${scenario.spaceId} space`,
+        {
+          auth: {
+            username: scenario.userWithReadGlobally.USERNAME,
+            password: scenario.userWithReadGlobally.PASSWORD,
           },
           spaceId: scenario.spaceId,
           tests: {

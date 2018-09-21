@@ -8,7 +8,10 @@ import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
 // tslint:disable:no-default-export
-export default function({ getService, loadTestFile }: TestInvoker) {
+export default function securityAndSpacesSavedObjectsTestSuite({
+  getService,
+  loadTestFile,
+}: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');
 

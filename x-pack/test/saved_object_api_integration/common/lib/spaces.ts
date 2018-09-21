@@ -14,4 +14,7 @@ export const SPACES = {
   DEFAULT: {
     spaceId: 'default',
   },
+  NON_EXISTENT: {
+    spaceId: 'not-a-space',
+  },
 };
