@@ -142,7 +142,7 @@ export function explorerChartsContainerServiceFactory(
 
     // Query 4 - load the rare chart's event distribution
     function getEventDistribution(config, range) {
-      let splitField = config.entityFields.find(f => f.fiedType === 'partition');
+      let splitField = config.entityFields.find(f => f.fieldType === 'partition');
       let filterField = null;
       if (config.functionDescription === 'rare') {
         splitField = config.entityFields.find(f => f.fieldType === 'by');
@@ -190,15 +190,25 @@ export function explorerChartsContainerServiceFactory(
         return [];
       }
 
-      let chartData = _.map(metricData, (value, time) => ({
-        date: +time,
-        value: value
-      }));
-
+      let chartData;
       if (eventDistribution.length > 0) {
-        chartData = eventDistribution;
+        const filterField = records[0].by_field_value;
+        chartData = eventDistribution.filter(d => (d.entity !== filterField));
+        _.map(metricData, (value, time) => {
+          if (value > 0) {
+            chartData.push({
+              date: +time,
+              value: value,
+              entity: filterField
+            });
+          }
+        });
+      } else {
+        chartData = _.map(metricData, (value, time) => ({
+          date: +time,
+          value: value
+        }));
       }
-
 
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
