@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { StyleTabs } from './view';
-import { updateLayerStyle, clearTemporaryStyles } from '../../../actions/style_actions';
+import { updateLayerStyle, clearTemporaryStyles } from '../../../actions/store_actions';
 
 function mapDispatchToProps(dispatch) {
   return {

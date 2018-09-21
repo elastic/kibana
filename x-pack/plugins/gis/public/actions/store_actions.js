@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getDataFilters } from '../selectors/map_selectors';
+import { getLayerList, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -22,6 +22,9 @@ export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
+export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
+export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
+export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -49,7 +52,7 @@ export function replaceLayerList(newLayerList) {
     layerList.forEach(layer => {
       const { startLoading, stopLoading } =
         getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
+      layer.syncData(startLoading, stopLoading, dataFilters);
 
     });
   };
@@ -123,7 +126,7 @@ export function mapExtentChanged(newMapConstants) {
     layerList.forEach(layer => {
       const { startLoading, stopLoading } = getLayerLoadingFunctions(
         dispatch, layer.getId(), tokenString);
-      layer.syncDataToMapState(startLoading, stopLoading,
+      layer.syncData(startLoading, stopLoading,
         { ...dataFilters, ...newMapConstants });
     });
   };
@@ -156,7 +159,7 @@ export function addPreviewLayer(layer, position) {
     const dataFilters = getDataFilters(getState());
     const { startLoading, stopLoading } =
       getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-    layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
+    layer.syncData(startLoading, stopLoading, dataFilters);
   };
 }
 
@@ -193,17 +196,44 @@ export function setTimeFilters(timeFilters) {
     });
     const state = getState();
     const dataFilters = getDataFilters(state);
-
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } = getLayerLoadingFunctions(
-        dispatch, layer.getId(), tokenString);
-      // State should be up-to-date, but just in case, pass timefilters explicitly
-      layer.syncDataToMapState(startLoading, stopLoading,
-        { ...dataFilters, timeFilters: { ...timeFilters } });
+      const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      layer.syncData(startLoading, stopLoading, { ...dataFilters, timeFilters: { ...timeFilters } });
     });
   };
 }
+
+export function updateLayerStyle(style, temporary = true) {
+  const tokenString = 'data_request_sync_style_change';
+  return async (dispatch, getState) => {
+    await dispatch({
+      type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+      style: {
+        ...style,
+        temporary
+      },
+    });
+    const state = getState();
+    const dataFilters = getDataFilters(state);
+    const layer = getSelectedLayer(state);
+    const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    layer.syncData(startLoading, stopLoading, { ...dataFilters });
+  };
+}
+
+export function promoteTemporaryStyles() {
+  return {
+    type: PROMOTE_TEMPORARY_STYLES
+  };
+}
+
+export function clearTemporaryStyles() {
+  return {
+    type: CLEAR_TEMPORARY_STYLES
+  };
+}
+
 
 
 export async function loadMapResources(dispatch) {
@@ -238,7 +268,7 @@ export async function loadMapResources(dispatch) {
           "format": "geojson" },
         "visible": true,
         "temporary": false,
-        "style": { "type": "FILL_AND_OUTLINE", "color": "#e6194b" },
+        "style": { "type": "VECTOR", "color": "#e6194b" },
         "type": "VECTOR"
       },
       {

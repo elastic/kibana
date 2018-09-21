@@ -15,9 +15,9 @@ import {
 
 const DEFAULT_COLOR = '#e6194b';
 
-export class FillAndOutlineStyle {
+export class VectorStyle {
 
-  static type = 'FILL_AND_OUTLINE';
+  static type = 'VECTOR';
   static DEFAULT_COLOR_HEX = '#ffffff';
 
   constructor(descriptor) {
@@ -25,12 +25,12 @@ export class FillAndOutlineStyle {
   }
 
   static canEdit(styleInstance) {
-    return styleInstance.constructor === FillAndOutlineStyle;
+    return styleInstance.constructor === VectorStyle;
   }
 
   static createDescriptor(color) {
     return {
-      type: FillAndOutlineStyle.type,
+      type: VectorStyle.type,
       color: color
     };
   }
@@ -42,15 +42,15 @@ export class FillAndOutlineStyle {
   static renderEditor({ handleStyleChange, style, reset }) {
 
     if (style === null) {
-      const fallbackDescriptor = FillAndOutlineStyle.createDescriptor(FillAndOutlineStyle.DEFAULT_COLOR_HEX);
-      style = new FillAndOutlineStyle(fallbackDescriptor);
+      const fallbackDescriptor = VectorStyle.createDescriptor(VectorStyle.DEFAULT_COLOR_HEX);
+      style = new VectorStyle(fallbackDescriptor);
     }
 
     const changeColor = (color) => {
-      const fillAndOutlineDescriptor = FillAndOutlineStyle.createDescriptor(color);
+      const fillAndOutlineDescriptor = VectorStyle.createDescriptor(color);
       handleStyleChange(fillAndOutlineDescriptor);
     };
-    const selectedColor = style ? style.getHexColor() : FillAndOutlineStyle.DEFAULT_COLOR_HEX;
+    const selectedColor = style ? style.getHexColor() : VectorStyle.DEFAULT_COLOR_HEX;
     return (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
@@ -77,7 +77,7 @@ export class FillAndOutlineStyle {
   }
 
 
-  setMBPaintProperties(mbMap, fillLayerId, lineLayerId, temp) {
+  setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
     const color = this.getHexColor() || DEFAULT_COLOR;
     mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
     mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
@@ -86,5 +86,20 @@ export class FillAndOutlineStyle {
     mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
   }
 
+  addMbPointsLayerAndSetMBPaintProperties(mbMap, sourceId, pointLayerId, temp) {
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    if (!pointLayer) {
+      mbMap.addLayer({
+        id: pointLayerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {}
+      });
+    }
+    const color = this.getHexColor() || DEFAULT_COLOR;
+    mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
+    mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
+    mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
+  }
 
 }

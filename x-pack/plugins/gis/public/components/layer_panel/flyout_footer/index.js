@@ -7,8 +7,7 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { setSelectedLayer, removeLayer } from '../../../actions/store_actions';
-import { promoteTemporaryStyles, clearTemporaryStyles } from '../../../actions/style_actions';
+import { promoteTemporaryStyles, clearTemporaryStyles, setSelectedLayer, removeLayer } from '../../../actions/store_actions';
 
 const mapDispatchToProps = dispatch => {
   return {

@@ -68,6 +68,20 @@ export class HeatmapStyle {
     return this._descriptor.refinement;
   }
 
+  getPrecisionRefinementDelta() {
+    let refinementFactor;
+    if (this._descriptor.refinement === 'coarse') {
+      refinementFactor = 0;
+    } else if (this._descriptor.refinement === 'fine') {
+      refinementFactor = 1;
+    } else if (this._descriptor.refinement === 'most_fine') {
+      refinementFactor = 2;
+    } else {
+      throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
+    }
+    return refinementFactor;
+  }
+
 }
 
 

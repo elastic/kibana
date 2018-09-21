@@ -16,7 +16,7 @@ import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../shared/layers/sources/es_search_source';
-import { FillAndOutlineStyle } from '../shared/layers/styles/fill_and_outline_style';
+import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 
 function createLayerInstance(layerDescriptor, dataSources) {
@@ -66,8 +66,8 @@ function createStyleInstance(styleDescriptor) {
   }
 
   switch (styleDescriptor.type) {
-    case FillAndOutlineStyle.type:
-      return new FillAndOutlineStyle(styleDescriptor);
+    case VectorStyle.type:
+      return new VectorStyle(styleDescriptor);
     case HeatmapStyle.type:
       return new HeatmapStyle(styleDescriptor);
     default:

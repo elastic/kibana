@@ -106,16 +106,18 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(startLoading, stopLoading, dataFilters) {
+  async syncData(startLoading, stopLoading, dataFilters) {
 
     if (!dataFilters.extent) {
       return;
     }
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)];
-    // TODO: Re-evaluate function and likely separate sync data ops
-    let samePrecision;
-    let isContained;
-    let sameTime;
+
+
+    const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)] + this._style.getPrecisionRefinementDelta();
+
+    let samePrecision = false;
+    let isContained = false;
+    let sameTime = false;
     if (this._descriptor.dataMeta) {
       if (this._descriptor.dataMeta.extent) {
         const dataExtent = turf.bboxPolygon([
@@ -135,25 +137,17 @@ export class GeohashGridLayer extends ALayer {
         samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
       }
       if (this._descriptor.dataMeta.timeFilters) {
-        sameTime = dataFilters.timeFilters ===
-this._descriptor.dataMeta.timeFilters;
+        sameTime = dataFilters.timeFilters === this._descriptor.dataMeta.timeFilters;
       }
     }
     if (samePrecision && isContained && sameTime) {
       return;
     }
-    const updatedFilters = {
-      ...dataFilters,
-      precision: targetPrecision
-    };
-    return this._fetchNewData(startLoading, stopLoading, updatedFilters);
-  }
 
-  async _fetchNewData(startLoading, stopLoading, fetchDataFilters) {
-    const { precision, extent, timeFilters } = fetchDataFilters;
-    const scaleFactor = 0.5;
+    const extent = dataFilters.extent;
     const width = extent.max_lon - extent.min_lon;
     const height = extent.max_lat - extent.min_lat;
+    const scaleFactor = 0.5;
     const expandExtent = {
       min_lon: extent.min_lon - width * scaleFactor,
       min_lat: extent.min_lat - height * scaleFactor,
@@ -161,14 +155,19 @@ this._descriptor.dataMeta.timeFilters;
       max_lat: extent.max_lat + height * scaleFactor
     };
 
-    startLoading({
-      precision,
-      timeFilters,
-      extent: expandExtent
-    });
-    const data = await this._source.getGeoJsonPointsWithTotalCount(
-      precision, expandExtent, timeFilters);
-    stopLoading(data);
+    const dataMeta = {
+      ...dataFilters,
+      extent: expandExtent,
+      precision: targetPrecision
+    };
+    return this._fetchNewData(startLoading, stopLoading, dataMeta);
   }
 
+  async _fetchNewData(startLoading, stopLoading, dataMeta) {
+    const { precision, timeFilters, extent } = dataMeta;
+    startLoading(dataMeta);
+    const data = await this._source.getGeoJsonPointsWithTotalCount(
+      precision, extent, timeFilters);
+    stopLoading(data);
+  }
 }

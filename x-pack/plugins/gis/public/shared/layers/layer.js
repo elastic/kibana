@@ -70,7 +70,11 @@ export class ALayer {
     return this._descriptor;
   }
 
-  async syncDataToMapState() {
+  async syncData() {
+    //no-op by default
+  }
+
+  async syncDataToStyleChange() {
     //no-op by default
   }
 

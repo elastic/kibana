@@ -18,6 +18,8 @@ export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
 
+  static typeDisplayName = 'EMS';
+
   static createDescriptor(name) {
     return {
       type: EMSFileSource.type,
