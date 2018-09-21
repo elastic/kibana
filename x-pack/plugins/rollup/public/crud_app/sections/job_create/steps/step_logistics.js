@@ -241,6 +241,7 @@ export class StepLogisticsUi extends Component {
       indexPattern,
       rollupIndex,
       rollupPageSize,
+      rollupDelay,
     } = fields;
 
     const {
@@ -248,6 +249,7 @@ export class StepLogisticsUi extends Component {
       indexPattern: errorIndexPattern,
       rollupIndex: errorRollupIndex,
       rollupPageSize: errorRollupPageSize,
+      rollupDelay: errorRollupDelay,
     } = fieldErrors;
 
     return (
@@ -415,17 +417,28 @@ export class StepLogisticsUi extends Component {
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.description"
                 defaultMessage={`
-                  How often should data be rolled up and how many results should be indexed at a time?
-                  A larger page size will roll up data more quickly, but will require more memory during processing.
+                  How often should data be rolled up?
                 `}
               />
             )}
             fullWidth
           >
             {this.renderCronEditor()}
+          </EuiDescribedFormGroup>
 
-            <EuiSpacer size="l" />
-
+          <EuiDescribedFormGroup
+            title={<div />}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.description"
+                defaultMessage={`
+                  How many documents should be rolled up at a time? A larger page size
+                  will roll up data more quickly, but will require more memory during processing.
+                `}
+              />
+            )}
+            fullWidth
+          >
             <EuiFormRow
               label={(
                 <FormattedMessage
@@ -443,6 +456,50 @@ export class StepLogisticsUi extends Component {
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
                 min={0}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+
+          <EuiDescribedFormGroup
+            title={<div />}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionDelay.description"
+                defaultMessage={`
+                  How long should the rollup job wait before rolling up new data? Waiting will
+                  yield a higher-fidelity rollup by adjusting for variable ingest latency.
+                  By default, the rollup job attempts to roll up all data that is available.
+                `}
+              />
+            )}
+            fullWidth
+          >
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
+                  defaultMessage="Delay (optional)"
+                />
+              )}
+              error={errorRollupDelay}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
+              helpText={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
+                      defaultMessage="Example delay values: 30s, 20m, 24h, 2d, 1w, 1M"
+                    />
+                  </p>
+                </Fragment>
+              )}
+              fullWidth
+            >
+              <EuiFieldText
+                value={rollupDelay || ''}
+                onChange={e => onFieldsChange({ rollupDelay: e.target.value })}
+                isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

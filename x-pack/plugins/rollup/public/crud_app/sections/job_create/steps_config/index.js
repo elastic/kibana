@@ -9,9 +9,9 @@ import { validateIndexPattern } from './validate_index_pattern';
 import { validateRollupIndex } from './validate_rollup_index';
 import { validateRollupCron } from './validate_rollup_cron';
 import { validateRollupPageSize } from './validate_rollup_page_size';
+import { validateRollupDelay } from './validate_rollup_delay';
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
-import { validateDateHistogramDelay } from './validate_date_histogram_delay';
 import { validateHistogramInterval } from './validate_histogram_interval';
 import { validateMetrics } from './validate_metrics';
 
@@ -39,6 +39,7 @@ export const stepIdToStepConfigMap = {
       rollupIndex: '',
       rollupCron: '0 0 * * 6', // Every week on Saturday, at 00:00
       rollupPageSize: '',
+      rollupDelay: '1d',
     },
     fieldsValidator: fields => {
       const {
@@ -47,6 +48,7 @@ export const stepIdToStepConfigMap = {
         rollupIndex,
         rollupCron,
         rollupPageSize,
+        rollupDelay,
       } = fields;
 
       const errors = {
@@ -55,6 +57,7 @@ export const stepIdToStepConfigMap = {
         rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
+        rollupDelay: validateRollupDelay(rollupDelay),
       };
 
       return errors;
@@ -64,20 +67,17 @@ export const stepIdToStepConfigMap = {
     defaultFields: {
       dateHistogramField: null,
       dateHistogramInterval: null,
-      dateHistogramDelay: null,
       dateHistogramTimeZone: 'UTC',
     },
     fieldsValidator: fields => {
       const {
         dateHistogramField,
         dateHistogramInterval,
-        dateHistogramDelay,
       } = fields;
 
       const errors = {
         dateHistogramField: validateDateHistogramField(dateHistogramField),
         dateHistogramInterval: validateDateHistogramInterval(dateHistogramInterval),
-        dateHistogramDelay: validateDateHistogramDelay(dateHistogramDelay),
       };
 
       return errors;

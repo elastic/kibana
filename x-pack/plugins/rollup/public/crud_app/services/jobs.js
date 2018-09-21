@@ -21,7 +21,7 @@ export function serializeJob(jobConfig) {
     rollupIndex,
     rollupCron,
     dateHistogramInterval,
-    dateHistogramDelay,
+    rollupDelay,
     rollupPageSize,
     dateHistogramTimeZone,
     dateHistogramField,
@@ -41,7 +41,7 @@ export function serializeJob(jobConfig) {
     groups: {
       date_histogram: removeUndefinedValues({
         interval: dateHistogramInterval,
-        delay: dateHistogramDelay,
+        delay: rollupDelay,
         time_zone: dateHistogramTimeZone,
         field: dateHistogramField,
       }),
@@ -88,7 +88,7 @@ export function deserializeJob(job) {
       groups: {
         date_histogram: {
           interval: dateHistogramInterval,
-          delay: dateHistogramDelay,
+          delay: rollupDelay,
           time_zone: dateHistogramTimeZone,
           field: dateHistogramField,
         },
@@ -115,7 +115,7 @@ export function deserializeJob(job) {
     rollupIndex,
     rollupCron,
     dateHistogramInterval,
-    dateHistogramDelay,
+    rollupDelay,
     dateHistogramTimeZone,
     dateHistogramField,
     status,
