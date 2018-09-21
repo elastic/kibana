@@ -6,8 +6,8 @@
 
 import { ALayer } from './layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-// import turf from 'turf';
-// import turfBooleanContains from '@turf/boolean-contains';
+import turf from 'turf';
+import turfBooleanContains from '@turf/boolean-contains';
 
 const ZOOM_TO_PRECISION = {
   "0": 1,
@@ -117,34 +117,41 @@ export class GeohashGridLayer extends ALayer {
     }
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)];
     // TODO: Re-evaluate function and likely separate sync data ops
-    // if (this._descriptor.dataMeta && this._descriptor.dataMeta.extent) {
+    let samePrecision;
+    let isContained;
+    let sameTime;
+    if (this._descriptor.dataMeta) {
+      if (this._descriptor.dataMeta.extent) {
+        const dataExtent = turf.bboxPolygon([
+          this._descriptor.dataMeta.extent.min_lon,
+          this._descriptor.dataMeta.extent.min_lat,
+          this._descriptor.dataMeta.extent.max_lon,
+          this._descriptor.dataMeta.extent.max_lat,
+        ]);
+        const mapStateExtent = turf.bboxPolygon([
+          dataFilters.extent.min_lon,
+          dataFilters.extent.min_lat,
+          dataFilters.extent.max_lon,
+          dataFilters.extent.max_lat
+        ]);
 
-    //   const dataExtent = turf.bboxPolygon([
-    //     this._descriptor.dataMeta.extent.min_lon,
-    //     this._descriptor.dataMeta.extent.min_lat,
-    //     this._descriptor.dataMeta.extent.max_lon,
-    //     this._descriptor.dataMeta.extent.max_lat,
-    //   ]);
-    //   const mapStateExtent = turf.bboxPolygon([
-    //     dataFilters.extent.min_lon,
-    //     dataFilters.extent.min_lat,
-    //     dataFilters.extent.max_lon,
-    //     dataFilters.extent.max_lat
-    //   ]);
-
-    //   const isContained = turfBooleanContains(dataExtent, mapStateExtent);
-    //   const samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
-    //   if (samePrecision && isContained) {
-    //     return;
-    //   }
-    // }
+        isContained = turfBooleanContains(dataExtent, mapStateExtent);
+        samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
+      }
+      if (this._descriptor.dataMeta.timeFilters) {
+        sameTime = dataFilters.timeFilters ===
+          this._descriptor.dataMeta.timeFilters;
+      }
+    }
+    if (samePrecision && isContained && sameTime) {
+      return;
+    }
     const updatedFilters = {
       ...dataFilters,
       precision: targetPrecision
     };
     return this._fetchNewData(startLoading, stopLoading, updatedFilters);
   }
-
 
   async _fetchNewData(startLoading, stopLoading, fetchDataFilters) {
     const { precision, extent, timeFilters } = fetchDataFilters;
