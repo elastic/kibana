@@ -13,12 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
+import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../../components/connected_link';
 import { TagBadge } from '../../components/tag';
+import { supportedConfigs } from '../../config_schemas';
 
 interface BeatDetailPageProps {
   beat: CMPopulatedBeat | undefined;
@@ -38,16 +39,23 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
         tagColor: tag.color,
         ...beat,
         ...configuration,
+        displayValue: get(
+          supportedConfigs.find(config => config.value === configuration.type),
+          'text',
+          null
+        ),
       }));
     })
   );
 
   const columns = [
     {
-      field: 'type',
+      field: 'displayValue',
       name: 'Type',
       sortable: true,
-      render: (type: string) => <EuiLink href="#">{type}</EuiLink>,
+      render: (value: string | null, configuration: any) => (
+        <EuiLink href="#">{value || configuration.type}</EuiLink>
+      ),
     },
     {
       field: 'module',
