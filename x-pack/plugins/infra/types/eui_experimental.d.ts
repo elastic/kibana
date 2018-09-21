@@ -50,14 +50,14 @@ declare module '@elastic/eui/lib/experimental' {
     };
   }
 
-  export interface EuiFormatedValue {
+  export interface EuiFormattedValue {
     title: any;
     value: any;
   }
   type EuiCrosshairXProps = CommonProps & {
     seriesNames: string[];
-    titleFormat?: (dataPoints: EuiDataPoint[]) => EuiFormatedValue | undefined;
-    itemsFormat?: (dataPoints: EuiDataPoint[]) => EuiFormatedValue[];
+    titleFormat?: (dataPoints: EuiDataPoint[]) => EuiFormattedValue | undefined;
+    itemsFormat?: (dataPoints: EuiDataPoint[]) => EuiFormattedValue[];
   };
   export const EuiCrosshairX: React.SFC<EuiCrosshairXProps>;
 }
