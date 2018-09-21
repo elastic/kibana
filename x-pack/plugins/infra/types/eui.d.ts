@@ -112,4 +112,10 @@ declare module '@elastic/eui' {
     append?: React.ReactNode;
   };
   export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
+
+  type EuiErrorBoundaryProps = CommonProps & {
+    children: React.ReactNode;
+  };
+
+  export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
 }

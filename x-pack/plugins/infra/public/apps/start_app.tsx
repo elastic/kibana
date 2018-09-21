@@ -13,6 +13,7 @@ import { pluck } from 'rxjs/operators';
 import { ThemeProvider } from 'styled-components';
 
 // TODO use theme provided from parentApp when kibana supports it
+import { EuiErrorBoundary } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import '@elastic/eui/dist/eui_theme_light.css';
 import { InfraFrontendLibs } from '../lib/lib';
@@ -29,12 +30,14 @@ export async function startApp(libs: InfraFrontendLibs) {
   });
 
   libs.framework.render(
-    <ReduxStoreProvider store={store}>
-      <ApolloProvider client={libs.apolloClient}>
-        <ThemeProvider theme={{ eui: euiVars }}>
-          <PageRouter history={history} />
-        </ThemeProvider>
-      </ApolloProvider>
-    </ReduxStoreProvider>
+    <EuiErrorBoundary>
+      <ReduxStoreProvider store={store}>
+        <ApolloProvider client={libs.apolloClient}>
+          <ThemeProvider theme={{ eui: euiVars }}>
+            <PageRouter history={history} />
+          </ThemeProvider>
+        </ApolloProvider>
+      </ReduxStoreProvider>
+    </EuiErrorBoundary>
   );
 }
