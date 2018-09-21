@@ -881,39 +881,39 @@ module.controller('MlExplorerController', function (
     ) {
       finish();
       return;
-    }
-
-    // Ensure the search bounds align to the bucketing interval used in the swimlane so
-    // that the first and last buckets are complete.
-    const bounds = timefilter.getActiveBounds();
-    const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
-    const selectedJobIds = $scope.getSelectedJobIds();
-    const limit = mlSelectLimitService.state.get('limit');
-    const swimlaneLimit = (limit === undefined) ? 10 : limit;
-
-    // load scores by influencer/jobId value and time.
-    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-    // which wouldn't be the case if e.g. '1M' was used.
-    const interval = $scope.swimlaneBucketInterval.asSeconds() + 's';
-    if ($scope.swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
-      mlResultsService.getInfluencerValueMaxScoreByTime(
-        selectedJobIds,
-        $scope.swimlaneViewByFieldName,
-        fieldValues,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        interval,
-        swimlaneLimit
-      ).then(finish);
     } else {
-      const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
-      mlResultsService.getScoresByBucket(
-        jobIds,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        interval,
-        swimlaneLimit
-      ).then(finish);
+      // Ensure the search bounds align to the bucketing interval used in the swimlane so
+      // that the first and last buckets are complete.
+      const bounds = timefilter.getActiveBounds();
+      const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
+      const selectedJobIds = $scope.getSelectedJobIds();
+      const limit = mlSelectLimitService.state.get('limit');
+      const swimlaneLimit = (limit === undefined) ? 10 : limit;
+
+      // load scores by influencer/jobId value and time.
+      // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+      // which wouldn't be the case if e.g. '1M' was used.
+      const interval = $scope.swimlaneBucketInterval.asSeconds() + 's';
+      if ($scope.swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+        mlResultsService.getInfluencerValueMaxScoreByTime(
+          selectedJobIds,
+          $scope.swimlaneViewByFieldName,
+          fieldValues,
+          searchBounds.min.valueOf(),
+          searchBounds.max.valueOf(),
+          interval,
+          swimlaneLimit
+        ).then(finish);
+      } else {
+        const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
+        mlResultsService.getScoresByBucket(
+          jobIds,
+          searchBounds.min.valueOf(),
+          searchBounds.max.valueOf(),
+          interval,
+          swimlaneLimit
+        ).then(finish);
+      }
     }
   }
 
