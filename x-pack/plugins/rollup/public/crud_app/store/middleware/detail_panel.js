@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRouter, userHasLeftApp } from '../../services';
+import { getRouter, getUserHasLeftApp } from '../../services';
 import { CLOSE_DETAIL_PANEL } from '../action_types';
 
 export const detailPanel = () => next => action => {
@@ -12,7 +12,7 @@ export const detailPanel = () => next => action => {
 
   switch (type) {
     case CLOSE_DETAIL_PANEL:
-      if (!userHasLeftApp()) {
+      if (!getUserHasLeftApp()) {
         const { history } = getRouter();
 
         // Persist state to query params by removing deep link.

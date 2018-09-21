@@ -12,11 +12,11 @@ import { createLocation } from 'history';
 
 let _userHasLeftApp = false;
 
-export function userHasLeftApp(flag) {
-  if (flag != null) {
-    _userHasLeftApp = flag;
-  }
+export function setUserHasLeftApp(userHasLeftApp) {
+  _userHasLeftApp = userHasLeftApp;
+}
 
+export function getUserHasLeftApp() {
   return _userHasLeftApp;
 }
 

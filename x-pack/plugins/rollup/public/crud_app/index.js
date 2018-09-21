@@ -13,7 +13,7 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttp, userHasLeftApp } from './services';
+import { setHttp, setUserHasLeftApp } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
@@ -66,7 +66,7 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
             $route.current = appRoute;
           } else {
             // Set internal flag so we can prevent reacting to the route change internally.
-            userHasLeftApp(true);
+            setUserHasLeftApp(true);
           }
         });
 

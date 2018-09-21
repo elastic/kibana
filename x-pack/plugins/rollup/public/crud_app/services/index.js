@@ -50,7 +50,8 @@ export {
 } from './query_params';
 
 export {
-  userHasLeftApp,
+  setUserHasLeftApp,
+  getUserHasLeftApp,
   registerRouter,
   getRouter,
   getRouterLinkProps,
