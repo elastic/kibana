@@ -14,7 +14,8 @@ import {
 } from 'ui/timefilter';
 import { getStore } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
-
+import { Inspector } from 'ui/inspector';
+import { inspectorAdapters } from './kibana_services';
 
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
@@ -41,9 +42,16 @@ export function initTimepicker(resolve) {
   uiModules
     .get('app/gis', [])
     .controller('TimePickerController', ($scope) => {
-      // Add APM feedback menu
-      // TODO: move this somewhere else
-      $scope.topNavMenu = [];
+      $scope.topNavMenu = [{
+        key: 'inspect',
+        description: 'Open Inspector',
+        testId: 'openInspectorButton',
+        run() {
+          Inspector.open(inspectorAdapters, {
+            title: 'Layer requests'
+          });
+        }
+      }];
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 

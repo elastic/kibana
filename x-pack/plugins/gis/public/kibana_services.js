@@ -6,9 +6,13 @@
 
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
+import { MappedRequestAdapter } from 'ui/inspector/adapters';
 
 export let indexPatternService;
 export let SearchSource;
+export const inspectorAdapters = {
+  requests: new MappedRequestAdapter()
+};
 
 uiModules.get('gis').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');

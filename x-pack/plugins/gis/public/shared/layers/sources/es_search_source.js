@@ -11,9 +11,14 @@ import React, { Fragment } from 'react';
 import { ASource } from './source';
 import { IndexPatternSelect } from './index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
-import { indexPatternService, SearchSource } from '../../../kibana_services';
+import {
+  indexPatternService,
+  inspectorAdapters,
+  SearchSource,
+} from '../../../kibana_services';
 import { VectorLayer } from '../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 export class ESSearchSource extends ASource {
 
@@ -65,8 +70,18 @@ export class ESSearchSource extends ASource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
+      inspectorAdapters.requests.resetRequest(this._descriptor.id);
+      const inspectorRequest = inspectorAdapters.requests.start(this._descriptor.id, this._descriptor.name);
+      inspectorRequest.stats(getRequestInspectorStats(searchSource));
+      searchSource.getSearchRequestBody().then(body => {
+        inspectorRequest.json(body);
+      });
       resp = await searchSource.fetch();
+      inspectorRequest
+        .stats(getResponseInspectorStats(searchSource, resp))
+        .ok({ json: resp });
     } catch(error) {
+      console.log(error);
       // TODO dispatch action to set error state in store
       return { type: 'FeatureCollection', features: [] };
     }
@@ -181,7 +196,8 @@ class Editor extends React.Component {
         indexPatternId,
         geoField,
         limit: 10,
-        name: 'My elasticsearch document layer'
+        name: 'My elasticsearch document layer',
+        id: (new Date()).getTime().toString(),
       });
     }
   }
