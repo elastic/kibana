@@ -12,5 +12,8 @@
   "devDependencies": {
     "@types/jest": "^22.2.2",
     "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "tslib": "^1.9.3"
   }
 }

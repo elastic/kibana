@@ -424,7 +424,7 @@ tree-kill@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.0.tgz#5846786237b4239014f05db156b643212d4c6f36"
 
-tslib@^1.9.0:
+tslib@^1.9.0, tslib@^1.9.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
 

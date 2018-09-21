@@ -3,8 +3,12 @@
 
 
 "@types/jest@^22.2.2":
-  version "22.2.2"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.2.tgz#afe5dacbd00d65325f52da0ed3e76e259629ac9d"
+  version "22.2.3"
+  resolved "http://registry.npmjs.org/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
+
+tslib@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
 
 typescript@^2.9.2:
   version "2.9.2"
