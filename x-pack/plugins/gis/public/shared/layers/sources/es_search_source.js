@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
 import { ASource } from './source';
-import { IndexPatternSelect } from './index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
 import {
   indexPatternService,
