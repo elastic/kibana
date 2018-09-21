@@ -53,7 +53,7 @@ const HOUR_OPTIONS = makeSequence(0, 23).map(value => ({
   text: padLeft(value, 2, '0'),
 }));
 
-const DAY_OPTIONS = makeSequence(0, 6).map(value => ({
+const DAY_OPTIONS = makeSequence(1, 7).map(value => ({
   value: value.toString(),
   text: getDayName(value),
 }));
@@ -117,52 +117,52 @@ const frequencyToFieldsMap = {
 
 const frequencyToBaselineFieldsMap = {
   [MINUTE]: {
+    second: '0',
     minute: '*',
     hour: '*',
     date: '*',
     month: '*',
-    day: '*',
-    year: '?',
+    day: '?',
   },
   [HOUR]: {
+    second: '0',
     minute: '0',
     hour: '*',
     date: '*',
     month: '*',
-    day: '*',
-    year: '?',
+    day: '?',
   },
   [DAY]: {
+    second: '0',
     minute: '0',
     hour: '0',
     date: '*',
     month: '*',
-    day: '*',
-    year: '?',
+    day: '?',
   },
   [WEEK]: {
+    second: '0',
     minute: '0',
     hour: '0',
     date: '*',
     month: '*',
     day: '6',
-    year: '?',
   },
   [MONTH]: {
+    second: '0',
     minute: '0',
     hour: '0',
     date: '1',
     month: '*',
-    day: '*',
-    year: '?',
+    day: '?',
   },
   [YEAR]: {
+    second: '0',
     minute: '0',
     hour: '0',
     date: '1',
     month: '1',
-    day: '*',
-    year: '?',
+    day: '?',
   },
 };
 

@@ -27,7 +27,7 @@ import {
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl } from '../../../services';
+import { logisticalDetailsUrl, cronUrl } from '../../../services';
 import { CronEditor } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -173,7 +173,7 @@ export class StepLogisticsUi extends Component {
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
                     defaultMessage="{link}"
                     values={{ link: (
-                      <EuiLink href="https://en.wikipedia.org/wiki/Cron" target="_blank">
+                      <EuiLink href={cronUrl} target="_blank">
                         <FormattedMessage
                           id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
                           defaultMessage="Learn more about cron syntax"

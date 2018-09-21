@@ -13,6 +13,7 @@ export const YEAR = 'YEAR';
 
 export function cronExpressionToParts(expression) {
   const parsedCron = {
+    second: undefined,
     minute: undefined,
     hour: undefined,
     day: undefined,
@@ -23,35 +24,39 @@ export function cronExpressionToParts(expression) {
   const parts = expression.split(' ');
 
   if (parts.length >= 1) {
-    parsedCron.minute = parts[0];
+    parsedCron.second = parts[0];
   }
 
   if (parts.length >= 2) {
-    parsedCron.hour = parts[1];
+    parsedCron.minute = parts[1];
   }
 
   if (parts.length >= 3) {
-    parsedCron.date = parts[2];
+    parsedCron.hour = parts[2];
   }
 
   if (parts.length >= 4) {
-    parsedCron.month = parts[3];
+    parsedCron.date = parts[3];
   }
 
   if (parts.length >= 5) {
-    parsedCron.day = parts[4];
+    parsedCron.month = parts[4];
+  }
+
+  if (parts.length >= 6) {
+    parsedCron.day = parts[5];
   }
 
   return parsedCron;
 }
 
 export function cronPartsToExpression({
+  second,
   minute,
   hour,
   day,
   date,
   month,
-  year,
 }) {
-  return `${minute} ${hour} ${date} ${month} ${day} ${year}`;
+  return `${second} ${minute} ${hour} ${date} ${month} ${day}`;
 }

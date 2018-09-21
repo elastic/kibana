@@ -31,6 +31,7 @@ export {
   termsDetailsUrl,
   histogramDetailsUrl,
   metricsDetailsUrl,
+  cronUrl,
 } from './documentation_links';
 
 export {

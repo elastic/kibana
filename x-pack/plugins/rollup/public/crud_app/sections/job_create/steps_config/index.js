@@ -39,7 +39,7 @@ export const stepIdToStepConfigMap = {
       id: '',
       indexPattern: '',
       rollupIndex: '',
-      rollupCron: '0 0 * * 6 ?', // Every week on Saturday, at 00:00
+      rollupCron: '0 0 0 * * 6', // Every week on Saturday, at 00:00:00
       rollupPageSize: '',
       rollupDelay: '1d',
       cronFrequency: WEEK,
