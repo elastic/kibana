@@ -86,13 +86,28 @@ const getSelectedLayerId = ({ map }) => {
 
 const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
-export const getMapExtent = ({ map }) => map.mapState.exent ?
+export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;
 
+export const getTimeFilters = ({ map }) => map.mapState.timeFilters;
+
 export const getMetadata = ({ config }) => config && config.meta;
+
+export const getDataFilters = createSelector(
+  getMapExtent,
+  getMapZoom,
+  getTimeFilters,
+  (mapExtent, mapZoom, timeFilters) => {
+    return {
+      extent: mapExtent,
+      zoom: mapZoom,
+      timeFilters: timeFilters
+    };
+  }
+);
 
 export const getDataSources = createSelector(
   getMetadata,
