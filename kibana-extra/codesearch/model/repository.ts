@@ -73,6 +73,7 @@ export interface WorkerProgress {
 }
 
 export interface CloneProgress {
+  isCloned?: boolean;
   receivedObjects: number;
   indexedObjects: number;
   totalObjects: number;

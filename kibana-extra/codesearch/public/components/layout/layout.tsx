@@ -23,7 +23,7 @@ import { Link, match, withRouter } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
 import { Location } from 'vscode-languageserver';
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { FileTree as Tree, FileTreeItemType } from '../../../model';
+import { CloneProgress, FileTree as Tree, FileTreeItemType } from '../../../model';
 import {
   closeTreePath,
   FetchFileResponse,
@@ -72,6 +72,7 @@ interface Props {
   isNotFound: boolean;
   file: FetchFileResponse;
   progress?: number;
+  cloneProgress?: CloneProgress;
 }
 
 const DirectoryView = withRouter(props => {
@@ -258,7 +259,6 @@ export class LayoutPage extends React.Component<Props, State> {
 
   public render() {
     const { progress, isNotFound, cloneProgress } = this.props;
-    const shouldRenderProgress = progress !== null && progress < 100;
     if (isNotFound) {
       return <NotFound />;
     }
@@ -293,7 +293,7 @@ export class LayoutPage extends React.Component<Props, State> {
       </EuiFlexItem>
     );
 
-    if (shouldRenderProgress) {
+    if (this.shouldRenderProgress(progress, cloneProgress)) {
       return (
         <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
           {this.state.showSearchBox && searchBox}
@@ -373,6 +373,10 @@ export class LayoutPage extends React.Component<Props, State> {
       revision,
       path: path || '',
     });
+  }
+
+  private shouldRenderProgress(progress?: number | null, cloneProgress?: CloneProgress | null) {
+    return !!progress && progress < 100 && !RepositoryUtils.hasFullyCloned(cloneProgress);
   }
 }
 

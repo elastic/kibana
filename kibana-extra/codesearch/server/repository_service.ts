@@ -53,6 +53,7 @@ export class RepositoryService {
                       (100 * (stats.receivedObjects() + stats.indexedObjects())) /
                       (stats.totalObjects() * 2);
                     const cloneProgress = {
+                      isCloned: false,
                       receivedObjects: stats.receivedObjects(),
                       indexedObjects: stats.indexedObjects(),
                       totalObjects: stats.totalObjects(),

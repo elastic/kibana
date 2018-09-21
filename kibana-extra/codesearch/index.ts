@@ -115,6 +115,7 @@ export default (kibana: any) =>
       const updateScheduler = new UpdateScheduler(
         updateWorker,
         serverOptions,
+        objectsClient,
         adminCluster.getClient(),
         log
       );

@@ -6,8 +6,12 @@
 
 import { EsClient } from '@codesearch/esqueue';
 
-import { REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE } from '../../mappings';
-import { Repository, WorkerProgress } from '../../model';
+import { RepositoryUtils } from '../../common/repository_utils';
+import {
+  REPOSITORY_GIT_STATUS_INDEX_TYPE,
+  REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
+} from '../../mappings';
+import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
 import { ServerOptions } from '../server_options';
@@ -21,28 +25,47 @@ export class IndexScheduler extends AbstractScheduler {
     client: EsClient,
     protected readonly log: Log
   ) {
-    super(client);
-    this.POLL_FREQUENCY_MS = this.serverOptions.indexFrequencyMs;
+    super(client, serverOptions.indexFrequencyMs);
   }
 
-  protected async executeJob(repo: Repository) {
+  protected async executeSchedulingJob(repo: Repository) {
     this.log.info(`Schedule index repo request for ${repo.uri}`);
-    const res = await this.objectsClient.get(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, repo.uri);
-    const repoIndexStatus: WorkerProgress = res.attributes;
-    // Schedule index job only when the indexed revision is different from the current repository
-    // revision.
-    this.log.info(
-      `Current repo revision: ${repo.revision}, indexed revision ${repoIndexStatus.revision}.`
-    );
-    if (repoIndexStatus.progress === 100 && repoIndexStatus.revision === repo.revision) {
-      this.log.info(`Repo does not change since last index. Skip index for ${repo.uri}.`);
-    } else {
-      const payload = {
-        uri: repo.uri,
-        revision: repo.revision,
-        dataPath: this.serverOptions.repoPath,
-      };
-      await this.indexWorker.enqueueJob(payload, {});
+    try {
+      const cloneStatusRes = await this.objectsClient.get(
+        REPOSITORY_GIT_STATUS_INDEX_TYPE,
+        repo.uri
+      );
+      const cloneStatus: CloneWorkerProgress = cloneStatusRes.attributes;
+      if (
+        !RepositoryUtils.hasFullyCloned(cloneStatus.cloneProgress) ||
+        cloneStatus.progress !== 100
+      ) {
+        this.log.info(`Repo ${repo.uri} has not been fully cloned yet or in update. Skip index.`);
+        return;
+      }
+
+      const res = await this.objectsClient.get(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, repo.uri);
+      const repoIndexStatus: WorkerProgress = res.attributes;
+
+      // Schedule index job only when the indexed revision is different from the current repository
+      // revision.
+      this.log.info(
+        `Current repo revision: ${repo.revision}, indexed revision ${repoIndexStatus.revision}.`
+      );
+      if (repoIndexStatus.progress >= 0 && repoIndexStatus.progress < 100) {
+        this.log.info(`Repo is still in indexing. Skip index for ${repo.uri}`);
+      } else if (repoIndexStatus.progress === 100 && repoIndexStatus.revision === repo.revision) {
+        this.log.info(`Repo does not change since last index. Skip index for ${repo.uri}.`);
+      } else {
+        const payload = {
+          uri: repo.uri,
+          revision: repo.revision,
+          dataPath: this.serverOptions.repoPath,
+        };
+        await this.indexWorker.enqueueJob(payload, {});
+      }
+    } catch (error) {
+      this.log.info(`Schedule index job for ${repo.uri} error. ${error}`);
     }
   }
 }

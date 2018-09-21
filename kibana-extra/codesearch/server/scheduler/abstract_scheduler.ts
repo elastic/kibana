@@ -14,15 +14,14 @@ import {
 import { Poller } from '../poller';
 
 export abstract class AbstractScheduler {
-  protected POLL_FREQUENCY_MS: number = 60 * 1000;
   private poller: Poller;
 
-  constructor(private readonly client: EsClient) {
+  constructor(protected readonly client: EsClient, pollFrequencyMs: number) {
     this.poller = new Poller({
       functionToPoll: () => {
         return this.schedule();
       },
-      pollFrequencyInMillis: this.POLL_FREQUENCY_MS,
+      pollFrequencyInMillis: pollFrequencyMs,
       trailing: true,
       continuePollingOnError: true,
       pollFrequencyErrorMultiplier: 2,
@@ -55,12 +54,12 @@ export abstract class AbstractScheduler {
       .then((res: any) => {
         Array.from(res.hits.hits).map((hit: any) => {
           const repo: Repository = hit._source[RepositoryReserviedField];
-          this.executeJob(repo);
+          this.executeSchedulingJob(repo);
         });
       });
   }
 
-  protected async executeJob(repo: Repository) {
+  protected async executeSchedulingJob(repo: Repository) {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<any>((resolve, _) => {
       resolve();

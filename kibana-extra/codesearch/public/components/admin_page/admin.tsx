@@ -30,10 +30,10 @@ import {
 } from '@elastic/eui';
 
 import { Link } from 'react-router-dom';
-
 import styled from 'styled-components';
-import { Repository } from '../../../model';
-import { RepoConfigs } from '../../../model/workspace';
+
+import { RepositoryUtils } from '../../../common/repository_utils';
+import { RepoConfigs, Repository } from '../../../model';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
 import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
@@ -98,12 +98,13 @@ const RepositoryItem = (props: RepositoryItemProps) => {
     <EuiButtonIcon iconType="play" aria-label="run init command" onClick={props.initRepoCommand} />
   );
 
-  const progress = props.status && (
-    <Progress progress={props.status.progress}>
-      Cloning...
-      {props.status.progress.toFixed(2)}%
-    </Progress>
-  );
+  const progress = props.status &&
+    !RepositoryUtils.hasFullyCloned(props.status.cloneProgress) && (
+      <Progress progress={props.status.progress}>
+        Cloning...
+        {props.status.progress.toFixed(2)}%
+      </Progress>
+    );
 
   return (
     <EuiFlexGroup className="repoItem" wrap={true} justifyContent="spaceBetween">

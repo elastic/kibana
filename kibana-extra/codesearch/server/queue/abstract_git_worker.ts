@@ -7,7 +7,7 @@
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import {
@@ -56,9 +56,12 @@ export abstract class AbstractGitWorker extends AbstractWorker {
 
     // Update the clone status.
     try {
-      return await this.objectsClient.update(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri, {
+      return await this.objectsClient.update(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri, {
         revision,
         progress: 100,
+        cloneProgress: {
+          isCloned: true,
+        },
       });
     } catch (error) {
       this.log.debug(`Update revision of repo clone progress error: ${error}`);
@@ -75,7 +78,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       cloneProgress,
     };
     try {
-      return await this.objectsClient.update(REPOSITORY_CLONE_STATUS_INDEX_TYPE, p.uri, p);
+      return await this.objectsClient.update(REPOSITORY_GIT_STATUS_INDEX_TYPE, p.uri, p);
     } catch (error) {
       this.log.debug(`Update git clone progress error: ${error}`);
     }

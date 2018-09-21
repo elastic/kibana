@@ -9,3 +9,4 @@ export * from './search';
 export * from './repository';
 export * from './task';
 export * from './lsp';
+export * from './workspace';

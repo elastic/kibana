@@ -8,7 +8,7 @@ import GitUrlParse from 'git-url-parse';
 import path from 'path';
 import { Location } from 'vscode-languageserver';
 
-import { FileTree, FileTreeItemType, Repository, RepositoryUri } from '../model';
+import { CloneProgress, FileTree, FileTreeItemType, Repository, RepositoryUri } from '../model';
 import { parseLspUrl, toCanonicalUrl } from './uri_util';
 
 export class RepositoryUtils {
@@ -86,5 +86,9 @@ export class RepositoryUtils {
         break;
     }
     return result;
+  }
+
+  public static hasFullyCloned(cloneProgress?: CloneProgress | null): boolean {
+    return !!cloneProgress && cloneProgress.isCloned !== undefined && cloneProgress.isCloned;
   }
 }

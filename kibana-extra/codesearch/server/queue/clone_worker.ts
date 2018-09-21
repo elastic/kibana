@@ -7,7 +7,7 @@
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
@@ -60,7 +60,7 @@ export class CloneWorker extends AbstractGitWorker {
       progress: 0,
       timestamp: new Date(),
     };
-    return await this.objectsClient.create(REPOSITORY_CLONE_STATUS_INDEX_TYPE, progress, {
+    return await this.objectsClient.create(REPOSITORY_GIT_STATUS_INDEX_TYPE, progress, {
       id: repo.uri,
     });
   }

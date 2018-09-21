@@ -15,7 +15,7 @@ import { Full } from '@codesearch/lsp-extension';
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
 import { parseLspUrl } from '../../common/uri_util';
-import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
 import { Log } from '../log';
@@ -40,7 +40,7 @@ export class WorkspaceHandler {
    */
   public async openWorkspace(repositoryUri: string, revision: string) {
     try {
-      const res = await this.objectsClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repositoryUri);
+      const res = await this.objectsClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repositoryUri);
       const cloneProgress: CloneWorkerProgress = res.attributes;
       if (cloneProgress.progress !== 100) {
         throw Boom.internal(`repository has not been fully cloned yet.`);

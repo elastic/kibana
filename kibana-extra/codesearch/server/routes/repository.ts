@@ -8,7 +8,7 @@ import Boom from 'boom';
 
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_CLONE_STATUS_INDEX_TYPE } from '../../mappings';
+import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
 import { RepositoryIndexInitializer } from '../indexer';
 import {
@@ -154,7 +154,7 @@ export function repositoryRoute(
       const objectClient = req.getSavedObjectsClient();
 
       try {
-        const response = await objectClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri);
+        const response = await objectClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri);
         const status: CloneWorkerProgress = response.attributes;
         reply(status);
       } catch (error) {
@@ -212,7 +212,7 @@ export function repositoryRoute(
       const objectClient = req.getSavedObjectsClient();
 
       try {
-        const response = await objectClient.get(REPOSITORY_CLONE_STATUS_INDEX_TYPE, repoUri);
+        const response = await objectClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri);
         const cloneStatus: CloneWorkerProgress = response.attributes;
 
         const payload = {

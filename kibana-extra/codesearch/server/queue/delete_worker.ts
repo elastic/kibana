@@ -7,8 +7,8 @@
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
 import {
-  REPOSITORY_CLONE_STATUS_INDEX_TYPE,
   REPOSITORY_DELETE_STATUS_INDEX_TYPE,
+  REPOSITORY_GIT_STATUS_INDEX_TYPE,
   REPOSITORY_INDEX_STATUS_INDEX_TYPE,
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
@@ -41,8 +41,8 @@ export class DeleteWorker extends AbstractWorker {
 
     // 2. Delete repository status in ES.
     const deleteCloneStatusPromise = this.deletePromiseWrapper(
-      this.objectsClient.delete(REPOSITORY_CLONE_STATUS_INDEX_TYPE, uri),
-      'clone status',
+      this.objectsClient.delete(REPOSITORY_GIT_STATUS_INDEX_TYPE, uri),
+      'git status',
       uri
     );
 
