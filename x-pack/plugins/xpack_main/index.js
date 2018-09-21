@@ -88,6 +88,9 @@ export const xpackMain = (kibana) => {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
           telemetryOptedIn: null,
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+          userProfile: {},
         };
       },
       hacks: [
