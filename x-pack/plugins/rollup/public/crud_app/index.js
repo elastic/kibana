@@ -13,7 +13,7 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttp } from './services';
+import { setHttp, setUserHasLeftApp } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
@@ -54,11 +54,19 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
         const appElement = document.getElementById('rollupJobsReactRoot');
         renderReact(appElement);
 
-        const lastRoute = $route.current;
+        const appRoute = $route.current;
         const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
           const currentRoute = $route.current;
-          if (lastRoute.$$route.template === currentRoute.$$route.template) {
-            $route.current = lastRoute;
+
+          const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
+
+          // When we navigate within rollups, prevent Angular from re-matching the route and
+          // rebuilding the app.
+          if (isNavigationInApp) {
+            $route.current = appRoute;
+          } else {
+            // Set internal flag so we can prevent reacting to the route change internally.
+            setUserHasLeftApp(true);
           }
         });
 
