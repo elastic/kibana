@@ -14,12 +14,10 @@
     }
   }
 
-  // SASSTODO: Remove !important's when sense-help-example,
-  // and sense-history-viewer are refactored
   .ace_snippet-marker {
-    width: 100% !important;
-    background-color: tintOrShade($euiColorLightShade, 50%, 0) !important;
-    border: none !important;
+    width: 100%;
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+    border: none;
   }
 
   .ace_search {

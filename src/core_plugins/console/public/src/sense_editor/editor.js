@@ -614,7 +614,6 @@ export default function SenseEditor($el) {
       if (!editor.$actions) {
         return;
       }
-      // console.log(editor.$el);
       if (CURRENT_REQ_RANGE) {
         // elements are positioned relative to the editor's container
         // pageY is relative to page, so subtract the offset

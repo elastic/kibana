@@ -4,7 +4,7 @@
 .cxtSizePicker {
   appearance: textfield;
   text-align: center;
-  width: 5em;
+  width: $euiSize * 5;
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {

@@ -33,12 +33,12 @@ describe('Integration', () => {
   beforeEach(() => {
     // Set up our document body
     document.body.innerHTML =
-      '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="copy_as_curl" /></div>';
+      '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#copy_as_curl'),
+      $('#ConCopyAsCurl'),
       null
     );
     input.$el.show();

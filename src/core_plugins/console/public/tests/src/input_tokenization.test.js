@@ -33,16 +33,16 @@ describe('Input Tokenization', () => {
       `<div>
         <div id="ConAppEditor" />
         <div id="ConAppEditorActions" />
-        <div id="copy_as_curl" />
+        <div id="ConCopyAsCurl" />
       </div>`;
 
     input = initializeInput(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      $('#copy_as_curl'),
+      $('#ConCopyAsCurl'),
       null
     );
-    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#copy_as_curl'), null);
+    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), null);
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
   });

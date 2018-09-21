@@ -45,7 +45,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   let output;
   $timeout(async () => {
     output = initializeOutput($('#ConAppOutput'));
-    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#copy_as_curl'), output, $scope.openDocumentation);
+    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
     init(input, output, $location.search().load_from);
     kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();

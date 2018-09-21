@@ -28,7 +28,7 @@
             aria-labelledby="consoleRequestOptions"
           >
             <li role="menuitem">
-              <button id="copy_as_curl">Copy as cURL</button>
+              <button id="ConCopyAsCurl">Copy as cURL</button>
             </li>
             <li role="menuitem" ng-if="documentation">
               <button ng-click="openDocumentation(documentation)">Open documentation</button>
@@ -46,7 +46,7 @@
   }</div>
 
     </div>
-    <div class="conApp__resizer">&#xFE19;</div>
+    <div class="conApp__resizer" id="ConAppResizer">&#xFE19;</div>
     <div class="conApp__output" data-test-subj="response-editor">
       <div class="conApp__outputContent" id="ConAppOutput">{}</div>
     </div>
