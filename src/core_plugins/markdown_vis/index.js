@@ -24,7 +24,8 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/markdown_vis/markdown_vis'
-      ]
+      ],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     }
 
   });
