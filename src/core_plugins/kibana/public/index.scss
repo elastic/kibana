@@ -10,6 +10,11 @@
 @import './visualize/index';
 @import 'ui/public/vis/index';
 
+// Also import Timelion in case of embedding chart into dashboard
+// SASSTODO: Remove once the pipeline imports all compiled CSS files always
+@import '../../timelion/public/directives/index';
+@import '../../timelion/public/vis/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
