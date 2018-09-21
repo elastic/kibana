@@ -218,12 +218,19 @@ export async function deleteIndex(callCluster: CallCluster, index: string) {
  * @param {string} alias - The name of the index being converted to an alias
  */
 export async function convertToAlias(callCluster: CallCluster, info: FullIndexInfo, alias: string) {
+  // Reindexing a relatively large (~10K docs) index takes around 40 seconds or so
+  // on a relatively fast SSD. So, we need to override the default timeout 10 minutes
+  // should be ample time for any index that migrations is designed to handle. We may
+  // want to make this a configurable knob at some point.
+  const requestTimeout = 10 * 60 * 1000;
+
   await callCluster('indices.create', {
     body: { mappings: info.mappings },
     index: info.indexName,
   });
 
   await callCluster('reindex', {
+    requestTimeout,
     body: {
       dest: { index: info.indexName },
       source: { index: alias },

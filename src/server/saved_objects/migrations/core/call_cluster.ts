@@ -101,6 +101,7 @@ export interface ReindexOpts {
   };
   refresh: boolean;
   waitForCompletion: boolean;
+  requestTimeout: number;
 }
 
 export type AliasAction =

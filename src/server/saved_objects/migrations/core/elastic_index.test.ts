@@ -252,7 +252,7 @@ describe('ElasticIndex', () => {
             expect(arg.index).toEqual('.ze-index');
             return true;
           case 'reindex':
-            expect(arg).toEqual({
+            expect(arg).toMatchObject({
               body: {
                 dest: { index: '.ze-index' },
                 source: { index: '.muchacha' },
@@ -260,6 +260,9 @@ describe('ElasticIndex', () => {
               refresh: true,
               waitForCompletion: true,
             });
+            // Ensure we are overriding the default timeout so that
+            // migrations handle largish indices.
+            expect(arg.requestTimeout).toBeGreaterThan(30000);
             return true;
           case 'indices.getAlias':
             return { '.my-fanci-index': '.muchacha' };
