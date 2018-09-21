@@ -19,8 +19,7 @@ export class StyleTabs extends React.Component {
     super();
     this.state = {
       tabSelected: '',
-      currentStyle: props.layer
-        && props.layer.getCurrentStyle()
+      currentStyle: props.layer && props.layer.getCurrentStyle()
     };
   }
 

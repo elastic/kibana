@@ -136,7 +136,7 @@ export class GeohashGridLayer extends ALayer {
       }
       if (this._descriptor.dataMeta.timeFilters) {
         sameTime = dataFilters.timeFilters ===
-          this._descriptor.dataMeta.timeFilters;
+this._descriptor.dataMeta.timeFilters;
       }
     }
     if (samePrecision && isContained && sameTime) {

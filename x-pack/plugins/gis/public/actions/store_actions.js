@@ -246,7 +246,7 @@ export async function loadMapResources(dispatch) {
         "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
         "visible": true,
         "temporary": false,
-        "style": { "type": "HEATMAP" },
+        "style": { "type": "HEATMAP", "refinement": "coarse" },
         "type": "GEOHASH_GRID"
       }
     ]
