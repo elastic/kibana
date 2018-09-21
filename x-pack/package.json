@@ -58,7 +58,7 @@
     "jest": "^23.5.0",
     "jest-cli": "^23.5.0",
     "jest-styled-components": "^6.1.1",
-    "jsdom": "9.9.1",
+    "jsdom": "^12.0.0",
     "mocha": "3.3.0",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",

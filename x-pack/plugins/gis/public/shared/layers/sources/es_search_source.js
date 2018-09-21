@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
 import { ASource } from './source';
-import { IndexPatternSelect } from './index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
 import {
   indexPatternService,
@@ -56,7 +56,7 @@ export class ESSearchSource extends ASource {
     );
   }
 
-  async getGeoJson(/* precision, extent */) {
+  async getGeoJson({ layerId, layerName }) {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -70,8 +70,8 @@ export class ESSearchSource extends ASource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
-      inspectorAdapters.requests.resetRequest(this._descriptor.id);
-      const inspectorRequest = inspectorAdapters.requests.start(this._descriptor.id, this._descriptor.name);
+      inspectorAdapters.requests.resetRequest(layerId);
+      const inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
       searchSource.getSearchRequestBody().then(body => {
         inspectorRequest.json(body);
@@ -109,7 +109,7 @@ export class ESSearchSource extends ASource {
   }
 
   getDisplayName() {
-    return this._descriptor.name;
+    return this._descriptor.indexPatternId;
   }
 }
 
@@ -196,8 +196,6 @@ class Editor extends React.Component {
         indexPatternId,
         geoField,
         limit: 10,
-        name: 'My elasticsearch document layer',
-        id: (new Date()).getTime().toString(),
       });
     }
   }

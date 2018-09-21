@@ -7,7 +7,9 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,   MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST, SET_TIME_FILTERS
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,
+  MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST, SET_TIME_FILTERS,
+  UPDATE_LAYER_LABEL
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -74,6 +76,8 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
+    case UPDATE_LAYER_LABEL:
+      return updateLayerInList(state, action.id, 'label', action.newLabel);
     case ADD_LAYER:
       // Remove temporary layers (if any)
       const preAddLayerList = action.layer.temporary ? state.layerList.filter(

@@ -21,15 +21,15 @@
       </div>
     </div>
 
-    <div class="kuiSideBarFormRow" ng-hide="!editorState.params.emsHotLink">
+    <div class="form-group clearfix" ng-hide="!editorState.params.emsHotLink">
         <a
-          class="ems-hotlink"
+          class="ems-hotlink pull-right"
           target="_blank"
           rel="noopener noreferrer"
           ng-href="{{editorState.params.emsHotLink}}"
           target="_blank"
           title="Preview {{editorState.params.selectedLayer.name}} on the Elastic Maps Service"
-        >Preview on EMS
+        ><icon aria-hidden size="'s'" type="'link'" /> Preview on EMS
         </a>
     </div>
 

@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapZoom } from '../selectors/map_selectors';
+import { getLayerList, getDataFilters } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -21,6 +21,7 @@ export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
+export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -29,15 +30,6 @@ function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
   return {
     startLoading: initData => dispatch(startDataLoad(layerId, requestToken, initData)),
     stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData))
-  };
-}
-
-// TODO: Migrate to selectors
-function getDataFilters(state) {
-  return {
-    extent: state.map.mapState.extent,
-    zoom: getMapZoom(state),
-    timeFilters: state.map.mapState.timeFilters
   };
 }
 
@@ -155,9 +147,8 @@ export function endDataLoad(layerId, requestToken, data) {
   });
 }
 
-export function addLayerFromSource(source, layerOptions = {}, position) {
+export function addPreviewLayer(layer, position) {
   const tokenString = 'data_request';
-  const layer = source.createDefaultLayer(layerOptions);
   const layerDescriptor = layer.toLayerDescriptor();
 
   return async (dispatch, getState) => {
@@ -166,6 +157,14 @@ export function addLayerFromSource(source, layerOptions = {}, position) {
     const { startLoading, stopLoading } =
       getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
     layer.syncDataToMapState(startLoading, stopLoading, dataFilters);
+  };
+}
+
+export function updateLayerLabel(id, newLabel) {
+  return {
+    type: UPDATE_LAYER_LABEL,
+    id,
+    newLabel
   };
 }
 
