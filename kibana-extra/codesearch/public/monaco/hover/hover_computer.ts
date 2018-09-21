@@ -39,12 +39,12 @@ export class HoverComputer implements Computer<Hover> {
     return {
       range: {
         start: {
-          line: this.range.startLineNumber,
-          character: this.range.startColumn,
+          line: this.range.startLineNumber - 1,
+          character: this.range.startColumn - 1,
         },
         end: {
-          line: this.range.endLineNumber,
-          character: this.range.endColumn,
+          line: this.range.endLineNumber - 1,
+          character: this.range.endColumn - 1,
         },
       },
       contents: 'loading',
