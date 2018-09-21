@@ -6,7 +6,7 @@
 
 import { InfraDatabaseSearchResponse } from '../../framework';
 
-export const checkValidNode = (
+export const checkValidNode = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
   indexPattern: string,
   field: string,
@@ -24,10 +24,5 @@ export const checkValidNode = (
       },
     },
   };
-  return search(params).then(results => {
-    if (results.hits.total > 0) {
-      return true;
-    }
-    return false;
-  });
+  return (await search(params)).hits.total > 0;
 };
