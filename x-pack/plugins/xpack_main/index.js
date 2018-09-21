@@ -82,6 +82,11 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
+      savedObjectsSchema: {
+        telemetry: {
+          isNamespaceAgnostic: true,
+        },
+      },
       injectDefaultVars(server) {
         const config = server.config();
         return {
