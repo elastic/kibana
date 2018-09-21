@@ -446,44 +446,21 @@ module.controller('MlExplorerController', function (
       return;
     }
 
+    // If cellData is an empty object we clear any existing selection,
+    // otherwise we save the new selection in AppState and update the Explorer.
     if (_.keys(cellData).length === 0) {
-      // Swimlane deselection - clear anomalies section.
       if ($scope.viewByLoadedForTimeFormatted) {
         // Reload 'view by' swimlane over full time range.
         loadViewBySwimlane([]);
       }
       clearSelectedAnomalies();
     } else {
-      if (cellData.score > 0) {
-        $scope.appState.mlExplorerSwimlane.selectedType = cellData.type;
-        $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.lanes;
-        $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.times;
-        $scope.appState.save();
-
-        $scope.cellData = cellData;
-
-        updateExplorer();
-      } else {
-        // Multiple cells are selected, all with a score of 0 - clear all anomalies.
-        $scope.$evalAsync(() => {
-          $scope.influencers = {};
-          $scope.anomalyChartRecords = [];
-
-          $scope.tableData = {
-            anomalies: [],
-            interval: mlSelectIntervalService.state.get('interval').val,
-            examplesByJobId: {},
-            showViewSeriesLink: true
-          };
-        });
-
-        const timerange = getSelectionTimeRange(cellData);
-        mlExplorerDashboardService.anomalyDataChange.changed(
-          [],
-          timerange.earliestMs,
-          timerange.latestMs
-        );
-      }
+      $scope.appState.mlExplorerSwimlane.selectedType = cellData.type;
+      $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.lanes;
+      $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.times;
+      $scope.appState.save();
+      $scope.cellData = cellData;
+      updateExplorer();
     }
   };
   mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);

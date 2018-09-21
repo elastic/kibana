@@ -100,9 +100,7 @@ export class ExplorerSwimlane extends React.Component {
         selectedData.laneLabels = _.uniq(selectedData.laneLabels);
         selectedData.times = _.uniq(selectedData.times);
         if (_.isEqual(selectedData, this.previousSelectedData) === false) {
-          const cellsToSelect = elements;
-          const { laneLabels, bucketScore, times } = selectedData;
-          this.selectCell(cellsToSelect, laneLabels, times, bucketScore, true);
+          this.selectCell(elements, selectedData, true);
           this.previousSelectedData = selectedData;
         }
       }
@@ -185,7 +183,7 @@ export class ExplorerSwimlane extends React.Component {
     }
   }
 
-  selectCell(cellsToSelect, lanes, times, bucketScore, checkEqualSelection = false) {
+  selectCell(cellsToSelect, { laneLabels, bucketScore, times }, checkEqualSelection = false) {
     const {
       selection,
       mlExplorerDashboardService,
@@ -212,7 +210,7 @@ export class ExplorerSwimlane extends React.Component {
 
     const newSelection = {
       selectedType: swimlaneType,
-      selectedLanes: lanes,
+      selectedLanes: laneLabels,
       selectedTimes: d3.extent(times)
     };
 
@@ -227,10 +225,9 @@ export class ExplorerSwimlane extends React.Component {
 
     const cellData = {
       fieldName: swimlaneData.fieldName,
-      lanes,
+      lanes: laneLabels,
       times: d3.extent(times),
-      type: swimlaneType,
-      score: bucketScore
+      type: swimlaneType
     };
     mlExplorerDashboardService.swimlaneCellClick.changed(cellData);
   }
