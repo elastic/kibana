@@ -24,7 +24,7 @@ export const createCapabilitiesResolvers = (libs: {
   };
 } => ({
   InfraSource: {
-    async capabilitiesByNode(source: any, args: any, { req }: any) {
+    async capabilitiesByNode(source, args, { req }) {
       const result = await libs.capabilities.getCapabilities(
         req,
         source.id,
