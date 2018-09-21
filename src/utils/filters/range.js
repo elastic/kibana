@@ -33,7 +33,7 @@ const comparators = {
 };
 
 function formatValue(field, params) {
-  return _.map(params, (val, key) => operators[key] + field.format.convert(val)).join(' ');
+  return _.map(params, (val, key) => operators[key] + format(field, val)).join(' ');
 }
 
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
@@ -102,3 +102,10 @@ export function getRangeScript(field, params) {
     }
   };
 }
+
+function format(field, value) {
+  return field && field.format && field.format.convert
+    ? field.format.convert(value)
+    : value;
+}
+

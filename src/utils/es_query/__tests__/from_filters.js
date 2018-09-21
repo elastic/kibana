@@ -18,13 +18,10 @@
  */
 
 import { buildQueryFromFilters } from '../from_filters';
-import ngMock from 'ng_mock';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
+import { expectDeepEqual } from '../../../test_utils/expect_deep_equal';
 
 describe('build query', function () {
   describe('buildQueryFromFilters', function () {
-    beforeEach(ngMock.module('kibana'));
-
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildQueryFromFilters([]);
       const expected = {

@@ -20,9 +20,8 @@
 import * as ast from '../ast';
 import expect from 'expect.js';
 import { nodeTypes } from '../../node_types/index';
-import indexPatternResponse from '../../__tests__/index_pattern_response.json';
-
-import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal.js';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
+import { expectDeepEqual } from '../../../../test_utils/expect_deep_equal';
 
 
 // Helpful utility allowing us to test the PEG parser by simply checking for deep equality between

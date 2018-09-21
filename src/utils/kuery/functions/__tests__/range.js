@@ -18,10 +18,10 @@
  */
 
 import expect from 'expect.js';
-import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
+import { expectDeepEqual } from '../../../../test_utils/expect_deep_equal';
 import * as range from '../range';
 import { nodeTypes } from '../../node_types';
-import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
 
 
 let indexPattern;

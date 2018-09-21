@@ -17,11 +17,22 @@
  * under the License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
+import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
 
 export function buildQueryFromKuery(indexPattern, queries = [], config) {
   const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-  const queryASTs = queries.map(query => fromKueryExpression(query.query, { allowLeadingWildcards }));
+  const queryASTs = queries.map(query => {
+    try {
+      return fromKueryExpression(query.query, { allowLeadingWildcards });
+    } catch (parseError) {
+      try {
+        fromLegacyKueryExpression(query.query);
+      } catch (legacyParseError) {
+        throw parseError;
+      }
+      throw new Error(`It looks like you're using an outdated Kuery syntax. See what changed in the docs.`);
+    }
+  });
   return buildQuery(indexPattern, queryASTs);
 }
 

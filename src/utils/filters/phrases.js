@@ -24,7 +24,7 @@ export function buildPhrasesFilter(field, params, indexPattern) {
   const type = 'phrases';
   const key = field.name;
   const value = params
-    .map(value => field.format.convert(value))
+    .map(value => format(field, value))
     .join(', ');
 
   const filter = {
@@ -52,4 +52,10 @@ export function buildPhrasesFilter(field, params, indexPattern) {
   };
 
   return filter;
+}
+
+function format(field, value) {
+  return field && field.format && field.format.convert
+    ? field.format.convert(value)
+    : value;
 }

@@ -18,21 +18,17 @@
  */
 
 import { buildQueryFilter } from '../query';
+import { cloneDeep } from 'lodash';
 import expect from 'expect.js';
-import _ from 'lodash';
-import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPattern from '../../__tests__/index_pattern_response.json';
 
-let indexPattern;
 let expected;
 
 describe('Filter Manager', function () {
   describe('Phrase filter builder', function () {
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      expected = _.cloneDeep(require('fixtures/filter_skeleton'));
-    }));
+    beforeEach(() => {
+      expected = cloneDeep(require('../../../fixtures/filter_skeleton'));
+    });
 
     it('should be a function', function () {
       expect(buildQueryFilter).to.be.a(Function);

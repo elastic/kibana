@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import * as geoBoundingBox from '../geo_bounding_box';
 import { nodeTypes } from '../../node_types';
-import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
 
 let indexPattern;
 const params = {

@@ -20,78 +20,76 @@
 import { buildRangeFilter } from '../range';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPattern from '../../__tests__/index_pattern_response.json';
 
-let indexPattern;
 let expected;
 
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      expected = _.cloneDeep(require('fixtures/filter_skeleton'));
-    }));
+    beforeEach(() => {
+      expected = _.cloneDeep(require('../../../fixtures/filter_skeleton'));
+    });
 
     it('should be a function', function () {
       expect(buildRangeFilter).to.be.a(Function);
     });
 
     it('should return a range filter when passed a standard field', function () {
+      const field = getField(indexPattern, 'bytes');
       expected.range = {
         bytes: {
           gte: 1,
           lte: 3
         }
       };
-      expect(buildRangeFilter(indexPattern.fields.byName.bytes, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
+      expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
+      const field = getField(indexPattern, 'script number');
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
         lang: 'expression',
-        inline: '(' + indexPattern.fields.byName['script number'].script + ')>=gte && (' +
-        indexPattern.fields.byName['script number'].script + ')<=lte',
+        inline: '(' + field.script + ')>=gte && (' + field.script + ')<=lte',
         params: {
           value: '>=1 <=3',
           gte: 1,
           lte: 3
         }
       });
-      expect(buildRangeFilter(
-        indexPattern.fields.byName['script number'], { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
+      expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).to.eql(expected);
     });
 
     it('should wrap painless scripts in comparator lambdas', function () {
+      const field = getField(indexPattern, 'script date');
       const expected = `boolean gte(Supplier s, def v) {return s.get() >= v} ` +
               `boolean lte(Supplier s, def v) {return s.get() <= v}` +
-              `gte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.gte) && ` +
-              `lte(() -> { ${indexPattern.fields.byName['script date'].script} }, params.lte)`;
+              `gte(() -> { ${field.script} }, params.gte) && ` +
+              `lte(() -> { ${field.script} }, params.lte)`;
 
-      const inlineScript = buildRangeFilter(
-        indexPattern.fields.byName['script date'], { gte: 1, lte: 3 }, indexPattern).script.script.inline;
+      const inlineScript = buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern).script.script.inline;
       expect(inlineScript).to.be(expected);
     });
 
     it('should throw an error when gte and gt, or lte and lt are both passed', function () {
+      const field = getField(indexPattern, 'script number');
       expect(function () {
-        buildRangeFilter(indexPattern.fields.byName['script number'], { gte: 1, gt: 3 }, indexPattern);
+        buildRangeFilter(field, { gte: 1, gt: 3 }, indexPattern);
       }).to.throwError();
       expect(function () {
-        buildRangeFilter(indexPattern.fields.byName['script number'], { lte: 1, lt: 3 }, indexPattern);
+        buildRangeFilter(field, { lte: 1, lt: 3 }, indexPattern);
       }).to.throwError();
     });
 
     it('to use the right operator for each of gte, gt, lt and lte', function () {
+      const field = getField(indexPattern, 'script number');
       _.each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, function (operator, key) {
         const params = {};
         params[key] = 5;
-        const filter = buildRangeFilter(indexPattern.fields.byName['script number'], params, indexPattern);
+        const filter = buildRangeFilter(field, params, indexPattern);
 
         expect(filter.script.script.inline).to.be(
-          '(' + indexPattern.fields.byName['script number'].script + ')' + operator + key);
+          '(' + field.script + ')' + operator + key);
         expect(filter.script.script.params[key]).to.be(5);
         expect(filter.script.script.params.value).to.be(operator + 5);
 
@@ -99,9 +97,10 @@ describe('Filter Manager', function () {
     });
 
     describe('when given params where one side is infinite', function () {
+      const field = getField(indexPattern, 'script number');
       let filter;
       beforeEach(function () {
-        filter = buildRangeFilter(indexPattern.fields.byName['script number'], { gte: 0, lt: Infinity }, indexPattern);
+        filter = buildRangeFilter(field, { gte: 0, lt: Infinity }, indexPattern);
       });
 
       describe('returned filter', function () {
@@ -118,17 +117,19 @@ describe('Filter Manager', function () {
         });
 
         it('does not contain a script condition for the infinite side', function () {
-          const script = indexPattern.fields.byName['script number'].script;
+          const field = getField(indexPattern, 'script number');
+          const script = field.script;
           expect(filter.script.script.inline).to.equal(`(${script})>=gte`);
         });
       });
     });
 
     describe('when given params where both sides are infinite', function () {
+      const field = getField(indexPattern, 'script number');
       let filter;
       beforeEach(function () {
         filter = buildRangeFilter(
-          indexPattern.fields.byName['script number'], { gte: -Infinity, lt: Infinity }, indexPattern);
+          field, { gte: -Infinity, lt: Infinity }, indexPattern);
       });
 
       describe('returned filter', function () {
@@ -148,3 +149,7 @@ describe('Filter Manager', function () {
     });
   });
 });
+
+function getField(indexPattern, name) {
+  return indexPattern.fields.find(field => field.name === name);
+}

@@ -18,7 +18,7 @@
  */
 
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
+import { expectDeepEqual } from '../../../test_utils/expect_deep_equal';
 import expect from 'expect.js';
 
 describe('build query', function () {

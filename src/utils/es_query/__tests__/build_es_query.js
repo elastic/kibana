@@ -18,25 +18,22 @@
  */
 
 import { BuildESQueryProvider } from '../build_es_query';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-import { fromKueryExpression, toElasticsearchQuery } from '../../../../../../utils/kuery';
+import indexPattern from '../../__tests__/index_pattern_response.json';
+import { expectDeepEqual } from '../../../test_utils/expect_deep_equal';
+import { fromKueryExpression, toElasticsearchQuery } from '../../../utils/kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
-import { decorateQuery } from '../../decorate_query';
+import { decorateQuery } from '../decorate_query';
 
-let indexPattern;
 let buildEsQuery;
 
+const configStub = { get: () => ({}) };
+const privateStub = fn => fn(configStub);
+
 describe('build query', function () {
-
   describe('buildESQuery', function () {
-
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-      buildEsQuery = Private(BuildESQueryProvider);
-    }));
+    beforeEach(() => {
+      buildEsQuery = privateStub(BuildESQueryProvider);
+    });
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildEsQuery();
@@ -66,7 +63,7 @@ describe('build query', function () {
       const expectedResult = {
         bool: {
           must: [
-            decorateQuery(luceneStringToDsl('bar:baz')),
+            decorateQuery(luceneStringToDsl('bar:baz'), configStub),
             { match_all: {} },
           ],
           filter: [

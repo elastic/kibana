@@ -57,7 +57,8 @@ module
     $timeout,
     $window,
     Private,
-    AppState) {
+    AppState,
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -258,7 +259,7 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery);
+      decorateQuery(searchQuery, config);
       return searchQuery;
     }
 

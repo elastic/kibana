@@ -25,6 +25,8 @@ import { createFilterFilters } from './create_filter/filters';
 import { decorateQuery, luceneStringToDsl } from '../../courier';
 import filtersTemplate from '../controls/filters.html';
 
+import chrome from 'ui/chrome';
+
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: 'Filters',
@@ -53,7 +55,7 @@ export const filtersBucketAgg = new BucketAggType({
             return;
           }
 
-          decorateQuery(query);
+          decorateQuery(query, chrome.getUiSettingsClient());
 
           const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
           const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);

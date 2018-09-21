@@ -18,10 +18,11 @@
  */
 
 import { buildQueryFromLucene } from '../from_lucene';
-import { decorateQuery } from '../../decorate_query';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
+import { decorateQuery } from '../decorate_query';
+import { expectDeepEqual } from '../../../test_utils/expect_deep_equal';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 
+const configStub = { get: () => ({}) };
 
 describe('build query', function () {
 
@@ -46,11 +47,11 @@ describe('build query', function () {
 
       const expectedESQueries = queries.map(
         (query) => {
-          return decorateQuery(luceneStringToDsl(query.query));
+          return decorateQuery(luceneStringToDsl(query.query), configStub);
         }
       );
 
-      const result = buildQueryFromLucene(queries, decorateQuery);
+      const result = buildQueryFromLucene(queries, configStub);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
@@ -60,7 +61,7 @@ describe('build query', function () {
         { query: { match_all: {} }, language: 'lucene' },
       ];
 
-      const result = buildQueryFromLucene(queries, decorateQuery);
+      const result = buildQueryFromLucene(queries, configStub);
 
       expectDeepEqual(result.must, [queries[0].query]);
     });

@@ -19,10 +19,10 @@
 
 import { getFields } from '../../utils/get_fields';
 import expect from 'expect.js';
-import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
+import indexPatternResponse from '../../../../__tests__/index_pattern_response.json';
 
 import { nodeTypes } from '../../..';
-import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
+import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 

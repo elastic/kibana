@@ -20,9 +20,9 @@
 import expect from 'expect.js';
 import * as is from '../is';
 import { nodeTypes } from '../../node_types';
-import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
 
-import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
+import { expectDeepEqual } from '../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 

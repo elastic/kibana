@@ -21,25 +21,22 @@
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
 import expect from 'expect.js';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPattern from '../../__tests__/index_pattern_response.json';
 
-let indexPattern;
 let expected;
 
 describe('Filter Manager', function () {
   describe('Phrase filter builder', function () {
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      expected = _.cloneDeep(require('fixtures/filter_skeleton'));
-    }));
+    beforeEach(() => {
+      expected = _.cloneDeep(require('../../../fixtures/filter_skeleton'));
+    });
 
     it('should be a function', function () {
       expect(buildPhraseFilter).to.be.a(Function);
     });
 
     it('should return a match query filter when passed a standard field', function () {
+      const field = getField(indexPattern, 'bytes');
       expected.query = {
         match: {
           bytes: {
@@ -48,19 +45,20 @@ describe('Filter Manager', function () {
           }
         }
       };
-      expect(buildPhraseFilter(indexPattern.fields.byName.bytes, 5, indexPattern)).to.eql(expected);
+      expect(buildPhraseFilter(field, 5, indexPattern)).to.eql(expected);
     });
 
     it('should return a script filter when passed a scripted field', function () {
+      const field = getField(indexPattern, 'script number');
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
-        inline: '(' + indexPattern.fields.byName['script number'].script + ') == value',
+        inline: '(' + field.script + ') == value',
         lang: 'expression',
         params: {
           value: 5,
         }
       });
-      expect(buildPhraseFilter(indexPattern.fields.byName['script number'], 5, indexPattern)).to.eql(expected);
+      expect(buildPhraseFilter(field, 5, indexPattern)).to.eql(expected);
     });
   });
 
@@ -90,3 +88,7 @@ describe('Filter Manager', function () {
     });
   });
 });
+
+function getField(indexPattern, name) {
+  return indexPattern.fields.find(field => field.name === name);
+}

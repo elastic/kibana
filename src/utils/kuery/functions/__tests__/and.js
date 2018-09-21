@@ -21,7 +21,7 @@ import expect from 'expect.js';
 import * as and from '../and';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
 
 
 let indexPattern;
