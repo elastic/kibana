@@ -797,7 +797,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         _source: [
-          'foo.title', 'type', 'title'
+          'foo.title', 'namespace', 'type', 'title'
         ]
       }));
 
