@@ -1,6 +1,6 @@
-<div>
+<div class="euiText timHelp">
   <div ng-show="page === 1">
-    <div class="doc-container-content">
+    <div>
       <h1>Welcome to <strong>Timelion</strong>!</h1>
       <p>
         Timelion is the clawing, gnashing, zebra killing, pluggable time
@@ -18,28 +18,28 @@
         Jump to the function reference</a>.
       </p>
     </div>
-    <div class="doc-container-buttons">
-      <div class="btn-doc-prev">
-        <button
-          ng-click="opts.dontShowHelp()"
-          class="kuiButton kuiButton--hollow"
-        >
-          Don't show this again
-        </button>
-      </div>
-      <div class="btn-doc-next">
-        <button
-          ng-click="setPage(page+1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Next
-        </button>
-      </div>
+    <div class="timHelp__buttons">
+
+      <button
+        ng-click="opts.dontShowHelp()"
+        class="kuiButton kuiButton--hollow"
+      >
+        Don't show this again
+      </button>
+
+
+      <button
+        ng-click="setPage(page+1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Next
+      </button>
+
     </div>
   </div>
   <div ng-show="page === 2">
     <div ng-show="!es.valid">
-      <div class="doc-container-content">
+      <div>
         <h2>First time configuration</h2>
         <p>
           If you're using Logstash, you don't need to configure anything to
@@ -55,32 +55,32 @@
           them on the fly if you need to.
         </p>
       </div>
-      <div class="doc-container-buttons">
-        <div class="btn-doc-prev">
-          <button
-            ng-click="setPage(page-1)"
-            class="kuiButton kuiButton--primary"
-          >
-            Previous
-          </button>
-        </div>
+      <div class="timHelp__buttons">
+
+        <button
+          ng-click="setPage(page-1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+
         <span ng-show="es.invalidCount > 0 && !es.valid">
           Could not validate Elasticsearch settings:
-          <strong>{{es.invalidReason}}.</strong> Check your Advanced Settings
+          <strong>{{es.invalidReason}}</strong>. Check your Advanced Settings
           and try again. ({{es.invalidCount}})
         </span>
-        <div class="btn-doc-next">
-          <button
-            ng-click="recheckElasticsearch()"
-            class="kuiButton kuiButton--primary"
-          >
-            Validate Config
-          </button>
-        </div>
+
+        <button
+          ng-click="recheckElasticsearch()"
+          class="kuiButton kuiButton--primary"
+        >
+          Validate Config
+        </button>
+
       </div>
     </div>
     <div ng-show="es.valid">
-      <div class="doc-container-content">
+      <div>
         <h2>Good news, Elasticsearch is configured correctly!</h2>
         <p>
           We validated your default index and your timefield and everything
@@ -117,7 +117,7 @@
           <li>
             <strong>Time range</strong>
             <p>
-              Use the timepicker <i class="fa fa-clock-o"></i> in the
+              Use the timepicker in the
               Kibana toolbar to select the time period that contains the
               data you want to visualize. Make sure you select a time
               period that includes all or part of the time range shown
@@ -130,28 +130,28 @@
           data points over time.
         </p>
       </div>
-      <div class="doc-container-buttons">
-        <div class="btn-doc-prev">
-          <button
-            ng-click="setPage(page-1)"
-            class="kuiButton kuiButton--primary"
-          >
-            Previous
-          </button>
-        </div>
-        <div class="btn-doc-next">
-          <button
-            ng-click="setPage(page+1)"
-            class="kuiButton kuiButton--primary"
-          >
-            Next
-          </button>
-        </div>
+      <div class="timHelp__buttons">
+
+        <button
+          ng-click="setPage(page-1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Previous
+        </button>
+
+
+        <button
+          ng-click="setPage(page+1)"
+          class="kuiButton kuiButton--primary"
+        >
+          Next
+        </button>
+
       </div>
     </div>
   </div>
   <div ng-show="page === 3">
-    <div class="doc-container-content">
+    <div>
       <h2>Querying the Elasticsearch datasource</h2>
       <p>
         Now that we've validated that you have a working Elasticsearch
@@ -208,28 +208,28 @@
         <code>avg</code> metric: <code>.es(metric='avg:bytes')</code>.
       </p>
     </div>
-    <div class="doc-container-buttons">
-      <div class="btn-doc-prev">
-        <button
-          ng-click="setPage(page-1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Previous
-        </button>
-      </div>
-      <div class="btn-doc-next">
-        <button
-          ng-click="setPage(page+1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Next
-        </button>
-      </div>
+    <div class="timHelp__buttons">
+
+      <button
+        ng-click="setPage(page-1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Previous
+      </button>
+
+
+      <button
+        ng-click="setPage(page+1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Next
+      </button>
+
     </div>
   </div>
 
   <div ng-show="page === 4">
-    <div class="doc-container-content">
+    <div>
       <h2>Expressing yourself with expressions</h2>
       <p>
         Every  expression starts with a datasource function. From there, you
@@ -286,27 +286,27 @@
         the <a ng-click="setPage(0)">Function reference</a>.
       </p>
     </div>
-    <div class="doc-container-buttons">
-      <div class="btn-doc-prev">
-        <button
-          ng-click="setPage(page-1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Previous
-        </button>
-      </div>
-      <div class="btn-doc-next">
-        <button
-          ng-click="setPage(page+1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Next
-        </button>
-      </div>
+    <div class="timHelp__buttons">
+
+      <button
+        ng-click="setPage(page-1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Previous
+      </button>
+
+
+      <button
+        ng-click="setPage(page+1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Next
+      </button>
+
     </div>
   </div>
   <div ng-show="page === 5">
-    <div class="doc-container-content">
+    <div>
       <h2>Transforming your data: the real fun begins!</h2>
       <p>
         Now that you've mastered the basics, it's time to unleash the power of
@@ -346,24 +346,24 @@
         <strong>Tutorial</strong> link at the top of the reference.
       </p>
     </div>
-    <div class="doc-container-buttons">
-      <div class="btn-doc-prev">
-        <button
-          ng-click="setPage(page-1)"
-          class="kuiButton kuiButton--primary"
-        >
-          Previous
-        </button>
-      </div>
+    <div class="timHelp__buttons">
 
-      <div class="btn-doc-next">
-        <button
-          ng-click="opts.dontShowHelp()"
-          class="kuiButton kuiButton--hollow"
-        >
-          Don't show this again
-        </button>
-      </div>
+      <button
+        ng-click="setPage(page-1)"
+        class="kuiButton kuiButton--primary"
+      >
+        Previous
+      </button>
+
+
+
+      <button
+        ng-click="opts.dontShowHelp()"
+        class="kuiButton kuiButton--hollow"
+      >
+        Don't show this again
+      </button>
+
     </div>
   </div>
 </div>
@@ -386,10 +386,10 @@
           </a>.
         </div>
 
-        <div class="timelionFunctionsDropdownContent">
-          <table class="table table-condensed table-bordered timelionFunctionsTable">
+        <div class="timHelp__functions">
+          <table class="table table-condensed table-bordered">
             <tr
-              class="timelionFunctionsTableRow"
+              class="timHelp__functionsTableRow"
               ng-repeat-start="function in functions.list"
               ng-class="{active: functions.details === function.name}"
               ng-click="functions.details =
@@ -405,7 +405,7 @@
                 <div class="suggestion-details" >
                   <table
                     class="table table-condensed table-bordered
-                           timelionFunctionDetailsTable"
+                           timHelp__functionDetailsTable"
                     ng-show="function.args.length > (function.chainable ? 1: 0)"
                   >
                     <thead>
@@ -439,15 +439,15 @@
     <tab heading="Keyboard tips">
       <div class="list-group-item list-group-item--noBorder">
         <!-- General editing tips -->
-        <dl class="dl-horizontal timelionHelpKeyboardTipsSection">
-          <dt></dt>
+        <dl class="dl-horizontal">
           <dd><strong>General editing</strong></dd>
+          <dt></dt>
           <dt>Ctrl/Cmd + Enter</dt>
           <dd>Submit request</dd>
         </dl>
 
         <!-- Auto complete tips -->
-        <dl class="dl-horizontal timelionHelpKeyboardTipsSection">
+        <dl class="dl-horizontal">
           <dt></dt>
           <dd><strong>When auto-complete is visible</strong></dd>
           <dt>Down arrow</dt>
