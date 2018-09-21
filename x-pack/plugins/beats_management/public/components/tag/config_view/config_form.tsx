@@ -132,7 +132,19 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   />
                 );
               case 'password':
-                return <FormsyEuiPasswordText />;
+                return (
+                  <FormsyEuiPasswordText
+                    key={schema.id}
+                    id={schema.id}
+                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
+                    validations={schema.validations}
+                    validationError={schema.error}
+                    required={schema.required}
+                  />
+                );
               case 'multi-input':
                 return (
                   <FormsyEuiMultiFieldText
