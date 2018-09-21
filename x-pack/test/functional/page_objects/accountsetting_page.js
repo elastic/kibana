@@ -21,12 +21,13 @@ export function AccountSettingProvider({ getService }) {
       expect(emailField).to.be(expectedEmail);
     }
 
-    async changePasswordLink(currentPassword, newPassword) {
+    async changePassword(currentPassword, newPassword) {
       await testSubjects.click('changePasswordLink');
       await testSubjects.setValue('newPasswordInput', newPassword);
       await testSubjects.setValue('currentPasswordInput', currentPassword);
       await testSubjects.setValue('confirmPasswordInput', newPassword);
-      return await testSubjects.click('saveChangesButton');
+      await testSubjects.click('saveChangesButton');
+      await testSubjects.existOrFail('passwordUpdateSuccess');
     }
   }
   return new AccountSettingsPage();

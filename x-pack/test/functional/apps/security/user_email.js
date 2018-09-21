@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('click changepassword link, change the password and re-login', async function () {
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
-      await PageObjects.accountSetting.changePasswordLink('changeme', 'mechange');
+      await PageObjects.accountSetting.changePassword('changeme', 'mechange');
       await PageObjects.security.logout();
     });
 
