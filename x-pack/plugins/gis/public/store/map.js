@@ -7,7 +7,7 @@
 import {
   SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,   MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST
+  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,   MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST, SET_TIME_FILTERS
 } from "../actions/store_actions";
 import { UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES }
   from '../actions/style_actions';
@@ -38,7 +38,11 @@ const INITIAL_STATE = {
       lon: -100.41,
       lat: 32.82
     },
-    extent: null
+    extent: null,
+    timeFilters: { // TODO: Init vals during app hydration
+      from: 'now-24h',
+      to: 'now'
+    },
   },
   selectedLayerId: null,
   layerList: []
@@ -61,7 +65,10 @@ export function map(state = INITIAL_STATE, action) {
         zoom: action.mapState.zoom,
         extent: action.mapState.extent
       };
-      return { ...state, mapState: newMapState };
+      return { ...state, mapState: { ...state.mapState, ...newMapState } };
+    case SET_TIME_FILTERS:
+      const { from, to } = action;
+      return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };

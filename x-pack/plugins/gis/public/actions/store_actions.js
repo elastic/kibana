@@ -32,10 +32,12 @@ function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
   };
 }
 
-function getZoomAndExtent(state) {
+// TODO: Migrate to selectors
+function getDataFilters(state) {
   return {
     extent: state.map.mapState.extent,
-    zoom: getMapZoom(state)
+    zoom: getMapZoom(state),
+    timeFilters: state.map.mapState.timeFilters
   };
 }
 
