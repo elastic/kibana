@@ -10,24 +10,34 @@
 
 import { createLocation } from 'history';
 
+let _userHasLeftApp = false;
+
+export function setUserHasLeftApp(userHasLeftApp) {
+  _userHasLeftApp = userHasLeftApp;
+}
+
+export function getUserHasLeftApp() {
+  return _userHasLeftApp;
+}
+
 const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = event => event.button === 0;
 
 let router;
-export const registerRouter = reactRouter => {
+export function registerRouter(reactRouter) {
   router = reactRouter;
-};
+}
 
-export const getRouter = () => {
+export function getRouter() {
   return router;
-};
+}
 
 /**
  * The logic for generating hrefs and onClick handlers from the `to` prop is largely borrowed from
  * https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/modules/Link.js.
  */
-export const getRouterLinkProps = to => {
+export function getRouterLinkProps(to) {
   const location = typeof to === "string"
     ? createLocation(to, null, null, router.history.location)
     : to;
@@ -54,4 +64,4 @@ export const getRouterLinkProps = to => {
   };
 
   return { href, onClick };
-};
+}
