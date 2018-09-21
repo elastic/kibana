@@ -173,20 +173,21 @@ export default ({ getService }) => {
       await createIndex({ callCluster, index });
       await createDocs({ callCluster, index, docs: originalDocs });
 
-      const result = await Promise.all([
+      const actual = await Promise.all([
         migrateIndex({ callCluster, index, migrations, mappingProperties }),
         migrateIndex({ callCluster, index, migrations, mappingProperties }),
       ]);
 
-      // The polling instance and the migrating instance should both
-      // return a similar migraiton result.
-      assert.deepEqual(
-        result.map(({ status, destIndex }) => ({ status, destIndex })).sort((a) => a.destIndex ? 0 : 1),
-        [
-          { status: 'migrated', destIndex: '.migration-c_2' },
-          { status: 'skipped', destIndex: undefined },
-        ],
-      );
+      const expected = [
+        { status: 'migrated', destIndex: '.migration-c_2' },
+        { status: 'skipped', destIndex: undefined },
+      ];
+
+      const orderedResult = (result) =>
+        result.map(({ status, destIndex }) => ({ status, destIndex }))
+          .sort((a, b) => a.status.localeCompare(b.status));
+
+      assert.deepEqual(orderedResult(actual), orderedResult(expected));
 
       // It only created the original and the dest
       assert.deepEqual(
