@@ -40,7 +40,7 @@ function normalize(localPath, type, pluginSpec) {
     );
   }
 
-  if (!localPath.startsWith(publicDir)) {
+  if (!path.normalize(localPath).startsWith(publicDir)) {
     throw new Error(
       `[plugin:${pluginId}] uiExports.styleSheetPaths must be child of publicDir [${publicDir}]`
     );
