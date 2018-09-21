@@ -13,8 +13,8 @@ import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
 // @ts-ignore
 import { HeaderContainer } from '../../shared/UIComponents';
 // @ts-ignore
-import ServiceOverview from '../ServiceOverview';
-import TraceOverview from '../TraceOverview';
+import { ServiceOverview } from '../ServiceOverview';
+import { TraceOverview } from '../TraceOverview';
 
 export function Home() {
   return (

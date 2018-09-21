@@ -6,17 +6,13 @@
 
 import { connect } from 'react-redux';
 // @ts-ignore
-import { selectTraceList } from '../../../store/reactReduxRequest/traceList';
-// @ts-ignore
 import { getUrlParams } from '../../../store/urlParams';
-import { TraceOverview } from './view';
+import { TraceOverview as View } from './view';
 
 function mapStateToProps(state = {}) {
   return {
-    traceList: selectTraceList(state),
     urlParams: getUrlParams(state)
   };
 }
 
-// tslint:disable-next-line:no-default-export
-export default connect(mapStateToProps)(TraceOverview);
+export const TraceOverview = connect(mapStateToProps)(View);

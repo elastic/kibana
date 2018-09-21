@@ -7,17 +7,11 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-interface Props {
-  heading: string;
-  subheading?: string;
-  hideSubheading?: boolean;
-}
-
 function EmptyMessage({
   heading = 'No data found.',
   subheading = 'Try another time range or reset the search filter.',
   hideSubheading = false
-}: Props) {
+}) {
   return (
     <EuiEmptyPrompt
       titleSize="s"

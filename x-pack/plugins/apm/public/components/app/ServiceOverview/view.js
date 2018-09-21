@@ -14,7 +14,7 @@ import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList
 import EmptyMessage from '../../shared/EmptyMessage';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
 
-class ServiceOverview extends Component {
+export class ServiceOverview extends Component {
   state = {
     historicalDataFound: true
   };
@@ -67,5 +67,3 @@ class ServiceOverview extends Component {
     );
   }
 }
-
-export default ServiceOverview;
