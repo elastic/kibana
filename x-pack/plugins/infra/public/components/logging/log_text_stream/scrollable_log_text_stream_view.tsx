@@ -9,7 +9,7 @@ import * as React from 'react';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { InfraLoading } from '../../loading';
+import { InfraLoadingPanel } from '../../loading';
 import { LogTextStreamEmptyView } from './empty_view';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogTextStreamItemView } from './item_view';
@@ -100,7 +100,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const { targetId } = this.state;
     const hasItems = items.length > 0;
     if (isReloading && !hasItems) {
-      return <InfraLoading height={height} width={width} text="Loading entries" />;
+      return <InfraLoadingPanel height={height} width={width} text="Loading entries" />;
     } else if (!hasItems) {
       return <LogTextStreamEmptyView reload={this.handleReload} />;
     } else {

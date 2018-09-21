@@ -19,7 +19,7 @@ import {
 } from '../../lib/lib';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
-import { InfraLoading } from '../loading';
+import { InfraLoadingPanel } from '../loading';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
@@ -53,7 +53,7 @@ export class Waffle extends React.Component<Props, {}> {
   public render() {
     const { loading, map, reload } = this.props;
     if (loading) {
-      return <InfraLoading height="100%" width="100%" text="Loading data" />;
+      return <InfraLoadingPanel height="100%" width="100%" text="Loading data" />;
     } else if (!loading && map && map.length === 0) {
       return (
         <EuiEmptyPrompt
@@ -61,7 +61,14 @@ export class Waffle extends React.Component<Props, {}> {
           titleSize="m"
           body={<p>Try adjusting your time or filter.</p>}
           actions={
-            <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
+            <EuiButton
+              iconType="refresh"
+              color="primary"
+              fill
+              onClick={() => {
+                reload();
+              }}
+            >
               Check for new data
             </EuiButton>
           }

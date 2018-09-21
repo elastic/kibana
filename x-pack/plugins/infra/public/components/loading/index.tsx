@@ -14,7 +14,7 @@ interface InfraLoadingProps {
   width: number | string;
 }
 
-export class InfraLoading extends React.PureComponent<InfraLoadingProps, {}> {
+export class InfraLoadingPanel extends React.PureComponent<InfraLoadingProps, {}> {
   public render() {
     const { height, text, width } = this.props;
     return (
