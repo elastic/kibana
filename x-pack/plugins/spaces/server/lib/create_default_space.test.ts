@@ -21,14 +21,21 @@ beforeEach(() => {
 });
 interface MockServerSettings {
   defaultExists?: boolean;
-  simulateErrorCondition?: boolean;
+  simulateGetErrorCondition?: boolean;
+  simulateCreateErrorCondition?: boolean;
+  simulateConflict?: boolean;
   [invalidKeys: string]: any;
 }
 const createMockServer = (settings: MockServerSettings = {}) => {
-  const { defaultExists = false, simulateErrorCondition = false } = settings;
+  const {
+    defaultExists = false,
+    simulateGetErrorCondition = false,
+    simulateConflict = false,
+    simulateCreateErrorCondition = false,
+  } = settings;
 
   const mockGet = jest.fn().mockImplementation(() => {
-    if (simulateErrorCondition) {
+    if (simulateGetErrorCondition) {
       throw new Error('unit test: unexpected exception condition');
     }
 
@@ -38,7 +45,16 @@ const createMockServer = (settings: MockServerSettings = {}) => {
     throw Boom.notFound('unit test: default space not found');
   });
 
-  const mockCreate = jest.fn().mockReturnValue(null);
+  const mockCreate = jest.fn().mockImplementation(() => {
+    if (simulateConflict) {
+      throw new Error('unit test: default space already exists');
+    }
+    if (simulateCreateErrorCondition) {
+      throw new Error('unit test: some other unexpected error');
+    }
+
+    return null;
+  });
 
   const mockServer = {
     config: jest.fn().mockReturnValue({
@@ -48,6 +64,7 @@ const createMockServer = (settings: MockServerSettings = {}) => {
       SavedObjectsClient: {
         errors: {
           isNotFoundError: (e: Error) => e.message === 'unit test: default space not found',
+          isConflictError: (e: Error) => e.message === 'unit test: default space already exists',
         },
       },
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
@@ -102,16 +119,34 @@ test(`it does not attempt to recreate the default space if it already exists`, a
   expect(repository.create).toHaveBeenCalledTimes(0);
 });
 
-test(`it throws all other errors from the saved objects client`, async () => {
+test(`it throws all other errors from the saved objects client when checking for the default space`, async () => {
   const server = createMockServer({
     defaultExists: true,
-    simulateErrorCondition: true,
+    simulateGetErrorCondition: true,
   });
 
-  try {
-    await createDefaultSpace(server);
-    throw new Error(`Expected error to be thrown!`);
-  } catch (e) {
-    expect(e.message).toEqual('unit test: unexpected exception condition');
-  }
+  expect(createDefaultSpace(server)).rejects.toThrowErrorMatchingSnapshot();
+});
+
+test(`it ignores conflict errors if the default space already exists`, async () => {
+  const server = createMockServer({
+    defaultExists: false,
+    simulateConflict: true,
+  });
+
+  await createDefaultSpace(server);
+
+  const repository = server.savedObjects.getSavedObjectsRepository();
+
+  expect(repository.get).toHaveBeenCalledTimes(1);
+  expect(repository.create).toHaveBeenCalledTimes(1);
+});
+
+test(`it throws other errors if there is an error creating the default space`, async () => {
+  const server = createMockServer({
+    defaultExists: false,
+    simulateCreateErrorCondition: true,
+  });
+
+  expect(createDefaultSpace(server)).rejects.toThrowErrorMatchingSnapshot();
 });

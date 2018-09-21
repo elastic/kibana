@@ -27,16 +27,26 @@ export async function createDefaultSpace(server: any) {
     id: DEFAULT_SPACE_ID,
   };
 
-  await savedObjectsRepository.create(
-    'space',
-    {
-      name: 'Default',
-      description: 'This is your default space!',
-      color: '#00bfb3',
-      _reserved: true,
-    },
-    options
-  );
+  try {
+    await savedObjectsRepository.create(
+      'space',
+      {
+        name: 'Default',
+        description: 'This is your default space!',
+        color: '#00bfb3',
+        _reserved: true,
+      },
+      options
+    );
+  } catch (error) {
+    // Ignore conflict errors.
+    // It is possible that another Kibana instance, or another invocation of this function
+    // created the default space in the time it took this to complete.
+    if (SavedObjectsClient.errors.isConflictError(error)) {
+      return;
+    }
+    throw error;
+  }
 }
 
 async function doesDefaultSpaceExist(SavedObjectsClient: any, savedObjectsRepository: any) {
