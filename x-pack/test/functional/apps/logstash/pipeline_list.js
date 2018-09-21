@@ -93,9 +93,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('delete button', () => {
-      it('is disabled when no rows are selected', async () => {
+      it('is missing when no rows are selected', async () => {
         await pipelineList.deselectAllRows();
-        await pipelineList.assertDeleteButton({ enabled: false });
+        await pipelineList.assertDeleteButtonMissing();
       });
 
       it('is enabled when all rows are selected', async () => {

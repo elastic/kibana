@@ -224,6 +224,18 @@ export function PipelineListProvider({ getService }) {
     }
 
     /**
+     * Check if the delete button has been rendered on the page
+     * and throw an error if it has
+     */
+    async assertDeleteButtonMissing() {
+      try {
+        await testSubjects.missingOrFail(SUBJ_BTN_DELETE);
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    /**
      * Click the next page button
      */
     async clickNextPage() {
