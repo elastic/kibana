@@ -43,6 +43,7 @@ export const WithWaffleNodes = ({
   <Query<WaffleNodesQuery.Query, WaffleNodesQuery.Variables>
     query={waffleNodesQuery}
     fetchPolicy="no-cache"
+    notifyOnNetworkStatusChange
     variables={{
       sourceId,
       metrics,
