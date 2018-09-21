@@ -144,7 +144,7 @@ class RangeControlUi extends Component {
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
         data-test-subj="rangeControlFormRow"
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <input
               id={`${this.props.control.id}_min`}
@@ -158,7 +158,7 @@ class RangeControlUi extends Component {
               onChange={this.handleMinChange}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="inputRangeContainer">
+          <EuiFlexItem grow={false} className="icvInputRange__container">
             <InputRange
               maxValue={this.props.control.max}
               minValue={this.props.control.min}

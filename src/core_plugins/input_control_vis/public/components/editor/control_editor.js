@@ -152,7 +152,7 @@ class ControlEditorUi extends Component {
 
   render() {
     return (
-      <EuiPanel grow={false} className="controlEditorPanel">
+      <EuiPanel grow={false} className="icvControlEditor__panel">
 
         <EuiAccordion
           id="controlEditorAccordion"
