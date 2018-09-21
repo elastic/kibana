@@ -125,4 +125,10 @@ declare module '@elastic/eui' {
     }>;
   };
   export const EuiSideNav: React.SFC<EuiSideNavProps>;
+
+  type EuiErrorBoundaryProps = CommonProps & {
+    children: React.ReactNode;
+  };
+
+  export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
 }
