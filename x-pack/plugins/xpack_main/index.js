@@ -82,7 +82,7 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
-      savedObjectsSchema: {
+      savedObjectSchemas: {
         telemetry: {
           isNamespaceAgnostic: true,
         },
