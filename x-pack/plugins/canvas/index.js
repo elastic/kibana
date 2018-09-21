@@ -21,8 +21,8 @@ export function canvas(kibana) {
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
         main: 'plugins/canvas/app',
-        styleSheetPath: `${__dirname}/public/style/index.scss`,
       },
+      styleSheetPaths: `${__dirname}/public/style/index.scss`,
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',
