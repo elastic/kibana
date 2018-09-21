@@ -350,11 +350,10 @@ module.controller('MlExplorerController', function (
   }
 
   function mapScopeToSwimlaneProps(swimlaneType) {
-    const swimlaneData = getSwimlaneData(swimlaneType);
     return {
       chartWidth: $scope.swimlaneWidth,
       MlTimeBuckets: TimeBuckets,
-      swimlaneData,
+      swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
       mlExplorerDashboardService,
       selection: $scope.appState.mlExplorerSwimlane
@@ -986,7 +985,7 @@ module.controller('MlExplorerController', function (
   function updateExplorer() {
     const cellData = $scope.cellData;
 
-    const jobIds = (cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.laneLabels : $scope.getSelectedJobIds();
+    const jobIds = (cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ? cellData.lanes : $scope.getSelectedJobIds();
     const timerange = getSelectionTimeRange(cellData);
     const influencers = getSelectionInfluencers(cellData);
 

@@ -120,67 +120,6 @@ export class ExplorerSwimlane extends React.Component {
   }
 
   checkForSelection() {
-    const element = d3.select(this.rootNode.parentNode);
-
-    const {
-      selection,
-      swimlaneData,
-      swimlaneType
-    } = this.props;
-
-    // Check for selection and reselect the corresponding swimlane cell
-    // if the time range and lane label are still in view.
-    const selectionState = selection;
-    const selectedType = _.get(selectionState, 'selectedType', undefined);
-    const viewBy = _.get(selectionState, 'viewBy', '');
-
-    // If a selection was done in the other swimlane, add the "masked" classes
-    // to de-emphasize the swimlane cells.
-    if (swimlaneType !== selectedType && selectedType !== undefined) {
-      element.selectAll('.lane-label').classed('lane-label-masked', true);
-      element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
-    }
-
-    if ((swimlaneType !== selectedType) ||
-      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
-      // Not this swimlane which was selected.
-      return;
-    }
-
-    const cellsToSelect = [];
-    const selectedLanes = _.get(selectionState, 'selectedLanes', []);
-    const selectedTimes = _.get(selectionState, 'selectedTimes', []);
-    const selectedTimeExtent = d3.extent(selectedTimes);
-
-    const lanes = swimlaneData.laneLabels;
-    const startTime = swimlaneData.earliest;
-    const endTime = swimlaneData.latest;
-
-    selectedLanes.forEach((selectedLane) => {
-      if (lanes.indexOf(selectedLane) > -1 && selectedTimeExtent[0] >= startTime && selectedTimeExtent[1] <= endTime) {
-        // Locate matching cell - look for exact time, otherwise closest before.
-        const swimlanes = element.select('.ml-swimlanes');
-        const laneCells = swimlanes.selectAll(`div[data-lane-label="${mlEscape(selectedLane)}"]`);
-
-        laneCells.each(function () {
-          const cell = d3.select(this);
-          const cellTime = cell.attr('data-time');
-          if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
-            cellsToSelect.push(cell.node());
-          }
-        });
-      }
-    });
-
-    const selectedMaxBucketScore = cellsToSelect.reduce((maxBucketScore, cell) => {
-      return Math.max(maxBucketScore, +d3.select(cell).attr('data-bucket-score') || 0);
-    }, 0);
-
-    if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
-      this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
-    } else {
-      this.clearSelection();
-    }
   }
 
   selectCell(cellsToSelect, { laneLabels, bucketScore, times }, checkEqualSelection = false) {
@@ -486,7 +425,55 @@ export class ExplorerSwimlane extends React.Component {
 
     mlExplorerDashboardService.swimlaneRenderDone.changed();
 
-    this.checkForSelection();
+    // Check for selection and reselect the corresponding swimlane cell
+    // if the time range and lane label are still in view.
+    const selectionState = selection;
+    const selectedType = _.get(selectionState, 'selectedType', undefined);
+    const viewBy = _.get(selectionState, 'viewBy', '');
+
+    // If a selection was done in the other swimlane, add the "masked" classes
+    // to de-emphasize the swimlane cells.
+    if (swimlaneType !== selectedType && selectedType !== undefined) {
+      element.selectAll('.lane-label').classed('lane-label-masked', true);
+      element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
+    }
+
+    if ((swimlaneType !== selectedType) ||
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
+      // Not this swimlane which was selected.
+      return;
+    }
+
+    const cellsToSelect = [];
+    const selectedLanes = _.get(selectionState, 'selectedLanes', []);
+    const selectedTimes = _.get(selectionState, 'selectedTimes', []);
+    const selectedTimeExtent = d3.extent(selectedTimes);
+
+    selectedLanes.forEach((selectedLane) => {
+      if (lanes.indexOf(selectedLane) > -1 && selectedTimeExtent[0] >= startTime && selectedTimeExtent[1] <= endTime) {
+        // Locate matching cell - look for exact time, otherwise closest before.
+        const swimlaneElements = element.select('.ml-swimlanes');
+        const laneCells = swimlaneElements.selectAll(`div[data-lane-label="${mlEscape(selectedLane)}"]`);
+
+        laneCells.each(function () {
+          const cell = d3.select(this);
+          const cellTime = cell.attr('data-time');
+          if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
+            cellsToSelect.push(cell.node());
+          }
+        });
+      }
+    });
+
+    const selectedMaxBucketScore = cellsToSelect.reduce((maxBucketScore, cell) => {
+      return Math.max(maxBucketScore, +d3.select(cell).attr('data-bucket-score') || 0);
+    }, 0);
+
+    if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
+      this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
+    } else {
+      this.clearSelection();
+    }
   }
 
   shouldComponentUpdate() {
