@@ -10,7 +10,7 @@ import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kiban
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
 import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
-import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapater';
+import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapter';
 import { ElasticsearchNodesAdapter } from '../adapters/nodes/elasticsearch_nodes_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
 import { InfraConfigurationSourcesAdapter } from '../adapters/sources/configuration_sources_adapter';
