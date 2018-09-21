@@ -352,11 +352,6 @@ module.controller('MlExplorerController', function (
   function mapScopeToSwimlaneProps(swimlaneType) {
     const swimlaneData = getSwimlaneData(swimlaneType);
     return {
-      lanes: swimlaneData.laneLabels,
-      startTime: swimlaneData.earliest,
-      endTime: swimlaneData.latest,
-      stepSecs: swimlaneData.interval,
-      points: swimlaneData.points,
       chartWidth: $scope.swimlaneWidth,
       MlTimeBuckets: TimeBuckets,
       swimlaneData,

@@ -27,8 +27,12 @@ import { DRAG_SELECT_ACTION } from './explorer_constants';
 
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
-    lanes: PropTypes.array.isRequired,
-    mlExplorerDashboardService: PropTypes.object.isRequired
+    chartWidth: PropTypes.number.isRequired,
+    MlTimeBuckets: PropTypes.func.isRequired,
+    swimlaneData: PropTypes.object.isRequired,
+    swimlaneType: PropTypes.string.isRequired,
+    mlExplorerDashboardService: PropTypes.object.isRequired,
+    selection: PropTypes.object
   }
 
   // Since this component is mostly rendered using d3 and cellMouseoverActive is only
@@ -283,11 +287,6 @@ export class ExplorerSwimlane extends React.Component {
     const cellMouseoverActive = this.cellMouseoverActive;
 
     const {
-      lanes,
-      startTime,
-      endTime,
-      stepSecs,
-      points,
       chartWidth,
       MlTimeBuckets,
       swimlaneData,
@@ -295,6 +294,14 @@ export class ExplorerSwimlane extends React.Component {
       mlExplorerDashboardService,
       selection
     } = this.props;
+
+    const {
+      laneLabels: lanes,
+      earliest: startTime,
+      latest: endTime,
+      interval: stepSecs,
+      points
+    } = swimlaneData;
 
     function colorScore(value) {
       return getSeverityColor(value);

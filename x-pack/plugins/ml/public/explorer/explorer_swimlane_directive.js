@@ -25,8 +25,8 @@ module.directive('mlExplorerSwimlane', function (mlExplorerDashboardService) {
       if (
         props.swimlaneType !== scope.swimlaneType ||
         props.swimlaneData === undefined ||
-        props.startTime === undefined ||
-        props.endTime === undefined
+        props.swimlaneData.earliest === undefined ||
+        props.swimlaneData.latest === undefined
       ) {
         return;
       }
