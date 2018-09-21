@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getMapZoom } from '../selectors/map_selectors';
+import { getLayerList, getDataFilters } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -29,15 +29,6 @@ function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
   return {
     startLoading: initData => dispatch(startDataLoad(layerId, requestToken, initData)),
     stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData))
-  };
-}
-
-// TODO: Migrate to selectors
-function getDataFilters(state) {
-  return {
-    extent: state.map.mapState.extent,
-    zoom: getMapZoom(state),
-    timeFilters: state.map.mapState.timeFilters
   };
 }
 
