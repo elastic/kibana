@@ -130,7 +130,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
-    "lodash": "3.10.1",
+    "lodash": "git://github.com/kobelb/lodash.git#3.10.2-npm",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "minimatch": "^3.0.4",
