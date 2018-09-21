@@ -18,5 +18,8 @@ export function plugins(server) {
 
       return getPluginStream(type);
     },
+    config: {
+      auth: false,
+    },
   });
 }

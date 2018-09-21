@@ -11,10 +11,23 @@
   min-height: auto;
 }
 
-.licenseManagement__pageContent {
-  flex-grow: 0; // Temporary fix for EUI bug.
-}
+// EUITODO: Fix modal width/max-width
+.licenseManagement__modal {
+  width: 70vw;
 
-.licenseManagement__contain {
-  margin: auto;
+  @media only screen and (max-width: 767px) {
+    width: ~"calc(100vw + 2px)";
+  }
+}
+.licenseManagement__baseline {
+  vertical-align: baseline;
+}
+.licenseManagement__narrowText {
+  width: 240px;
+}
+.licenseManagement__marginTop {
+  margin-top: auto;
+}
+.licenseManagement__ieFlex {
+  flex-shrink: 0; 
 }

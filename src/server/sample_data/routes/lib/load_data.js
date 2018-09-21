@@ -24,7 +24,7 @@ import zlib from 'zlib';
 const BULK_INSERT_SIZE = 500;
 
 export function loadData(path, bulkInsert) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function (resolve, reject) {
     let count = 0;
     let docs = [];
     let isPaused = false;
