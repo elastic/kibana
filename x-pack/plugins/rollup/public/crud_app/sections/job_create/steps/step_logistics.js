@@ -436,12 +436,21 @@ export class StepLogisticsUi extends Component {
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={<div />}
+            title={(
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    defaultMessage="How many documents should be rolled up at a time?"
+                  />
+                </h5>
+              </EuiTitle>
+            )}
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.description"
                 defaultMessage={`
-                  How many documents should be rolled up at a time? A larger page size
+                  A larger page size
                   will roll up data more quickly, but will require more memory during processing.
                 `}
               />
@@ -470,13 +479,21 @@ export class StepLogisticsUi extends Component {
           </EuiDescribedFormGroup>
 
           <EuiDescribedFormGroup
-            title={<div />}
+            title={(
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    defaultMessage="How long should the rollup job wait before rolling up new data?"
+                  />
+                </h5>
+              </EuiTitle>
+            )}
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelay.description"
                 defaultMessage={`
-                  How long should the rollup job wait before rolling up new data? Waiting will
-                  yield a higher-fidelity rollup by adjusting for variable ingest latency.
+                  Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
                   By default, the rollup job attempts to roll up all data that is available.
                 `}
               />
