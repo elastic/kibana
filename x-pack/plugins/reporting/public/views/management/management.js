@@ -32,7 +32,7 @@ routes.defaults(/\/management/, {
 
         return kibanaManagementSection.register('reporting', {
           order: 15,
-          display: i18n('xpack.reporting.views.management.reportingTitle', {
+          display: i18n('xpack.reporting.management.reportingTitle', {
             defaultMessage: 'Reporting'
           }),
           url,

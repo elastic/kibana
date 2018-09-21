@@ -33,7 +33,7 @@ function reportingProvider(Private: any, i18n) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
-      const panelTitle = i18n('xpack.reporting.shareContextMenu.register.csvReportsButtonLabel', {
+      const panelTitle = i18n('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
 

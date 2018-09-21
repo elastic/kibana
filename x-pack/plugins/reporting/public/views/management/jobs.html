@@ -3,7 +3,7 @@
     <div class="euiPageBody">
       <h1
         class="euiTitle"
-        i18n-id="xpack.reporting.views.management.jobs.generatedReportsTitle"
+        i18n-id="xpack.reporting.management.generatedReports.table.generatedReportsTitle"
         i18n-default-message="Generated reports"
       >
       </h1>
@@ -11,15 +11,15 @@
       <table class="table table-striped job-list" ng-class="{ loading: jobsCtrl.loading }">
         <thead>
           <tr>
-            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.documentTitle" i18n-default-message="Document"></th>
-            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.addedTitle" i18n-default-message="Added"></th>
-            <th scope="col" i18n-id="xpack.reporting.views.management.statusTitle" i18n-default-message="Status"></th>
-            <th scope="col" i18n-id="xpack.reporting.views.management.jobs.actionsTitle" i18n-default-message="Actions"></th>
+            <th scope="col" i18n-id="xpack.reporting.management.generatedReports.table.documentTitle" i18n-default-message="Document"></th>
+            <th scope="col" i18n-id="xpack.reporting.management.generatedReports.table.addedTitle" i18n-default-message="Added"></th>
+            <th scope="col" i18n-id="xpack.reporting.management.generatedReports.table.statusTitle" i18n-default-message="Status"></th>
+            <th scope="col" i18n-id="xpack.reporting.management.generatedReports.table.actionsTitle" i18n-default-message="Actions"></th>
           </tr>
         </thead>
         <tbody>
           <tr ng-if="!jobsCtrl.reportingJobs.jobs.length">
-            <td colspan="5" i18n-id="xpack.reporting.views.management.jobs.noReportsDescription" i18n-default-message="No reports have been created"></td>
+            <td colspan="5" i18n-id="xpack.reporting.management.generatedReports.table.noReportsDescription" i18n-default-message="No reports have been created"></td>
           </tr>
           <tr ng-if="jobsCtrl.reportingJobs.jobs.length" ng-repeat="job in jobsCtrl.reportingJobs.jobs">
             <td>
@@ -32,7 +32,7 @@
             </td>
             <td>
               <div ng-class="{kuiStatusText: true, 'kuiStatusText--warning': job.max_size_reached}">
-                {{ job.status }}<span ng-if="job.max_size_reached" i18n-id="xpack.reporting.views.management.jobs.maxSizeDescription" i18n-default-message="&nbsp;- max size reached"></span>
+                {{ job.status }}<span ng-if="job.max_size_reached" i18n-id="xpack.reporting.management.generatedReports.table.maxSizeDescription" i18n-default-message="&nbsp;- max size reached"></span>
               </div>
               <div
                 class="metadata"
@@ -52,7 +52,7 @@
                 class="kuiButton kuiButton--danger"
                 ng-if="job.status === 'failed' && jobsCtrl.errorMessage.job_id !== job.id"
                 ng-click=jobsCtrl.showError(job.id)
-                aria-label="{{'xpack.reporting.views.management.jobs.showErrorAriaLabel' | i18n: { defaultMessage: 'Show report-generation error' } }}"
+                aria-label="{{'xpack.reporting.management.generatedReports.table.showErrorAriaLabel' | i18n: { defaultMessage: 'Show report-generation error' } }}"
               >
                 <span class="kuiIcon fa-question-circle"></span>
               </button>
@@ -70,7 +70,7 @@
                 ng-class="{ kuiButton: true,
                   'kuiButton--basic': !job.max_size_reached,
                   'kuiButton--warning': job.max_size_reached}"
-                aria-label="{{'xpack.reporting.views.management.jobs.downloadReportAriaLabel' | i18n: { defaultMessage: 'Download report' } }}"
+                aria-label="{{'xpack.reporting.management.generatedReports.table.downloadReportAriaLabel' | i18n: { defaultMessage: 'Download report' } }}"
                 ng-attr-tooltip="{{ job.download_button_tooltip }}"
               >
                 <span class="kuiIcon fa-download"></span>

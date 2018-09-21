@@ -87,7 +87,7 @@ function executeJobFn(server) {
     const process$ = Rx.of(jobToExecute).pipe(
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.server.executeJob.failedToDecryptErrorMessage', {
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.executeJob.failedToDecryptErrorMessage', {
           defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
         }))
       ),

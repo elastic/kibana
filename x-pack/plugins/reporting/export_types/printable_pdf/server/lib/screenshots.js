@@ -62,7 +62,7 @@ export function screenshotsObservableFactory(server) {
 
   const waitForNotFoundError = async (browser) => {
     await browser.waitForSelector(`.toast.alert.alert-danger`);
-    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.screenshots.subjectCouldNotBeLoadedErrorMessage', {
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.screenshots.subjectCouldNotBeLoadedErrorMessage', {
       defaultMessage: 'Reporting subject could not be loaded to take a screenshot.'
     }));
   };

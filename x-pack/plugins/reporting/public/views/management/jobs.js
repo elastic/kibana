@@ -62,7 +62,7 @@ routes.when('/management/kibana/reporting', {
         .then((jobs) => {
           return reportingJobQueue.total()
             .then((total) => {
-              const downloadReportButtonTooltip = i18n('xpack.reporting.views.management.jobs.downloadReportTooltip',
+              const downloadReportButtonTooltip = i18n('xpack.reporting.management.generatedReports.table.downloadReportTooltip',
                 { defaultMessage: 'Max size reached, contains partial data.' });
               const mappedJobs = mapJobs(jobs).map(job => {
                 return {
@@ -84,7 +84,7 @@ routes.when('/management/kibana/reporting', {
 
           if (err.status !== 401 && err.status !== 403) {
             toastNotifications.addDanger(err.statusText
-              || i18n('xpack.reporting.views.management.jobs.requestFailedErrorMessage', { defaultMessage: 'Request failed' }));
+              || i18n('xpack.reporting.management.generatedReports.table.requestFailedErrorMessage', { defaultMessage: 'Request failed' }));
           }
 
           return {

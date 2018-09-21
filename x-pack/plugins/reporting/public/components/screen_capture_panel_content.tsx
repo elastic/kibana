@@ -51,7 +51,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         <EuiSwitch
           label={
             <FormattedMessage
-              id="xpack.reporting.components.screenCapturePanelContent.optimizeForPrintingDescription"
+              id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingDescription"
               defaultMessage="Optimize for printing"
             >
               {(text: string) => text}

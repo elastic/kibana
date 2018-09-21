@@ -134,7 +134,7 @@ class PdfMaker {
   getBuffer() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.pdf.bufferErrorMessage', {
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.bufferErrorMessage', {
           defaultMessage: 'Document stream has not been generated'
         })
       );
@@ -153,7 +153,7 @@ class PdfMaker {
   getStream() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.pdf.streamErrorMessage', {
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.streamErrorMessage', {
           defaultMessage: 'Document stream has not been generated'
         })
       );
@@ -216,7 +216,7 @@ function getTemplate(layout, logo, title) {
               image: logo || logoPath,
             }, {
               alignment: 'center',
-              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.pdf.pagingDescription', {
+              text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
                 defaultMessage: 'Page {currentString} of {pageCount}',
                 values: { currentString: currentPage.toString(), pageCount }
               }),
@@ -226,7 +226,7 @@ function getTemplate(layout, logo, title) {
             }, ''],
             [
               logo ? {
-                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.server.lib.pdf.logoDescription', {
+                text: i18n.translate('xpack.reporting.exportTypes.printablePdf.logoDescription', {
                   defaultMessage: 'Powered by Elastic'
                 }),
                 fontSize: 10,

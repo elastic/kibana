@@ -53,7 +53,7 @@ function reportingProvider(Private: any, dashboardConfig: any, i18n) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
-      const panelTitle = i18n('xpack.reporting.shareContextMenu.register.pdfReportsButtonLabel', {
+      const panelTitle = i18n('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
         defaultMessage: 'PDF Reports',
       });
 
