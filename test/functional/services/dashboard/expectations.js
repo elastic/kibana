@@ -173,7 +173,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async metricValuesExist(values) {
       log.debug(`DashboardExpect.metricValuesExist(${values})`);
-      await this.textWithinCssElementExists(values, '.metric-value');
+      await this.textWithinCssElementExists(values, '.mtrVis__value');
     }
 
     async tsvbMetricValuesExist(values) {
