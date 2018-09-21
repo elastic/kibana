@@ -51,7 +51,8 @@ export class EditorComponent extends React.Component<Props> {
         this.props.fileContent!,
         this.props.repoUri,
         this.props.file,
-        this.props.fileLanguage!
+        this.props.fileLanguage!,
+        this.props.revision
       ).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
@@ -69,7 +70,8 @@ export class EditorComponent extends React.Component<Props> {
         nextProps.fileContent,
         nextProps.repoUri,
         nextProps.file,
-        nextProps.fileLanguage!
+        nextProps.fileLanguage!,
+        nextProps.revision
       ).then(() => {
         if (nextProps.revealPosition) {
           this.revealPosition(nextProps.revealPosition);
@@ -90,9 +92,9 @@ export class EditorComponent extends React.Component<Props> {
     );
   }
 
-  private async loadText(text: string, repo: string, file: string, lang: string) {
+  private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
-      await this.monaco.loadFile(repo, file, text, lang);
+      await this.monaco.loadFile(repo, file, text, lang, revision);
     }
   }
 
@@ -138,7 +140,7 @@ export class EditorComponent extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   file: state.file.file!.payload.path,
   repoUri: state.file.file!.payload.uri,
-  revision: state.file.file!.payload.uri,
+  revision: state.file.file!.payload.revision,
   fileContent: state.file.file!.content,
   fileLanguage: state.file.file!.lang,
   isReferencesOpen: state.editor.showing,
