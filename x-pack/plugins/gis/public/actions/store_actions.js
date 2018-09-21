@@ -5,7 +5,7 @@
  */
 
 import { GIS_API_PATH } from '../../common/constants';
-import { getLayerList, getDataFilters } from '../selectors/map_selectors';
+import { getLayerList, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -22,7 +22,7 @@ export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
-export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
+export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 
@@ -208,7 +208,7 @@ export function updateLayerStyle(style, temporary = true) {
   const tokenString = 'data_request_sync_style_change';
   return async (dispatch, getState) => {
     await dispatch({
-      type: UPDATE_LAYER_STYLE,
+      type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
       style: {
         ...style,
         temporary
@@ -216,11 +216,9 @@ export function updateLayerStyle(style, temporary = true) {
     });
     const state = getState();
     const dataFilters = getDataFilters(state);
-    const layerList = getLayerList(state);
-    layerList.forEach(layer => {
-      const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncData(startLoading, stopLoading, { ...dataFilters });
-    });
+    const layer = getSelectedLayer(state);
+    const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    layer.syncData(startLoading, stopLoading, { ...dataFilters });
   };
 }
 

@@ -9,7 +9,7 @@ import {
   ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
   CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,
   MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST, SET_TIME_FILTERS,
-  UPDATE_LAYER_LABEL, UPDATE_LAYER_STYLE, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES
+  UPDATE_LAYER_LABEL, UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -111,7 +111,7 @@ export function map(state = INITIAL_STATE, action) {
     // TODO: Simplify cases below
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
-    case UPDATE_LAYER_STYLE:
+    case UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER:
       const styleLayerId = state.selectedLayerId;
       const styleLayerIdx = getLayerIndex(state.layerList, styleLayerId);
       const layerStyle = state.layerList[styleLayerIdx].style;
