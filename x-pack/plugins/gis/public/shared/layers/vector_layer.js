@@ -41,7 +41,7 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncDataToMapState(startLoading, stopLoading) {
+  async syncData(startLoading, stopLoading) {
     if (this._descriptor.data || this._descriptor.dataRequestToken) {
       return;
     }

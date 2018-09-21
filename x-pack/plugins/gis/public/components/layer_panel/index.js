@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { clearTemporaryStyles } from '../../actions/style_actions';
+import { clearTemporaryStyles } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {

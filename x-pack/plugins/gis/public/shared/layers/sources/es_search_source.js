@@ -81,7 +81,7 @@ export class ESSearchSource extends ASource {
         .stats(getResponseInspectorStats(searchSource, resp))
         .ok({ json: resp });
     } catch(error) {
-      console.log(error);
+      console.error(error);
       // TODO dispatch action to set error state in store
       return { type: 'FeatureCollection', features: [] };
     }
