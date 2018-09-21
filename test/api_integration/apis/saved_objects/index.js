@@ -26,5 +26,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./migrations'));
   });
 }

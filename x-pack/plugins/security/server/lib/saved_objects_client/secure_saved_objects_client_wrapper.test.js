@@ -449,358 +449,177 @@ describe(`spaces disabled`, () => {
   });
 
   describe('#find', () => {
-    describe('type', () => {
-      test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-        const type = 'foo';
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => {
-            throw new Error('An actual error would happen here');
-          })
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockActions = createMockActions();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: null,
-        });
-
-        await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
-
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => {
+          throw new Error('An actual error would happen here');
+        })
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockActions = createMockActions();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
       });
 
-      test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
-        const type = 'foo';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: false,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: null,
-        });
-        const options = { type };
+      await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
 
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-          username,
-          'find',
-          [type],
-          [mockActions.getSavedObjectAction(type, 'find')],
-          {
-            options
-          }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type1, 'find')]: false,
-              [mockActions.getSavedObjectAction(type2, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: null,
-        });
-        const options = { type: [type1, type2] };
-
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find')
-        ]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-          username,
-          'find',
-          [type1, type2],
-          [mockActions.getSavedObjectAction(type1, 'find')],
-          {
-            options
-          }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`returns result of baseClient.find when authorized`, async () => {
-        const type = 'foo';
-        const username = Symbol();
-        const returnValue = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn().mockReturnValue(returnValue)
-        };
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: null,
-        });
-        const options = { type };
-
-        const result = await client.find(options);
-
-        expect(result).toBe(returnValue);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
-          options,
-        });
-      });
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    describe('no type', () => {
-      test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => {
-            throw new Error('An actual error would happen here');
-          })
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockActions = createMockActions();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [type1, type2],
-          spaces: null,
-        });
-
-        await expect(client.find()).rejects.toThrowError(mockErrors.generalError);
-
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find'),
-        ]);
-        expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`throws decorated ForbiddenError when unauthorized`, async () => {
-        const type = 'foo';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: false,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [type],
-          spaces: null,
-        });
-        const options = Symbol();
-
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => ({
+          hasAllRequested: false,
           username,
-          'find',
-          [type],
-          [mockActions.getSavedObjectAction(type, 'find')],
-          {
-            options
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'find')]: false,
           }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
       });
+      const options = { type };
 
-      test(`returns result of baseClient.find when authorized`, async () => {
-        const type = 'foo';
-        const spaceType = 'space';
-        const username = Symbol();
-        const returnValue = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn().mockReturnValue(returnValue)
-        };
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [type, spaceType],
-          spaces: null,
-        });
-        const options = {
-          bar: true,
-        };
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-        const result = await client.find(options);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'find',
+        [type],
+        [mockActions.getSavedObjectAction(type, 'find')],
+        {
+          options
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
 
-        expect(result).toBe(returnValue);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith({ bar: true, type: ['foo'] });
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
-          options: {
-            type: [type],
-            ...options,
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
+      const type1 = 'foo';
+      const type2 = 'bar';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => ({
+          hasAllRequested: false,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type1, 'find')]: false,
+            [mockActions.getSavedObjectAction(type2, 'find')]: true,
           }
-        });
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
       });
+      const options = { type: [type1, type2] };
 
-      test(`specifies authorized types when calling repository.find()`, async () => {
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const spaceType = 'space';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn(),
-        };
-        const mockCheckPrivileges = {
-          globally: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type1, 'find')]: false,
-              [mockActions.getSavedObjectAction(type2, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [type1, type2, spaceType],
-          spaces: null,
-        });
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-        await client.find();
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
+        mockActions.getSavedObjectAction(type1, 'find'),
+        mockActions.getSavedObjectAction(type2, 'find')
+      ]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'find',
+        [type1, type2],
+        [mockActions.getSavedObjectAction(type1, 'find')],
+        {
+          options
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
 
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find'),
-        ]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith(expect.objectContaining({
-          type: [type2]
-        }));
+    test(`returns result of baseClient.find when authorized`, async () => {
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = {
+        find: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockCheckPrivileges = {
+        globally: jest.fn(async () => ({
+          hasAllRequested: true,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'find')]: true,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: mockBaseClient,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: null,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: null,
+      });
+      const options = { type };
+
+      const result = await client.find(options);
+
+      expect(result).toBe(returnValue);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
+        options,
       });
     });
   });
@@ -1663,396 +1482,197 @@ describe(`spaces enabled`, () => {
   });
 
   describe('#find', () => {
-    describe('type', () => {
-      test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-        const spaceId = 'space_1';
-        const type = 'foo';
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => {
-            throw new Error('An actual error would happen here');
-          })
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockActions = createMockActions();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: mockSpaces,
-        });
-
-        await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
-
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => {
+          throw new Error('An actual error would happen here');
+        })
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockActions = createMockActions();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
       });
 
-      test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
-        const spaceId = 'space_1';
-        const type = 'foo';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: false,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: mockSpaces,
-        });
-        const options = { type };
+      await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
 
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-          username,
-          'find',
-          [type],
-          [mockActions.getSavedObjectAction(type, 'find')],
-          {
-            options
-          }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
-        const spaceId = 'space_1';
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type1, 'find')]: false,
-              [mockActions.getSavedObjectAction(type2, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: mockSpaces,
-        });
-        const options = { type: [type1, type2] };
-
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find')
-        ]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-          username,
-          'find',
-          [type1, type2],
-          [mockActions.getSavedObjectAction(type1, 'find')],
-          {
-            options
-          }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`returns result of baseClient.find when authorized`, async () => {
-        const spaceId = 'space_1';
-        const type = 'foo';
-        const username = Symbol();
-        const returnValue = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn().mockReturnValue(returnValue)
-        };
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [],
-          spaces: mockSpaces,
-        });
-        const options = { type };
-
-        const result = await client.find(options);
-
-        expect(result).toBe(returnValue);
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
-          options,
-        });
-      });
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    describe('no type', () => {
-      test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-        const spaceId = 'space_1';
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => {
-            throw new Error('An actual error would happen here');
-          })
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockActions = createMockActions();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [type1, type2],
-          spaces: mockSpaces,
-        });
-
-        await expect(client.find()).rejects.toThrowError(mockErrors.generalError);
-
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find'),
-        ]);
-        expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-      });
-
-      test(`throws decorated ForbiddenError when unauthorized`, async () => {
-        const spaceId = 'space_1';
-        const type = 'foo';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockErrors = createMockErrors();
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: false,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: false,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: null,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: mockErrors,
-          request: mockRequest,
-          savedObjectTypes: [type],
-          spaces: mockSpaces,
-        });
-        const options = Symbol();
-
-        await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
-
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+    test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => ({
+          hasAllRequested: false,
           username,
-          'find',
-          [type],
-          [mockActions.getSavedObjectAction(type, 'find')],
-          {
-            options
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'find')]: false,
           }
-        );
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
       });
+      const options = { type };
 
-      test(`returns result of baseClient.find when authorized`, async () => {
-        const spaceId = 'space_1';
-        const type = 'foo';
-        const username = Symbol();
-        const returnValue = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn().mockReturnValue(returnValue)
-        };
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [type],
-          spaces: mockSpaces,
-        });
-        const options = {
-          bar: true,
-        };
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-        const result = await client.find(options);
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'find',
+        [type],
+        [mockActions.getSavedObjectAction(type, 'find')],
+        {
+          options
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
 
-        expect(result).toBe(returnValue);
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith({ bar: true, type: ['foo'] });
-        expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-        expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
-          options: {
-            type: [type],
-            ...options,
+    test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
+      const spaceId = 'space_1';
+      const type1 = 'foo';
+      const type2 = 'bar';
+      const username = Symbol();
+      const mockActions = createMockActions();
+      const mockErrors = createMockErrors();
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => ({
+          hasAllRequested: false,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type1, 'find')]: false,
+            [mockActions.getSavedObjectAction(type2, 'find')]: true,
           }
-        });
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+
+      const mockAuditLogger = createMockAuditLogger();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: null,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: mockErrors,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
       });
+      const options = { type: [type1, type2] };
 
-      test(`specifies authorized types when calling repository.find()`, async () => {
-        const spaceId = 'space_1';
-        const type1 = 'foo';
-        const type2 = 'bar';
-        const username = Symbol();
-        const mockActions = createMockActions();
-        const mockBaseClient = {
-          find: jest.fn(),
-        };
-        const mockCheckPrivileges = {
-          atSpace: jest.fn(async () => ({
-            hasAllRequested: true,
-            username,
-            privileges: {
-              [mockActions.getSavedObjectAction(type1, 'find')]: false,
-              [mockActions.getSavedObjectAction(type2, 'find')]: true,
-            }
-          }))
-        };
-        const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
-        const mockRequest = Symbol();
-        const mockAuditLogger = createMockAuditLogger();
-        const mockSpaces = {
-          getSpaceId: jest.fn().mockReturnValue(spaceId)
-        };
-        const client = new SecureSavedObjectsClientWrapper({
-          actions: mockActions,
-          auditLogger: mockAuditLogger,
-          baseClient: mockBaseClient,
-          checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-          errors: null,
-          request: mockRequest,
-          savedObjectTypes: [type1, type2],
-          spaces: mockSpaces,
-        });
+      await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
-        await client.find();
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
+        mockActions.getSavedObjectAction(type1, 'find'),
+        mockActions.getSavedObjectAction(type2, 'find')
+      ]);
+      expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
+        username,
+        'find',
+        [type1, type2],
+        [mockActions.getSavedObjectAction(type1, 'find')],
+        {
+          options
+        }
+      );
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
+    });
 
-        expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-        expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-          mockActions.getSavedObjectAction(type1, 'find'),
-          mockActions.getSavedObjectAction(type2, 'find'),
-        ]);
-        expect(mockBaseClient.find).toHaveBeenCalledWith(expect.objectContaining({
-          type: [type2]
-        }));
+    test(`returns result of baseClient.find when authorized`, async () => {
+      const spaceId = 'space_1';
+      const type = 'foo';
+      const username = Symbol();
+      const returnValue = Symbol();
+      const mockActions = createMockActions();
+      const mockBaseClient = {
+        find: jest.fn().mockReturnValue(returnValue)
+      };
+      const mockCheckPrivileges = {
+        atSpace: jest.fn(async () => ({
+          hasAllRequested: true,
+          username,
+          privileges: {
+            [mockActions.getSavedObjectAction(type, 'find')]: true,
+          }
+        }))
+      };
+      const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+      const mockRequest = Symbol();
+      const mockAuditLogger = createMockAuditLogger();
+      const mockSpaces = {
+        getSpaceId: jest.fn().mockReturnValue(spaceId)
+      };
+      const client = new SecureSavedObjectsClientWrapper({
+        actions: mockActions,
+        auditLogger: mockAuditLogger,
+        baseClient: mockBaseClient,
+        checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+        errors: null,
+        request: mockRequest,
+        savedObjectTypes: [],
+        spaces: mockSpaces,
+      });
+      const options = { type };
+
+      const result = await client.find(options);
+
+      expect(result).toBe(returnValue);
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
+      expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
+        options,
       });
     });
   });

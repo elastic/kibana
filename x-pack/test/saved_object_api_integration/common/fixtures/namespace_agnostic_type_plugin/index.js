@@ -11,7 +11,7 @@ export default function (kibana) {
     require: [],
     name: 'namespace_agnostic_type_plugin',
     uiExports: {
-      savedObjectsSchema: {
+      savedObjectSchemas: {
         globaltype: {
           isNamespaceAgnostic: true
         }

@@ -53,7 +53,7 @@ export const spaces = (kibana: any) =>
       ],
       hacks: [],
       mappings,
-      savedObjectsSchema: {
+      savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
         },
