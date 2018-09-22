@@ -85,8 +85,8 @@ export class ExplorerChartRare extends React.Component {
     const CHART_TYPE = (config.functionDescription === 'rare') ? 'rare' : 'population';
     const CHART_Y_ATTRIBUTE = (config.functionDescription === 'rare') ? 'entity' : 'value';
 
-    init(config);
-    drawRareChart(config.chartData);
+    const filteredChartData = init(config);
+    drawRareChart(filteredChartData);
 
     function init({ chartLimits, chartData }) {
       const $el = $('.ml-explorer-chart');
@@ -103,13 +103,23 @@ export class ExplorerChartRare extends React.Component {
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
+      let highlight = chartData.find(d => (d.anomalyScore !== undefined));
+      highlight = highlight && highlight.entity;
+      const categoryLimit = 30;
       const scaleCategories = d3.nest()
         .key(d => d.entity)
         .entries(chartData)
         .sort((a, b) => {
           return b.values.length - a.values.length;
         })
+        .filter((d, i) => {
+          return (i < categoryLimit || d.key === highlight);
+        })
         .map(d => d.key);
+
+      chartData = chartData.filter((d) => {
+        return (scaleCategories.findIndex(s => (s === d.entity)) > -1);
+      });
 
       if (CHART_TYPE === 'population') {
         lineChartYScale = d3.scale.linear()
@@ -178,6 +188,7 @@ export class ExplorerChartRare extends React.Component {
         .attr('class', 'line-chart')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+      return chartData;
     }
 
     function drawRareChart(data) {

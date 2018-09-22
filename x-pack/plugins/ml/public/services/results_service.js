@@ -1398,6 +1398,8 @@ function getEventRateData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
+// const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 200;
 function getEventDistributionData(
   index,
   types,
@@ -1466,10 +1468,17 @@ function getEventDistributionData(
             min_doc_count: 0
           },
           aggs: {
-            entities: {
-              terms: {
-                field: splitField.fieldName,
-                size: 10
+            sample: {
+              sampler: {
+                shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+              },
+              aggs: {
+                entities: {
+                  terms: {
+                    field: splitField.fieldName,
+                    size: 10
+                  }
+                }
               }
             }
           }
@@ -1506,7 +1515,7 @@ function getEventDistributionData(
         const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
         const data = dataByTime.reduce((d, dataForTime) => {
           const date = +dataForTime.key;
-          const entities = _.get(dataForTime, ['entities', 'buckets'], []);
+          const entities = _.get(dataForTime, ['sample', 'entities', 'buckets'], []);
           entities.forEach((entity) => {
             d.push({
               date,
