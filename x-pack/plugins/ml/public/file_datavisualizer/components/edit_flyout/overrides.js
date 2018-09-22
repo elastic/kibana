@@ -28,17 +28,17 @@ import {
   getCharsetOptions,
 } from './options';
 
+const formatOptions = getFormatOptions();
+const timestampFormatOptions = getTimestampFormatOptions();
+const delimiterOptions = getDelimiterOptions();
+const quoteOptions = getQuoteOptions();
+const charsetOptions = getCharsetOptions();
+
 export class Overrides extends Component {
   constructor(props) {
     super(props);
 
     this.state = {};
-
-    this.formatOptions = getFormatOptions();
-    this.timestampFormatOptions = getTimestampFormatOptions();
-    this.delimiterOptions = getDelimiterOptions();
-    this.quoteOptions = getQuoteOptions();
-    this.charsetOptions = getCharsetOptions();
   }
 
   static getDerivedStateFromProps(props) {
@@ -173,7 +173,7 @@ export class Overrides extends Component {
           label="Data format"
         >
           <EuiSuperSelect
-            options={this.formatOptions}
+            options={formatOptions}
             valueOfSelected={format}
             onChange={this.onFormatChange}
           />
@@ -185,7 +185,7 @@ export class Overrides extends Component {
               label="Delimiter"
             >
               <EuiSuperSelect
-                options={this.delimiterOptions}
+                options={delimiterOptions}
                 valueOfSelected={delimiter}
                 onChange={this.onDelimiterChange}
               />
@@ -206,7 +206,7 @@ export class Overrides extends Component {
               label="Quote character"
             >
               <EuiSuperSelect
-                options={this.quoteOptions}
+                options={quoteOptions}
                 valueOfSelected={quote}
                 onChange={this.onQuoteChange}
               />
@@ -251,7 +251,7 @@ export class Overrides extends Component {
           label="Timestamp format"
         >
           <EuiSuperSelect
-            options={this.timestampFormatOptions}
+            options={timestampFormatOptions}
             valueOfSelected={timestampFormat}
             onChange={this.onTimestampFormatChange}
           />
@@ -271,7 +271,7 @@ export class Overrides extends Component {
           label="Charset"
         >
           <EuiSuperSelect
-            options={this.charsetOptions}
+            options={charsetOptions}
             valueOfSelected={charset}
             onChange={this.onCharsetChange}
           />
