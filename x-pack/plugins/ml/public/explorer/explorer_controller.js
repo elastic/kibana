@@ -254,6 +254,7 @@ module.controller('MlExplorerController', function (
 
     // Clear viewBy from the state if we are moving from single
     // to multi selection, or vice-versa.
+    $scope.appState.fetch();
     if ((previousSelected <= 1 && $scope.selectedJobs.length > 1) ||
       ($scope.selectedJobs.length === 1 && previousSelected > 1)) {
       delete $scope.appState.mlExplorerSwimlane.viewBy;
@@ -289,6 +290,7 @@ module.controller('MlExplorerController', function (
     $scope.swimlaneViewByFieldName = viewByFieldName;
 
     // Save the 'view by' field name to the AppState so that it can restored from the URL.
+    $scope.appState.fetch();
     $scope.appState.mlExplorerSwimlane.viewBy = viewByFieldName;
     $scope.appState.save();
 
@@ -334,6 +336,7 @@ module.controller('MlExplorerController', function (
   });
 
   function clearSwimlaneSelectionFromAppState() {
+    $scope.appState.fetch();
     delete $scope.appState.mlExplorerSwimlane.selectedType;
     delete $scope.appState.mlExplorerSwimlane.selectedLanes;
     delete $scope.appState.mlExplorerSwimlane.selectedTimes;
@@ -454,6 +457,7 @@ module.controller('MlExplorerController', function (
       }
       clearSelectedAnomalies();
     } else {
+      $scope.appState.fetch();
       $scope.appState.mlExplorerSwimlane.selectedType = cellData.type;
       $scope.appState.mlExplorerSwimlane.selectedLanes = cellData.lanes;
       $scope.appState.mlExplorerSwimlane.selectedTimes = cellData.times;
@@ -715,6 +719,7 @@ module.controller('MlExplorerController', function (
 
       }
 
+      $scope.appState.fetch();
       $scope.appState.mlExplorerSwimlane.viewBy = $scope.swimlaneViewByFieldName;
       $scope.appState.save();
     }
