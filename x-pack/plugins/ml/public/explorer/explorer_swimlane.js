@@ -29,7 +29,9 @@ export class ExplorerSwimlane extends React.Component {
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
     MlTimeBuckets: PropTypes.func.isRequired,
-    swimlaneData: PropTypes.object.isRequired,
+    swimlaneData: PropTypes.shape({
+      laneLabels: PropTypes.array.isRequired
+    }).isRequired,
     swimlaneType: PropTypes.string.isRequired,
     mlExplorerDashboardService: PropTypes.object.isRequired,
     selection: PropTypes.object
