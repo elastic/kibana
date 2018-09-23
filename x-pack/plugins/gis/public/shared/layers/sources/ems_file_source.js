@@ -16,7 +16,6 @@ import { GIS_API_PATH } from '../../../../common/constants';
 export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
-
   static typeDisplayName = 'EMS';
 
   static createDescriptor(name) {
@@ -63,7 +62,7 @@ export class EMSFileSource extends VectorSource {
   async getGeoJson() {
     const fileSource = this._emsFiles.find((source => source.name === this._descriptor.name));
     const fetchUrl = `../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`;
-    return this._getGeoJson(fileSource, fetchUrl);
+    return VectorSource.getGeoJson(fileSource, fetchUrl);
   }
 
   renderDetails() {

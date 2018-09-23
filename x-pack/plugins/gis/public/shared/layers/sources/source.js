@@ -50,6 +50,32 @@ export class TMSSource extends ASource {
 
 export class VectorSource extends ASource {
 
+  static async getGeoJson({ format, meta }, fetchUrl) {
+    let jsonFeatures;
+    try {
+      format = _.get(format, 'type', format); // Hacky workaround for differing config data structure
+      const vectorFetch = await fetch(fetchUrl);
+      const fetchedJson = await vectorFetch.json();
+
+      if (format === 'geojson') {
+        jsonFeatures = fetchedJson;
+      } else if (format === 'topojson') {
+        const featureCollectionPath = meta && meta.feature_collection_path
+          && `objects.${meta.feature_collection_path}` || 'objects.data';
+        const features = _.get(fetchedJson, featureCollectionPath);
+        jsonFeatures = topojson.feature(fetchedJson, features);
+      } else {
+        //should never happen
+        jsonFeatures = {};
+        throw new Error(`Unrecognized format: ${format}`);
+      }
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+    return jsonFeatures;
+  }
+
   _createDefaultLayerDescriptor(options) {
     return VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
@@ -74,32 +100,6 @@ export class VectorSource extends ASource {
 
   async getGeoJson() {
     throw new Error('Should implement VectorSource#getGeoJson');
-  }
-
-  async _getGeoJson({ format, meta }, fetchUrl) {
-    let jsonFeatures;
-    try {
-      format = _.get(format, 'type', format); // Hacky workaround for differing config data structure
-      const vectorFetch = await fetch(fetchUrl);
-      const fetchedJson = await vectorFetch.json();
-
-      if (format === 'geojson') {
-        jsonFeatures = fetchedJson;
-      } else if (format === 'topojson') {
-        const featureCollectionPath = meta && meta.feature_collection_path
-          && `objects.${meta.feature_collection_path}` || 'objects.data';
-        const features = _.get(fetchedJson, featureCollectionPath);
-        jsonFeatures = topojson.feature(fetchedJson, features);
-      } else {
-        //should never happen
-        jsonFeatures = {};
-        throw new Error(`Unrecognized format: ${format}`);
-      }
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-    return jsonFeatures;
   }
 
   async isTimeAware() {
