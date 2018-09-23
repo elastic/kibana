@@ -25,12 +25,20 @@ export class VectorStyle {
   static createDescriptor(color) {
     return {
       type: VectorStyle.type,
-      color: color
+      properties: [
+        {
+          property: 'FillAndOutline',
+          type: 'STATIC',
+          options: {
+            color: color
+          }
+        }
+      ]
     };
   }
 
   static getDisplayName() {
-    return 'Vector Styles';
+    return 'Vector Style';
   }
 
   static renderEditor({ handleStyleChange, style, reset: resetStyle }) {
@@ -38,7 +46,8 @@ export class VectorStyle {
   }
 
   getHexColor() {
-    return this._descriptor.color;
+    const property = this._descriptor.properties.find(p => p.property === 'FillAndOutline');
+    return property.options.color;
   }
 
   setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {

@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { VectorStyle } from '../vector_style';
+import { DynamicColorSelection } from './dynamic_color_selection';
+import { StaticColorSelection } from './static_color_selection';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiColorPicker,
   EuiButtonToggle
 } from '@elastic/eui';
-
 
 const STYLE_TYPE = {
   'DYNAMIC': 'Dynamic',
@@ -46,14 +46,14 @@ export class VectorStyleEditor extends React.Component {
       });
     };
 
-    const changeColor = (color) => {
-      const fillAndOutlineDescriptor = VectorStyle.createDescriptor(color);
-      this.props.handleStyleChange(fillAndOutlineDescriptor);
+    const changeToStaticColor = (color) => {
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(color);
+      this.props.handleStyleChange(vectorStyleDescriptor);
     };
     const selectedColor = style ? style.getHexColor() : VectorStyle.DEFAULT_COLOR_HEX;
 
     const ColorSelector = this._isDynamic() ? (<DynamicColorSelection/>) :
-(<StaticColorSelection changeColor={changeColor} selectedColor={selectedColor} />);
+      (<StaticColorSelection changeColor={changeToStaticColor} selectedColor={selectedColor} />);
     return (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
@@ -75,18 +75,4 @@ export class VectorStyleEditor extends React.Component {
 }
 
 
-class StaticColorSelection extends React.Component {
-  render() {
-    return (<EuiColorPicker
-      onChange={this.props.changeColor}
-      color={this.props.selectedColor}
-    />);
-  }
-}
 
-
-class DynamicColorSelection extends React.Component {
-  render() {
-    return 'here be dynamic color selection';
-  }
-}
