@@ -13,6 +13,7 @@ export class VectorStyle {
 
   static type = 'VECTOR';
   static DEFAULT_COLOR_HEX = '#ffffff';
+  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
   constructor(descriptor) {
     this._descriptor = descriptor;
@@ -25,15 +26,14 @@ export class VectorStyle {
   static createDescriptor(color) {
     return {
       type: VectorStyle.type,
-      properties: [
-        {
-          property: 'FillAndOutline',
+      properties: {
+        fillAndOutline: {
           type: 'STATIC',
           options: {
             color: color
           }
         }
-      ]
+      }
     };
   }
 
@@ -46,17 +46,21 @@ export class VectorStyle {
   }
 
   getHexColor() {
-    const property = this._descriptor.properties.find(p => p.property === 'FillAndOutline');
-    return property.options.color;
+    return this._descriptor.properties.fillAndOutline.options.color;
   }
 
   setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
-    const color = this.getHexColor() || DEFAULT_COLOR;
-    mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-    mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
-    mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-    mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
-    mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
+
+    if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC) {
+      const color = this.getHexColor() || DEFAULT_COLOR;
+      mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
+      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
+      mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
+    } else {
+      console.warn('Should implement rendering of dynamic style type');
+    }
   }
 
   addMbPointsLayerAndSetMBPaintProperties(mbMap, sourceId, pointLayerId, temp) {

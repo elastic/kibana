@@ -15,22 +15,18 @@ import {
   EuiButtonToggle
 } from '@elastic/eui';
 
-const STYLE_TYPE = {
-  'DYNAMIC': 'Dynamic',
-  'STATIC': 'Static'
-};
 
 export class VectorStyleEditor extends React.Component {
 
   constructor() {
     super();
     this.state = {
-      type: STYLE_TYPE.STATIC
+      type: VectorStyle.STYLE_TYPE.STATIC
     };
   }
 
   _isDynamic() {
-    return this.state.type === STYLE_TYPE.DYNAMIC;
+    return this.state.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
   render() {
@@ -42,7 +38,7 @@ export class VectorStyleEditor extends React.Component {
 
     const onToggleChange = (e) => {
       this.setState({
-        type: e.target.checked ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC
+        type: e.target.checked ? VectorStyle.STYLE_TYPE.DYNAMIC : VectorStyle.STYLE_TYPE.STATIC
       });
     };
 
