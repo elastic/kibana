@@ -11,13 +11,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiColorPicker,
-  EuiKeyboardAccessible
+  EuiButtonToggle
 } from '@elastic/eui';
+
+
+const STYLE_TYPE = {
+  'DYNAMIC': 'Dynamic',
+  'STATIC': 'Static'
+};
 
 export class VectorStyleEditor extends React.Component {
 
   constructor() {
     super();
+    this.state = {
+      type: STYLE_TYPE.STATIC
+    };
+  }
+
+  _isDynamic() {
+    return this.state.type === STYLE_TYPE.DYNAMIC;
   }
 
   render() {
@@ -27,32 +40,53 @@ export class VectorStyleEditor extends React.Component {
       style = new VectorStyle(fallbackDescriptor);
     }
 
+    const onToggleChange = (e) => {
+      this.setState({
+        type: e.target.checked ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC
+      });
+    };
+
     const changeColor = (color) => {
       const fillAndOutlineDescriptor = VectorStyle.createDescriptor(color);
       this.props.handleStyleChange(fillAndOutlineDescriptor);
     };
     const selectedColor = style ? style.getHexColor() : VectorStyle.DEFAULT_COLOR_HEX;
+
+    const ColorSelector = this._isDynamic() ? (<DynamicColorSelection/>) :
+(<StaticColorSelection changeColor={changeColor} selectedColor={selectedColor} />);
     return (
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           Fill and outline
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiColorPicker
-            onChange={changeColor}
-            color={selectedColor}
+          <EuiButtonToggle
+            label={this._isDynamic() ? 'Dynamic' : 'Static'}
+            onChange={onToggleChange}
+            isSelected={this._isDynamic()}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <p className="kuiText">
-            <EuiKeyboardAccessible>
-              <a className="kuiLink" onClick={this.props.resetStyle}>
-                Reset
-              </a>
-            </EuiKeyboardAccessible>
-          </p>
+          {ColorSelector}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+}
+
+
+class StaticColorSelection extends React.Component {
+  render() {
+    return (<EuiColorPicker
+      onChange={this.props.changeColor}
+      color={this.props.selectedColor}
+    />);
+  }
+}
+
+
+class DynamicColorSelection extends React.Component {
+  render() {
+    return 'here be dynamic color selection';
   }
 }
