@@ -40,15 +40,24 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncData(startLoading, stopLoading) {
-    if (this._descriptor.data || this._descriptor.dataRequestToken) {
-      return;
+  async syncData(startLoading, stopLoading, dataFilters) {
+    const timeAware = await this._source.isTimeAware();
+    if (!timeAware) {
+      if (this._descriptor.data || this._descriptor.dataRequestToken) {
+        return;
+      }
+    } else {
+      if (this._descriptor.dataMeta && this._descriptor.dataMeta.timeFilters) {
+        if (dataFilters.timeFilters === this._descriptor.dataMeta.timeFilters) {
+          return;
+        }
+      }
     }
-    startLoading();
+    startLoading({ timeFilters: dataFilters.timeFilters });
     const data = await this._source.getGeoJson({
       layerId: this._descriptor.id,
       layerName: this._descriptor.label,
-    });
+    }, dataFilters);
     stopLoading(data);
   }
 

@@ -96,4 +96,7 @@ export class KibanaRegionmapSource extends VectorSource {
     return this._descriptor.name;
   }
 
+  async isTimeAware() {
+    return false;
+  }
 }

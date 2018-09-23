@@ -132,7 +132,7 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function startDataLoad(layerId, requestToken, meta) {
+export function startDataLoad(layerId, requestToken, meta = {}) {
   return ({
     meta,
     type: LAYER_DATA_LOAD_STARTED,

@@ -7,8 +7,6 @@
 import React, { Fragment } from 'react';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
-import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
-import { KibanaTilemapSource } from '../../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
 import {
@@ -211,7 +209,7 @@ export class AddLayerPanel extends React.Component {
 
   _renderFlyout() {
     return (
-      <EuiFlyout onClose={this.props.closeFlyout} style={{ maxWidth: 768 }}>
+      <EuiFlyout onClose={this.props.closeFlyout} size="s">
         <EuiFlyoutHeader>
           <EuiTitle size="l">
             <h2>Add layer</h2>
