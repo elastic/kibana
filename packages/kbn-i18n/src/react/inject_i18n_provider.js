@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { I18nProvider } from './provider';
 
-export {
-  intlShape,
-  FormattedDate,
-  FormattedTime,
-  FormattedRelative,
-  FormattedNumber,
-  FormattedPlural,
-  FormattedMessage,
-  FormattedHTMLMessage,
-} from 'react-intl';
+export const injectI18nProvider = WrappedComponent => {
+  const I18nProviderWrapper = props => {
+    return (
+      <I18nProvider>
+        <WrappedComponent {...props} />
+      </I18nProvider>
+    );
+  };
 
-export { I18nProvider } from './provider';
-export { injectI18nProvider } from './inject_i18n_provider';
-export { injectI18n } from './inject';
+  I18nProviderWrapper.PropTypes = WrappedComponent.PropTypes;
+
+  return I18nProviderWrapper;
+};
