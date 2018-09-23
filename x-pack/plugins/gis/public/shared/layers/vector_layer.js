@@ -7,29 +7,29 @@
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 
+
+const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
+let defaultColorIndex = 0;
+
 export class VectorLayer extends ALayer {
 
   static type = 'VECTOR';
 
   static createDescriptor(options) {
-    const vectorLayerDescriptor = super.createDescriptor(options);
-    vectorLayerDescriptor.type = VectorLayer.type;
-    vectorLayerDescriptor.style = {
-      ...vectorLayerDescriptor.style,
-      ...this._applyDefaultStyle()
-    };
-    return vectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options);
+    layerDescriptor.type = VectorLayer.type;
+    defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
+    if (!options.style) {
+      layerDescriptor.style = VectorStyle.createDescriptor(
+        {
+          type: VectorStyle.STYLE_TYPE.STATIC,
+          options: {
+            color: DEFAULT_COLORS[defaultColorIndex++]
+          }
+        });
+    }
+    return layerDescriptor;
   }
-
-  static _applyDefaultStyle = (() => {
-    const defaultColors = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-    let defaultColorIndex = 0;
-    return () => {
-      defaultColorIndex = defaultColorIndex >= defaultColors.length
-        ? 0 : defaultColorIndex;
-      return VectorStyle.createDescriptor(defaultColors[defaultColorIndex++]);
-    };
-  })();
 
   getSupportedStyles() {
     return [VectorStyle];

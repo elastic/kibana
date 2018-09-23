@@ -20,7 +20,6 @@ import {
   inspectorAdapters,
   SearchSource,
 } from '../../../kibana_services';
-import { VectorLayer } from '../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from '../../../../../../../src/ui/public/timefilter/timefilter';
@@ -119,16 +118,6 @@ export class ESSearchSource extends VectorSource {
     return geoJson;
   }
 
-  createDefaultLayer(options) {
-    return new VectorLayer({
-      layerDescriptor: VectorLayer.createDescriptor({
-        sourceDescriptor: this._descriptor,
-        ...options
-      }),
-      source: this
-    });
-  }
-
   getDisplayName() {
     return this._descriptor.indexPatternId;
   }
@@ -141,6 +130,7 @@ export class ESSearchSource extends VectorSource {
 }
 
 class Editor extends React.Component {
+
   static propTypes = {
     onSelect: PropTypes.func.isRequired,
   }

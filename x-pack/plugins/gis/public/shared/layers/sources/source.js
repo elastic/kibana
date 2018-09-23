@@ -7,6 +7,8 @@
 import React from 'react';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
+import { VectorLayer } from '../vector_layer';
+import { VectorStyle } from '../styles/vector_style';
 
 export class ASource {
 
@@ -47,6 +49,23 @@ export class TMSSource extends ASource {
 }
 
 export class VectorSource extends ASource {
+
+  _createDefaultLayerDescriptor(options) {
+    return VectorLayer.createDescriptor({
+      sourceDescriptor: this._descriptor,
+      ...options
+    });
+  }
+
+  createDefaultLayer(options) {
+    const layerDescriptor = this._createDefaultLayerDescriptor(options);
+    const style = new VectorStyle(layerDescriptor.style);
+    return new VectorLayer({
+      layerDescriptor: layerDescriptor,
+      source: this,
+      style: style
+    });
+  }
 
   async getNumberFieldNames() {
     console.warn('Should implement VectorSource#getNumberFields');

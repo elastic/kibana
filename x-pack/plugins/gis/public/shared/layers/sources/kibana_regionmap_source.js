@@ -11,7 +11,6 @@ import {
   EuiSelect,
   EuiSpacer
 } from '@elastic/eui';
-import { VectorLayer } from '../vector_layer';
 
 export class KibanaRegionmapSource extends VectorSource {
 
@@ -76,20 +75,6 @@ export class KibanaRegionmapSource extends VectorSource {
   async getGeoJson() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
     return this._getGeoJson(fileSource, fileSource.url);
-  }
-
-  _createDefaultLayerDescriptor(options) {
-    return VectorLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options
-    });
-  }
-
-  createDefaultLayer(options) {
-    return new VectorLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
-    });
   }
 
   getDisplayName() {

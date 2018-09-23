@@ -11,7 +11,6 @@ import {
   EuiSelect,
   EuiSpacer
 } from '@elastic/eui';
-import { VectorLayer } from '../vector_layer';
 import { GIS_API_PATH } from '../../../../common/constants';
 
 export class EMSFileSource extends VectorSource {
@@ -84,20 +83,6 @@ export class EMSFileSource extends VectorSource {
         </div>
       </Fragment>
     );
-  }
-
-  _createDefaultLayerDescriptor(options) {
-    return VectorLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options
-    });
-  }
-
-  createDefaultLayer(options) {
-    return new VectorLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
-    });
   }
 
   getDisplayName() {
