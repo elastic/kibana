@@ -12,7 +12,6 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
       return _.has(hit, `_source[${geoFieldName}]`);
     })
     .map(hit => {
-      console.log(hit);
       const value = _.get(hit, `_source[${geoFieldName}]`);
       let geometry;
       if (geoFieldType === 'geo_point') {

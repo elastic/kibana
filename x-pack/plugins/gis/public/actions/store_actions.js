@@ -262,23 +262,30 @@ export async function loadMapResources(dispatch) {
         "style": {},
         "type": "TILE"
       },
-      {
-        "id": "hqoqo",
-        "sourceDescriptor": { "name": "World Countries", "type": "EMS_FILE",
-          "format": "geojson" },
-        "visible": true,
-        "temporary": false,
-        "style": { "type": "VECTOR", "color": "#e6194b" },
-        "type": "VECTOR"
-      },
-      {
-        "id": "dx9uf",
-        "sourceDescriptor": { "type": "ES_GEOHASH_GRID", "esIndexPattern": "log*", "pointField": "geo.coordinates" },
-        "visible": true,
-        "temporary": false,
-        "style": { "type": "HEATMAP", "refinement": "coarse" },
-        "type": "GEOHASH_GRID"
-      }
+      // {
+      //   "id": "1pnwt",
+      //   "label": null,
+      //   "sourceDescriptor": {
+      //     "type": "ES_SEARCH",
+      //     "indexPatternId": "6e853b20-bbb5-11e8-88aa-9d8656848e00",
+      //     "geoField": "geometry",
+      //     "limit": 256
+      //   },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {
+      //     "type": "VECTOR",
+      //     "properties": {
+      //       fillAndOutline: {
+      //         type: 'STATIC',
+      //         options: {
+      //           color: "#e6194b"
+      //         }
+      //       }
+      //     }
+      //   },
+      //   "type": "VECTOR"
+      // }
     ]
   ));
 

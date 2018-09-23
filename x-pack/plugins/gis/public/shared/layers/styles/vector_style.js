@@ -41,7 +41,12 @@ export class VectorStyle {
   }
 
   getHexColorForFillAndOutline() {
-    return this._descriptor.properties.fillAndOutline.options.color;
+    try {
+      return this._descriptor.properties.fillAndOutline.options.color;
+    } catch(e) {
+      console.warn('vector-style descriptor is not inialized correctly');
+      return VectorStyle.DEFAULT_COLOR_HEX;
+    }
   }
 
   _getDataDrivenColor() {
@@ -70,7 +75,10 @@ export class VectorStyle {
 
   setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
 
-    if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC) {
+    if (
+      this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC ||
+      !this._descriptor.properties.fillAndOutline.type //todo: style-descriptors shouldn't be empty like this
+    ) {
       const color = this.getHexColorForFillAndOutline() || DEFAULT_COLOR;
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
@@ -90,7 +98,10 @@ export class VectorStyle {
   }
 
   addMbPointsLayerAndSetMBPaintProperties(mbMap, sourceId, pointLayerId, temp) {
-    if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC) {
+    if (
+      this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC ||
+      !this._descriptor.properties.fillAndOutline.type //todo: style-descriptors shouldn't be empty like this
+    ) {
       const pointLayer = mbMap.getLayer(pointLayerId);
       if (!pointLayer) {
         mbMap.addLayer({
@@ -104,11 +115,11 @@ export class VectorStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
-    } else {
-      console.warn('Should implement rendering of dynamic style type');
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', null);
+    } else if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
+      const color = this._getDataDrivenColor();
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
+      mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
+      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
     }
   }
 
