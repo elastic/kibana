@@ -69,7 +69,7 @@ export class StyleTabs extends React.Component {
           this.props.updateStyle(styleDescriptor);
         },
         style: seedStyle,
-        reset: () => this.props.reset()
+        resetStyle: () => this.props.reset()
       });
       return (
         <Fragment key={index}>

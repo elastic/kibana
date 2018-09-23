@@ -48,8 +48,13 @@ export class TMSSource extends ASource {
 
 export class VectorSource extends ASource {
 
+  async getNumberFieldNames() {
+    console.warn('Should implement VectorSource#getNumberFields');
+    return [];
+  }
+
   async getGeoJson() {
-    throw new Error('Should implement');
+    throw new Error('Should implement VectorSource#getGeoJson');
   }
 
   async _getGeoJson({ format, meta }, fetchUrl) {

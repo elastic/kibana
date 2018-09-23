@@ -5,13 +5,7 @@
  */
 
 import React from 'react';
-
-import {
-  EuiColorPicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiKeyboardAccessible,
-} from '@elastic/eui';
+import { VectorStyleEditor } from './components/vector_style_editor';
 
 const DEFAULT_COLOR = '#e6194b';
 
@@ -36,46 +30,16 @@ export class VectorStyle {
   }
 
   static getDisplayName() {
-    return 'Vector Adjustment';
+    return 'Vector Styles';
   }
 
-  static renderEditor({ handleStyleChange, style, reset }) {
-
-    if (style === null) {
-      const fallbackDescriptor = VectorStyle.createDescriptor(VectorStyle.DEFAULT_COLOR_HEX);
-      style = new VectorStyle(fallbackDescriptor);
-    }
-
-    const changeColor = (color) => {
-      const fillAndOutlineDescriptor = VectorStyle.createDescriptor(color);
-      handleStyleChange(fillAndOutlineDescriptor);
-    };
-    const selectedColor = style ? style.getHexColor() : VectorStyle.DEFAULT_COLOR_HEX;
-    return (
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiColorPicker
-            onChange={changeColor}
-            color={selectedColor}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <p className="kuiText">
-            <EuiKeyboardAccessible>
-              <a className="kuiLink" onClick={reset}>
-                Reset
-              </a>
-            </EuiKeyboardAccessible>
-          </p>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  static renderEditor({ handleStyleChange, style, reset: resetStyle }) {
+    return (<VectorStyleEditor handleStyleChange={handleStyleChange} seedStyle={style} resetStyle={resetStyle}/>);
   }
 
   getHexColor() {
     return this._descriptor.color;
   }
-
 
   setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
     const color = this.getHexColor() || DEFAULT_COLOR;

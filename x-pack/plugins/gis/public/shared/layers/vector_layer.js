@@ -22,7 +22,6 @@ export class VectorLayer extends ALayer {
   }
 
   static _applyDefaultStyle = (() => {
-    //todo: should follow fixed ordering, similar to POC
     const defaultColors = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
     let defaultColorIndex = 0;
     return () => {
@@ -39,6 +38,15 @@ export class VectorLayer extends ALayer {
   isLayerLoading() {
     return !!this._descriptor.dataDirty;
   }
+
+  async getOrdinalFields() {
+    //best effort to avoid PEBCAK
+    const numberFields = await this._source.getNumberFieldNames();
+    console.log('numberfield', numberFields);
+    return numberFields;
+  }
+
+
 
   async syncData(startLoading, stopLoading, dataFilters) {
     const timeAware = await this._source.isTimeAware();

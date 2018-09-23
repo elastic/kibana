@@ -36,12 +36,23 @@ export class ESSearchSource extends VectorSource {
       const layerSource = new ESSearchSource(layerConfig);
       onPreviewSource(layerSource);
     };
-
     return (<Editor onSelect={onSelect}/>);
   }
 
   constructor(descriptor) {
-    super({ type: ESSearchSource.type, ...descriptor });
+    super({
+      type: ESSearchSource.type,
+      indexPatternId: descriptor.indexPatternId,
+      geoField: descriptor.geoField,
+      limit: descriptor.limit
+    });
+    window._ess = this;
+  }
+
+  async getNumberFieldNames() {
+    const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    const numberFields = indexPattern.fields.byType.number;
+    return numberFields.map(f => f.name);
   }
 
   renderDetails() {
