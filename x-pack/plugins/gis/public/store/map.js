@@ -49,6 +49,7 @@ const INITIAL_STATE = {
 };
 
 export function map(state = INITIAL_STATE, action) {
+  window._state = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
     case REPLACE_LAYERLIST:

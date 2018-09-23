@@ -64,7 +64,7 @@ export class StyleTabs extends React.Component {
 
     const styleEditors = supportedStyles.map((style, index) => {
       const seedStyle = (style.canEdit(currentStyle)) ? currentStyle : null;
-      const styleEditor = style.renderEditor({
+      const styleEditor = this.props.layer.renderStyleEditor(style, {
         handleStyleChange: (styleDescriptor) => {
           this.props.updateStyle(styleDescriptor);
         },

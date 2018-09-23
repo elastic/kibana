@@ -74,8 +74,8 @@ export class ALayer {
     //no-op by default
   }
 
-  async syncDataToStyleChange() {
-    //no-op by default
+  renderStyleEditor(style, options) {
+    return style.renderEditor(options);
   }
 
 }

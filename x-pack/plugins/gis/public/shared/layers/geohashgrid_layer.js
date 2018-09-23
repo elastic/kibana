@@ -50,7 +50,17 @@ export class GeohashGridLayer extends ALayer {
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
     heatmapLayerDescriptor.type = GeohashGridLayer.type;
+    const defaultStyle = HeatmapStyle.createDescriptor('coarse');
+    heatmapLayerDescriptor.style = defaultStyle;
     return heatmapLayerDescriptor;
+  }
+
+  constructor({ layerDescriptor, source, style }) {
+    super({ layerDescriptor, source, style });
+    if (!style) {
+      const defaultStyle = HeatmapStyle.createDescriptor('coarse');
+      this._style = new HeatmapStyle(defaultStyle);
+    }
   }
 
   getSupportedStyles() {
@@ -111,7 +121,6 @@ export class GeohashGridLayer extends ALayer {
     if (!dataFilters.extent) {
       return;
     }
-
 
     const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)] + this._style.getPrecisionRefinementDelta();
 

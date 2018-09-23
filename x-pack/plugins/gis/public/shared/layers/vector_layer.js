@@ -42,11 +42,8 @@ export class VectorLayer extends ALayer {
   async getOrdinalFields() {
     //best effort to avoid PEBCAK
     const numberFields = await this._source.getNumberFieldNames();
-    console.log('numberfield', numberFields);
     return numberFields;
   }
-
-
 
   async syncData(startLoading, stopLoading, dataFilters) {
     const timeAware = await this._source.isTimeAware();
