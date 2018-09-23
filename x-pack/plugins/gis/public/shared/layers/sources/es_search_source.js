@@ -109,8 +109,8 @@ export class ESSearchSource extends VectorSource {
 
     let geoJson;
     try {
-      const field = indexPattern.fields.byName[this._descriptor.geoField];
-      geoJson = hitsToGeoJson(resp.hits.hits, field.name, field.type);
+      const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+      geoJson = hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
     } catch(error) {
       // TODO dispatch action to set error state in store
       return { type: 'FeatureCollection', features: [] };

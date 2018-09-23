@@ -12,6 +12,7 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
       return _.has(hit, `_source[${geoFieldName}]`);
     })
     .map(hit => {
+      console.log(hit);
       const value = _.get(hit, `_source[${geoFieldName}]`);
       let geometry;
       if (geoFieldType === 'geo_point') {
@@ -21,9 +22,20 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
       } else {
         throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
       }
+
+      const properties = {};
+      for (const fieldName in hit._source) {
+        if (hit._source.hasOwnProperty(fieldName)) {
+          if (fieldName !== geoFieldName) {
+            properties[fieldName] = hit._source[fieldName];
+          }
+        }
+      }
+
       return {
         type: 'Feature',
-        geometry: geometry
+        geometry: geometry,
+        properties: properties
       };
     });
 

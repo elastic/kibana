@@ -125,4 +125,11 @@ export class VectorLayer extends ALayer {
 
   }
 
+  renderStyleEditor(style, options) {
+    return style.renderEditor({
+      layer: this,
+      ...options
+    });
+  }
+
 }

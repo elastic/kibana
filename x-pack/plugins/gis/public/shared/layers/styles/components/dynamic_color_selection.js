@@ -6,8 +6,40 @@
 
 import React from 'react';
 
+import {
+  EuiComboBox
+} from '@elastic/eui';
+
 export class DynamicColorSelection extends React.Component {
+
+  constructor() {
+    super();
+    this.state = {
+      selectedOptions: []
+    };
+  }
+
   render() {
-    return 'here be dynamic color selection';
+    const options = this.props.fields.map(fieldName => {
+      return { label: fieldName };
+    });
+    const onChange = (selectedOptions) => {
+      this.setState({
+        selectedOptions: selectedOptions
+      });
+      if (selectedOptions.length) {
+        this.props.onChange(selectedOptions[0].label);
+      } else {
+        this.props.onChange(null);
+      }
+    };
+
+    return (<EuiComboBox
+      selectedOptions={this.state.selectedOptions}
+      options={options}
+      onChange={onChange}
+      singleSelection={{}}
+    />);
+
   }
 }

@@ -23,16 +23,11 @@ export class VectorStyle {
     return styleInstance.constructor === VectorStyle;
   }
 
-  static createDescriptor(color) {
+  static createDescriptor(fillAndOutlineDescriptor) {
     return {
       type: VectorStyle.type,
       properties: {
-        fillAndOutline: {
-          type: 'STATIC',
-          options: {
-            color: color
-          }
-        }
+        fillAndOutline: fillAndOutlineDescriptor
       }
     };
   }
@@ -41,42 +36,80 @@ export class VectorStyle {
     return 'Vector Style';
   }
 
-  static renderEditor({ handleStyleChange, style, reset: resetStyle }) {
-    return (<VectorStyleEditor handleStyleChange={handleStyleChange} seedStyle={style} resetStyle={resetStyle}/>);
+  static renderEditor({ handleStyleChange, style, reset: resetStyle, layer }) {
+    return (<VectorStyleEditor handleStyleChange={handleStyleChange} seedStyle={style} resetStyle={resetStyle} layer={layer}/>);
   }
 
-  getHexColor() {
+  getHexColorForFillAndOutline() {
     return this._descriptor.properties.fillAndOutline.options.color;
+  }
+
+  _getDataDrivenColor() {
+    if (this._descriptor.properties.fillAndOutline.options.field) {
+
+      return [
+        'interpolate',
+        ['linear'],
+        ['get', this._descriptor.properties.fillAndOutline.options.field],
+        0, '#F2F12D',
+        500000, '#EED322',
+        750000, '#E6B71E',
+        1000000, '#DA9C20',
+        2500000, '#CA8323',
+        5000000, '#B86B25',
+        7500000, '#A25626',
+        10000000, '#8B4225',
+        25000000, '#723122'
+      ];
+
+
+    } else {
+      return null;
+    }
   }
 
   setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
 
     if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC) {
-      const color = this.getHexColor() || DEFAULT_COLOR;
+      const color = this.getHexColorForFillAndOutline() || DEFAULT_COLOR;
+      mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
+      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
+      mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
+    } else if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
+      const color = this._getDataDrivenColor();
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
       mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
     } else {
-      console.warn('Should implement rendering of dynamic style type');
+      throw new Error('Style type not recognized');
     }
   }
 
   addMbPointsLayerAndSetMBPaintProperties(mbMap, sourceId, pointLayerId, temp) {
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    if (!pointLayer) {
-      mbMap.addLayer({
-        id: pointLayerId,
-        type: 'circle',
-        source: sourceId,
-        paint: {}
-      });
+    if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC) {
+      const pointLayer = mbMap.getLayer(pointLayerId);
+      if (!pointLayer) {
+        mbMap.addLayer({
+          id: pointLayerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {}
+        });
+      }
+      const color = this.getHexColorForFillAndOutline() || DEFAULT_COLOR;
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
+      mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
+      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
+    } else {
+      console.warn('Should implement rendering of dynamic style type');
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', null);
+      mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
+      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', null);
     }
-    const color = this.getHexColor() || DEFAULT_COLOR;
-    mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
-    mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
-    mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
   }
 
 }
