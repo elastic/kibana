@@ -99,7 +99,6 @@ export class ESSearchSource extends ASource {
       return { type: 'FeatureCollection', features: [] };
     }
 
-    console.log('get geojson', geoJson);
     return geoJson;
   }
 
