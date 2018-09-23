@@ -69,36 +69,27 @@ export class VectorLayer extends ALayer {
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
-
-    const fillLayerId = this.getId() +  '_fill';
-    const strokeLayerId = this.getId() +  '_line';
-    const pointLayerId = this.getId() +  '_circle';
-
     if (!mbSource) {
+      //todo: hack, but want to get some quick visual indication for points data
+      //cannot map single kibana layer to single mapbox source
       mbMap.addSource(this.getId(), {
         type: 'geojson',
         data: { 'type': 'FeatureCollection', 'features': [] }
       });
-
-
-      mbMap.addLayer({
-        id: fillLayerId,
-        type: 'fill',
-        source: this.getId(),
-        paint: {}
-      });
-      mbMap.addLayer({
-        id: strokeLayerId,
-        type: 'line',
-        source: this.getId(),
-        paint: {}
-      });
     }
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
-    const mbSourceAfter = mbMap.getSource(this.getId());
-    if (this._descriptor.data !== mbSourceAfter._data) {
-      mbSourceAfter.setData(this._descriptor.data);
+    const mbSourceAfterAdding = mbMap.getSource(this.getId());
+    if (this._descriptor.data !== mbSourceAfterAdding._data) {
+      //keep track of the on the data.
+      mbSourceAfterAdding.setData(this._descriptor.data);
+    }
+
+    if (this._style.isFillAndOutlineDynamic()) {
+      const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(this._descriptor.data);
+      if (shouldRefresh) {
+        mbSourceAfterAdding.setData(this._descriptor.data);
+      }
     }
 
     let isPointsOnly = true;
@@ -113,12 +104,13 @@ export class VectorLayer extends ALayer {
       isPointsOnly = false;
     }
 
+    const fillLayerId = this.getId() +  '_fill';
+    const strokeLayerId = this.getId() +  '_line';
+    const pointLayerId = this.getId() +  '_circle';
     if (isPointsOnly) {
-      //todo: hack, but want to get some quick visual indication for points data
-      //cannot map single kibana layer to single mapbox source
       this._style.addMbPointsLayerAndSetMBPaintProperties(mbMap, this.getId(), pointLayerId, this.isTemporary());
     } else {
-      this._style.setMBPaintProperties(mbMap, fillLayerId, strokeLayerId, this.isTemporary());
+      this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
     }
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');

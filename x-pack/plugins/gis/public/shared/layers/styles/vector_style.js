@@ -49,31 +49,90 @@ export class VectorStyle {
     }
   }
 
+  isFillAndOutlineDynamic() {
+    return this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+  }
+
+  enrichFeatureCollectionWithScaledProps(featureCollection) {
+
+    if (!featureCollection) {
+      return false;
+    }
+
+    if (!featureCollection.computed) {
+      featureCollection.computed = [];
+    }
+
+
+    if (!this._descriptor.properties.fillAndOutline.options.field) {
+      return;
+    }
+
+    if (featureCollection.computed.find(f => f === this._descriptor.properties.fillAndOutline.options.field)) {
+      return false;
+    }
+
+    const features = featureCollection.features;
+    if (!features.length) {
+      return false;
+    }
+    const fieldName = this._descriptor.properties.fillAndOutline.options.field;
+    let min = features[0].properties[fieldName];
+    let max = features[0].properties[fieldName];
+    for (let i = 1; i < features.length; i++) {
+      min = Math.min(min, features[i].properties[fieldName]);
+      max = Math.max(max, features[i].properties[fieldName]);
+    }
+
+    //scale to 0 -1
+    const propName = `__kbn__${fieldName}__`;
+    for (let i = 0; i < features.length; i++) {
+      features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
+    }
+    featureCollection.computed.push(fieldName);
+    return true;
+  }
+
   _getDataDrivenColor() {
     if (this._descriptor.properties.fillAndOutline.options.field) {
-
+      const targetName = `__kbn__${this._descriptor.properties.fillAndOutline.options.field}__`;
       return [
         'interpolate',
         ['linear'],
-        ['get', this._descriptor.properties.fillAndOutline.options.field],
-        0, '#F2F12D',
-        500000, '#EED322',
-        750000, '#E6B71E',
-        1000000, '#DA9C20',
-        2500000, '#CA8323',
-        5000000, '#B86B25',
-        7500000, '#A25626',
-        10000000, '#8B4225',
-        25000000, '#723122'
+        ['get', targetName],
+        0 / 8, '#F2F12D',
+        1 / 8, '#EED322',
+        2 / 8, '#E6B71E',
+        3 / 8, '#DA9C20',
+        4 / 8, '#CA8323',
+        5 / 8, '#B86B25',
+        6 / 8, '#A25626',
+        7 / 8, '#8B4225',
+        8 / 8, '#723122'
       ];
-
-
     } else {
       return null;
     }
   }
 
-  setMBPaintProperties(mbMap, fillLayerId, lineLayerId, pointLayerId, temp) {
+  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId, temp) {
+
+    if (!mbMap.getLayer(fillLayerId)) {
+      mbMap.addLayer({
+        id: fillLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {}
+      });
+    }
+    if (!mbMap.getLayer(lineLayerId)) {
+      mbMap.addLayer({
+        id: lineLayerId,
+        type: 'line',
+        source: sourceId,
+        paint: {}
+      });
+    }
 
     if (
       this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC ||
