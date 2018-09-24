@@ -16,12 +16,12 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
     label: 'Container Overview',
-    requires: 'docker',
+    requires: ['docker'],
     sections: [
       {
         id: InfraMetric.containerOverview,
         label: 'Overview',
-        requires: 'system',
+        requires: ['docker.cpu', 'docker.memory', 'docker.network'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
@@ -55,7 +55,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.containerCpuUsage,
         label: 'CPU Usage',
-        requires: 'docker.cpu',
+        requires: ['docker.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           stacked: true,
@@ -69,7 +69,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.containerMemory,
         label: 'Memory Usage',
-        requires: 'docker.memory',
+        requires: ['docker.memory'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           stacked: true,
@@ -83,7 +83,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.containerNetworkTraffic,
         label: 'Network Traffic',
-        requires: 'docker.network',
+        requires: ['docker.network'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bits,
@@ -98,7 +98,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.containerDiskIOOps,
         label: 'Disk IO (Ops)',
-        requires: 'docker.diskio',
+        requires: ['docker.diskio'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.number,
@@ -113,7 +113,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.containerDiskIOBytes,
         label: 'Disk IO (Bytes)',
-        requires: 'docker.diskio',
+        requires: ['docker.diskio'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bytes,

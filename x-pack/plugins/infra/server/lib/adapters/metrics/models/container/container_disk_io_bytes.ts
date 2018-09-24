@@ -12,7 +12,7 @@ export const containerDiskIOBytes: InfraMetricModelCreator = (
   interval
 ) => ({
   id: 'containerDiskIOBytes',
-  requires: 'docker.disk',
+  requires: ['docker.disk'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

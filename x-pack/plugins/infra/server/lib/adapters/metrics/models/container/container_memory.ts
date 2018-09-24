@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const containerMemory: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'containerMemory',
-  requires: 'docker.memory',
+  requires: ['docker.memory'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

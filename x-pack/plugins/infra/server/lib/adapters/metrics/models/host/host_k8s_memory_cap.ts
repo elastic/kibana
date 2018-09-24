@@ -9,7 +9,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 export const hostK8sMemoryCap: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'hostK8sMemoryCap',
   map_field_to: 'kubernetes.node.name',
-  requires: 'kubernetes.node',
+  requires: ['kubernetes.node'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

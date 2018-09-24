@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const hostFilesystem: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'hostFilesystem',
-  requires: 'system.filesystem',
+  requires: ['system.filesystem'],
   filter: 'system.filesystem.device_name:\\/*',
   index_pattern: indexPattern,
   time_field: timeField,

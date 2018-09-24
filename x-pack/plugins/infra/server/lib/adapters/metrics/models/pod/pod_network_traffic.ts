@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const podNetworkTraffic: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'podNetworkTraffic',
-  requires: 'kubernetes.pod',
+  requires: ['kubernetes.pod'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

@@ -42,7 +42,7 @@ export enum InfraMetricModelMetricType {
 
 export interface InfraMetricModel {
   id: string;
-  requires: string;
+  requires: string[];
   index_pattern: string;
   interval: string;
   time_field: string;

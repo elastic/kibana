@@ -16,12 +16,12 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'systemOverview',
     label: 'System Overview',
-    requires: 'system',
+    requires: ['system'],
     sections: [
       {
         id: InfraMetric.hostSystemOverview,
         label: 'System Overview',
-        requires: 'system',
+        requires: ['system.cpu', 'system.load', 'system.memory', 'system.network'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
@@ -56,7 +56,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostCpuUsage,
         label: 'CPU Usage',
-        requires: 'system.cpu',
+        requires: ['system.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           stacked: true,
@@ -77,7 +77,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostLoad,
         label: 'Load',
-        requires: 'system.load',
+        requires: ['system.load'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           seriesOverrides: {
@@ -90,7 +90,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostMemoryUsage,
         label: 'MemoryUsage',
-        requires: 'system.memory',
+        requires: ['system.memory'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           stacked: true,
@@ -106,7 +106,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostNetworkTraffic,
         label: 'Network Traffic',
-        requires: 'system.network',
+        requires: ['system.network'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bits,
@@ -123,12 +123,12 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'k8sOverview',
     label: 'Kubernetes Overview',
-    requires: 'kubernetes',
+    requires: ['kubernetes'],
     sections: [
       {
         id: InfraMetric.hostK8sOverview,
         label: 'Kuberntes Overview',
-        requires: 'kubernetes',
+        requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
@@ -163,7 +163,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostK8sCpuCap,
         label: 'Node CPU Capacity',
-        requires: 'kubernetes.node',
+        requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.abvNumber,
@@ -176,7 +176,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostK8sMemoryCap,
         label: 'Node Memory Capacity',
-        requires: 'kubernetes.node',
+        requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bytes,
@@ -189,7 +189,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostK8sDiskCap,
         label: 'Node Disk Capacity',
-        requires: 'kubernetes.node',
+        requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bytes,
@@ -202,7 +202,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.hostK8sPodCap,
         label: 'Node Pod Capacity',
-        requires: 'kubernetes.node',
+        requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.number,

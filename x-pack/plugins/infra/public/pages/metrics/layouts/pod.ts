@@ -16,12 +16,12 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'podOverview',
     label: 'Pod Overview',
-    requires: 'kubernetes',
+    requires: ['kubernetes'],
     sections: [
       {
         id: InfraMetric.podOverview,
         label: 'Pod Overview',
-        requires: 'kubernetes',
+        requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
@@ -55,7 +55,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.podCpuUsage,
         label: 'CPU Usage',
-        requires: 'kubernetes.pod',
+        requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.percent,
@@ -67,7 +67,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.podMemoryUsage,
         label: 'Memory Usage',
-        requires: 'kubernetes.pod',
+        requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.percent,
@@ -82,7 +82,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.podNetworkTraffic,
         label: 'Network Traffic',
-        requires: 'kubernetes.pod',
+        requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.bits,

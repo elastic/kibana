@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const containerDiskIOOps: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'containerDiskIOOps',
-  requires: 'docker.disk',
+  requires: ['docker.disk'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

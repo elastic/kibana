@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const hostNetworkTraffic: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'hostNetworkTraffic',
-  requires: 'system.network',
+  requires: ['system.network'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const containerOverview: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'containerOverview',
-  requires: 'docker',
+  requires: ['docker'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

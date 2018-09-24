@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const hostMemoryUsage: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'hostMemoryUsage',
-  requires: 'system.memory',
+  requires: ['system.memory'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

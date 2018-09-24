@@ -42,7 +42,7 @@ export interface InfraMetricLayoutVisualizationConfig {
 export interface InfraMetricLayoutSection {
   id: InfraMetric;
   label: string;
-  requires: string;
+  requires: string[];
   visConfig: InfraMetricLayoutVisualizationConfig;
   type: InfraMetricLayoutSectionType;
 }
@@ -50,7 +50,7 @@ export interface InfraMetricLayoutSection {
 export interface InfraMetricLayout {
   id: string;
   label: string;
-  requires: string;
+  requires: string[];
   sections: InfraMetricLayoutSection[];
 }
 

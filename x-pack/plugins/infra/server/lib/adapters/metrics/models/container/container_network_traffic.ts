@@ -12,7 +12,7 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
   interval
 ) => ({
   id: 'containerNetworkTraffic',
-  requires: 'docker.network',
+  requires: ['docker.network'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,

@@ -8,7 +8,7 @@ import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapt
 
 export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
   id: 'hostK8sOverview',
-  requires: 'kubernetes',
+  requires: ['kubernetes'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
