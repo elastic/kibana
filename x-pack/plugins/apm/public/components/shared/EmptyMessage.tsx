@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import React from 'react';
 
-function EmptyMessage({ heading, subheading, hideSubheading }) {
-  if (!subheading) {
-    subheading = 'Try another time range or reset the search filter.';
-  }
-
+function EmptyMessage({
+  heading = 'No data found.',
+  subheading = 'Try another time range or reset the search filter.',
+  hideSubheading = false
+}) {
   return (
     <EuiEmptyPrompt
       titleSize="s"
@@ -22,13 +21,5 @@ function EmptyMessage({ heading, subheading, hideSubheading }) {
   );
 }
 
-EmptyMessage.propTypes = {
-  heading: PropTypes.string,
-  hideSubheading: PropTypes.bool
-};
-
-EmptyMessage.defaultProps = {
-  hideSubheading: false
-};
-
+// tslint:disable-next-line:no-default-export
 export default EmptyMessage;
