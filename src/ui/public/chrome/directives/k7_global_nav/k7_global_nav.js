@@ -22,7 +22,6 @@ import { uiModules } from '../../../modules';
 import { Header } from './components/header';
 import './k7_global_nav.less';
 import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
-import { BreadcrumbsObservable } from './';
 
 const module = uiModules.get('kibana');
 
