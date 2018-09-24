@@ -8,6 +8,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -108,6 +109,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -213,6 +215,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -313,6 +316,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
