@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { FormsyEuiCodeEditor } from './code_editor';
 export { FormsyEuiFieldText } from './input';
 export { FormsyEuiPasswordText } from './password_input';
+export { FormsyEuiMultiFieldText } from './multi_input';
+export { FormsyEuiSelect } from './select';

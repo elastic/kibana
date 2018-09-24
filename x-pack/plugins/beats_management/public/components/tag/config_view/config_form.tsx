@@ -10,10 +10,13 @@ import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { YamlConfigSchema } from '../../../lib/lib';
-import { FormsyEuiFieldText, FormsyEuiPasswordText } from '../../inputs';
-import { FormsyEuiCodeEditor } from '../../inputs/code_editor';
-import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
-import { FormsyEuiSelect } from '../../inputs/select';
+import {
+  FormsyEuiCodeEditor,
+  FormsyEuiFieldText,
+  FormsyEuiMultiFieldText,
+  FormsyEuiPasswordText,
+  FormsyEuiSelect,
+} from '../../inputs';
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
   if (values && values.length > 0 && values instanceof Array) {
