@@ -378,11 +378,9 @@ export default function({ getService }: TestInvoker) {
           ),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
-          ),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -429,11 +427,9 @@ export default function({ getService }: TestInvoker) {
           ),
         },
         noType: {
-          description: 'all objects',
-          statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
-          ),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -480,11 +476,9 @@ export default function({ getService }: TestInvoker) {
           ),
         },
         noType: {
-          description: `forbidded can't find any types`,
-          statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
-          ),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
@@ -531,11 +525,9 @@ export default function({ getService }: TestInvoker) {
           ),
         },
         noType: {
-          description: `forbidded can't find any types`,
-          statusCode: 403,
-          response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
-          ),
+          description: 'bad request, type is required',
+          statusCode: 400,
+          response: expectTypeRequired,
         },
       },
     });
