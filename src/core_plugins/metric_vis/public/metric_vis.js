@@ -98,8 +98,7 @@ function MetricVisProvider(Private) {
           aggFilter: ['!geohash_grid', '!filter']
         }
       ])
-    },
-    responseHandler: 'tabify',
+    }
   });
 }
 

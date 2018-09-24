@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import uuid from 'uuid';
-
 import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
-import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
+import { savedObjectToRaw, rawToSavedObject, generateRawId } from '../../serialization';
 import * as errors from './errors';
 
 
@@ -36,9 +34,18 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = () => {},
+      migrator = { migrateDocument: (doc) => doc },
+      onBeforeWrite = () => { },
     } = options;
 
+    // It's important that we migrate documents / mark them as up-to-date
+    // prior to writing them to the index. Otherwise, we'll cause unecessary
+    // index migrations to run at Kibana startup, and those will probably fail
+    // due to invalidly versioned documents in the index.
+    //
+    // The migrator performs double-duty, and validates the documents prior
+    // to returning them.
+    this._migrator = migrator;
     this._index = index;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
@@ -54,37 +61,42 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationVersion=undefined]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      overwrite = false
+      migrationVersion,
+      overwrite = false,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
     try {
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        attributes,
+        migrationVersion,
+        updated_at: time,
+      });
+
+      const raw = savedObjectToRaw(migrated);
+
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: raw._id,
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+        body: raw._source,
       });
 
-      return {
-        id: trimIdPrefix(response._id, type),
-        type,
-        updated_at: time,
-        version: response._version,
-        attributes
-      };
+      return rawToSavedObject({
+        ...raw,
+        ...response,
+      });
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -98,7 +110,7 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
@@ -110,19 +122,23 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        updated_at: time,
+      });
+      const raw = savedObjectToRaw(migrated);
 
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
+            _id: raw._id,
             _type: this._type,
           }
         },
-        {
-          type: object.type,
-          updated_at: time,
-          [object.type]: object.attributes
-        }
+        raw._source,
       ];
     };
 
@@ -186,7 +202,7 @@ export class SavedObjectsRepository {
    */
   async delete(type, id) {
     const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -235,6 +251,10 @@ export class SavedObjectsRepository {
       fields,
     } = options;
 
+    if (!type) {
+      throw new TypeError(`options.type must be a string or an array of strings`);
+    }
+
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
     }
@@ -278,16 +298,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
-        return {
-          id: trimIdPrefix(hit._id, type),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-        };
-      }),
+      saved_objects: response.hits.hits.map(rawToSavedObject),
     };
   }
 
@@ -312,7 +323,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: generateRawId(object.type, object.id),
           _type: this._type,
         }))
       }
@@ -336,7 +347,8 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
+          attributes: doc._source[type],
+          migrationVersion: doc._source.migrationVersion,
         };
       })
     };
@@ -351,7 +363,7 @@ export class SavedObjectsRepository {
    */
   async get(type, id) {
     const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -371,7 +383,8 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: response._source[type],
+      migrationVersion: response._source.migrationVersion,
     };
   }
 
@@ -387,7 +400,7 @@ export class SavedObjectsRepository {
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+      id: generateRawId(type, id),
       type: this._type,
       index: this._index,
       version: options.version,
@@ -395,8 +408,8 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         doc: {
+          [type]: attributes,
           updated_at: time,
-          [type]: attributes
         }
       },
     });
@@ -430,10 +443,6 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
-  }
-
-  _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
   }
 
   _getCurrentTime() {

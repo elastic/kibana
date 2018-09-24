@@ -12,6 +12,7 @@ import React, {
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -135,6 +136,10 @@ export class CustomUrls extends Component {
       });
   }
 
+  closeEditor = () => {
+    this.setState({ editorOpen: false });
+  }
+
   render() {
     const {
       customUrls,
@@ -151,22 +156,25 @@ export class CustomUrls extends Component {
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
-        <CustomUrlList
-          job={this.props.job}
-          customUrls={customUrls}
-          setCustomUrls={this.setCustomUrls}
-        />
-
         {editorOpen === false ? (
-          <EuiButtonEmpty
-            onClick={() => this.editNewCustomUrl()}
-          >
-            Add custom URL
-          </EuiButtonEmpty>
+          <React.Fragment>
+            <EuiButton
+              size="s"
+              onClick={() => this.editNewCustomUrl()}
+            >
+              Add custom URL
+            </EuiButton>
+          </React.Fragment>
         ) : (
           <React.Fragment>
-            <EuiSpacer size="l" />
-            <EuiPanel className="ml-custom-url-editor">
+            <EuiPanel className="edit-custom-url-panel">
+              <EuiButtonIcon
+                color="text"
+                onClick={() => this.closeEditor()}
+                iconType="cross"
+                aria-label="Close custom URL editor"
+                className="close-editor-button"
+              />
               <CustomUrlEditor
                 customUrl={editorSettings}
                 setEditCustomUrl={this.setEditCustomUrl}
@@ -200,6 +208,12 @@ export class CustomUrls extends Component {
             </EuiPanel>
           </React.Fragment>
         )}
+        <EuiSpacer size="l" />
+        <CustomUrlList
+          job={this.props.job}
+          customUrls={customUrls}
+          setCustomUrls={this.setCustomUrls}
+        />
 
       </React.Fragment>
     );

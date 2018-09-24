@@ -14,6 +14,7 @@ const FADE_TIMEOUT_MS = 200;
 export const mlChartTooltipService = {
   element: null,
   fadeTimeout: null,
+  visible: false
 };
 
 mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }) {
@@ -21,6 +22,7 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
     return;
   }
 
+  this.visible = true;
   // if a previous fade out was happening, stop it
   if (this.fadeTimeout !== null) {
     clearTimeout(this.fadeTimeout);
@@ -64,6 +66,8 @@ mlChartTooltipService.hide = function () {
     return;
   }
 
+  this.visible = false;
+
   this.element.css({
     opacity: '0',
   });
@@ -71,7 +75,9 @@ mlChartTooltipService.hide = function () {
   // after the fade out transition has finished, set the display to
   // none so it doesn't block any mouse events underneath it.
   this.fadeTimeout = setTimeout(() => {
-    this.element.css('display', 'none');
+    if (this.visible === false) {
+      this.element.css('display', 'none');
+    }
     this.fadeTimeout = null;
   }, FADE_TIMEOUT_MS);
 };
