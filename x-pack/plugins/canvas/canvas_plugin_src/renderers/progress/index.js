@@ -13,23 +13,10 @@ export const progress = () => ({
   help: 'Reveal a percentage of an element',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const {
-      shape,
-      value,
-      max,
-      valueColor,
-      barColor,
-      valueWeight,
-      barWeight,
-      label,
-      labelPosition,
-      font,
-    } = config;
+    const { shape, value, max, valueColor, barColor, valueWeight, barWeight, label, font } = config;
     const percent = value / max;
     const shapeDef = shapes[shape];
     const offset = Math.max(valueWeight, barWeight);
-
-    console.log({ valueWeight, barWeight });
 
     if (shapeDef) {
       const parser = new DOMParser();
@@ -41,16 +28,18 @@ export const progress = () => ({
         .getAttribute('viewBox')
         .split(' ')
         .map(v => parseInt(v, 10));
-      let [minX, minY] = initialViewBox;
-      const [, , width, height] = initialViewBox;
-      if (shape !== 'horizontalBar') minX -= offset / 2;
-      if (shape !== 'verticalBar') minY -= offset / 2;
-      let offsetWidth = width + offset;
-      let offsetHeight = height + offset;
+      let [minX, minY, width, height] = initialViewBox;
+
+      if (shape !== 'horizontalBar') {
+        minX -= offset / 2;
+        width += offset;
+      }
+      if (shape !== 'verticalBar') {
+        minY -= offset / 2;
+        height += offset;
+      }
 
       shapeSvg.setAttribute('className', 'canvasProgress');
-      shapeSvg.setAttribute('width', domNode.offsetWidth);
-      shapeSvg.setAttribute('height', domNode.offsetHeight);
 
       const svgId = getId('svg');
       shapeSvg.id = svgId;
@@ -73,97 +62,40 @@ export const progress = () => ({
 
       shapeSvg.appendChild(value);
 
-      if (label) {
-        const labelText = document.createTextNode(label);
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      const [text] = shapeSvg.getElementsByTagName('text');
+
+      if (label && text) {
+        text.textContent = label;
         text.setAttribute('className', 'canvasProgress__label');
+
+        if (shape === 'horizontalPill')
+          text.setAttribute('x', parseInt(text.getAttribute('x'), 10) + offset / 2);
+        if (shape === 'verticalPill')
+          text.setAttribute('y', parseInt(text.getAttribute('y'), 10) - offset / 2);
+
         Object.assign(text.style, font.spec);
-
-        text.appendChild(labelText);
         shapeSvg.appendChild(text);
-
         domNode.appendChild(shapeSvg);
 
-        const { width: labelWidth, height: labelHeight } = document
-          .getElementById(svgId)
-          .lastChild.getBBox();
+        const { width: labelWidth, height: labelHeight } = text.getBBox();
 
-        let labelX;
-        let labelY;
-        let textAnchor;
-        let dominantBaseline;
-
-        switch (labelPosition) {
-          case 'center':
-            textAnchor = 'middle';
-            dominantBaseline = 'central';
-            labelX = width / 2;
-            labelY = height / 2;
-
-            if (labelWidth > offsetWidth) {
-              minX = -labelWidth / 2;
-              offsetWidth = labelWidth;
-            }
-            break;
-          case 'above':
-            textAnchor = 'middle';
-            dominantBaseline = 'text-after-edge';
-            labelX = width / 2;
-            labelY = shape === 'verticalBar' ? 0 : -offset / 2;
-            minY -= labelHeight;
-            offsetHeight += labelHeight;
-
-            if (labelWidth > offsetWidth) {
-              minX = -labelWidth / 2;
-              offsetWidth = labelWidth;
-            }
-            break;
-          case 'below':
-            textAnchor = 'middle';
-            dominantBaseline = 'text-before-edge';
-            labelX = width / 2;
-            labelY = shape === 'verticalBar' ? height : height + offset / 2;
-            offsetHeight += labelHeight;
-
-            if (labelWidth > offsetWidth) {
-              minX = -labelWidth / 2;
-              offsetWidth = labelWidth;
-            }
-            break;
-          case 'left':
-            textAnchor = 'end';
-            dominantBaseline = 'central';
-            labelX = shape === 'horizontalBar' ? 0 : -offset / 2;
-            labelY = height / 2;
-            minX -= labelWidth;
-            offsetWidth += labelWidth;
-
-            if (labelHeight > offsetHeight) {
-              minY = -labelHeight / 2;
-              offsetHeight = labelHeight;
-            }
-            break;
-          case 'right':
-            textAnchor = 'start';
-            dominantBaseline = 'central';
-            labelX = shape === 'horizontalBar' ? width : width + offset / 2;
-            labelY = labelY = height / 2;
-            offsetWidth += labelWidth;
-
-            if (labelHeight > offsetHeight) {
-              minY = -labelHeight / 2;
-              offsetHeight = labelHeight;
-            }
-            break;
+        if (shape === 'horizontalBar' || shape === 'horizontalPill') {
+          text.setAttribute('x', parseInt(text.getAttribute('x'), 10));
+          width += labelWidth;
         }
-
-        text.setAttribute('text-anchor', textAnchor);
-        text.setAttribute('dominant-baseline', dominantBaseline);
-        text.setAttribute('x', labelX);
-        text.setAttribute('y', labelY);
+        if (shape === 'verticalBar' || shape === 'verticalPill') {
+          if (labelWidth > width) {
+            minX = -labelWidth / 2;
+            width = labelWidth;
+          }
+          minY -= labelHeight;
+          height += labelHeight;
+        }
       }
 
-      shapeSvg.setAttribute('viewBox', [minX, minY, offsetWidth, offsetHeight].join(' '));
+      shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
+      shapeSvg.setAttribute('width', domNode.offsetWidth);
+      shapeSvg.setAttribute('height', domNode.offsetHeight);
 
       if (domNode.firstChild) domNode.removeChild(domNode.firstChild);
       domNode.appendChild(shapeSvg);

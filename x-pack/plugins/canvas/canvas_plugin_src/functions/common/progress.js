@@ -55,11 +55,6 @@ export const progress = () => ({
       help: `Set true/false to show/hide label or provide a string to display as the label`,
       default: true,
     },
-    labelPosition: {
-      type: ['string'],
-      help: 'Set the position of the label in respect to the shape',
-      default: 'center',
-    },
     font: {
       types: ['style'],
       help: 'Font settings for the label. Technically you can stick other styles in here too!',
@@ -67,17 +62,8 @@ export const progress = () => ({
     },
   },
   fn: (value, args) => {
-    const labelPositions = ['center', 'above', 'below', 'left', 'right'];
     if (args.max <= 0) throw new Error(`'max' must be greater than 0`);
     if (value > args.max || value < 0) throw new Error(`Context must be between 0 and ${args.max}`);
-
-    if (args.labelPosition && !labelPositions.includes(args.labelPosition)) {
-      throw new Error(
-        `'labelPosition' must be ${labelPositions
-          .map((position, i) => (i === labelPositions.length - 1 ? `or ${position}` : position))
-          .join(', ')}`
-      );
-    }
 
     let label = '';
     if (args.label) label = typeof args.label === 'string' ? args.label : `${value}`;

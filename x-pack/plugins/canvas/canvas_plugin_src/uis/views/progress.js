@@ -15,11 +15,13 @@ export const progress = () => ({
   args: [
     {
       name: 'shape',
-      displayName: 'Select a Shape',
-      argType: 'shape',
-      help: 'A basic shape',
+      argType: 'select',
       options: {
-        shapes,
+        choices: Object.keys(shapes).map(key => ({
+          value: key,
+          //turns camel into title case
+          name: key[0].toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+        })),
       },
     },
     {
@@ -63,22 +65,6 @@ export const progress = () => ({
       help: `Set true/false to show/hide label or provide a string to display as the label`,
       argType: 'toggle',
       default: 'true',
-    },
-    {
-      name: 'labelPosition',
-      displayName: 'Label Position',
-      help: `Set the position of the label`,
-      argType: 'select',
-      default: 'center',
-      options: {
-        choices: [
-          { value: 'center', name: 'Center' },
-          { value: 'above', name: 'Above' },
-          { value: 'below', name: 'Below' },
-          { value: 'left', name: 'On the left' },
-          { value: 'right', name: 'On the right' },
-        ],
-      },
     },
     {
       name: 'font',

@@ -98,18 +98,33 @@ describe('progress', () => {
       });
     });
 
-    describe('weight', () => {
+    describe('valueWeight', () => {
       it('sets the thickness of the bars', () => {
         const result = fn(value, {
-          weight: 100,
+          valuWeight: 100,
         });
 
-        expect(result.value).to.have.property('weight', 100);
+        expect(result.value).to.have.property('valuWeight', 100);
       });
 
       it(`defaults to 20`, () => {
         const result = fn(value);
-        expect(result.value).to.have.property('weight', 20);
+        expect(result.value).to.have.property('barWeight', 20);
+      });
+    });
+
+    describe('barWeight', () => {
+      it('sets the thickness of the bars', () => {
+        const result = fn(value, {
+          barWeight: 50,
+        });
+
+        expect(result.value).to.have.property('barWeight', 50);
+      });
+
+      it(`defaults to 20`, () => {
+        const result = fn(value);
+        expect(result.value).to.have.property('barWeight', 20);
       });
     });
 
@@ -130,38 +145,6 @@ describe('progress', () => {
       it('defaults to true which sets the context as the label', () => {
         const result = fn(value);
         expect(result.value).to.have.property('label', '0.33');
-      });
-    });
-
-    describe('labelPosition', () => {
-      it('sets the position of the label', () => {
-        let result = fn(value, { labelPosition: 'center' });
-        expect(result.value).to.have.property('labelPosition', 'center');
-
-        result = fn(value, { labelPosition: 'above' });
-        expect(result.value).to.have.property('labelPosition', 'above');
-
-        result = fn(value, { labelPosition: 'below' });
-        expect(result.value).to.have.property('labelPosition', 'below');
-
-        result = fn(value, { labelPosition: 'left' });
-        expect(result.value).to.have.property('labelPosition', 'left');
-
-        result = fn(value, { labelPosition: 'right' });
-        expect(result.value).to.have.property('labelPosition', 'right');
-      });
-
-      it(`defaults to 'center'`, () => {
-        const result = fn(value);
-        expect(result.value).to.have.property('labelPosition', 'center');
-      });
-
-      it('throws if given an invalid position', () => {
-        expect(fn)
-          .withArgs(value, { labelPosition: 'foo' })
-          .to.throwException(e => {
-            expect(e.message).to.be(`'labelPosition' must be center, above, below, left, or right`);
-          });
       });
     });
 

@@ -13,7 +13,6 @@ export const ShapePreview = ({ shape }) => {
   const [shapeSvg] = parser.parseFromString(shape, 'image/svg+xml').getElementsByTagName('svg');
   shapeSvg.setAttribute('fill', 'none');
   shapeSvg.setAttribute('stroke', 'black');
-  shapeSvg.setAttribute('stroke-width', weight);
 
   const initialViewBox = shapeSvg
     .getAttribute('viewBox')
