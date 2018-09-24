@@ -8,7 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { MemoryRouter } from 'react-router-dom';
-import List from '../index';
+import { ServiceList } from '../index';
 import props from './props.json';
 import {
   mountWithRouterAndStore,
@@ -25,7 +25,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MemoryRouter>
-        <List items={[]} />
+        <ServiceList items={[]} />
       </MemoryRouter>,
       storeState
     );
@@ -36,7 +36,7 @@ describe('ErrorGroupOverview -> List', () => {
   it('should render with data', () => {
     const storeState = { location: {} };
     const wrapper = mountWithRouterAndStore(
-      <List items={props.items} />,
+      <ServiceList items={props.items} />,
       storeState
     );
 
