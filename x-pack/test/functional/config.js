@@ -17,6 +17,7 @@ import {
   WatcherPageProvider,
   ReportingPageProvider,
   SpaceSelectorPageProvider,
+  AccountSettingProvider,
 } from './page_objects';
 
 import {
@@ -109,6 +110,7 @@ export default async function ({ readConfigFile }) {
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
       security: SecurityPageProvider,
+      accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
       logstash: LogstashPageProvider,
       graph: GraphPageProvider,

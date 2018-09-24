@@ -12,15 +12,15 @@ export default function (kibana) {
         title: '<%= startCase(name) %>',
         description: '<%= description %>',
         main: 'plugins/<%= snakeCase(name) %>/app',
-        <%_ if (generateScss) { -%>
-        styleSheetPath: require('path').resolve(__dirname, 'public/app.scss'),
-        <%_ } -%>
       },
       <%_ } -%>
       <%_ if (generateHack) { -%>
       hacks: [
         'plugins/<%= snakeCase(name) %>/hack'
       ]
+      <%_ } -%>
+      <%_ if (generateScss) { -%>
+      styleSheetPaths: require('path').resolve(__dirname, 'public/app.scss'),
       <%_ } -%>
     },
 
