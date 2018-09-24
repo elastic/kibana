@@ -88,6 +88,7 @@
   "dependencies": {
     "@elastic/datemath": "^4.0.2",
     "@elastic/eui": "4.0.1",
+    "@elastic/lodash": "^3.10.1-kibana1",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -135,7 +136,6 @@
     "joi": "6.10.1",
     "jquery": "^3.3.1",
     "jstimezonedetect": "1.0.5",
-    "lodash": "git://github.com/kobelb/lodash.git#3.10.2-npm",
     "lodash.clone": "^4.5.0",
     "lodash.keyby": "^4.6.0",
     "lodash.lowercase": "^4.3.0",

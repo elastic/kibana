@@ -121,6 +121,10 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
+"@elastic/lodash@^3.10.1-kibana1":
+  version "3.10.1-kibana1"
+  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana1.tgz#9baa52c296ec06a52461f8516bb94172ef53a7fe"
+
 "@elastic/node-crypto@0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
@@ -8723,10 +8727,6 @@ lodash@^4.0.0, lodash@^4.17.10:
 lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.4, lodash@~4.17.5:
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
-
-"lodash@git://github.com/kobelb/lodash.git#3.10.2-npm":
-  version "3.10.2"
-  resolved "git://github.com/kobelb/lodash.git#f3969c402203ec22bd6b1dae3841c73df134e7db"
 
 lodash@~4.3.0:
   version "4.3.0"
