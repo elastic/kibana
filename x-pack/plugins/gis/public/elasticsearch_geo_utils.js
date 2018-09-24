@@ -112,3 +112,48 @@ export function geoShapeToGeometry(value) {
   return geoJson;
 }
 
+export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
+  // TODO this is not a complete implemenation. Need to handle other cases:
+  // 1) bounds are all east of 180
+  // 2) bounds are all west of -180
+  const noWrapMapExtent = {
+    min_lon: mapExtent.min_lon < -180 ? -180 : mapExtent.min_lon,
+    min_lat: mapExtent.min_lat,
+    max_lon: mapExtent.max_lon > 180 ? 180 : mapExtent.max_lon,
+    max_lat: mapExtent.max_lat
+  };
+
+  if (geoFieldType === 'geo_point') {
+    return {
+      geo_bounding_box: {
+        [geoFieldName]: {
+          top_left: {
+            lat: noWrapMapExtent.max_lat,
+            lon: noWrapMapExtent.min_lon
+          },
+          bottom_right: {
+            lat: noWrapMapExtent.min_lat,
+            lon: noWrapMapExtent.max_lon
+          }
+        }
+      }
+    };
+  } else if (geoFieldType === 'geo_shape') {
+    return {
+      geo_shape: {
+        [geoFieldName]: {
+          shape: {
+            type: 'envelope',
+            coordinates: [
+              [noWrapMapExtent.min_lon, noWrapMapExtent.max_lat],
+              [noWrapMapExtent.max_lon, noWrapMapExtent.min_lat]
+            ]
+          },
+          relation: 'INTERSECTS'
+        }
+      }
+    };
+  } else {
+    throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
+  }
+}

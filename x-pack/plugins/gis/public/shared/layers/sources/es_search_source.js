@@ -12,6 +12,7 @@ import { VectorSource } from './source';
 import {
   EuiFormRow,
   EuiFieldNumber,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
@@ -20,7 +21,7 @@ import {
   inspectorAdapters,
   SearchSource,
 } from '../../../kibana_services';
-import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
+import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from '../../../../../../../src/ui/public/timefilter/timefilter';
 
@@ -43,7 +44,8 @@ export class ESSearchSource extends VectorSource {
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
-      limit: descriptor.limit
+      limit: descriptor.limit,
+      filterByMapBounds: descriptor.filterByMapBounds
     });
     window._ess = this;
   }
@@ -82,16 +84,32 @@ export class ESSearchSource extends VectorSource {
       return { type: 'FeatureCollection', features: [] };
     }
 
+    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    if (!geoField) {
+      // TODO dispatch action to set error state in store
+      return { type: 'FeatureCollection', features: [] };
+    }
+
+    inspectorAdapters.requests.resetRequest(layerId);
+    let inspectorRequest;
     let resp;
     try {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
+      const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
-        return timefilter.createFilter(indexPattern, searchFilters.timefilter);
+        const filters = [];
+        if (this.filterByMapBounds()) {
+          filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
+        }
+        if (isTimeAware) {
+          filters.push(timefilter.createFilter(indexPattern, searchFilters.timefilter));
+        }
+        return filters;
       });
-      inspectorAdapters.requests.resetRequest(layerId);
-      const inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
+
+      inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
       searchSource.getSearchRequestBody().then(body => {
         inspectorRequest.json(body);
@@ -101,14 +119,13 @@ export class ESSearchSource extends VectorSource {
         .stats(getResponseInspectorStats(searchSource, resp))
         .ok({ json: resp });
     } catch(error) {
-      console.error(error);
+      inspectorRequest.error({ error });
       // TODO dispatch action to set error state in store
       return { type: 'FeatureCollection', features: [] };
     }
 
     let geoJson;
     try {
-      const geoField = indexPattern.fields.byName[this._descriptor.geoField];
       geoJson = hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
     } catch(error) {
       // TODO dispatch action to set error state in store
@@ -143,6 +160,7 @@ class Editor extends React.Component {
       geoField: '',
       selectedFields: [],
       limit: DEFAULT_LIMIT,
+      filterByMapBounds: true,
     };
   }
 
@@ -211,17 +229,25 @@ class Editor extends React.Component {
     }, this.previewLayer);
   }
 
+  onFilterByMapBoundsChange = e => {
+    this.setState({
+      filterByMapBounds: e.target.checked,
+    }, this.previewLayer);
+  };
+
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
-      limit
+      limit,
+      filterByMapBounds,
     } = this.state;
     if (indexPatternId && geoField) {
       this.props.onSelect({
         indexPatternId,
         geoField,
         limit: limit ? limit : DEFAULT_LIMIT,
+        filterByMapBounds,
       });
     }
   }
@@ -263,6 +289,14 @@ class Editor extends React.Component {
             value={this.state.limit}
             onChange={this.onLimitChange}
             aria-label="Limit"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label="Filter by map bounds"
+            checked={this.state.filterByMapBounds}
+            onChange={this.onFilterByMapBoundsChange}
           />
         </EuiFormRow>
 

@@ -40,6 +40,10 @@ export class ASource {
     console.warn('Source should implement Source#getDisplayName');
     return '';
   }
+
+  filterByMapBounds() {
+    return _.get(this._descriptor, 'filterByMapBounds', false);
+  }
 }
 
 export class TMSSource extends ASource {
