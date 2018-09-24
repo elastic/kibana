@@ -43,6 +43,8 @@ function getExplorerSwimlaneMocks() {
   };
 }
 
+const mockChartWidth = 800;
+
 describe('ExplorerSwimlane', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -59,7 +61,7 @@ describe('ExplorerSwimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
     const wrapper = mount(<ExplorerSwimlane
-      chartWidth={800}
+      chartWidth={mockChartWidth}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mocks.swimlaneData}
       swimlaneType="overall"
@@ -84,7 +86,7 @@ describe('ExplorerSwimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
 
     const wrapper = mount(<ExplorerSwimlane
-      chartWidth={800}
+      chartWidth={mockChartWidth}
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mockOverallSwimlaneData}
       swimlaneType="overall"
