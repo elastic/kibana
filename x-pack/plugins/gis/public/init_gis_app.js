@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import {
   uiModules
 } from 'ui/modules';
@@ -16,6 +17,8 @@ import { getStore } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
@@ -50,6 +53,29 @@ export function initGisApp(resolve) {
           Inspector.open(inspectorAdapters, {
             title: 'Layer requests'
           });
+        }
+      }, {
+        key: 'save',
+        description: 'Save Visualization',
+        testId: 'visualizeSaveButton',
+        run: async () => {
+          const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+            return new Promise(resolve => {
+              console.log({ newTitle, newCopyOnSave,
+                isTitleDuplicateConfirmed, onTitleDuplicate });
+              resolve({ id: 'id' });
+            });
+          };
+
+          const saveModal = (
+            <SavedObjectSaveModal
+              onSave={onSave}
+              onClose={() => {}}
+              title={'Save map settings'}
+              showCopyOnSave={false}
+              objectType="visualization"
+            />);
+          showSaveModal(saveModal);
         }
       }];
       timefilter.enableTimeRangeSelector();
