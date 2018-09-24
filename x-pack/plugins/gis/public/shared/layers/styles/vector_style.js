@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { VectorStyleEditor } from './components/vector_style_editor';
+import React, { Fragment } from 'react';
+import { VectorStyleColorEditor } from './components/vector_style_color_editor';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem
+} from '@elastic/eui';
 
 const DEFAULT_COLOR = '#e6194b';
 
@@ -23,11 +28,11 @@ export class VectorStyle {
     return styleInstance.constructor === VectorStyle;
   }
 
-  static createDescriptor(fillAndOutlineDescriptor) {
+  static createDescriptor(propertyType, propertyValue) {
     return {
       type: VectorStyle.type,
       properties: {
-        fillAndOutline: fillAndOutlineDescriptor
+        [propertyType]: propertyValue
       }
     };
   }
@@ -36,21 +41,52 @@ export class VectorStyle {
     return 'Vector Style';
   }
 
-  static renderEditor({ handleStyleChange, style, reset: resetStyle, layer }) {
-    return (<VectorStyleEditor handleStyleChange={handleStyleChange} seedStyle={style} resetStyle={resetStyle} layer={layer}/>);
+  static renderEditor({ handleStyleChange, style, layer }) {
+
+
+    const handlePropertyChange = (propertyName, settings) => {
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(propertyName, settings);
+      handleStyleChange(vectorStyleDescriptor);
+    };
+
+    return (
+      <Fragment>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <VectorStyleColorEditor
+              property={'fillColor'}
+              name={"Fill"}
+              handlePropertyChange={handlePropertyChange}
+              seedStyle={style}
+              layer={layer}
+            />
+            {/*<VectorStyleColorEditor*/}
+            {/*property={'outlineColor'}*/}
+            {/*name={"Outline"}*/}
+            {/*handleStyleChange={handlePropertyChange}*/}
+            {/*seedStyle={style}*/}
+            {/*layer={layer}*/}
+            {/*/>*/}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    );
   }
 
-  getHexColorForFillAndOutline() {
-    try {
-      return this._descriptor.properties.fillAndOutline.options.color;
-    } catch(e) {
-      console.warn('vector-style descriptor is not inialized correctly');
-      return VectorStyle.DEFAULT_COLOR_HEX;
+  getHexColor(colorProperty) {
+
+    if (!this._descriptor.properties[colorProperty]) {
+      return null;
     }
+
+    return this._descriptor.properties[colorProperty].options.color;
   }
 
-  isFillAndOutlineDynamic() {
-    return this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+  isPropertyDynamic(property) {
+    if (!this._descriptor.properties[property]) {
+      return false;
+    }
+    return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
   enrichFeatureCollectionWithScaledProps(featureCollection) {
@@ -64,11 +100,11 @@ export class VectorStyle {
     }
 
 
-    if (!this._descriptor.properties.fillAndOutline.options.field) {
+    if (!this._descriptor.properties.fillColor.options.field) {
       return;
     }
 
-    if (featureCollection.computed.find(f => f === this._descriptor.properties.fillAndOutline.options.field)) {
+    if (featureCollection.computed.find(f => f === this._descriptor.properties.fillColor.options.field)) {
       return false;
     }
 
@@ -76,7 +112,7 @@ export class VectorStyle {
     if (!features.length) {
       return false;
     }
-    const fieldName = this._descriptor.properties.fillAndOutline.options.field;
+    const fieldName = this._descriptor.properties.fillColor.options.field;
     let min = features[0].properties[fieldName];
     let max = features[0].properties[fieldName];
     for (let i = 1; i < features.length; i++) {
@@ -93,9 +129,14 @@ export class VectorStyle {
     return true;
   }
 
-  _getDataDrivenColor() {
-    if (this._descriptor.properties.fillAndOutline.options.field) {
-      const targetName = `__kbn__${this._descriptor.properties.fillAndOutline.options.field}__`;
+  _getDataDrivenColor(property) {
+
+    if (!this._descriptor.properties[property]) {
+      return null;
+    }
+
+    if (this._descriptor.properties[property].options.field) {
+      const targetName = `__kbn__${this._descriptor.properties[property].options.field}__`;
       return [
         'interpolate',
         ['linear'],
@@ -134,51 +175,55 @@ export class VectorStyle {
       });
     }
 
-    if (
-      this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC ||
-      !this._descriptor.properties.fillAndOutline.type //todo: style-descriptors shouldn't be empty like this
-    ) {
-      const color = this.getHexColorForFillAndOutline() || DEFAULT_COLOR;
+    if (this._descriptor.properties.fillColor) {
+      let color;
+      if (
+        this._descriptor.properties.fillColor.type === VectorStyle.STYLE_TYPE.STATIC
+      ) {
+        color = this.getHexColor('fillColor') || DEFAULT_COLOR;
+      } else if (this._descriptor.properties.fillColor.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
+        color = this._getDataDrivenColor('fillColor');
+      } else {
+        throw new Error(`Style type not recognized: ${this._descriptor.properties.fillColor.type}`);
+      }
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
-      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
-      mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
-    } else if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
-      const color = this._getDataDrivenColor();
-      mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
-      mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
-      mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
     } else {
-      throw new Error('Style type not recognized');
+      mbMap.setPaintProperty(fillLayerId, 'fill-color', null);
+      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
     }
   }
 
-  addMbPointsLayerAndSetMBPaintProperties(mbMap, sourceId, pointLayerId, temp) {
-    if (
-      this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.STATIC ||
-      !this._descriptor.properties.fillAndOutline.type //todo: style-descriptors shouldn't be empty like this
-    ) {
-      const pointLayer = mbMap.getLayer(pointLayerId);
-      if (!pointLayer) {
-        mbMap.addLayer({
-          id: pointLayerId,
-          type: 'circle',
-          source: sourceId,
-          paint: {}
-        });
+  setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId, temp) {
+
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    if (!pointLayer) {
+      mbMap.addLayer({
+        id: pointLayerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {}
+      });
+    }
+
+    if (this._descriptor.properties.fillColor) {
+      let color;
+      if (
+        this._descriptor.properties.fillColor.type === VectorStyle.STYLE_TYPE.STATIC
+      ) {
+        color = this.getHexColor('fillColor') || DEFAULT_COLOR;
+      } else if (this._descriptor.properties.fillColor.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
+        color = this._getDataDrivenColor('fillColor');
+      } else {
+        throw new Error(`Style type not recognized: ${this._descriptor.properties.fillColor.type}`);
       }
-      const color = this.getHexColorForFillAndOutline() || DEFAULT_COLOR;
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
-    } else if (this._descriptor.properties.fillAndOutline.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
-      const color = this._getDataDrivenColor();
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
-      mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
+    } else {
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
+      mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
+      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
   }
 

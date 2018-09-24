@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 
-export class VectorStyleEditor extends React.Component {
+export class VectorStyleColorEditor extends React.Component {
 
   constructor() {
     super();
@@ -45,23 +45,23 @@ export class VectorStyleEditor extends React.Component {
     }
 
     const changeToStaticColor = (color) => {
-      const vectorStyleDescriptor = VectorStyle.createDescriptor({
+      const property = {
         type: VectorStyle.STYLE_TYPE.STATIC,
         options: {
           color: color
         }
-      });
-      this.props.handleStyleChange(vectorStyleDescriptor);
+      };
+      this.props.handlePropertyChange(this.props.property, property);
     };
 
     const changeToDynamicColor = (field) => {
-      const vectorStyleDescriptor = VectorStyle.createDescriptor({
+      const property = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: field
         }
-      });
-      this.props.handleStyleChange(vectorStyleDescriptor);
+      };
+      this.props.handlePropertyChange(this.props.property, property);
     };
 
     const onTypeToggle = (e) => {
@@ -76,7 +76,7 @@ export class VectorStyleEditor extends React.Component {
       });
     };
 
-    const selectedColor = vectorStyle ? vectorStyle.getHexColorForFillAndOutline() : VectorStyle.DEFAULT_COLOR_HEX;
+    const selectedColor = vectorStyle ? vectorStyle.getHexColor(this.props.property) : VectorStyle.DEFAULT_COLOR_HEX;
     this._lastStaticColor = selectedColor;
 
     let colorSelector;
@@ -93,12 +93,11 @@ export class VectorStyleEditor extends React.Component {
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
-          Fill and outline color
+          {this.props.name}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           < EuiButtonToggle
-            label={this._isDynamic() ? 'Dynamic' : 'Static'
-            }
+            label={this._isDynamic() ? 'Dynamic' : 'Static'}
             onChange={onTypeToggle}
             isSelected={this._isDynamic()
             }
@@ -114,7 +113,7 @@ export class VectorStyleEditor extends React.Component {
   render() {
     let style = this.props.seedStyle;
     if (style === null) {
-      const fallbackDescriptor = VectorStyle.createDescriptor({
+      const fallbackDescriptor = VectorStyle.createDescriptor('fillColor', {
         type: VectorStyle.STYLE_TYPE.STATIC,
         options: {
           color: VectorStyle.DEFAULT_COLOR_HEX

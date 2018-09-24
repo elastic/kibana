@@ -20,7 +20,7 @@ export class VectorLayer extends ALayer {
     layerDescriptor.type = VectorLayer.type;
     defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
     if (!options.style) {
-      layerDescriptor.style = VectorStyle.createDescriptor(
+      layerDescriptor.style = VectorStyle.createDescriptor('fillColor',
         {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
@@ -85,7 +85,7 @@ export class VectorLayer extends ALayer {
       mbSourceAfterAdding.setData(this._descriptor.data);
     }
 
-    if (this._style.isFillAndOutlineDynamic()) {
+    if (this._style.isPropertyDynamic('fillColor')) {
       const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(this._descriptor.data);
       if (shouldRefresh) {
         mbSourceAfterAdding.setData(this._descriptor.data);
@@ -108,7 +108,7 @@ export class VectorLayer extends ALayer {
     const strokeLayerId = this.getId() +  '_line';
     const pointLayerId = this.getId() +  '_circle';
     if (isPointsOnly) {
-      this._style.addMbPointsLayerAndSetMBPaintProperties(mbMap, this.getId(), pointLayerId, this.isTemporary());
+      this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
     } else {
       this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
     }
