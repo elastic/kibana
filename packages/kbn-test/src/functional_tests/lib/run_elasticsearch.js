@@ -24,7 +24,7 @@ import { createEsTestCluster } from '../../es';
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
 export async function runElasticsearch({ config, options }) {
-  const { log, esFrom, esInstallDir } = options;
+  const { log, esFrom } = options;
   const isOss = config.get('esTestCluster.license') === 'oss';
 
   const cluster = createEsTestCluster({
@@ -34,7 +34,6 @@ export async function runElasticsearch({ config, options }) {
     log,
     basePath: resolve(KIBANA_ROOT, '.es'),
     esFrom: esFrom || config.get('esTestCluster.from'),
-    esInstallDir,
   });
 
   const esArgs = config.get('esTestCluster.serverArgs');
