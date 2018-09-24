@@ -823,11 +823,8 @@ module.controller('MlExplorerController', function (
           $scope.cellData !== undefined &&
           $scope.cellData.type === SWIMLANE_TYPE.VIEW_BY
         ) {
-          let selectionExists = false;
-          $scope.cellData.lanes.forEach((lane) => {
-            if ($scope.viewBySwimlaneData.laneLabels.indexOf(lane) > -1) {
-              selectionExists = true;
-            }
+          const selectionExists = $scope.cellData.lanes.some((lane) => {
+            return ($scope.viewBySwimlaneData.laneLabels.includes(lane));
           });
           if (selectionExists === false) {
             clearSelectedAnomalies();
