@@ -10,10 +10,13 @@ import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { YamlConfigSchema } from '../../../lib/lib';
-import { FormsyEuiCodeEditor } from '../../inputs/code_editor';
-import { FormsyEuiFieldText } from '../../inputs/input';
-import { FormsyEuiMultiFieldText } from '../../inputs/multi_input';
-import { FormsyEuiSelect } from '../../inputs/select';
+import {
+  FormsyEuiCodeEditor,
+  FormsyEuiFieldText,
+  FormsyEuiMultiFieldText,
+  FormsyEuiPasswordText,
+  FormsyEuiSelect,
+} from '../../inputs';
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
   if (values && values.length > 0 && values instanceof Array) {
@@ -120,6 +123,20 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
               case 'input':
                 return (
                   <FormsyEuiFieldText
+                    key={schema.id}
+                    id={schema.id}
+                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    name={schema.id}
+                    helpText={schema.ui.helpText}
+                    label={schema.ui.label}
+                    validations={schema.validations}
+                    validationError={schema.error}
+                    required={schema.required}
+                  />
+                );
+              case 'password':
+                return (
+                  <FormsyEuiPasswordText
                     key={schema.id}
                     id={schema.id}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
