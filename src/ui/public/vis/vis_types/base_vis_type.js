@@ -32,7 +32,7 @@ export class BaseVisType {
     if (!opts.description) {
       throw('vis_type must define its description');
     }
-    if (!opts.icon && !opts.image) {
+    if (!opts.icon && !opts.image && !opts.legacyIcon) {
       throw('vis_type must define its icon or image');
     }
     if (!opts.visualization) {
@@ -47,7 +47,7 @@ export class BaseVisType {
         defaults: {},            // default configuration
       },
       requestHandler: 'courier',    // select one from registry or pass a function
-      responseHandler: 'tabify',
+      responseHandler: 'none',
       editor: 'default',
       editorConfig: {
         collections: {},         // collections used for configuration (list of positions, ...)

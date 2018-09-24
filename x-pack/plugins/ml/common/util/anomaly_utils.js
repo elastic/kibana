@@ -75,30 +75,6 @@ export function getSeverityColor(normalizedScore) {
   }
 }
 
-// Recurses through an object holding the list of detector descriptions against job IDs
-// checking for duplicate descriptions. For any detectors with duplicate descriptions, the
-// description is modified by appending the job ID in parentheses.
-// Only checks for duplicates across jobs; any duplicates within a job are left as-is.
-export function labelDuplicateDetectorDescriptions(detectorsByJob) {
-  const checkedJobIds = [];
-  _.each(detectorsByJob, function (detectors, jobId) {
-    checkedJobIds.push(jobId);
-    const otherJobs = _.omit(detectorsByJob, checkedJobIds);
-    _.each(detectors, function (description, i) {
-      _.each(otherJobs, function (otherJobDetectors, otherJobId) {
-        _.each(otherJobDetectors, function (otherDescription, j) {
-          if (description === otherDescription) {
-            detectors[i] = description + ' (' + jobId + ')';
-            otherJobDetectors[j] = description + ' (' + otherJobId + ')';
-          }
-        });
-      });
-    });
-  });
-
-  return detectorsByJob;
-}
-
 // Returns the name of the field to use as the entity name from the source record
 // obtained from Elasticsearch. The function looks first for a by_field, then over_field,
 // then partition_field, returning undefined if none of these fields are present.

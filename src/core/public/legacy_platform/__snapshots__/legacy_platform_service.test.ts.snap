@@ -8,6 +8,7 @@ Array [
   "ui/chrome/api/loading_count",
   "ui/chrome/api/base_path",
   "ui/chrome/api/ui_settings",
+  "ui/chrome/api/injected_vars",
   "ui/chrome",
   "legacy files",
 ]
@@ -21,6 +22,7 @@ Array [
   "ui/chrome/api/loading_count",
   "ui/chrome/api/base_path",
   "ui/chrome/api/ui_settings",
+  "ui/chrome/api/injected_vars",
   "ui/test_harness",
   "legacy files",
 ]

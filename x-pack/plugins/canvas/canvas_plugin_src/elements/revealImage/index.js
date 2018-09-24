@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Image Reveal',
+  displayName: 'Image reveal',
   help: 'Reveals a percentage of an image',
   image: header,
   expression: `filters
