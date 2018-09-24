@@ -47,23 +47,33 @@ export class VectorLayer extends ALayer {
 
   async syncData(startLoading, stopLoading, dataFilters) {
     const timeAware = await this._source.isTimeAware();
-    if (!timeAware) {
+    const extentAware = this._source.filterByMapBounds();
+    if (!timeAware && !extentAware) {
       if (this._descriptor.data || this._descriptor.dataRequestToken) {
         return;
       }
     } else {
-      if (this._descriptor.dataMeta && this._descriptor.dataMeta.timeFilters) {
+      // TODO do not re-fetch data if dataFilters have not changed
+      // This is going to take some work since we have to consider all the combinations of what could have changed
+      /*if (this._descriptor.dataMeta && this._descriptor.dataMeta.timeFilters) {
         if (dataFilters.timeFilters === this._descriptor.dataMeta.timeFilters) {
           return;
         }
-      }
+      }*/
     }
+
     startLoading({ timeFilters: dataFilters.timeFilters });
-    const data = await this._source.getGeoJson({
-      layerId: this._descriptor.id,
-      layerName: this._descriptor.label,
-    }, dataFilters);
-    stopLoading(data);
+    try {
+      const data = await this._source.getGeoJson({
+        layerId: this._descriptor.id,
+        layerName: this._descriptor.label,
+      }, dataFilters);
+      stopLoading(data);
+    } catch(error) {
+      // TODO dispatch action to set error state in store
+      // Should call something like errorOnLoading instead of stopLoading
+      stopLoading({ type: 'FeatureCollection', features: [] });
+    }
   }
 
   syncLayerWithMB(mbMap) {
