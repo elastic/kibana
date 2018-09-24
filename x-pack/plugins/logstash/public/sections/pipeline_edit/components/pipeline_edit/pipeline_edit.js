@@ -23,6 +23,7 @@ app.directive('pipelineEdit', function ($injector) {
   const securityService = $injector.get('logstashSecurityService');
   const kbnUrl = $injector.get('kbnUrl');
   const shieldUser = $injector.get('ShieldUser');
+  const $route = $injector.get('$route');
 
   return {
     restrict: 'E',
@@ -44,6 +45,7 @@ app.directive('pipelineEdit', function ($injector) {
           username={userResource ? userResource.username : null}
           pipeline={scope.pipeline}
           pipelineService={pipelineService}
+          routeService={$route}
           toastNotifications={toastNotifications}
           licenseService={licenseService}
           notifier={new Notifier({ location: 'Logstash' })}

@@ -26,6 +26,7 @@ import {
   EuiPageContent,
   EuiSelect,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
@@ -69,7 +70,10 @@ export class PipelineEditor extends React.Component {
   }
 
   componentDidMount = () => {
-    const { licenseService: { isReadOnly, message }, toastNotifications } = this.props;
+    const {
+      licenseService: { isReadOnly, message },
+      toastNotifications,
+    } = this.props;
     if (isReadOnly) {
       toastNotifications.addWarning(message);
     }
@@ -204,6 +208,25 @@ export class PipelineEditor extends React.Component {
       .catch(this.notifyOnError);
   };
 
+  getPipelineHeadingText = () => {
+    const {
+      routeService: {
+        current: {
+          params: { clone, id },
+        },
+      },
+      isNewPipeline,
+    } = this.props;
+
+    if (!!clone && id) {
+      return `Clone Pipeline "${id}"`;
+    }
+    if (!isNewPipeline) {
+      return `Edit Pipeline "${this.state.pipeline.id}"`;
+    }
+    return 'Create Pipeline';
+  };
+
   render() {
     return (
       <EuiPage data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
@@ -214,6 +237,10 @@ export class PipelineEditor extends React.Component {
           verticalPosition="center"
           horizontalPosition="center"
         >
+          <EuiTitle size="m">
+            <h2>{this.getPipelineHeadingText()}</h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
             {this.props.isNewPipeline && (
               <EuiFormRow fullWidth label="Pipeline ID">
@@ -375,8 +402,16 @@ export class PipelineEditor extends React.Component {
 
 PipelineEditor.propTypes = {
   close: PropTypes.func.isRequired,
-  open: PropTypes.func.isRequired,
   isNewPipeline: PropTypes.bool.isRequired,
+  licenseService: PropTypes.shape({
+    checkValidity: PropTypes.func.isRequired,
+    isReadOnly: PropTypes.bool.isRequired,
+    message: PropTypes.string,
+  }).isRequired,
+  notifier: PropTypes.shape({
+    error: PropTypes.func.isRequired,
+  }).isRequired,
+  open: PropTypes.func.isRequired,
   pipeline: PropTypes.shape({
     id: PropTypes.string,
     description: PropTypes.string,
@@ -394,17 +429,17 @@ PipelineEditor.propTypes = {
     deletePipeline: PropTypes.func.isRequired,
     savePipeline: PropTypes.func.isRequired,
   }).isRequired,
+  routeService: PropTypes.shape({
+    current: PropTypes.shape({
+      params: PropTypes.shape({
+        clone: PropTypes.oneOf([true, undefined]),
+        id: PropTypes.string,
+      }),
+    }),
+  }).isRequired,
   toastNotifications: PropTypes.shape({
     addWarning: PropTypes.func.isRequired,
     addSuccess: PropTypes.func.isRequired,
-  }).isRequired,
-  licenseService: PropTypes.shape({
-    checkValidity: PropTypes.func.isRequired,
-    isReadOnly: PropTypes.bool.isRequired,
-    message: PropTypes.string,
-  }).isRequired,
-  notifier: PropTypes.shape({
-    error: PropTypes.func.isRequired,
   }).isRequired,
   username: PropTypes.string,
 };
