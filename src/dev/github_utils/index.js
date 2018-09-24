@@ -17,15 +17,27 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
+import Octokit from '@octokit/rest';
+import { markdownMetadata } from './metadata';
 
-export { IndexPatternsProvider } from './index_patterns';
+export { markdownMetadata };
 
-export {
-  IndexPatternsApiClientProvider,
-} from './index_patterns_api_client_provider';
+export function getGithubClient() {
+  const client = new Octokit();
+  client.authenticate({
+    type: 'token',
+    token: process.env.GITHUB_TOKEN
+  });
 
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
+  return client;
+}
+
+export async function paginate(client, promise) {
+  let response = await promise;
+  let { data } = response;
+  while (client.hasNextPage(response)) {
+    response = await client.getNextPage(response);
+    data = data.concat(response.data);
+  }
+  return data;
+}
