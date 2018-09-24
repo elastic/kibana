@@ -19,7 +19,6 @@ export const uiExports = {
     k7IconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
-    styleSheetPath: `${__dirname}/public/index.scss`,
   },
   injectDefaultVars(server) {
     const config = server.config();
@@ -28,5 +27,6 @@ export const uiExports = {
     };
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
-  home: [ 'plugins/monitoring/register_feature' ]
+  home: [ 'plugins/monitoring/register_feature' ],
+  styleSheetPaths: `${__dirname}/public/index.scss`,
 };

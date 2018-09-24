@@ -22,8 +22,8 @@ export function canvas(kibana) {
         icon: 'plugins/canvas/icon.svg',
         k7IconType: 'reportingApp', // TODO: replace with real icon once it exists in EUI
         main: 'plugins/canvas/app',
-        styleSheetPath: `${__dirname}/public/style/index.scss`,
       },
+      styleSheetPaths: `${__dirname}/public/style/index.scss`,
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',

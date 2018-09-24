@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import path from 'path';
 import { UiNavLink } from '../ui_nav_links';
 
 export class UiApp {
@@ -35,7 +34,6 @@ export class UiApp {
       linkToLastSubUrl,
       listed,
       url = `/app/${id}`,
-      styleSheetPath,
     } = spec;
 
     if (!id) {
@@ -55,7 +53,6 @@ export class UiApp {
     this._url = url;
     this._pluginId = pluginId;
     this._kbnServer = kbnServer;
-    this._styleSheetPath = styleSheetPath;
 
     if (this._pluginId && !this._getPlugin()) {
       throw new Error(`Unknown plugin id "${this._pluginId}"`);
@@ -108,25 +105,6 @@ export class UiApp {
     return this._main;
   }
 
-  getStyleSheetUrlPath() {
-    if (!this._styleSheetPath) {
-      return;
-    }
-
-    const plugin = this._getPlugin();
-
-    // get the path of the stylesheet relative to the public dir for the plugin
-    let relativePath = path.relative(plugin.publicDir, this._styleSheetPath);
-
-    // replace back slashes on windows
-    relativePath = relativePath.split('\\').join('/');
-
-    // replace the extension of relativePath to be .css
-    relativePath = relativePath.slice(0, -path.extname(relativePath).length) + '.css';
-
-    return `plugins/${plugin.id}/${relativePath}`;
-  }
-
   _getPlugin() {
     const pluginId = this._pluginId;
     const { plugins } = this._kbnServer;
@@ -146,7 +124,6 @@ export class UiApp {
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,
-      styleSheetPath: this._styleSheetPath,
     };
   }
 }

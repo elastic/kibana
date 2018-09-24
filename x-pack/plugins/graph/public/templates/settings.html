@@ -49,13 +49,13 @@
     ng-show="spymode == 'request'"
     ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
     ng-model="workspace.lastRequest"
-    class="requestJsonView"
+    class="gphSettings__jsonView"
   ></div>
   <div
     ng-show="spymode == 'response'"
     ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
     ng-model="workspace.lastResponse"
-    class="requestJsonView"
+    class="gphSettings__jsonView"
   ></div>
 </div>
 <!-- ====== end spy tab content ====== -->
@@ -70,7 +70,7 @@
     These terms are currently blacklisted from re-appearing in the workspace
   </p>
 
-  <div class="selectionList kuiVerticalRhythm">
+  <div class="gphSelectionList kuiVerticalRhythm">
     <!-- ====== start terms ====== -->
     <div
       ng-repeat="n in workspace.blacklistedNodes"
@@ -183,12 +183,12 @@
       </div>
 
       <div class="col-sm-9">
-        <span class="legend-value-icon-picker">
+        <span class="gphIconPicker">
           <i
             ng-repeat="i in drillDownIconChoices"
             ng-click="toggleDrillDownIcon(newUrlTemplate,i)"
             ng-class="{selectedNode:i==newUrlTemplate.icon}"
-            class="fa icon noUserSelect"
+            class="fa gphIconPicker__icon gphNoUserSelect"
             ng-bind="i.code"
           ></i>
         </span>
@@ -222,12 +222,12 @@
   <!-- ====== stop add form ====== -->
 
   <!-- ====== start list ====== -->
-  <div class="scrollable-list">
-    <ul  class="li-striped list-group list-group-menu">
-      <li class="list-group-item" ng-repeat="urlTemplate in urlTemplates">
+  <div class="gphDrilldownList">
+    <ul  class="list-group">
+      <li class="gphDrilldownList__item list-group-item" ng-repeat="urlTemplate in urlTemplates">
         <i
           ng-if="urlTemplate.icon"
-          class="fa icon noUserSelect"
+          class="fa icon gphNoUserSelect"
         >
           {{urlTemplate.icon.code}}
         </i>
@@ -266,7 +266,7 @@
   ng-if="(selectedIndex !== null) && (configPanel === 'settings')"
 >
   <form class="form-horizontal">
-    <div class="form-group form-group-sm small-graph-form">
+    <div class="form-group form-group-sm gphFormGroup--small">
       <label for="qIndexSampleSize" class="col-sm-4 control-label">
         Sample size
       </label>
@@ -307,7 +307,7 @@
       </div>
     </div>
 
-    <div class="form-group form-group-sm small-graph-form">
+    <div class="form-group form-group-sm gphFormGroup--small">
       <label for="minDocCount" class="col-sm-4 control-label">Certainty</label>
       <div class="col-sm-6">
         <input
@@ -326,7 +326,7 @@
       </div>
     </div>
 
-    <div class="form-group form-group-sm small-graph-form">
+    <div class="form-group form-group-sm gphFormGroup--small">
       <label for="qDiversityField" class="col-sm-4 control-label">
         Diversity field
       </label>
@@ -349,7 +349,7 @@
     </div>
 
     <div
-      class="form-group form-group-sm small-graph-form"
+      class="form-group form-group-sm gphFormGroup--small"
       ng-show="exploreControls.sampleDiversityField"
     >
       <label
@@ -377,7 +377,7 @@
       </div>
     </div>
 
-    <div class="form-group form-group-sm small-graph-form">
+    <div class="form-group form-group-sm gphFormGroup--small">
       <label
         for="qTimeoutMillis"
         class="col-sm-4 control-label"

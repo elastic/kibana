@@ -55,7 +55,9 @@ export default async function install(settings, logger) {
 
     await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
 
-    await rebuildCache(settings, logger);
+    if (settings.optimize) {
+      await rebuildCache(settings, logger);
+    }
 
     logger.log('Plugin installation complete');
   } catch (err) {

@@ -28,6 +28,7 @@ export default function (kibana) {
         icon: 'plugins/timelion/icon.svg',
         k7IconType: 'timelionApp',
         main: 'plugins/timelion/app',
+        styleSheetPath: `${__dirname}/public/index.scss`,
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',
