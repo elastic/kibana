@@ -21,12 +21,18 @@ import {
 } from '@elastic/eui';
 
 import {
-  formatOptions,
-  timestampFormatOptions,
-  delimiterOptions,
-  quoteOptions,
-  charsetOptions,
+  getFormatOptions,
+  getTimestampFormatOptions,
+  getDelimiterOptions,
+  getQuoteOptions,
+  getCharsetOptions,
 } from './options';
+
+const formatOptions = getFormatOptions();
+const timestampFormatOptions = getTimestampFormatOptions();
+const delimiterOptions = getDelimiterOptions();
+const quoteOptions = getQuoteOptions();
+const charsetOptions = getCharsetOptions();
 
 export class Overrides extends Component {
   constructor(props) {

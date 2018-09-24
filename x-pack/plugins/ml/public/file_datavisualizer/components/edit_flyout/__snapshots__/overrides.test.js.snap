@@ -14,19 +14,19 @@ exports[`Overrides render overrides 1`] = `
         Array [
           Object {
             "inputDisplay": <span>
-              JSON
+              json
             </span>,
             "value": "json",
           },
           Object {
             "inputDisplay": <span>
-              Delimited
+              delimited
             </span>,
             "value": "delimited",
           },
           Object {
             "inputDisplay": <span>
-              Semi structured text
+              semi_structured_text
             </span>,
             "value": "semi_structured_text",
           },
