@@ -35,7 +35,7 @@ aggTypeFieldFilters.addFilter(
     aggConfig,
     vis
   ) => {
-    if (aggConfig.type.name !== 'top_hit' || vis.type.name === 'table' || vis.type.name === 'metric') {
+    if (aggConfig.type.name !== 'top_hit' || vis.type.type === 'table' || vis.type.name === 'metric') {
       return true;
     }
     return field.type === 'number';
@@ -138,8 +138,8 @@ export const topHitMetricAgg = new MetricAggType({
             defaultMessage: 'Concatenate'
           }),
           isCompatibleType: _.constant(true),
-          isCompatibleVis: function (name) {
-            return name === 'metric' || name === 'table';
+          isCompatibleVis: function (name, type) {
+            return name === 'metric' || type === 'table';
           },
           disabled: true,
           val: 'concat'
@@ -147,10 +147,10 @@ export const topHitMetricAgg = new MetricAggType({
       ],
       controller: function ($scope) {
         $scope.options = [];
-        $scope.$watchGroup([ 'vis.type.name', 'agg.params.field.type' ], function ([ visName, fieldType ]) {
+        $scope.$watchGroup([ 'vis.type.name', 'vis.type.type', 'agg.params.field.type' ], function ([ visName, visType, fieldType ]) {
           if (fieldType && visName) {
             $scope.options = _.filter($scope.aggParam.options, option => {
-              return option.isCompatibleVis(visName) && option.isCompatibleType(fieldType);
+              return option.isCompatibleVis(visName, visType) && option.isCompatibleType(fieldType);
             });
             if ($scope.options.length === 1) {
               $scope.agg.params.aggregate = $scope.options[0];
