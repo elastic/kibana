@@ -126,15 +126,6 @@ describe('start servers CLI', () => {
       expect(exitMock).not.toHaveBeenCalled();
     });
 
-    it('rejects non-enum value for esFrom', async () => {
-      global.process.argv.push('--esFrom', 'butter');
-
-      await startServersCli('foo');
-
-      expect(exitMock).toHaveBeenCalledWith(1);
-      checkMockConsoleLogSnapshot(logMock);
-    });
-
     it('accepts debug option', async () => {
       global.process.argv.push('--debug');
 
