@@ -145,8 +145,17 @@ export const spaces = (kibana: any) =>
       registerUserProfileCapabilityFactory(async request => {
         const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
 
+        let manageSecurity = false;
+
+        if (server.plugins.security) {
+          const { allowRbac = false } =
+            xpackMainPlugin.info.feature('security').getLicenseCheckResults() || {};
+          manageSecurity = allowRbac;
+        }
+
         return {
           manageSpaces: await spacesClient.canEnumerateSpaces(),
+          manageSecurity,
         };
       });
 

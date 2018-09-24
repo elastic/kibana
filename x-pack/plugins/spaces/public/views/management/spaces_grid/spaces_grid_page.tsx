@@ -29,6 +29,7 @@ import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib/spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
+import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 
 interface Props {
@@ -84,6 +85,7 @@ export class SpacesGridPage extends Component<Props, State> {
             <EuiText>
               <h1>Spaces</h1>
             </EuiText>
+            <SecureSpaceMessage userProfile={this.props.userProfile} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
