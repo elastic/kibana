@@ -80,8 +80,8 @@ export class ConfirmDeleteModal extends Component<Props, State> {
           <EuiModalBody>
             <EuiText data-test-subj="confirmModalBodyText">
               <p>
-                Deleting a space permanently removes the space and all of its contents. You can't
-                undo this action.
+                Deleting a space permanently removes the space and{' '}
+                <strong>all of its contents</strong>. You can't undo this action.
               </p>
 
               <EuiFormRow
@@ -115,7 +115,7 @@ export class ConfirmDeleteModal extends Component<Props, State> {
               color={'danger'}
               isLoading={this.state.deleteInProgress}
             >
-              Delete space
+              Delete space and all contents
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

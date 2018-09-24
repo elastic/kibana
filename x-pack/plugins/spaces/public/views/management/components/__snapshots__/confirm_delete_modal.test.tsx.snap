@@ -21,7 +21,12 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         grow={true}
       >
         <p>
-          Deleting a space permanently removes the space and all of its contents. You can't undo this action.
+          Deleting a space permanently removes the space and
+           
+          <strong>
+            all of its contents
+          </strong>
+          . You can't undo this action.
         </p>
         <EuiFormRow
           describedByIds={Array []}
@@ -80,7 +85,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Delete space
+        Delete space and all contents
       </EuiButton>
     </EuiModalFooter>
   </EuiModal>
