@@ -13,7 +13,8 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiIcon,
-  EuiIconTip
+  EuiIconTip,
+  EuiTextColor
 } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 
@@ -63,11 +64,34 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagOps',
-              name: 'Sync Lag (ops)'
+              name: 'Sync Lag (ops)',
+              render: (syncLagOps, data) => (
+                <span>
+                  {syncLagOps}
+                  &nbsp;&nbsp;
+                  <EuiIconTip
+                    size="m"
+                    type="iInCircle"
+                    content={(
+                      <Fragment>
+                        <span>Leader lag: {data.syncLagOpsLeader}</span>
+                        <br/>
+                        <span>Follower lag: {data.syncLagOpsFollower}</span>
+                      </Fragment>
+                    )}
+                    position="right"
+                  />
+                </span>
+              )
             },
             {
               field: 'error',
               name: 'Error',
+              render: error => (
+                <EuiTextColor color="danger">
+                  {error}
+                </EuiTextColor>
+              )
             }
           ]}
           sorting={true}
@@ -155,7 +179,12 @@ export class Ccr extends Component {
           {
             field: 'error',
             sortable: true,
-            name: 'Error'
+            name: 'Error',
+            render: error => (
+              <EuiTextColor color="danger">
+                {error}
+              </EuiTextColor>
+            )
           }
         ]}
         items={items}
