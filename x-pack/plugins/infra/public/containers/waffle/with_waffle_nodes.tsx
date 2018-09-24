@@ -19,6 +19,8 @@ import { waffleNodesQuery } from './waffle_nodes.gql_query';
 
 interface WithWaffleNodesArgs {
   nodes: InfraWaffleMapGroup[];
+  loading: boolean;
+  refetch: () => void;
 }
 
 interface WithWaffleNodesProps {
@@ -41,6 +43,7 @@ export const WithWaffleNodes = ({
   <Query<WaffleNodesQuery.Query, WaffleNodesQuery.Variables>
     query={waffleNodesQuery}
     fetchPolicy="no-cache"
+    notifyOnNetworkStatusChange
     variables={{
       sourceId,
       metrics,
@@ -49,12 +52,14 @@ export const WithWaffleNodes = ({
       filterQuery,
     }}
   >
-    {({ data }) =>
+    {({ data, loading, refetch }) =>
       children({
+        loading,
         nodes:
           data && data.source && data.source.map && data.source.map.nodes
             ? nodesToWaffleMap(data.source.map.nodes)
             : [],
+        refetch,
       })
     }
   </Query>

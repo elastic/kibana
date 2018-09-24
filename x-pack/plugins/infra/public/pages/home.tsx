@@ -92,7 +92,14 @@ export class HomePage extends React.PureComponent {
                         sourceId={sourceId}
                         timerange={currentTimeRange}
                       >
-                        {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}
+                        {({ nodes, loading, refetch }) => (
+                          <Waffle
+                            map={nodes}
+                            loading={loading}
+                            options={wafflemap}
+                            reload={refetch}
+                          />
+                        )}
                       </WithWaffleNodes>
                     )}
                   </WithWaffleTime>

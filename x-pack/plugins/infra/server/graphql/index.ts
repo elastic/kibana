@@ -6,6 +6,7 @@
 
 import { rootSchema } from '../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../common/graphql/shared/schema.gql';
+import { capabilitiesSchema } from './capabilities/schema.gql';
 import { logEntriesSchema } from './log_entries/schema.gql';
 import { metricsSchema } from './metrics/schema.gql';
 import { nodesSchema } from './nodes/schema.gql';
@@ -15,6 +16,7 @@ import { sourcesSchema } from './sources/schema.gql';
 export const schemas = [
   rootSchema,
   sharedSchema,
+  capabilitiesSchema,
   logEntriesSchema,
   nodesSchema,
   sourcesSchema,

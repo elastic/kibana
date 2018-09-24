@@ -6,6 +6,7 @@
 
 import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
+import { InfraCapabilitiesDomain } from './domains/capabilities_domain';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -14,6 +15,7 @@ import { InfraSourceStatus } from './source_status';
 import { InfraSourceConfigurations, InfraSources } from './sources';
 
 export interface InfraDomainLibs {
+  capabilities: InfraCapabilitiesDomain;
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;
   nodes: InfraNodesDomain;

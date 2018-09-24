@@ -9,11 +9,11 @@ import * as React from 'react';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
+import { InfraLoadingPanel } from '../../loading';
 import { LogTextStreamEmptyView } from './empty_view';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogTextStreamItemView } from './item_view';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
-import { LogTextStreamLoadingView } from './loading_view';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 
@@ -98,13 +98,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
     } = this.props;
     const { targetId } = this.state;
-
     const hasItems = items.length > 0;
-
     if (isReloading && !hasItems) {
-      return <LogTextStreamLoadingView height={height} width={width} />;
+      return <InfraLoadingPanel height={height} width={width} text="Loading entries" />;
     } else if (!hasItems) {
-      return <LogTextStreamEmptyView height={height} width={width} reload={this.handleReload} />;
+      return <LogTextStreamEmptyView reload={this.handleReload} />;
     } else {
       return (
         <VerticalScrollPanel
