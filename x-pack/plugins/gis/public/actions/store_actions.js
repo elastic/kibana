@@ -22,7 +22,7 @@ export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
-export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
+export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
@@ -174,9 +174,37 @@ export function addPreviewLayer(layer, position) {
 
 export function updateLayerLabel(id, newLabel) {
   return {
-    type: UPDATE_LAYER_LABEL,
+    type: UPDATE_LAYER_PROP,
     id,
-    newLabel
+    propName: 'label',
+    newValue: newLabel,
+  };
+}
+
+export function updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'showAtAllZoomLevels',
+    newValue: showAtAllZoomLevels,
+  };
+}
+
+export function updateLayerMinZoom(id, minZoom) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'minZoom',
+    newValue: minZoom,
+  };
+}
+
+export function updateLayerMaxZoom(id, maxZoom) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'maxZoom',
+    newValue: maxZoom,
   };
 }
 

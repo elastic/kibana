@@ -19,7 +19,7 @@ import {
   MAP_READY,
   REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
-  UPDATE_LAYER_LABEL,
+  UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
   CLEAR_TEMPORARY_STYLES,
@@ -90,8 +90,8 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
-    case UPDATE_LAYER_LABEL:
-      return updateLayerInList(state, action.id, 'label', action.newLabel);
+    case UPDATE_LAYER_PROP:
+      return updateLayerInList(state, action.id, action.propName, action.newValue);
     case ADD_LAYER:
       // Remove temporary layers (if any)
       const preAddLayerList = action.layer.temporary ? state.layerList.filter(
