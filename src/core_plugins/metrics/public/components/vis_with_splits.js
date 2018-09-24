@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
-import { last, findIndex, first } from 'lodash';
+import { last, findIndex, first } from '@elastic/lodash';
 import calculateLabel  from '../../common/calculate_label';
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual, isPlainObject } from 'lodash';
+import { cloneDeep, isEqual, isPlainObject } from '@elastic/lodash';
 import { Observable, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import typeDetect from 'type-detect';

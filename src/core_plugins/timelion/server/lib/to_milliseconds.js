@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 
 // map of moment's short/long unit ids and elasticsearch's long unit ids

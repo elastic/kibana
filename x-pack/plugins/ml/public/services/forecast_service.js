@@ -8,7 +8,7 @@
 
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { ml } from 'plugins/ml/services/ml_api_service';

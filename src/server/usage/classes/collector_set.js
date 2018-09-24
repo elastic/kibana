@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { snakeCase } from 'lodash';
+import { snakeCase } from '@elastic/lodash';
 import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';

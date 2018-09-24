@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { aggTypes } from 'ui/agg_types/index';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';

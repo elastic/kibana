@@ -14,7 +14,7 @@ import { notify } from 'ui/notify';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 // Our imports
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import 'ace';
 import 'angular-ui-ace';
 import 'plugins/searchprofiler/directives';

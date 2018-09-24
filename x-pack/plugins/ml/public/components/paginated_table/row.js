@@ -10,7 +10,7 @@
 // overridden to add the option for row expansion.
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 

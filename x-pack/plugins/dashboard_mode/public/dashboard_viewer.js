@@ -28,7 +28,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';
 import 'ui/vislib';

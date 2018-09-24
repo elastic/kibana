@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { filter as filterAsync, props as propsAsync } from 'bluebird';
-import { times, mapValues } from 'lodash';
+import { times, mapValues } from '@elastic/lodash';
 
 export function PipelineListProvider({ getService }) {
   const testSubjects = getService('testSubjects');

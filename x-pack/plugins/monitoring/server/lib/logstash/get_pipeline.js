@@ -5,7 +5,7 @@
  */
 
 import boom from 'boom';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';

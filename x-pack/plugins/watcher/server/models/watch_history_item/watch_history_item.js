@@ -6,7 +6,7 @@
 
 import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
-import { get, cloneDeep } from 'lodash';
+import { get, cloneDeep } from '@elastic/lodash';
 import { WatchStatus } from '../watch_status';
 
 export class WatchHistoryItem {

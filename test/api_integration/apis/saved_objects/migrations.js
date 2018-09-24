@@ -21,7 +21,7 @@
  * Smokescreen tests for core migration logic
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { assert } from 'chai';
 import {
   DocumentMigrator,

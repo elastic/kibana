@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import rison from 'rison-node';
 import angular from 'angular';
 

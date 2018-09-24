@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 export default function splitByFilter(req, panel, series) {
   return next => doc => {
     if (series.split_mode !== 'filter') return next(doc);

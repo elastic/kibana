@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 export default (row, metric) => {
   let key = metric.type.replace(/_bucket$/, '');
   if (key === 'std_deviation' && _.includes(['upper', 'lower'], metric.mode)) {

@@ -12,7 +12,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import {
   EuiDescriptionList,

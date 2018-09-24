@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { uniqueId, startsWith } from 'lodash';
+import { uniqueId, startsWith } from '@elastic/lodash';
 import { EuiCallOut } from '@elastic/eui';
 import {
   history,

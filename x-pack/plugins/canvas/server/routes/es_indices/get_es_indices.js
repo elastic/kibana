@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map } from 'lodash';
+import { map } from '@elastic/lodash';
 
 export function getESIndices(kbnIndex, elasticsearchClient) {
   const config = {

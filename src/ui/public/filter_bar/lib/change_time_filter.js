@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { timefilter } from 'ui/timefilter';
 
 export function changeTimeFilter(filter) {

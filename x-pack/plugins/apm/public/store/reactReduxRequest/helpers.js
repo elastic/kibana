@@ -5,7 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 export const createInitialDataSelector = initialData => {
   return createSelector(

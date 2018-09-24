@@ -7,7 +7,7 @@
 import chrome from 'ui/chrome';
 import lzString from 'lz-string';
 import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { APP_ROUTE } from '../../common/lib/constants';
 import { getWindow } from './get_window';
 

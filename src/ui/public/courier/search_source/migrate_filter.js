@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { getConvertedValueForField } from '../../filter_manager/lib/phrase';
 
 export function migrateFilter(filter, indexPattern) {

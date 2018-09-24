@@ -5,7 +5,7 @@
  */
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 
 export function routeInitProvider(Private, monitoringClusters, globalState, license, kbnUrl) {

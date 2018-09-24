@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pick } from 'lodash';
+import { get, pick } from '@elastic/lodash';
 import { mapNodesInfo } from './map_nodes_info';
 import { mapNodesMetrics } from './map_nodes_metrics';
 import { LISTING_METRICS_NAMES } from './nodes_listing_metrics';

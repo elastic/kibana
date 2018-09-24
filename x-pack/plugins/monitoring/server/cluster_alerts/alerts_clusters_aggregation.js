@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, find } from 'lodash';
+import { get, find } from '@elastic/lodash';
 import { verifyMonitoringLicense } from './verify_monitoring_license';
 
 export function alertsClustersAggregation(req, alertsIndex, clusters, checkLicense) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 export function dropLastBucket(resp, panel, series) {
   return next => results => {
     const seriesDropLastBucket = get(series, 'override_drop_last_bucket', 1);

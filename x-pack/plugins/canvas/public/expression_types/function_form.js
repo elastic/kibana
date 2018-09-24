@@ -6,7 +6,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { isPlainObject, uniq, last, compact } from 'lodash';
+import { isPlainObject, uniq, last, compact } from '@elastic/lodash';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';

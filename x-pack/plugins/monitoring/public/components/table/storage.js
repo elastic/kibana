@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set } from '@elastic/lodash';
 import { STORAGE_KEY } from '../../../common/constants';
 
 export const tableStorageGetter = keyPrefix => {

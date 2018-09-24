@@ -18,7 +18,7 @@
  */
 
 import { fromNode } from 'bluebird';
-import { get, once } from 'lodash';
+import { get, once } from '@elastic/lodash';
 
 export default (kbnServer, server, config) => {
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+const _ = require('@elastic/lodash');
 const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
 
 const jsonRules = function (root) {

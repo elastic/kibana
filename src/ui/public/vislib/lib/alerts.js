@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export function VislibLibAlertsProvider() {
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';

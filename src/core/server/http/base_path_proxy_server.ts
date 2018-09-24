@@ -19,7 +19,7 @@
 
 import { Server } from 'hapi-latest';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import { sample } from 'lodash';
+import { sample } from '@elastic/lodash';
 import { ByteSizeValue } from '../config/schema';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';

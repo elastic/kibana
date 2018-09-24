@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
+import { memoize } from '@elastic/lodash';
 import numeral from '@elastic/numeral';
 
 const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
+import { once } from '@elastic/lodash';
 import { compatibilityShimFactory } from './compatibility_shim';
 
 const createMockServer = () => {

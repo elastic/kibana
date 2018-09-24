@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum } from 'lodash';
+import { get, includes, max, min, sum } from '@elastic/lodash';
 import extendStatsTypes from './extended_stats_types';
 
 const aggFns = {

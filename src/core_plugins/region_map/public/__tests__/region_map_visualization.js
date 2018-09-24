@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { RegionMapsVisualizationProvider } from '../region_map_visualization';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';

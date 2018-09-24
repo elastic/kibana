@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export function mapRequests(requests) {
   return _.reduce(_.values(requests), (result, value) => {

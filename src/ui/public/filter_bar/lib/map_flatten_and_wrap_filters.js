@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { FilterBarLibMapAndFlattenFiltersProvider } from './map_and_flatten_filters';
 
 export function FilterBarLibMapFlattenAndWrapFiltersProvider(Private) {

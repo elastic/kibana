@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 function BaseParamType(config) {
   _.assign(this, config);

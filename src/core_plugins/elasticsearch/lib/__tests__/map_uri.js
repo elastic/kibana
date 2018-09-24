@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import mapUri from '../map_uri';
-import { defaults } from 'lodash';
+import { defaults } from '@elastic/lodash';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/map_uri', function () {

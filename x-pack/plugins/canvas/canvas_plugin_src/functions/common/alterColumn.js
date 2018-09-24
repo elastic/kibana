@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import { omit } from '@elastic/lodash';
 
 export const alterColumn = () => ({
   name: 'alterColumn',

@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { HeaderLarge } from '../../shared/UIComponents';
 import DetailView from './DetailView';
 import Distribution from './Distribution';

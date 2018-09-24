@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit } from 'lodash';
+import { get, omit } from '@elastic/lodash';
 import { fromCallback } from 'bluebird';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';

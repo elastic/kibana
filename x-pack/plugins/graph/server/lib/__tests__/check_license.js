@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { set } from 'lodash';
+import { set } from '@elastic/lodash';
 import sinon from 'sinon';
 import { checkLicense } from '../check_license';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 function getAncestors(siblings, item) {
   const ancestors = item.id && [item.id] || [];

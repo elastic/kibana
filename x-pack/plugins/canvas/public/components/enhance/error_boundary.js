@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
+import { omit } from '@elastic/lodash';
 
 export const errorBoundaryHoc = compose(
   withState('error', 'setError', null),

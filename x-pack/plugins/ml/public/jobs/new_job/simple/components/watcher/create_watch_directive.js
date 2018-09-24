@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 

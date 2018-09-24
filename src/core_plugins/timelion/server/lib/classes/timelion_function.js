@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import loadFunctions from '../load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 

@@ -5,7 +5,7 @@
  */
 
 
-import { difference } from 'lodash';
+import { difference } from '@elastic/lodash';
 import chrome from 'ui/chrome';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';

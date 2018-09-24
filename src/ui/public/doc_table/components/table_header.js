@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import './table_header.less';
 import '../../filters/short_dots';
 import headerHtml from './table_header.html';

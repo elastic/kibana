@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { uiModules } from '../modules';
 import { callAfterBindingsWorkaround } from '../compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';

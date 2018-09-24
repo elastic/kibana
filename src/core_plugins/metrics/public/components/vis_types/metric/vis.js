@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import tickFormatter from '../../lib/tick_formatter';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import Metric from '../../../visualizations/components/metric';
 import getLastValue from '../../../../common/get_last_value';
 import color from 'color';

@@ -18,7 +18,7 @@
  */
 
 import { CATEGORY } from '../vis_category';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export class BaseVisType {
   constructor(opts = {}) {

@@ -19,7 +19,7 @@
 
 import createAgent from './create_agent';
 import mapUri from './map_uri';
-import { assign } from 'lodash';
+import { assign } from '@elastic/lodash';
 
 export function createPath(prefix, path) {
   path = path[0] === '/' ? path : `/${path}`;

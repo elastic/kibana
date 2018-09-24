@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 

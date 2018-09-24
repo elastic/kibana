@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export default {
   'yAxisLabel': 'Count',

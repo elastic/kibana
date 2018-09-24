@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { escape, flatten } from 'lodash';
+import { escape, flatten } from '@elastic/lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from 'ui/index_patterns/static_utils';

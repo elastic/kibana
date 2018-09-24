@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import tableHtml from './table.html';

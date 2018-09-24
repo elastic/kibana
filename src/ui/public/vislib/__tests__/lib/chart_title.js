@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VislibLibChartTitleProvider } from '../../lib/chart_title';

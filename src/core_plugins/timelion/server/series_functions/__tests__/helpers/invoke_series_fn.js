@@ -18,7 +18,7 @@
  */
 
 // invokes a series_function with the specified arguments
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import indexArguments from '../../../handlers/lib/index_arguments';
 

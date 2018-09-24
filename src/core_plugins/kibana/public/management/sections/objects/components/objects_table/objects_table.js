@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { flattenDeep } from 'lodash';
+import { flattenDeep } from '@elastic/lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';

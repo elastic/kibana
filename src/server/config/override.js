@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import explodeBy from './explode_by';
 import { getFlattenedObject } from '../../utils';
 

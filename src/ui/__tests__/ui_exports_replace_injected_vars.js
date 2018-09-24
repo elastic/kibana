@@ -23,7 +23,7 @@ import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import cheerio from 'cheerio';
-import { noop } from 'lodash';
+import { noop } from '@elastic/lodash';
 
 import { createRoot, getKbnServer, request } from '../../test_utils/kbn_server';
 

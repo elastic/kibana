@@ -19,7 +19,7 @@
 
 import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import processBucket from './table/process_bucket';
 export async function getTableData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');

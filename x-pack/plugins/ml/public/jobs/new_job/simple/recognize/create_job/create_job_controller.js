@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import angular from 'angular';
 import dateMath from '@kbn/datemath';
 import { isJobIdValid, prefixDatafeedId } from 'plugins/ml/../common/util/job_utils';

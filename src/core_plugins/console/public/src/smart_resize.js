@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, throttle } from 'lodash';
+import { get, throttle } from '@elastic/lodash';
 
 export default function (editor) {
   const resize = editor.resize;

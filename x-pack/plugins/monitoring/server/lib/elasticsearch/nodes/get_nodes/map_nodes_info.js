@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isUndefined } from 'lodash';
+import { get, isUndefined } from '@elastic/lodash';
 import {
   calculateNodeType,
   getNodeTypeClassLabel,

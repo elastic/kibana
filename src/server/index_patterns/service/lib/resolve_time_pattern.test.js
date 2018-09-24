@@ -19,7 +19,7 @@
 
 /* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
-import { noop } from 'lodash';
+import { noop } from '@elastic/lodash';
 
 import { callIndexAliasApi } from './es_api';
 import * as callIndexAliasApiNS from './es_api';

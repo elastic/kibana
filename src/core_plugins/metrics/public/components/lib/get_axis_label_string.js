@@ -18,7 +18,7 @@
  */
 
 import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 const unitLookup = {
   s: 'seconds',

@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import moment from 'moment';
-import { noop, random, get, find, identity } from 'lodash';
+import { noop, random, get, find, identity } from '@elastic/lodash';
 import { ClientMock } from './fixtures/elasticsearch';
 import { QueueMock } from './fixtures/queue';
 import { Worker } from '../worker';

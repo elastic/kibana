@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // Upsampling of non-cumulative sets
 // Good: average, min, max

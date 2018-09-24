@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { find } from '@elastic/lodash';
 import sinon from 'sinon';
 
 import * as states from './states';

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, HealthStatusIndicator, BytesUsage, BytesPercentageUsage } from './helpers';
 import {

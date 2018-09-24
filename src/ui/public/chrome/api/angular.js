@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { modifyUrl } from 'ui/url';
 
 import { uiModules } from '../../modules';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import getAggValue from '../../helpers/get_agg_value';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';

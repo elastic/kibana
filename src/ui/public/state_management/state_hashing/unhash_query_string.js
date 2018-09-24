@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import { mapValues } from '@elastic/lodash';
 
 export function unhashQueryString(parsedQueryString, states) {
   return mapValues(parsedQueryString, (val, key) => {

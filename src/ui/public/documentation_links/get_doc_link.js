@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { documentationLinks } from './documentation_links';
 
 export const getDocLink = id => get(documentationLinks, id);

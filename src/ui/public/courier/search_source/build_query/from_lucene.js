@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 
 export function buildQueryFromLucene(queries, decorateQuery) {

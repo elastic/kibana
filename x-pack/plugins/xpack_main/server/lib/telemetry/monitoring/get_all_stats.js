@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, merge } from 'lodash';
+import { get, set, merge } from '@elastic/lodash';
 import {
   KIBANA_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,

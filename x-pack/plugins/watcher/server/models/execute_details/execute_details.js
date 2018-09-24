@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit, isUndefined } from 'lodash';
+import { omit, isUndefined } from '@elastic/lodash';
 
 export class ExecuteDetails {
   constructor(props) {

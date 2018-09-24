@@ -20,7 +20,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set } from 'lodash';
+import { set } from '@elastic/lodash';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {

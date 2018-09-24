@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import moment from 'moment';
-import { partialRight } from 'lodash';
+import { partialRight } from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import {
   KuiTableRowCell,

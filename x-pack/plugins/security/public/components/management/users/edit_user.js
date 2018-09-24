@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint camelcase: 0 */
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import React, { Component, Fragment } from 'react';
 import {
   EuiButton,

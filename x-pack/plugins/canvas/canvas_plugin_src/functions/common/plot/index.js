@@ -5,7 +5,7 @@
  */
 
 import keyBy from 'lodash.keyby';
-import { groupBy, get, set, map, sortBy } from 'lodash';
+import { groupBy, get, set, map, sortBy } from '@elastic/lodash';
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 import { getLegendConfig } from '../../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';

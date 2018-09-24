@@ -19,7 +19,7 @@
 
 import { EventEmitter } from 'events';
 import $ from 'jquery';
-import { isEqual } from 'lodash';
+import { isEqual } from '@elastic/lodash';
 import ResizeObserver from 'resize-observer-polyfill';
 
 function validateElArg(el: HTMLElement) {

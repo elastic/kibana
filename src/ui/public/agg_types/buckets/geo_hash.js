@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import precisionTemplate from '../controls/precision.html';

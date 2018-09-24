@@ -22,7 +22,7 @@
  * elasticsearch indices.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { MigrationVersion, ROOT_TYPE } from '../../serialization';
 import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
 

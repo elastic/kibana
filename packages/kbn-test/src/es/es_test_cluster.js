@@ -19,8 +19,8 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import { get } from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import { get } from '@elastic/lodash';
+import toPath from '@elastic/lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';

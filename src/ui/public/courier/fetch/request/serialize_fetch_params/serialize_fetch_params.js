@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { toJson } from '../../../../../../core_plugins/kibana/common/utils/aggressive_parse';
 
 function emptySearch() {

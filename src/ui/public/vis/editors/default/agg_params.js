@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { has, get } from 'lodash';
+import { has, get } from '@elastic/lodash';
 import aggSelectHtml from './agg_select.html';
 import advancedToggleHtml from './advanced_toggle.html';
 import '../../../filters/match_any';

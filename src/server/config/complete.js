@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
+import { difference } from '@elastic/lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 

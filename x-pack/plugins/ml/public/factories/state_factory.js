@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { listenerFactoryProvider } from './listener_factory';
 

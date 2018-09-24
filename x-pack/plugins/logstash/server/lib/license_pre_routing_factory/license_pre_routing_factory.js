@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
+import { once } from '@elastic/lodash';
 import { wrapCustomError } from '../error_wrappers';
 import { PLUGIN } from '../../../common/constants';
 

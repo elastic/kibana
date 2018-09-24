@@ -19,7 +19,7 @@
 
 import alter from '../lib/alter.js';
 import toMS from '../lib/to_milliseconds.js';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('scale_interval', {

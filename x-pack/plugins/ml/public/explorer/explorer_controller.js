@@ -12,7 +12,7 @@
  * in the view.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import DragSelect from 'dragselect';
 import moment from 'moment';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep } from '@elastic/lodash';
 import Boom from 'boom';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';

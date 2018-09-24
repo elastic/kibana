@@ -10,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import React, {
   Component

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { updateOldState } from './vis_update_state';
 
 // eslint-disable-next-line camelcase

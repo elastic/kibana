@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import AggConfigResult from '../../vis/agg_config_result';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 

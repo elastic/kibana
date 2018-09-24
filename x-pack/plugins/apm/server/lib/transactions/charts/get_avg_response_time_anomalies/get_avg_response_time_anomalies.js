@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { getAnomalyAggs } from './get_anomaly_aggs';
 import { getBucketWithInitialAnomalyBounds } from './get_buckets_with_initial_anomaly_bounds';

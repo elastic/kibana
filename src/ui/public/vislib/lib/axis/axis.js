@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import { VislibLibErrorHandlerProvider } from '../_error_handler';
 import { VislibLibAxisTitleProvider } from './axis_title';

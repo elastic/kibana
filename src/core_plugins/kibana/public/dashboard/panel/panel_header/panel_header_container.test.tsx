@@ -18,7 +18,7 @@
  */
 
 import { mount, ReactWrapper } from 'enzyme';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 

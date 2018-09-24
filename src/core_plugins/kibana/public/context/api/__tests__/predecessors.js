@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import * as _ from 'lodash';
+import * as _ from '@elastic/lodash';
 
 import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
 import { SearchSourceProvider } from 'ui/courier';

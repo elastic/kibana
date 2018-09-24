@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last, get, omit } from 'lodash';
+import { last, get, omit } from '@elastic/lodash';
 import { Vertex } from './vertex';
 
 export const TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT = 2;

@@ -5,7 +5,7 @@
  */
 
 import Promise from 'bluebird';
-import { contains, get } from 'lodash';
+import { contains, get } from '@elastic/lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';

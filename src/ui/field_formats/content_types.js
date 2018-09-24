@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { asPrettyString } from '../../core_plugins/kibana/common/utils/as_pretty_string';
 import { getHighlightHtml } from '../../core_plugins/kibana/common/highlight/highlight_html';
 

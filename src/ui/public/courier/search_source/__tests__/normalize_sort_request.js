@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { NormalizeSortRequestProvider } from '../_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 describe('SearchSource#normalizeSortRequest', function () {
   let normalizeSortRequest;

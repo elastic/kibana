@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop } from 'lodash';
+import { noop } from '@elastic/lodash';
 
 const confirmMessage = `You have unsaved changes. Proceed and discard changes?`;
 

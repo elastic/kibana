@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import React from 'react';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

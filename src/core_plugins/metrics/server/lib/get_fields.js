@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 
 export async function getFields(req) {
   const { indexPatternsService } = req.pre;

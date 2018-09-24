@@ -21,7 +21,7 @@ import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
 import es from 'event-stream';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
-import { find } from 'lodash';
+import { find } from '@elastic/lodash';
 import stripAnsi from 'strip-ansi';
 
 const GITHUB_FLAKY_TEST_LABEL = 'failed-test';

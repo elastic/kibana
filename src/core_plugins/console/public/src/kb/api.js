@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+const _ = require('@elastic/lodash');
 import { UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
 import  { globalsOnlyAutocompleteComponents, compileBodyDescription } from '../autocomplete/body_completer';

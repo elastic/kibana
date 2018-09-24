@@ -20,7 +20,7 @@
 /**
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { VislibTypesProvider } from './types';
 import { VislibLibDataProvider } from './data';
 

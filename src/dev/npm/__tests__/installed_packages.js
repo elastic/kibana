@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 import expect from 'expect.js';
 
 import { getInstalledPackages } from '../installed_packages';

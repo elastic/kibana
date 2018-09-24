@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 const longString = Array(200).join('_');
 
 export default function (id, mapping) {

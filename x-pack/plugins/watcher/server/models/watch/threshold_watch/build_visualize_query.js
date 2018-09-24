@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from '@elastic/lodash';
 import { buildInput } from './build_input';
 import { AGG_TYPES } from '../../../../common/constants';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 export default function getLastMetric(series) {
   return _.last(series.metrics.filter(s => s.type !== 'series_agg'));
 

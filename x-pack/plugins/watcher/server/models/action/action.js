@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/lodash';
 import { badRequest } from 'boom';
 import { getActionType } from '../../../common/lib/get_action_type';
 import { ACTION_TYPES } from '../../../common/constants';

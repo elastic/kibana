@@ -10,7 +10,7 @@ import { Worker } from './worker';
 import { constants } from './constants';
 import { createClient } from './helpers/create_client';
 import { indexTimestamp } from './helpers/index_timestamp';
-import { omit } from 'lodash';
+import { omit } from '@elastic/lodash';
 
 export { events } from './constants/events';
 

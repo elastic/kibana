@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 

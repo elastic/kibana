@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';

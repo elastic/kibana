@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { all } from 'lodash';
+import { all } from '@elastic/lodash';
 import {
   EuiButton,
   EuiCallOut,

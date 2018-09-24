@@ -18,7 +18,7 @@
  */
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from '../../components/field_chooser/lib/field_calculator';
 import expect from 'expect.js';

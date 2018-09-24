@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import template from './nav_menu.html';
 import uiRouter from 'ui/routes';

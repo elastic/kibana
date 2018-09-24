@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { migrateFilter } from 'ui/courier';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';

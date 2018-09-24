@@ -19,7 +19,7 @@
 
 import os from 'os';
 import v8 from 'v8';
-import { get, isObject, merge } from 'lodash';
+import { get, isObject, merge } from '@elastic/lodash';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
 

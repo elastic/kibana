@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { merge } from 'lodash';
+import { merge } from '@elastic/lodash';
 
 const OVERRIDES = {
   _source: { type: '_source' },

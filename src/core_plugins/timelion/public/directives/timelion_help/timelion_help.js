@@ -19,7 +19,7 @@
 
 import template from './timelion_help.html';
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 
 const app = uiModules.get('apps/timelion', []);

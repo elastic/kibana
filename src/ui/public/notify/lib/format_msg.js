@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { formatESMsg } from './format_es_msg';
 const has = _.has;
 

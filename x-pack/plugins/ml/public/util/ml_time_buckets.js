@@ -11,7 +11,7 @@
 // allowing for a more granular visualization interval without having to
 // modify the global settings stored in the kibana config
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
 

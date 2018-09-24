@@ -21,7 +21,7 @@ const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 import moment from 'moment';
 const expect = require('chai').expect;
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 describe(filename, function () {
   it('fills holes in the data', function () {

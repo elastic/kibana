@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import chrome from '../chrome';
 import { parseInterval } from '../utils/parse_interval';

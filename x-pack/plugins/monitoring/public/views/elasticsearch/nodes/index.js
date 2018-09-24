@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from 'lodash';
+import { find } from '@elastic/lodash';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

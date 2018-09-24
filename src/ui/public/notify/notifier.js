@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import '../render_directive';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 import { castEsToKbnFieldTypeName } from '../../../../../utils';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 

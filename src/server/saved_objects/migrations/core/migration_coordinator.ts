@@ -34,7 +34,7 @@
  * Kibana.
 */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { Logger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;

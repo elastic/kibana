@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
+import { sum as arraySum, min as arrayMin, max as arrayMax, get } from '@elastic/lodash';
 import { CANVAS_USAGE_TYPE, CANVAS_TYPE } from '../../common/lib/constants';
 import { fromExpression } from '../../common/lib/ast';
 

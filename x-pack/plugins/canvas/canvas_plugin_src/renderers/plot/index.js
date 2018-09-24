@@ -8,7 +8,7 @@
 import 'jquery';
 import '../../lib/flot-charts';
 
-import { debounce, includes } from 'lodash';
+import { debounce, includes } from '@elastic/lodash';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
 import './plot.scss';

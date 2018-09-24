@@ -19,7 +19,7 @@
 
 import { PersistedState } from 'ui/persisted_state';
 import { Embeddable } from 'ui/embeddable';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {
   constructor({ onEmbeddableStateChanged, savedVisualization, editUrl, loader }) {

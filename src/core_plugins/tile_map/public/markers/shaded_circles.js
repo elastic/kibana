@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { ScaledCirclesMarkers } from './scaled_circles';
 
 export class ShadedCirclesMarkers extends ScaledCirclesMarkers {

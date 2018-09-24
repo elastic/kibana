@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, startsWith } from 'lodash';
+import { isString, startsWith } from '@elastic/lodash';
 
 /**
  * Serializes the given object into a JSON string

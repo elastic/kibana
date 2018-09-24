@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { functions } from '../functions';
 
 export function buildNode(functionName, ...functionArgs) {

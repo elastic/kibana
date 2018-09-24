@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import { TooltipProvider } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';

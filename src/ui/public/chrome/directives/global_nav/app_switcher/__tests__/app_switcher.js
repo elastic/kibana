@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { DomLocationProvider } from '../../../../../dom_location';
-import { constant, cloneDeep } from 'lodash';
+import { constant, cloneDeep } from '@elastic/lodash';
 import $ from 'jquery';
 import '../../../..';
 import '../app_switcher';

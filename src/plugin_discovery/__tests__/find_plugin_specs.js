@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { toArray } from 'rxjs/operators';
 
 import expect from 'expect.js';
-import { isEqual } from 'lodash';
+import { isEqual } from '@elastic/lodash';
 import { findPluginSpecs } from '../find_plugin_specs';
 import { PluginSpec } from '../plugin_spec';
 

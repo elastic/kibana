@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 const valueOf = function (o) {
   if (o) return o.valueOf();

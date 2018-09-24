@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 const getRootCause = err => _.get(err, 'resp.error.root_cause');
 

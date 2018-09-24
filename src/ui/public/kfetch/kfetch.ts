@@ -18,7 +18,7 @@
  */
 
 import 'isomorphic-fetch';
-import { merge } from 'lodash';
+import { merge } from '@elastic/lodash';
 // @ts-ignore not really worth typing
 import { metadata } from 'ui/metadata';
 import url from 'url';

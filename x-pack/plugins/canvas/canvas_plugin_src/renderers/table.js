@@ -6,7 +6,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { Datatable } from '../../public/components/datatable';
 
 export const table = () => ({

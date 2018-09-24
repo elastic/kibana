@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../modules';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { Storage } from '../storage';
 
 const localStorage = new Storage(window.localStorage);

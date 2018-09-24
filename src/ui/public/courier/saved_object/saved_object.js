@@ -29,7 +29,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { InvalidJSONProperty, SavedObjectNotFound } from '../../errors';
 import MappingSetupProvider from '../../utils/mapping_setup';

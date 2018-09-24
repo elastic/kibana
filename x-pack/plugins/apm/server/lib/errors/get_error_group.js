@@ -5,7 +5,7 @@
  */
 
 import { SERVICE_NAME, ERROR_GROUP_ID } from '../../../common/constants';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 export async function getErrorGroup({ serviceName, groupId, setup }) {
   const { start, end, esFilterQuery, client, config } = setup;

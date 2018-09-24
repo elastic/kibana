@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from '@elastic/lodash';
 import { stateMonitorFactory } from '../state_monitor_factory';
 import { SimpleEmitter } from '../../utils/simple_emitter';
 

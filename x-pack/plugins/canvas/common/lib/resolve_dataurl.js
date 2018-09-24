@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { isValid } from '../../common/lib/url';
 import { missingImage } from '../../common/lib/missing_asset';
 

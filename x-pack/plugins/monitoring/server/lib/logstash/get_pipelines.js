@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, last, omit } from 'lodash';
+import { cloneDeep, last, omit } from '@elastic/lodash';
 import { checkParam } from '../error_missing_required';
 import { getMetrics } from '../details/get_metrics';
 

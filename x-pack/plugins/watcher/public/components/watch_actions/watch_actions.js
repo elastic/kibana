@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find, remove, map, difference, forEach } from 'lodash';
+import { find, remove, map, difference, forEach } from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import template from './watch_actions.html';
 import './components/watch_action';

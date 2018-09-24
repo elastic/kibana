@@ -40,7 +40,7 @@
  *     that has more than a single consecutive newline.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
 

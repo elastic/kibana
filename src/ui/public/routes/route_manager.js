@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, defaultsDeep, wrap } from 'lodash';
+import { cloneDeep, defaultsDeep, wrap } from '@elastic/lodash';
 
 import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';

@@ -18,7 +18,7 @@
  */
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';

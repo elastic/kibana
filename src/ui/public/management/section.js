@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assign } from 'lodash';
+import { assign } from '@elastic/lodash';
 import { IndexedArray } from '../indexed_array';
 
 export class ManagementSection {

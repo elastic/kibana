@@ -6,7 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';

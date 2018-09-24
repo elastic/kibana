@@ -11,7 +11,7 @@ import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';
 import { mockGetXPack } from './get_xpack';
 
-import { omit } from 'lodash';
+import { omit } from '@elastic/lodash';
 import {
   getLocalStats,
   getLocalStatsWithCaller,

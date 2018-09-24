@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, snakeCase } from 'lodash';
+import { get, snakeCase } from '@elastic/lodash';
 import { KIBANA_USAGE_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 const TYPES = [

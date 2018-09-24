@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partial } from 'lodash';
+import { partial } from '@elastic/lodash';
 import { getESFieldTypes } from './get_es_field_types';
 
 // TODO: Error handling, note: esErrors

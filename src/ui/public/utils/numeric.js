@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export function isNumeric(v) {
   return !_.isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !_.isNaN(parseFloat(v))));

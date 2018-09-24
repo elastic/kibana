@@ -11,7 +11,7 @@
  * document count on the field data card.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import d3 from 'd3';
 import moment from 'moment';
 

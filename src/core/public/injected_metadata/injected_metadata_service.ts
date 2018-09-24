@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 

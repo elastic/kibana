@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);

@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';

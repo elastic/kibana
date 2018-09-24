@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, get, values, set } from 'lodash';
+import { map, get, values, set } from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import template from './watch_action_mode_table.html';
 import { getActionType } from 'plugins/watcher/../common/lib/get_action_type';

@@ -21,7 +21,7 @@
   Single exponential smoothing. Assuming even interval
 */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export default function ses(points, alpha) {
   let origin;

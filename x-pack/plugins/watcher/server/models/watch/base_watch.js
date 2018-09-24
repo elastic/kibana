@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map, pick } from 'lodash';
+import { get, map, pick } from '@elastic/lodash';
 import { badRequest } from 'boom';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';

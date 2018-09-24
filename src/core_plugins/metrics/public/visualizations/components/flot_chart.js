@@ -20,7 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';

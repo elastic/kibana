@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isPlainObject, omit, get, set } from 'lodash';
+import { isPlainObject, omit, get, set } from '@elastic/lodash';
 import rison from 'rison-node';
 
 const stateTypeKeys = {

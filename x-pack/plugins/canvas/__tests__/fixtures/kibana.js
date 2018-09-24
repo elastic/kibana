@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, noop } from 'lodash';
+import { get, has, noop } from '@elastic/lodash';
 import mockElasticsearch from './elasticsearch_plugin';
 
 const config = {

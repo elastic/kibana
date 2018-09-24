@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 export default function byType(type) {
   return (field) => {
     switch (type) {

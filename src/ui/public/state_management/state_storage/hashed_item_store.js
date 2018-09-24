@@ -70,7 +70,7 @@
  * For these reasons, HashedItemStore doesn't concern itself with this constraint.
  */
 
-import { pull, sortBy } from 'lodash';
+import { pull, sortBy } from '@elastic/lodash';
 
 export class HashedItemStore {
 

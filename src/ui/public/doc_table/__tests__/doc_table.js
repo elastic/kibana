@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ngMock from 'ng_mock';
 import '../../private';
 import '..';

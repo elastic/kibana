@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFunction, debounce } from 'lodash';
+import { isFunction, debounce } from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import template from './flot_chart.html';
 import './flot_chart.less';

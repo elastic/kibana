@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { orderedDateAxis } from '../_ordered_date_axis';

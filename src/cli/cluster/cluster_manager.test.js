@@ -28,7 +28,7 @@ jest.mock('readline', () => ({
 }));
 
 import cluster from 'cluster';
-import { sample } from 'lodash';
+import { sample } from '@elastic/lodash';
 
 import ClusterManager from './cluster_manager';
 import Worker from './worker';

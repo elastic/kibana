@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { partition } from 'lodash';
+import { partition } from '@elastic/lodash';
 
 export function sortPrefixFirst(array, prefix, property) {
   if (!prefix) return array;

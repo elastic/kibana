@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty, omit } from 'lodash';
+import { get, isEmpty, omit } from '@elastic/lodash';
 
 /**
  * This model captures the grok debugger response from upstream to be passed to

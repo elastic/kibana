@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { range } from 'lodash';
+import { range } from '@elastic/lodash';
 
 export function MonitoringElasticsearchNodesProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');

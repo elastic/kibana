@@ -25,7 +25,7 @@ import { LICENSE_OVERRIDES } from '../src/dev/license_checker';
 import {
   isNull,
   isUndefined
-} from 'lodash';
+} from '@elastic/lodash';
 
 const allDoubleQuoteRE = /"/g;
 

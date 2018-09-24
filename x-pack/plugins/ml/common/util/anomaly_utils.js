@@ -11,7 +11,7 @@
 * to extract information for display in dashboards.
 */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 
 // List of function descriptions for which actual values from record level results should be displayed.

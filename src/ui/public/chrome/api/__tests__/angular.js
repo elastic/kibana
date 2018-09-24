@@ -18,7 +18,7 @@
  */
 
 import { initAngularApi } from '../angular';
-import { noop } from 'lodash';
+import { noop } from '@elastic/lodash';
 
 describe('Chrome API :: Angular', () => {
   describe('location helper methods', () => {

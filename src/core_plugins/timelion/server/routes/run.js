@@ -18,7 +18,7 @@
  */
 
 import Promise from 'bluebird';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 

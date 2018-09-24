@@ -21,7 +21,7 @@ import RouteManager from '../route_manager';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import '../../private';
 
 

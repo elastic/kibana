@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { getIndexPatternById } from 'plugins/ml/util/index_utils';

@@ -11,7 +11,7 @@
  * the raw data in the Explorer dashboard.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, defaultsDeep } from 'lodash';
+import { cloneDeep, defaultsDeep } from '@elastic/lodash';
 import { Subject } from 'rxjs';
 
 import { UiSettingsState } from './types';

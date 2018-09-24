@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import { IndexedArray } from '../indexed_array';
 import { isNumeric } from '../utils/numeric';

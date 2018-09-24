@@ -18,7 +18,7 @@
  */
 import './setup_mocks';
 import $ from 'jquery';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 

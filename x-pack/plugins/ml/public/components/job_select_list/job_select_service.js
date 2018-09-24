@@ -8,7 +8,7 @@
 
 // Service with functions used for broadcasting job picker changes
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { mlJobService } from 'plugins/ml/services/job_service';

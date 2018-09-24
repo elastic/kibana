@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 import { isColorDark } from '@elastic/eui';

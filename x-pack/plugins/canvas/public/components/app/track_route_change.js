@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { getWindow } from '../../lib/get_window';
 import { CANVAS_APP } from '../../../common/lib/constants';
 

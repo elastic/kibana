@@ -7,7 +7,7 @@
 import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
 import { kfetch } from 'ui/kfetch';
-import { startsWith } from 'lodash';
+import { startsWith } from '@elastic/lodash';
 
 function fetchOptionsWithDebug(fetchOptions) {
   const debugEnabled =

@@ -27,7 +27,7 @@ Hourly data might have:
  - Annual seasonality (frequency=24×365.25=8766)
 */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // Uh, I don't think this will work when you have nulls in the initial seasonal components
 function initSeasonalComponents(samplePoints, seasonLength) {

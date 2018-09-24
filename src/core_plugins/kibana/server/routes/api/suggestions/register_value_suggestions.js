@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, map } from 'lodash';
+import { get, map } from '@elastic/lodash';
 import handleESError from '../../../lib/handle_es_error';
 
 export function registerValueSuggestions(server) {

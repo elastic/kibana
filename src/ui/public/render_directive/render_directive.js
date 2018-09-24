@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isPlainObject } from 'lodash';
+import { isPlainObject } from '@elastic/lodash';
 import { uiModules } from '../modules';
 import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
 

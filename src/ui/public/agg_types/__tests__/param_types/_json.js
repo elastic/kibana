@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import expect from 'expect.js';
 import { BaseParamType } from '../../param_types/base';
 import { JsonParamType } from '../../param_types/json';

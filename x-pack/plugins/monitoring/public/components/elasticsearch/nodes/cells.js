@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { KuiTableRowCell } from '@kbn/ui-framework/components';
 

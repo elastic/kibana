@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // Note: This function uses _.clone. This will clone objects created by constructors other than Object
 // to plain Object objects. Uncloneable values such as functions, DOM nodes, Maps, Sets, and WeakMaps

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import PropTypes from 'prop-types';
 import { createInitialDataSelector } from './helpers';
 import { Request } from 'react-redux-request';

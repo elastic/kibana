@@ -19,7 +19,7 @@
 
 import { format } from 'url';
 import { resolve } from 'path';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';

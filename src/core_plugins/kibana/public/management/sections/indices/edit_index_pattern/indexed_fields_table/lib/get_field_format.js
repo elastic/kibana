@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 export function getFieldFormat(indexPattern, fieldName) {
   return indexPattern && fieldName ? get(indexPattern, ['fieldFormatMap', fieldName, 'type', 'title']) : '';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import React from 'react';
 import $ from 'jquery-flot'; // webpackShim
 import { eventBus } from './event_bus';

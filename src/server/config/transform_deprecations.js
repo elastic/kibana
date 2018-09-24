@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { partial, set } from 'lodash';
+import _, { partial, set } from '@elastic/lodash';
 import { createTransform, Deprecations } from '../../deprecation';
 import { unset } from '../../utils';
 

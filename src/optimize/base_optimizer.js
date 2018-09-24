@@ -26,7 +26,7 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 
-import { defaults } from 'lodash';
+import { defaults } from '@elastic/lodash';
 
 import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
 

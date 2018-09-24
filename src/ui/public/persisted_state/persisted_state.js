@@ -23,8 +23,8 @@
  * @extends Events
  */
 
-import _ from 'lodash';
-import toPath from 'lodash/internal/toPath';
+import _ from '@elastic/lodash';
+import toPath from '@elastic/lodash/internal/toPath';
 import { PersistedStateError } from '../errors';
 import { SimpleEmitter } from '../utils/simple_emitter';
 

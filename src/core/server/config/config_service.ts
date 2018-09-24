@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual } from '@elastic/lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 

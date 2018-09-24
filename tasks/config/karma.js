@@ -19,7 +19,7 @@
 
 import { resolve, dirname } from 'path';
 import { platform as getOsPlatform } from 'os';
-import { times } from 'lodash';
+import { times } from '@elastic/lodash';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));

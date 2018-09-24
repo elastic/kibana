@@ -19,7 +19,7 @@
 
 import { buildQueryFilter } from '../query';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 function ErrorComponent(props) {
   const { error } = props;

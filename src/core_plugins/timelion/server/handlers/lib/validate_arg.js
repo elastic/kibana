@@ -18,7 +18,7 @@
  */
 
 import argType from './arg_type';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {

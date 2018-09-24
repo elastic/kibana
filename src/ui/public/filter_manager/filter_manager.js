@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { getPhraseScript } from './lib/phrase';
 

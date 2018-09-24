@@ -19,7 +19,7 @@
 
 import Color from 'color';
 import calculateLabel from '../../../../common/calculate_label';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import getLastMetric from './get_last_metric';
 import getSplitColors from './get_split_colors';
 import { formatKey } from './format_key';

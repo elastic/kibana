@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, omit } from 'lodash';
+import { pick, omit } from '@elastic/lodash';
 import { calculateOverallStatus } from '../calculate_overall_status';
 
 export function getClustersSummary(clusters, kibanaUuid) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { wrapError } from '../../../lib/errors';
 

@@ -19,7 +19,7 @@
 
 import loadFunctions from './load_functions.js';
 const functions  = loadFunctions('series_functions/');
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 
 export default (function () {

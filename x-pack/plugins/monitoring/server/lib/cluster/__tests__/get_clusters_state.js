@@ -7,7 +7,7 @@
 import { handleResponse } from '../get_clusters_state';
 import expect from 'expect.js';
 import moment from 'moment';
-import { set } from 'lodash';
+import { set } from '@elastic/lodash';
 
 const clusters = [
   {

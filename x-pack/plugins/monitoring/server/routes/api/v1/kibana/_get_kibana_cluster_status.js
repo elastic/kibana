@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { getKibanasForClusters } from '../../../../lib/kibana/get_kibanas_for_clusters';
 
 export const getKibanaClusterStatus = (req, kbnIndexPattern, { clusterUuid }) => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { toArray } from 'lodash';
+import { toArray } from '@elastic/lodash';
 import { tabifyGetColumns } from './_get_columns';
 
 /**

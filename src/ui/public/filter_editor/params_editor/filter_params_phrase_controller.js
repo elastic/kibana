@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import chrome from '../../chrome';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');

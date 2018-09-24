@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import AggConfigResult from '../../../vis/agg_config_result';
 import expect from 'expect.js';

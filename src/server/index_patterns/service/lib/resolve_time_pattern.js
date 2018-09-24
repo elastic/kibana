@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { chain } from 'lodash';
+import { chain } from '@elastic/lodash';
 import moment from 'moment';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';

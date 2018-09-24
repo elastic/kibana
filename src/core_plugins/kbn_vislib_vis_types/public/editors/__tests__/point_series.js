@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'jquery';

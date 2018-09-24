@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize } from 'lodash';
+import { capitalize } from '@elastic/lodash';
 
 /**
  * Map the {@code severity} value to the associated alert level to be usable within the UI.

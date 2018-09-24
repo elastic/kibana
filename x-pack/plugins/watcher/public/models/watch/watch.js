@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set } from '@elastic/lodash';
 import { WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import { JsonWatch } from './json_watch';
 import { ThresholdWatch } from './threshold_watch';

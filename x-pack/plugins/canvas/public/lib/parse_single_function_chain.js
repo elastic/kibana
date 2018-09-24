@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, mapValues, map } from 'lodash';
+import { get, mapValues, map } from '@elastic/lodash';
 import { fromExpression } from '../../common/lib/ast';
 
 export function parseSingleFunctionChain(filterString) {

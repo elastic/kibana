@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy } from '@elastic/lodash';
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { getDemoRows } from './get_demo_rows';
 

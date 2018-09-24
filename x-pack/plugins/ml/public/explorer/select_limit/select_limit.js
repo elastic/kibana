@@ -10,7 +10,7 @@
 * AngularJS directive for rendering a select element with limit levels.
 */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 

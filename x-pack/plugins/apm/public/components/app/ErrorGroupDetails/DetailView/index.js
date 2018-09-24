@@ -14,7 +14,7 @@ import {
   colors,
   borderRadius
 } from '../../../../style/variables';
-import { get, capitalize, isEmpty } from 'lodash';
+import { get, capitalize, isEmpty } from '@elastic/lodash';
 import { STATUS } from '../../../../constants';
 
 import { StickyProperties } from '../../../shared/StickyProperties';

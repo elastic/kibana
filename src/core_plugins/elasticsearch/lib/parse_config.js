@@ -19,7 +19,7 @@
 
 import util from 'util';
 import url from 'url';
-import { get, noop, size, pick } from 'lodash';
+import { get, noop, size, pick } from '@elastic/lodash';
 import { readFileSync } from 'fs';
 import Bluebird from 'bluebird';
 

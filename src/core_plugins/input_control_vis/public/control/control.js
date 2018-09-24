@@ -19,7 +19,7 @@
 
 /* eslint-disable no-multi-str*/
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { i18n } from '@kbn/i18n';
 
 export function noValuesDisableMsg(fieldName, indexPatternName) {

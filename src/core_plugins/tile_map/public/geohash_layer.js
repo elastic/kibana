@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { HeatmapMarkers } from './markers/heatmap';

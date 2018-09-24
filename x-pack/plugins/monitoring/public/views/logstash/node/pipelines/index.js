@@ -8,7 +8,7 @@
  * Logstash Node Pipelines Listing
  */
 
-import { find } from 'lodash';
+import { find } from '@elastic/lodash';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

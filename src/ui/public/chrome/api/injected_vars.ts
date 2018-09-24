@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from '@elastic/lodash';
 import { InjectedMetadataStartContract } from '../../../../core/public/injected_metadata';
 
 let newPlatformInjectedVars: InjectedMetadataStartContract;

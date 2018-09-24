@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 export function hasPrimaryChildren(item)  {
   return _.some(item.children, { primary: true });

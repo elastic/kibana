@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+const _ = require('@elastic/lodash');
 const ace = require('brace');
 const $ = require('jquery');
 const curl = require('../curl');

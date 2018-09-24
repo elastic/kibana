@@ -19,7 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { intersection, union, get } from 'lodash';
+import { intersection, union, get } from '@elastic/lodash';
 
 import {
   GetEnabledScriptingLanguagesProvider,

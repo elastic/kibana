@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { detectIE } from './detect_ie';
 export default (handleChange) => {
   return (name, defaultValue) => (e) => {

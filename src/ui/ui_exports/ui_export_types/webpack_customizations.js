@@ -19,7 +19,7 @@
 
 import { isAbsolute } from 'path';
 
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp } from '@elastic/lodash';
 
 import { flatConcatAtType, mergeAtType } from './reduce';
 import { alias, wrap, uniqueKeys, mapSpec } from './modify_reduce';

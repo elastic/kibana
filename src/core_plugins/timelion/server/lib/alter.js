@@ -18,7 +18,7 @@
  */
 
 import Promise from 'bluebird';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 /* @param {Array} args
  * - args[0] must be a seriesList

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 export default (fn, data) => {
   if (_.isNumber(data)) return data;
   if (!Array.isArray(data)) return 0;

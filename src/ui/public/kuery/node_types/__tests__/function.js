@@ -18,7 +18,7 @@
  */
 
 import * as functionType from '../function';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import expect from 'expect.js';
 import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal.js';
 import * as isFunction from '../../functions/is';

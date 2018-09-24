@@ -20,7 +20,7 @@
 import glob from 'glob';
 import { join, basename } from 'path';
 import { readFileSync } from 'fs';
-import { merge } from 'lodash';
+import { merge } from '@elastic/lodash';
 
 const extensionSpecFilePaths = [];
 function _getSpec(dirname = __dirname) {

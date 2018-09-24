@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, zipObject } from 'lodash';
+import { map, zipObject } from '@elastic/lodash';
 
 export const datatable = () => ({
   name: 'datatable',

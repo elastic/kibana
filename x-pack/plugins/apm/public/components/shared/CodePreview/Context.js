@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
 import { xcode } from 'react-syntax-highlighter/dist/styles';
-import { get, size } from 'lodash';
+import { get, size } from '@elastic/lodash';
 
 import {
   unit,

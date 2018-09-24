@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { set } from 'lodash';
+import { set } from '@elastic/lodash';
 import { createTypeFilter, createQuery } from '../create_query.js';
 
 describe('Create Type Filter', () => {

@@ -20,7 +20,7 @@
 import { ToolingLog } from '@kbn/dev-utils';
 // @ts-ignore: implicit any for JS file
 import { createEsTestCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep } from '@elastic/lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';

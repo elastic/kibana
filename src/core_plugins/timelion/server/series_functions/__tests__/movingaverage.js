@@ -22,7 +22,7 @@ const fn = require(`../${filename}`);
 const expect = require('chai').expect;
 
 import moment from 'moment';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import buckets from './fixtures/bucketList';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';

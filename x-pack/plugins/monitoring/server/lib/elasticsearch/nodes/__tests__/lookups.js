@@ -6,7 +6,7 @@
 
 import { nodeTypeClass, nodeTypeLabel } from '../lookups';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 describe('Node Types Lookups', () => {
   it('Has matching classes and labels', () => {

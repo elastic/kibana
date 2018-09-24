@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit, pick, find } from 'lodash';
+import { omit, pick, find } from '@elastic/lodash';
 
 export const columns = () => ({
   name: 'columns',

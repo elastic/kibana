@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 export function extractIndexPatterns(vis) {
   const patternsToFetch = [];
 

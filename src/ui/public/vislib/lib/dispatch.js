@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from '../../utils/simple_emitter';
 

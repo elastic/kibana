@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { resolveApi } from './api_server/server';
 import { resolve, join, sep } from 'path';
-import { has, isEmpty } from 'lodash';
+import { has, isEmpty } from '@elastic/lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
 import { addExtensionSpecFilePath } from './api_server/spec';
 

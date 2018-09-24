@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { isModelPlotEnabled } from 'plugins/ml/../common/util/job_utils';

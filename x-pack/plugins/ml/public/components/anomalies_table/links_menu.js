@@ -5,7 +5,7 @@
  */
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash';
+import { merge } from '@elastic/lodash';
 import { badRequest } from 'boom';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';

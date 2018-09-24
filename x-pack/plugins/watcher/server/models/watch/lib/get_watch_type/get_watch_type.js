@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, contains, values } from 'lodash';
+import { get, contains, values } from '@elastic/lodash';
 import { WATCH_TYPES } from '../../../../../common/constants';
 
 export function getWatchType(watchJson) {

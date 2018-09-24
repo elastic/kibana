@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import template from './kbn_timepicker_quick_panel.html';
 import { uiModules } from '../../modules';
 

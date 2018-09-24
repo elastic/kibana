@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import moment from 'moment';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 import { getHeatmapColors } from '../../components/color/heatmap_color';

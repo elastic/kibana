@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'lodash';
+import { take } from '@elastic/lodash';
 
 export const head = () => ({
   name: 'head',

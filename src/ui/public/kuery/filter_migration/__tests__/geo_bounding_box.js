@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import expect from 'expect.js';
 import { convertGeoBoundingBox } from '../geo_bounding_box';
 

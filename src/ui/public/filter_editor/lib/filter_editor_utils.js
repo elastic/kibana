@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { FILTER_OPERATORS } from './filter_operators';
 
 export function getQueryDslFromFilter(filter) {

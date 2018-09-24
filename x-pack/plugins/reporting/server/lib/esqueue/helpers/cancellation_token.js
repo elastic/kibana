@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFunction } from 'lodash';
+import { isFunction } from '@elastic/lodash';
 
 export class CancellationToken {
   constructor() {

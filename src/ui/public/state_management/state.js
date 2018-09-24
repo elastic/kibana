@@ -25,7 +25,7 @@
  * @description Persists generic "state" to and reads it from the URL.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from '../utils/diff_object';

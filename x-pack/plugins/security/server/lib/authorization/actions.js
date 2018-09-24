@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isString } from 'lodash';
+import { isString } from '@elastic/lodash';
 
 export function actionsFactory(config) {
   const kibanaVersion = config.get('pkg.version');

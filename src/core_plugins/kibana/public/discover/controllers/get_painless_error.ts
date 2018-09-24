@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 export function getPainlessError(error: Error) {
   const rootCause: Array<{ lang: string; script: string }> | undefined = get(

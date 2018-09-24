@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 // bar sizes are measured in milliseconds so this assumes that the different
 // between timestamps is in milliseconds. A normal bar size is 70% which gives
 // enough spacing for the bar.

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import { PathProvider } from 'plugins/xpack_main/services/path';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import { find } from '@elastic/lodash';
 
 /**
  * Returns an object matching a given title

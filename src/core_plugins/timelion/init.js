@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import processFunctionDefinition from './server/lib/process_function_definition';
 
 export default function (server) {

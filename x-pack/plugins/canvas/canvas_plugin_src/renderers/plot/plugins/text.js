@@ -5,7 +5,7 @@
  */
 
 import $ from 'jquery';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 /*
   FreeBSD-License

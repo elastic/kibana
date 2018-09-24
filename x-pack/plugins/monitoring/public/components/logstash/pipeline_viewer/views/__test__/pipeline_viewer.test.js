@@ -7,7 +7,7 @@
 import React from 'react';
 import { PipelineViewer } from '../pipeline_viewer';
 import { shallow } from 'enzyme';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 describe('PipelineViewer component', () => {
   let pipeline;

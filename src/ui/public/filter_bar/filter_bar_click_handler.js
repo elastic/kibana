@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { dedupFilters } from './lib/dedup_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { findByParam } from '../utils/find_by_param';

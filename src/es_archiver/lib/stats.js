@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from '@elastic/lodash';
 
 export function createStats(name, log) {
   const info = (msg, ...args) => log.info(`[${name}] ${msg}`, ...args);

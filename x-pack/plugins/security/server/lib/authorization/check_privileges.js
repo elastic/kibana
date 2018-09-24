@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 import { ALL_RESOURCE } from '../../../common/constants';
 import { buildLegacyIndexPrivileges } from './privileges';
 import { validateEsPrivilegeResponse } from './validate_es_response';

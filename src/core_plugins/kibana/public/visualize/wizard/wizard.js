@@ -22,7 +22,7 @@ import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
 import '../../discover/saved_searches/saved_searches';
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { CATEGORY, CATEGORY_DISPLAY_NAMES } from 'ui/vis/vis_category';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';

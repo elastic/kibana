@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, merge } from 'lodash';
+import { get, merge } from '@elastic/lodash';
 import { checkParam } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 

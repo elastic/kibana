@@ -5,7 +5,7 @@
  */
 
 import 'isomorphic-fetch';
-import { flatten, memoize } from 'lodash';
+import { flatten, memoize } from '@elastic/lodash';
 import { escapeQuotes } from './escape_kuery';
 import { kfetch } from 'ui/kfetch';
 

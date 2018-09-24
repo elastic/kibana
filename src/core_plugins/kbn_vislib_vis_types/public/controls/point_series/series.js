@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { uiModules } from 'ui/modules';
 import vislibSeriesTemplate from './series.html';
 const module = uiModules.get('kibana');

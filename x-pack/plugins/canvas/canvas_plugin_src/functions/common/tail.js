@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { takeRight } from 'lodash';
+import { takeRight } from '@elastic/lodash';
 
 export const tail = () => ({
   name: 'tail',

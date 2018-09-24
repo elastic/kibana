@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, includes } from 'lodash';
+import { mapValues, includes } from '@elastic/lodash';
 import { Arg } from './arg';
 
 export function Fn(config) {

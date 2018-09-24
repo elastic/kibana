@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // Applies to unresolved arguments in the AST
 export default function repositionArguments(functionDef, unorderedArgs) {

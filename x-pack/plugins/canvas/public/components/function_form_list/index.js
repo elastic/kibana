@@ -5,7 +5,7 @@
  */
 
 import { compose, withProps } from 'recompose';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { interpretAst } from '../../lib/interpreter';
 import { toExpression } from '../../../common/lib/ast';

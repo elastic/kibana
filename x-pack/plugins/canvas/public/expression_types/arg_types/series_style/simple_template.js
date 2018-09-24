@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 

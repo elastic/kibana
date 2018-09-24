@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 const ace = require('brace');
 const settings = require('./settings');
 const OutputMode = require('./sense_editor/mode/output');

@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import faker from 'faker';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { AppStateProvider } from '../../state_management/app_state';
 import '..';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, values } from 'lodash';
+import { pick, values } from '@elastic/lodash';
 
 /**
  * @param object to be used to generate the search value

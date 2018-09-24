@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
 import { set } from 'object-path-immutable';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 const defaultExpression = {
   type: 'expression',

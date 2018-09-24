@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, omit, trimLeft, trimRight } from 'lodash';
+import { defaults, omit, trimLeft, trimRight } from '@elastic/lodash';
 import { parse as parseUrl, format as formatUrl } from 'url';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';

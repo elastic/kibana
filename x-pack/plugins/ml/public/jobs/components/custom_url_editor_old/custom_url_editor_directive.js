@@ -11,7 +11,7 @@
  * user to drill through from an anomaly to another URL such as a Kibana dashboard.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import rison from 'rison-node';
 
 import template from './custom_url_editor.html';

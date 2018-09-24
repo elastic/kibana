@@ -9,7 +9,7 @@
 // directive for displaying detectors form list.
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import 'plugins/ml/jobs/new_job/advanced/detector_modal';
 import 'plugins/ml/jobs/new_job/advanced/detector_filter_modal';
 import { detectorToString } from 'plugins/ml/util/string_utils';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import routes from 'ui/routes';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { toggle } from 'plugins/security/lib/util';

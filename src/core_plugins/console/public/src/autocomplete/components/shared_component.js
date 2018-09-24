@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { AutocompleteComponent } from './autocomplete_component';
 export class  SharedComponent extends AutocompleteComponent {
   constructor(name, parent) {

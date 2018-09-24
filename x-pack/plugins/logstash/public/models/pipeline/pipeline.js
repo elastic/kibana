@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit, isEqual, defaultsDeep } from 'lodash';
+import { get, omit, isEqual, defaultsDeep } from '@elastic/lodash';
 
 // This config template is presented to the user for the 'new pipeline' workflow
 const emptyPipeline = 'input {\n' +

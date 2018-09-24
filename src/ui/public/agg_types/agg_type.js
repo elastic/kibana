@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { AggParams } from './agg_params';
 import { fieldFormats } from '../registry/field_formats';
 

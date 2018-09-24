@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
+import { memoize } from '@elastic/lodash';
 
 const esErrorsFactory = memoize((server) => {
   return server.plugins.elasticsearch.getCluster('admin').errors;

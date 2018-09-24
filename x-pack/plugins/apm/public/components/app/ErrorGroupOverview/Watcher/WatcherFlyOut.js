@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,

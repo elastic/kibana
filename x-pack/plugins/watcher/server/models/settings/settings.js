@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash';
+import { merge } from '@elastic/lodash';
 import { ACTION_TYPES } from '../../../common/constants';
 
 function isEnabledByDefault(actionType) {

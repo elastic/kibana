@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set } from '@elastic/lodash';
 import { ACTION_TYPES } from 'plugins/watcher/../common/constants';
 import { EmailAction } from './email_action';
 import { LoggingAction } from './logging_action';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import '../../validate_date_interval';
 import chrome from '../../chrome';

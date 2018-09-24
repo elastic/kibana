@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, cloneDeep, has, merge } from 'lodash';
+import { isEmpty, cloneDeep, has, merge } from '@elastic/lodash';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
 

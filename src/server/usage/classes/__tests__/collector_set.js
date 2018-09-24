@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop } from 'lodash';
+import { noop } from '@elastic/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import { Collector } from '../collector';

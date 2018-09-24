@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { uiModules } from '../modules';
 // Filters out all duplicate items in an array
 

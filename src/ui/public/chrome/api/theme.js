@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function (chrome, internals) {

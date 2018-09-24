@@ -20,7 +20,7 @@
 import { Deprecations } from '../../../deprecation';
 import expect from 'expect.js';
 import index from '../index';
-import { noop, set } from 'lodash';
+import { noop, set } from '@elastic/lodash';
 import sinon from 'sinon';
 
 describe('plugins/elasticsearch', function () {

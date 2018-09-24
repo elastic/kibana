@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { WorkQueue } from './work_queue';
 
 export function wrapRouteWithPrep(route, setup) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, find } from 'lodash';
+import { get, find } from '@elastic/lodash';
 import { checkParam } from '../error_missing_required';
 import { createTypeFilter } from '../create_query';
 

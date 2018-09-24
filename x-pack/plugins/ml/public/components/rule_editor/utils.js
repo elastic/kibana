@@ -11,7 +11,7 @@ import {
   OPERATOR
 } from '../../../common/constants/detector_rule';
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from '@elastic/lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 

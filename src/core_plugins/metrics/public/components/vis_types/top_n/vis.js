@@ -24,7 +24,7 @@ import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
+import { sortBy, first, get, gt, gte, lt, lte } from '@elastic/lodash';
 const OPERATORS = { gt, gte, lt, lte };
 
 function sortByDirection(data, direction, fn) {

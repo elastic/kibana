@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
-import { without, includes } from 'lodash';
+import { without, includes } from '@elastic/lodash';
 import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
 

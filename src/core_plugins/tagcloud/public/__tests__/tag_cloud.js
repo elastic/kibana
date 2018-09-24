@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import TagCloud from '../tag_cloud';
 import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';

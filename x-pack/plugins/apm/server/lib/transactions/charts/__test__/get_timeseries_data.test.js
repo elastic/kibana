@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { getTimeseriesData } from '../get_timeseries_data';
 import timeseriesResponse from './timeseries_response.json';
 import responseTimeAnomalyResponse from './response_time_anomaly_response.json';

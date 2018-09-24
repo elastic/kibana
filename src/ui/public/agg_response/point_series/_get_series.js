@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { getPoint } from './_get_point';
 import { addToSiri } from './_add_to_siri';
 

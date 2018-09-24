@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import collectBranch from './_collect_branch';
 import numeral from 'numeral';

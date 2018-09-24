@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 
 import { timezoneProvider } from 'ui/vis/lib/timezone';

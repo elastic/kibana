@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { omit } from 'lodash';
+import { omit } from '@elastic/lodash';
 
 export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');

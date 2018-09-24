@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { clone, get } from 'lodash';
+import { clone, get } from '@elastic/lodash';
 import { resolve } from 'url';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export

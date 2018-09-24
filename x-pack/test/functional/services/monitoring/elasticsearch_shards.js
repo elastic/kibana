@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { range } from 'lodash';
+import { range } from '@elastic/lodash';
 
 const generateVisibleTextString = text => {
   return text.split("\n").join(' | ');

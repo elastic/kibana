@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq } from '@elastic/lodash';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { getReportCountsByParameter } from './get_reporting_type_counts';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';

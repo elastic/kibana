@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 function TabifyBuckets(aggResp, aggParams, timeRange) {
   if (_.has(aggResp, 'buckets')) {

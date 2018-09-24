@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import tickFormatter from '../../lib/tick_formatter';

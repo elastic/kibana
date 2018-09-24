@@ -6,7 +6,7 @@
 
 
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 

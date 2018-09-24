@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 // Throw this inside of an Angular route resolver after calling `kbnUrl.change`
 // so that the $router can observe the $location update. Otherwise, the location

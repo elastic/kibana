@@ -7,7 +7,7 @@
 
 
 import $ from   'jquery';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 
 import 'plugins/ml/components/item_select';
 import 'plugins/ml/settings/scheduled_events/components/events_list';

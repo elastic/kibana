@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, isEmpty, uniq, compact } from 'lodash';
+import { defaultsDeep, isEmpty, uniq, compact } from '@elastic/lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,

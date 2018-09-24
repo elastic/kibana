@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { i18n } from '@kbn/i18n';
 
 export function IndicesEditSectionsProvider() {

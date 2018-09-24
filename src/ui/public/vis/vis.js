@@ -28,7 +28,7 @@
  */
 
 import { EventEmitter } from 'events';
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';

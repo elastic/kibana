@@ -18,7 +18,7 @@
  */
 
 import Wreck from 'wreck';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;

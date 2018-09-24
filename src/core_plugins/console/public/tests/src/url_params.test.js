@@ -20,7 +20,7 @@ import './setup_mocks';
 import 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
-const _ = require('lodash');
+const _ = require('@elastic/lodash');
 import { UrlParams } from '../../src/autocomplete/url_params';
 import { populateContext } from '../../src/autocomplete/engine';
 

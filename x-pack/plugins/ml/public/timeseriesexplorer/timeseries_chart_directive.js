@@ -11,7 +11,7 @@
  * annotated with anomalies.
  */
 
-import _ from 'lodash';
+import _ from '@elastic/lodash';
 import $ from 'jquery';
 import angular from 'angular';
 import d3 from 'd3';

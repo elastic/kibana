@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce } from 'lodash';
+import { debounce } from '@elastic/lodash';
 import { Inspector } from '../../inspector';
 
 import { PersistedState } from '../../persisted_state';

@@ -7,7 +7,7 @@
 import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
 import { withState, withHandlers, compose } from 'recompose';
-import { get } from 'lodash';
+import { get } from '@elastic/lodash';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
 import { getFunctionDefinitions } from '../../state/selectors/app';
