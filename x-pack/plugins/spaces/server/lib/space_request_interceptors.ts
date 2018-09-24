@@ -6,6 +6,7 @@
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { wrapError } from './errors';
+import { getSpaceSelectorUrl } from './get_space_selector_url';
 import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 
 export function initSpacesRequestInterceptors(server: any) {
@@ -41,6 +42,7 @@ export function initSpacesRequestInterceptors(server: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
+    const isRequestingApplication = path.startsWith('/app');
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,
@@ -75,6 +77,26 @@ export function initSpacesRequestInterceptors(server: any) {
       }
     }
 
+    // This condition should only happen after selecting a space, or when transitioning from one application to another
+    // e.g.: Navigating from Dashboard to Timelion
+    if (isRequestingApplication) {
+      let spaceId;
+      try {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
+
+        server.log(['spaces', 'debug'], `Verifying access to space "${spaceId}"`);
+
+        await spacesClient.get(spaceId);
+      } catch (error) {
+        server.log(
+          ['spaces', 'error'],
+          `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+        );
+        // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
+        return reply.redirect(getSpaceSelectorUrl(server.config()));
+      }
+    }
     return reply.continue();
   });
 }

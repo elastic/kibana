@@ -1,0 +1,76 @@
+//
+// LAYOUT
+//
+
+.visEditorSidebar__container {
+  @include flex-parent(1, 1, auto);
+  background-color: $euiColorLightestShade;
+}
+
+.visEditorSidebar__form {
+  @include flex-parent(1, 1, auto);
+}
+
+.visEditorSidebar__config {
+  padding: $euiSizeS;
+
+  @include euiBreakpoint('l', 'xl') {
+    @include flex-parent(1, 1, 1px);
+    overflow: auto;
+  }
+}
+
+//
+// NAVIGATION
+//
+
+.visEditorSidebar__indexPattern,
+.visEditorSidebar__nav {
+  min-height: auto;
+  border-radius: 0px;
+}
+
+.visEditorSidebar__nav .navbar-right {
+  // Match correct bootstrap container spacing to pull buttons fully right
+  margin-right: -15px;
+}
+
+/**
+ * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
+ */
+.visEditorSidebar__navLink {
+  padding: 2px $euiSizeS !important; /* 1 */
+  color: $euiColorDarkShade !important; /* 1 */
+
+  &.visEditorSidebar__navLink-isSelected {
+    border-bottom: 2px solid $euiColorPrimary;
+    border-color: $euiColorPrimary !important;
+    color: $euiColorPrimary !important;
+
+    &:before {
+      display: none;
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
+
+/**
+ * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
+ */
+.visEditorSidebar__navLink--danger {
+  color: $euiColorEmptyShade !important; /* 1 */
+  background-color: $euiColorDanger;
+
+  &:hover {
+    background-color: shadeOrTint($euiColorDanger, 12%, 0%) !important; /* 1 */
+  }
+}
+
+.visEditorSidebar__navButtonLink {
+  // Make the line-height the same size as the icon for better alignement
+  line-height: $euiSize;
+}
+

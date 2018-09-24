@@ -11,28 +11,13 @@ exports[`render 1`] = `
   size="s"
 >
   <EuiFlyoutBody>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+    <EuiTitle
+      size="s"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            Add Panels
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <h1>
+        Add Panels
+      </h1>
+    </EuiTitle>
     <EuiTabs
       expand={false}
       size="m"
@@ -72,11 +57,11 @@ exports[`render 1`] = `
           Add new Visualization
         </EuiButton>
       }
-      find={[Function]}
       key="visSavedObjectFinder"
       noItemsMessage="No matching visualizations found."
       onChoose={[Function]}
       savedObjectType="visualization"
+      visTypes={Object {}}
     />
   </EuiFlyoutBody>
 </EuiFlyout>

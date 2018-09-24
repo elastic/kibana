@@ -142,50 +142,15 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const expectTypeRequired = (resp: any) => {
     expect(resp.body).to.eql({
-      page: 1,
-      per_page: 20,
-      total: 5,
-      saved_objects: [
-        {
-          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-          type: 'index-pattern',
-          updated_at: '2017-09-21T18:49:16.270Z',
-          version: 1,
-          attributes: resp.body.saved_objects[0].attributes,
-        },
-        {
-          id: '7.0.0-alpha1',
-          type: 'config',
-          updated_at: '2017-09-21T18:49:16.302Z',
-          version: 1,
-          attributes: resp.body.saved_objects[1].attributes,
-        },
-        {
-          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          type: 'visualization',
-          updated_at: '2017-09-21T18:51:23.794Z',
-          version: 1,
-          attributes: resp.body.saved_objects[2].attributes,
-        },
-        {
-          id: `${getIdPrefix(spaceId)}be3733a0-9efe-11e7-acb3-3dab96693fab`,
-          type: 'dashboard',
-          updated_at: '2017-09-21T18:57:40.826Z',
-          version: 1,
-          attributes: resp.body.saved_objects[3].attributes,
-        },
-        {
-          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          type: 'globaltype',
-          updated_at: '2017-09-21T18:59:16.270Z',
-          version: 1,
-          attributes: {
-            name: 'My favorite global object',
-          },
-        },
-      ],
+      error: 'Bad Request',
+      message: 'child "type" fails because ["type" is required]',
+      statusCode: 400,
+      validation: {
+        keys: ['type'],
+        source: 'query',
+      },
     });
   };
 
@@ -228,10 +193,10 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   return {
     createExpectEmpty,
     createExpectRbacForbidden,
-    createExpectResults,
     createExpectLegacyForbidden,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
+    expectTypeRequired,
     findTest,
   };
 }

@@ -22,12 +22,10 @@ import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { BuildHierarchicalDataProvider } from '../build_hierarchical_data';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VislibResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
-
-let hierarchicalConverter;
+import { VislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
+import { tabifyAggResponse } from '../../tabify';
 
 describe('buildHierarchicalData', function () {
   let Vis;
@@ -36,17 +34,16 @@ describe('buildHierarchicalData', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    hierarchicalConverter = Private(BuildHierarchicalDataProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    responseHandler = Private(VislibResponseHandlerProvider).handler;
+    responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
   }));
 
-  const buildHierarchicalData = async (aggs, data) => {
+  const buildHierarchicalData = async (aggs, response) => {
     const vis = new Vis(indexPattern, { type: 'histogram',  aggs: aggs });
     vis.isHierarchical = () => true;
-    vis.type.responseConverter = hierarchicalConverter;
-    return await responseHandler(vis, data);
+    const data = tabifyAggResponse(vis.aggs, response, { metricsAtAllLevels: true });
+    return await responseHandler(data);
   };
 
   describe('metric only', function () {

@@ -33,6 +33,7 @@ export interface RequestHandlerParams {
   forceFetch: boolean;
   queryFilter: QueryFilter;
   uiState: PersistedState;
+  partialRows?: boolean;
 }
 
 export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;

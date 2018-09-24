@@ -5,7 +5,6 @@
  */
 
 import { get, uniq } from 'lodash';
-import { IGNORED_TYPES } from '../../../common/constants';
 
 export class SecureSavedObjectsClientWrapper {
   constructor(options) {
@@ -62,11 +61,13 @@ export class SecureSavedObjectsClientWrapper {
   }
 
   async find(options = {}) {
-    if (options.type) {
-      return await this._findWithTypes(options);
-    }
+    await this._ensureAuthorized(
+      options.type,
+      'find',
+      { options }
+    );
 
-    return await this._findAcrossAllTypes(options);
+    return this._baseClient.find(options);
   }
 
   async bulkGet(objects = [], options = {}) {
@@ -134,52 +135,6 @@ export class SecureSavedObjectsClientWrapper {
       const msg = `Unable to ${action} ${[...types].sort().join(',')}, missing ${[...missing].sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
-  }
-
-  async _findAcrossAllTypes(options) {
-    const action = 'find';
-
-    // we have to filter for only their authorized types
-    const types = this._savedObjectTypes.filter(type => !IGNORED_TYPES.includes(type));
-    const typesToPrivilegesMap = new Map(types.map(type => [type, this._actions.getSavedObjectAction(type, action)]));
-    const { username, privileges } = await this._checkSavedObjectPrivileges(Array.from(typesToPrivilegesMap.values()));
-
-    const authorizedTypes = Array.from(typesToPrivilegesMap.entries())
-      .filter(([, privilege]) => privileges[privilege])
-      .map(([type]) => type);
-
-    if (authorizedTypes.length === 0) {
-      this._auditLogger.savedObjectsAuthorizationFailure(
-        username,
-        action,
-        types,
-        this._getMissingPrivileges(privileges),
-        { options }
-      );
-      throw this.errors.decorateForbiddenError(new Error(`Not authorized to find saved_object`));
-    }
-
-    this._auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, {
-      options: {
-        ...options,
-        type: authorizedTypes,
-      }
-    });
-
-    return await this._baseClient.find({
-      ...options,
-      type: authorizedTypes
-    });
-  }
-
-  async _findWithTypes(options) {
-    await this._ensureAuthorized(
-      options.type,
-      'find',
-      { options },
-    );
-
-    return await this._baseClient.find(options);
   }
 
   _getMissingPrivileges(response) {

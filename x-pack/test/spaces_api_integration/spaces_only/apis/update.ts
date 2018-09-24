@@ -20,7 +20,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     expectNewSpaceNotFound,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe.only('update', () => {
+  describe('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

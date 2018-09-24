@@ -24,6 +24,8 @@ import * as getSearchDslNS from './search_dsl/search_dsl';
 import { getSearchDsl } from './search_dsl';
 import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
+import { SavedObjectsSchema } from '../../schema';
+import { SavedObjectsSerializer } from '../../serialization';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -34,6 +36,7 @@ describe('SavedObjectsRepository', () => {
   let callAdminCluster;
   let onBeforeWrite;
   let savedObjectsRepository;
+  let migrator;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const noNamespaceSearchResults = {
@@ -83,12 +86,12 @@ describe('SavedObjectsRepository', () => {
       }, {
         _index: '.kibana',
         _type: 'doc',
-        _id: 'no-ns-type:something',
+        _id: 'globaltype:something',
         _score: 1,
         _source: {
-          type: 'no-ns-type',
+          type: 'globaltype',
           ...mockTimestampFields,
-          'no-ns-type': {
+          'globaltype': {
             name: 'bar',
           }
         }
@@ -146,12 +149,12 @@ describe('SavedObjectsRepository', () => {
       }, {
         _index: '.kibana',
         _type: 'doc',
-        _id: 'no-ns-type:something',
+        _id: 'globaltype:something',
         _score: 1,
         _source: {
-          type: 'no-ns-type',
+          type: 'globaltype',
           ...mockTimestampFields,
-          'no-ns-type': {
+          'globaltype': {
             name: 'bar',
           }
         }
@@ -188,19 +191,23 @@ describe('SavedObjectsRepository', () => {
     }
   };
 
-  const schema = {
-    isNamespaceAgnostic: type => type === 'no-ns-type',
-  };
+  const schema = new SavedObjectsSchema({ globaltype: { isNamespaceAgnostic: true } });
 
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
+    migrator = {
+      migrateDocument: sinon.spy((doc) => doc),
+    };
 
+    const serializer = new SavedObjectsSerializer(schema);
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
-      schema,
       callCluster: callAdminCluster,
+      migrator,
+      schema,
+      serializer,
       onBeforeWrite
     });
 
@@ -223,12 +230,12 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('formats Elasticsearch response', async () => {
-      const response = await savedObjectsRepository.create('index-pattern',
-        {
-          title: 'Logstash'
-        }, {
-          id: 'logstash-*'
-        });
+      const response = await savedObjectsRepository.create('index-pattern', {
+        title: 'Logstash'
+      }, {
+        id: 'logstash-*',
+        namespace: 'foo-namespace',
+      });
 
       expect(response).toEqual({
         type: 'index-pattern',
@@ -250,6 +257,29 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWith(callAdminCluster, 'index');
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('migrates the doc', async () => {
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.title = doc.attributes.title + '!!';
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+      expect(callAdminCluster.args[0][1]).toMatchObject({
+        body: {
+          'index-pattern': { id: 'logstash-*', title: 'Logstash!!' },
+          migrationVersion: { foo: '2.3.4' },
+          type: 'index-pattern',
+          updated_at: '2017-08-14T15:49:14.886Z'
+        },
+      });
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
@@ -301,7 +331,6 @@ describe('SavedObjectsRepository', () => {
           namespace: 'foo-namespace',
         },
       );
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: `foo-namespace:index-pattern:foo-id`,
@@ -312,7 +341,6 @@ describe('SavedObjectsRepository', () => {
           updated_at: '2017-08-14T15:49:14.886Z'
         }
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
@@ -325,7 +353,6 @@ describe('SavedObjectsRepository', () => {
           id: 'foo-id'
         }
       );
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: `index-pattern:foo-id`,
@@ -335,12 +362,11 @@ describe('SavedObjectsRepository', () => {
           updated_at: '2017-08-14T15:49:14.886Z'
         }
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      await savedObjectsRepository.create('no-ns-type',
+      await savedObjectsRepository.create('globaltype',
         {
           title: 'Logstash'
         },
@@ -349,17 +375,15 @@ describe('SavedObjectsRepository', () => {
           namespace: 'foo-namespace',
         }
       );
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
-        id: `no-ns-type:foo-id`,
+        id: `globaltype:foo-id`,
         body: {
-          [`no-ns-type`]: { title: 'Logstash' },
-          type: 'no-ns-type',
+          [`globaltype`]: { title: 'Logstash' },
+          type: 'globaltype',
           updated_at: '2017-08-14T15:49:14.886Z'
         }
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
   });
@@ -374,16 +398,41 @@ describe('SavedObjectsRepository', () => {
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
+      const bulkCalls = callAdminCluster.args.filter(([path]) => path === 'bulk');
+
+      expect(bulkCalls.length).toEqual(1);
+
+      expect(bulkCalls[0][1].body).toEqual([
+        { create: { _type: 'doc', _id: 'config:one' } },
+        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+        { create: { _type: 'doc', _id: 'index-pattern:two' } },
+        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+      ]);
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('migrates the docs', async () => {
+      callAdminCluster.returns({ items: [] });
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.title = doc.attributes.title + '!!';
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ]);
+
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           { create: { _type: 'doc', _id: 'config:one' } },
-          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One!!' }, migrationVersion: { foo: '2.3.4' } },
           { create: { _type: 'doc', _id: 'index-pattern:two' } },
-          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two!!' }, migrationVersion: { foo: '2.3.4' } }
         ]
       }));
-
-      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
@@ -480,7 +529,9 @@ describe('SavedObjectsRepository', () => {
       const response = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-      ]);
+      ], {
+        namespace: 'foo-namespace',
+      });
 
       expect(response).toEqual({
         saved_objects: [
@@ -503,7 +554,6 @@ describe('SavedObjectsRepository', () => {
 
     it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
       callAdminCluster.returns({ items: [] });
-
       await savedObjectsRepository.bulkCreate(
         [
           { type: 'config', id: 'one', attributes: { title: 'Test One' } },
@@ -513,7 +563,6 @@ describe('SavedObjectsRepository', () => {
           namespace: 'foo-namespace',
         },
       );
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
@@ -523,18 +572,15 @@ describe('SavedObjectsRepository', () => {
           { namespace: 'foo-namespace', type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
         ]
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
       callAdminCluster.returns({ items: [] });
-
       await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
@@ -544,30 +590,26 @@ describe('SavedObjectsRepository', () => {
           { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
         ]
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.returns({ items: [] });
-
       await savedObjectsRepository.bulkCreate(
         [
-          { type: 'no-ns-type', id: 'one', attributes: { title: 'Test One' } },
+          { type: 'globaltype', id: 'one', attributes: { title: 'Test One' } },
         ],
         {
           namespace: 'foo-namespace',
         },
       );
-
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
-          { create: { _type: 'doc', _id: 'no-ns-type:one' } },
-          { type: 'no-ns-type', ...mockTimestampFields, 'no-ns-type': { title: 'Test One' } },
+          { create: { _type: 'doc', _id: 'globaltype:one' } },
+          { type: 'globaltype', ...mockTimestampFields, 'globaltype': { title: 'Test One' } },
         ]
       }));
-
       sinon.assert.calledOnce(onBeforeWrite);
     });
   });
@@ -629,14 +671,14 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns({
         result: 'deleted'
       });
-      await savedObjectsRepository.delete('no-ns-type', 'logstash-*', {
+      await savedObjectsRepository.delete('globaltype', 'logstash-*', {
         namespace: 'foo-namespace',
       });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
         type: 'doc',
-        id: 'no-ns-type:logstash-*',
+        id: 'globaltype:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
         ignore: [404],
@@ -689,10 +731,17 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#find', () => {
+
+    it('requires type to be defined', async () => {
+      await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
+    });
+
     it('requires searchFields be an array if defined', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
       try {
-        await savedObjectsRepository.find({ searchFields: 'string' });
+        await savedObjectsRepository.find({ type: 'foo', searchFields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -704,7 +753,7 @@ describe('SavedObjectsRepository', () => {
     it('requires fields be an array if defined', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
       try {
-        await savedObjectsRepository.find({ fields: 'string' });
+        await savedObjectsRepository.find({ type: 'foo', fields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -713,7 +762,7 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, schema, namespace, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
+    it('passes mappings, schema, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
       callAdminCluster.returns(namespacedSearchResults);
       const relevantOpts = {
         namespace: 'foo-namespace',
@@ -732,7 +781,7 @@ describe('SavedObjectsRepository', () => {
     it('merges output of getSearchDsl into es request body', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
       getSearchDsl.returns({ query: 1, aggregations: 2 });
-      await savedObjectsRepository.find();
+      await savedObjectsRepository.find({ type: 'foo' });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
@@ -747,14 +796,14 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns(noNamespaceSearchResults);
       const count = noNamespaceSearchResults.hits.hits.length;
 
-      const response = await savedObjectsRepository.find();
+      const response = await savedObjectsRepository.find({ type: 'foo' });
 
       expect(response.total).toBe(count);
       expect(response.saved_objects).toHaveLength(count);
 
       noNamespaceSearchResults.hits.hits.forEach((doc, i) => {
         expect(response.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(index-pattern|config|no-ns-type)\:/, ''),
+          id: doc._id.replace(/(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
           version: doc._version,
@@ -768,6 +817,7 @@ describe('SavedObjectsRepository', () => {
       const count = namespacedSearchResults.hits.hits.length;
 
       const response = await savedObjectsRepository.find({
+        type: 'foo',
         namespace: 'foo-namespace',
       });
 
@@ -776,7 +826,7 @@ describe('SavedObjectsRepository', () => {
 
       namespacedSearchResults.hits.hits.forEach((doc, i) => {
         expect(response.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|no-ns-type)\:/, ''),
+          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
           version: doc._version,
@@ -787,7 +837,7 @@ describe('SavedObjectsRepository', () => {
 
     it('accepts per_page/page', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
-      await savedObjectsRepository.find({ perPage: 10, page: 6 });
+      await savedObjectsRepository.find({ type: 'foo', perPage: 10, page: 6 });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -800,12 +850,12 @@ describe('SavedObjectsRepository', () => {
 
     it('can filter by fields', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
-      await savedObjectsRepository.find({ fields: ['title'] });
+      await savedObjectsRepository.find({ type: 'foo', fields: ['title'] });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         _source: [
-          '*.title', 'type', 'title'
+          'foo.title', 'namespace', 'type', 'title'
         ]
       }));
 
@@ -842,9 +892,24 @@ describe('SavedObjectsRepository', () => {
       }
     };
 
-    it('formats Elasticsearch response', async () => {
+    it('formats Elasticsearch response when there is no namespace', async () => {
+      callAdminCluster.returns(Promise.resolve(noNamespaceResult));
+      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
+      sinon.assert.notCalled(onBeforeWrite);
+      expect(response).toEqual({
+        id: 'logstash-*',
+        type: 'index-pattern',
+        updated_at: mockTimestamp,
+        version: 2,
+        attributes: {
+          title: 'Testing'
+        }
+      });
+    });
+
+    it('formats Elasticsearch response when there are namespaces', async () => {
       callAdminCluster.returns(Promise.resolve(namespacedResult));
-      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*', 'foo-namespace');
+      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
       sinon.assert.notCalled(onBeforeWrite);
       expect(response).toEqual({
         id: 'logstash-*',
@@ -885,14 +950,14 @@ describe('SavedObjectsRepository', () => {
 
     it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.returns(Promise.resolve(namespacedResult));
-      await savedObjectsRepository.get('no-ns-type', 'logstash-*', {
+      await savedObjectsRepository.get('globaltype', 'logstash-*', {
         namespace: 'foo-namespace',
       });
 
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
-        id: 'no-ns-type:logstash-*',
+        id: 'globaltype:logstash-*',
         type: 'doc'
       }));
     });
@@ -905,7 +970,7 @@ describe('SavedObjectsRepository', () => {
       await savedObjectsRepository.bulkGet([
         { id: 'one', type: 'config' },
         { id: 'two', type: 'index-pattern' },
-        { id: 'three', type: 'no-ns-type' },
+        { id: 'three', type: 'globaltype' },
       ]);
 
       sinon.assert.calledOnce(callAdminCluster);
@@ -914,7 +979,7 @@ describe('SavedObjectsRepository', () => {
           docs: [
             { _type: 'doc', _id: 'config:one' },
             { _type: 'doc', _id: 'index-pattern:two' },
-            { _type: 'doc', _id: 'no-ns-type:three' },
+            { _type: 'doc', _id: 'globaltype:three' },
           ]
         }
       }));
@@ -929,7 +994,7 @@ describe('SavedObjectsRepository', () => {
         [
           { id: 'one', type: 'config' },
           { id: 'two', type: 'index-pattern' },
-          { id: 'three', type: 'no-ns-type' },
+          { id: 'three', type: 'globaltype' },
         ], {
           namespace: 'foo-namespace',
         }
@@ -941,7 +1006,7 @@ describe('SavedObjectsRepository', () => {
           docs: [
             { _type: 'doc', _id: 'foo-namespace:config:one' },
             { _type: 'doc', _id: 'foo-namespace:index-pattern:two' },
-            { _type: 'doc', _id: 'no-ns-type:three' },
+            { _type: 'doc', _id: 'globaltype:three' },
           ]
         }
       }));
@@ -1013,7 +1078,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('returns current ES document version', async () => {
-      const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes);
+      const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' });
       expect(response).toEqual({
         id,
         type,
@@ -1037,7 +1102,7 @@ describe('SavedObjectsRepository', () => {
       }));
     });
 
-    it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
+    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.update('index-pattern', 'logstash-*', {
         title: 'Testing',
       }, {
@@ -1050,7 +1115,7 @@ describe('SavedObjectsRepository', () => {
         id: 'foo-namespace:index-pattern:logstash-*',
         version: undefined,
         body: {
-          doc: { namespace: 'foo-namespace', updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
         },
         ignore: [404],
         refresh: 'wait_for',
@@ -1080,7 +1145,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      await savedObjectsRepository.update('no-ns-type', 'foo', {
+      await savedObjectsRepository.update('globaltype', 'foo', {
         name: 'bar',
       }, {
         namespace: 'foo-namespace',
@@ -1089,10 +1154,10 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: 'doc',
-        id: 'no-ns-type:foo',
+        id: 'globaltype:foo',
         version: undefined,
         body: {
-          doc: { updated_at: mockTimestamp, 'no-ns-type': { name: 'bar' } }
+          doc: { updated_at: mockTimestamp, 'globaltype': { name: 'bar' } }
         },
         ignore: [404],
         refresh: 'wait_for',

@@ -55,6 +55,7 @@ export class SpacesClient {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
 
       const spaces = saved_objects.map(this.transformSavedObjectToSpace);
@@ -82,6 +83,7 @@ export class SpacesClient {
         type: 'space',
         page: 1,
         perPage: 1000,
+        sortField: 'name.keyword',
       });
 
       return saved_objects.map(this.transformSavedObjectToSpace);
