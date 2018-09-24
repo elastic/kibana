@@ -3,6 +3,6 @@
   "version": "kibana",
   "dependencies": {
     "@elastic/eui": "0.0.55",
-    "react": "^16.4.1"
+    "react": "^16.2.2"
   }
 }
