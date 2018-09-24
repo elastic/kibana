@@ -22,7 +22,7 @@ export class ALayer {
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 22);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
@@ -49,6 +49,18 @@ export class ALayer {
 
   isVisible() {
     return this._descriptor.visible;
+  }
+
+  showAtZoomLevel(zoom) {
+    if (this._descriptor.showAtAllZoomLevels) {
+      return true;
+    }
+
+    if (zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom) {
+      return true;
+    }
+
+    return false;
   }
 
   isTemporary() {

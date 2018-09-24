@@ -41,7 +41,7 @@ export class AddLayerPanel extends React.Component {
       sourceType: '',
       showAtAllZoomLevels: true,
       minZoom: 0,
-      maxZoom: 22,
+      maxZoom: 24,
     };
   }
 
@@ -85,7 +85,7 @@ export class AddLayerPanel extends React.Component {
 
   _onMinZoomChange = (event) => {
     const sanitizedValue = parseInt(event.target.value, 10);
-    const minZoom = sanitizedValue >= 22 ? 21 : sanitizedValue;
+    const minZoom = sanitizedValue >= 24 ? 23 : sanitizedValue;
     this.setState((prevState) => {
       if (minZoom >= prevState.maxZoom) {
         return {
@@ -253,7 +253,7 @@ export class AddLayerPanel extends React.Component {
         >
           <EuiRange
             min={0}
-            max={22}
+            max={24}
             value={this.state.minZoom.toString()}
             onChange={this._onMinZoomChange}
             showInput
@@ -265,7 +265,7 @@ export class AddLayerPanel extends React.Component {
         >
           <EuiRange
             min={0}
-            max={22}
+            max={24}
             value={this.state.maxZoom.toString()}
             onChange={this._onMaxZoomChange}
             showInput

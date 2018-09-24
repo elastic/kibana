@@ -47,6 +47,10 @@ export class VectorLayer extends ALayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+
     const timeAware = await this._source.isTimeAware();
     const extentAware = this._source.filterByMapBounds();
     if (!timeAware && !extentAware) {
@@ -116,17 +120,25 @@ export class VectorLayer extends ALayer {
       isPointsOnly = false;
     }
 
+    if (isPointsOnly) {
+      const pointLayerId = this.getId() +  '_circle';
+      this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
+      mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+      if (!this._descriptor.showAtAllZoomLevels) {
+        mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+      }
+      return;
+    }
+
     const fillLayerId = this.getId() +  '_fill';
     const strokeLayerId = this.getId() +  '_line';
-    const pointLayerId = this.getId() +  '_circle';
-    if (isPointsOnly) {
-      this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
-    } else {
-      this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
-    }
+    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-
+    if (!this._descriptor.showAtAllZoomLevels) {
+      mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+      mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
   }
 
   renderStyleEditor(style, options) {
