@@ -27,6 +27,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSuperSelect,
+  EuiSwitch,
+  EuiRange,
 } from '@elastic/eui';
 
 export class AddLayerPanel extends React.Component {
@@ -37,6 +39,9 @@ export class AddLayerPanel extends React.Component {
     this.state = {
       label: '',
       sourceType: '',
+      showAtAllZoomLevels: true,
+      minZoom: 0,
+      maxZoom: 22,
     };
   }
 
@@ -44,18 +49,68 @@ export class AddLayerPanel extends React.Component {
     this.layer = source.createDefaultLayer({
       temporary: true,
       label: this.state.label,
+      showAtAllZoomLevels: this.state.showAtAllZoomLevels,
+      minZoom: this.state.minZoom,
+      maxZoom: this.state.maxZoom,
     });
     this.props.previewLayer(this.layer);
   }
 
   _onLabelChange = (event) => {
+    const label = event.target.value;
+    this.setState({ label });
+
+    if (this.layer) {
+      this.props.updateLabel(this.layer.getId(), label);
+    }
+  }
+
+  _onShowAtAllZoomLevelsChange = (event) => {
+    const isChecked = event.target.checked;
     this.setState({
-      label: event.target.value,
+      showAtAllZoomLevels: isChecked,
     });
 
     if (this.layer) {
-      this.props.updateLayerLabel(this.layer.getId(), event.target.value);
+      this.props.updateShowAtAllZoomLevels(this.layer.getId(), isChecked);
     }
+  };
+
+  _onZoomRangeChange = () => {
+    if (this.layer) {
+      this.props.updateMinZoom(this.layer.getId(), this.state.minZoom);
+      this.props.updateMaxZoom(this.layer.getId(), this.state.maxZoom);
+    }
+  }
+
+  _onMinZoomChange = (event) => {
+    const sanitizedValue = parseInt(event.target.value, 10);
+    const minZoom = sanitizedValue >= 22 ? 21 : sanitizedValue;
+    this.setState((prevState) => {
+      if (minZoom >= prevState.maxZoom) {
+        return {
+          minZoom,
+          maxZoom: minZoom + 1,
+        };
+      }
+
+      return { minZoom };
+    }, this._onZoomRangeChange);
+  }
+
+  _onMaxZoomChange = (event) => {
+    const sanitizedValue = parseInt(event.target.value, 10);
+    const maxZoom = sanitizedValue <= 0 ? 1 : sanitizedValue;
+    this.setState((prevState) => {
+      if (maxZoom <= prevState.minZoom) {
+        return {
+          minZoom: maxZoom - 1,
+          maxZoom
+        };
+      }
+
+      return { maxZoom };
+    }, this._onZoomRangeChange);
   }
 
   _onSourceTypeChange = (sourceType) => {
@@ -186,6 +241,40 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
+  _renderZoomSliders() {
+    if (this.state.showAtAllZoomLevels) {
+      return;
+    }
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label="Min zoom"
+        >
+          <EuiRange
+            min={0}
+            max={22}
+            value={this.state.minZoom.toString()}
+            onChange={this._onMinZoomChange}
+            showInput
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label="Max zoom"
+        >
+          <EuiRange
+            min={0}
+            max={22}
+            value={this.state.maxZoom.toString()}
+            onChange={this._onMaxZoomChange}
+            showInput
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+
   _renderAddLayerForm() {
     return (
       <EuiForm>
@@ -198,6 +287,16 @@ export class AddLayerPanel extends React.Component {
             aria-label="layer display name"
           />
         </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label="Show layer at all zoom levels"
+            checked={this.state.showAtAllZoomLevels}
+            onChange={this._onShowAtAllZoomLevelsChange}
+          />
+        </EuiFormRow>
+
+        {this._renderZoomSliders()}
 
         {this._renderSourceSelect()}
 

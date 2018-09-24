@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
+
 export class ALayer {
 
   constructor({ layerDescriptor, source, style }) {
@@ -18,6 +20,9 @@ export class ALayer {
     layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
+    layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
+    layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 22);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
