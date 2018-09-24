@@ -18,20 +18,31 @@
  */
 
 import _ from 'lodash';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
+import { PanelState } from '../selectors';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
 const PANEL_WIDTH_SCALE_FACTOR = 4;
 
 export class PanelUtils {
-
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
-  static convertPanelDataPre_6_1(panel) { // eslint-disable-line camelcase
+  public static convertPanelDataPre_6_1(panel: {
+    panelIndex: string;
+    gridData: { x: number; y: number; w: number; h: number; id: string };
+    col: number;
+    row: number;
+    size_x: any;
+    size_y: any;
+    version: string;
+  }) {
+    // eslint-disable-line camelcase
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
-        throw new Error(`Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: ${key}`);
+        throw new Error(
+          `Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: ${key}`
+        );
       }
     });
 
@@ -40,10 +51,10 @@ export class PanelUtils {
       y: panel.row - 1,
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
-      i: panel.panelIndex.toString()
+      id: panel.panelIndex.toString(),
     };
     panel.version = chrome.getKibanaVersion();
-    panel.panelIndex = panel.panelIndex.toString();
+    panel.panelIndex = panel.panelIndex;
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;
@@ -56,15 +67,26 @@ export class PanelUtils {
   // 1) decrease column height from 100 to 20.
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
-  static convertPanelDataPre_6_3(panel, useMargins) { // eslint-disable-line camelcase
+  public static convertPanelDataPre_6_3(
+    panel: {
+      gridData: { w: number; x: number; h: number; y: number };
+      version: string;
+    },
+    useMargins: boolean
+  ) {
+    // eslint-disable-line camelcase
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
-        throw new Error(`Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`);
+        throw new Error(
+          `Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`
+        );
       }
     });
 
     // see https://github.com/elastic/kibana/issues/20635 on why the scale factor changes when margins are being used
-    const heightScaleFactor = useMargins ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS : PANEL_HEIGHT_SCALE_FACTOR;
+    const heightScaleFactor = useMargins
+      ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS
+      : PANEL_HEIGHT_SCALE_FACTOR;
 
     panel.gridData.w = panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR;
     panel.gridData.x = panel.gridData.x * PANEL_WIDTH_SCALE_FACTOR;
@@ -75,32 +97,32 @@ export class PanelUtils {
     return panel;
   }
 
-  static parseVersion(version = '6.0.0') {
+  public static parseVersion(version = '6.0.0') {
     const versionSplit = version.split('.');
     if (versionSplit.length < 3) {
       throw new Error(`Invalid version, ${version}, expected <major>.<minor>.<patch>`);
     }
     return {
       major: parseInt(versionSplit[0], 10),
-      minor: parseInt(versionSplit[1], 10)
+      minor: parseInt(versionSplit[1], 10),
     };
   }
 
-  static initPanelIndexes(panels) {
+  public static initPanelIndexes(panels: PanelState[]) {
     // find the largest panelIndex in all the panels
     let maxIndex = this.getMaxPanelIndex(panels);
 
     // ensure that all panels have a panelIndex
-    panels.forEach(function (panel) {
+    panels.forEach(panel => {
       if (!panel.panelIndex) {
-        panel.panelIndex = maxIndex++;
+        panel.panelIndex = (maxIndex++).toString();
       }
     });
   }
 
-  static getMaxPanelIndex(panels) {
-    let maxId = panels.reduce(function (id, panel) {
-      return Math.max(id, panel.panelIndex || id);
+  public static getMaxPanelIndex(panels: PanelState[]) {
+    let maxId = panels.reduce((id, panel) => {
+      return Math.max(id, Number(panel.panelIndex));
     }, 0);
     return ++maxId;
   }
