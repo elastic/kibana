@@ -16,7 +16,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     updateTest,
-    expectNewSpaceNotFound,
+    expectNotFound,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectRbacForbidden,
@@ -98,7 +98,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
@@ -124,7 +124,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
@@ -150,7 +150,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
@@ -176,7 +176,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }

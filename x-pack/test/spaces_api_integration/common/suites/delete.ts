@@ -26,6 +26,45 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectLegacyForbidden = (username: string, action: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const createExpectResult = (expectedResult: any) => (resp: any) => {
+    expect(resp.body).to.eql(expectedResult);
+  };
+
+  const expectEmptyResult = (resp: any) => {
+    expect(resp.body).to.eql('');
+  };
+
+  const expectNotFound = (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Not Found',
+      statusCode: 404,
+    });
+  };
+
+  const expectRbacForbidden = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Unauthorized to delete spaces',
+    });
+  };
+
+  const expectReservedSpaceResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Bad Request',
+      statusCode: 400,
+      message: `This Space cannot be deleted because it is reserved.`,
+    });
+  };
+
   const makeDeleteTest = (describeFn: DescribeFn) => (
     description: string,
     { auth = {}, spaceId, tests }: DeleteTestDefinition
@@ -68,52 +107,13 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   // @ts-ignore
   deleteTest.only = makeDeleteTest(describe.only);
 
-  const createExpectResult = (expectedResult: any) => (resp: any) => {
-    expect(resp.body).to.eql(expectedResult);
-  };
-
-  const expectEmptyResult = (resp: any) => {
-    expect(resp.body).to.eql('');
-  };
-
-  const expectNotFoundResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Not Found',
-      statusCode: 404,
-    });
-  };
-
-  const expectReservedSpaceResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Bad Request',
-      statusCode: 400,
-      message: `This Space cannot be deleted because it is reserved.`,
-    });
-  };
-
-  const expectRbacForbidden = (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: 'Unauthorized to delete spaces',
-    });
-  };
-
-  const createExpectLegacyForbidden = (username: string, action: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
-    });
-  };
-
   return {
-    deleteTest,
     createExpectLegacyForbidden,
     createExpectResult,
-    expectRbacForbidden,
+    deleteTest,
     expectEmptyResult,
-    expectNotFoundResult,
+    expectNotFound,
+    expectRbacForbidden,
     expectReservedSpaceResult,
   };
 }

@@ -19,7 +19,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
     createExpectLegacyForbidden,
     expectRbacForbidden,
     expectEmptyResult,
-    expectNotFoundResult,
+    expectNotFound,
     expectReservedSpaceResult,
   } = deleteTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
@@ -89,7 +89,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });
@@ -111,7 +111,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });
@@ -133,7 +133,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });
@@ -155,7 +155,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });
@@ -224,7 +224,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });

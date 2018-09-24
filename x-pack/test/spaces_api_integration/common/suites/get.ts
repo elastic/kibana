@@ -24,30 +24,35 @@ interface GetTestDefinition {
   tests: GetTests;
 }
 
+const nonExistantSpaceId = 'not-a-space';
+
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
-  const nonExistantSpaceId = 'not-a-space';
+  const createExpectEmptyResult = () => (resp: any) => {
+    expect(resp.body).to.eql('');
+  };
 
-  const makeGetTest = (describeFn: DescribeFn) => (
-    description: string,
-    { auth = {}, currentSpaceId, spaceId, tests }: GetTestDefinition
-  ) => {
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${tests.default.statusCode}`, async () => {
-        return supertest
-          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/space/${spaceId}`)
-          .auth(auth.username, auth.password)
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
-      });
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
     });
   };
 
-  const getTest = makeGetTest(describe);
-  // @ts-ignore
-  getTest.only = makeGetTest(describe);
+  const createExpectNotFoundResult = () => (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Not Found',
+      statusCode: 404,
+    });
+  };
+
+  const createExpectRbacForbidden = (spaceId: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unauthorized to get ${spaceId} space`,
+    });
+  };
 
   const createExpectResults = (spaceId: string) => (resp: any) => {
     const allSpaces = [
@@ -71,40 +76,35 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
   };
 
-  const createExpectEmptyResult = () => (resp: any) => {
-    expect(resp.body).to.eql('');
-  };
+  const makeGetTest = (describeFn: DescribeFn) => (
+    description: string,
+    { auth = {}, currentSpaceId, spaceId, tests }: GetTestDefinition
+  ) => {
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
 
-  const createExpectNotFoundResult = () => (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Not Found',
-      statusCode: 404,
+      it(`should return ${tests.default.statusCode}`, async () => {
+        return supertest
+          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/space/${spaceId}`)
+          .auth(auth.username, auth.password)
+          .expect(tests.default.statusCode)
+          .then(tests.default.response);
+      });
     });
   };
 
-  const createExpectRbacForbidden = (spaceId: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unauthorized to get ${spaceId} space`,
-    });
-  };
-
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
-  };
+  const getTest = makeGetTest(describe);
+  // @ts-ignore
+  getTest.only = makeGetTest(describe);
 
   return {
-    getTest,
-    nonExistantSpaceId,
     createExpectResults,
     createExpectRbacForbidden,
     createExpectEmptyResult,
     createExpectNotFoundResult,
     createExpectLegacyForbidden,
+    getTest,
+    nonExistantSpaceId,
   };
 }

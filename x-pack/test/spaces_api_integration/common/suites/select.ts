@@ -26,30 +26,35 @@ interface SelectTestDefinition {
   tests: SelectTests;
 }
 
+const nonExistantSpaceId = 'not-a-space';
+
 export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const nonExistantSpaceId = 'not-a-space';
+  const createExpectEmptyResult = () => (resp: any) => {
+    expect(resp.body).to.eql('');
+  };
 
-  const makeSelectTest = (describeFn: DescribeFn) => (
-    description: string,
-    { auth = {}, currentSpaceId, spaceId, tests }: SelectTestDefinition
-  ) => {
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${tests.default.statusCode}`, async () => {
-        return supertest
-          .post(`${getUrlPrefix(currentSpaceId)}/api/spaces/v1/space/${spaceId}/select`)
-          .auth(auth.username, auth.password)
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
-      });
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
     });
   };
 
-  const selectTest = makeSelectTest(describe);
-  // @ts-ignore
-  selectTest.only = makeSelectTest(describe.only);
+  const createExpectNotFoundResult = () => (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Not Found',
+      statusCode: 404,
+    });
+  };
+
+  const createExpectRbacForbidden = (spaceId: any) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unauthorized to get ${spaceId} space`,
+    });
+  };
 
   const createExpectResults = (spaceId: string) => (resp: any) => {
     const allSpaces = [
@@ -73,30 +78,6 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
   };
 
-  const createExpectEmptyResult = () => (resp: any) => {
-    expect(resp.body).to.eql('');
-  };
-
-  const createExpectNotFoundResult = () => (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Not Found',
-      statusCode: 404,
-    });
-  };
-  const createExpectRbacForbidden = (spaceId: any) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unauthorized to get ${spaceId} space`,
-    });
-  };
-
-  const expectDefaultSpaceResponse = (resp: any) => {
-    expect(resp.body).to.eql({
-      location: `/app/kibana`,
-    });
-  };
-
   const createExpectSpaceResponse = (spaceId: string) => (resp: any) => {
     if (spaceId === DEFAULT_SPACE_ID) {
       expectDefaultSpaceResponse(resp);
@@ -107,23 +88,43 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const expectDefaultSpaceResponse = (resp: any) => {
     expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
+      location: `/app/kibana`,
     });
   };
 
+  const makeSelectTest = (describeFn: DescribeFn) => (
+    description: string,
+    { auth = {}, currentSpaceId, spaceId, tests }: SelectTestDefinition
+  ) => {
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+
+      it(`should return ${tests.default.statusCode}`, async () => {
+        return supertest
+          .post(`${getUrlPrefix(currentSpaceId)}/api/spaces/v1/space/${spaceId}/select`)
+          .auth(auth.username, auth.password)
+          .expect(tests.default.statusCode)
+          .then(tests.default.response);
+      });
+    });
+  };
+
+  const selectTest = makeSelectTest(describe);
+  // @ts-ignore
+  selectTest.only = makeSelectTest(describe.only);
+
   return {
-    selectTest,
-    nonExistantSpaceId,
-    expectDefaultSpaceResponse,
-    createExpectSpaceResponse,
-    createExpectResults,
-    createExpectRbacForbidden,
     createExpectEmptyResult,
-    createExpectNotFoundResult,
     createExpectLegacyForbidden,
+    createExpectNotFoundResult,
+    createExpectRbacForbidden,
+    createExpectResults,
+    createExpectSpaceResponse,
+    expectDefaultSpaceResponse,
+    nonExistantSpaceId,
+    selectTest,
   };
 }

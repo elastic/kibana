@@ -25,75 +25,46 @@ interface BulkCreateTestDefinition {
   tests: BulkCreateTests;
 }
 
+const createBulkRequests = (spaceId: string) => [
+  {
+    type: 'visualization',
+    id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+    attributes: {
+      title: 'An existing visualization',
+    },
+  },
+  {
+    type: 'dashboard',
+    id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+    attributes: {
+      title: 'A great new dashboard',
+    },
+  },
+  {
+    type: 'globaltype',
+    id: '05976c65-1145-4858-bbf0-d225cc78a06e',
+    attributes: {
+      name: 'A new globaltype object',
+    },
+  },
+  {
+    type: 'globaltype',
+    id: '8121a00-8efd-21e7-1cb3-34ab966434445',
+    attributes: {
+      name: 'An existing globaltype',
+    },
+  },
+];
+
+const isGlobalType = (type: string) => type === 'globaltype';
+
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const isGlobalType = (type: string) => type === 'globaltype';
-
-  const createBulkRequests = (spaceId: string) => [
-    {
-      type: 'visualization',
-      id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-      attributes: {
-        title: 'An existing visualization',
-      },
-    },
-    {
-      type: 'dashboard',
-      id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
-      attributes: {
-        title: 'A great new dashboard',
-      },
-    },
-    {
-      type: 'globaltype',
-      id: '05976c65-1145-4858-bbf0-d225cc78a06e',
-      attributes: {
-        name: 'A new globaltype object',
-      },
-    },
-    {
-      type: 'globaltype',
-      id: '8121a00-8efd-21e7-1cb3-34ab966434445',
-      attributes: {
-        name: 'An existing globaltype',
-      },
-    },
-  ];
-
-  const makeBulkCreateTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: BulkCreateTestDefinition
-  ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
-
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${tests.default.statusCode}`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
-          .auth(auth.username, auth.password)
-          .send(createBulkRequests(spaceId))
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
-      });
-    });
-  };
-
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
       // eslint-disable-next-line max-len
       message: `action [indices:data/write/bulk] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/bulk] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectRbacForbidden = (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/visualization/bulk_create`,
     });
   };
 
@@ -156,6 +127,35 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         expect(actualNamespace).to.eql(spaceId);
       }
     }
+  };
+
+  const expectRbacForbidden = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to bulk_create dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/visualization/bulk_create`,
+    });
+  };
+
+  const makeBulkCreateTest = (describeFn: DescribeFn) => (
+    description: string,
+    definition: BulkCreateTestDefinition
+  ) => {
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+
+      it(`should return ${tests.default.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
+          .auth(auth.username, auth.password)
+          .send(createBulkRequests(spaceId))
+          .expect(tests.default.statusCode)
+          .then(tests.default.response);
+      });
+    });
   };
 
   const bulkCreateTest = makeBulkCreateTest(describe);

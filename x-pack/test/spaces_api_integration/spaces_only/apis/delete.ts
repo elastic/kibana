@@ -17,7 +17,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
     deleteTest,
     expectEmptyResult,
     expectReservedSpaceResult,
-    expectNotFoundResult,
+    expectNotFound,
   } = deleteTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('delete', () => {
@@ -42,7 +42,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFoundResult,
+            response: expectNotFound,
           },
         },
       });

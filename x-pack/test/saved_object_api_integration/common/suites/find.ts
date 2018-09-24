@@ -30,8 +30,85 @@ interface FindTestDefinition {
   tests: FindTests;
 }
 
-// TODO: add space unaware type
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: any) => {
+    expect(resp.body).to.eql({
+      page,
+      per_page: perPage,
+      total,
+      saved_objects: [],
+    });
+  };
+
+  const createExpectRbacForbidden = (type?: string) => (resp: any) => {
+    const message = type
+      ? `Unable to find ${type}, missing action:saved_objects/${type}/find`
+      : `Not authorized to find saved_object`;
+
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message,
+    });
+  };
+
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      // eslint-disable-next-line max-len
+      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const expectNotSpaceAwareResults = (resp: any) => {
+    expect(resp.body).to.eql({
+      page: 1,
+      per_page: 20,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'globaltype',
+          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
+          version: 1,
+          attributes: {
+            name: 'My favorite global object',
+          },
+        },
+      ],
+    });
+  };
+
+  const expectTypeRequired = (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Bad Request',
+      message: 'child "type" fails because ["type" is required]',
+      statusCode: 400,
+      validation: {
+        keys: ['type'],
+        source: 'query',
+      },
+    });
+  };
+
+  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+    expect(resp.body).to.eql({
+      page: 1,
+      per_page: 20,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'visualization',
+          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+          version: 1,
+          attributes: {
+            title: 'Count of requests',
+          },
+        },
+      ],
+    });
+  };
+
   const makeFindTest = (describeFn: DescribeFn) => (
     description: string,
     definition: FindTestDefinition
@@ -112,88 +189,10 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   // @ts-ignore
   findTest.only = makeFindTest(describe.only);
 
-  const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: any) => {
-    expect(resp.body).to.eql({
-      page,
-      per_page: perPage,
-      total,
-      saved_objects: [],
-    });
-  };
-
-  const createExpectRbacForbidden = (type?: string) => (resp: any) => {
-    const message = type
-      ? `Unable to find ${type}, missing action:saved_objects/${type}/find`
-      : `Not authorized to find saved_object`;
-
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message,
-    });
-  };
-
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectTypeRequired = (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Bad Request',
-      message: 'child "type" fails because ["type" is required]',
-      statusCode: 400,
-      validation: {
-        keys: ['type'],
-        source: 'query',
-      },
-    });
-  };
-
-  const expectNotSpaceAwareResults = (resp: any) => {
-    expect(resp.body).to.eql({
-      page: 1,
-      per_page: 20,
-      total: 1,
-      saved_objects: [
-        {
-          type: 'globaltype',
-          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: 1,
-          attributes: {
-            name: 'My favorite global object',
-          },
-        },
-      ],
-    });
-  };
-
-  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
-    expect(resp.body).to.eql({
-      page: 1,
-      per_page: 20,
-      total: 1,
-      saved_objects: [
-        {
-          type: 'visualization',
-          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: 1,
-          attributes: {
-            title: 'Count of requests',
-          },
-        },
-      ],
-    });
-  };
-
   return {
     createExpectEmpty,
-    createExpectRbacForbidden,
     createExpectLegacyForbidden,
+    createExpectRbacForbidden,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     expectTypeRequired,

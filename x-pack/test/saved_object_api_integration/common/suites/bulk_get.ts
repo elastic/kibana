@@ -26,57 +26,28 @@ interface BulkGetTestDefinition {
   tests: BulkGetTests;
 }
 
+const createBulkRequests = (spaceId: string) => [
+  {
+    type: 'visualization',
+    id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+  },
+  {
+    type: 'dashboard',
+    id: `${getIdPrefix(spaceId)}does not exist`,
+  },
+  {
+    type: 'globaltype',
+    id: '8121a00-8efd-21e7-1cb3-34ab966434445',
+  },
+];
+
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createBulkRequests = (spaceId: string) => [
-    {
-      type: 'visualization',
-      id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-    },
-    {
-      type: 'dashboard',
-      id: `${getIdPrefix(spaceId)}does not exist`,
-    },
-    {
-      type: 'globaltype',
-      id: '8121a00-8efd-21e7-1cb3-34ab966434445',
-    },
-  ];
-
-  const makeBulkGetTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: BulkGetTestDefinition
-  ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
-
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${tests.default.statusCode}`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-          .auth(auth.username, auth.password)
-          .send(createBulkRequests(otherSpaceId || spaceId))
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
-      });
-    });
-  };
-
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
       // eslint-disable-next-line max-len
       message: `action [indices:data/read/mget] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/mget] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectRbacForbidden = (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
     });
   };
 
@@ -109,6 +80,14 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           },
         },
       ],
+    });
+  };
+
+  const expectRbacForbidden = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
     });
   };
 
@@ -148,6 +127,27 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           },
         },
       ],
+    });
+  };
+
+  const makeBulkGetTest = (describeFn: DescribeFn) => (
+    description: string,
+    definition: BulkGetTestDefinition
+  ) => {
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+
+      it(`should return ${tests.default.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+          .auth(auth.username, auth.password)
+          .send(createBulkRequests(otherSpaceId || spaceId))
+          .expect(tests.default.statusCode)
+          .then(tests.default.response);
+      });
     });
   };
 

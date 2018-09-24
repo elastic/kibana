@@ -28,6 +28,80 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      // eslint-disable-next-line max-len
+      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const createExpectRbacForbidden = (type: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to update ${type}, missing action:saved_objects/${type}/update`,
+    });
+  };
+  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
+
+  const expectNotFound = (resp: any) => {
+    expect(resp.body).eql({
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Saved object [visualization/not an id] not found',
+    });
+  };
+
+  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+
+  const expectNotSpaceAwareResults = (resp: any) => {
+    // loose uuid validation
+    expect(resp.body)
+      .to.have.property('id')
+      .match(/^[0-9a-f-]{36}$/);
+
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(resp.body)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(resp.body).to.eql({
+      id: resp.body.id,
+      type: 'globaltype',
+      updated_at: resp.body.updated_at,
+      version: 2,
+      attributes: {
+        name: 'My second favorite',
+      },
+    });
+  };
+
+  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
+
+  const expectSpaceAwareResults = (resp: any) => {
+    // loose uuid validation ignoring prefix
+    expect(resp.body)
+      .to.have.property('id')
+      .match(/[0-9a-f-]{36}$/);
+
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(resp.body)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(resp.body).to.eql({
+      id: resp.body.id,
+      type: 'visualization',
+      updated_at: resp.body.updated_at,
+      version: 2,
+      attributes: {
+        title: 'My second favorite vis',
+      },
+    });
+  };
+
   const makeUpdateTest = (describeFn: DescribeFn) => (
     description: string,
     definition: UpdateTestDefinition
@@ -92,83 +166,14 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   // @ts-ignore
   updateTest.only = makeUpdateTest(describe.only);
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectSpaceAwareResults = (resp: any) => {
-    // loose uuid validation ignoring prefix
-    expect(resp.body)
-      .to.have.property('id')
-      .match(/[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(resp.body)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(resp.body).to.eql({
-      id: resp.body.id,
-      type: 'visualization',
-      updated_at: resp.body.updated_at,
-      version: 2,
-      attributes: {
-        title: 'My second favorite vis',
-      },
-    });
-  };
-
-  const expectNotSpaceAwareResults = (resp: any) => {
-    // loose uuid validation
-    expect(resp.body)
-      .to.have.property('id')
-      .match(/^[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(resp.body)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(resp.body).to.eql({
-      id: resp.body.id,
-      type: 'globaltype',
-      updated_at: resp.body.updated_at,
-      version: 2,
-      attributes: {
-        name: 'My second favorite',
-      },
-    });
-  };
-
-  const expectNotFound = (resp: any) => {
-    expect(resp.body).eql({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Saved object [visualization/not an id] not found',
-    });
-  };
-
-  const createExpectRbacForbidden = (type: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to update ${type}, missing action:saved_objects/${type}/update`,
-    });
-  };
-
   return {
     createExpectLegacyForbidden,
-    expectDoesntExistRbacForbidden: createExpectRbacForbidden('visualization'),
-    expectNotSpaceAwareResults,
-    expectNotSpaceAwareRbacForbidden: createExpectRbacForbidden('globaltype'),
+    expectDoesntExistRbacForbidden,
     expectNotFound,
+    expectNotSpaceAwareRbacForbidden,
+    expectNotSpaceAwareResults,
+    expectSpaceAwareRbacForbidden,
     expectSpaceAwareResults,
-    expectSpaceAwareRbacForbidden: createExpectRbacForbidden('visualization'),
     updateTest,
   };
 }
