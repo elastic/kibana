@@ -52,8 +52,9 @@
 
 // LAYOUT MODES
 
-// Adjust borders/etc... for non-spaced out panels
-.dshLayout-withoutMargins {
+// Adjust borders/etc... for non-spaced out and expanded panels
+.dshLayout-withoutMargins,
+.dshDashboardGrid__item--expanded {
   // Remove border color unless in editing mode
   .dshPanel:not(.dshPanel--editing) {
     border-color: transparent;
