@@ -31,8 +31,14 @@ class Breadcrumbs extends React.Component {
   }
 
   render() {
-    const { breadcrumbs, location } = this.props;
+    const { breadcrumbs, location, showPluginBreadcrumbs } = this.props;
     const { _g = '', kuery = '' } = toQuery(location.search);
+
+    // If we're not display plugin breadcrumbs, render null, but continue
+    // to push updates to header.
+    if (!showPluginBreadcrumbs) {
+      return null;
+    }
 
     return (
       <div className="kuiLocalBreadcrumbs">

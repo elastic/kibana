@@ -150,8 +150,8 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
+  breadcrumbState
 ) {
-
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
@@ -249,6 +249,12 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
+
+  if (savedSearch.id && savedSearch.title) {
+    breadcrumbState.set([{ text: 'Discover', href: '#/discover' }, { text: savedSearch.title }]);
+  } else {
+    breadcrumbState.set([{ text: 'Discover' }]);
+  }
 
   let stateMonitor;
 

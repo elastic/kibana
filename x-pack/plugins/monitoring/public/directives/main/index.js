@@ -69,7 +69,7 @@ export class MonitoringMainController {
 }
 
 const uiModule = uiModules.get('plugins/monitoring/directives', []);
-uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
+uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
   return {
     restrict: 'E',
     transclude: true,
@@ -78,6 +78,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl) => {
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
       controller.setup({
         licenseService: license,
