@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -19,6 +19,7 @@ import {
 } from '../../lib/lib';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
+import { InfraLoadingPanel } from '../loading';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
@@ -27,6 +28,8 @@ import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 interface Props {
   options: InfraWaffleMapOptions;
   map: InfraWaffleData;
+  loading: boolean;
+  reload: () => void;
 }
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
@@ -48,11 +51,34 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 
 export class Waffle extends React.Component<Props, {}> {
   public render() {
-    const bounds = calculateBoundsFromMap(this.props.map);
+    const { loading, map, reload } = this.props;
+    if (loading) {
+      return <InfraLoadingPanel height="100%" width="100%" text="Loading data" />;
+    } else if (!loading && map && map.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          title={<h2>There is no data to display.</h2>}
+          titleSize="m"
+          body={<p>Try adjusting your time or filter.</p>}
+          actions={
+            <EuiButton
+              iconType="refresh"
+              color="primary"
+              fill
+              onClick={() => {
+                reload();
+              }}
+            >
+              Check for new data
+            </EuiButton>
+          }
+        />
+      );
+    }
+    const bounds = calculateBoundsFromMap(map);
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
-          const { map } = this.props;
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
             <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
