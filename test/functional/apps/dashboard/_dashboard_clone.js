@@ -61,8 +61,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
-      const isWarningDisplayed = await PageObjects.dashboard.isDuplicateTitleWarningDisplayed();
-      expect(isWarningDisplayed).to.equal(true);
+      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
 
     it('and doesn\'t save', async () => {
