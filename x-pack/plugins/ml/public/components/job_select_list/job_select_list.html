@@ -25,7 +25,7 @@
               <label class="kuiFormLabel">
                 <div >
                   <input
-                    aria-label="Group I.D. {{group.id}}"
+                    aria-label="Group ID {{group.id}}"
                     ng-if="singleSelection !== true && group.selectable === true" type="checkbox"
                     ng-model="group.selected"
                     ng-click="toggleGroupSelection()" />
@@ -73,7 +73,7 @@
                   value="{{job.id}}"
                   ng-model="$parent.$parent.selectedJobRadio"
                   ng-disabled='job.disabled' />
-                <span ng-class="{'disabled-job': job.disabled}" aria-label="Job I.D. {{job.id}}">{{job.id}}</span>
+                <span ng-class="{'disabled-job': job.disabled}" aria-label="Job ID {{job.id}}">{{job.id}}</span>
               </span>
             </div>
             <div>
