@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -13,6 +13,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiIcon,
+  EuiIconTip
 } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 
@@ -62,7 +63,7 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagOps',
-              name: 'Sync Lag (ops)',
+              name: 'Sync Lag (ops)'
             },
             {
               field: 'error',
@@ -131,7 +132,25 @@ export class Ccr extends Component {
           {
             field: 'syncLagOps',
             sortable: true,
-            name: 'Sync Lag (ops)'
+            name: 'Sync Lag (ops)',
+            render: (syncLagOps, data) => (
+              <span>
+                {syncLagOps}
+                &nbsp;&nbsp;
+                <EuiIconTip
+                  size="m"
+                  type="iInCircle"
+                  content={(
+                    <Fragment>
+                      <span>Leader lag: {data.syncLagOpsLeader}</span>
+                      <br/>
+                      <span>Follower lag: {data.syncLagOpsFollower}</span>
+                    </Fragment>
+                  )}
+                  position="right"
+                />
+              </span>
+            )
           },
           {
             field: 'error',
