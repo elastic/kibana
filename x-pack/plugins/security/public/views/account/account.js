@@ -33,7 +33,10 @@ routes.when('/account', {
       }
 
       $scope.user.$changePassword()
-        .then(() => toastNotifications.addSuccess('Updated password'))
+        .then(() => toastNotifications.addSuccess({
+          title: 'Updated password',
+          'data-test-subj': 'passwordUpdateSuccess',
+        }))
         .then(onSuccess)
         .catch(error => {
           if (error.status === 401) {
