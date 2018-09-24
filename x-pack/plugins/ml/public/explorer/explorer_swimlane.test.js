@@ -69,7 +69,7 @@ describe('ExplorerSwimlane', () => {
     />);
 
     expect(wrapper.html()).toBe(
-      `<div class="ml-swimlanes"><div class="time-tick-labels"><svg width="800" height="25">` +
+      `<div class="ml-swimlanes"><div class="time-tick-labels"><svg width="${mockChartWidth}" height="25">` +
       `<g class="x axis"><path class="domain" d="MNaN,6V0H0V6"></path></g></svg></div></div>`
     );
 

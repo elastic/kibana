@@ -268,8 +268,9 @@ export class ExplorerSwimlane extends React.Component {
       // which is where d3 supplies a reference to the corresponding DOM element.
       return function (lane) {
         const bucketScore = getBucketScore(lane, time);
-        if (bucketScore === 0) { return; }
-        cellMouseover(this, lane, bucketScore, i, time);
+        if (bucketScore !== 0) {
+          cellMouseover(this, lane, bucketScore, i, time);
+        }
       };
     }
 
