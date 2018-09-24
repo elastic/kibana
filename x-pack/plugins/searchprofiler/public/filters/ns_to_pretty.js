@@ -11,10 +11,10 @@ export function nsToPretty(ns, precision) {
     precision = 1;
   }
   const units = ['ns', 'µs'];
-  // eslint-disable-next-line guard-for-in
-  for (const i in units) {
+
+  for (const unit of units) {
     if (ns < 1000) {
-      return ns.toFixed(precision) + units[i];
+      return ns.toFixed(precision) + unit;
     }
     ns /= 1000;
   }
