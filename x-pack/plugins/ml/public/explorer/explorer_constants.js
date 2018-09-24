@@ -13,3 +13,10 @@ export const DRAG_SELECT_ACTION = {
   ELEMENT_SELECT: 'elementSelect',
   DRAG_START: 'dragStart'
 };
+
+export const SWIMLANE_DEFAULT_LIMIT = 10;
+
+export const SWIMLANE_TYPE = {
+  OVERALL: 'overall',
+  VIEW_BY: 'viewBy'
+};

@@ -40,7 +40,11 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
-import { DRAG_SELECT_ACTION } from './explorer_constants';
+import {
+  DRAG_SELECT_ACTION,
+  SWIMLANE_DEFAULT_LIMIT,
+  SWIMLANE_TYPE
+} from './explorer_constants';
 
 uiRoutes
   .when('/explorer/?', {
@@ -65,10 +69,6 @@ function getDefaultViewBySwimlaneData() {
   };
 }
 
-const SWIMLANE_TYPE = {
-  OVERALL: 'overall',
-  VIEW_BY: 'viewBy'
-};
 
 module.controller('MlExplorerController', function (
   $scope,
@@ -864,7 +864,7 @@ module.controller('MlExplorerController', function (
       const searchBounds = getBoundsRoundedToInterval(bounds, $scope.swimlaneBucketInterval, false);
       const selectedJobIds = $scope.getSelectedJobIds();
       const limit = mlSelectLimitService.state.get('limit');
-      const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
+      const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
       // load scores by influencer/jobId value and time.
       // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -896,7 +896,7 @@ module.controller('MlExplorerController', function (
   function loadViewBySwimlaneForSelectedTime(earliestMs, latestMs) {
     const selectedJobIds = $scope.getSelectedJobIds();
     const limit = mlSelectLimitService.state.get('limit');
-    const swimlaneLimit = (limit === undefined) ? 10 : limit.val;
+    const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
     // Find the top field values for the selected time, and then load the 'view by'
     // swimlane over the full time range for those specific field values.
