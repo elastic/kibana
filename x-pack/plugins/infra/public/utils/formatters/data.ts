@@ -69,5 +69,5 @@ export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (val: n
   if (power < 0) {
     return `${val} ${labels[0]}`;
   }
-  return `${formatNumber(val / Math.pow(base, power))} ${labels[power]} `;
+  return `${formatNumber(val / Math.pow(base, power))} ${labels[power]}`;
 };

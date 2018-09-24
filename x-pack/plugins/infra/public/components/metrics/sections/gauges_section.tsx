@@ -76,8 +76,8 @@ export class GaugesSection extends React.PureComponent<Props> {
                   <EuiText style={{ textAlign: 'right' }} size="s">
                     {name}
                   </EuiText>
-                  <EuiTitle size="m">
-                    <h1 style={{ textAlign: 'right' }}>{value}</h1>
+                  <EuiTitle size="s">
+                    <h1 style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{value}</h1>
                   </EuiTitle>
                   <EuiProgress
                     value={lastDataPoint.value || 0}
