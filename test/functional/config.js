@@ -151,6 +151,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
       },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
+      },
       home: {
         pathname: '/app/kibana',
         hash: '/home',
