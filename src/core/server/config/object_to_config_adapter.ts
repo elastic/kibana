@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, has, set } from '@elastic/lodash';
+import { cloneDeep, get, has, set } from 'lodash';
 
 import { Config, ConfigPath } from './';
 

@@ -20,7 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';

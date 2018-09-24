@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { makeFakeXAspect } from './_fake_x_aspect';
 
 const map = {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import template from './account.html';

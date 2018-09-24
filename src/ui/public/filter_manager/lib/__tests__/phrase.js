@@ -20,7 +20,7 @@
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
 import expect from 'expect.js';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

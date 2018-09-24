@@ -26,7 +26,7 @@
  * accessing instances of AggConfig.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { IndexedArray } from '../indexed_array';
 import { AggConfig } from './agg_config';
 

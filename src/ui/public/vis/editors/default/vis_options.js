@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from '../../../modules';

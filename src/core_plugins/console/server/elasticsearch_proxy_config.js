@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';

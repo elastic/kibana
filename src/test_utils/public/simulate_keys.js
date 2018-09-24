@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Promise from 'bluebird';
 import { keyMap } from 'ui/utils/key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));

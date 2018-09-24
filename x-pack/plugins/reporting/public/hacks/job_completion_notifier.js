@@ -9,7 +9,7 @@ import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { addSystemApiHeader } from 'ui/system_api';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import {
   API_BASE_URL
 } from '../../common/constants';

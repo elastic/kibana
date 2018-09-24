@@ -24,7 +24,7 @@ import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 class VisEditor extends Component {
   constructor(props) {

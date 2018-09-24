@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from '@elastic/lodash';
+import { pick } from 'lodash';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 

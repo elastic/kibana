@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';

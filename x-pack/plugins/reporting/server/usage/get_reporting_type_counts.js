@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 /*
  * @param {Object} response: Elasticsearch response for an aggregation

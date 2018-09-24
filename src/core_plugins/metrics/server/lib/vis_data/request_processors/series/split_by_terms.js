@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketsPath from '../../helpers/get_buckets_path';
 import bucketTransform from '../../helpers/bucket_transform';

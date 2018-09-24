@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 // given an object or array of objects, return the value of the passed param
 // if the param is missing, return undefined

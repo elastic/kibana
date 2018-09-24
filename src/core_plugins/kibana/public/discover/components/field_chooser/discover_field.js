@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import html from './discover_field.html';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import detailsHtml from './lib/detail_views/string.html';

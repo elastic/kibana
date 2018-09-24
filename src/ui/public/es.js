@@ -25,7 +25,7 @@
  */
 
 import 'elasticsearch-browser';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from './modules';
 
 const plugins = [function (Client, config) {

@@ -18,7 +18,7 @@
  */
 
 import alter from '../lib/alter.js';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import loadFunctions from '../lib/load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');

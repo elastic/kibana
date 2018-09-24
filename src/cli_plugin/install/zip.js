@@ -21,7 +21,7 @@ import yauzl from 'yauzl';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import { createWriteStream } from 'fs';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 /**
  * Returns an array of package objects. There will be one for each of

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import { ROOT_TYPE, SavedObjectDoc } from '../../serialization';
 import { CallCluster } from './call_cluster';

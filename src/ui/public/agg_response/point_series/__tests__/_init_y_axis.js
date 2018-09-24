@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import expect from 'expect.js';
 import { initYAxis } from '../_init_y_axis';
 

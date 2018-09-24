@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../case_conversion';
 
 describe('keysToSnakeCaseShallow', function () {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import { SavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';

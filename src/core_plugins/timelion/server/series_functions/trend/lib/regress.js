@@ -23,7 +23,7 @@
 * Licensed under the MIT license.
 */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 function sum(data, fn) {
   return _.reduce(data, function (sum, d) {

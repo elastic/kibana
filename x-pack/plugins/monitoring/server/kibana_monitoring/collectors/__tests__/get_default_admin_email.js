@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../../../../../server/lib/constants';
 import { getDefaultAdminEmail, resetDeprecationWarning } from '../get_settings_collector';

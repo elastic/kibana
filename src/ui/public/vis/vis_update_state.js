@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring

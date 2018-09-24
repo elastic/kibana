@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 export class ConstantComponent extends SharedComponent {
   constructor(name, parent, options) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { noWhiteSpace } from '../../utils/no_white_space';
 import { toJson } from '../../utils/aggressive_parse';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';

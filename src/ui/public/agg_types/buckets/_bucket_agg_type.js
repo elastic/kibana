@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { AggType } from '../agg_type';
 import { createLegacyClass } from '../../utils/legacy_class';
 

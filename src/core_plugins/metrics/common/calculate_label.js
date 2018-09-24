@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { includes, startsWith } from '@elastic/lodash';
+import { includes, startsWith } from 'lodash';
 import lookup from './agg_lookup';
 const paths = [
   'cumulative_sum',

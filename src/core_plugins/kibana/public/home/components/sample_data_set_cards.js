@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {

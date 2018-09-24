@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 
 export function wrapComponentWithDefaults(component, defaults) {
   const originalGetTerms = component.getTerms;

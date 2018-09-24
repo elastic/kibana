@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { reduce } from '@elastic/lodash';
+import { reduce } from 'lodash';
 import { ROUTES, WATCH_TYPES, ACTION_MODES } from '../../../common/constants';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details';
 import { Watch } from 'plugins/watcher/models/watch';

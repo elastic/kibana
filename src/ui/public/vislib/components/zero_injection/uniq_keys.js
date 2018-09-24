@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { VislibComponentsZeroInjectionFlattenDataProvider } from './flatten_data';
 
 export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {

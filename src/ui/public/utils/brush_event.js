@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 import { buildRangeFilter } from '../filter_manager/lib/range';
 import { timefilter } from 'ui/timefilter';

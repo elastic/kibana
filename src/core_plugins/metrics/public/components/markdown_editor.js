@@ -27,7 +27,7 @@ import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
 import { KuiCodeEditor } from '@kbn/ui-framework/components';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 

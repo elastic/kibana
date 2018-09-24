@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { pkg } from '../utils';
 import Command from '../cli/command';
 import listCommand from './list';

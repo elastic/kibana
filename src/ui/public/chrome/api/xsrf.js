@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 
 export function initChromeXsrfApi(chrome, internals) {
 

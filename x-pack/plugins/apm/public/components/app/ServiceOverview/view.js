@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import { STATUS } from '../../../constants';
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 import { loadAgentStatus } from '../../../services/rest/apm';
 import { KibanaLink } from '../../../utils/url';
 import { EuiButton } from '@elastic/eui';

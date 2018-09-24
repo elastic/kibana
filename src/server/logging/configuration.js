@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import logReporter from './log_reporter';
 
 export default function loggingConfiguration(config) {

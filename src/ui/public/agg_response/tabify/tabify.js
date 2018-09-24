@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { TabbedAggResponseWriter } from './_response_writer';
 import { TabifyBuckets } from './_buckets';
 

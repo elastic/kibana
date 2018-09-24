@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import '../filters/uriescape';
 import '../filters/rison';
 import { uiModules } from '../modules';

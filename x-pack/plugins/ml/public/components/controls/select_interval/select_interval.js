@@ -9,7 +9,7 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React, { Component } from 'react';
 
 import {

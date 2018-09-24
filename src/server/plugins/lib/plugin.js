@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { once } from '@elastic/lodash';
+import { once } from 'lodash';
 
 /**
  * The server plugin class, used to extend the server

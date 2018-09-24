@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
 import { KbnUrlProvider } from 'ui/url';

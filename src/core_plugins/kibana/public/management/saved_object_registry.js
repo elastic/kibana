@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 const registry = [];
 export const savedObjectManagementRegistry = {
   register: function (service) {

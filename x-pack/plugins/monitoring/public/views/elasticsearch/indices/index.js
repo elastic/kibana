@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from '@elastic/lodash';
+import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find, filter, includes, forEach, every, some } from '@elastic/lodash';
+import { find, filter, includes, forEach, every, some } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './threshold_watch_expression.html';
 import './components/threshold_watch_agg_type';

@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 // Data
 import seriesPos from 'fixtures/vislib/mock_data/date_histogram/_series';

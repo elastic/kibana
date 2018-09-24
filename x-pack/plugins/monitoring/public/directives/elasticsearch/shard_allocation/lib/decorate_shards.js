@@ -5,7 +5,7 @@
  */
 
 
-import { capitalize, find, get, includes } from '@elastic/lodash';
+import { capitalize, find, get, includes } from 'lodash';
 
 export function decorateShards(shards, nodes) {
   function getTooltipMessage(shard) {

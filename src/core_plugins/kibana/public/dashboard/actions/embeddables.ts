@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { getEmbeddableCustomization, getPanel } from '../../selectors';
 import { PanelId, PanelState } from '../selectors';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import dateMath from '@kbn/datemath';
 
 export function calculateBounds(timeRange, options = {}) {

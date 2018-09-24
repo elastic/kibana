@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from '@elastic/lodash';
+import { find } from 'lodash';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from 'plugins/monitoring/components';
 

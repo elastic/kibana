@@ -18,7 +18,7 @@
  */
 
 import { jstz as tzDetect } from 'jstimezonedetect';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment';
 import '../../filters/field_type';

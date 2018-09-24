@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { ES_FIELD_TYPES } from '../../../common/constants/field_types';
 import { parseInterval } from '../../../common/util/parse_interval.js';

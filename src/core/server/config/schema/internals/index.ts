@@ -27,7 +27,7 @@ import {
   ValidationErrorItem,
   ValidationOptions,
 } from 'joi';
-import { isPlainObject } from '@elastic/lodash';
+import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';

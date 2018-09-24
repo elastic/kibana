@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { identity } from '@elastic/lodash';
+import { identity } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import 'plugins/security/services/auto_logout';

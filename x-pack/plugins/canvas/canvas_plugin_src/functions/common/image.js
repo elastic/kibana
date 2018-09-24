@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { includes } from '@elastic/lodash';
+import { includes } from 'lodash';
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 import { elasticLogo } from '../../lib/elastic_logo';
 

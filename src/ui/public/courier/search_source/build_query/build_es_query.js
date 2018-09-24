@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupBy, has } from '@elastic/lodash';
+import { groupBy, has } from 'lodash';
 import { decorateQuery } from '../decorate_query';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';

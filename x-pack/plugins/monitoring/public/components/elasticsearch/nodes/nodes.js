@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { SORT_ASCENDING } from '../../../../common/constants';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib

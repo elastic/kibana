@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { keys } from '@elastic/lodash';
+import _, { keys } from 'lodash';
 
 import { run } from '../utilities/visual_regression';
 

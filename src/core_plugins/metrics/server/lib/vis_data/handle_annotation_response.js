@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 export default function handleAnnotationResponse(resp, annotation) {
   return _.get(resp, `aggregations.${annotation.id}.buckets`, [])
     .filter(bucket => bucket.hits.hits.total)

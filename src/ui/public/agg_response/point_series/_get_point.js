@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 function unwrap(aggConfigResult, def) {
   return aggConfigResult ? aggConfigResult.value : def;

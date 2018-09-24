@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export class SavedObject {
   constructor(client, { id, type, version, attributes, error, migrationVersion } = {}) {

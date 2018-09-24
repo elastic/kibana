@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import { ROOT_TYPE } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';

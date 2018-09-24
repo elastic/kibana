@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { last } from '@elastic/lodash';
+import { last } from 'lodash';
 
 const defaultPerRow = 6;
 

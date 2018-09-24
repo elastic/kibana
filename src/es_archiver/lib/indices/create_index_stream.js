@@ -19,7 +19,7 @@
 
 import { Transform } from 'stream';
 
-import { get, once } from '@elastic/lodash';
+import { get, once } from 'lodash';
 import { deleteKibanaIndices } from './kibana_index';
 
 import { deleteIndex } from './delete_index';

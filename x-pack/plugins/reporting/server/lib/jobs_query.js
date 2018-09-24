@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { QUEUE_DOCTYPE } from '../../common/constants';
 import { oncePerServer } from './once_per_server';
 

@@ -22,7 +22,7 @@ import 'ui/directives/field_name';
 import 'ui/filters/unique';
 import './discover_field';
 import 'angular-ui-select';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';

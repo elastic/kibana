@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 
 function cloneBuffersCustomizer(val) {
   if (Buffer.isBuffer(val)) {

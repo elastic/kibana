@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy, pluck, map, startsWith, endsWith } from '@elastic/lodash';
+import { sortBy, pluck, map, startsWith, endsWith } from 'lodash';
 import 'plugins/watcher/services/indices';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 export const URL_PATH_END_MARKER = '__url_path_end__';
 

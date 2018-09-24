@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { remove } from '@elastic/lodash';
+import { remove } from 'lodash';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 

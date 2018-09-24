@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { mount } from 'enzyme';
 import { DashboardPanelContainer } from './dashboard_panel_container';
 import { DashboardViewMode } from '../dashboard_view_mode';

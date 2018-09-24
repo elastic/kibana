@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { buildExistsFilter } from '../../filter_manager/lib/exists';
 import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
 import { buildQueryFromFilters } from '../../courier';

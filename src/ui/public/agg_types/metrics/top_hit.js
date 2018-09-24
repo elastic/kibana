@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
 import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';

@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import uuid from 'uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';

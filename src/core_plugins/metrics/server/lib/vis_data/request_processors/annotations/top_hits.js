@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 export default function topHits(req, panel, annotation) {
   return next => doc => {
     const fields = annotation.fields && annotation.fields.split(/[,\s]+/) || [];

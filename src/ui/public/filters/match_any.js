@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from '../modules';
 // Gets all fields of a given type.
 // You may also pass "*" to get all types

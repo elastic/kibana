@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';

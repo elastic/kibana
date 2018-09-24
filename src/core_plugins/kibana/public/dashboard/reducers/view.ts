@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 import { Reducer } from 'redux';
 import { ViewActions, ViewActionTypeKeys } from '../actions';
 

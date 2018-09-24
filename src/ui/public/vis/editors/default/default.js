@@ -23,7 +23,7 @@ import './vis_editor_resizer';
 import './vis_type_agg_filter';
 import $ from 'jquery';
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from '@elastic/eui';

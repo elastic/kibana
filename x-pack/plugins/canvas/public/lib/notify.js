@@ -6,7 +6,7 @@
 
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib/format_msg';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 const getToast = (err, opts = {}) => {
   const errData = get(err, 'response') || err;

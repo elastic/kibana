@@ -7,7 +7,7 @@
 import {
   pick,
   capitalize
-} from '@elastic/lodash';
+} from 'lodash';
 
 import { getSearchValue } from 'plugins/logstash/lib/get_search_value';
 import { getMoment } from 'plugins/logstash/../common/lib/get_moment';

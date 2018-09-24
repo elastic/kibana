@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 // Only applies to already resolved arguments
 export default function indexArguments(functionDef, orderedArgs) {

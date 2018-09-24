@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 
 const BOOLEAN = {
   __one_of: [true, false],

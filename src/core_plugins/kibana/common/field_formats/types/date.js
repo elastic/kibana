@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 export function createDateFormat(FieldFormat) {

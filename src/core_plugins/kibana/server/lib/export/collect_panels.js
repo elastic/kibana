@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 import { collectIndexPatterns } from './collect_index_patterns';
 import { collectSearchSources } from './collect_search_sources';

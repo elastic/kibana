@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 

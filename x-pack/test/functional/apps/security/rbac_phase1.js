@@ -5,7 +5,7 @@
 */
 
 import expect from 'expect.js';
-import { indexBy } from '@elastic/lodash';
+import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);

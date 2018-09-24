@@ -11,7 +11,7 @@
  *  - client only node: --node.data=false --node.master=false
  *  https://www.elastic.co/guide/en/elasticsearch/reference/2.x/modules-node.html
  */
-import { includes, isUndefined } from '@elastic/lodash';
+import { includes, isUndefined } from 'lodash';
 
 export function calculateNodeType(node, masterNodeId) {
   const attrs = node.attributes || {};

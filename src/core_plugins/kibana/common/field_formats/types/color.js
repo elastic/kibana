@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { asPrettyString } from '../../utils/as_pretty_string';
 import { DEFAULT_COLOR } from './color_default';
 

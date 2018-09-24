@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, partialRight, assign, max, sum } from '@elastic/lodash';
+import { get, partialRight, assign, max, sum } from 'lodash';
 import moment from 'moment';
 import v8 from 'v8';
 import { mapRequests } from './map_requests';

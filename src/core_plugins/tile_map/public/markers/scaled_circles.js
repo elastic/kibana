@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';

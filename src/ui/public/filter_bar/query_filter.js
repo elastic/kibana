@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { onlyDisabled } from './lib/only_disabled';
 import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import moment from 'moment';
 import { verifyMonitoringLicense } from './verify_monitoring_license';
 

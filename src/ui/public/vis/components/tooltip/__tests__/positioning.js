@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import $ from 'jquery';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import getTimerange from '../../helpers/get_timerange';

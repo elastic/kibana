@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 import { checkLicenseFactory } from '../check_license';
 
 describe('check_license', function () {

@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { debounce, invoke, bindAll, once, uniq } from '@elastic/lodash';
+import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import { fromEvent, race } from 'rxjs';
 import { first } from 'rxjs/operators';
 

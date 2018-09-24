@@ -18,7 +18,7 @@
  */
 
 import crypto from 'crypto';
-import { chain } from '@elastic/lodash';
+import { chain } from 'lodash';
 
 const protocolMap = {
   TLSv1: crypto.constants.SSL_OP_NO_TLSv1,

@@ -7,7 +7,7 @@
 
 
 import chrome from 'ui/chrome';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { http } from '../../../../../services/http_service';
 
 import emailBody from './email.html';

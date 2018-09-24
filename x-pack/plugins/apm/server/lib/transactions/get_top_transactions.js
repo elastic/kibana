@@ -12,7 +12,7 @@ import {
   TRANSACTION_ID,
   TRANSACTION_DURATION
 } from '../../../common/constants';
-import { get, sortBy } from '@elastic/lodash';
+import { get, sortBy } from 'lodash';
 
 export async function getTopTransactions({
   transactionType,

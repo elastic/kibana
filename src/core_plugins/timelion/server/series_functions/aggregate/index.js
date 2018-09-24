@@ -19,7 +19,7 @@
 
 import alter from '../../lib/alter.js';
 import Chainable from '../../lib/classes/chainable';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 const functions = {
   avg: require('./avg'),

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { transform, keys, startsWith } = require('@elastic/lodash');
+const { transform, keys, startsWith } = require('lodash');
 
 class Storage {
   constructor(engine, prefix) {

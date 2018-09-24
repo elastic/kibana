@@ -10,7 +10,7 @@
  * AngularJS directive for rendering a card showing data on a field in an index pattern.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import chrome from 'ui/chrome';
 import 'ui/filters/moment';

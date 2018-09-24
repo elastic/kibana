@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pick } from '@elastic/lodash';
+import { get, pick } from 'lodash';
 
 export class GrokdebuggerRequest {
   constructor(props = {}) {

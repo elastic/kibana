@@ -19,7 +19,7 @@
 
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 function unflatten(data) {
   if (Object(data) !== data || Array.isArray(data)) return data;

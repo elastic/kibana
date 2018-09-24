@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export const flattenObject = (nestedObj, flattenArrays) => {
   const stack = []; // track key stack

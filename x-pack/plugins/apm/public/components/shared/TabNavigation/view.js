@@ -16,7 +16,7 @@ import {
   fontSizes,
   truncate
 } from '../../../style/variables';
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 
 import TooltipOverlay from '../../shared/TooltipOverlay';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';

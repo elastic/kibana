@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, identity } from '@elastic/lodash';
+import { get, identity } from 'lodash';
 import { getType } from '../lib/get_type';
 
 export function serializeProvider(types) {

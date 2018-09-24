@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map } from '@elastic/lodash';
+import { map } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './action_type_select.html';
 import 'angular-ui-select';

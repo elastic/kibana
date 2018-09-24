@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 export default props => (row, i) => {
 
   function tickFormatter(value) {

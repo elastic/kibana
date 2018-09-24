@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import rison from 'rison-node';
 import { keyMap } from '../utils/key_map';
 import { SavedObjectRegistryProvider } from '../saved_objects/saved_object_registry';

@@ -22,7 +22,7 @@ import classNames from 'classnames';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
-import { memoize } from '@elastic/lodash';
+import { memoize } from 'lodash';
 
 /**
  * Return a memoized markdown rendering function that use the specified

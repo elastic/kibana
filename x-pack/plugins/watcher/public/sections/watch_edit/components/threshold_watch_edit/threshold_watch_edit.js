@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, isEqual } from '@elastic/lodash';
+import { debounce, isEqual } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import 'ui/dirty_prompt';

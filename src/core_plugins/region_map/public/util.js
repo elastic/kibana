@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function mapToLayerWithId(prefix, isEMS, layer) {
   const clonedLayer = _.cloneDeep(layer);

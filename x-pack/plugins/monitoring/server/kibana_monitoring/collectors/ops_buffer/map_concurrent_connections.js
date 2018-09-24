@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function mapConcurrentConnections(concurrents) {
   return _.reduce(_.values(concurrents), (result, value) => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { handleShortUrlError } from './short_url_error';
 
 function createErrorWithStatus(status) {

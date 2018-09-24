@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from '@elastic/lodash';
+import { sortBy } from 'lodash';
 
 export const sort = () => ({
   name: 'sort',

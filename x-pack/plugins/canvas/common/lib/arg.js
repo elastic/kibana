@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { includes } from '@elastic/lodash';
+import { includes } from 'lodash';
 
 export function Arg(config) {
   if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');

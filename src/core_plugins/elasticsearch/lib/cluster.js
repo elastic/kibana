@@ -18,8 +18,8 @@
  */
 
 import elasticsearch from 'elasticsearch';
-import { get, set, isEmpty, cloneDeep, pick } from '@elastic/lodash';
-import toPath from '@elastic/lodash/internal/toPath';
+import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
+import toPath from 'lodash/internal/toPath';
 import Boom from 'boom';
 
 import filterHeaders from './filter_headers';

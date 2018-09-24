@@ -299,11 +299,11 @@ possible (which is almost everywhere):
 
 ```js
 // good
-import { mapValues } from '@elastic/lodash';
+import { mapValues } from 'lodash';
 export mapValues;
 
 // bad
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 module.exports = _.mapValues;
 
 // worse
@@ -472,7 +472,7 @@ comprehensible.
 const userNames = users.map(user => user.name);
 
 // ok
-import { pluck } from '@elastic/lodash';
+import { pluck } from 'lodash';
 const userNames = pluck(users, 'name');
 
 // bad

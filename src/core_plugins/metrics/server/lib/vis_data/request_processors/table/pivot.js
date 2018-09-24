@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, set, last } from '@elastic/lodash';
+import { get, set, last } from 'lodash';
 
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketsPath from '../../helpers/get_buckets_path';

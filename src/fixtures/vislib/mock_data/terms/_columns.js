@@ -1,4 +1,4 @@
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export default {
   'columns': [

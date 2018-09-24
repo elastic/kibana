@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';

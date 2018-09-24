@@ -16,7 +16,7 @@ import './row';
 import './styles/main.less';
 import 'ui/directives/paginate';
 import 'ui/styles/pagination.less';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import template from './paginated_table.html';
 
 import { uiModules } from 'ui/modules';

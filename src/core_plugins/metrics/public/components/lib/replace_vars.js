@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
 export default function replaceVars(str, args = {}, vars = {}) {
   try {

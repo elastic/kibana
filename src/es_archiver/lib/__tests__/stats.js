@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import { uniq } from '@elastic/lodash';
+import { uniq } from 'lodash';
 import sinon from 'sinon';
 
 import { createStats } from '../';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from '@elastic/lodash';
+import { defaults } from 'lodash';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 

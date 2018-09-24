@@ -11,7 +11,7 @@
  * one or more jobs from the list of configured jobs.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import d3 from 'd3';

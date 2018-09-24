@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 import {
   EuiForm,
   EuiButton,

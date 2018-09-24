@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { IndexedArray } from '../../../indexed_array';
 import { AggParams } from '../../../agg_types/agg_params';
 

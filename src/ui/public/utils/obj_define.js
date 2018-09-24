@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function ObjDefine(defaults, prototype) {
   this.obj; // created by this.create()

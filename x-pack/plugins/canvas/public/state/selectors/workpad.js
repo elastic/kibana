@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit } from '@elastic/lodash';
+import { get, omit } from 'lodash';
 import { safeElementFromExpression } from '../../../common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';

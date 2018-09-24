@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import Chance from 'chance';
-import { times } from '@elastic/lodash';
+import { times } from 'lodash';
 const chance = new Chance();
 
 export const createStubStats = () => ({

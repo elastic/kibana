@@ -8,7 +8,7 @@
 import 'jquery';
 import '../../lib/flot-charts';
 
-import { debounce, includes } from '@elastic/lodash';
+import { debounce, includes } from 'lodash';
 import { pie as piePlugin } from './plugins/pie';
 
 export const pie = () => ({

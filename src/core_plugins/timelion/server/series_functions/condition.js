@@ -18,7 +18,7 @@
  */
 
 import alter from '../lib/alter.js';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import argType from '../handlers/lib/arg_type.js';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults, get } from '@elastic/lodash';
+import { defaults, get } from 'lodash';
 import { MissingRequiredError } from './error_missing_required';
 import moment from 'moment';
 

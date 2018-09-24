@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { each } from '@elastic/lodash';
+import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 

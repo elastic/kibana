@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { buildAggBody } from './agg_body';
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {

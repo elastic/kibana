@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has } from '@elastic/lodash';
+import { has } from 'lodash';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

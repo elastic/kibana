@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { get, uniq, first, zipObject, difference, isEmpty } from '@elastic/lodash';
+import { get, uniq, first, zipObject, difference, isEmpty } from 'lodash';
 import Span from './Span';
 import TimelineHeader from './TimelineHeader';
 import { SPAN_ID } from '../../../../../../common/constants';

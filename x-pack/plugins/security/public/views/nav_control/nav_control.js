@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { constant } from '@elastic/lodash';
+import { constant } from 'lodash';
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import { uiModules } from 'ui/modules';
 import template from 'plugins/security/views/nav_control/nav_control.html';

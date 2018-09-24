@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import getPanelData from './vis_data/get_panel_data';
 
 function getVisData(req) {

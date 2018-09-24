@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 

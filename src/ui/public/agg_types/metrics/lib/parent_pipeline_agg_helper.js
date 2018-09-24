@@ -18,7 +18,7 @@
  */
 
 import metricAggTemplate from '../../controls/sub_agg.html';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';

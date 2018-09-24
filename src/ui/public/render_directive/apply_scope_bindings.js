@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forOwn, noop } from '@elastic/lodash';
+import { forOwn, noop } from 'lodash';
 
 import '../bind';
 

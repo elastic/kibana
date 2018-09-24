@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
 import 'react-grid-layout/css/styles.css';

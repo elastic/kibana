@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaultsDeep } from '@elastic/lodash';
+import { defaultsDeep } from 'lodash';
 
 import { ProxyConfig } from './proxy_config';
 import { parse as parseUrl } from 'url';

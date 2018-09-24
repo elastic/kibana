@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import worldbank from './worldbank.js';
 import Promise from 'bluebird';
 import Datasource from '../lib/classes/datasource';

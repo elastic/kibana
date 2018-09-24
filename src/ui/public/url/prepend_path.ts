@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString } from '@elastic/lodash';
+import { isString } from 'lodash';
 import { format, parse } from 'url';
 
 /**

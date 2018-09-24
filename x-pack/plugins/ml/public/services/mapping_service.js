@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 

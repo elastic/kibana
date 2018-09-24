@@ -13,7 +13,7 @@ import {
   ERROR_EXC_HANDLED,
   PROCESSOR_EVENT
 } from '../../../common/constants';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 export async function getErrorGroups({
   serviceName,

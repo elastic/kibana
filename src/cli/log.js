@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 const log = _.restParam(function (color, label, rest1) {
   console.log.apply(console, [color(` ${_.trim(label)} `)].concat(rest1));

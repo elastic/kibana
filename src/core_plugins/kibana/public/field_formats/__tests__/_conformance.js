@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import expect from 'expect.js';
 import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';

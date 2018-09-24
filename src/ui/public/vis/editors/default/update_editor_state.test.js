@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 import { updateEditorStateWithChanges } from './update_editor_state';
 
 // Parts of the tests in this file are generated more dynamically, based on the

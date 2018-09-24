@@ -18,7 +18,7 @@
  */
 
 import { rename } from 'fs';
-import { delay } from '@elastic/lodash';
+import { delay } from 'lodash';
 
 export function renamePlugin(workingPath, finalPath) {
   return new Promise(function (resolve, reject) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { trim, startCase } from '@elastic/lodash';
+import { trim, startCase } from 'lodash';
 
 /**
  *  Take a path (from $location.path() usually) and parse

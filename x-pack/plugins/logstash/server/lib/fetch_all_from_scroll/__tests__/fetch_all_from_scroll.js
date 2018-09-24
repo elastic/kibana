@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { fetchAllFromScroll } from '../fetch_all_from_scroll';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 
 describe('fetch_all_from_scroll', () => {
 

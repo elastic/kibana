@@ -13,7 +13,7 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits } from '../../util/chart_utils';

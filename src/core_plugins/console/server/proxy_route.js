@@ -20,7 +20,7 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import Wreck from 'wreck';
-import { trimLeft, trimRight } from '@elastic/lodash';
+import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
   return `${trimRight(base, '/')}/${trimLeft(path, '/')}`;

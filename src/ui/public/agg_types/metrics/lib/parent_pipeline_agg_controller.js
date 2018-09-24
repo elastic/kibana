@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { safeMakeLabel } from './safe_make_label';
 
 const parentPipelineAggController = function ($scope) {

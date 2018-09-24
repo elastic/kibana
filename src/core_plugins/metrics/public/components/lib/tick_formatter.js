@@ -19,7 +19,7 @@
 
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
-import { capitalize, isNumber } from '@elastic/lodash';
+import { capitalize, isNumber } from 'lodash';
 import { fieldFormats } from 'ui/registry/field_formats';
 
 const durationsLookup = durationInputOptions.reduce((acc, row) => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import RouteManager from '../route_manager';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 const utils = require('../../src/utils');
 const collapsingTests = require('./utils_string_collapsing.txt');
 const expandingTests = require('./utils_string_expanding.txt');

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { fromExpression } from '../../../../../common/lib/ast';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';

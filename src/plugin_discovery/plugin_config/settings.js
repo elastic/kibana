@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, noop } from '@elastic/lodash';
+import { get, noop } from 'lodash';
 
 import * as serverConfig from '../../server/config';
 import { createTransform, Deprecations } from '../../deprecation';

@@ -18,7 +18,7 @@
  */
 
 import crypto from 'crypto';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 export function shortUrlLookupProvider(server) {
   async function updateMetadata(doc, req) {

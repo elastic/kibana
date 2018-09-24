@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from '@elastic/lodash';
+import { once } from 'lodash';
 
 const callWithRequest = once((server) => {
   const cluster = server.plugins.elasticsearch.getCluster('data');

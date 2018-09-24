@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { difference, memoize } from '@elastic/lodash';
+import { difference, memoize } from 'lodash';
 import { jobs } from './jobs';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 jest.mock('../lib/authorized_user_pre_routing', () => {

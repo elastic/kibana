@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from '@elastic/lodash';
+import { noop } from 'lodash';
 import expect from 'expect.js';
 import { deprecations as deprecationsModule } from '../deprecations';
 import sinon from 'sinon';

@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { has } from '@elastic/lodash';
+import { has } from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 

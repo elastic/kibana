@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 const ERR_ES_INDEX_NOT_FOUND = 'index_not_found_exception';
 const ERR_NO_MATCHING_INDICES = 'no_matching_indices';

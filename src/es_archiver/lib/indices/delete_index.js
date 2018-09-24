@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
 const PENDING_SNAPSHOT_STATUSES = [

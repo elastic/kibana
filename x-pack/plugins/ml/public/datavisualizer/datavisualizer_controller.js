@@ -11,7 +11,7 @@
   * to explore the data in the fields in an index pattern prior to creating a job.
   */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import rison from 'rison-node';
 
 import 'plugins/ml/components/form_filter_input';

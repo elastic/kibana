@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {

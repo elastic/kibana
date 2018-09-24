@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export default function unzipPairs(timeValObject) {
   const paired = _.chain(timeValObject).pairs().map(function (point) {

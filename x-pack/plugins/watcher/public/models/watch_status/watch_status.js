@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { getMoment } from 'plugins/watcher/../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 

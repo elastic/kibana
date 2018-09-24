@@ -8,7 +8,7 @@ import React from 'react';
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import { toQuery } from '../../../utils/url';
 import { routes } from './routeConfig';
-import { flatten, capitalize } from '@elastic/lodash';
+import { flatten, capitalize } from 'lodash';
 
 class Breadcrumbs extends React.Component {
   render() {

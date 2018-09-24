@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { VislibLibErrorHandlerProvider } from './_error_handler';
 import { TooltipProvider } from '../../vis/components/tooltip';
 

@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import L from 'leaflet';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import d3 from 'd3';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';

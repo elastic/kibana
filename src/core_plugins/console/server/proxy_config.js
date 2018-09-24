@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { values } from '@elastic/lodash';
+import { values } from 'lodash';
 import { format as formatUrl } from 'url';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';

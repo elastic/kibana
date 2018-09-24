@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
 import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';

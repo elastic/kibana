@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compact, get, has, set } from '@elastic/lodash';
+import { compact, get, has, set } from 'lodash';
 import { unset } from '../../utils';
 
 import healthCheck from './lib/health_check';

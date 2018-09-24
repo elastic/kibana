@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import chrome from '../chrome';
-import { isPlainObject } from '@elastic/lodash';
+import { isPlainObject } from 'lodash';
 import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana/config');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';

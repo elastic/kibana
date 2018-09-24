@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment-timezone';
-import { capitalize } from '@elastic/lodash';
+import { capitalize } from 'lodash';
 import { EuiLink } from '@elastic/eui';
 
 const formatDateLocal = input => moment.tz(input, moment.tz.guess()).format('LL');

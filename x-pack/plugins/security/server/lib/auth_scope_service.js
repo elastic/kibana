@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq, flattenDeep } from '@elastic/lodash';
+import { uniq, flattenDeep } from 'lodash';
 
 /**
  *  Manages the creation of the scopes attached to the credentials which result

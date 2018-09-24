@@ -20,7 +20,7 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../${filename}`);
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 

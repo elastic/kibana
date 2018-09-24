@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 const newFn = () => ({ id: uuid.v1() });
 

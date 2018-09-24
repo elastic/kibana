@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last, get } from '@elastic/lodash';
+import { last, get } from 'lodash';
 import { getAnomalyAggs } from './get_anomaly_aggs';
 
 export async function getBucketWithInitialAnomalyBounds({

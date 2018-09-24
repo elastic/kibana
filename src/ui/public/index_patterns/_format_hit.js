@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import chrome from '../chrome';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields

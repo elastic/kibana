@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
-import toPath from '@elastic/lodash/internal/toPath';
+import _ from 'lodash';
+import toPath from 'lodash/internal/toPath';
 
 export function unset(object, rawPath) {
   if (!object) return;

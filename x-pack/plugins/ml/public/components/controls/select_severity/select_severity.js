@@ -10,7 +10,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React, { Component } from 'react';
 
 import {

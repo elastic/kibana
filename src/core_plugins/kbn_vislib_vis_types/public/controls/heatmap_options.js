@@ -19,7 +19,7 @@
 
 import { uiModules } from 'ui/modules';
 import heatmapOptionsTemplate from './heatmap_options.html';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 const module = uiModules.get('kibana');
 
 module.directive('heatmapOptions', function () {

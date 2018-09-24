@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has, get } from '@elastic/lodash';
+import { has, get } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapRangeProvider(Promise, indexPatterns) {

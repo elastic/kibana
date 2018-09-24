@@ -9,7 +9,7 @@
 /*
 * Contains utility functions for performing operations on Strings.
 */
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import d3 from 'd3';
 
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';

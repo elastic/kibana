@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 function baseTickFormatter(value, axis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;

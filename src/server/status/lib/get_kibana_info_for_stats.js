@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 const snapshotRegex = /-snapshot/i;
 

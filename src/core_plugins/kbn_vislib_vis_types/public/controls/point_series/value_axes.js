@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from './value_axes.html';
 const module = uiModules.get('kibana');

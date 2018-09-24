@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from '@elastic/lodash';
+import { get, isEmpty } from 'lodash';
 import { getBuckets } from './get_buckets';
 import { calculateBucketSize } from './calculate_bucket_size';
 

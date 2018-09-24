@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { Hint } from 'react-vis';
 import moment from 'moment';
 import styled from 'styled-components';

@@ -20,7 +20,7 @@
 import { Deprecations } from '../../../deprecation';
 import expect from 'expect.js';
 import index from '../index';
-import { noop } from '@elastic/lodash';
+import { noop } from 'lodash';
 import sinon from 'sinon';
 
 describe('plugins/console', function () {

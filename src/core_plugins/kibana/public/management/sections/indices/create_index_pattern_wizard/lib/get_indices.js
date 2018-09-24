@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, sortBy } from '@elastic/lodash';
+import { get, sortBy } from 'lodash';
 
 export async function getIndices(es, rawPattern, limit) {
   const pattern = rawPattern.trim();

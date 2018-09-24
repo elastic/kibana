@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { parseRange } from '../utils/range';
 import './number_list_input';
 import { uiModules } from '../modules';

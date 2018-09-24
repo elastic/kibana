@@ -9,7 +9,7 @@
 //  Calendar ID requires the same format as a Job ID, therefore isJobIdValid can be used
 
 import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function validateCalendarId(calendarId, checks) {
   let valid = true;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, get } from '@elastic/lodash';
+import { isEmpty, get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './watch_edit_execute_detail.html';
 import './watch_edit_execute_detail.less';

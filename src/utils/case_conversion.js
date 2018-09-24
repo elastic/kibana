@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function keysToSnakeCaseShallow(object) {
   return _.mapKeys(object, (value, key) => {

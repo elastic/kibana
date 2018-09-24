@@ -21,7 +21,7 @@ import 'angular';
 import 'angular-recursion';
 import '../paginated_table';
 import './agg_table.less';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from '../modules';
 import aggTableTemplate from './agg_table.html';
 import { fieldFormats } from '../registry/field_formats';

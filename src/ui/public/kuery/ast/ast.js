@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import * as errors from '../errors';
 import { parse as parseKuery } from './kuery';

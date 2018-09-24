@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 
 import { Keystore } from '../../server/keystore';
 import { getData } from '../../server/path';

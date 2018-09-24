@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, zipObject } from '@elastic/lodash';
+import { map, zipObject } from 'lodash';
 import { normalizeType } from '../../../../server/lib/normalize_type';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
 import { sanitizeName } from '../../../../server/lib/sanitize_name';

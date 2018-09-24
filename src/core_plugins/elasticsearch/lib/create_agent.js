@@ -18,7 +18,7 @@
  */
 
 import url from 'url';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import http from 'http';
 import https from 'https';
 

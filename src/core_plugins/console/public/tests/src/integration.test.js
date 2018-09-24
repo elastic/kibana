@@ -20,7 +20,7 @@ import './setup_mocks';
 import 'brace';
 import 'brace/mode/json';
 import { initializeInput } from '../../src/input';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 const $ = require('jquery');
 
 const kb = require('../../src/kb');

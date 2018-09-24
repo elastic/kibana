@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
 import { units, colors, px, unit } from '../../../../style/variables';
 import { rgba } from 'polished';

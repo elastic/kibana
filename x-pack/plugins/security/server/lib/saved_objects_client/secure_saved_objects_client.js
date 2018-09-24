@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, uniq } from '@elastic/lodash';
+import { get, uniq } from 'lodash';
 import { CHECK_PRIVILEGES_RESULT } from '../authorization/check_privileges';
 
 export class SecureSavedObjectsClient {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Joi from 'joi';
 
 import { createIndexName } from './lib/create_index_name';

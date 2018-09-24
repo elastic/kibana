@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import AggConfigResult from '../vis/agg_config_result';
 
 import { uiModules } from '../modules';

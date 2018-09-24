@@ -21,7 +21,7 @@ import buildProcessorFunction from '../build_processor_function';
 import processors from '../response_processors/table';
 import getLastValue from '../../../../common/get_last_value';
 import regression from 'regression';
-import { first, get } from '@elastic/lodash';
+import { first, get } from 'lodash';
 export default function processBucket(panel) {
   return bucket => {
     const series = panel.series.map(series => {

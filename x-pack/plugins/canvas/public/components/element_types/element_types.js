@@ -16,7 +16,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 import lowerCase from 'lodash.lowercase';
-import { map, includes, sortBy } from '@elastic/lodash';
+import { map, includes, sortBy } from 'lodash';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);

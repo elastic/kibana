@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { getId } from '../../lib/get_id';
 import { notify } from '../../lib/notify';
 

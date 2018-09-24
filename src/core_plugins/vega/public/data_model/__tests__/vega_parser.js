@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import expect from 'expect.js';
 import { VegaParser } from '../vega_parser';
 import { bypassExternalUrlCheck } from '../../vega_view/vega_base_view';

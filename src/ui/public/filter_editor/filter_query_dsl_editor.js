@@ -18,7 +18,7 @@
  */
 
 import 'ace';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from '../modules';
 import template from './filter_query_dsl_editor.html';
 import '../accessibility/kbn_ui_ace_keyboard_mode';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isPlainObject } from '@elastic/lodash';
+import { isPlainObject } from 'lodash';
 
 export default function setHeaders(originalHeaders, newHeaders) {
   if (!isPlainObject(originalHeaders)) {

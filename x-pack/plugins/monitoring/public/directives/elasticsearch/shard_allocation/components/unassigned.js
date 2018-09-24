@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 

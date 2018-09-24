@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import numeral from '@elastic/numeral';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import Stacktrace from '../../../../../shared/Stacktrace';
 import DiscoverButton from '../../../../../shared/DiscoverButton';

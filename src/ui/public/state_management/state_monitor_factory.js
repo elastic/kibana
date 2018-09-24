@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual, set, isPlainObject } from '@elastic/lodash';
+import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
 
 export const stateMonitorFactory = {
   create: (state, customInitialState) => stateMonitor(state, customInitialState)

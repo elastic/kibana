@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 export async function callEsGraphExploreApi({ callCluster, index, query }) {
   try {

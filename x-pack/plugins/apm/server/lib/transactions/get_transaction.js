@@ -5,7 +5,7 @@
  */
 
 import { TRANSACTION_ID, PROCESSOR_EVENT } from '../../../common/constants';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 async function getTransaction({ transactionId, setup }) {
   const { start, end, esFilterQuery, client, config } = setup;

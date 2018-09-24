@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 import { ConstantComponent, ListComponent, SharedComponent } from './components';
 
 export class ParamComponent extends ConstantComponent {

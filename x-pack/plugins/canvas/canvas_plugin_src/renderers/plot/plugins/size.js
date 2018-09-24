@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { min, max, map, flatten } from '@elastic/lodash';
+import { min, max, map, flatten } from 'lodash';
 
 /*
  * The MIT License

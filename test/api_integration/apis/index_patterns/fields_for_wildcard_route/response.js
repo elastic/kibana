@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import { sortBy } from '@elastic/lodash';
+import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');

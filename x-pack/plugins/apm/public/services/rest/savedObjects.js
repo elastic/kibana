@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize, isEmpty, first } from '@elastic/lodash';
+import { memoize, isEmpty, first } from 'lodash';
 import chrome from 'ui/chrome';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { callApi } from './callApi';

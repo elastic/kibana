@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 function YesNo(props) {
   const { name, value } = props;

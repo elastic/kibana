@@ -6,7 +6,7 @@
 
 
 
-import { pick } from '@elastic/lodash';
+import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';

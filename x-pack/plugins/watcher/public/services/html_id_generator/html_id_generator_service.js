@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelCase } from '@elastic/lodash';
+import { camelCase } from 'lodash';
 
 export function createHtmlIdGenerator(rootPartOrParts = []) {
   const rootParts = Array.isArray(rootPartOrParts) ? rootPartOrParts : [rootPartOrParts];

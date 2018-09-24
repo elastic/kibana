@@ -8,7 +8,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 import { checkLicense } from '../check_license';
 
 describe('check_license', () => {

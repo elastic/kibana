@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 const curl = require('../../src/curl');
 import curlTests from './curl_parsing.txt';
 

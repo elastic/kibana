@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { elementsReducer } from '../elements';
 import { actionCreator } from './fixtures/action_creator';
 

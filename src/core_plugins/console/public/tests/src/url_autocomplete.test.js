@@ -20,7 +20,7 @@ import './setup_mocks';
 import 'brace';
 import 'brace/mode/javascript';
 import 'brace/mode/json';
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,

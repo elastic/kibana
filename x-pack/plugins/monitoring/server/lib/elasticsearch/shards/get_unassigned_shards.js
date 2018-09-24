@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 // Methods for calculating metrics for
 // - Number of Primary Shards

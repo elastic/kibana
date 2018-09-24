@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { indexBy } from '@elastic/lodash';
+import { indexBy } from 'lodash';
 
 const watchID = "watchID";
 const watchName = "watch Name";

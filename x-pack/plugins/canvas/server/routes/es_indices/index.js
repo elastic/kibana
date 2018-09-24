@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partial } from '@elastic/lodash';
+import { partial } from 'lodash';
 import { getESIndices } from './get_es_indices';
 
 // TODO: Error handling, note: esErrors

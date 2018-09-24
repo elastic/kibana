@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from '@elastic/lodash';
+import { noop } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiChrome from 'ui/chrome';
 import template from './index.html';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { flatten } from '@elastic/lodash';
+import { flatten } from 'lodash';
 
 export async function importDashboards(req) {
   const { payload } = req;

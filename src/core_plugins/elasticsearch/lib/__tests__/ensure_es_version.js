@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';

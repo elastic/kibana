@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 
 export const updateEditorStateWithChanges = (newState, oldState, editorState) => {
   let dirty = false;

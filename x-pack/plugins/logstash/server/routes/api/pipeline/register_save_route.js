@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { wrapEsError } from '../../../lib/error_wrappers';
 import { INDEX_NAMES, TYPE_NAMES } from '../../../../common/constants';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';

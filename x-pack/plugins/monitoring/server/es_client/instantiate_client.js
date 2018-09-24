@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bindKey, once } from '@elastic/lodash';
+import { bindKey, once } from 'lodash';
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { LOGGING_TAG } from '../../common/constants';
 

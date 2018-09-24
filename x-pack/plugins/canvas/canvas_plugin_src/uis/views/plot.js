@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, uniq } from '@elastic/lodash';
+import { map, uniq } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
 

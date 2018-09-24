@@ -7,7 +7,7 @@
 /**
  * Controller for Advanced Node Detail
  */
-import { find } from '@elastic/lodash';
+import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';

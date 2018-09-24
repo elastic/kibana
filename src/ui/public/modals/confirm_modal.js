@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { noop } from '@elastic/lodash';
+import { noop } from 'lodash';
 import { uiModules } from '../modules';
 import template from './confirm_modal.html';
 import { ModalOverlay } from './modal_overlay';

@@ -5,7 +5,7 @@
  */
 
 import { badRequest } from 'boom';
-import { forEach, keys, sortBy } from '@elastic/lodash';
+import { forEach, keys, sortBy } from 'lodash';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
 
 function buildFieldList(fields) {

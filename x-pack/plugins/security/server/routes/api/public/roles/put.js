@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, identity } from '@elastic/lodash';
+import { pick, identity } from 'lodash';
 import Joi from 'joi';
 import { ALL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';

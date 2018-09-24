@@ -6,7 +6,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get, set } from '@elastic/lodash';
+import { get, set } from 'lodash';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { TimeFilter } from './components/time_filter';
 

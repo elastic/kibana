@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { contains } from '@elastic/lodash';
+import { contains } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { ML_SUPPORTED_LICENSES } from '../../common/constants';
 

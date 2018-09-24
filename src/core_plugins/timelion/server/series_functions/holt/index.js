@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
 import ses from './lib/ses';
 import des from './lib/des';

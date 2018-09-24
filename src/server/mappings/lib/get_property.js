@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import toPath from '@elastic/lodash/internal/toPath';
+import toPath from 'lodash/internal/toPath';
 
 import { getRootType } from './get_root_type';
 

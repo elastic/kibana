@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import TransactionCharts from '../../shared/charts/TransactionCharts';

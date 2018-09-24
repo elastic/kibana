@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { capitalize, get } from '@elastic/lodash';
+import { capitalize, get } from 'lodash';
 import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
 import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
 import { formatMetric } from '../../../lib/format_number';

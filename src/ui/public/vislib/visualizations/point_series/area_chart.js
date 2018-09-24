@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 

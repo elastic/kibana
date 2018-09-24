@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import 'ui/pager_control';
 import 'ui/pager';

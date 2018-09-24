@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';

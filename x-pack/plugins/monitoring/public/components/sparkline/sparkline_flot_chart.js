@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last, isFunction, debounce } from '@elastic/lodash';
+import { last, isFunction, debounce } from 'lodash';
 import $ from 'jquery-flot'; // webpackShim
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
 

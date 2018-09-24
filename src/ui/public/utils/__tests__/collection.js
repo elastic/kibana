@@ -18,7 +18,7 @@
  */
 
 import expect from 'expect.js';
-import { groupBy } from '@elastic/lodash';
+import { groupBy } from 'lodash';
 import { move, pushAll, organizeBy } from '../collection';
 
 describe('collection', () => {

@@ -14,7 +14,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import { isEqual } from '@elastic/lodash';
+import { isEqual } from 'lodash';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 

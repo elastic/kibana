@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, indexBy, sortBy } from '@elastic/lodash';
+import { defaults, indexBy, sortBy } from 'lodash';
 
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';

@@ -22,7 +22,7 @@
  * that defined in Kibana's package.json.
  */
 
-import { forEach, get } from '@elastic/lodash';
+import { forEach, get } from 'lodash';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**

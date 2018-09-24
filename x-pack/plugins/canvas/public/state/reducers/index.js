@@ -6,7 +6,7 @@
 
 import { combineReducers } from 'redux';
 import reduceReducers from 'reduce-reducers';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 import { appReducer } from './app';
 import { transientReducer } from './transient';

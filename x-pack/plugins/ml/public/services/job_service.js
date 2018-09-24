@@ -6,7 +6,7 @@
 
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 

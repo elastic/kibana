@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { memoize } from '@elastic/lodash';
+import { memoize } from 'lodash';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';

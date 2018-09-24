@@ -19,7 +19,7 @@
 
 
 import { fromRoot } from '../../utils';
-import { chain } from '@elastic/lodash';
+import { chain } from 'lodash';
 import { resolve } from 'path';
 import { fromNode } from 'bluebird';
 import glob from 'glob-all';

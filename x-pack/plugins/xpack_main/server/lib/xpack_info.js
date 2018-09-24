@@ -6,7 +6,7 @@
 
 import { createHash } from 'crypto';
 import moment from 'moment';
-import { get, has } from '@elastic/lodash';
+import { get, has } from 'lodash';
 import { Poller } from '../../../../common/poller';
 import { XPackInfoLicense } from './xpack_info_license';
 

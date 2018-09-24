@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { merge } from '@elastic/lodash';
+import { merge } from 'lodash';
 import { createStubs } from './fixtures/create_stubs';
 import { alertsClustersAggregation } from '../alerts_clusters_aggregation';
 

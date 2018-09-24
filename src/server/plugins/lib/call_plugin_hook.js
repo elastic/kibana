@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last } from '@elastic/lodash';
+import { last } from 'lodash';
 
 export async function callPluginHook(hookName, plugins, id, history) {
   const plugin = plugins.find(plugin => plugin.id === id);

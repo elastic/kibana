@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from '@elastic/lodash';
+import { find } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './watch_edit_actions_execute_summary.html';
 import 'plugins/watcher/components/action_state_icon';

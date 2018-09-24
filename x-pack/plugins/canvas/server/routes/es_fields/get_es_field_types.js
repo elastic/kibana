@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, keys } from '@elastic/lodash';
+import { mapValues, keys } from 'lodash';
 import { normalizeType } from '../../lib/normalize_type';
 
 export function getESFieldTypes(index, fields, elasticsearchClient) {

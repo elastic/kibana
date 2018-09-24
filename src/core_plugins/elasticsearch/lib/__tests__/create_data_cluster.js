@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { set, get, partial } from '@elastic/lodash';
+import { set, get, partial } from 'lodash';
 import { createDataCluster } from '../create_data_cluster';
 
 describe('plugins/elasticsearch', function () {

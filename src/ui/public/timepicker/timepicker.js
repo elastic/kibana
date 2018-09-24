@@ -22,7 +22,7 @@ import './quick_panel';
 import './recent_panel';
 import './relative_panel';
 import './absolute_panel';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@kbn/datemath';

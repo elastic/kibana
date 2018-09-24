@@ -6,7 +6,7 @@
 
 
 
-import { once } from '@elastic/lodash';
+import { once } from 'lodash';
 
 const _callWithInternalUser = once((server) => {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');

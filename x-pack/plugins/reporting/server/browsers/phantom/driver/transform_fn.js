@@ -5,7 +5,7 @@
  */
 
 import { transform as babelTransform } from 'babel-core';
-import { memoize } from '@elastic/lodash';
+import { memoize } from 'lodash';
 
 const safeWrap = (obj) => {
   const code = obj.toString();

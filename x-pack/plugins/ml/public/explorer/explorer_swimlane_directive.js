@@ -10,7 +10,7 @@
  * AngularJS directive for rendering Explorer dashboard swimlanes.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 

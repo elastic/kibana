@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import numeral from '@elastic/numeral';
 import numeralLanguages from '@elastic/numeral/languages';
 

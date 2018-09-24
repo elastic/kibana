@@ -8,7 +8,7 @@
 
 import template from './influencers_selection.html';
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');

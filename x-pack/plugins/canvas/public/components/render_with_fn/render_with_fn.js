@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEqual, cloneDeep } from '@elastic/lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { RenderToDom } from '../render_to_dom';
 
 export class RenderWithFn extends React.Component {

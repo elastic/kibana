@@ -18,7 +18,7 @@
  */
 
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';

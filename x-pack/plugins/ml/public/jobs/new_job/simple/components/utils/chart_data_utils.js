@@ -8,7 +8,7 @@
 
 // various util functions for populating the chartData object used by the job wizards
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';

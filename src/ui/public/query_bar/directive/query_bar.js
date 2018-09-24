@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compact } from '@elastic/lodash';
+import { compact } from 'lodash';
 import { uiModules } from '../../modules';
 import { callAfterBindingsWorkaround } from '../../compat';
 import template from './query_bar.html';

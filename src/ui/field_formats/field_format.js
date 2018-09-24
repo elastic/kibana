@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { contentTypesSetup } from './content_types';
 
 export function FieldFormat(params) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { uiModules } from '../modules';
 // Shorts dot notated strings

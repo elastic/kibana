@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../../modules';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
 

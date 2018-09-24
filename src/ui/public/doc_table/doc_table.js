@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import html from './doc_table.html';
 import { getSort } from './lib/get_sort';
 import './doc_table.less';

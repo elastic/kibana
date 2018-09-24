@@ -8,7 +8,7 @@
 
 // utility functions for handling custom URLs
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 import { parseInterval } from '../../common/util/parse_interval';

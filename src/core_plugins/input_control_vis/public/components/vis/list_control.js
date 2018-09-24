@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { FormRow } from './form_row';
 import { injectI18n } from '@kbn/i18n/react';
 

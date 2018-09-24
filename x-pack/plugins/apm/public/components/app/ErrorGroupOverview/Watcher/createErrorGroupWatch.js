@@ -7,7 +7,7 @@
 import url from 'url';
 import chrome from 'ui/chrome';
 import uuid from 'uuid';
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 import {
   SERVICE_NAME,
   PROCESSOR_EVENT,

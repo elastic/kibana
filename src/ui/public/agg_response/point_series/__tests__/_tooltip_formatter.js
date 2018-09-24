@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
 import { getSort } from 'ui/doc_table/lib/get_sort';

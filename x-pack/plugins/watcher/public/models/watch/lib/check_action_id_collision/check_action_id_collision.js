@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from '@elastic/lodash';
+import { find } from 'lodash';
 
 export function checkActionIdCollision(actions, action) {
   const collision = find(actions, { id: action.id });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 import expect from 'expect.js';
 import { handleResponse } from '../get_shard_stats';
 import { shardStatsFixture, clusterFixture } from './fixtures';

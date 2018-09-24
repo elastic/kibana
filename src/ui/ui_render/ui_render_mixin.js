@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from '@elastic/lodash';
+import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';

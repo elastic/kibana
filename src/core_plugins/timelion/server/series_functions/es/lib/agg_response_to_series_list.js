@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function timeBucketsToPairs(buckets) {
   const timestamps = _.pluck(buckets, 'key');

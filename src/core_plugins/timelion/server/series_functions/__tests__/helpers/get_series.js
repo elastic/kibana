@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export default function getSeries(name, buckets, points) {
   const fill = _.partial(_.zip, _.map(buckets, function (bucket) { return bucket.valueOf(); }));

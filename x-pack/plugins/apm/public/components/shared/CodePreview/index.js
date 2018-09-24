@@ -14,7 +14,7 @@ import {
   borderRadius
 } from '../../../style/variables';
 
-import { isEmpty } from '@elastic/lodash';
+import { isEmpty } from 'lodash';
 
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 import javascript from 'react-syntax-highlighter/dist/languages/javascript';

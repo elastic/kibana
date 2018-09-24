@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { identity } from '@elastic/lodash';
+import { identity } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';

@@ -13,7 +13,7 @@
  * And a minimum bucket span
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function polledDataCheckerFactory(callWithRequest) {
   class PolledDataChecker {

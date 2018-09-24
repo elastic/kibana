@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { escape } from '@elastic/lodash';
+import { escape } from 'lodash';
 export function normalizeVersionString(string) {
   if (string) {
     // get just the number.number.number portion (filter out '-snapshot')

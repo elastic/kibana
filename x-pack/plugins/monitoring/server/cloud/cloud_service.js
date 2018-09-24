@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject, isString } from '@elastic/lodash';
+import { isObject, isString } from 'lodash';
 import request from 'request';
 import { CloudServiceResponse } from './cloud_response';
 

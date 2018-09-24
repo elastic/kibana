@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import color from 'color';
 import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';

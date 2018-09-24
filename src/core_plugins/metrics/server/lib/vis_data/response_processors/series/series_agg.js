@@ -18,7 +18,7 @@
  */
 
 import SeriesAgg from './_series_agg';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import calculateLabel from '../../../../../common/calculate_label';
 export default function seriesAgg(resp, panel, series) {

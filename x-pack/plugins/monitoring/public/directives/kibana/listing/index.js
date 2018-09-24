@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from '@elastic/lodash';
+import { capitalize, get } from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';

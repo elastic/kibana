@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { each } from '@elastic/lodash';
+import { each } from 'lodash';
 
 export function findInObject(o, fn, memo, name) {
   memo = memo || [];

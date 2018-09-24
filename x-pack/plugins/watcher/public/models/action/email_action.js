@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isArray } from '@elastic/lodash';
+import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 
 export class EmailAction extends BaseAction {

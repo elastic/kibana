@@ -12,7 +12,7 @@
  * to Elasticsearch to obtain the data to populate all the components in the view.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 import 'plugins/ml/components/anomalies_table';

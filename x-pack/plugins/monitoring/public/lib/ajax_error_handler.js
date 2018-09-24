@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { contains } from '@elastic/lodash';
+import { contains } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib';
 import {

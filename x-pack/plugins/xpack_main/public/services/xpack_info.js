@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
 import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_converter';

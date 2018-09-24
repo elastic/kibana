@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import chalk from 'chalk';
 
 import LogFormat from './log_format';

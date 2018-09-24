@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sortBy } from '@elastic/lodash';
+import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';

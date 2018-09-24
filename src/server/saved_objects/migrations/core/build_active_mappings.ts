@@ -21,7 +21,7 @@
  * This file contains logic to build the index mappings for a migration.
 */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { IndexMapping, MappingProperties } from './call_cluster';
 
 /**

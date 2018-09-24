@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, take, get as getField } from '@elastic/lodash';
+import { groupBy, take, get as getField } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,

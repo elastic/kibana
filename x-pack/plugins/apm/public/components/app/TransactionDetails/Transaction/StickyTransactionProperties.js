@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { StickyProperties } from '../../../shared/StickyProperties';
 import {
   TRANSACTION_DURATION,

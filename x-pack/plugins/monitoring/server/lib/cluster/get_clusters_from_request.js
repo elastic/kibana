@@ -5,7 +5,7 @@
  */
 
 import { notFound } from 'boom';
-import { set, findIndex } from '@elastic/lodash';
+import { set, findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';

@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 export default source => {
   const series = _.cloneDeep(source);
   series.id = uuid.v1();

@@ -20,7 +20,7 @@
 import angular from 'angular';
 import moment from 'moment';
 import expect from 'expect.js';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/visualize/index';

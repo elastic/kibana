@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { sizeWorkpad, setName } from '../../state/actions/workpad';
 import { getWorkpad } from '../../state/selectors/workpad';
 

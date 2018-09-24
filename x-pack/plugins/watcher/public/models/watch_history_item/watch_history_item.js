@@ -5,7 +5,7 @@
  */
 
 import 'moment-duration-format';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { getMoment } from 'plugins/watcher/../common/lib/get_moment';
 import { WatchStatus } from '../watch_status';
 

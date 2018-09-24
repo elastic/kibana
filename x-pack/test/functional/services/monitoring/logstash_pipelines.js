@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { range } from '@elastic/lodash';
+import { range } from 'lodash';
 
 export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');

@@ -6,7 +6,7 @@
 
 
 
-import { get, sortBy } from '@elastic/lodash';
+import { get, sortBy } from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculateClass';

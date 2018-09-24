@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchNowProvider } from './fetch_now';
 

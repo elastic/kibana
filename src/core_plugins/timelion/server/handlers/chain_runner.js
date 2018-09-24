@@ -18,7 +18,7 @@
  */
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Promise from 'bluebird';
 import parseSheet from './lib/parse_sheet.js';
 import parseDateMath from '../lib/date_math.js';

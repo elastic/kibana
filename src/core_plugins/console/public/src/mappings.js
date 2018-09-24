@@ -18,7 +18,7 @@
  */
 
 const $ = require('jquery');
-const _ = require('@elastic/lodash');
+const _ = require('lodash');
 const es = require('./es');
 const settings = require('./settings');
 

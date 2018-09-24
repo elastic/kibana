@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import { EuiToolTip } from '@elastic/eui';
 

@@ -5,7 +5,7 @@
  */
 
 import 'angular-resource';
-import { omit } from '@elastic/lodash';
+import { omit } from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 

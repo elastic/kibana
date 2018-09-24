@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { inflector } from './inflector';
 import { organizeBy } from '../utils/collection';
 

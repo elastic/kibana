@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { Binder } from '../../../binder';
 import { positionTooltip } from './position_tooltip';
 import $ from 'jquery';

@@ -10,7 +10,7 @@ import {
   SERVICE_AGENT_NAME,
   PROCESSOR_EVENT
 } from '../../../common/constants';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 export async function getServices({ setup }) {
   const { start, end, esFilterQuery, client, config } = setup;

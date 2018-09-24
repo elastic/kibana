@@ -20,7 +20,7 @@ import {
   EuiModalBody,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { sortByOrder } from '@elastic/lodash';
+import { sortByOrder } from 'lodash';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';

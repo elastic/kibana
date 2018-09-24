@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { includes, isFunction } from '@elastic/lodash';
+import { includes, isFunction } from 'lodash';
 import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';

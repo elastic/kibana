@@ -35,7 +35,7 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import expect from 'expect.js';
 import moment from 'moment';
 import { onBrushEvent } from '../brush_event';

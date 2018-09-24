@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { createSelector } from 'reselect';
-import { get, isEmpty } from '@elastic/lodash';
+import { get, isEmpty } from 'lodash';
 import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams } from '../urlParams';
 import { Request } from 'react-redux-request';

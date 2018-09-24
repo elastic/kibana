@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { badRequest } from 'boom';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 /**
  * This model deals with a pipeline object from ES and converts it to Kibana downstream

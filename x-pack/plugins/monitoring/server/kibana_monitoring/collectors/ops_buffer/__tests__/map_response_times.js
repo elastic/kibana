@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from '@elastic/lodash';
+import { isEqual } from 'lodash';
 import { mapResponseTimes } from '../map_response_times';
 import expect from 'expect.js';
 

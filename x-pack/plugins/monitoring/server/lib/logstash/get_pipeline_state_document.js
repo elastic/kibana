@@ -6,7 +6,7 @@
 
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 
 export async function getPipelineStateDocument(callWithRequest, req, logstashIndexPattern,
   { clusterUuid, pipelineId, version }) {

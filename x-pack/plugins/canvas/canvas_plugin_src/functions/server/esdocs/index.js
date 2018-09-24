@@ -5,7 +5,7 @@
  */
 
 import squel from 'squel';
-import { map, zipObject } from '@elastic/lodash';
+import { map, zipObject } from 'lodash';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
 import { normalizeType } from '../../../../server/lib/normalize_type';
 import { sanitizeName } from '../../../../server/lib/sanitize_name';

@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { isEmpty, get } from '@elastic/lodash';
+import { isEmpty, get } from 'lodash';
 import CodePreview from '../../shared/CodePreview';
 import { Ellipsis } from '../../shared/Icons';
 import { units, px } from '../../../style/variables';

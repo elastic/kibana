@@ -18,7 +18,7 @@
  */
 
 import { Config } from './config';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Joi from 'joi';
 
 /**

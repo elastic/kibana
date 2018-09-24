@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import override from './override';
 import createDefaultSchema from './schema';
 import { pkg, unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
 import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';

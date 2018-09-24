@@ -5,7 +5,7 @@
  */
 
 import Promise from 'bluebird';
-import { chain, find, get } from '@elastic/lodash';
+import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
 import { KibanaClusterMetric } from '../metrics';

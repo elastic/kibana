@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pluck, min, max, last } from '@elastic/lodash';
+import { get, pluck, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
 

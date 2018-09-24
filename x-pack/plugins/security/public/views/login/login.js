@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'url';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import 'ui/autoload/styles';
 import 'plugins/security/views/login/login.less';
 import chrome from 'ui/chrome';

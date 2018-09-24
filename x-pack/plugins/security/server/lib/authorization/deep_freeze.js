@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject } from '@elastic/lodash';
+import { isObject } from 'lodash';
 
 export function deepFreeze(object) {
   // for any properties that reference an object, makes sure that object is

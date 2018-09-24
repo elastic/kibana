@@ -15,7 +15,7 @@ import {
   borderRadius
 } from '../../../../style/variables';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import { isEmpty, capitalize, get, sortBy, last } from '@elastic/lodash';
+import { isEmpty, capitalize, get, sortBy, last } from 'lodash';
 
 import StickyTransactionProperties from './StickyTransactionProperties';
 import {

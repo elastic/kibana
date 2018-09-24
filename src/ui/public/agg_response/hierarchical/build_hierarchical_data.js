@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { toArray } from '@elastic/lodash';
+import { toArray } from 'lodash';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
 
 export function BuildHierarchicalDataProvider(Private) {

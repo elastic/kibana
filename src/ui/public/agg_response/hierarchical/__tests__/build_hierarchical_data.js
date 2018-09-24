@@ -18,7 +18,7 @@
  */
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

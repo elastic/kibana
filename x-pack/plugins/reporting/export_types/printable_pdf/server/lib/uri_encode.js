@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { forEach, isArray } from '@elastic/lodash';
+import { forEach, isArray } from 'lodash';
 import { encodeUriQuery } from './encode_uri_query';
 
 function toKeyValue(obj) {

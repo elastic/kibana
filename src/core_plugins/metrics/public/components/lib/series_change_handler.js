@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import newMetricAggFn from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../common/agg_lookup';
 import {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { move } from 'ui/utils/collection';
 
 require('angular-sortable-view');

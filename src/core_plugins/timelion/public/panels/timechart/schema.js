@@ -18,7 +18,7 @@
  */
 
 require('./flot');
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from '../../lib/observe_resize';

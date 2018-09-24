@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { render } from 'react-dom';
-import { capitalize, get } from '@elastic/lodash';
+import { capitalize, get } from 'lodash';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { uiModules } from 'ui/modules';

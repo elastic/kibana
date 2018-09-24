@@ -18,7 +18,7 @@
  */
 
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import collectBranch from '../_collect_branch';
 import expect from 'expect.js';
 describe('collectBranch()', function () {

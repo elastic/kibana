@@ -13,7 +13,7 @@ import {
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
-import { last } from '@elastic/lodash';
+import { last } from 'lodash';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';

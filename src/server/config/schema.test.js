@@ -19,7 +19,7 @@
 
 import schemaProvider from './schema';
 import Joi from 'joi';
-import { set } from '@elastic/lodash';
+import { set } from 'lodash';
 
 describe('Config schema', function () {
   let schema;

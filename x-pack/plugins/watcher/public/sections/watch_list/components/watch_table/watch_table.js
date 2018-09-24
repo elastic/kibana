@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import 'ui/check_box';
 import 'ui/sortable_column';

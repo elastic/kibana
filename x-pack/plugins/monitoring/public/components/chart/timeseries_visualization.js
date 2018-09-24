@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import { getLastValue } from './get_last_value';
 import { TimeseriesContainer } from './timeseries_container';

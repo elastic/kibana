@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';

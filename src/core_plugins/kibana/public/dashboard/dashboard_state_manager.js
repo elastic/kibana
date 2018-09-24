@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import moment from 'moment';
 
 import { DashboardViewMode } from './dashboard_view_mode';

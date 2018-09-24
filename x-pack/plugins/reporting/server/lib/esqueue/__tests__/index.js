@@ -8,7 +8,7 @@ import events from 'events';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
-import { noop, times } from '@elastic/lodash';
+import { noop, times } from 'lodash';
 import { constants } from '../constants';
 import { ClientMock } from './fixtures/elasticsearch';
 import { JobMock } from './fixtures/job';

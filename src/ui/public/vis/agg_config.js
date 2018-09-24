@@ -24,7 +24,7 @@
  * the Visualize app.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
 
 class AggConfig {

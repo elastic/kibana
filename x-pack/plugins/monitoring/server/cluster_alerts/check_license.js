@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { includes } from '@elastic/lodash';
+import { includes } from 'lodash';
 
 /**
  * Function to do the work of checking license for cluster alerts feature support

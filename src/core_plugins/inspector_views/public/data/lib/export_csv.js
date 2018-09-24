@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 import chrome from 'ui/chrome';
 

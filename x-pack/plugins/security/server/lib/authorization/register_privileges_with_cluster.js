@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, isEmpty, isEqual } from '@elastic/lodash';
+import { difference, isEmpty, isEqual } from 'lodash';
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 

@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { cloneDeep } from '@elastic/lodash';
+import { cloneDeep } from 'lodash';
 
 import './styles/main.less';
 import { ml } from '../../../../../services/ml_api_service';

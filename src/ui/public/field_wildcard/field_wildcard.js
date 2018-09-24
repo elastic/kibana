@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { escapeRegExp, memoize } from '@elastic/lodash';
+import { escapeRegExp, memoize } from 'lodash';
 
 export function FieldWildcardProvider(config) {
   const metaFields = config.get('metaFields');

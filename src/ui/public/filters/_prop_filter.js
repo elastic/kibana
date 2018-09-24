@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from '@elastic/lodash';
+import { isFunction } from 'lodash';
 
 /**
  * Filters out a list by a given filter. This is currently used to implement:

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map, forEach, max } from '@elastic/lodash';
+import { get, map, forEach, max } from 'lodash';
 import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';

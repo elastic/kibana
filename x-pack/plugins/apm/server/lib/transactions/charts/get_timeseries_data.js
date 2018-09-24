@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME
 } from '../../../../common/constants';
-import { get, sortBy, round } from '@elastic/lodash';
+import { get, sortBy, round } from 'lodash';
 import mean from 'lodash.mean';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getAvgResponseTimeAnomalies } from './get_avg_response_time_anomalies/get_avg_response_time_anomalies';

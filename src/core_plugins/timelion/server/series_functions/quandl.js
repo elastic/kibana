@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 fetch.Promise = require('bluebird');

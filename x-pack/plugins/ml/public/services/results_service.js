@@ -8,7 +8,7 @@
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../util/string_utils';

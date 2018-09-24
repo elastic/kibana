@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { sortBy } from '@elastic/lodash';
+import { sortBy } from 'lodash';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { getType } from '../../../../common/lib/get_type';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';

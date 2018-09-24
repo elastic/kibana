@@ -8,7 +8,7 @@ import events from 'events';
 import Puid from 'puid';
 import { constants } from './constants';
 import { createIndex } from './helpers/create_index';
-import { isPlainObject } from '@elastic/lodash';
+import { isPlainObject } from 'lodash';
 
 const puid = new Puid();
 

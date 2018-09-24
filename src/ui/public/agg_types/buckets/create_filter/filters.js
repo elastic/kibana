@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFilter } from '../../../filter_manager/lib/query';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 
 export function createFilterFilters(aggConfig, key) {
   // have the aggConfig write agg dsl params

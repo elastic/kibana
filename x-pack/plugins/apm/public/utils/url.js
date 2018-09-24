@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import qs from 'querystring';
 import url from 'url';
 import { Link } from 'react-router-dom';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import rison from 'rison-node';
 import { EuiLink } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';

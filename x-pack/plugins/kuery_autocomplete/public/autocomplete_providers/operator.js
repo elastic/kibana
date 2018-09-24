@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from '@elastic/lodash';
+import { flatten } from 'lodash';
 const type = 'operator';
 
 const operators = {

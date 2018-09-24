@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { toQuery, fromQuery, history } from '../../../../../utils/url';
 import SpanDetails from './SpanDetails';

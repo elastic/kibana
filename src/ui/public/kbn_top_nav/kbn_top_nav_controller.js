@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { capitalize, isArray, isFunction, get } from '@elastic/lodash';
+import { capitalize, isArray, isFunction, get } from 'lodash';
 
 import chrome from '../chrome';
 import filterTemplate from '../chrome/config/filter.html';

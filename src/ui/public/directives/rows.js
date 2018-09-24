@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import AggConfigResult from '../vis/agg_config_result';
 import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { uiModules } from '../modules';

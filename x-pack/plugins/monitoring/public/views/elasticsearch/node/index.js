@@ -7,7 +7,7 @@
 /**
  * Controller for Node Detail
  */
-import { find, partial } from '@elastic/lodash';
+import { find, partial } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';

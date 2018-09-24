@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import chrome from '../chrome';
 
 export const Scanner = function ($http, { index, type } = {}) {

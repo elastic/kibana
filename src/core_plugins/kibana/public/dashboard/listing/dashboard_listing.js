@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,

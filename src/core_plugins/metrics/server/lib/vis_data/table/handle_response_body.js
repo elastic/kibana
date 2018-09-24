@@ -18,7 +18,7 @@
  */
 
 import buildProcessorFunction from '../build_processor_function';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import processors from '../response_processors/table';
 
 export default function handleResponseBody(panel) {

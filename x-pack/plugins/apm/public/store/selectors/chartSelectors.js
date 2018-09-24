@@ -5,7 +5,7 @@
  */
 
 import d3 from 'd3';
-import { last, zipObject, difference, memoize, get, isEmpty } from '@elastic/lodash';
+import { last, zipObject, difference, memoize, get, isEmpty } from 'lodash';
 import { colors } from '../../style/variables';
 import {
   asMillisWithDefault,

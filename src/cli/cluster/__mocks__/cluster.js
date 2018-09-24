@@ -19,7 +19,7 @@
 /* eslint-env jest */
 
 import EventEmitter from 'events';
-import { assign, random } from '@elastic/lodash';
+import { assign, random } from 'lodash';
 import { delay } from 'bluebird';
 
 class MockClusterFork extends EventEmitter {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize } from '@elastic/lodash';
+import { capitalize } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { formatNumber, formatMetric } from 'plugins/monitoring/lib/format_number';
 import { extractIp } from 'plugins/monitoring/lib/extract_ip';

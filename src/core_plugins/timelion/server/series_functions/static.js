@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
 import Promise from 'bluebird';
 

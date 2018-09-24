@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, map } from '@elastic/lodash';
+import { get, map } from 'lodash';
 import { getType } from '../../../../common/lib/get_type';
 
 export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {}) => {

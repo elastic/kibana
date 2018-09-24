@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find, get } from '@elastic/lodash';
+import { find, get } from 'lodash';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { MonitoringViewBaseController } from 'plugins/monitoring/views';

@@ -27,7 +27,7 @@ import createDateAgg from '../es/lib/create_date_agg';
 import esResponse from './fixtures/es_response';
 
 import Promise from 'bluebird';
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from './helpers/invoke_series_fn.js';

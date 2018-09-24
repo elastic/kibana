@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { BaseObject } from './base_object';
 import { createLegacyClass } from './legacy_class';
 

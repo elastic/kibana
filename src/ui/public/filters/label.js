@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from '../modules';
-import { words, capitalize } from '@elastic/lodash';
+import { words, capitalize } from 'lodash';
 
 uiModules
   .get('kibana')

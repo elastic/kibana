@@ -6,7 +6,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get } from '@elastic/lodash';
+import { get } from 'lodash';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { DropdownFilter } from './component';
 

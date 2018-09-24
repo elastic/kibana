@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { debounce } from '@elastic/lodash';
+import { debounce } from 'lodash';
 
 export class DomPreview extends React.Component {
   static container = null;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from '@elastic/lodash';
+import _ from 'lodash';
 import { VisColorMappedColorsProvider } from './mapped_colors';
 
 export function VislibComponentsColorColorProvider(Private) {
