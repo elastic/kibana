@@ -7,78 +7,65 @@
 
 
 /*
- * React component for rendering a select element with various aggregation limits.
- */
+* AngularJS directive for rendering a select element with limit levels.
+*/
 
-import React, { Component } from 'react';
+import _ from 'lodash';
 
-import {
-  EuiSelect
-} from '@elastic/eui';
+import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 
+import template from './select_limit.html';
+import 'plugins/ml/components/controls/controls_select';
 
-const OPTIONS = [
-  { text: '5', value: '5' },
-  { text: '10', value: '10' },
-  { text: '25', value: '25' },
-  { text: '50', value: '50' }
-];
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/ml');
 
-function optionValueToLimit(value) {
-  // Builds the corresponding limit object with
-  // the required display and val properties
-  // from the specified value.
-  const option = OPTIONS.find(opt => (opt.value === value));
-
-  // Default to 10 if supplied value doesn't map to one of the options.
-  let limit = +OPTIONS[1].value;
-  if (option !== undefined) {
-    limit = +option.value;
-  }
-
-  return limit;
-}
-
-class SelectLimit extends Component {
-  constructor(props) {
-    super(props);
-
-    // Restore the limit from the state, or default to 10.
-    this.mlSelectLimitService = this.props.mlSelectLimitService;
-    const limitValue = this.mlSelectLimitService.state.get('limit');
-    const limit = optionValueToLimit(limitValue);
-    this.mlSelectLimitService.state.set('limit', limit);
-
-    this.state = {
-      value: limit
-    };
-  }
-
-  onChange = (e) => {
-    this.setState({
-      value: e.target.value,
+module
+  .service('mlSelectLimitService', function (Private) {
+    const stateFactory = Private(stateFactoryProvider);
+    this.state = stateFactory('mlSelectLimit', {
+      limit: { display: '10', val: 10 }
     });
+  })
+  .directive('mlSelectLimit', function (mlSelectLimitService) {
+    return {
+      restrict: 'E',
+      template,
+      link: function (scope, element) {
+        scope.limitOptions = [
+          { display: '5', val: 5 },
+          { display: '10', val: 10 },
+          { display: '25', val: 25 },
+          { display: '50', val: 50 }
+        ];
 
-    const limit = optionValueToLimit(e.target.value);
-    this.mlSelectLimitService.state.set('limit', +limit).changed();
-  };
+        const limitState = mlSelectLimitService.state.get('limit');
+        const limitValue = _.get(limitState, 'val', 0);
+        let limitOption = scope.limitOptions.find(d => d.val === limitValue);
+        if (limitOption === undefined) {
+          // Attempt to set value in URL which doesn't map to one of the options.
+          limitOption = scope.limitOptions.find(d => d.val === 10);
+        }
+        scope.limit = limitOption;
+        mlSelectLimitService.state.set('limit', scope.limit);
 
-  render() {
-    return (
-      <React.Fragment>
-        <label htmlFor="selectLimit" className="euiFormLabel">Limit:</label>
-        <div style={{ width: '170px', display: 'inline-block' }}>
-          <EuiSelect
-            id="selectLimit"
-            options={OPTIONS}
-            className="ml-select-limit"
-            value={this.state.value}
-            onChange={this.onChange}
-          />
-        </div>
-      </React.Fragment>
-    );
-  }
-}
+        scope.setLimit = function (limit) {
+          if (!_.isEqual(scope.limit, limit)) {
+            scope.limit = limit;
+            mlSelectLimitService.state.set('limit', scope.limit).changed();
+          }
+        };
 
-export { SelectLimit };
+        function setLimit() {
+          scope.setLimit(mlSelectLimitService.state.get('limit'));
+        }
+
+        mlSelectLimitService.state.watch(setLimit);
+
+        element.on('$destroy', () => {
+          mlSelectLimitService.state.unwatch(setLimit);
+          scope.$destroy();
+        });
+      }
+    };
+  });
