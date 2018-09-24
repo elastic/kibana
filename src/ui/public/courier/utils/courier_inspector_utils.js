@@ -61,7 +61,7 @@ function getResponseInspectorStats(searchSource, resp) {
 
     stats.Hits = {
       value: `${resp.hits.hits.length}`,
-      description: 'The number of documents that match the query.',
+      description: 'The number of documents returned by the query.',
     };
   }
 
