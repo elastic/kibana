@@ -5,19 +5,14 @@
  */
 
 import { connect } from 'react-redux';
-import { ServiceOverview as View } from './view';
-import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
+// @ts-ignore
 import { getUrlParams } from '../../../store/urlParams';
+import { TraceOverview as View } from './view';
 
 function mapStateToProps(state = {}) {
   return {
-    serviceList: getServiceList(state),
     urlParams: getUrlParams(state)
   };
 }
 
-const mapDispatchToProps = {};
-export const ServiceOverview = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(View);
+export const TraceOverview = connect(mapStateToProps)(View);

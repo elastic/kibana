@@ -6,25 +6,40 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import ServiceOverview from '../ServiceOverview';
-import ErrorGroupDetails from '../ErrorGroupDetails';
-import ErrorGroupOverview from '../ErrorGroupOverview';
-import TransactionDetails from '../TransactionDetails';
-import TransactionOverview from '../TransactionOverview';
+// @ts-ignore
 import { legacyDecodeURIComponent } from '../../../utils/url';
+// @ts-ignore
+import ErrorGroupDetails from '../ErrorGroupDetails';
+// @ts-ignore
+import ErrorGroupOverview from '../ErrorGroupOverview';
+// @ts-ignore
+import TransactionDetails from '../TransactionDetails';
+// @ts-ignore
+import TransactionOverview from '../TransactionOverview';
+import { Home } from './Home';
+
+interface BreadcrumbArgs {
+  match: {
+    params: StringMap<any>;
+  };
+}
+
+interface RenderArgs {
+  location: StringMap<any>;
+}
 
 export const routes = [
   {
     exact: true,
     path: '/',
-    component: ServiceOverview,
+    component: Home,
     breadcrumb: 'APM'
   },
   {
     exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
-    breadcrumb: ({ match }) => match.params.groupId
+    breadcrumb: ({ match }: BreadcrumbArgs) => match.params.groupId
   },
   {
     exact: true,
@@ -44,8 +59,8 @@ export const routes = [
       {
         exact: true,
         path: '/:serviceName',
-        breadcrumb: ({ match }) => match.params.serviceName,
-        render: ({ location }) => {
+        breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
+        render: ({ location }: RenderArgs) => {
           return (
             <Redirect
               to={{
@@ -68,14 +83,14 @@ export const routes = [
     exact: true,
     path: '/:serviceName/transactions/:transactionType',
     component: TransactionOverview,
-    breadcrumb: ({ match }) =>
+    breadcrumb: ({ match }: BreadcrumbArgs) =>
       legacyDecodeURIComponent(match.params.transactionType)
   },
   {
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',
     component: TransactionDetails,
-    breadcrumb: ({ match }) =>
+    breadcrumb: ({ match }: BreadcrumbArgs) =>
       legacyDecodeURIComponent(match.params.transactionName)
   }
 ];
