@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import ccrFixture from './fixtures/ccr';
-// import indexDetailAdvancedFixture from './fixtures/index_detail_advanced';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -14,6 +13,10 @@ export default function ({ getService }) {
 
   describe('ccr', () => {
     const archive = 'monitoring/ccr';
+    const timeRange = {
+      min: '2018-09-19T00:00:00.000Z',
+      max: '2018-09-19T23:59:59.000Z'
+    };
 
     before('load archive', () => {
       return esArchiver.load(archive);
@@ -28,6 +31,7 @@ export default function ({ getService }) {
         .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr')
         .set('kbn-xsrf', 'xxx')
         .send({
+          timeRange,
         })
         .expect(200);
 

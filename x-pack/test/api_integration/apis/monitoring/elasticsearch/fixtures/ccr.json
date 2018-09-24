@@ -1,89 +1,111 @@
 {
-  "data": {
-    "shardStatsByFollowerIndex": {
-      "follower2": {
-        "0": {
-          "id": "follower2",
-          "index": "follower2",
-          "follows": "leader2",
-          "shardId": 0,
-          "opsSynced": 52,
-          "syncLagTime": 4900,
-          "syncLagOps": 0,
-          "error": null
-        },
-        "1": {
-          "id": "follower2",
-          "index": "follower2",
-          "follows": "leader2",
-          "shardId": 1,
-          "opsSynced": 48,
-          "syncLagTime": 9919,
-          "syncLagOps": 0,
-          "error": null
-        },
-        "4": {
-          "id": "follower2",
-          "index": "follower2",
-          "follows": "leader2",
-          "shardId": 4,
-          "opsSynced": 156,
-          "syncLagTime": 49923,
-          "syncLagOps": 0,
-          "error": null
-        }
-      },
-      "follower": {
-        "0": {
-          "id": "follower",
-          "index": "follower",
-          "follows": "leader",
-          "shardId": 0,
-          "opsSynced": 86,
-          "syncLagTime": 19886,
-          "syncLagOps": 0,
-          "error": null
-        },
-        "1": {
-          "id": "follower",
-          "index": "follower",
-          "follows": "leader",
-          "shardId": 1,
-          "opsSynced": 257,
-          "syncLagTime": 19886,
-          "syncLagOps": 0,
-          "error": null
-        },
-        "2": {
-          "id": "follower",
-          "index": "follower",
-          "follows": "leader",
-          "shardId": 2,
-          "opsSynced": 77,
-          "syncLagTime": 14899,
-          "syncLagOps": 0,
-          "error": null
-        }
-      }
-    },
-    "all": [{
-      "id": "follower",
-      "index": "follower",
-      "follows": "leader",
-      "shardId": 1,
-      "opsSynced": 257,
-      "syncLagTime": 19886,
+  "data": [{
+    "id": "follower2",
+    "index": "follower2",
+    "follows": "leader2",
+    "shards": [{
+      "id": "follower2",
+      "index": "follower2",
+      "follows": "leader2",
+      "shardId": 0,
+      "error": null,
+      "opsSynced": 52,
+      "syncLagTime": 59881,
       "syncLagOps": 0,
-      "error": null
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }, {
+      "id": "follower2",
+      "index": "follower2",
+      "follows": "leader2",
+      "shardId": 1,
+      "error": null,
+      "opsSynced": 47,
+      "syncLagTime": 59959,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }, {
+      "id": "follower2",
+      "index": "follower2",
+      "follows": "leader2",
+      "shardId": 2,
+      "error": null,
+      "opsSynced": 51,
+      "syncLagTime": 55229,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }, {
+      "id": "follower2",
+      "index": "follower2",
+      "follows": "leader2",
+      "shardId": 3,
+      "error": null,
+      "opsSynced": 50,
+      "syncLagTime": 50483,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
     }, {
       "id": "follower2",
       "index": "follower2",
       "follows": "leader2",
       "shardId": 4,
-      "opsSynced": 156,
-      "syncLagTime": 49923,
+      "error": null,
+      "opsSynced": 55,
+      "syncLagTime": 55554,
       "syncLagOps": 0,
-      "error": null
-    }]
-  }
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }],
+    "opsSynced": 255,
+    "syncLagTime": 59959,
+    "syncLagOps": 0,
+    "syncLagOpsLeader": 0,
+    "syncLagOpsFollower": 0
+  }, {
+    "id": "follower",
+    "index": "follower",
+    "follows": "leader",
+    "shards": [{
+      "id": "follower",
+      "index": "follower",
+      "follows": "leader",
+      "shardId": 0,
+      "error": null,
+      "opsSynced": 85,
+      "syncLagTime": 45513,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }, {
+      "id": "follower",
+      "index": "follower",
+      "follows": "leader",
+      "shardId": 1,
+      "error": null,
+      "opsSynced": 94,
+      "syncLagTime": 55205,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }, {
+      "id": "follower",
+      "index": "follower",
+      "follows": "leader",
+      "shardId": 2,
+      "error": null,
+      "opsSynced": 76,
+      "syncLagTime": 50003,
+      "syncLagOps": 0,
+      "syncLagOpsLeader": 0,
+      "syncLagOpsFollower": 0
+    }],
+    "opsSynced": 255,
+    "syncLagTime": 55205,
+    "syncLagOps": 0,
+    "syncLagOpsLeader": 0,
+    "syncLagOpsFollower": 0
+  }]
 }
