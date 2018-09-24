@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
@@ -40,7 +41,8 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { showSaveModal } from './top_nav/show_save_modal';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
@@ -271,7 +273,6 @@ app.directive('dashboardApp', function ($injector) {
       function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
-            $scope.kbnTopNav.close('save');
             if (id) {
               toastNotifications.addSuccess({
                 title: `Dashboard '${dash.title}' was saved`,
@@ -335,13 +336,17 @@ app.directive('dashboardApp', function ($injector) {
           });
         };
 
-        showSaveModal({
-          onSave,
-          title: currentTitle,
-          description: currentDescription,
-          timeRestore: currentTimeRestore,
-          showCopyOnSave: dash.id ? true : false,
-        });
+        const dashboardSaveModal = (
+          <DashboardSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={currentTitle}
+            description={currentDescription}
+            timeRestore={currentTimeRestore}
+            showCopyOnSave={dash.id ? true : false}
+          />
+        );
+        showSaveModal(dashboardSaveModal);
       };
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = dashboardStateManager.getTitle();
@@ -372,10 +377,7 @@ app.directive('dashboardApp', function ($injector) {
           $scope.$apply();
         };
 
-        const isLabsEnabled = config.get('visualize:enableLabs');
-        const listingLimit = config.get('savedObjects:listingLimit');
-
-        showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({

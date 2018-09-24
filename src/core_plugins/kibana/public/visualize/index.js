@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './styles/main.less';
 import './editor/editor';
 import './wizard/wizard';
 import 'ui/draggable/draggable_container';

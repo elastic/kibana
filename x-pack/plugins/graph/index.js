@@ -24,6 +24,7 @@ export function graph(kibana) {
         description: 'Graph exploration',
         main: 'plugins/graph/app',
       },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],
       mappings

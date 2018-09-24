@@ -1,0 +1,70 @@
+.timChart {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  // Custom Jquery FLOT / schema selectors
+  // Cannot change at the moment
+
+  .chart-top-title {
+    @include euiFontSizeXS;
+    flex: 0;
+    text-align: center;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .chart-canvas {
+    min-width: 100%;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .legendLabel {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    line-height: normal;
+  }
+
+  .legendColorBox {
+    vertical-align: middle;
+  }
+
+  .ngLegendValue {
+    color: $euiTextColor;
+
+    .tab-dashboard.theme-dark & {
+      color: $euiColorLightShade;
+    }
+
+    &:focus,
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .ngLegendValueNumber {
+    margin-left: $euiSizeXS;
+    margin-right: $euiSizeXS;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .flot-tick-label {
+    color: $euiColorDarkShade;
+
+    .tab-dashboard.theme-dark & {
+      color: $euiColorMediumShade;
+    }
+  }
+}
+
+.timChart__legendCaption {
+  color: $euiTextColor;
+  white-space: nowrap;
+  font-weight: $euiFontWeightBold;
+
+  .tab-dashboard.theme-dark & {
+    color: $euiColorLightShade;
+  }
+}
