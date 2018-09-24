@@ -23,6 +23,7 @@ const { installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 const { createCliError } = require('./errors');
+const spawn = require('child_process').spawn;
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -145,7 +146,12 @@ exports.Cluster = class Cluster {
       throw new Error('ES has not been started');
     }
 
-    this._process.kill();
+    if (process.platform === 'win32') {
+      await spawn('taskkill', ['/pid', this._process.pid, '/f', '/t']);
+    } else {
+      this._process.kill();
+    }
+
     await this._outcome;
   }
 
