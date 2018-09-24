@@ -284,13 +284,15 @@ module.controller('MlExplorerController', function (
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
-  $(window).resize(() => {
+  function jqueryRedrawOnResize() {
+
     if (resizeTimeout !== null) {
       $timeout.cancel(resizeTimeout);
     }
     // Only redraw 500ms after last resize event.
     resizeTimeout = $timeout(redrawOnResize, 500);
-  });
+  }
+  $(window).resize(jqueryRedrawOnResize);
 
   const navListener = $scope.$on('globalNav:update', () => {
     // Run in timeout so that content pane has resized after global nav has updated.
@@ -508,6 +510,7 @@ module.controller('MlExplorerController', function (
     mlSelectLimitService.state.unwatch(swimlaneLimitListener);
     delete $scope.cellData;
     refreshWatcher.cancel();
+    $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
     navListener();
   });
