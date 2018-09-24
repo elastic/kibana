@@ -61,7 +61,6 @@
   "dependencies": {
     "@elastic/eui": "4.0.1",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/lodash": "^3.10.1-kibana1",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
@@ -131,6 +130,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "minimatch": "^3.0.4",
