@@ -95,13 +95,14 @@ export class ESSearchSource extends VectorSource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
+      const timeField = indexPattern.timeFieldName;
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
         if (this.filterByMapBounds()) {
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
         }
-        if (isTimeAware) {
+        if (timeField && isTimeAware) {
           filters.push(timefilter.createFilter(indexPattern, searchFilters.timefilter));
         }
         return filters;
