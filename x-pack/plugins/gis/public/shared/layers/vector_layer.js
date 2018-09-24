@@ -20,13 +20,14 @@ export class VectorLayer extends ALayer {
     layerDescriptor.type = VectorLayer.type;
     defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
     if (!options.style) {
-      layerDescriptor.style = VectorStyle.createDescriptorForSingleProperty('fillColor',
-        {
+      layerDescriptor.style = VectorStyle.createDescriptor({
+        'fillColor': {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
             color: DEFAULT_COLORS[defaultColorIndex++]
           }
-        });
+        }
+      });
     }
     return layerDescriptor;
   }

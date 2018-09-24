@@ -29,12 +29,9 @@ export class VectorStyle {
   }
 
   static createDescriptorForSingleProperty(propertyType, propertyValue) {
-    return {
-      type: VectorStyle.type,
-      properties: {
-        [propertyType]: propertyValue
-      }
-    };
+    return VectorStyle.createDescriptor({
+      [propertyType]: propertyValue
+    });
   }
 
   static createDescriptor(properties) {

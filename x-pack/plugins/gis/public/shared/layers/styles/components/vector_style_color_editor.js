@@ -103,7 +103,7 @@ export class VectorStyleColorEditor extends React.Component {
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           {colorSelector}
         </EuiFlexItem>
       </Fragment>
@@ -113,16 +113,20 @@ export class VectorStyleColorEditor extends React.Component {
   render() {
     let style = this.props.seedStyle;
     if (style === null) {
-      const fallbackDescriptor = VectorStyle.createDescriptorForSingleProperty('fillColor', {
-        type: VectorStyle.STYLE_TYPE.STATIC,
-        options: {
-          color: VectorStyle.DEFAULT_COLOR_HEX
+      const fallbackDescriptor = VectorStyle.createDescriptor(
+        {
+          'fillColor': {
+            type: VectorStyle.STYLE_TYPE.STATIC,
+            options: {
+              color: VectorStyle.DEFAULT_COLOR_HEX
+            }
+          }
         }
-      });
+      );
       style = new VectorStyle(fallbackDescriptor);
     }
     return (
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly">
         {this._renderFillAndOutlineStyle(style)}
       </EuiFlexGroup>
     );
