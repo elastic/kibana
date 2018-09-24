@@ -163,34 +163,6 @@ export const metrics = {
     description: 'HTTP Requests rejected during server shutdown'
   }),
 
-  apm_decoder_deflate_contentlength: new ApmMetric({
-    field: 'beats_stats.metrics.apm-server.decoder.deflate.content-length',
-    label: 'Deflater',
-    title: 'Incoming Requests Size',
-    description: 'PLZ FILL ME IN',
-    format: LARGE_BYTES,
-    metricAgg: 'max',
-    units: 'B'
-  }),
-  apm_decoder_gzip_contentlength: new ApmMetric({
-    field: 'beats_stats.metrics.apm-server.decoder.gzip.content-length',
-    label: 'Gzip',
-    title: 'Gzip',
-    description: 'PLZ FILL ME IN',
-    format: LARGE_BYTES,
-    metricAgg: 'max',
-    units: 'B'
-  }),
-  apm_decoder_uncompressed_contentlength: new ApmMetric({
-    field: 'beats_stats.metrics.apm-server.decoder.uncompressed.content-length',
-    label: 'Uncompressed',
-    title: 'Uncompressed',
-    description: 'PLZ FILL ME IN',
-    format: LARGE_BYTES,
-    metricAgg: 'max',
-    units: 'B'
-  }),
-
   apm_processor_transaction_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.transaction.transformations',
     title: 'Processed Events',
