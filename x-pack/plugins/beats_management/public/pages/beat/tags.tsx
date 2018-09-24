@@ -6,14 +6,15 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { get } from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { CMPopulatedBeat } from '../../../common/domain_types';
 import { AssignmentOptionsComponent, BaseAssignmentOptions } from '../../components/table';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
 
 interface BeatTagsPageProps {
-  beat: CMPopulatedBeat;
+  beatId: string;
   libs: FrontendLibs;
   refreshBeat(): void;
 }
@@ -21,8 +22,8 @@ interface BeatTagsPageProps {
 interface BeatTagsPageState {
   assignmentOptions: BaseAssignmentOptions;
   mounted: boolean;
+  beat: CMPopulatedBeat | null;
   notifications: any[];
-  tags: BeatTag[];
 }
 
 export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTagsPageState> {
@@ -37,11 +38,13 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
         type: AssignmentOptionsComponent.Primary,
       },
       mounted: false,
+      beat: null,
       notifications: [],
-      tags: [],
     };
+  }
 
-    this.getTags();
+  public async componentWillMount() {
+    await this.getBeat();
   }
 
   public componentDidMount() {
@@ -53,11 +56,12 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
   }
 
   public render() {
+    const { beat } = this.state;
     return (
       <div>
         <Table
           assignmentOptions={this.state.assignmentOptions}
-          items={this.state.tags}
+          items={beat ? beat.full_tags : []}
           ref={this.tableRef}
           type={BeatDetailTagsTable}
         />
@@ -79,15 +83,17 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     totalTags: number,
     action: 'remove' | 'add'
   ) => {
+    const { beat } = this.state;
     const actionName = action === 'remove' ? 'Removed' : 'Added';
     const preposition = action === 'remove' ? 'from' : 'to';
     this.setState({
       notifications: this.state.notifications.concat({
         title: `Tags ${actionName} ${preposition} Beat`,
         color: 'success',
+        id: moment.now(),
         text: (
           <p>{`${actionName} ${numRemoved} of ${totalTags} tags ${preposition} ${
-            this.props.beat ? this.props.beat.id : 'beat'
+            beat ? beat.name || beat.id : 'beat'
           }`}</p>
         ),
       }),
@@ -107,11 +113,11 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
         // awaiting an ES filter endpoint
         break;
     }
-    this.props.refreshBeat();
+    this.getBeat();
   };
 
   private associateTagsToBeat = async () => {
-    const { beat } = this.props;
+    const { beat } = this.state;
 
     if (!beat) {
       throw new Error('Beat cannot be undefined');
@@ -132,7 +138,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
   };
 
   private disassociateTagsFromBeat = async () => {
-    const { beat } = this.props;
+    const { beat } = this.state;
 
     if (!beat) {
       throw new Error('Beat cannot be undefined');
@@ -152,12 +158,10 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     this.setUpdatedTagNotification(assignments.length, tagsToDisassociate.length, 'remove');
   };
 
-  private getTags = async () => {
+  private getBeat = async () => {
     try {
-      const tags = await this.props.libs.tags.getAll();
-      if (this.state.mounted) {
-        this.setState({ tags });
-      }
+      const beat = await this.props.libs.beats.get(this.props.beatId);
+      this.setState({ beat });
     } catch (e) {
       throw new Error(e);
     }
