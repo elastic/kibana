@@ -75,13 +75,18 @@ export class ESSearchSource extends VectorSource {
     );
   }
 
-  async getGeoJson({ layerId, layerName }, searchFilters) {
+  async _getIndexPatternService() {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
     } catch (error) {
       throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}, error: ${error.message}`);
     }
+    return indexPattern;
+  }
+
+  async getGeoJson({ layerId, layerName }, searchFilters) {
+    const indexPattern = await this._getIndexPatternService();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
     if (!geoField) {
@@ -95,14 +100,13 @@ export class ESSearchSource extends VectorSource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
-      const timeField = indexPattern.timeFieldName;
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
         if (this.filterByMapBounds()) {
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
         }
-        if (timeField && isTimeAware) {
+        if (isTimeAware) {
           filters.push(timefilter.createFilter(indexPattern, searchFilters.timefilter));
         }
         return filters;
@@ -134,8 +138,9 @@ export class ESSearchSource extends VectorSource {
   }
 
   async isTimeAware() {
-    console.warn('TODO: Determine dynamically');
-    return true;
+    const indexPattern = await this._getIndexPatternService();
+    const timeField = indexPattern.timeFieldName;
+    return !!timeField;
   }
 
 }
