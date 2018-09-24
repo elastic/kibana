@@ -9,6 +9,8 @@ import React from 'react';
 
 import {
   EuiButtonEmpty,
+  EuiFlexGrid,
+  EuiFlexItem,
   EuiIconTip,
   EuiToolTip
 } from '@elastic/eui';
@@ -25,100 +27,126 @@ const textTooManyBuckets = `This selection contains too many buckets to be displ
  The dashboard is best viewed over a shorter time range.`;
 const textViewButton = 'Open in Single Metric Viewer';
 
-export function ExplorerChartsContainer({
-  seriesToPlot,
-  layoutCellsPerChart,
+// create a somewhat unique ID
+// from charts metadata for React's key attribute
+function getChartId(series) {
+  const {
+    jobId,
+    detectorLabel,
+    entityFields
+  } = series;
+  const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
+  const id = `${jobId}_${detectorLabel}_${entities}`;
+  return id;
+}
+
+// Wrapper for a single explorer chart
+function ExplorerChartContainer({
+  series,
   tooManyBuckets,
   mlSelectSeverityService
 }) {
-  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+  const wrapLabel = isLabelLengthAboveThreshold(series);
+
+  const {
+    detectorLabel,
+    entityFields,
+    functionDescription
+  } = series;
 
   return (
-    <div className="explorer-charts">
-      {(seriesToPlot.length > 0) &&
-        seriesToPlot.map((series) => {
-
-          // create a somewhat unique ID from charts metadata for React's key attribute
-          const {
-            jobId,
-            detectorLabel,
-            entityFields,
-            functionDescription
-          } = series;
-          const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
-          const id = `${jobId}_${detectorLabel}_${entities}`;
-
+    <React.Fragment>
+      <div className="ml-explorer-chart-icons">
+        {tooManyBuckets && (
+          <span className="ml-explorer-chart-icon">
+            <EuiIconTip
+              content={textTooManyBuckets}
+              position="top"
+              size="s"
+              type="alert"
+              color="warning"
+            />
+          </span>
+        )}
+        <EuiToolTip
+          position="top"
+          content={textViewButton}
+        >
+          <EuiButtonEmpty
+            iconSide="right"
+            iconType="popout"
+            size="xs"
+            onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
+          >
+            View
+          </EuiButtonEmpty>
+        </EuiToolTip>
+      </div>
+      <ExplorerChartLabel
+        detectorLabel={detectorLabel}
+        entityFields={entityFields}
+        infoTooltip={series.infoTooltip}
+        wrapLabel={wrapLabel}
+      />
+      {(() => {
+        if (functionDescription === 'rare') {
           return (
-            <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
-              <div className="ml-explorer-chart-icons">
-                {tooManyBuckets && (
-                  <span className="ml-explorer-chart-icon">
-                    <EuiIconTip
-                      content={textTooManyBuckets}
-                      position="top"
-                      size="s"
-                      type="alert"
-                      color="warning"
-                    />
-                  </span>
-                )}
-                <EuiToolTip
-                  position="top"
-                  content={textViewButton}
-                >
-                  <EuiButtonEmpty
-                    iconSide="right"
-                    iconType="popout"
-                    size="xs"
-                    onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
-                  >
-                    View
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </div>
-              <ExplorerChartLabel
-                detectorLabel={detectorLabel}
-                entityFields={entityFields}
-                infoTooltip={series.infoTooltip}
-                wrapLabel={wrapLabel}
-              />
-              {(() => {
-                if (functionDescription === 'rare') {
-                  return (
-                    <ExplorerChartRare
-                      tooManyBuckets={tooManyBuckets}
-                      seriesConfig={series}
-                      mlSelectSeverityService={mlSelectSeverityService}
-                    />
-                  );
-                }
-                if (functionDescription === 'count') {
-                  return (
-                    <ExplorerChartRare
-                      tooManyBuckets={tooManyBuckets}
-                      seriesConfig={series}
-                      mlSelectSeverityService={mlSelectSeverityService}
-                    />
-                  );
-                }
-                return (
-                  <ExplorerChartSingleMetric
-                    tooManyBuckets={tooManyBuckets}
-                    seriesConfig={series}
-                    mlSelectSeverityService={mlSelectSeverityService}
-                  />
-                );
-              })()}
-            </div>
+            <ExplorerChartRare
+              tooManyBuckets={tooManyBuckets}
+              seriesConfig={series}
+              mlSelectSeverityService={mlSelectSeverityService}
+            />
           );
-        })
-      }
-    </div>
+        }
+        if (functionDescription === 'count') {
+          return (
+            <ExplorerChartRare
+              tooManyBuckets={tooManyBuckets}
+              seriesConfig={series}
+              mlSelectSeverityService={mlSelectSeverityService}
+            />
+          );
+        }
+        return (
+          <ExplorerChartSingleMetric
+            tooManyBuckets={tooManyBuckets}
+            seriesConfig={series}
+            mlSelectSeverityService={mlSelectSeverityService}
+          />
+        );
+      })()}
+    </React.Fragment>
+  );
+}
+
+// Flex layout wrapper for all explorer charts
+export function ExplorerChartsContainer({
+  chartsPerRow,
+  seriesToPlot,
+  tooManyBuckets,
+  mlSelectSeverityService
+}) {
+  // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
+  // If that's the case we trick it doing that with the following settings:
+  const chartsWidth = (chartsPerRow === 1) ? 'calc(100% - 20px)' : 'auto';
+  const chartsColumns = (chartsPerRow === 1) ? 0 : chartsPerRow;
+
+  return (
+    <EuiFlexGrid columns={chartsColumns}>
+      {(seriesToPlot.length > 0) && seriesToPlot.map((series) => (
+        <EuiFlexItem key={getChartId(series)} className="ml-explorer-chart-container" style={{ minWidth: chartsWidth }}>
+          <ExplorerChartContainer
+            series={series}
+            tooManyBuckets={tooManyBuckets}
+            mlSelectSeverityService={mlSelectSeverityService}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
   );
 }
 ExplorerChartsContainer.propTypes = {
   seriesToPlot: PropTypes.array.isRequired,
-  layoutCellsPerChart: PropTypes.number.isRequired,
   tooManyBuckets: PropTypes.bool.isRequired,
   mlSelectSeverityService: PropTypes.object.isRequired,
   mlChartTooltipService: PropTypes.object.isRequired

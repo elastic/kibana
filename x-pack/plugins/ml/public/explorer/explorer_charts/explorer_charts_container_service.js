@@ -33,14 +33,12 @@ export function explorerChartsContainerServiceFactory(
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
-  const DEFAULT_LAYOUT_CELLS_PER_CHART = 12;
   const MAX_CHARTS_PER_ROW = 4;
 
   function getDefaultData() {
     return {
       seriesToPlot: [],
       // default values, will update on every re-render
-      layoutCellsPerChart: DEFAULT_LAYOUT_CELLS_PER_CHART,
       tooManyBuckets: false,
       timeFieldName: 'timestamp'
     };
@@ -63,7 +61,7 @@ export function explorerChartsContainerServiceFactory(
       chartsPerRow = 1;
     }
 
-    data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
+    data.chartsPerRow = chartsPerRow;
 
     // Build the data configs of the anomalies to be displayed.
     // TODO - implement paging?
