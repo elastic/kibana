@@ -13,9 +13,7 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { InfraAxiosApiAdapter } from '../adapters/api/axios_api_adapter';
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
-import { InfraFieldsDomain } from '../domains/fields_domain';
 
 import introspectionQueryResultData from '../../../common/graphql/introspection.json';
 import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
@@ -62,12 +60,8 @@ export function compose(): InfraFrontendLibs {
 
   const framework = new InfraKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
 
-  const api = new InfraAxiosApiAdapter({ framework });
-
   const libs: InfraFrontendLibs = {
-    api,
     apolloClient,
-    fields: new InfraFieldsDomain(api, framework),
     framework,
     observableApi,
   };
