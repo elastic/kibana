@@ -27,78 +27,60 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
     ].forEach(scenario => {
-      deleteTest(`${scenario.notAKibanaUser.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.noAccess.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.notAKibanaUser.USERNAME,
-          password: scenario.notAKibanaUser.PASSWORD,
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
         },
         tests: {
           exists: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
           },
           reservedSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
           },
           doesntExist: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
           },
         },
       });
 
-      deleteTest(`${scenario.superuser.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.superuser.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.superuser.USERNAME,
-          password: scenario.superuser.PASSWORD,
-        },
-        tests: {
-          exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
-          },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
-          },
-        },
-      });
-
-      deleteTest(`${scenario.userWithAllGlobally.USERNAME} from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.userWithAllGlobally.USERNAME,
-          password: scenario.userWithAllGlobally.PASSWORD,
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
         },
         tests: {
           exists: {
@@ -116,11 +98,11 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userWithDualAll.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.allGlobally.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithDualAll.USERNAME,
-          password: scenario.userWithDualAll.PASSWORD,
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
         },
         tests: {
           exists: {
@@ -138,11 +120,11 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userWithLegacyAll.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.dualAll.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyAll.USERNAME,
-          password: scenario.userWithLegacyAll.PASSWORD,
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
         },
         tests: {
           exists: {
@@ -160,11 +142,33 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userWithReadGlobally.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.legacyAll.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithReadGlobally.USERNAME,
-          password: scenario.userWithReadGlobally.PASSWORD,
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 204,
+            response: expectEmptyResult,
+          },
+          reservedSpace: {
+            statusCode: 400,
+            response: expectReservedSpaceResult,
+          },
+          doesntExist: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
+
+      deleteTest(`${scenario.users.readGlobally.USERNAME} from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
         },
         tests: {
           exists: {
@@ -182,11 +186,11 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userwithDualRead.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.dualRead.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userwithDualRead.USERNAME,
-          password: scenario.userwithDualRead.PASSWORD,
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
         },
         tests: {
           exists: {
@@ -204,17 +208,17 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userWithLegacyRead.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.legacyRead.USERNAME} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyRead.USERNAME,
-          password: scenario.userWithLegacyRead.PASSWORD,
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
         },
         tests: {
           exists: {
             statusCode: 403,
             response: createExpectLegacyForbidden(
-              scenario.userWithLegacyRead.USERNAME,
+              scenario.users.legacyRead.USERNAME,
               'write/delete'
             ),
           },
@@ -229,11 +233,11 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.userWithAllAtSpace} from the ${scenario.spaceId} space`, {
+      deleteTest(`${scenario.users.allAtSpace} from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithAllAtSpace.USERNAME,
-          password: scenario.userWithAllAtSpace.PASSWORD,
+          username: scenario.users.allAtSpace.USERNAME,
+          password: scenario.users.allAtSpace.PASSWORD,
         },
         tests: {
           exists: {

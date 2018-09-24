@@ -25,52 +25,55 @@ export default function({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithNoKibanaAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+        },
       },
     ].forEach(scenario => {
-      bulkGetTest(`${scenario.notAKibanaUser.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.notAKibanaUser.USERNAME,
-          password: scenario.notAKibanaUser.PASSWORD,
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
           },
         },
       });
 
-      bulkGetTest(`${scenario.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.superuser.USERNAME,
-          password: scenario.superuser.PASSWORD,
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -81,10 +84,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.userWithLegacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithLegacyAll.USERNAME,
-          password: scenario.userWithLegacyAll.PASSWORD,
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -95,10 +98,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.userWithLegacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithLegacyRead.USERNAME,
-          password: scenario.userWithLegacyRead.PASSWORD,
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -109,10 +112,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.userWithDualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithDualAll.USERNAME,
-          password: scenario.userWithDualAll.PASSWORD,
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -123,10 +126,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.userWithDualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithDualRead.USERNAME,
-          password: scenario.userWithDualRead.PASSWORD,
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -137,10 +140,52 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.userWithAllGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithAllGlobally.USERNAME,
-          password: scenario.userWithAllGlobally.PASSWORD,
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
+          },
+        },
+      });
+
+      bulkGetTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
+          },
+        },
+      });
+
+      bulkGetTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allAtSpace.USERNAME,
+          password: scenario.users.allAtSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
+          },
+        },
+      });
+
+      bulkGetTest(`${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.readAtSpace.USERNAME,
+          password: scenario.users.readAtSpace.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -152,56 +197,11 @@ export default function({ getService }: TestInvoker) {
       });
 
       bulkGetTest(
-        `${scenario.userWithReadGlobally.USERNAME} within the ${scenario.spaceId} space`,
+        `${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
         {
           auth: {
-            username: scenario.userWithReadGlobally.USERNAME,
-            password: scenario.userWithReadGlobally.PASSWORD,
-          },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 200,
-              response: createExpectResults(scenario.spaceId),
-            },
-          },
-        }
-      );
-
-      bulkGetTest(`${scenario.userWithAllAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.userWithAllAtSpace.USERNAME,
-          password: scenario.userWithAllAtSpace.PASSWORD,
-        },
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-        },
-      });
-
-      bulkGetTest(`${scenario.userWithReadAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.userWithReadAtSpace.USERNAME,
-          password: scenario.userWithReadAtSpace.PASSWORD,
-        },
-        spaceId: scenario.spaceId,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
-          },
-        },
-      });
-
-      bulkGetTest(
-        `${scenario.userWithAllAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.userWithAllAtOtherSpace.USERNAME,
-            password: scenario.userWithAllAtOtherSpace.PASSWORD,
+            username: scenario.users.allAtOtherSpace.USERNAME,
+            password: scenario.users.allAtOtherSpace.PASSWORD,
           },
           spaceId: scenario.spaceId,
           tests: {

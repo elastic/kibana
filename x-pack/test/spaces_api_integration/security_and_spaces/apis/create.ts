@@ -27,78 +27,60 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
     ].forEach(scenario => {
-      createTest(`${scenario.notAKibanaUser.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.notAKibanaUser.USERNAME,
-          password: scenario.notAKibanaUser.PASSWORD,
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
         },
         tests: {
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.notAKibanaUser.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
           },
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.notAKibanaUser.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
           },
           reservedSpecified: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.notAKibanaUser.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
           },
         },
       });
 
-      createTest(`${scenario.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.superuser.USERNAME,
-          password: scenario.superuser.PASSWORD,
-        },
-        tests: {
-          newSpace: {
-            statusCode: 200,
-            response: expectNewSpaceResult,
-          },
-          alreadyExists: {
-            statusCode: 409,
-            response: expectConflictResponse,
-          },
-          reservedSpecified: {
-            statusCode: 200,
-            response: expectReservedSpecifiedResult,
-          },
-        },
-      });
-
-      createTest(`${scenario.userWithAllGlobally.USERNAME} within the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.userWithAllGlobally.USERNAME,
-          password: scenario.userWithAllGlobally.PASSWORD,
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
         },
         tests: {
           newSpace: {
@@ -116,11 +98,11 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.userWithDualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithDualAll.USERNAME,
-          password: scenario.userWithDualAll.PASSWORD,
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
         },
         tests: {
           newSpace: {
@@ -138,11 +120,11 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.userWithLegacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyAll.USERNAME,
-          password: scenario.userWithLegacyAll.PASSWORD,
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
         },
         tests: {
           newSpace: {
@@ -160,11 +142,33 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.userWithReadGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithReadGlobally.USERNAME,
-          password: scenario.userWithReadGlobally.PASSWORD,
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
+        },
+        tests: {
+          newSpace: {
+            statusCode: 200,
+            response: expectNewSpaceResult,
+          },
+          alreadyExists: {
+            statusCode: 409,
+            response: expectConflictResponse,
+          },
+          reservedSpecified: {
+            statusCode: 200,
+            response: expectReservedSpecifiedResult,
+          },
+        },
+      });
+
+      createTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
         },
         tests: {
           newSpace: {
@@ -182,11 +186,11 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.userWithDualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithDualRead.USERNAME,
-          password: scenario.userWithDualRead.PASSWORD,
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
         },
         tests: {
           newSpace: {
@@ -204,33 +208,33 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.userWithLegacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyRead.USERNAME,
-          password: scenario.userWithLegacyRead.PASSWORD,
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
         },
         tests: {
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.userWithLegacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
           },
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.userWithLegacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
           },
           reservedSpecified: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.userWithLegacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
           },
         },
       });
 
-      createTest(`${scenario.userWithAllAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithAllAtSpace.USERNAME,
-          password: scenario.userWithAllAtSpace.PASSWORD,
+          username: scenario.users.allAtSpace.USERNAME,
+          password: scenario.users.allAtSpace.PASSWORD,
         },
         tests: {
           newSpace: {

@@ -28,35 +28,38 @@ export default function({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithNoKibanaAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+        },
       },
     ].forEach(scenario => {
-      findTest(`${scenario.notAKibanaUser.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
           password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -96,7 +99,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.SUPERUSER.USERNAME,
           password: AUTHENTICATION.SUPERUSER.PASSWORD,
@@ -136,7 +139,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithLegacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -176,7 +179,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithLegacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -216,7 +219,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithDualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -256,7 +259,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithDualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -296,7 +299,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithAllGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -336,7 +339,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithReadGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -376,10 +379,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithAllAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithAllAtSpace.USERNAME,
-          password: scenario.userWithAllAtSpace.PASSWORD,
+          username: scenario.users.allAtSpace.USERNAME,
+          password: scenario.users.allAtSpace.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -416,10 +419,10 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.userWithReadAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
         auth: {
-          username: scenario.userWithReadAtSpace.USERNAME,
-          password: scenario.userWithReadAtSpace.PASSWORD,
+          username: scenario.users.readAtSpace.USERNAME,
+          password: scenario.users.readAtSpace.PASSWORD,
         },
         spaceId: scenario.spaceId,
         tests: {
@@ -456,48 +459,45 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(
-        `${scenario.userWithAllAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.userWithAllAtOtherSpace.USERNAME,
-            password: scenario.userWithAllAtOtherSpace.PASSWORD,
+      findTest(`${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allAtOtherSpace.USERNAME,
+          password: scenario.users.allAtOtherSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAwareType: {
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            spaceAwareType: {
-              description: 'forbidden login and find visualization message',
-              statusCode: 403,
-              response: createExpectRbacForbidden('visualization'),
-            },
-            notSpaceAwareType: {
-              description: 'forbidden login and find globaltype message',
-              statusCode: 403,
-              response: createExpectRbacForbidden('globaltype'),
-            },
-            unknownType: {
-              description: 'forbidden login and find wigwags message',
-              statusCode: 403,
-              response: createExpectRbacForbidden('wigwags'),
-            },
-            pageBeyondTotal: {
-              description: 'forbidden login and find visualization message',
-              statusCode: 403,
-              response: createExpectRbacForbidden('visualization'),
-            },
-            unknownSearchField: {
-              description: 'forbidden login and find wigwags message',
-              statusCode: 403,
-              response: createExpectRbacForbidden('wigwags'),
-            },
-            noType: {
-              description: 'bad request, type is required',
-              statusCode: 400,
-              response: expectTypeRequired,
-            },
+          notSpaceAwareType: {
+            description: 'forbidden login and find globaltype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
           },
-        }
-      );
+          unknownType: {
+            description: 'forbidden login and find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          pageBeyondTotal: {
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
+          },
+          unknownSearchField: {
+            description: 'forbidden login and find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          noType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+        },
+      });
     });
   });
 }
