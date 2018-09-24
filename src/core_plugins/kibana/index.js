@@ -76,7 +76,7 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/discover`,
           description: 'interactively explore your data',
           icon: 'plugins/kibana/assets/discover.svg',
-          k7IconType: 'discoverApp',
+          euiIconType: 'discoverApp',
         }, {
           id: 'kibana:visualize',
           title: 'Visualize',
@@ -84,7 +84,7 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/visualize`,
           description: 'design data visualizations',
           icon: 'plugins/kibana/assets/visualize.svg',
-          k7IconType: 'visualizeApp',
+          euiIconType: 'visualizeApp',
         }, {
           id: 'kibana:dashboard',
           title: 'Dashboard',
@@ -98,7 +98,7 @@ export default function (kibana) {
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
-          k7IconType: 'dashboardApp',
+          euiIconType: 'dashboardApp',
         }, {
           id: 'kibana:dev_tools',
           title: 'Dev Tools',
@@ -106,7 +106,7 @@ export default function (kibana) {
           url: '/app/kibana#/dev_tools',
           description: 'development tools',
           icon: 'plugins/kibana/assets/wrench.svg',
-          k7IconType: 'devToolsApp',
+          euiIconType: 'devToolsApp',
         }, {
           id: 'kibana:management',
           title: 'Management',
@@ -114,7 +114,7 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/management`,
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
-          k7IconType: 'managementApp',
+          euiIconType: 'managementApp',
           linkToLastSubUrl: false
         },
       ],

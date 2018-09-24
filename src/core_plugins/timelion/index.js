@@ -26,7 +26,7 @@ export default function (kibana) {
         order: -1000,
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
-        k7IconType: 'timelionApp',
+        euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
         styleSheetPath: `${__dirname}/public/index.scss`,
       },

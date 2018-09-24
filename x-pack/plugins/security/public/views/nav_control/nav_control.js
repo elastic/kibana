@@ -17,9 +17,9 @@ import '../account/account';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { SecurityNavControl } from './nav_control_component';
-import { NavControlSide } from 'ui/chrome/directives/k7_global_nav';
+import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
 
 chromeNavControlsRegistry.register(constant({
   name: 'security',
@@ -47,7 +47,7 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
 });
 
 
-chromeK7NavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
+chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
   name: 'security',
   order: 1000,
   side: NavControlSide.Right,

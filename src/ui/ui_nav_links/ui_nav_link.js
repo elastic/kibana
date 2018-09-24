@@ -27,7 +27,7 @@ export class UiNavLink {
       subUrlBase,
       description,
       icon,
-      k7IconType,
+      euiIconType,
       linkToLastSubUrl = true,
       hidden = false,
       disabled = false,
@@ -41,7 +41,7 @@ export class UiNavLink {
     this._subUrlBase = `${urlBasePath || ''}${subUrlBase || url}`;
     this._description = description;
     this._icon = icon;
-    this._k7IconType = k7IconType;
+    this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._disabled = disabled;
@@ -61,7 +61,7 @@ export class UiNavLink {
       subUrlBase: this._subUrlBase,
       description: this._description,
       icon: this._icon,
-      k7IconType: this._k7IconType,
+      euiIconType: this._euiIconType,
       linkToLastSubUrl: this._linkToLastSubUrl,
       hidden: this._hidden,
       disabled: this._disabled,

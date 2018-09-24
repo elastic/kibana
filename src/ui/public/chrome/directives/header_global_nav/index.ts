@@ -18,7 +18,7 @@
  */
 
 import { IconType } from '@elastic/eui';
-import './k7_global_nav';
+import './header_global_nav';
 
 export enum NavControlSide {
   Left = 'left',
@@ -36,7 +36,7 @@ export interface NavLink {
   title: string;
   url: string;
   id: string;
-  k7IconType: IconType;
+  euiIconType: IconType;
 }
 
 export interface Breadcrumb {

@@ -19,7 +19,7 @@
 
 
 import './global_nav';
-import './k7_global_nav';
+import './header_global_nav';
 
 import { kbnChromeProvider } from './kbn_chrome';
 import { kbnAppendChromeNavControls } from './append_nav_controls';

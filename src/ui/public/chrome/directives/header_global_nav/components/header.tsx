@@ -36,13 +36,13 @@ import { HeaderAppMenu } from './header_app_menu';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
-import { ChromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
 interface Props {
   breadcrumbs: Observable<Breadcrumb[]>;
   navLinks: NavLink[];
-  navControls: ChromeK7NavControlsRegistry;
+  navControls: ChromeHeaderNavControlsRegistry;
   isVisible: boolean;
   appTitle?: string;
 }

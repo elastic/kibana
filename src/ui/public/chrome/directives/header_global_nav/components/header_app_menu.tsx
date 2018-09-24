@@ -94,7 +94,7 @@ export class HeaderAppMenu extends Component<Props, State> {
               key={navLink.id}
               onClick={this.closeMenu}
             >
-              <EuiIcon type={navLink.k7IconType} size="l" />
+              <EuiIcon type={navLink.euiIconType} size="l" />
             </EuiKeyPadMenuItem>
           ))}
         </EuiKeyPadMenu>

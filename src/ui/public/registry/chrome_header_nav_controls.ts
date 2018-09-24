@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NavControl } from '../chrome/directives/k7_global_nav';
+import { NavControl } from '../chrome/directives/header_global_nav';
 import { IndexedArray } from '../indexed_array';
 import { uiRegistry, UIRegistry } from './_registry';
 
@@ -26,12 +26,12 @@ interface BySideDictionary {
   [side: string]: IndexedArray<NavControl>;
 }
 
-export interface ChromeK7NavControlsRegistry extends UIRegistry<NavControl> {
+export interface ChromeHeaderNavControlsRegistry extends UIRegistry<NavControl> {
   bySide: BySideDictionary;
 }
 
-export const chromeK7NavControlsRegistry: ChromeK7NavControlsRegistry = uiRegistry({
-  name: 'chromeK7NavControls',
+export const chromeHeaderNavControlsRegistry: ChromeHeaderNavControlsRegistry = uiRegistry({
+  name: 'chromeHeaderNavControls',
   order: ['order'],
   group: ['side'],
-}) as ChromeK7NavControlsRegistry;
+}) as ChromeHeaderNavControlsRegistry;

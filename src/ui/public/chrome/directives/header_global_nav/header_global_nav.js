@@ -20,13 +20,13 @@
 
 import { uiModules } from '../../../modules';
 import { Header } from './components/header';
-import './k7_global_nav.less';
-import { chromeK7NavControlsRegistry } from 'ui/registry/chrome_k7_nav_controls';
+import './header_global_nav.less';
+import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 
 const module = uiModules.get('kibana');
 
-module.directive('k7GlobalNav', (reactDirective, chrome, Private, breadcrumbState) => {
-  const navControls = Private(chromeK7NavControlsRegistry);
+module.directive('headerGlobalNav', (reactDirective, chrome, Private, breadcrumbState) => {
+  const navControls = Private(chromeHeaderNavControlsRegistry);
   const navLinks = chrome.getNavLinks();
 
   return reactDirective(Header, [

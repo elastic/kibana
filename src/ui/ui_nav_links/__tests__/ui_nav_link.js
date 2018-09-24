@@ -32,7 +32,7 @@ describe('UiNavLink', () => {
         url: '/app/kibana#/discover',
         description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
-        k7IconType: 'discoverApp',
+        euiIconType: 'discoverApp',
         hidden: true,
         disabled: true
       };
@@ -46,7 +46,7 @@ describe('UiNavLink', () => {
         subUrlBase: `${urlBasePath}${spec.url}`,
         description: spec.description,
         icon: spec.icon,
-        k7IconType: spec.k7IconType,
+        euiIconType: spec.euiIconType,
         hidden: spec.hidden,
         disabled: spec.disabled,
 

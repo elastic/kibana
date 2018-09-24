@@ -9,12 +9,12 @@
     app-title="chrome.getAppTitle()"
   ></global-nav>
 
-  <k7-global-nav
+  <header-global-nav
     ng-if="k7design"
-    class="k7-header-wrapper"
+    class="header-global-wrapper"
     is-visible="chrome.getVisible()"
     app-title="chrome.getAppTitle()"
-  ></k7-global-nav>
+  ></header-global-nav>
 
   <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
     <div class="app-wrapper-panel">
