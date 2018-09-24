@@ -22,7 +22,7 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
   ) {}
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
-    let port = 2090;
+    let port = 2089;
 
     if (!this.detach) {
       port = await getPort();
