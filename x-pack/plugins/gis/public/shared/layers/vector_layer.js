@@ -46,7 +46,7 @@ export class VectorLayer extends ALayer {
     return numberFields;
   }
 
-  async syncData(startLoading, stopLoading, dataFilters) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const timeAware = await this._source.isTimeAware();
     const extentAware = this._source.filterByMapBounds();
     if (!timeAware && !extentAware) {
@@ -71,9 +71,7 @@ export class VectorLayer extends ALayer {
       }, dataFilters);
       stopLoading(data);
     } catch(error) {
-      // TODO dispatch action to set error state in store
-      // Should call something like errorOnLoading instead of stopLoading
-      stopLoading({ type: 'FeatureCollection', features: [] });
+      onLoadError(error.message);
     }
   }
 

@@ -5,11 +5,24 @@
  */
 
 import {
-  SET_SELECTED_LAYER, UPDATE_LAYER_ORDER, LAYER_DATA_LOAD_STARTED,
-  ADD_LAYER, REMOVE_LAYER, PROMOTE_TEMPORARY_LAYERS,
-  CLEAR_TEMPORARY_LAYERS, TOGGLE_LAYER_VISIBLE, MAP_EXTENT_CHANGED,
-  MAP_READY, LAYER_DATA_LOAD_ENDED, REPLACE_LAYERLIST, SET_TIME_FILTERS,
-  UPDATE_LAYER_LABEL, UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER, PROMOTE_TEMPORARY_STYLES, CLEAR_TEMPORARY_STYLES
+  SET_SELECTED_LAYER,
+  UPDATE_LAYER_ORDER,
+  LAYER_DATA_LOAD_STARTED,
+  LAYER_DATA_LOAD_ENDED,
+  LAYER_DATA_LOAD_ERROR,
+  ADD_LAYER,
+  REMOVE_LAYER,
+  PROMOTE_TEMPORARY_LAYERS,
+  CLEAR_TEMPORARY_LAYERS,
+  TOGGLE_LAYER_VISIBLE,
+  MAP_EXTENT_CHANGED,
+  MAP_READY,
+  REPLACE_LAYERLIST,
+  SET_TIME_FILTERS,
+  UPDATE_LAYER_LABEL,
+  UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+  PROMOTE_TEMPORARY_STYLES,
+  CLEAR_TEMPORARY_STYLES,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -56,6 +69,8 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: [ ...action.layerList] };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
+    case LAYER_DATA_LOAD_ERROR:
+      return updateWithDataLoadError(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case MAP_READY:
@@ -138,15 +153,17 @@ export function map(state = INITIAL_STATE, action) {
 
 function updateWithDataRequest(state, action) {
   const layerRequestingData = findLayerById(state, action.layerId);
-  if (layerRequestingData) {
-    layerRequestingData.dataDirty = true;//needs to be synced to OL/MB
-    layerRequestingData.dataMetaAtStart = action.meta;
-    layerRequestingData.dataRequestToken = action.requestToken;
-    const layerList = [...state.layerList];
-    return { ...state, layerList };
-  } else {
-    return { ...state };
+  if (!layerRequestingData) {
+    return state;
   }
+
+  layerRequestingData.hasLoadError = false;
+  layerRequestingData.loadError = null;
+  layerRequestingData.dataDirty = true; // needs to be synced to MB
+  layerRequestingData.dataMetaAtStart = action.meta;
+  layerRequestingData.dataRequestToken = action.requestToken;
+  const layerList = [...state.layerList];
+  return { ...state, layerList };
 }
 
 function updateWithDataResponse(state, action) {
@@ -154,19 +171,42 @@ function updateWithDataResponse(state, action) {
   if (!layerReceivingData) {
     return state;
   }
+
   if (
     layerReceivingData.dataRequestToken &&
     layerReceivingData.dataRequestToken !== action.requestToken
   ) {
-    //hackyest way to deal with race conditions
-    //just pick response of last request
+    // ignore responses to outdated requests
     return { ...state };
   }
+
   layerReceivingData.data = action.data;
   layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
   layerReceivingData.dataMetaAtStart = null;
   layerReceivingData.dataDirty = false;
   layerReceivingData.dataRequestToken = null;
+  const layerList = [...state.layerList];
+  return { ...state, layerList };
+}
+
+function updateWithDataLoadError(state, action) {
+  const layer = findLayerById(state, action.layerId);
+  if (!layer) {
+    return state;
+  }
+
+  if (
+    layer.dataRequestToken &&
+    layer.dataRequestToken !== action.requestToken
+  ) {
+    // ignore responses to outdated requests
+    return state;
+  }
+
+  layer.hasLoadError = true;
+  layer.loadError = action.errorMessage;
+  layer.dataDirty = false;
+  layer.dataRequestToken = null;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }

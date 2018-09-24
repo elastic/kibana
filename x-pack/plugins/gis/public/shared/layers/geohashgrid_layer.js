@@ -116,7 +116,7 @@ export class GeohashGridLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
-  async syncData(startLoading, stopLoading, dataFilters) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
     if (!dataFilters.extent) {
       return;
@@ -169,14 +169,18 @@ export class GeohashGridLayer extends ALayer {
       extent: expandExtent,
       precision: targetPrecision
     };
-    return this._fetchNewData(startLoading, stopLoading, dataMeta);
+    return this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta });
   }
 
-  async _fetchNewData(startLoading, stopLoading, dataMeta) {
+  async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision, timeFilters, extent } = dataMeta;
     startLoading(dataMeta);
-    const data = await this._source.getGeoJsonPointsWithTotalCount(
-      precision, extent, timeFilters);
-    stopLoading(data);
+    try {
+      const data = await this._source.getGeoJsonPointsWithTotalCount(
+        precision, extent, timeFilters);
+      stopLoading(data);
+    } catch(error) {
+      onLoadError(error.message);
+    }
   }
 }

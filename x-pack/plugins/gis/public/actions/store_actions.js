@@ -19,6 +19,7 @@ export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
+export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const UPDATE_LAYER_LABEL = 'UPDATE_LAYER_LABEL';
@@ -32,7 +33,8 @@ function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
   const requestToken = Symbol(tokenString);
   return {
     startLoading: initData => dispatch(startDataLoad(layerId, requestToken, initData)),
-    stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData))
+    stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData)),
+    onLoadError: errorMessage => dispatch(onDataLoadError(layerId, requestToken, errorMessage)),
   };
 }
 
@@ -50,10 +52,8 @@ export function replaceLayerList(newLayerList) {
     const dataFilters = getDataFilters(state);
 
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } =
-        getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncData(startLoading, stopLoading, dataFilters);
-
+      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      layer.syncData({ ...loadingFunctions, dataFilters });
     });
   };
 
@@ -124,10 +124,11 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } = getLayerLoadingFunctions(
-        dispatch, layer.getId(), tokenString);
-      layer.syncData(startLoading, stopLoading,
-        { ...dataFilters, ...newMapConstants });
+      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      layer.syncData({
+        ...loadingFunctions,
+        dataFilters: { ...dataFilters, ...newMapConstants }
+      });
     });
   };
 }
@@ -136,17 +137,26 @@ export function startDataLoad(layerId, requestToken, meta = {}) {
   return ({
     meta,
     type: LAYER_DATA_LOAD_STARTED,
-    layerId: layerId,
-    requestToken: requestToken
+    layerId,
+    requestToken
   });
 }
 
 export function endDataLoad(layerId, requestToken, data) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
-    layerId: layerId,
-    data: data,
-    requestToken: requestToken
+    layerId,
+    data,
+    requestToken
+  });
+}
+
+export function onDataLoadError(layerId, requestToken, errorMessage) {
+  return ({
+    type: LAYER_DATA_LOAD_ERROR,
+    layerId,
+    requestToken,
+    errorMessage
   });
 }
 
@@ -157,9 +167,8 @@ export function addPreviewLayer(layer, position) {
   return async (dispatch, getState) => {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
-    const { startLoading, stopLoading } =
-      getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-    layer.syncData(startLoading, stopLoading, dataFilters);
+    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -198,8 +207,11 @@ export function setTimeFilters(timeFilters) {
     const dataFilters = getDataFilters(state);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-      layer.syncData(startLoading, stopLoading, { ...dataFilters, timeFilters: { ...timeFilters } });
+      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      layer.syncData({
+        ...loadingFunctions,
+        dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
+      });
     });
   };
 }
@@ -217,8 +229,8 @@ export function updateLayerStyle(style, temporary = true) {
     const state = getState();
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
-    const { startLoading, stopLoading } = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
-    layer.syncData(startLoading, stopLoading, { ...dataFilters });
+    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
