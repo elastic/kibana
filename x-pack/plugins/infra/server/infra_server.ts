@@ -6,6 +6,7 @@
 
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { schemas } from './graphql';
+import { createCapabilitiesResolvers } from './graphql/capabilities';
 import { createLogEntriesResolvers } from './graphql/log_entries';
 import { createNodeResolvers } from './graphql/nodes';
 import { createSourceStatusResolvers } from './graphql/source_status';
@@ -16,6 +17,7 @@ import { initLegacyLoggingRoutes } from './logging_legacy';
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
+      createCapabilitiesResolvers(libs) as IResolvers,
       createLogEntriesResolvers(libs) as IResolvers,
       createNodeResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
