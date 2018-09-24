@@ -61,12 +61,19 @@ export class VectorLayer extends ALayer {
         }
       }*/
     }
+
     startLoading({ timeFilters: dataFilters.timeFilters });
-    const data = await this._source.getGeoJson({
-      layerId: this._descriptor.id,
-      layerName: this._descriptor.label,
-    }, dataFilters);
-    stopLoading(data);
+    try {
+      const data = await this._source.getGeoJson({
+        layerId: this._descriptor.id,
+        layerName: this._descriptor.label,
+      }, dataFilters);
+      stopLoading(data);
+    } catch(error) {
+      // TODO dispatch action to set error state in store
+      // Should call something like errorOnLoading instead of stopLoading
+      stopLoading({ type: 'FeatureCollection', features: [] });
+    }
   }
 
   syncLayerWithMB(mbMap) {

@@ -79,15 +79,13 @@ export class ESSearchSource extends VectorSource {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (err) {
-      // TODO dispatch action to set error state in store
-      return { type: 'FeatureCollection', features: [] };
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}, error: ${error.message}`);
     }
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
     if (!geoField) {
-      // TODO dispatch action to set error state in store
-      return { type: 'FeatureCollection', features: [] };
+      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
     inspectorAdapters.requests.resetRequest(layerId);
@@ -120,19 +118,14 @@ export class ESSearchSource extends VectorSource {
         .ok({ json: resp });
     } catch(error) {
       inspectorRequest.error({ error });
-      // TODO dispatch action to set error state in store
-      return { type: 'FeatureCollection', features: [] };
+      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
 
-    let geoJson;
     try {
-      geoJson = hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
+      return hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
     } catch(error) {
-      // TODO dispatch action to set error state in store
-      return { type: 'FeatureCollection', features: [] };
+      throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
     }
-
-    return geoJson;
   }
 
   getDisplayName() {
