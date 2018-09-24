@@ -9,10 +9,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { VisibilityToggle } from './visiblity_toggle';
 
 export function TOCEntry(props) {
+  const visibilityIndicator = props.layer.isLayerLoading()
+    ? (<EuiLoadingSpinner size="s"/>)
+    : (<VisibilityToggle
+      checked={props.layer.isVisible()}
+      onChange={() => props.toggleVisible(props.layer.getId())}
+    />);
   return (
     <div
       className={`layerEntry`}
@@ -21,10 +28,7 @@ export function TOCEntry(props) {
     >
       <EuiFlexGroup gutterSize="s" responsive={false} className={props.layer.isVisible() ? 'visible' : 'notvisible'}>
         <EuiFlexItem grow={false} className="layerEntry--visibility">
-          <VisibilityToggle
-            checked={props.layer.isVisible()}
-            onChange={() => props.toggleVisible(props.layer.getId())}
-          />
+          {visibilityIndicator}
         </EuiFlexItem>
         <EuiFlexItem className="layerEntry--name">
           <button onClick={() => props.onButtonClick(props.layer.getId())}>
