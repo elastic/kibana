@@ -11,8 +11,8 @@ export const horizontalProgressPill = () => ({
   name: 'horizontalProgressPill',
   displayName: 'Horizontal Progress Pill',
   help: 'Displays progress as a portion of a horizontal pill',
-  width: 200,
-  height: 50,
+  width: 400,
+  height: 30,
   image: header,
   expression: `filters
 | demodata

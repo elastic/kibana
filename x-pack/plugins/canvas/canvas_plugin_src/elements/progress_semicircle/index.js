@@ -7,12 +7,12 @@
 import { openSans } from '../../../common/lib/fonts';
 import header from './header.png';
 
-export const progressCircle = () => ({
-  name: 'progressCircle',
-  displayName: 'Progress Circle',
+export const progressSemicircle = () => ({
+  name: 'progressSemicircle',
+  displayName: 'Progress Semicircle',
   help: 'Displays progress as a portion of a semicircle',
   width: 200,
-  height: 200,
+  height: 100,
   image: header,
   expression: `filters
 | demodata

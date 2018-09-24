@@ -34,7 +34,11 @@ export const progress = () => ({
         minX -= offset / 2;
         width += offset;
       }
-      if (shape !== 'verticalBar') {
+
+      if (shape === 'semicircle') {
+        minY -= offset / 2;
+        height += offset / 2;
+      } else if (shape !== 'verticalBar') {
         minY -= offset / 2;
         height += offset;
       }

@@ -11,8 +11,8 @@ export const horizontalProgressBar = () => ({
   name: 'horizontalProgressBar',
   displayName: 'Horizontal Progress Bar',
   help: 'Displays progress as a portion of a horizontal bar',
-  width: 200,
-  height: 50,
+  width: 400,
+  height: 30,
   image: header,
   expression: `filters
 | demodata
