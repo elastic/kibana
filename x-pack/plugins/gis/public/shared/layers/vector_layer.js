@@ -20,7 +20,7 @@ export class VectorLayer extends ALayer {
     layerDescriptor.type = VectorLayer.type;
     defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
     if (!options.style) {
-      layerDescriptor.style = VectorStyle.createDescriptor('fillColor',
+      layerDescriptor.style = VectorStyle.createDescriptorForSingleProperty('fillColor',
         {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
@@ -95,7 +95,10 @@ export class VectorLayer extends ALayer {
       mbSourceAfterAdding.setData(this._descriptor.data);
     }
 
-    if (this._style.isPropertyDynamic('fillColor')) {
+    if (
+      this._style.isPropertyDynamic('fillColor') ||
+      this._style.isPropertyDynamic('lineColor')
+    ) {
       const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(this._descriptor.data);
       if (shouldRefresh) {
         mbSourceAfterAdding.setData(this._descriptor.data);

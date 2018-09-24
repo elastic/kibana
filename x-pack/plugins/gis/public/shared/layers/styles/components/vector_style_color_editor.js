@@ -113,7 +113,7 @@ export class VectorStyleColorEditor extends React.Component {
   render() {
     let style = this.props.seedStyle;
     if (style === null) {
-      const fallbackDescriptor = VectorStyle.createDescriptor('fillColor', {
+      const fallbackDescriptor = VectorStyle.createDescriptorForSingleProperty('fillColor', {
         type: VectorStyle.STYLE_TYPE.STATIC,
         options: {
           color: VectorStyle.DEFAULT_COLOR_HEX
