@@ -22,6 +22,7 @@ import {
   fetchRepoTree,
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
+  fetchTreeCommitsSuccess,
   openTreePath,
   resetRepoTree,
   routeChange,
@@ -38,6 +39,8 @@ export interface FileState {
   file?: FetchFileResponse;
   opendir?: FileTree;
   isNotFound: boolean;
+  treeCommits: { [path: string]: CommitInfo[] };
+  currentPath: string;
 }
 
 const initialState: FileState = {
@@ -52,7 +55,9 @@ const initialState: FileState = {
   branches: [],
   tags: [],
   commits: [],
+  treeCommits: {},
   isNotFound: false,
+  currentPath: '',
 };
 
 function mergeTree(draft: FileState, update: FileTree) {
@@ -80,8 +85,9 @@ function mergeTree(draft: FileState, update: FileTree) {
 
 export const file = handleActions(
   {
-    [String(fetchRepoTree)]: (state: FileState) =>
+    [String(fetchRepoTree)]: (state: FileState, action: Action<any>) =>
       produce(state, draft => {
+        draft.currentPath = action.payload.path;
         draft.loading = true;
       }),
     [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<FileTree>) =>
@@ -155,6 +161,11 @@ export const file = handleActions(
     [String(routeChange)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.isNotFound = false;
+      }),
+    [String(fetchTreeCommitsSuccess)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        const { path, commits } = action.payload;
+        draft.treeCommits[path] = commits;
       }),
   },
   initialState

@@ -43,7 +43,7 @@ import { CloneStatus } from './clone_status';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 import 'github-markdown-css/github-markdown.css';
-import { cloneProgressSelector, progressSelector } from '../../selectors';
+import { cloneProgressSelector, progressSelector, treeCommitsSelector } from '../../selectors';
 import { AlignCenterContainer } from '../../styled_components/align_center_container';
 import { CommitMessages } from './commit_messages';
 
@@ -105,6 +105,14 @@ const DirectoryView = withRouter(props => {
 });
 
 const Commits = props => {
+  if (!props.commits) {
+    return (
+      <CommitMessages>
+        <h1 className="commitsHeader">Commits</h1>
+        <h3>loading</h3>
+      </CommitMessages>
+    );
+  }
   const commitList = props.commits.map(commit => (
     <div key={commit.id} className="commitItem">
       <Link to={`/commit/${props.repoId}/${commit.id}`}>{commit.id}</Link> {commit.message}{' '}
@@ -401,7 +409,7 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   symbols: state.symbolSearch.symbols,
   isSymbolsLoading: state.symbolSearch.isLoading,
-  commits: state.file.commits,
+  commits: treeCommitsSelector(state),
   file: state.file.file,
   progress: progressSelector(state),
   cloneProgress: cloneProgressSelector(state),

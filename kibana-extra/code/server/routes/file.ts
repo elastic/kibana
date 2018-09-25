@@ -8,6 +8,7 @@ import Boom from 'boom';
 import fileType from 'file-type';
 import hapi, { RequestQuery } from 'hapi';
 import { Reference } from 'nodegit';
+import { Commit, Revwalk } from 'nodegit';
 import { ReferenceInfo } from '../../model/commit';
 import {
   commitInfo,
@@ -142,7 +143,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
-    async handler(req) {
+    async handler(req, reply) {
       const gitOperations = new GitOperations(options.repoPath);
       const uri = req.params.uri;
       try {

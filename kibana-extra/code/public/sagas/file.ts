@@ -31,6 +31,9 @@ import {
   fetchRepoTreeSuccess,
   gotoRepo,
   Match,
+  fetchTreeCommits,
+  fetchTreeCommitsFailed,
+  fetchTreeCommitsSuccess,
   openTreePath,
   setNotFound,
 } from '../actions';
@@ -120,9 +123,20 @@ function* handleFetchCommits(action: Action<FetchRepoPayloadWithRevision>) {
   }
 }
 
-function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision) {
+function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
+  try {
+    const path = action.payload!.path;
+    const commits = yield call(requestCommits, action.payload!, path);
+    yield put(fetchTreeCommitsSuccess({ path, commits }));
+  } catch (err) {
+    yield put(fetchTreeCommitsFailed(err));
+  }
+}
+
+function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision, path?: string) {
+  const pathStr = path ? `/${path}` : '';
   return kfetch({
-    pathname: `../api/code/repo/${uri}/history/${revision}`,
+    pathname: `../api/code/repo/${uri}/history/${revision}${pathStr}`,
   });
 }
 
@@ -191,6 +205,7 @@ export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
   yield takeLatest(String(fetchFile), handleFetchFile);
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
+  yield takeLatest(String(fetchTreeCommits), handleFetchTreeCommits);
 }
 
 function* handleRepoRouteChange(action: Action<Match>) {

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { parseLspUrl } from '../../common/uri_util';
 import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.file.tree;
@@ -47,5 +46,13 @@ export const cloneProgressSelector = (state: RootState) => {
     return status.cloneProgress === undefined ? null : status.cloneProgress;
   } else {
     return null;
+  }
+};
+export const treeCommitsSelector = (state: RootState) => {
+  const path = state.file.currentPath;
+  if (path === '') {
+    return state.file.commits;
+  } else {
+    return state.file.treeCommits[path];
   }
 };
