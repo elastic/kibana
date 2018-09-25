@@ -10,7 +10,7 @@ import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { compatibilityShimFactory } from './compatibility_shim';
+import { compatibilityShimFactory } from '../../../common/execute_job/compatibility_shim';
 
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
