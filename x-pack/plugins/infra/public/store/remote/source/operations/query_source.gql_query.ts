@@ -14,7 +14,7 @@ export const sourceQuery = gql`
         logAlias
         fields {
           container
-          hostname
+          host
           pod
         }
       }

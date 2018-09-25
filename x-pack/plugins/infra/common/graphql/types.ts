@@ -804,7 +804,7 @@ export namespace SourceQuery {
   export type Fields = {
     __typename?: 'InfraSourceFields';
     container: string;
-    hostname: string;
+    host: string;
     pod: string;
   };
 

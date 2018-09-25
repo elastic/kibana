@@ -23,7 +23,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]> {
     const fields = {
-      [InfraNodeType.host]: options.sourceConfiguration.fields.hostname,
+      [InfraNodeType.host]: options.sourceConfiguration.fields.host,
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };

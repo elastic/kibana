@@ -117,7 +117,7 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
 const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType: string) => {
   switch (nodeType) {
     case 'host':
-      return sourceConfiguration.fields.hostname;
+      return sourceConfiguration.fields.host;
     case 'container':
       return sourceConfiguration.fields.container;
     default:

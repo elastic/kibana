@@ -16,6 +16,7 @@ import {
   EuiXAxis,
   EuiYAxis,
 } from '@elastic/eui/lib/experimental';
+import Color from 'color';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ReactText } from 'react';
@@ -50,7 +51,10 @@ const getChartName = (section: InfraMetricLayoutSection, seriesId: string) => {
 };
 
 const getChartColor = (section: InfraMetricLayoutSection, seriesId: string): string | undefined => {
-  return get(section, ['visConfig', 'seriesOverrides', seriesId, 'color'], void 0);
+  const color = new Color(
+    get(section, ['visConfig', 'seriesOverrides', seriesId, 'color'], '#999')
+  );
+  return color.hex().toString();
 };
 
 const getChartType = (section: InfraMetricLayoutSection, seriesId: string) => {
