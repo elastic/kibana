@@ -22,7 +22,7 @@ export const isString = (value: any): value is string => typeof value === 'strin
 export const isObject = (value: any): value is object =>
   typeof value === 'object' && value !== null;
 
-export const hasValues = (values: object) => Object.keys(values).length > 0;
+export const hasValues = (values: any) => Object.keys(values).length > 0;
 
 export const unique = <T>(arr: T[] = []): T[] => [...new Set(arr)];
 

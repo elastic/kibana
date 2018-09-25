@@ -21,8 +21,9 @@ import { readFile } from 'fs';
 import * as JSON5 from 'json5';
 import * as path from 'path';
 import { promisify } from 'util';
+
 import { unique } from './core/helper';
-import { Messages } from './messages';
+import { Messages, PlainMessages } from './messages';
 
 const asyncReadFile = promisify(readFile);
 
@@ -38,7 +39,7 @@ const translationsRegistry: { [key: string]: string[] } = {};
  * Internal property for caching loaded translations files.
  * Key is path to translation file, value is object with translation messages
  */
-const loadedFiles: { [key: string]: Messages } = {};
+const loadedFiles: { [key: string]: PlainMessages } = {};
 
 /**
  * Returns locale by the given translation file name
@@ -78,7 +79,7 @@ async function loadFile(pathToFile: string) {
  * @returns
  */
 async function loadAndCacheFiles(files: string[]) {
-  const translations = await Promise.all(files.map(loadFile));
+  const translations: PlainMessages[] = await Promise.all(files.map(loadFile));
 
   files.forEach((file, index) => {
     loadedFiles[file] = translations[index];
@@ -126,7 +127,7 @@ export function getRegisteredLocales() {
  * @param locale
  * @returns translation messages
  */
-export async function getTranslationsByLocale(locale: string): Promise<Messages> {
+export async function getTranslationsByLocale(locale: string): Promise<PlainMessages> {
   const files = translationsRegistry[locale] || [];
   const notLoadedFiles = files.filter(file => !loadedFiles[file]);
 
