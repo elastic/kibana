@@ -271,6 +271,19 @@ export class LayoutPage extends React.Component<Props, State> {
       };
     });
 
+    // NOTICE: this is a temporary solution. Will be removed soon.
+    const submit = (event: any) => {
+      const queryInput = event.target.querySelector('input');
+      if (!queryInput) {
+        return;
+      }
+      const query: string = queryInput.value;
+      if (query.trim().length === 0) {
+        return;
+      }
+      history.push(`/search?q=${query}`);
+    };
+
     const searchBox = (
       <EuiFlexItem grow={false} style={noMarginStyle}>
         <EuiFlexGroup
@@ -280,14 +293,17 @@ export class LayoutPage extends React.Component<Props, State> {
           style={noMarginStyle}
         >
           <EuiFlexItem grow={false} style={noMarginStyle}>
-            <EuiComboBox
-              placeholder="Search..."
-              async={true}
-              options={symbolOptions}
-              isLoading={isSymbolsLoading}
-              onChange={this.onChange}
-              onSearchChange={this.onSearchChange}
-            />
+            <form onSubmit={submit}>
+              <EuiComboBox
+                placeholder="Search..."
+                async={true}
+                options={symbolOptions}
+                isLoading={isSymbolsLoading}
+                onChange={this.onChange}
+                onSearchChange={this.onSearchChange}
+              />
+              <input type="submit" hidden={true} />
+            </form>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
