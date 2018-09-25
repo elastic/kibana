@@ -110,52 +110,57 @@ export default function ({ getService }) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.now());
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt));
       });
     });
 
     it('should reschedule if task returns runAt', async () => {
       const nextRunMilliseconds = _.random(60000, 200000);
       const count = _.random(1, 20);
-      const buffer = 10000;
 
-      await scheduleTask({
+      const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         params: { nextRunMilliseconds },
         state: { count },
       });
 
-      retry.try(async () => {
+      await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
-        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.now() + (nextRunMilliseconds - buffer));
-        expect(Date.parse(task.runAt).getTime()).to.be.lessThan(Date.now() + nextRunMilliseconds);
+
+        expectReschedule(originalTask, task, nextRunMilliseconds);
       });
     });
 
     it('should reschedule if task has an interval', async () => {
       const interval = _.random(5, 200);
       const intervalMilliseconds = interval * 60000;
-      const buffer = 10000;
 
-      await scheduleTask({
+      const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         interval: `${interval}m`,
         params: { },
       });
 
-      retry.try(async () => {
+      await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
-        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.now() + (intervalMilliseconds - buffer));
-        expect(Date.parse(task.runAt).getTime()).to.be.lessThan(Date.now() + intervalMilliseconds);
+
+        expectReschedule(originalTask, task, intervalMilliseconds);
       });
     });
+
+    async function expectReschedule(originalTask, currentTask, expectedDiff) {
+      const originalRunAt = Date.parse(originalTask.runAt);
+      const buffer = 10000;
+      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
+      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
+    }
   });
 }
