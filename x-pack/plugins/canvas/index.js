@@ -28,6 +28,7 @@ export function canvas(kibana) {
         'plugins/canvas/lib/window_error_handler.js',
 
         // Client side plugins go here
+        'plugins/canvas/lib/load',
         'plugins/canvas/lib/load_expression_types.js',
         'plugins/canvas/lib/load_transitions.js',
       ],
