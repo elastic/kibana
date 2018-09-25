@@ -59,7 +59,7 @@ export class HomePage extends React.PureComponent {
                 )}
               </WithKueryAutocompletion>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <WithOptions>
                 {({ wafflemap: { path } }) => (
                   <WithWaffleMetrics>
