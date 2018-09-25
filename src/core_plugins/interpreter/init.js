@@ -17,6 +17,10 @@
  * under the License.
  */
 
+import { routes } from './server/routes';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { loadServerPlugins } from './server/lib/load_server_plugins';
+
 export default function (server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
@@ -27,8 +31,12 @@ export default function (server /*options*/) {
       kbnIndex: config.get('kibana.index'),
       esShardTimeout: config.get('elasticsearch.shardTimeout'),
       esApiVersion: config.get('elasticsearch.apiVersion'),
+      serverFunctions: functionsRegistry.toArray(),
       basePath,
       reportingBrowserType,
     };
   });
+
+  loadServerPlugins();
+  routes(server);
 }
