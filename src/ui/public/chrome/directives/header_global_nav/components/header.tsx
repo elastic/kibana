@@ -40,7 +40,7 @@ import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_c
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
 interface Props {
-  breadcrumbs: Observable<Breadcrumb[]>;
+  breadcrumbObservable: Observable<Breadcrumb[]>;
   navLinks: NavLink[];
   navControls: ChromeHeaderNavControlsRegistry;
   isVisible: boolean;
@@ -53,7 +53,7 @@ export class Header extends Component<Props> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs, navControls, navLinks, isVisible } = this.props;
+    const { appTitle, breadcrumbObservable, navControls, navLinks, isVisible } = this.props;
 
     if (!isVisible) {
       return null;
@@ -69,7 +69,7 @@ export class Header extends Component<Props> {
 
           <HeaderNavControls navControls={leftNavControls} />
 
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs={breadcrumbs} />
+          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbObservable={breadcrumbObservable} />
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">

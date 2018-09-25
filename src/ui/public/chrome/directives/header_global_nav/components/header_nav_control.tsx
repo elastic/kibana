@@ -26,14 +26,14 @@ interface Props {
 
 export class HeaderNavControl extends React.Component<Props> {
   private readonly ref = React.createRef<HTMLDivElement>();
-  private unrenderNavControl?: () => void;
+  private unrender?: () => void;
 
   public componentDidMount() {
     if (!this.ref.current) {
       throw new Error('<NavControl /> mounted without ref');
     }
 
-    this.unrenderNavControl = this.props.navControl.render(this.ref.current) || undefined;
+    this.unrender = this.props.navControl.render(this.ref.current) || undefined;
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -45,16 +45,16 @@ export class HeaderNavControl extends React.Component<Props> {
       throw new Error('<NavControl /> updated without ref');
     }
 
-    if (this.unrenderNavControl) {
-      this.unrenderNavControl();
+    if (this.unrender) {
+      this.unrender();
     }
 
-    this.unrenderNavControl = this.props.navControl.render(this.ref.current) || undefined;
+    this.unrender = this.props.navControl.render(this.ref.current) || undefined;
   }
 
   public componentWillUnmount() {
-    if (this.unrenderNavControl) {
-      this.unrenderNavControl();
+    if (this.unrender) {
+      this.unrender();
     }
   }
 

@@ -29,7 +29,7 @@ import { Breadcrumb } from '../';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs: Observable<Breadcrumb[]>;
+  breadcrumbObservable: Observable<Breadcrumb[]>;
 }
 
 interface State {
@@ -46,16 +46,20 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    this.subscription = this.props.breadcrumbs.subscribe(breadcrumbs => {
-      this.setState({ breadcrumbs });
-    });
+    this.subscribe();
+  }
+
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.breadcrumbObservable === this.props.breadcrumbObservable) {
+      return;
+    }
+
+    this.unsubscribe();
+    this.subscribe();
   }
 
   public componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
+    this.unsubscribe();
   }
 
   public render() {
@@ -66,5 +70,18 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
     }
 
     return <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
+  }
+
+  private subscribe() {
+    this.subscription = this.props.breadcrumbObservable.subscribe(breadcrumbs => {
+      this.setState({ breadcrumbs });
+    });
+  }
+
+  private unsubscribe() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 }

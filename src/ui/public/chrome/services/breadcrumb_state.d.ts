@@ -17,28 +17,9 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { Breadcrumb } from '../directives/header_global_nav';
 
-import { uiModules } from '../../../modules';
-import { Header } from './components/header';
-import './header_global_nav.less';
-import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+export const observable: Observable<Breadcrumb[]>;
 
-const module = uiModules.get('kibana');
-
-module.directive('headerGlobalNav', (reactDirective, chrome, Private, breadcrumbState) => {
-  const navControls = Private(chromeHeaderNavControlsRegistry);
-  const navLinks = chrome.getNavLinks();
-
-  return reactDirective(Header, [
-    // scope accepted by directive, passed in as React props
-    'appTitle',
-    'isVisible',
-  ],
-  {},
-  // angular injected React props
-  {
-    breadcrumbObservable: breadcrumbState.observable,
-    navLinks,
-    navControls
-  });
-});
+export function set(breadcrumbs: Breadcrumb[]): void;

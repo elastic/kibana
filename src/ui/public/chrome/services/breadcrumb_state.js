@@ -24,7 +24,7 @@ let shouldClear = false; // flag used to keep track of clearing between route ch
 let observer;
 
 // Observable used by Header component to subscribe to breadcrumbs changes.
-const observable = Observable.create((o) => observer = o);
+export const observable = Observable.create((o) => observer = o);
 
 /**
  * Should be called by plugins to set breadcrumbs in the header navigation.
