@@ -17,6 +17,7 @@
  * under the License.
  */
 
+
 import { getType } from '@kbn/interpreter/common/lib/get_type';
 
 export const mapColumn = () => ({

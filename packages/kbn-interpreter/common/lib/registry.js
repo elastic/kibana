@@ -35,8 +35,9 @@ export class Registry {
 
     const obj = fn();
 
-    if (typeof obj !== 'object' || !obj[this._prop])
+    if (typeof obj !== 'object' || !obj[this._prop]) {
       throw new Error(`Registered functions must return an object with a ${this._prop} property`);
+    }
 
     this._indexed[obj[this._prop].toLowerCase()] = this.wrapper(obj);
   }

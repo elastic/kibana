@@ -79,7 +79,7 @@ export const alterColumn = () => ({
           default:
             throw new Error(`Cannot convert to ${type}`);
         }
-      })();
+      }());
     }
 
     const rows = context.rows.map(row => ({

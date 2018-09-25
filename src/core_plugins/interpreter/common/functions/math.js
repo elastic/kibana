@@ -52,8 +52,9 @@ export const math = () => ({
           'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
         );
       }
-      if (isNaN(result))
+      if (isNaN(result)) {
         throw new Error('Failed to execute math expression. Check your column names');
+      }
       return result;
     } catch (e) {
       if (context.rows.length === 0) throw new Error('Empty datatable');

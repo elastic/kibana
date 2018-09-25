@@ -26,7 +26,8 @@ export const doFn = () => ({
       aliases: ['_'],
       multi: true,
       help:
-        'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
+        'One or more sub-expressions. The value of these is not available in the root ' +
+        'pipeline as this function simply returns the passed in context',
     },
   },
   fn: context => context,

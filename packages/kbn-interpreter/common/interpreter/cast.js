@@ -32,8 +32,9 @@ export function castProvider(types) {
 
     for (let i = 0; i < toTypeNames.length; i++) {
       // First check if the current type can cast to this type
-      if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i]))
+      if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i])) {
         return fromTypeDef.to(node, toTypeNames[i], types);
+      }
 
       // If that isn't possible, check if this type can cast from the current type
       const toTypeDef = types[toTypeNames[i]];

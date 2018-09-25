@@ -18,9 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { staticColumn } from '../staticColumn';
-import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
-import { testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
+import { staticColumn } from '../static_column';
+import { functionWrapper, testTable } from '@kbn/interpreter/test_utils';
 
 describe('staticColumn', () => {
   const fn = functionWrapper(staticColumn);
