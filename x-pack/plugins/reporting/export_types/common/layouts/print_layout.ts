@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { EvaluateOptions, KbnServer, Size } from '../../../../../types';
-import { LayoutTypes } from '../../../common/constants';
+import { EvaluateOptions, KbnServer, Size } from '../../../types';
+import { LayoutTypes } from '../constants';
 import { Layout } from './layout';
 import { CaptureConfig } from './types';
 

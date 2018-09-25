@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { oncePerServer } from '../../../server/lib/once_per_server';
 
 function getAbsoluteUrlFn(server) {
   const config = server.config();

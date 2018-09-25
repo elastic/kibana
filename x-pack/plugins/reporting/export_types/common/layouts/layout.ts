@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Size, ViewZoomWidthHeight } from '../../../../../types';
+import { Size, ViewZoomWidthHeight } from '../../../types';
 
 export interface PageSizeParams {
   pageMarginTop: number;

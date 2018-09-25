@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { Size } from '../../../../../types';
-import { LayoutTypes } from '../../../common/constants';
+import { Size } from '../../../types';
+import { LayoutTypes } from '../constants';
 import { Layout, PageSizeParams } from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.

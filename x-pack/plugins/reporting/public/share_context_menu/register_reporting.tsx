@@ -82,6 +82,32 @@ function reportingProvider(Private: any, dashboardConfig: any) {
     }
 
     // TODO register PNG menu item once PNG is supported on server side
+    if (xpackInfo.get('features.reporting.png.showLinks', false)) {
+      const panelTitle = 'PNG Reports';
+
+      shareActions.push({
+        shareMenuItem: {
+          name: panelTitle,
+          icon: 'document',
+          toolTipContent: xpackInfo.get('features.reporting.png.message'),
+          disabled: !xpackInfo.get('features.reporting.png.enableLinks', false) ? true : false,
+          ['data-test-subj']: 'pngReportMenuItem',
+        },
+        panel: {
+          title: panelTitle,
+          content: (
+            <ScreenCapturePanelContent
+              reportType="png"
+              objectType={objectType}
+              objectId={objectId}
+              getJobParams={getReportingJobParams}
+              isDirty={isDirty}
+              onClose={onClose}
+            />
+          ),
+        },
+      });
+    }
 
     return shareActions;
   };
