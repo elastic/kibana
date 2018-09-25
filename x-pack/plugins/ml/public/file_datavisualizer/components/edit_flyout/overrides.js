@@ -62,14 +62,17 @@ export class Overrides extends Component {
       customDelimiter: customD
     } = convertDelimiter((delimiter === undefined) ? originalSettings.delimiter : delimiter);
 
-    const tempColumnNames = (columnNames === undefined && originalSettings.columnNames !== undefined) ?
-      [...originalSettings.columnNames] : columnNames;
+    const {
+      newColumnNames,
+      originalColumnNames
+    } = getColumnNames(columnNames, originalSettings);
 
     return {
       charset: (charset === undefined) ? originalSettings.charset : charset,
       format: (format === undefined) ? originalSettings.format : format,
       hasHeaderRow: (hasHeaderRow === undefined) ? originalSettings.hasHeaderRow : hasHeaderRow,
-      columnNames: tempColumnNames,
+      columnNames: newColumnNames,
+      originalColumnNames,
       delimiter: d,
       customDelimiter: (customD === undefined) ? '' : customD,
       quote: (quote === undefined) ? originalSettings.quote : quote,
@@ -96,6 +99,7 @@ export class Overrides extends Component {
     const overrides = { ...this.state };
     overrides.delimiter = convertDelimiterBack(overrides);
     delete overrides.customDelimiter;
+    delete overrides.originalColumnNames;
 
     this.props.setOverrides(overrides);
   }
@@ -160,11 +164,11 @@ export class Overrides extends Component {
       shouldTrimFields,
       charset,
       columnNames,
+      originalColumnNames,
       grokPattern,
     } = this.state;
 
     const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
-    const originalColumnNames = (columnNames !== undefined) ? [...columnNames] : [];
 
     return (
 
@@ -359,4 +363,16 @@ function convertDelimiterBack({ delimiter, customDelimiter }) {
     default:
       return undefined;
   }
+}
+
+function getColumnNames(columnNames, originalSettings) {
+  const newColumnNames = (columnNames === undefined && originalSettings.columnNames !== undefined) ?
+    [...originalSettings.columnNames] : columnNames;
+
+  const originalColumnNames = (newColumnNames !== undefined) ? [...newColumnNames] : [];
+
+  return {
+    newColumnNames,
+    originalColumnNames,
+  };
 }
