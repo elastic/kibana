@@ -26,7 +26,7 @@ export class LogsPage extends React.Component {
       <ColumnarPage>
         <WithSource>
           {({ logIndicesExist }) =>
-            logIndicesExist ? (
+            logIndicesExist || logIndicesExist === null ? (
               <>
                 <WithLogFilterUrlState />
                 <WithLogPositionUrlState />

@@ -24,7 +24,7 @@ export class HomePage extends React.PureComponent {
       <ColumnarPage>
         <WithSource>
           {({ metricIndicesExist }) =>
-            metricIndicesExist ? (
+            metricIndicesExist || metricIndicesExist === null ? (
               <>
                 <WithWaffleTimeUrlState />
                 <WithWaffleFilterUrlState />
