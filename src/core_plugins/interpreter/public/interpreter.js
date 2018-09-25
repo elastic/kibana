@@ -23,7 +23,6 @@ import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { socket } from './socket';
 import { createHandlers } from './create_handlers';
-import { loadBrowserPlugins } from '../../../../x-pack/plugins/canvas/public/lib/load_browser_plugins';
 
 // Create the function list
 socket.emit('getFunctionList');
@@ -32,7 +31,7 @@ export const getServerFunctions = new Promise(resolve => socket.once('functionLi
 // Use the above promise to seed the interpreter with the functions it can defer to
 export function interpretAst(ast, context) {
   // Load plugins before attempting to get functions, otherwise this gets racey
-  return Promise.all([getServerFunctions, loadBrowserPlugins()])
+  return Promise.all([getServerFunctions])
     .then(([serverFunctionList]) => {
       return socketInterpreterProvider({
         types: typesRegistry.toJS(),

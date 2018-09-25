@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
+import { socketApi } from './socket';
+import { translate } from './translate';
+import { esFields } from './es_fields';
+import { esIndices } from './es_indices';
+import { getAuth } from './get_auth';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
-
-    init,
-  });
+export function routes(server) {
+  socketApi(server);
+  translate(server);
+  esFields(server);
+  esIndices(server);
+  getAuth(server);
 }
-

@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
+import { commonFunctions } from '../common/functions/index';
+import { clientFunctions } from './functions/index';
+import { typeSpecs } from '../common/types/index';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
+const loadBrowserPlugins = () => {
+  clientFunctions.forEach(fn => functionsRegistry.register(fn));
+  commonFunctions.forEach(fn => functionsRegistry.register(fn));
+  typeSpecs.forEach(fn => typesRegistry.register(fn));
+};
 
-    init,
-  });
-}
-
+loadBrowserPlugins();

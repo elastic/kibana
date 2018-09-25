@@ -23,11 +23,12 @@ import { socketInterpreterProvider } from '@kbn/interpreter/common/interpreter/s
 import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { getAuthHeader } from '../lib/get_auth_header';
+import { getAuthHeader } from './get_auth/get_auth_header';
 import { loadServerPlugins } from '../lib/load_server_plugins';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
+  loadServerPlugins();
 
   io.on('connection', socket => {
     // This is the HAPI request object
@@ -40,7 +41,7 @@ export function socketApi(server) {
     const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
-      loadServerPlugins().then(() => socket.emit('functionList', functionsRegistry.toJS()));
+      socket.emit('functionList', functionsRegistry.toJS());
     });
 
     const handler = ({ ast, context, id }) => {
