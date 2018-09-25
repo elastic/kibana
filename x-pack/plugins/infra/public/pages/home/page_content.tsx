@@ -29,7 +29,9 @@ export const HomePageContent: React.SFC = () => (
                   sourceId={wafflemap.sourceId}
                   timerange={currentTimeRange}
                 >
-                  {({ nodes }) => <Waffle map={nodes} options={wafflemap} />}
+                  {({ nodes, loading, refetch }) => (
+                    <Waffle map={nodes} loading={loading} options={wafflemap} reload={refetch} />
+                  )}
                 </WithWaffleNodes>
               )}
             </WithWaffleTime>
