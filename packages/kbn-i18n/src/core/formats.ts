@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IFormats } from 'kbn-i18n-formats';
+
 /**
  * Default format options used for "en" locale.
  * These are used when constructing the internal Intl.NumberFormat
@@ -28,7 +30,7 @@
  * described in `options` section of [DateTimeFormat constructor].
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat}
  */
-export const formats = {
+export const formats: IFormats = {
   number: {
     currency: {
       style: 'currency',

@@ -24,7 +24,7 @@ import { injectI18n } from './inject';
 import { I18nProvider } from './provider';
 
 describe('I18nProvider', () => {
-  it('renders children', () => {
+  test('renders children', () => {
     const ChildrenMock = () => null;
 
     const wrapper = shallow(
@@ -36,7 +36,7 @@ describe('I18nProvider', () => {
     expect(wrapper.children()).toMatchSnapshot();
   });
 
-  it('provides with context', () => {
+  test('provides with context', () => {
     const childrenMock = () => <div />;
     const WithIntl = injectI18n(childrenMock);
 

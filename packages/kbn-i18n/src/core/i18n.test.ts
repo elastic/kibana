@@ -20,7 +20,7 @@
 import * as i18nModule from './i18n';
 
 describe('I18n engine', () => {
-  let i18n = i18nModule;
+  let i18n: typeof i18nModule;
 
   beforeEach(() => {
     i18n = require.requireActual('./i18n');
@@ -267,16 +267,16 @@ describe('I18n engine', () => {
 
   describe('setFormats', () => {
     test('should throw error if formats parameter is not a non-empty object', () => {
-      expect(() => i18n.setFormats(undefined)).toThrow();
-      expect(() => i18n.setFormats(null)).toThrow();
-      expect(() => i18n.setFormats(true)).toThrow();
-      expect(() => i18n.setFormats(5)).toThrow();
-      expect(() => i18n.setFormats('foo')).toThrow();
-      expect(() => i18n.setFormats({})).toThrow();
+      expect(() => i18n.setFormats(undefined as any)).toThrow();
+      expect(() => i18n.setFormats(null as any)).toThrow();
+      expect(() => i18n.setFormats(true as any)).toThrow();
+      expect(() => i18n.setFormats(5 as any)).toThrow();
+      expect(() => i18n.setFormats('foo' as any)).toThrow();
+      expect(() => i18n.setFormats({} as any)).toThrow();
     });
 
     test('should merge current formats with a passed formats', () => {
-      expect(i18n.getFormats().date.short).not.toEqual({
+      expect(i18n.getFormats().date!.short).not.toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -292,7 +292,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.short).toEqual({
+      expect(i18n.getFormats().date!.short).toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -306,7 +306,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.short).toEqual({
+      expect(i18n.getFormats().date!.short).toEqual({
         month: 'long',
         day: 'numeric',
         year: 'numeric',
@@ -325,12 +325,22 @@ describe('I18n engine', () => {
       const { formats } = require('./formats');
 
       i18n.setFormats({
-        foo: 'bar',
+        number: {
+          currency: {
+            style: 'currency',
+            currency: 'EUR',
+          },
+        },
       });
 
       expect(i18n.getFormats()).toEqual({
         ...formats,
-        foo: 'bar',
+        number: {
+          currency: {
+            style: 'currency',
+            currency: 'EUR',
+          },
+        },
       });
     });
   });

@@ -19,10 +19,7 @@
 
 import * as i18n from '../core';
 
-export type I18nServiceType = (
-  id: string,
-  options: { values: { [key: string]: string }; defaultMessage: string }
-) => string;
+export type I18nServiceType = ReturnType<I18nProvider['$get']>;
 
 export class I18nProvider implements angular.IServiceProvider {
   public addMessages = i18n.addMessages;
@@ -35,5 +32,5 @@ export class I18nProvider implements angular.IServiceProvider {
   public getFormats = i18n.getFormats;
   public getRegisteredLocales = i18n.getRegisteredLocales;
   public init = i18n.init;
-  public $get = (): I18nServiceType => i18n.translate;
+  public $get = () => i18n.translate;
 }

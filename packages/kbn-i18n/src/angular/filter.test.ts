@@ -24,20 +24,19 @@ jest.mock('../core/i18n', () => ({
 import angular from 'angular';
 import 'angular-mocks';
 import { I18nProvider, I18nServiceType } from './provider';
-import { i18nFilter } from './filter';
+import { i18nFilter as angularI18nFilter } from './filter';
 import * as i18n from '../core/i18n';
 
 angular
   .module('app', [])
   .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter);
+  .filter('i18n', angularI18nFilter);
 
 describe('i18nFilter', () => {
   let filter: I18nServiceType;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    // tslint:disable-next-line:no-shadowed-variable
     angular.mock.inject(i18nFilter => {
       filter = i18nFilter;
     })
@@ -46,7 +45,7 @@ describe('i18nFilter', () => {
     jest.resetAllMocks();
   });
 
-  it('provides wrapper around i18n engine', () => {
+  test('provides wrapper around i18n engine', () => {
     const id = 'id';
     const defaultMessage = 'default-message';
     const values = {};

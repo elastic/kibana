@@ -17,15 +17,16 @@
  * under the License.
  */
 
-export const isString = (value: any) => typeof value === 'string';
+export const isString = (value: any): value is string => typeof value === 'string';
 
-export const isObject = (value: any) => typeof value === 'object' && value !== null;
+export const isObject = (value: any): value is object =>
+  typeof value === 'object' && value !== null;
 
-export const hasValues = (values: any) => Object.keys(values).length > 0;
+export const hasValues = (values: object) => Object.keys(values).length > 0;
 
 export const unique = <T>(arr: T[] = []): T[] => [...new Set(arr)];
 
-const merge = (a: any, b: any): any =>
+const merge = (a: any, b: any): { [k: string]: any } =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {
     if (isObject(a[key]) && isObject(b[key]) && !Array.isArray(a[key]) && !Array.isArray(b[key])) {
       return {

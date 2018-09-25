@@ -44,11 +44,11 @@ describe('i18nProvider', () => {
     })
   );
 
-  it('provides wrapper around i18n engine', () => {
+  test('provides wrapper around i18n engine', () => {
     expect(service).toEqual(i18n.translate);
   });
 
-  it('provides service wrapper around i18n engine', () => {
+  test('provides service wrapper around i18n engine', () => {
     const serviceMethodNames = Object.keys(provider);
     const pluginMethodNames = Object.keys(i18n);
 

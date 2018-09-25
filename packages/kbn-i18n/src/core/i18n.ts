@@ -17,33 +17,26 @@
  * under the License.
  */
 
-/**
- * @typedef Messages - messages tree, where leafs are translated strings
- * @property [locale] - locale of the messages
- * @property [formats] - set of options to the underlying formatter
- */
-
 import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
+import { IFormats } from 'kbn-i18n-formats';
+
 import { formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
+import { Messages, PlainMessages } from '../messages';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
 
-interface Messages {
-  [key: string]: any;
-}
-
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages: { [key: string]: any } = {};
+const messages: Messages = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
-let formats = EN_FORMATS;
+let formats: IFormats = EN_FORMATS;
 
 IntlMessageFormat.defaultLocale = defaultLocale;
 IntlRelativeFormat.defaultLocale = defaultLocale;
@@ -68,10 +61,10 @@ function normalizeLocale(locale: string) {
 
 /**
  * Provides a way to register translations with the engine
- * @param {Messages} newMessages
+ * @param newMessages
  * @param [locale = messages.locale]
  */
-export function addMessages(newMessages: Messages = {}, locale = newMessages.locale) {
+export function addMessages(newMessages: PlainMessages = {}, locale = newMessages.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
@@ -92,9 +85,9 @@ export function addMessages(newMessages: Messages = {}, locale = newMessages.loc
 
 /**
  * Returns messages for the current language
- * @returns {Messages} messages
+ * @returns messages
  */
-export function getMessages() {
+export function getMessages(): PlainMessages {
   return messages[currentLocale] || {};
 }
 
@@ -151,7 +144,7 @@ export function getDefaultLocale() {
  * @param [newFormats.date]
  * @param [newFormats.time]
  */
-export function setFormats(newFormats: any) {
+export function setFormats(newFormats: IFormats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
@@ -169,10 +162,15 @@ export function getFormats() {
 
 /**
  * Returns array of locales having translations
- * @returns {string[]} locales
+ * @returns locales
  */
 export function getRegisteredLocales() {
   return Object.keys(messages);
+}
+
+interface ITranslateArguments {
+  values?: { [key: string]: string | number | Date };
+  defaultMessage?: string;
 }
 
 /**
@@ -183,7 +181,13 @@ export function getRegisteredLocales() {
  * @param [options.defaultMessage] - will be used unless translation was successful
  * @returns
  */
-export function translate(id: string, { values = {}, defaultMessage = '' } = {}) {
+export function translate(
+  id: string,
+  { values = {}, defaultMessage = '' }: ITranslateArguments = {
+    values: {},
+    defaultMessage: '',
+  }
+): string {
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
@@ -221,9 +225,9 @@ export function translate(id: string, { values = {}, defaultMessage = '' } = {})
 
 /**
  * Initializes the engine
- * @param {Messages} newMessages
+ * @param newMessages
  */
-export function init(newMessages?: Messages) {
+export function init(newMessages?: PlainMessages) {
   if (!newMessages) {
     return;
   }

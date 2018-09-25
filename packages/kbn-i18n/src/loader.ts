@@ -17,40 +17,33 @@
  * under the License.
  */
 
-/**
- * @typedef Messages - messages tree, where leafs are translated strings
- * @type {object<string, object>}
- * @property {string} [locale] - locale of the messages
- * @property {object} [formats] - set of options to the underlying formatter
- */
-
 import { readFile } from 'fs';
 import * as JSON5 from 'json5';
 import * as path from 'path';
 import { promisify } from 'util';
 import { unique } from './core/helper';
+import { Messages } from './messages';
 
 const asyncReadFile = promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
 /**
- * Internal property for storing registered translations paths
- * @type {Map<string, string[]>|{}} - Key is locale, value is array of registered paths
+ * Internal property for storing registered translations paths.
+ * Key is locale, value is array of registered paths
  */
 const translationsRegistry: { [key: string]: string[] } = {};
 
 /**
- * Internal property for caching loaded translations files
- * @type {Map<string, Messages>|{}} - Key is path to translation file, value is
- * object with translation messages
+ * Internal property for caching loaded translations files.
+ * Key is path to translation file, value is object with translation messages
  */
-const loadedFiles: { [key: string]: { [key: string]: string } } = {};
+const loadedFiles: { [key: string]: Messages } = {};
 
 /**
  * Returns locale by the given translation file name
- * @param {string} fullFileName
- * @returns {string} locale
+ * @param fullFileName
+ * @returns locale
  * @example
  * getLocaleFromFileName('./path/to/translation/ru.json') // => 'ru'
  */
@@ -72,8 +65,8 @@ function getLocaleFromFileName(fullFileName: string) {
 
 /**
  * Loads file and parses it as JSON5
- * @param {string} pathToFile
- * @returns {Promise<object>}
+ * @param pathToFile
+ * @returns
  */
 async function loadFile(pathToFile: string) {
   return JSON5.parse(await asyncReadFile(pathToFile, 'utf8'));
@@ -81,8 +74,8 @@ async function loadFile(pathToFile: string) {
 
 /**
  * Loads translations files and adds them into "loadedFiles" cache
- * @param {string[]} files
- * @returns {Promise<void>}
+ * @param files
+ * @returns
  */
 async function loadAndCacheFiles(files: string[]) {
   const translations = await Promise.all(files.map(loadFile));
@@ -94,7 +87,7 @@ async function loadAndCacheFiles(files: string[]) {
 
 /**
  * Registers translation file with i18n loader
- * @param {string} translationFilePath - Absolute path to the translation file to register.
+ * @param translationFilePath - Absolute path to the translation file to register.
  */
 export function registerTranslationFile(translationFilePath: string) {
   if (!path.isAbsolute(translationFilePath)) {
@@ -114,7 +107,7 @@ export function registerTranslationFile(translationFilePath: string) {
 
 /**
  * Registers array of translation files with i18n loader
- * @param {string[]} arrayOfPaths - Array of absolute paths to the translation files to register.
+ * @param arrayOfPaths - Array of absolute paths to the translation files to register.
  */
 export function registerTranslationFiles(arrayOfPaths: string[] = []) {
   arrayOfPaths.forEach(registerTranslationFile);
@@ -122,7 +115,7 @@ export function registerTranslationFiles(arrayOfPaths: string[] = []) {
 
 /**
  * Returns an array of locales that have been registered with i18n loader
- * @returns {string[]} registeredTranslations
+ * @returns registeredTranslations
  */
 export function getRegisteredLocales() {
   return Object.keys(translationsRegistry);
@@ -130,10 +123,10 @@ export function getRegisteredLocales() {
 
 /**
  * Returns translation messages by specified locale
- * @param {string} locale
- * @returns {Promise<Messages>} translations - translation messages
+ * @param locale
+ * @returns translation messages
  */
-export async function getTranslationsByLocale(locale: string) {
+export async function getTranslationsByLocale(locale: string): Promise<Messages> {
   const files = translationsRegistry[locale] || [];
   const notLoadedFiles = files.filter(file => !loadedFiles[file]);
 
@@ -154,10 +147,10 @@ export async function getTranslationsByLocale(locale: string) {
 
 /**
  * Returns all translations for registered locales
- * @return {Promise<Map<string, Messages>>} translations - A Promise object
+ * @returns A Promise object
  * where keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslations() {
+export async function getAllTranslations(): Promise<{ [key: string]: Messages }> {
   const locales = getRegisteredLocales();
   const translations = await Promise.all(locales.map(getTranslationsByLocale));
 
@@ -173,11 +166,13 @@ export async function getAllTranslations() {
 /**
  * Registers passed translations files, loads them and returns promise with
  * all translation messages
- * @param {string[]} paths - Array of absolute paths to the translation files
- * @returns {Promise<Map<string, Messages>>} translations - A Promise object
- * where keys are the locale and values are objects of translation messages
+ * @param paths - Array of absolute paths to the translation files
+ * @returns A Promise object where
+ * keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslationsFromPaths(paths: string[]) {
+export async function getAllTranslationsFromPaths(
+  paths: string[]
+): Promise<{ [key: string]: Messages }> {
   registerTranslationFiles(paths);
 
   return await getAllTranslations();

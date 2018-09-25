@@ -2,18 +2,14 @@
   "extends": "../../tsconfig.json",
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "types/index.d.ts"
   ],
   "exclude": [
     "target"
   ],
-  "compileOnSave": true,
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./target/types",
     "declarationDir": "./target/types",
-    "typeRoots": [
-      "./node_modules/@types",
-    ]
   }
 }
