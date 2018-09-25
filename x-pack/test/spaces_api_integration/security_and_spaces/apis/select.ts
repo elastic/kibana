@@ -62,14 +62,11 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.noAccess.USERNAME,
-            password: scenario.users.noAccess.PASSWORD,
-          },
+          user: scenario.users.noAccess,
           tests: {
             default: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.noAccess.username),
             },
           },
         }
@@ -82,10 +79,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.superuser.USERNAME,
-            password: scenario.users.superuser.PASSWORD,
-          },
+          user: scenario.users.superuser,
           tests: {
             default: {
               statusCode: 200,
@@ -102,10 +96,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.allGlobally.USERNAME,
-            password: scenario.users.allGlobally.PASSWORD,
-          },
+          user: scenario.users.allGlobally,
           tests: {
             default: {
               statusCode: 200,
@@ -122,10 +113,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.dualAll.USERNAME,
-            password: scenario.users.dualAll.PASSWORD,
-          },
+          user: scenario.users.dualAll,
           tests: {
             default: {
               statusCode: 200,
@@ -140,10 +128,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.legacyAll.USERNAME,
-            password: scenario.users.legacyAll.PASSWORD,
-          },
+          user: scenario.users.legacyAll,
           tests: {
             default: {
               statusCode: 200,
@@ -159,10 +144,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.readGlobally.USERNAME,
-            password: scenario.users.readGlobally.PASSWORD,
-          },
+          user: scenario.users.readGlobally,
           tests: {
             default: {
               statusCode: 200,
@@ -178,10 +160,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.dualRead.USERNAME,
-            password: scenario.users.dualRead.PASSWORD,
-          },
+          user: scenario.users.dualRead,
           tests: {
             default: {
               statusCode: 200,
@@ -197,10 +176,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.legacyRead.USERNAME,
-            password: scenario.users.legacyRead.PASSWORD,
-          },
+          user: scenario.users.legacyRead,
           tests: {
             default: {
               statusCode: 200,
@@ -237,10 +213,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.allAtSpace.USERNAME,
-            password: scenario.users.allAtSpace.PASSWORD,
-          },
+          user: scenario.users.allAtSpace,
           tests: {
             default: {
               statusCode: 200,
@@ -256,10 +229,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.readAtSpace.USERNAME,
-            password: scenario.users.readAtSpace.PASSWORD,
-          },
+          user: scenario.users.readAtSpace,
           tests: {
             default: {
               statusCode: 200,
@@ -275,10 +245,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.allAtOtherSpace.USERNAME,
-            password: scenario.users.allAtOtherSpace.PASSWORD,
-          },
+          user: scenario.users.allAtOtherSpace,
           tests: {
             default: {
               statusCode: 403,
@@ -309,10 +276,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.userWithAllAtSpace.USERNAME,
-            password: scenario.users.userWithAllAtSpace.PASSWORD,
-          },
+          user: scenario.users.userWithAllAtSpace,
           tests: {
             default: {
               statusCode: 200,
@@ -328,10 +292,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.userWithAllAtBothSpaces.USERNAME,
-            password: scenario.users.userWithAllAtBothSpaces.PASSWORD,
-          },
+          user: scenario.users.userWithAllAtBothSpaces,
           tests: {
             default: {
               statusCode: 200,
@@ -349,10 +310,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.userWithAllAtOtherSpace.USERNAME,
-            password: scenario.users.userWithAllAtOtherSpace.PASSWORD,
-          },
+          user: scenario.users.userWithAllAtOtherSpace,
           tests: {
             default: {
               statusCode: 403,
@@ -386,10 +344,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         selectTest(`rbac user with all globally cannot access non-existent space`, {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.userWithAllGlobally.USERNAME,
-            password: scenario.users.userWithAllGlobally.PASSWORD,
-          },
+          user: scenario.users.userWithAllGlobally,
           tests: {
             default: {
               statusCode: 404,
@@ -401,10 +356,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         selectTest(`rbac user with all at space cannot access non-existent space`, {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
-          auth: {
-            username: scenario.users.userWithAllAtSpace.USERNAME,
-            password: scenario.users.userWithAllAtSpace.PASSWORD,
-          },
+          user: scenario.users.userWithAllAtSpace,
           tests: {
             default: {
               statusCode: 403,

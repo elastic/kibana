@@ -20,7 +20,7 @@ interface SelectTests {
 }
 
 interface SelectTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   currentSpaceId: string;
   selectSpaceId: string;
   tests: SelectTests;
@@ -96,7 +96,7 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeSelectTest = (describeFn: DescribeFn) => (
     description: string,
-    { auth = {}, currentSpaceId, selectSpaceId, tests }: SelectTestDefinition
+    { user = {}, currentSpaceId, selectSpaceId, tests }: SelectTestDefinition
   ) => {
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -105,7 +105,7 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       it(`should return ${tests.default.statusCode}`, async () => {
         return supertest
           .post(`${getUrlPrefix(currentSpaceId)}/api/spaces/v1/space/${selectSpaceId}/select`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });

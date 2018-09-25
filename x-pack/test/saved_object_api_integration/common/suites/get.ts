@@ -21,7 +21,7 @@ interface GetTests {
 }
 
 interface GetTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   otherSpaceId?: string;
   tests: GetTests;
@@ -117,7 +117,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     description: string,
     definition: GetTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -132,7 +132,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
               otherSpaceId || spaceId
             )}${spaceAwareId}`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response);
       });
@@ -142,7 +142,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       } when deleting a non-space-aware doc`, async () => {
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
       });
@@ -155,7 +155,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
                 otherSpaceId || spaceId
               )}${doesntExistId}`
             )
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.doesntExist.statusCode)
             .then(tests.doesntExist.response);
         });

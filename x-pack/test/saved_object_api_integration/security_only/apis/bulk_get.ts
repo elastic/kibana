@@ -20,23 +20,17 @@ export default function({ getService }: TestInvoker) {
 
   describe('_bulk_get', () => {
     bulkGetTest(`user with no access`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
       },
     });
 
     bulkGetTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
+      user: AUTHENTICATION.SUPERUSER,
       tests: {
         default: {
           statusCode: 200,
@@ -46,10 +40,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -59,10 +50,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`legacy reeadonly user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -72,10 +60,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`dual-privileges user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -85,10 +70,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`dual-privileges readonly user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -98,10 +80,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`rbac user with all globally`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -111,10 +90,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`rbac user with read globally`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
       tests: {
         default: {
           statusCode: 200,
@@ -124,60 +100,48 @@ export default function({ getService }: TestInvoker) {
     });
 
     bulkGetTest(`rbac user with all at default space`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
       tests: {
         default: {
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
       },
     });
 
     bulkGetTest(`rbac user with read at default space`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
       tests: {
         default: {
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
       },
     });
 
     bulkGetTest(`rbac user with all at space_1`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
       tests: {
         default: {
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
       },
     });
 
     bulkGetTest(`rbac user with read at space_1`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
       tests: {
         default: {
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
       },

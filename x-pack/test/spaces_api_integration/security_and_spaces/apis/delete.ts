@@ -56,32 +56,26 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
     ].forEach(scenario => {
       deleteTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.noAccess.USERNAME,
-          password: scenario.users.noAccess.PASSWORD,
-        },
+        user: scenario.users.noAccess,
         tests: {
           exists: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
           reservedSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
           doesntExist: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME, 'read/get'),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
         },
       });
 
       deleteTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.superuser.USERNAME,
-          password: scenario.users.superuser.PASSWORD,
-        },
+        user: scenario.users.superuser,
         tests: {
           exists: {
             statusCode: 204,
@@ -100,10 +94,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allGlobally.USERNAME,
-          password: scenario.users.allGlobally.PASSWORD,
-        },
+        user: scenario.users.allGlobally,
         tests: {
           exists: {
             statusCode: 204,
@@ -122,10 +113,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`dual-privileges user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualAll.USERNAME,
-          password: scenario.users.dualAll.PASSWORD,
-        },
+        user: scenario.users.dualAll,
         tests: {
           exists: {
             statusCode: 204,
@@ -144,10 +132,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyAll.USERNAME,
-          password: scenario.users.legacyAll.PASSWORD,
-        },
+        user: scenario.users.legacyAll,
         tests: {
           exists: {
             statusCode: 204,
@@ -166,10 +151,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.readGlobally.USERNAME,
-          password: scenario.users.readGlobally.PASSWORD,
-        },
+        user: scenario.users.readGlobally,
         tests: {
           exists: {
             statusCode: 403,
@@ -188,10 +170,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualRead.USERNAME,
-          password: scenario.users.dualRead.PASSWORD,
-        },
+        user: scenario.users.dualRead,
         tests: {
           exists: {
             statusCode: 403,
@@ -210,15 +189,12 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`legacy readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyRead.USERNAME,
-          password: scenario.users.legacyRead.PASSWORD,
-        },
+        user: scenario.users.legacyRead,
         tests: {
           exists: {
             statusCode: 403,
             response: createExpectLegacyForbidden(
-              scenario.users.legacyRead.USERNAME,
+              scenario.users.legacyRead.username,
               'write/delete'
             ),
           },
@@ -235,10 +211,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
       deleteTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allAtSpace.USERNAME,
-          password: scenario.users.allAtSpace.PASSWORD,
-        },
+        user: scenario.users.allAtSpace,
         tests: {
           exists: {
             statusCode: 403,

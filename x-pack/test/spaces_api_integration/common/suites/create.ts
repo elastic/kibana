@@ -21,7 +21,7 @@ interface CreateTests {
 }
 
 interface CreateTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: CreateTests;
 }
@@ -72,7 +72,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
-    { auth = {}, spaceId, tests }: CreateTestDefinition
+    { user = {}, spaceId, tests }: CreateTestDefinition
   ) => {
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -81,7 +81,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       it(`should return ${tests.newSpace.statusCode}`, async () => {
         return supertest
           .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send({
             name: 'marketing',
             id: 'marketing',
@@ -96,7 +96,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.alreadyExists.statusCode}`, async () => {
           return supertest
             .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               name: 'space_1',
               id: 'space_1',
@@ -112,7 +112,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved`, async () => {
           return supertest
             .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               name: 'reserved space',
               id: 'reserved',

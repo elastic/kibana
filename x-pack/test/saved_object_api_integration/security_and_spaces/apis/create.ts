@@ -60,28 +60,22 @@ export default function({ getService }: TestInvoker) {
       },
     ].forEach(scenario => {
       createTest(`user with no access  within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.noAccess.USERNAME,
-          password: scenario.users.noAccess.PASSWORD,
-        },
+        user: scenario.users.noAccess,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
 
       createTest(`superuser within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.superuser.USERNAME,
-          password: scenario.users.superuser.PASSWORD,
-        },
+        user: scenario.users.superuser,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -96,10 +90,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`legacy user within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.legacyAll.USERNAME,
-          password: scenario.users.legacyAll.PASSWORD,
-        },
+        user: scenario.users.legacyAll,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -114,28 +105,22 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`legacy readonly user within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.legacyRead.USERNAME,
-          password: scenario.users.legacyRead.PASSWORD,
-        },
+        user: scenario.users.legacyRead,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
         },
       });
 
       createTest(`dual-privileges user within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.dualAll.USERNAME,
-          password: scenario.users.dualAll.PASSWORD,
-        },
+        user: scenario.users.dualAll,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -150,10 +135,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.dualRead.USERNAME,
-          password: scenario.users.dualRead.PASSWORD,
-        },
+        user: scenario.users.dualRead,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -168,10 +150,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.allGlobally.USERNAME,
-          password: scenario.users.allGlobally.PASSWORD,
-        },
+        user: scenario.users.allGlobally,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -186,10 +165,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.readGlobally.USERNAME,
-          password: scenario.users.readGlobally.PASSWORD,
-        },
+        user: scenario.users.readGlobally,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -204,10 +180,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.allAtSpace.USERNAME,
-          password: scenario.users.allAtSpace.PASSWORD,
-        },
+        user: scenario.users.allAtSpace,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -222,10 +195,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.readAtSpace.USERNAME,
-          password: scenario.users.readAtSpace.PASSWORD,
-        },
+        user: scenario.users.readAtSpace,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
@@ -240,10 +210,7 @@ export default function({ getService }: TestInvoker) {
       });
 
       createTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
-        auth: {
-          username: scenario.users.allAtOtherSpace.USERNAME,
-          password: scenario.users.allAtOtherSpace.PASSWORD,
-        },
+        user: scenario.users.allAtOtherSpace,
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {

@@ -22,7 +22,7 @@ interface UpdateTests {
 }
 
 interface UpdateTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   otherSpaceId?: string;
   tests: UpdateTests;
@@ -118,7 +118,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     description: string,
     definition: UpdateTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -130,7 +130,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               otherSpaceId || spaceId
             )}dd7caf20-9efd-11e7-acb3-3dab96693fab`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send({
             attributes: {
               title: 'My second favorite vis',
@@ -147,7 +147,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               otherSpaceId || spaceId
             )}/api/saved_objects/globaltype/8121a00-8efd-21e7-1cb3-34ab966434445`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send({
             attributes: {
               name: 'My second favorite',
@@ -165,7 +165,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                 spaceId
               )}not an id`
             )
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               attributes: {
                 title: 'My second favorite vis',

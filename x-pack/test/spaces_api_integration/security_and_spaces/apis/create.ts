@@ -56,32 +56,26 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
     ].forEach(scenario => {
       createTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.noAccess.USERNAME,
-          password: scenario.users.noAccess.PASSWORD,
-        },
+        user: scenario.users.noAccess,
         tests: {
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
           reservedSpecified: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
         },
       });
 
       createTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.superuser.USERNAME,
-          password: scenario.users.superuser.PASSWORD,
-        },
+        user: scenario.users.superuser,
         tests: {
           newSpace: {
             statusCode: 200,
@@ -100,10 +94,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allGlobally.USERNAME,
-          password: scenario.users.allGlobally.PASSWORD,
-        },
+        user: scenario.users.allGlobally,
         tests: {
           newSpace: {
             statusCode: 200,
@@ -122,10 +113,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`dual-privileges user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualAll.USERNAME,
-          password: scenario.users.dualAll.PASSWORD,
-        },
+        user: scenario.users.dualAll,
         tests: {
           newSpace: {
             statusCode: 200,
@@ -144,10 +132,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyAll.USERNAME,
-          password: scenario.users.legacyAll.PASSWORD,
-        },
+        user: scenario.users.legacyAll,
         tests: {
           newSpace: {
             statusCode: 200,
@@ -166,10 +151,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.readGlobally.USERNAME,
-          password: scenario.users.readGlobally.PASSWORD,
-        },
+        user: scenario.users.readGlobally,
         tests: {
           newSpace: {
             statusCode: 403,
@@ -188,10 +170,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualRead.USERNAME,
-          password: scenario.users.dualRead.PASSWORD,
-        },
+        user: scenario.users.dualRead,
         tests: {
           newSpace: {
             statusCode: 403,
@@ -210,32 +189,26 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
 
       createTest(`legacy readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyRead.USERNAME,
-          password: scenario.users.legacyRead.PASSWORD,
-        },
+        user: scenario.users.legacyRead,
         tests: {
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.username),
           },
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.username),
           },
           reservedSpecified: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbiddenResponse(scenario.users.legacyRead.username),
           },
         },
       });
 
       createTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allAtSpace.USERNAME,
-          password: scenario.users.allAtSpace.PASSWORD,
-        },
+        user: scenario.users.allAtSpace,
         tests: {
           newSpace: {
             statusCode: 403,
