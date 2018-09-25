@@ -166,7 +166,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('clickGoButton');
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await testSubjects.click('timepickerGoButton');
+        // Sometimes EUI toast notification covers the go button
+        const elem = await testSubjects.find('timepickerGoButton');
+        await remote.execute('arguments[0].click();', [elem]);
         await this.waitUntilLoadingHasFinished();
       });
     }
