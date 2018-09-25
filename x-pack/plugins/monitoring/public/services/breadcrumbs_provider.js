@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
+
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
   const crumb = { url, label };
@@ -94,7 +96,7 @@ function getApmBreadcrumbs(mainInstance) {
   return breadcrumbs;
 }
 
-export function breadcrumbsProvider(breadcrumbState) {
+export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
     let breadcrumbs = [ createCrumb('#/home', 'Clusters', 'breadcrumbClusters') ];
 
@@ -118,7 +120,7 @@ export function breadcrumbsProvider(breadcrumbState) {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
-    breadcrumbState.set(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
+    setBreadcrumbs(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
     return breadcrumbs;
   };
