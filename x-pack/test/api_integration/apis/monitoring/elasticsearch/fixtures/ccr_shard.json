@@ -1,4 +1,5 @@
 {
+  "formattedLeader": "leader",
   "metrics": {
     "ccr_sync_lag_time": [{
       "bucket_size": "10 min",
@@ -13,9 +14,9 @@
         "label": "Fetch delay",
         "title": "Fetch delay",
         "description": "The amount of time the follower index is lagging behind the leader.",
-        "units": "ms",
+        "units": "s",
         "format": "0.[00]",
-        "hasCalculation": false,
+        "hasCalculation": true,
         "isDerivative": false
       },
       "data": []
