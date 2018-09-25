@@ -18,9 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { mapColumn } from '../mapColumn';
-import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
-import { testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
+import { mapColumn } from '../map_column';
+import { functionWrapper, testTable } from '@kbn/interpreter/test_utils';
 
 const pricePlusTwo = datatable => Promise.resolve(datatable.rows[0].price + 2);
 

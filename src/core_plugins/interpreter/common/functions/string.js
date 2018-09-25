@@ -29,7 +29,7 @@ export const string = () => ({
       aliases: ['_'],
       types: ['string'],
       multi: true,
-      help: "One or more strings to join together. Don't forget spaces where needed!",
+      help: 'One or more strings to join together. Don\'t forget spaces where needed!',
     },
   },
   fn: (context, args) => args.value.join(''),

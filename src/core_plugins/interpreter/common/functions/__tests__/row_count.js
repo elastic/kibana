@@ -18,9 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { rowCount } from '../rowCount';
-import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
+import { rowCount } from '../row_count';
+import { functionWrapper, emptyTable, testTable } from '@kbn/interpreter/test_utils';
 
 describe('rowCount', () => {
   const fn = functionWrapper(rowCount);

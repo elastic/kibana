@@ -26,7 +26,7 @@ export const location = () => ({
     types: ['null'],
   },
   help:
-    "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+    'Use the browser\'s location functionality to get your current location. Usually quite slow, but fairly accurate',
   fn: () => {
     return new Promise(resolve => {
       function createLocation(geoposition) {

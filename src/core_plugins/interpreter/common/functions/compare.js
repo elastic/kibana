@@ -20,7 +20,8 @@
 export const compare = () => ({
   name: 'compare',
   help:
-    'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
+    'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. ' +
+    'This only works with primitive types, such as number, string, and boolean.',
   aliases: ['condition'],
   example: 'math "random()" | compare gt this=0.5',
   type: 'boolean',

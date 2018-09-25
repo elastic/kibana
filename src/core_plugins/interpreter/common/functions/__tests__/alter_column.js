@@ -18,9 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { alterColumn } from '../alterColumn';
-import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
+import { alterColumn } from '../alter_column';
+import { functionWrapper, emptyTable, testTable  } from '@kbn/interpreter/test_utils';
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);
@@ -62,7 +61,7 @@ describe('alterColumn', () => {
 
       it('throws if column does not exists', () => {
         expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException(e => {
-          expect(e.message).to.be("Column not found: 'foo'");
+          expect(e.message).to.be('Column not found: \'foo\'');
         });
       });
     });
