@@ -21,17 +21,6 @@ import { WithOptions } from '../../containers/with_options';
 export const HomeToolbar: React.SFC = () => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <WithOptions>
-          {({ wafflemap: { path } }) => (
-            <WithWaffleMetrics>
-              {({ changeMetrics, metrics }) => (
-                <WaffleMetricControls metrics={metrics} path={path} onChange={changeMetrics} />
-              )}
-            </WithWaffleMetrics>
-          )}
-        </WithOptions>
-      </EuiFlexItem>
       <EuiFlexItem>
         <WithKueryAutocompletion>
           {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
@@ -56,6 +45,17 @@ export const HomeToolbar: React.SFC = () => (
             </WithWaffleFilter>
           )}
         </WithKueryAutocompletion>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <WithOptions>
+          {({ wafflemap: { path } }) => (
+            <WithWaffleMetrics>
+              {({ changeMetrics, metrics }) => (
+                <WaffleMetricControls metrics={metrics} path={path} onChange={changeMetrics} />
+              )}
+            </WithWaffleMetrics>
+          )}
+        </WithOptions>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <WithWaffleTime resetOnUnmount>

@@ -36,7 +36,7 @@ export const HomePageContent: React.SFC = () => (
                         <Waffle
                           map={nodes}
                           loading={loading}
-                          options={wafflemap}
+                          options={{ ...wafflemap, metrics }}
                           reload={refetch}
                         />
                       )}
