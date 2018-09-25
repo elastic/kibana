@@ -43,7 +43,7 @@ export class LogsPage extends React.Component {
                     title="Looks like you don't have any logging indices."
                     message="Let's add some!"
                     actionLabel="Setup Instructions"
-                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
                   />
                 )}
               </WithKibanaChrome>
