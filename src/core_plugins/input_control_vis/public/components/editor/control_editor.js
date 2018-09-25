@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './control_editor.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
