@@ -17,6 +17,7 @@ import {
   EuiCodeBlock,
   EuiTextColor,
   EuiHorizontalRule,
+  EuiAccordion,
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
@@ -46,7 +47,7 @@ export class CcrShard extends PureComponent {
     );
   }
 
-  renderExceptions() {
+  renderErrors() {
     const { stat } = this.props;
     if (stat.fetch_exceptions && stat.fetch_exceptions.length > 0) {
       return (
@@ -54,7 +55,7 @@ export class CcrShard extends PureComponent {
           <EuiPanel>
             <EuiTitle size="s" color="danger">
               <h3>
-                <EuiTextColor color="danger">Exceptions</EuiTextColor>
+                <EuiTextColor color="danger">Errors</EuiTextColor>
               </h3>
             </EuiTitle>
             <EuiSpacer size="s"/>
@@ -84,27 +85,26 @@ export class CcrShard extends PureComponent {
     const { stat } = this.props;
 
     return (
-      <Fragment>
-        <EuiTitle>
-          <h2>Advanced</h2>
-        </EuiTitle>
-        <EuiSpacer size="s"/>
+      <EuiAccordion
+        buttonContent={<EuiTitle><h2>Advanced</h2></EuiTitle>}
+        paddingSize="l"
+      >
         <EuiCodeBlock language="json">
           {JSON.stringify(stat, null, 2)}
         </EuiCodeBlock>
-      </Fragment>
+      </EuiAccordion>
     );
   }
 
   render() {
-    const { stat, oldestStat } = this.props;
+    const { stat, oldestStat, formattedLeader } = this.props;
 
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stat={stat} oldestStat={oldestStat}/>
+          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat}/>
           <EuiSpacer size="s"/>
-          {this.renderExceptions()}
+          {this.renderErrors()}
           <EuiFlexGroup wrap>
             {this.renderCharts()}
           </EuiFlexGroup>

@@ -11,6 +11,15 @@ import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 
+function getFormattedLeaderIndex(leaderIndex) {
+  let leader = leaderIndex;
+  if (leader.includes(':')) {
+    const leaderSplit = leader.split(':');
+    leader = `${leaderSplit[1]} on ${leaderSplit[0]}`;
+  }
+  return leader;
+}
+
 async function getCcrStat(req, esIndexPattern, filters) {
   const min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
@@ -131,6 +140,7 @@ export function ccrShardRoute(server) {
         reply({
           metrics,
           stat,
+          formattedLeader: getFormattedLeaderIndex(stat.leader_index),
           oldestStat,
         });
       } catch(err) {

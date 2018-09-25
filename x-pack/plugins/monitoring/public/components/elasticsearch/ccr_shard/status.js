@@ -8,11 +8,10 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 
-export function Status({ stat, oldestStat }) {
+export function Status({ stat, formattedLeader, oldestStat }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
-    leader_index: leaderIndex,
     number_of_operations_indexed: operationsReceived,
     number_of_failed_fetches: failedFetches
   } = stat;
@@ -35,7 +34,7 @@ export function Status({ stat, oldestStat }) {
     },
     {
       label: 'Leader Index',
-      value: leaderIndex,
+      value: formattedLeader,
       dataTestSubj: 'leaderIndex'
     },
     {

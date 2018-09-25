@@ -323,3 +323,16 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
     };
   }
 }
+
+export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      units: 's',
+    });
+
+    this.calculation = bucket => {
+      return _.get(bucket, 'metric.value') / 1000;
+    };
+  }
+}

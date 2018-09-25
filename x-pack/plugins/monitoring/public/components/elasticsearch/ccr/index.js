@@ -16,7 +16,10 @@ import {
   EuiIconTip,
   EuiTextColor
 } from '@elastic/eui';
-import { formatMetric } from '../../../lib/format_number';
+
+function toSeconds(ms) {
+  return Math.floor(ms / 1000) + 's';
+}
 
 export class Ccr extends Component {
   constructor(props) {
@@ -34,6 +37,15 @@ export class Ccr extends Component {
     if (itemIdToExpandedRowMap[index]) {
       delete itemIdToExpandedRowMap[index];
     } else {
+      let pagination = {
+        initialPageSize: 5,
+        pageSizeOptions: [5, 10, 20]
+      };
+
+      if (shards.length <= pagination.initialPageSize) {
+        pagination = false;
+      }
+
       itemIdToExpandedRowMap[index] = (
         <EuiInMemoryTable
           items={shards}
@@ -41,6 +53,7 @@ export class Ccr extends Component {
             {
               field: 'shardId',
               name: 'Shard',
+              width: '390px',
               render: shardId => {
                 return (
                   <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
@@ -50,17 +63,13 @@ export class Ccr extends Component {
               }
             },
             {
-              field: 'follows',
-              name: 'Follows'
-            },
-            {
               field: 'opsSynced',
               name: 'Ops synced'
             },
             {
               field: 'syncLagTime',
-              name: 'Last fetch time (ms)',
-              render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')} ago</span>
+              name: 'Last fetch time',
+              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
             },
             {
               field: 'syncLagOps',
@@ -95,7 +104,7 @@ export class Ccr extends Component {
             }
           ]}
           sorting={true}
-          pagination={true}
+          pagination={pagination}
         />
       );
     }
@@ -106,10 +115,14 @@ export class Ccr extends Component {
     const { data } = this.props;
     const items = data;
 
-    const pagination = {
+    let pagination = {
       initialPageSize: 5,
       pageSizeOptions: [5, 10, 20]
     };
+
+    if (items.length <= pagination.initialPageSize) {
+      pagination = false;
+    }
 
     const sorting = {
       sort: {
@@ -118,13 +131,13 @@ export class Ccr extends Component {
       },
     };
 
-
     return (
       <EuiInMemoryTable
         columns={[
           {
             field: 'index',
             name: 'Index',
+            width: '200px',
             sortable: true,
             render: (index, { shards }) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
@@ -139,6 +152,7 @@ export class Ccr extends Component {
           },
           {
             field: 'follows',
+            width: '200px',
             sortable: true,
             name: 'Follows'
           },
@@ -150,31 +164,13 @@ export class Ccr extends Component {
           {
             field: 'syncLagTime',
             sortable: true,
-            name: 'Last fetch time (ms)',
-            render: syncLagTime => <span>{formatMetric(syncLagTime, 'time_since')} ago</span>
+            name: 'Last fetch time',
+            render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
           },
           {
             field: 'syncLagOps',
             sortable: true,
             name: 'Sync Lag (ops)',
-            render: (syncLagOps, data) => (
-              <span>
-                {syncLagOps}
-                &nbsp;&nbsp;
-                <EuiIconTip
-                  size="m"
-                  type="iInCircle"
-                  content={(
-                    <Fragment>
-                      <span>Leader lag: {data.syncLagOpsLeader}</span>
-                      <br/>
-                      <span>Follower lag: {data.syncLagOpsFollower}</span>
-                    </Fragment>
-                  )}
-                  position="right"
-                />
-              </span>
-            )
           },
           {
             field: 'error',

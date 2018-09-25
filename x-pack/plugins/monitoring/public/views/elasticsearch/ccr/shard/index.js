@@ -33,7 +33,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         $injector
       });
 
-      $scope.instance = `${get(pageData, 'stat.follower_index')} - ${get(pageData, 'stat.shard_id')}`;
+      $scope.instance = `Index: ${get(pageData, 'stat.follower_index')} Shard: ${get(pageData, 'stat.shard_id')}`;
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
