@@ -4,21 +4,18 @@ exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
 <div
   className="explorer-chart-label"
 >
-  <div
-    className="explorer-chart-label-fields"
-  >
-    <span>
-      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-       - 
-    </span>
-    <span
-      key="0"
-    >
-      nginx.access.remote_ip
-       
-      72.57.0.53
-    </span>
-  </div>
+  <ChartLabel
+    detectorLabel="high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)"
+    entityFields={
+      Array [
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        },
+      ]
+    }
+  />
   <EuiIconTip
     aria-label="Info"
     content={

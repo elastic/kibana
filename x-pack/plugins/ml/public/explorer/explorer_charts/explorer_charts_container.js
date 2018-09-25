@@ -7,11 +7,51 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiIconTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIconTip
+} from '@elastic/eui';
 
 import { getExploreSeriesLink } from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
+
+const LABEL_SPLIT_THRESHOLD = 100;
+
+function getLabelCharLength(detectorLabel, entityFields) {
+  return detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length;
+}
+
+function ChartLabelBadge({ entity }) {
+  return (
+    <EuiBadge color="hollow" className="ml-chart-label-badge">
+      {entity.fieldName} <strong>{entity.fieldValue}</strong>
+    </EuiBadge>
+  );
+}
+
+function ChartLabel({ detectorLabel, entityFields }) {
+  let labelSeparator = ' - ';
+  if (getLabelCharLength(detectorLabel, entityFields) > LABEL_SPLIT_THRESHOLD) {
+    labelSeparator = <br />;
+  }
+
+  return (
+    <div className="explorer-chart-label-fields">
+      {(detectorLabel.length > 0 && entityFields.length > 0) && (
+        <span>{detectorLabel} {labelSeparator} </span>
+      )}
+      {(detectorLabel.length > 0 && entityFields.length === 0) && (
+        <span>{detectorLabel}</span>
+      )}
+      {entityFields.map((entity, j) => {
+        return (
+          <span key={j}><ChartLabelBadge entity={entity} /> </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export function ExplorerChartsContainer({
   seriesToPlot,
@@ -36,19 +76,7 @@ export function ExplorerChartsContainer({
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
               <div className="explorer-chart-label">
-                <div className="explorer-chart-label-fields">
-                  {(detectorLabel.length > 0 && entityFields.length > 0) && (
-                    <span>{detectorLabel} - </span>
-                  )}
-                  {(detectorLabel.length > 0 && entityFields.length === 0) && (
-                    <span>{detectorLabel}</span>
-                  )}
-                  {entityFields.map((entity, j) => {
-                    return (
-                      <span key={j}>{entity.fieldName} {entity.fieldValue}</span>
-                    );
-                  })}
-                </div>
+                <ChartLabel detectorLabel={detectorLabel} entityFields={entityFields} />
                 <EuiIconTip content={<ExplorerChartTooltip {...series.infoTooltip} />} position="left" size="s" />
                 {tooManyBuckets && (
                   <EuiIconTip
