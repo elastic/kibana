@@ -1,4 +1,4 @@
-<div class="vegaEditor" ng-controller="VegaEditorController">
+<div class="vgaEditor" ng-controller="VegaEditorController">
   <div
     kbn-ui-ace-keyboard-mode
     ui-ace="{
@@ -15,6 +15,7 @@
     id="vegaAceEditor"
     ng-model="editorState.params.spec"
     data-test-subj="vega-editor"
+    class="vgaEditor__aceEditor"
   ></div>
 
   <div id="editor_actions">

@@ -61,7 +61,7 @@ export class TooltipHandler {
 
     const el = document.createElement('div');
     el.setAttribute('id', tooltipId);
-    el.classList.add('euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`);
+    el.classList.add('vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`);
 
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.

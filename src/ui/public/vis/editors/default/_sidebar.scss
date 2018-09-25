@@ -20,15 +20,6 @@
   }
 }
 
-// The following is necessary for the Vega editor to expand to full height of the editor panel
-.visEditorSidebar__options {
-  @include flex-parent(1, 1, auto);
-
-  > * {
-    @include flex-parent(1, 1, auto);
-  }
-}
-
 //
 // NAVIGATION
 //

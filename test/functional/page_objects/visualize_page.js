@@ -236,11 +236,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getVegaViewContainer() {
-      return await find.byCssSelector('div.vega-view-container');
+      return await find.byCssSelector('div.vgaVis__view');
     }
 
     async getVegaControlContainer() {
-      return await find.byCssSelector('div.vega-controls-container');
+      return await find.byCssSelector('div.vgaVis__controls');
     }
 
     async setFromTime(timeString) {
