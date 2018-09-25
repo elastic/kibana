@@ -84,7 +84,7 @@ export class BasicLoginForm extends Component<Props, State> {
       return (
         <Fragment>
           <EuiText color="danger">
-            <p>{this.state.message}</p>
+            <p data-test-subj="loginErrorMessage">{this.state.message}</p>
           </EuiText>
           <EuiSpacer />
         </Fragment>

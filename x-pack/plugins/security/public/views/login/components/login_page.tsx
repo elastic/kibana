@@ -48,7 +48,7 @@ export class LoginPage extends Component<Props, {}> {
 
     return (
       <I18nProvider>
-        <div className="loginWelcome loginForm">
+        <div className="loginWelcome login-form">
           <header className="loginWelcome__header">
             <div className={contentHeaderClasses}>
               <EuiSpacer size="xxl" />
