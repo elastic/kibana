@@ -8,9 +8,8 @@ import url from 'url';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { generatePngObservableFactory } from '../lib/generate_png';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from '../../../common/execute_job/compatibility_shim';
 
@@ -27,11 +26,9 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const generatePdfObservable = generatePdfObservableFactory(server);
+  const generatePngObservable = generatePngObservableFactory(server);
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
-
-  const serverBasePath = server.config().get('server.basePath');
 
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
@@ -43,27 +40,7 @@ function executeJobFn(server) {
     return { job, filteredHeaders };
   };
 
-  const getCustomLogo = async ({ job, filteredHeaders }) => {
-    const fakeRequest = {
-      headers: filteredHeaders,
-      // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
-      // We use the basePath from the saved job, which we'll have post spaces being implemented;
-      // or we use the server base path, which uses the default space
-      getBasePath: () => job.basePath || serverBasePath
-    };
-
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
-      savedObjectsClient
-    });
-
-    const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
-
-    return { job, filteredHeaders, logo };
-  };
-
-  const addForceNowQuerystring = async ({ job, filteredHeaders, logo }) => {
+  const addForceNowQuerystring = async ({ job, filteredHeaders }) => {
     const urls = job.urls.map(jobUrl => {
       if (!job.forceNow) {
         return jobUrl;
@@ -85,7 +62,7 @@ function executeJobFn(server) {
         hash: transformedHash
       });
     });
-    return { job, filteredHeaders, logo, urls };
+    return { job, filteredHeaders, urls };
   };
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
@@ -93,13 +70,12 @@ function executeJobFn(server) {
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),
-      mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+      mergeMap(({ job, filteredHeaders, urls }) => {
+        return generatePngObservable(urls, filteredHeaders, job.layout);
       }),
       map(buffer => ({
-        content_type: 'application/pdf',
+        content_type: 'image/png',
         content: buffer.toString('base64')
       }))
     );
