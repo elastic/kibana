@@ -22,9 +22,9 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 import { IFormats } from 'kbn-i18n-formats';
 
+import { Messages, PlainMessages } from '../messages';
 import { formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
-import { Messages, PlainMessages } from '../messages';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';

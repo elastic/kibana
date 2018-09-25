@@ -19,8 +19,9 @@
 
 import angular from 'angular';
 import 'angular-mocks';
-import { I18nProvider, I18nServiceType } from './provider';
+
 import * as i18n from '../core/i18n';
+import { I18nProvider, I18nServiceType } from './provider';
 
 angular.module('app', []).provider('i18n', I18nProvider);
 

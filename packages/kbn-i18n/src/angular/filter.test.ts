@@ -23,9 +23,10 @@ jest.mock('../core/i18n', () => ({
 
 import angular from 'angular';
 import 'angular-mocks';
-import { I18nProvider, I18nServiceType } from './provider';
-import { i18nFilter as angularI18nFilter } from './filter';
+
 import * as i18n from '../core/i18n';
+import { i18nFilter as angularI18nFilter } from './filter';
+import { I18nProvider, I18nServiceType } from './provider';
 
 angular
   .module('app', [])
