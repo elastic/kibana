@@ -6,12 +6,12 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 The spaces API allows people to manage their spaces within {kib}.
 
-* <<spaces-api-put>>
 * <<spaces-api-post>>
+* <<spaces-api-put>>
 * <<spaces-api-get>>
 * <<spaces-api-delete>>
 
-include::spaces-management/put.asciidoc[]
 include::spaces-management/post.asciidoc[]
+include::spaces-management/put.asciidoc[]
 include::spaces-management/get.asciidoc[]
 include::spaces-management/delete.asciidoc[]
