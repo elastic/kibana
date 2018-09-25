@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { WEEK } from '../../../services';
+
 import { validateId } from './validate_id';
 import { validateIndexPattern } from './validate_index_pattern';
 import { validateRollupIndex } from './validate_rollup_index';
 import { validateRollupCron } from './validate_rollup_cron';
 import { validateRollupPageSize } from './validate_rollup_page_size';
+import { validateRollupDelay } from './validate_rollup_delay';
 import { validateDateHistogramField } from './validate_date_histogram_field';
 import { validateDateHistogramInterval } from './validate_date_histogram_interval';
-import { validateDateHistogramDelay } from './validate_date_histogram_delay';
 import { validateHistogramInterval } from './validate_histogram_interval';
 import { validateMetrics } from './validate_metrics';
 
@@ -37,8 +39,16 @@ export const stepIdToStepConfigMap = {
       id: '',
       indexPattern: '',
       rollupIndex: '',
-      rollupCron: '',
+      // Every week on Saturday, at 00:00:00
+      rollupCron: '0 0 0 * * 7',
       rollupPageSize: '',
+      // Though the API doesn't require a delay, in many real-world cases, servers will go down for
+      // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
+      // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
+      rollupDelay: '1d',
+      cronFrequency: WEEK,
+      isAdvancedCronVisible: false,
+      fieldToPreferredValueMap: {},
     },
     fieldsValidator: fields => {
       const {
@@ -47,6 +57,7 @@ export const stepIdToStepConfigMap = {
         rollupIndex,
         rollupCron,
         rollupPageSize,
+        rollupDelay,
       } = fields;
 
       const errors = {
@@ -55,6 +66,7 @@ export const stepIdToStepConfigMap = {
         rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
+        rollupDelay: validateRollupDelay(rollupDelay),
       };
 
       return errors;
@@ -64,20 +76,17 @@ export const stepIdToStepConfigMap = {
     defaultFields: {
       dateHistogramField: null,
       dateHistogramInterval: null,
-      dateHistogramDelay: null,
       dateHistogramTimeZone: 'UTC',
     },
     fieldsValidator: fields => {
       const {
         dateHistogramField,
         dateHistogramInterval,
-        dateHistogramDelay,
       } = fields;
 
       const errors = {
         dateHistogramField: validateDateHistogramField(dateHistogramField),
         dateHistogramInterval: validateDateHistogramInterval(dateHistogramInterval),
-        dateHistogramDelay: validateDateHistogramDelay(dateHistogramDelay),
       };
 
       return errors;
