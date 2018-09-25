@@ -10,7 +10,7 @@ import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
-import { BeatsTableType, Table } from '../../components/table';
+import { AssignmentOptionList, BeatsTableType, Table } from '../../components/table';
 import { TagAssignment } from '../../components/tag';
 import { FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
@@ -21,10 +21,10 @@ interface BeatsPageProps {
 }
 
 interface BeatsPageState {
+  assignmentOptions: AssignmentOptionList;
   beats: CMPopulatedBeat[];
   notifications: any[];
   tableRef: any;
-  tags: any[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
@@ -34,11 +34,18 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     super(props);
 
     this.state = {
+      assignmentOptions: {
+        actionHandler: this.handleBeatsActions,
+        items: [],
+        renderAssignmentOptions: this.renderTagAssignment,
+        title: 'Assign Tags to Beats',
+        type: 'list',
+      },
       beats: [],
       notifications: [],
       tableRef: React.createRef(),
-      tags: null,
     };
+    this.loadTags();
   }
   public componentDidMount() {
     this.mounted = true;
@@ -56,13 +63,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     return (
       <div>
         <Table
-          actionHandler={this.handleBeatsActions}
-          assignmentOptions={this.state.tags}
-          assignmentTitle="Set tags"
+          assignmentOptions={this.state.assignmentOptions}
           items={sortBy(this.state.beats, 'id') || []}
           ref={this.state.tableRef}
-          showAssignmentOptions={true}
-          renderAssignmentOptions={this.renderTagAssignment}
           type={BeatsTableType}
         />
         <EuiGlobalToastList
@@ -131,9 +134,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
-    this.setState({
-      tags,
-    });
+    if (this.mounted) {
+      this.setState({
+        assignmentOptions: { ...this.state.assignmentOptions, items: tags },
+      });
+    }
   };
 
   private createBeatTagAssignments = (

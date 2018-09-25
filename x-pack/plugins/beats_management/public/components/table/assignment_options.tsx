@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { ActionButton } from './action_button';
+import { AssignmentList } from './assignment_list';
+import {
+  AssignmentOptionList,
+  AssignmentOptionSearch,
+  BaseAssignmentOptions,
+  isListOptions,
+  isSearchOptions,
+} from './assignment_option_types';
+import { AssignmentSearch } from './assignment_search';
 import { ControlDefinitions } from './table_type_configs';
 
 interface AssignmentOptionsProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
-  renderAssignmentOptions?: (item: any, key: string) => any;
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | BaseAssignmentOptions;
   controlDefinitions: ControlDefinitions;
   selectionCount: number;
-  actionHandler(action: string, payload?: any): void;
 }
 
 interface AssignmentOptionsState {
@@ -38,10 +44,8 @@ export class AssignmentOptions extends React.Component<
 
   public render() {
     const {
-      actionHandler,
       assignmentOptions,
-      renderAssignmentOptions,
-      assignmentTitle,
+      assignmentOptions: { actionHandler, title },
       controlDefinitions: { actions },
       selectionCount,
     } = this.props;
@@ -62,47 +66,37 @@ export class AssignmentOptions extends React.Component<
             }}
           />
         </EuiFlexItem>
-        {assignmentTitle && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButton
-                  color="primary"
-                  iconSide="right"
-                  iconType="arrowDown"
-                  onClick={() => {
-                    this.setState({
-                      isAssignmentPopoverVisible: true,
-                    });
-                    actionHandler('loadAssignmentOptions');
-                  }}
-                >
-                  {assignmentTitle}
-                </EuiButton>
-              }
-              closePopover={() => {
-                this.setState({ isAssignmentPopoverVisible: false });
-              }}
-              id="assignmentList"
-              isOpen={isAssignmentPopoverVisible}
-              panelPaddingSize="s"
-              withTitle
-            >
-              {assignmentOptions && renderAssignmentOptions ? (
-                // @ts-ignore direction prop not available on current typing
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  {assignmentOptions.map((options, index) =>
-                    renderAssignmentOptions(options, `${index}`)
-                  )}
-                </EuiFlexGroup>
-              ) : (
-                <div>
-                  <EuiLoadingSpinner size="m" /> Loading
-                </div>
-              )}
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButton
+                color="primary"
+                iconSide="right"
+                iconType="arrowDown"
+                onClick={() => {
+                  this.setState({
+                    isAssignmentPopoverVisible: true,
+                  });
+                  actionHandler('loadAssignmentOptions');
+                }}
+              >
+                {title}
+              </EuiButton>
+            }
+            closePopover={() => {
+              this.setState({ isAssignmentPopoverVisible: false });
+            }}
+            id="assignmentList"
+            isOpen={isAssignmentPopoverVisible}
+            panelPaddingSize="s"
+            withTitle
+          >
+            {isListOptions(assignmentOptions) && (
+              <AssignmentList assignmentOptions={assignmentOptions} />
+            )}
+            {isSearchOptions(assignmentOptions) && <AssignmentSearch options={assignmentOptions} />}
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

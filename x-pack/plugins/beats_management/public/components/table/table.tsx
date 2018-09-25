@@ -12,17 +12,18 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { TABLE_CONFIG } from '../../../common/constants';
+import {
+  AssignmentOptionList,
+  AssignmentOptionSearch,
+  BaseAssignmentOptions,
+} from './assignment_option_types';
 import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
 interface TableProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
+  assignmentOptions: AssignmentOptionList | AssignmentOptionSearch | BaseAssignmentOptions;
   items: any[];
-  renderAssignmentOptions?: (item: any, key: string) => any;
-  showAssignmentOptions: boolean;
   type: TableType;
-  actionHandler(action: string, payload?: any): void;
 }
 
 interface TableState {
@@ -53,15 +54,7 @@ export class Table extends React.Component<TableProps, TableState> {
   };
 
   public render() {
-    const {
-      actionHandler,
-      assignmentOptions,
-      renderAssignmentOptions,
-      assignmentTitle,
-      items,
-      showAssignmentOptions,
-      type,
-    } = this.props;
+    const { assignmentOptions, items, type } = this.props;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -78,13 +71,9 @@ export class Table extends React.Component<TableProps, TableState> {
     return (
       <TableContainer>
         <ControlBar
-          actionHandler={actionHandler}
           assignmentOptions={assignmentOptions}
-          renderAssignmentOptions={renderAssignmentOptions}
-          assignmentTitle={assignmentTitle}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
-          showAssignmentOptions={showAssignmentOptions}
         />
         <EuiSpacer size="m" />
         <EuiInMemoryTable

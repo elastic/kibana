@@ -7,6 +7,12 @@
 export { Table } from './table';
 export { ControlBar } from './controls';
 export {
+  AssignmentOptionSearch,
+  AssignmentOptionList,
+  AssignmentOptionsComponent,
+  BaseAssignmentOptions,
+} from './assignment_option_types';
+export {
   ActionDefinition,
   BeatDetailTagsTable,
   BeatsTableType,

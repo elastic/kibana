@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
+import { AssignmentOptionsComponent, BaseAssignmentOptions } from '../../components/table';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/lib';
 
@@ -19,6 +20,8 @@ interface BeatTagsPageProps {
 }
 
 interface BeatTagsPageState {
+  assignmentOptions: BaseAssignmentOptions;
+  mounted: boolean;
   beat: CMPopulatedBeat | null;
   notifications: any[];
 }
@@ -29,6 +32,12 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     super(props);
 
     this.state = {
+      assignmentOptions: {
+        actionHandler: this.handleTableAction,
+        title: 'Manage Tags',
+        type: AssignmentOptionsComponent.Primary,
+      },
+      mounted: false,
       beat: null,
       notifications: [],
     };
@@ -38,17 +47,22 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     await this.getBeat();
   }
 
+  public componentDidMount() {
+    this.setState({ mounted: true });
+  }
+
+  public componentWillUnmount() {
+    this.setState({ mounted: false });
+  }
+
   public render() {
     const { beat } = this.state;
     return (
       <div>
         <Table
-          actionHandler={this.handleTableAction}
-          assignmentOptions={null}
-          assignmentTitle={null}
+          assignmentOptions={this.state.assignmentOptions}
           items={beat ? beat.full_tags : []}
           ref={this.tableRef}
-          showAssignmentOptions={false}
           type={BeatDetailTagsTable}
         />
         <EuiGlobalToastList
