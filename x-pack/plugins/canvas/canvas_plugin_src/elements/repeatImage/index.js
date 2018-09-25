@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Image Repeat',
+  displayName: 'Image repeat',
   help: 'Repeats an image N times',
   image: header,
   expression: `filters
