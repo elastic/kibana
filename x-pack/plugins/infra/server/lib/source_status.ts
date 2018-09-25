@@ -39,9 +39,23 @@ export class InfraSourceStatus {
     const hasAlias = await this.adapter.hasAlias(request, sourceConfiguration.metricAlias);
     return hasAlias;
   }
+  public async hasLogIndices(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
+    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const hasIndices = await this.adapter.hasIndices(request, sourceConfiguration.logAlias);
+    return hasIndices;
+  }
+  public async hasMetricIndices(
+    request: InfraFrameworkRequest,
+    sourceId: string
+  ): Promise<boolean> {
+    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const hasIndices = await this.adapter.hasIndices(request, sourceConfiguration.metricAlias);
+    return hasIndices;
+  }
 }
 
 export interface InfraSourceStatusAdapter {
   getIndexNames(request: InfraFrameworkRequest, aliasName: string): Promise<string[]>;
   hasAlias(request: InfraFrameworkRequest, aliasName: string): Promise<boolean>;
+  hasIndices(request: InfraFrameworkRequest, indexNames: string): Promise<boolean>;
 }

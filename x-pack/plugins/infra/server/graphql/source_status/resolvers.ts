@@ -17,6 +17,12 @@ export type InfraSourceStatusMetricAliasExistsResolver = InfraResolverOf<
   InfraContext
 >;
 
+export type InfraSourceStatusMetricIndicesExistResolver = InfraResolverOf<
+  InfraSourceStatusResolvers.MetricIndicesExistResolver,
+  InfraResolvedResult<QuerySourceResolver>,
+  InfraContext
+>;
+
 export type InfraSourceStatusMetricIndicesResolver = InfraResolverOf<
   InfraSourceStatusResolvers.MetricIndicesResolver,
   InfraResolvedResult<QuerySourceResolver>,
@@ -25,6 +31,12 @@ export type InfraSourceStatusMetricIndicesResolver = InfraResolverOf<
 
 export type InfraSourceStatusLogAliasExistsResolver = InfraResolverOf<
   InfraSourceStatusResolvers.LogAliasExistsResolver,
+  InfraResolvedResult<QuerySourceResolver>,
+  InfraContext
+>;
+
+export type InfraSourceStatusLogIndicesExistResolver = InfraResolverOf<
+  InfraSourceStatusResolvers.LogIndicesExistResolver,
   InfraResolvedResult<QuerySourceResolver>,
   InfraContext
 >;
@@ -47,8 +59,10 @@ export const createSourceStatusResolvers = (libs: {
 }): {
   InfraSourceStatus: {
     metricAliasExists: InfraSourceStatusMetricAliasExistsResolver;
+    metricIndicesExist: InfraSourceStatusMetricIndicesExistResolver;
     metricIndices: InfraSourceStatusMetricIndicesResolver;
     logAliasExists: InfraSourceStatusLogAliasExistsResolver;
+    logIndicesExist: InfraSourceStatusLogIndicesExistResolver;
     logIndices: InfraSourceStatusLogIndicesResolver;
     indexFields: InfraSourceStatusIndexFieldsResolver;
   };
@@ -57,11 +71,17 @@ export const createSourceStatusResolvers = (libs: {
     async metricAliasExists(source, args, { req }) {
       return await libs.sourceStatus.hasMetricAlias(req, source.id);
     },
+    async metricIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasMetricIndices(req, source.id);
+    },
     async metricIndices(source, args, { req }) {
       return await libs.sourceStatus.getMetricIndexNames(req, source.id);
     },
     async logAliasExists(source, args, { req }) {
       return await libs.sourceStatus.hasLogAlias(req, source.id);
+    },
+    async logIndicesExist(source, args, { req }) {
+      return await libs.sourceStatus.hasLogIndices(req, source.id);
     },
     async logIndices(source, args, { req }) {
       return await libs.sourceStatus.getLogIndexNames(req, source.id);

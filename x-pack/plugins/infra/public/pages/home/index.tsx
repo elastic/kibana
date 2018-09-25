@@ -6,44 +6,40 @@
 
 import React from 'react';
 
-import { LogsPageContent } from './page_content';
-import { LogsToolbar } from './toolbar';
+import { HomePageContent } from './page_content';
+import { HomeToolbar } from './toolbar';
 
 import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
-import { WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
-import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
-import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
-import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
+import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
+import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { WithSource } from '../../containers/with_source';
 
-export class LogsPage extends React.Component {
+export class HomePage extends React.PureComponent {
   public render() {
     return (
       <ColumnarPage>
         <WithSource>
-          {({ logIndicesExist }) =>
-            logIndicesExist || logIndicesExist === null ? (
+          {({ metricIndicesExist }) =>
+            metricIndicesExist || metricIndicesExist === null ? (
               <>
-                <WithLogFilterUrlState />
-                <WithLogPositionUrlState />
-                <WithLogMinimapUrlState />
-                <WithLogTextviewUrlState />
-                <Header breadcrumbs={[{ text: 'Logs' }]} />
-                <LogsToolbar />
-                <LogsPageContent />
+                <WithWaffleTimeUrlState />
+                <WithWaffleFilterUrlState />
+                <Header />
+                <HomeToolbar />
+                <HomePageContent />
               </>
             ) : (
               <WithKibanaChrome>
                 {({ basePath }) => (
                   <EmptyPage
-                    title="Looks like you don't have any logging indices."
+                    title="Looks like you don't have any metrics indices."
                     message="Let's add some!"
                     actionLabel="Setup Instructions"
-                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
+                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                   />
                 )}
               </WithKibanaChrome>

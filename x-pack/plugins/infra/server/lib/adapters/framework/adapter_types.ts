@@ -43,9 +43,9 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<boolean>;
   callWithRequest(
     req: InfraFrameworkRequest,
-    method: 'indices.getAlias',
+    method: 'indices.getAlias' | 'indices.get',
     options?: object
-  ): Promise<InfraDatabaseGetAliasResponse>;
+  ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     req: InfraFrameworkRequest,
     method: string,
@@ -121,7 +121,7 @@ export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
   fields: InfraFieldsResponse;
 }
 
-export interface InfraDatabaseGetAliasResponse {
+export interface InfraDatabaseGetIndicesResponse {
   [indexName: string]: {
     aliases: {
       [aliasName: string]: any;
@@ -184,7 +184,7 @@ interface InfraFrameworkIndexFieldDescriptor {
 
 export interface InfraFrameworkIndexPatternsService {
   getFieldsForWildcard(options: {
-    pattern: string[];
+    pattern: string | string[];
   }): Promise<InfraFrameworkIndexFieldDescriptor[]>;
 }
 

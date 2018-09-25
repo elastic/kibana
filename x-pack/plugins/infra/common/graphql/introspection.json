@@ -579,6 +579,32 @@
             "deprecationReason": null
           },
           {
+            "name": "metricIndicesExist",
+            "description":
+              "Whether the configured alias or wildcard pattern resolve to any metric indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "logIndicesExist",
+            "description":
+              "Whether the configured alias or wildcard pattern resolve to any log indices",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Boolean", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metricIndices",
             "description": "The list of indices in the metric alias",
             "args": [],

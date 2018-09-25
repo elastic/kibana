@@ -38,6 +38,16 @@ export const selectSourceStatus = createSelector(
   source => (source ? source.status : null)
 );
 
+export const selectSourceLogIndicesExist = createSelector(
+  selectSourceStatus,
+  sourceStatus => (sourceStatus ? sourceStatus.logIndicesExist : null)
+);
+
+export const selectSourceMetricIndicesExist = createSelector(
+  selectSourceStatus,
+  sourceStatus => (sourceStatus ? sourceStatus.metricIndicesExist : null)
+);
+
 export const selectSourceIndexFields = createSelector(
   selectSourceStatus,
   sourceStatus => (sourceStatus ? sourceStatus.indexFields : [])
