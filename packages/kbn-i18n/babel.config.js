@@ -17,12 +17,41 @@
  * under the License.
  */
 
-module.exports = {
-  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
-  presets: ['@babel/preset-react', '@babel/typescript'],
-  env: {
-    web: require('@kbn/babel-preset/webpack_preset'),
-    node: require('@kbn/babel-preset/node_preset'),
-  },
-  ignore: ['**/*.test.ts', '**/*.test.tsx'],
+module.exports = function(api) {
+  api.cache(true);
+
+  return {
+    plugins: [
+      '@babel/plugin-proposal-class-properties',
+      '@babel/plugin-proposal-object-rest-spread',
+    ],
+    presets: ['@babel/preset-react', '@babel/typescript'],
+    env: {
+      web: {
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              targets: {
+                browsers: ['last 2 versions', '> 5%', 'Safari 7'],
+              },
+            },
+          ],
+        ],
+      },
+      node: {
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              targets: {
+                node: 'current',
+              },
+            },
+          ],
+        ],
+      },
+    },
+    ignore: ['**/*.test.ts', '**/*.test.tsx'],
+  };
 };
