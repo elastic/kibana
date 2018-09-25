@@ -11,7 +11,7 @@ Reporting tests have their own top level test folder because:
 
   ### Running the tests
 
-  There is more information on running x-pack tests [here](../README.md#running-functional-tests). Similar to running the API tests, you need to specify a reporting configuration file.  Reporting currently has four configuration files you can point to:
+  There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file.  Reporting currently has four configuration files you can point to:
   - test/reporting/configs/chromium_api.js 
   - test/reporting/configs/phantom_api.js 
   - test/reporting/configs/chromium_functional.js 
@@ -124,7 +124,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 
 Now generate the new data. Injest new data, create new visualizations, create new dashboards using those visualizations. All the fun stuff that you may want to use in your tests.
 
-*Note* This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in [../../test/functional/apps/dashboard/_embedddable_rendering.js](../../test/functional/apps/dashboard/_embedddable_rendering.j).  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in [../../test/functional/apps/dashboard/_dashboard_filtering.js](../../test/functional/apps/dashboard/_dashboard_filtering.j).
+*Note* This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_embedddable_rendering.js.  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_dashboard_filtering.js
 
 The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
 
