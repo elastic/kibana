@@ -17,16 +17,34 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import io from 'socket.io-client';
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { pluginsLoadingState } from './plugins_loading_state';
+class PluginsLoadingState {
+  constructor() {
+    this.states = {};
+    this.promises = [];
+  }
 
-const basePath = chrome.getBasePath();
-export const socket = io(undefined, { path: `${basePath}/socket.io` });
+  setLoading() {
+    const id = '';
+    this.states[id] = true;
+    return id;
+  }
 
-socket.on('getFunctionList', () => {
-  pluginsLoadingState.loadingComplete().then(() => {
-    socket.emit('functionList', functionsRegistry.toJS());
-  });
-});
+  setComplete(id) {
+    delete this.states[id];
+    if (!Object.keys(this.states).length) {
+      this.promises.forEach(resolve => (resolve()));
+    }
+  }
+
+  loadingComplete() {
+    return new Promise(resolve => {
+      if (Object.keys(this.states).length) {
+        this.promises.push(resolve);
+      } else {
+        resolve();
+      }
+    });
+  }
+}
+
+export const pluginsLoadingState = new PluginsLoadingState();

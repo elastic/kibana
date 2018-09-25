@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pluginsLoadingState } from 'plugins/interpreter/plugins_loading_state';
 import { loadBrowserPlugins } from './load_browser_plugins';
 
-loadBrowserPlugins();
+const identifier = pluginsLoadingState.setLoading();
+loadBrowserPlugins().then(() => {
+  pluginsLoadingState.setComplete(identifier);
+});
