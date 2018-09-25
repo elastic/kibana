@@ -28,11 +28,11 @@ export const WithWaffleMetrics = asChildFunctionRenderer(withWaffleMetrics);
  * Url State
  */
 
-interface WaffleTimeUrlState {
+interface WaffleMetricsUrlState {
   metrics?: ReturnType<typeof waffleMetricsSelectors.selectMetrics>;
 }
 
-export const WithWaffleTimeUrlState = () => (
+export const WithWaffleMetricsUrlState = () => (
   <WithWaffleMetrics>
     {({ changeMetrics, urlState }) => (
       <UrlStateContainer
@@ -46,9 +46,7 @@ export const WithWaffleTimeUrlState = () => (
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState) {
-            changeMetrics(
-              initialUrlState.metrics ? initialUrlState.metrics : initialWaffleMetricsState.metrics
-            );
+            changeMetrics(initialUrlState.metrics || initialWaffleMetricsState.metrics);
           }
         }}
       />
@@ -56,7 +54,7 @@ export const WithWaffleTimeUrlState = () => (
   </WithWaffleMetrics>
 );
 
-const mapToUrlState = (value: any): WaffleTimeUrlState | undefined =>
+const mapToUrlState = (value: any): WaffleMetricsUrlState | undefined =>
   value
     ? {
         metrics: mapToMetricsUrlState(value.metrics),
