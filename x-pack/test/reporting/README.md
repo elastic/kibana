@@ -56,7 +56,7 @@ sudo apt-get install imagemagick ghostscript poppler-utils
 
 The functional version of the reporting tests create a few pdf reports and do a snapshot comparison against a couple baselines.  The baseline images are stored in `./functional/reports/baseline`.
 
-*Note:* The snapshot comparisons use a threshold due to expected visual difference when running on different browsers and different Operating Systems. This threshold is currently very high because of differences between Chromium and Phantom versions, and also because of some slight bugs with the Phantom version. The bug is [here](https://github.com/elastic/kibana/issues/21485), the issue tracking this very high threshold is [here](https://github.com/elastic/kibana/issues/21486). Once we remove Phantom support in 7.0, we can drop this threshold and hopefully catch more bugs!
+**Note:** The snapshot comparisons use a threshold due to expected visual difference when running on different browsers and different Operating Systems. This threshold is currently very high because of differences between Chromium and Phantom versions, and also because of some slight bugs with the Phantom version. The bug is [here](https://github.com/elastic/kibana/issues/21485), the issue tracking this very high threshold is [here](https://github.com/elastic/kibana/issues/21486). Once we remove Phantom support in 7.0, we can drop this threshold and hopefully catch more bugs!
 
 #### Updating the baselines
 
@@ -74,7 +74,7 @@ node scripts/functional_tests_server.js --config test/reporting/configs/chromium
   4. After manually verifying the new reports in the `session` folder, copy them into [./functional/reports/baseline/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/baseline)
   5. Create a new PR with the new snapshots in the baseline folder.
 
-*Note* Dashboard has some snapshot testing too, in `_dashboard_snapshots.js`. This test watches for a command line flag `--updateBaselines` which automates updating the baselines. Probably worthwhile to do some similar here in the long run.
+**Note:** Dashboard has some snapshot testing too, in `_dashboard_snapshots.js`. This test watches for a command line flag `--updateBaselines` which automates updating the baselines. Probably worthwhile to do some similar here in the long run.
 
   ### Adding a new BWC test
 
@@ -96,7 +96,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 ```
 ^^ That loads the data indices.
 
-*Note:* Depending on your kibana.yml configuration, you may need to adjust the username, pw, and port in the urls above.
+**Note:** Depending on your kibana.yml configuration, you may need to adjust the username, pw, and port in the urls above.
 
 5. Navigate to Kibana in the browser (`http://localhost:5601`)
 6. Log in, pick any index to be the default to get page the management screen (doesn’t matter)
@@ -111,7 +111,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 11. Write your new tests in [api/bwc_generation_urls.js](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/api/bwc_generation_urls.js)
 12. Run tests via the mechanism above.
 
-Note: We may at some point wish to push most of these tests into an integration suite, as testing BWC of urls generated in every single minor, especially if there were not notable changes, may be overkill, especially given the time they add to the ci.
+**Note:** We may at some point wish to push most of these tests into an integration suite, as testing BWC of urls generated in every single minor, especially if there were not notable changes, may be overkill, especially given the time they add to the ci.
 
 ### Expanding test coverage by including more data
 
@@ -136,13 +136,13 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 ```
 ^^ That loads the data indices.
 
-*Note*: Your es-url parameter might be different, but those are the default ports if running via `yarn start` and `yarn es snapshot --license trial`.
+**Note:** Your es-url parameter might be different, but those are the default ports if running via `yarn start` and `yarn es snapshot --license trial`.
 
 3. Now generate the new data, create new index patterns, create new visualizations, and create new dashboards using those visualizations. All the fun stuff that you may want to use in your tests.
 
-*Note:* This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_embedddable_rendering.js.  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_dashboard_filtering.js
+**Note:** This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_embedddable_rendering.js.  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_dashboard_filtering.js
 
-*Note:* The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
+**Note:** The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
 
 4. After adding more visualizations to a test dashboard, update tests if neccessary, update snapshots, then **save the new archives**!
  ```
