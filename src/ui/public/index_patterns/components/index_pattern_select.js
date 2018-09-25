@@ -20,14 +20,30 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
-import {
-  EuiFormRow,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-class IndexPatternSelectUi extends Component {
+const getIndexPatterns = async (search) => {
+  const resp = await chrome.getSavedObjectsClient().find({
+    type: 'index-pattern',
+    fields: ['title'],
+    search: `${search}*`,
+    search_fields: ['title'],
+    perPage: 100
+  });
+  return resp.savedObjects;
+};
+
+const getIndexPatternTitle = async (indexPatternId) => {
+  const savedObject = await chrome.getSavedObjectsClient().get('index-pattern', indexPatternId);
+  if (savedObject.error) {
+    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
+  }
+  return savedObject.attributes.title;
+};
+
+export class IndexPatternSelect extends Component {
   constructor(props) {
     super(props);
 
@@ -38,16 +54,13 @@ class IndexPatternSelectUi extends Component {
     };
   }
 
-  componentWillMount() {
-    this._isMounted = true;
-  }
-
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFetch.cancel();
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.fetchOptions();
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
@@ -66,9 +79,9 @@ class IndexPatternSelectUi extends Component {
       return;
     }
 
-    let indexPattern;
+    let indexPatternTitle;
     try {
-      indexPattern = await this.props.getIndexPattern(indexPatternId);
+      indexPatternTitle = await getIndexPatternTitle(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -80,14 +93,14 @@ class IndexPatternSelectUi extends Component {
 
     this.setState({
       selectedIndexPattern: {
-        value: indexPattern.id,
-        label: indexPattern.title,
+        value: indexPatternId,
+        label: indexPatternTitle,
       }
     });
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
-    const indexPatternSavedObjects = await this.props.getIndexPatterns(searchValue);
+    const savedObjects = await getIndexPatterns(searchValue);
 
     if (!this._isMounted) {
       return;
@@ -96,7 +109,7 @@ class IndexPatternSelectUi extends Component {
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
-      const options = indexPatternSavedObjects.map((indexPatternSavedObject) => {
+      const options = savedObjects.map((indexPatternSavedObject) => {
         return {
           label: indexPatternSavedObject.attributes.title,
           value: indexPatternSavedObject.id
@@ -121,45 +134,30 @@ class IndexPatternSelectUi extends Component {
   }
 
   render() {
-    const selectId = `indexPatternSelect-${this.props.controlIndex}`;
-    const selectedOptions = [];
-    const { intl } = this.props;
-    if (this.state.selectedIndexPattern) {
-      selectedOptions.push(this.state.selectedIndexPattern);
-    }
+    const {
+      onChange, // eslint-disable-line no-unused-vars
+      indexPatternId, // eslint-disable-line no-unused-vars
+      placeholder,
+      ...rest
+    } = this.props;
 
     return (
-      <EuiFormRow
-        id={selectId}
-        label={intl.formatMessage({
-          id: 'inputControl.editor.indexPatternSelect.patternLabel',
-          defaultMessage: 'Index Pattern'
-        })}
-      >
-        <EuiComboBox
-          placeholder={intl.formatMessage({
-            id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
-            defaultMessage: 'Select index pattern...'
-          })}
-          singleSelection={true}
-          isLoading={this.state.isLoading}
-          onSearchChange={this.fetchOptions}
-          options={this.state.options}
-          selectedOptions={selectedOptions}
-          onChange={this.onChange}
-          data-test-subj={selectId}
-        />
-      </EuiFormRow>
+      <EuiComboBox
+        placeholder={placeholder}
+        singleSelection={true}
+        isLoading={this.state.isLoading}
+        onSearchChange={this.fetchOptions}
+        options={this.state.options}
+        selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
+        onChange={this.onChange}
+        {...rest}
+      />
     );
   }
 }
 
-IndexPatternSelectUi.propTypes = {
-  getIndexPatterns: PropTypes.func.isRequired,
-  getIndexPattern: PropTypes.func.isRequired,
+IndexPatternSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
-  controlIndex: PropTypes.number.isRequired,
+  placeholder: PropTypes.string,
 };
-
-export const IndexPatternSelect = injectI18n(IndexPatternSelectUi);

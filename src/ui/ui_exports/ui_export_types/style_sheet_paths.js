@@ -25,7 +25,7 @@ const OK_EXTNAMES = ['.css', '.scss'];
 
 function normalize(localPath, type, pluginSpec) {
   const pluginId = pluginSpec.getId();
-  const publicDir = pluginSpec.getPublicDir();
+  const publicDir = path.normalize(pluginSpec.getPublicDir());
   const extname = path.extname(localPath);
 
   if (!OK_EXTNAMES.includes(extname)) {
@@ -40,7 +40,7 @@ function normalize(localPath, type, pluginSpec) {
     );
   }
 
-  if (!localPath.startsWith(publicDir)) {
+  if (!path.normalize(localPath).startsWith(publicDir)) {
     throw new Error(
       `[plugin:${pluginId}] uiExports.styleSheetPaths must be child of publicDir [${publicDir}]`
     );
