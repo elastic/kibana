@@ -18,7 +18,7 @@
  */
 
 import { mapValues, keys } from 'lodash';
-import { normalizeType } from '../../../../../../packages/kbn-interpreter/server/normalize_type';
+import { normalizeType } from '@kbn/interpreter/server';
 
 export function getESFieldTypes(index, fields, elasticsearchClient) {
   const config = {

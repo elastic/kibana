@@ -18,13 +18,13 @@
  */
 
 import socket from 'socket.io';
-import { createHandlers } from '../../../../../packages/kbn-interpreter/server/create_handlers';
-import { socketInterpreterProvider } from '../../../../../packages/kbn-interpreter/common/interpreter/socket_interpret';
-import { serializeProvider } from '../../../../../packages/kbn-interpreter/common/lib/serialize';
-import { functionsRegistry } from '../../../../../packages/kbn-interpreter/common/lib/functions_registry';
-import { typesRegistry } from '../../../../../packages/kbn-interpreter/common/lib/types_registry';
-import { loadServerPlugins } from '../../../../../x-pack/plugins/canvas/server/lib/load_server_plugins';
-import { getAuthHeader } from './get_auth/get_auth_header';
+import { createHandlers } from '@kbn/interpreter/server';
+import { socketInterpreterProvider } from '@kbn/interpreter/common/interpreter/socket_interpret';
+import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
+import { getAuthHeader } from '../lib/get_auth_header';
+import { loadServerPlugins } from '../lib/load_server_plugins';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });

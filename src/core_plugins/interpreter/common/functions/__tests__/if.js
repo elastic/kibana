@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { ifFn } from '../if';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('if', () => {
   const fn = functionWrapper(ifFn);

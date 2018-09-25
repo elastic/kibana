@@ -5,7 +5,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { safeElementFromExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
+import { safeElementFromExpression } from '@kbn/interpreter/common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 

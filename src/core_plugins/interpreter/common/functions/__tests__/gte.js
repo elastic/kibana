@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { gte } from '../gte';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('gte', () => {
   const fn = functionWrapper(gte);

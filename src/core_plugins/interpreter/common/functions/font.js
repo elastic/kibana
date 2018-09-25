@@ -18,7 +18,7 @@
  */
 
 import inlineStyle from 'inline-style';
-import { openSans } from '../../../../../packages/kbn-interpreter/common/lib/fonts';
+import { openSans } from '@kbn/interpreter/common/lib/fonts';
 
 export const font = () => ({
   name: 'font',

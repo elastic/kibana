@@ -7,7 +7,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { get, set } from 'lodash';
-import { fromExpression, toExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
+import { fromExpression, toExpression } from '@kbn/interpreter/common/lib/ast';
 import { TimeFilter } from './components/time_filter';
 
 export const timeFilter = () => ({

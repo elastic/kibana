@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { elasticLogo } from '../../../../../x-pack/plugins/canvas/canvas_plugin_src/lib/elastic_logo';
+import { elasticLogo } from '../../elastic_logo';
 
 export const fontStyle = {
   type: 'style',

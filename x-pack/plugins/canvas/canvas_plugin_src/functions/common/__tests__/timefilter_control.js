@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 import { timefilterControl } from '../timefilterControl';
-import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
 
 describe('timefilterControl', () => {
   const fn = functionWrapper(timefilterControl);

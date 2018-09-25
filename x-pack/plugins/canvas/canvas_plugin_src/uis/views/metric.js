@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { openSans } from '../../../../../../packages/kbn-interpreter/common/lib/fonts';
+import { openSans } from '@kbn/interpreter/common/lib/fonts';
 
 export const metric = () => ({
   name: 'metric',
