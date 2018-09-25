@@ -27,7 +27,7 @@ export function apmInstancesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -40,13 +40,12 @@ export function apmInstancesRoute(server) {
           getApms(req, apmIndexPattern, clusterUuid),
         ]);
 
-        reply({
+        return {
           stats,
           apms
-        });
-
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });
