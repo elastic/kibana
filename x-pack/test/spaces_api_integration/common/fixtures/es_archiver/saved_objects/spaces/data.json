@@ -96,8 +96,8 @@
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "dashboard": {
-        "description": "Space 1",
-        "title": "This is the second test space"
+        "description": "Default Space",
+        "title": "This is the default test space"
       }
     }
   }
