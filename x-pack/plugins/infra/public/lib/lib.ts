@@ -17,12 +17,9 @@ import {
   InfraPathInput,
   InfraTimerangeInput,
 } from '../../common/graphql/types';
-import { InfraFieldsDomain } from './domains/fields_domain';
 
 export interface InfraFrontendLibs {
   framework: InfraFrameworkAdapter;
-  fields: InfraFieldsDomain;
-  api: InfraApiAdapter;
   apolloClient: InfraApolloClient;
   observableApi: InfraObservableApi;
 }
@@ -151,6 +148,10 @@ export interface InfraWaffleMapStepLegend {
 export interface InfraWaffleMapGradientLegend {
   type: InfraWaffleMapLegendMode.gradient;
   rules: InfraWaffleMapGradientRule[];
+  boundsOverride?: {
+    min: number;
+    max: number;
+  };
 }
 
 export type InfraWaffleMapLegend = InfraWaffleMapStepLegend | InfraWaffleMapGradientLegend;

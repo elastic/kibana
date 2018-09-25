@@ -20,7 +20,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     logAlias: Joi.string(),
     fields: Joi.object({
       container: Joi.string(),
-      hostname: Joi.string(),
+      host: Joi.string(),
       message: Joi.array()
         .items(Joi.string())
         .single(),

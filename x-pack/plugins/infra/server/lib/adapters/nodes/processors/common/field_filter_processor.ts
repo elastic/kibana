@@ -6,19 +6,10 @@
 
 import { cloneDeep, set } from 'lodash';
 
-import {
-  InfraESSearchBody,
-  InfraProcesorRequestOptions,
-  InfraProcessor,
-  InfraProcessorChainFn,
-  InfraProcessorTransformer,
-} from '../../adapter_types';
+import { InfraESSearchBody, InfraProcesorRequestOptions } from '../../adapter_types';
 
-export const fieldsFilterProcessor: InfraProcessor<
-  InfraProcesorRequestOptions,
-  InfraESSearchBody
-> = (options: InfraProcesorRequestOptions): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
+export const fieldsFilterProcessor = (options: InfraProcesorRequestOptions) => {
+  return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     /*
      TODO: Need to add the filter logic to find all the fields the user is requesting
@@ -28,6 +19,6 @@ export const fieldsFilterProcessor: InfraProcessor<
      get filter out natually.
      */
     set(result, 'aggs.waffle.filter.match_all', {});
-    return next(result);
+    return result;
   };
 };

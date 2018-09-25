@@ -17,10 +17,8 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
-import { InfraAxiosApiAdapter } from '../adapters/api/axios_api_adapter';
 import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
-import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraFrontendLibs } from '../lib';
 
 export function compose(): InfraFrontendLibs {
@@ -30,7 +28,6 @@ export function compose(): InfraFrontendLibs {
     xsrfToken: chrome.getXsrfToken(),
   });
   const framework = new InfraKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
-  const api = new InfraAxiosApiAdapter({ framework });
   const typeDefs = `
   Query {}
 `;
@@ -54,9 +51,7 @@ export function compose(): InfraFrontendLibs {
   });
 
   const libs: InfraFrontendLibs = {
-    api,
     apolloClient,
-    fields: new InfraFieldsDomain(api, framework),
     framework,
     observableApi,
   };

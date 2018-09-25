@@ -20,7 +20,7 @@ describe('the InfraConfigurationSourcesAdapter', () => {
         logAlias: expect.any(String),
         fields: {
           container: expect.any(String),
-          hostname: expect.any(String),
+          host: expect.any(String),
           message: expect.arrayContaining([expect.any(String)]),
           pod: expect.any(String),
           tiebreaker: expect.any(String),
@@ -68,7 +68,7 @@ describe('the InfraConfigurationSourcesAdapter', () => {
         logAlias: 'LOG_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
-          hostname: expect.any(String),
+          host: expect.any(String),
           message: expect.arrayContaining([expect.any(String)]),
           pod: expect.any(String),
           tiebreaker: expect.any(String),
@@ -99,7 +99,7 @@ describe('the InfraConfigurationSourcesAdapter', () => {
         logAlias: 'LOG_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
-          hostname: expect.any(String),
+          host: expect.any(String),
           message: expect.arrayContaining([expect.any(String)]),
           pod: expect.any(String),
           tiebreaker: expect.any(String),

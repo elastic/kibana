@@ -86,7 +86,7 @@ export interface InfraESSearchBody {
 export type InfraESMSearchBody = InfraESSearchBody | InfraESMSearchHeader;
 
 export interface InfraNodeRequestOptions {
-  nodeField: string;
+  nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   groupBy: InfraPathInput[];
@@ -98,7 +98,12 @@ export enum InfraNodesKey {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
-  services = 'services',
+}
+
+export enum InfraNodeType {
+  host = 'host',
+  pod = 'pod',
+  container = 'container',
 }
 
 export interface InfraNodesAggregations {
@@ -118,6 +123,7 @@ export type InfraProcessorChainFn<T> = (
 export type InfraProcessor<O, T> = (options: O) => InfraProcessorChainFn<T>;
 
 export interface InfraProcesorRequestOptions {
+  nodeType: InfraNodeType;
   nodeOptions: InfraNodeRequestOptions;
   partitionId: number;
   numberOfPartitions: number;
@@ -143,7 +149,7 @@ export interface InfraGroupByTerms {
 }
 
 export interface InfraBucketWithKey {
-  key: string;
+  key: string | number;
   doc_count: number;
 }
 
@@ -153,7 +159,11 @@ export interface InfraBucketWithAggs {
   };
 }
 
-export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey;
+export interface InfraBucketWithValues {
+  [name: string]: { value: number };
+}
+
+export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey & InfraBucketWithValues;
 
 export interface InfraGroupWithNodes {
   name: string;
@@ -180,3 +190,37 @@ export interface InfraNodesOnlyResponse {
   total: number;
   nodes: InfraNode[];
 }
+
+export interface InfraAvgAgg {
+  avg: { field: string };
+}
+
+export interface InfraMaxAgg {
+  max: { field: string };
+}
+
+export interface InfraDerivativeAgg {
+  derivative: {
+    buckets_path: string;
+    gap_policy: string;
+    unit: string;
+  };
+}
+
+export interface InfraBucketScriptAgg {
+  bucket_script: {
+    buckets_path: { [key: string]: string };
+    script: {
+      source: string;
+      lang: string;
+    };
+    gap_policy: string;
+  };
+}
+
+export type InfraAgg = InfraBucketScriptAgg | InfraDerivativeAgg | InfraAvgAgg | InfraMaxAgg;
+export interface InfraNodeMetricAgg {
+  [key: string]: InfraAgg;
+}
+
+export type InfraNodeMetricFn = (nodeType: InfraNodeType) => InfraNodeMetricAgg | undefined;
