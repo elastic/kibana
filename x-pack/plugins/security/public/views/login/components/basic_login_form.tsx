@@ -55,6 +55,7 @@ export class BasicLoginForm extends Component<Props, State> {
               onChange={this.onUsernameChange}
               disabled={this.state.isLoading}
               aria-required={true}
+              inputRef={this.setUsernameInputRef}
             />
           </EuiFormRow>
 
@@ -117,6 +118,12 @@ export class BasicLoginForm extends Component<Props, State> {
     }
     return null;
   };
+
+  private setUsernameInputRef(ref: HTMLInputElement) {
+    if (ref) {
+      ref.focus();
+    }
+  }
 
   private isFormValid = () => {
     const { username, password } = this.state;
