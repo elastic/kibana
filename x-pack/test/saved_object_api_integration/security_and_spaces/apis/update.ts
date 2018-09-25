@@ -60,7 +60,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      updateTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`user with no access within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
           password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -82,7 +82,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`superuser within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.superuser.USERNAME,
           password: scenario.users.superuser.PASSWORD,
@@ -104,7 +104,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`legacy user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyAll.USERNAME,
           password: scenario.users.legacyAll.PASSWORD,
@@ -126,7 +126,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`legacy readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyRead.USERNAME,
           password: scenario.users.legacyRead.PASSWORD,
@@ -148,7 +148,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualAll.USERNAME,
           password: scenario.users.dualAll.PASSWORD,
@@ -170,7 +170,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualRead.USERNAME,
           password: scenario.users.dualRead.PASSWORD,
@@ -192,7 +192,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allGlobally.USERNAME,
           password: scenario.users.allGlobally.PASSWORD,
@@ -214,7 +214,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.readGlobally.USERNAME,
           password: scenario.users.readGlobally.PASSWORD,
@@ -236,7 +236,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allAtSpace.USERNAME,
           password: scenario.users.allAtSpace.PASSWORD,
@@ -258,7 +258,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.readAtSpace.USERNAME,
           password: scenario.users.readAtSpace.PASSWORD,
@@ -280,30 +280,27 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(
-        `${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.allAtOtherSpace.USERNAME,
-            password: scenario.users.allAtOtherSpace.PASSWORD,
+      updateTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allAtOtherSpace.USERNAME,
+          password: scenario.users.allAtOtherSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 403,
+            response: expectSpaceAwareRbacForbidden,
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            spaceAware: {
-              statusCode: 403,
-              response: expectSpaceAwareRbacForbidden,
-            },
-            notSpaceAware: {
-              statusCode: 403,
-              response: expectNotSpaceAwareRbacForbidden,
-            },
-            doesntExist: {
-              statusCode: 403,
-              response: expectDoesntExistRbacForbidden,
-            },
+          notSpaceAware: {
+            statusCode: 403,
+            response: expectNotSpaceAwareRbacForbidden,
           },
-        }
-      );
+          doesntExist: {
+            statusCode: 403,
+            response: expectDoesntExistRbacForbidden,
+          },
+        },
+      });
     });
   });
 }

@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface BulkCreateTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface BulkCreateCustomTest extends BulkCreateTest {
@@ -67,7 +67,7 @@ const createBulkRequests = (spaceId: string) => [
 const isGlobalType = (type: string) => type === 'globaltype';
 
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -76,7 +76,9 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     });
   };
 
-  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: any) => {
+  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       saved_objects: [
         {
@@ -137,7 +139,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     }
   };
 
-  const expectRbacForbidden = (resp: any) => {
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',

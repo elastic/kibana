@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface BulkGetTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface BulkGetTests {
@@ -42,7 +42,7 @@ const createBulkRequests = (spaceId: string) => [
 ];
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -51,7 +51,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     });
   };
 
-  const createExpectNotFoundResults = (spaceId: string) => (resp: any) => {
+  const createExpectNotFoundResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       saved_objects: [
         {
@@ -83,7 +83,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     });
   };
 
-  const expectRbacForbidden = (resp: any) => {
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -91,7 +91,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     });
   };
 
-  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       saved_objects: [
         {

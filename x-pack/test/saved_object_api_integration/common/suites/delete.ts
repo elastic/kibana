@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface DeleteTests {
@@ -29,7 +29,7 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -38,7 +38,9 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: any) => {
+  const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -46,7 +48,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectRbacForbidden = (type: string) => (resp: any) => {
+  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -54,15 +56,19 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     createExpectNotFound(spaceId, 'dashboard', 'be3733a0-9efe-11e7-acb3-3dab96693fab')(resp);
   };
 
-  const createExpectUnknownDocNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectUnknownDocNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     createExpectNotFound(spaceId, 'dashboard', `not-a-real-id`)(resp);
   };
 
-  const expectEmpty = (resp: any) => {
+  const expectEmpty = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({});
   };
 

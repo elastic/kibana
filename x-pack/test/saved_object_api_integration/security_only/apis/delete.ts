@@ -24,7 +24,7 @@ export default function({ getService }: TestInvoker) {
       expectRbacInvalidIdForbidden,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
-    deleteTest(`not a kibana user`, {
+    deleteTest(`user with no access`, {
       auth: {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -66,7 +66,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana legacy user`, {
+    deleteTest(`legacy user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -87,7 +87,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana legacy dashboard only user`, {
+    deleteTest(`legacy readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -114,7 +114,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana dual-privileges user`, {
+    deleteTest(`dual-privileges user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -135,7 +135,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana dual-privileges dashboard only user`, {
+    deleteTest(`dual-privileges readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -156,7 +156,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac user`, {
+    deleteTest(`rbac user with all globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -177,7 +177,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac dashboard only user`, {
+    deleteTest(`rbac user with read globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -198,7 +198,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac default space all user`, {
+    deleteTest(`rbac user with all at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
@@ -225,7 +225,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac default space read user`, {
+    deleteTest(`rbac user with read at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
@@ -252,7 +252,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac space 1 all user`, {
+    deleteTest(`rbac user with all at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
@@ -279,7 +279,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    deleteTest(`kibana rbac space 1 readonly user`, {
+    deleteTest(`rbac user with readonly at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,

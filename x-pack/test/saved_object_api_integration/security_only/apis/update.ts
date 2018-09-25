@@ -25,7 +25,7 @@ export default function({ getService }: TestInvoker) {
       updateTest,
     } = updateTestSuiteFactory(esArchiver, supertest);
 
-    updateTest(`not a kibana user`, {
+    updateTest(`user with no access`, {
       auth: {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -67,7 +67,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana legacy user`, {
+    updateTest(`legacy user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -88,7 +88,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana legacy dashboard only user`, {
+    updateTest(`legacy readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -115,7 +115,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana dual-privileges user`, {
+    updateTest(`dual-privileges user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -136,7 +136,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana dual-privileges dashboard only user`, {
+    updateTest(`dual-privileges readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -157,7 +157,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana rbac user`, {
+    updateTest(`rbac user with all globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -178,7 +178,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(`kibana rbac dashboard only user`, {
+    updateTest(`rbac user with read globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -199,7 +199,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME, {
+    updateTest(`rbac user with all at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
@@ -226,7 +226,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME, {
+    updateTest(`rbac user with read at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
@@ -253,7 +253,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME, {
+    updateTest(`rbac user with all at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
@@ -280,7 +280,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    updateTest(AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME, {
+    updateTest(`rbac user with read at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,
