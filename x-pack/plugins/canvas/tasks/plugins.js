@@ -21,34 +21,19 @@ export default function pluginsTasks(gulp, { log, colors }) {
     }
   };
 
-  const copyServerFiles = () => {
-    const serverSourceDir = path.resolve(__dirname, '../canvas_plugin_src/functions/server');
-    const serverBuildDir = path.resolve(__dirname, '../canvas_plugin/functions/server');
-    gulp
-      .src([
-        `${serverSourceDir}/**/*`,
-        `!${serverSourceDir}/__tests__/`,
-        `!${serverSourceDir}/__tests__/*`,
-      ])
-      .pipe(gulp.dest(`${serverBuildDir}`));
-  };
-
   gulp.task('canvas:plugins:build', function(done) {
-    copyServerFiles();
     webpack({ ...webpackConfig, devtool }, onComplete(done));
   });
 
   // eslint-disable-next-line no-unused-vars
   gulp.task('canvas:plugins:dev', function(done /* added to make gulp async */) {
     log(`${colors.green.bold('canvas:plugins')} Starting initial build, this will take a while`);
-    copyServerFiles();
     webpack({ ...webpackConfig, devtool, watch: true }, (err, stats) => {
       onComplete()(err, stats);
     });
   });
 
   gulp.task('canvas:plugins:build-prod', done => {
-    copyServerFiles();
     webpack(webpackConfig, onComplete(done));
   });
 }
