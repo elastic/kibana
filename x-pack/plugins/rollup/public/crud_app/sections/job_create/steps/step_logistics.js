@@ -27,7 +27,8 @@ import {
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { logisticalDetailsUrl } from '../../../services';
+import { logisticalDetailsUrl, cronUrl } from '../../../services';
+import { CronEditor } from './components';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -42,6 +43,34 @@ export class StepLogisticsUi extends Component {
     hasMatchingIndices: PropTypes.bool.isRequired,
     indexPatternAsyncErrors: PropTypes.array,
   }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      simpleRollupCron: props.fields.rollupCron,
+    };
+  }
+
+  showAdvancedCron = () => {
+    const { onFieldsChange } = this.props;
+    this.setState({
+      simpleRollupCron: this.props.fields.rollupCron,
+    });
+    onFieldsChange({
+      isAdvancedCronVisible: true,
+    });
+  };
+
+  hideAdvancedCron = () => {
+    const { onFieldsChange } = this.props;
+    const { simpleRollupCron } = this.state;
+    onFieldsChange({
+      isAdvancedCronVisible: false,
+      // Restore the last value of the simple cron editor.
+      rollupCron: simpleRollupCron,
+    });
+  };
 
   renderIndexPatternHelpText() {
     const {
@@ -105,6 +134,106 @@ export class StepLogisticsUi extends Component {
     );
   }
 
+  renderCronEditor() {
+    const {
+      fields,
+      onFieldsChange,
+      areStepErrorsVisible,
+      fieldErrors,
+    } = this.props;
+
+    const {
+      rollupCron,
+      cronFrequency,
+      isAdvancedCronVisible,
+      fieldToPreferredValueMap,
+    } = fields;
+
+    const {
+      rollupCron: errorRollupCron,
+    } = fieldErrors;
+
+    if (isAdvancedCronVisible) {
+      return (
+        <Fragment>
+          <EuiFormRow
+            label={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
+                defaultMessage="Cron pattern"
+              />
+            )}
+            error={errorRollupCron}
+            isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
+            helpText={(
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
+                    defaultMessage="{link}"
+                    values={{ link: (
+                      <EuiLink href={cronUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
+                          defaultMessage="Learn more about cron syntax"
+                        />
+                      </EuiLink>
+                    ) }}
+                  />
+                </p>
+              </Fragment>
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              value={rollupCron}
+              onChange={e => onFieldsChange({ rollupCron: e.target.value })}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
+              fullWidth
+            />
+          </EuiFormRow>
+
+          <EuiText size="s">
+            <EuiLink onClick={this.hideAdvancedCron}>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+                defaultMessage="Create basic interval"
+              />
+            </EuiLink>
+          </EuiText>
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        <CronEditor
+          fieldToPreferredValueMap={fieldToPreferredValueMap}
+          cronExpression={rollupCron}
+          frequency={cronFrequency}
+          onChange={({
+            cronExpression,
+            frequency,
+            fieldToPreferredValueMap,
+          }) => onFieldsChange({
+            rollupCron: cronExpression,
+            cronFrequency: frequency,
+            fieldToPreferredValueMap,
+          })}
+        />
+
+        <EuiText size="s">
+          <EuiLink onClick={this.showAdvancedCron}>
+            <FormattedMessage
+              id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+              defaultMessage="Create advanced cron expression"
+            />
+          </EuiLink>
+        </EuiText >
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       fields,
@@ -119,16 +248,16 @@ export class StepLogisticsUi extends Component {
       id,
       indexPattern,
       rollupIndex,
-      rollupCron,
       rollupPageSize,
+      rollupDelay,
     } = fields;
 
     const {
       id: errorId,
       indexPattern: errorIndexPattern,
       rollupIndex: errorRollupIndex,
-      rollupCron: errorRollupCron,
       rollupPageSize: errorRollupPageSize,
+      rollupDelay: errorRollupDelay,
     } = fieldErrors;
 
     return (
@@ -296,57 +425,37 @@ export class StepLogisticsUi extends Component {
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.description"
                 defaultMessage={`
-                  How often should data be rolled up and how many results should be indexed at a time?
-                  A larger page size will roll up data more quickly, but will require more memory during processing.
+                  How often should data be rolled up?
                 `}
               />
             )}
             fullWidth
           >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
-                  defaultMessage="Cron pattern"
-                />
-              )}
-              error={errorRollupCron}
-              isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
-              helpText={(
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpExample.label"
-                      defaultMessage="Example cron: /30 * * * * ?"
-                    />
-                  </p>
+            {this.renderCronEditor()}
+          </EuiDescribedFormGroup>
 
-                  <p>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
-                      defaultMessage="{link}"
-                      values={{ link: (
-                        <EuiLink href="https://en.wikipedia.org/wiki/Cron" target="_blank">
-                          <FormattedMessage
-                            id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
-                            defaultMessage="Learn more about cron syntax"
-                          />
-                        </EuiLink>
-                      ) }}
-                    />
-                  </p>
-                </Fragment>
-              )}
-              fullWidth
-            >
-              <EuiFieldText
-                value={rollupCron}
-                onChange={e => onFieldsChange({ rollupCron: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
-                fullWidth
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    defaultMessage="How many documents should be rolled up at a time?"
+                  />
+                </h5>
+              </EuiTitle>
+            )}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.description"
+                defaultMessage={`
+                  A larger page size
+                  will roll up data more quickly, but will require more memory during processing.
+                `}
               />
-            </EuiFormRow>
-
+            )}
+            fullWidth
+          >
             <EuiFormRow
               label={(
                 <FormattedMessage
@@ -363,7 +472,59 @@ export class StepLogisticsUi extends Component {
                 onChange={e => onFieldsChange({ rollupPageSize: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupPageSize)}
                 fullWidth
-                min="0"
+                min={0}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    defaultMessage="How long should the rollup job wait before rolling up new data?"
+                  />
+                </h5>
+              </EuiTitle>
+            )}
+            description={(
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepLogistics.sectionDelay.description"
+                defaultMessage={`
+                  Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
+                  By default, the rollup job attempts to roll up all data that is available.
+                `}
+              />
+            )}
+            fullWidth
+          >
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
+                  defaultMessage="Delay (optional)"
+                />
+              )}
+              error={errorRollupDelay}
+              isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
+              helpText={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
+                      defaultMessage="Example delay values: 30s, 20m, 24h, 2d, 1w, 1M"
+                    />
+                  </p>
+                </Fragment>
+              )}
+              fullWidth
+            >
+              <EuiFieldText
+                value={rollupDelay || ''}
+                onChange={e => onFieldsChange({ rollupDelay: e.target.value })}
+                isInvalid={Boolean(areStepErrorsVisible && errorRollupDelay)}
+                fullWidth
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
