@@ -24,6 +24,7 @@ module.service('mlExplorerDashboardService', function () {
   const swimlaneCellClick = this.swimlaneCellClick = listenerFactory();
   const swimlaneDataChange = this.swimlaneDataChange = listenerFactory();
   const swimlaneRenderDone = this.swimlaneRenderDone = listenerFactory();
+  const chartsInitDone = this.chartsInitDone = listenerFactory();
   this.anomalyDataChange = listenerFactory();
 
   this.init = function () {
@@ -32,6 +33,7 @@ module.service('mlExplorerDashboardService', function () {
     swimlaneCellClick.unwatchAll();
     swimlaneDataChange.unwatchAll();
     swimlaneRenderDone.unwatchAll();
+    chartsInitDone.unwatchAll();
   };
 
 });

@@ -7,7 +7,7 @@
     title="Aggregation Field"
     name="field"
     required
-    class="vis-editor-field-ui-select field-select"
+    class="visEditorAggSelect__select field-select"
     ng-show="indexedFields.length"
     ng-model="agg.params.field"
     on-select="aggParam.onChange(agg)"
@@ -23,7 +23,7 @@
     >
       <div
         data-test-subj="{{field.displayName}}"
-        class="vis-editor-field-ui-select__field-entry"
+        class="eui-textTruncate"
         ng-bind-html="field.displayName | highlight: $select.search"
         title="{{field.displayName}}"
       ></div>
