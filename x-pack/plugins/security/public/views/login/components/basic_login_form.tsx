@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFieldText, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { LoginState } from '../../../../common/login_state';
 
@@ -43,39 +43,47 @@ export class BasicLoginForm extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPanel>
+      <Fragment>
         {this.renderMessage()}
-        <EuiFieldText
-          name="username"
-          title="username"
-          placeholder="Username"
-          data-test-subj="loginUsername"
-          value={this.state.username}
-          onChange={this.onUsernameChange}
-          disabled={this.state.isLoading}
-        />
-        <EuiSpacer size="s" />
-        <EuiFieldText
-          name="password"
-          title="password"
-          placeholder="Password"
-          data-test-subj="loginPassword"
-          type="password"
-          value={this.state.password}
-          onChange={this.onPasswordChange}
-          disabled={this.state.isLoading}
-        />
-        <EuiSpacer />
-        <EuiButton
-          fill
-          color="primary"
-          onClick={this.submit}
-          isLoading={this.state.isLoading}
-          data-test-subj="loginSubmit"
-        >
-          Log in
-        </EuiButton>
-      </EuiPanel>
+        <EuiPanel>
+          <EuiFormRow label="Username">
+            <EuiFieldText
+              name="username"
+              title="username"
+              data-test-subj="loginUsername"
+              value={this.state.username}
+              onChange={this.onUsernameChange}
+              disabled={this.state.isLoading}
+              aria-required={true}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow label="Password">
+            <EuiFieldText
+              name="password"
+              title="password"
+              data-test-subj="loginPassword"
+              type="password"
+              value={this.state.password}
+              onChange={this.onPasswordChange}
+              disabled={this.state.isLoading}
+              aria-required={true}
+            />
+          </EuiFormRow>
+
+          <EuiSpacer />
+          <EuiButton
+            fill
+            color="primary"
+            onClick={this.submit}
+            isLoading={this.state.isLoading}
+            isDisabled={!this.isFormValid()}
+            data-test-subj="loginSubmit"
+          >
+            Log in
+          </EuiButton>
+        </EuiPanel>
+      </Fragment>
     );
   }
 
@@ -83,10 +91,13 @@ export class BasicLoginForm extends Component<Props, State> {
     if (this.state.message) {
       return (
         <Fragment>
-          <EuiText color="danger">
-            <p data-test-subj="loginErrorMessage">{this.state.message}</p>
-          </EuiText>
-          <EuiSpacer />
+          <EuiCallOut
+            size="s"
+            color="danger"
+            data-test-subj="loginErrorMessage"
+            title={this.state.message}
+          />
+          <EuiSpacer size="l" />
         </Fragment>
       );
     }
@@ -94,14 +105,23 @@ export class BasicLoginForm extends Component<Props, State> {
     if (this.props.infoMessage) {
       return (
         <Fragment>
-          <EuiText>
-            <p>{this.props.infoMessage}</p>
-          </EuiText>
-          <EuiSpacer />
+          <EuiCallOut
+            size="s"
+            color="primary"
+            data-test-subj="loginInfoMessage"
+            title={this.props.infoMessage}
+          />
+          <EuiSpacer size="l" />
         </Fragment>
       );
     }
     return null;
+  };
+
+  private isFormValid = () => {
+    const { username, password } = this.state;
+
+    return username && password;
   };
 
   private onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +143,10 @@ export class BasicLoginForm extends Component<Props, State> {
   };
 
   private submit = () => {
+    if (!this.isFormValid()) {
+      return;
+    }
+
     this.setState({
       isLoading: true,
       message: '',
