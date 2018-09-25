@@ -286,6 +286,35 @@ export async function loadMapResources(dispatch) {
   await dispatch(replaceLayerList(
     [
       {
+        "dataDirty": false,
+        "id": "fn5wx",
+        "label": "logs* documents",
+        "showAtAllZoomLevels": false,
+        "minZoom": 6,
+        "maxZoom": 24,
+        "sourceDescriptor": {
+          "type": "ES_SEARCH",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "geoField": "geo.coordinates",
+          "limit": 1000,
+          "filterByMapBounds": true
+        },
+        "visible": true,
+        "temporary": false,
+        "style": {
+          "type": "VECTOR",
+          "properties": {
+            "fillColor": {
+              "type": "STATIC",
+              "options": {
+                "color": "#e6194b"
+              }
+            }
+          }
+        },
+        "type": "VECTOR"
+      },
+      {
         dataDirty: false,
         id: "0hmz5",
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },

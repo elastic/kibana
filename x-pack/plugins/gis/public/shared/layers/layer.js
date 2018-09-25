@@ -91,6 +91,14 @@ export class ALayer {
     return false;
   }
 
+  hasLoadError() {
+    return this._descriptor.hasLoadError;
+  }
+
+  getLoadError() {
+    return this._descriptor.loadError;
+  }
+
   toLayerDescriptor() {
     return this._descriptor;
   }

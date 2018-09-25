@@ -80,7 +80,7 @@ export class ESSearchSource extends VectorSource {
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
     } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}, error: ${error.message}`);
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
     }
     return indexPattern;
   }

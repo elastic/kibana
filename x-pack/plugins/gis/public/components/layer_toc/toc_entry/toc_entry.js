@@ -12,12 +12,23 @@ import {
   EuiLoadingSpinner,
   EuiCheckbox,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 export function TOCEntry({ layer, openLayerPanel, toggleVisible, zoom }) {
 
   let visibilityIndicator;
-  if (layer.isLayerLoading()) {
+  if (layer.hasLoadError()) {
+    visibilityIndicator = (
+      <EuiIconTip
+        aria-label="Load warning"
+        size="m"
+        type="alert"
+        color="warning"
+        content={layer.getLoadError()}
+      />
+    );
+  } else if (layer.isLayerLoading()) {
     visibilityIndicator = <EuiLoadingSpinner size="s"/>;
   } else if (!layer.showAtZoomLevel(zoom)) {
     const { minZoom, maxZoom } = layer.getZoomConfig();
