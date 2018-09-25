@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { esdocs } from './esdocs';
-import { timelion } from './timelion';
+import { buildBoolArray } from './build_bool_array';
+import { buildESRequest } from './build_es_request';
+import { createHandlers } from './create_handlers';
+import { getESFilter } from './get_es_filter';
+import { normalizeType } from './normalize_type';
+import { sanitizeName } from './sanitize_name';
 
-export const serverFunctions = [esdocs, timelion];
+export { buildBoolArray, buildESRequest, createHandlers, getESFilter, normalizeType, sanitizeName };

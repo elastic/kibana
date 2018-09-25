@@ -17,7 +17,32 @@
  * under the License.
  */
 
-import { esdocs } from './esdocs';
-import { timelion } from './timelion';
+import { emptyTable, testTable, stringTable } from './common/__tests__/fixtures/test_tables';
+import {
+  fontStyle,
+  containerStyle,
+  defaultStyle,
+  seriesStyle,
+  grayscalePalette,
+  gradientPalette,
+  xAxisConfig,
+  yAxisConfig,
+  hideAxis
+} from './common/__tests__/fixtures/test_styles';
+import { functionWrapper } from './common/__tests__/helpers/function_wrapper';
 
-export const serverFunctions = [esdocs, timelion];
+export {
+  emptyTable,
+  testTable,
+  stringTable,
+  fontStyle,
+  containerStyle,
+  defaultStyle,
+  seriesStyle,
+  grayscalePalette,
+  gradientPalette,
+  xAxisConfig,
+  yAxisConfig,
+  hideAxis,
+  functionWrapper
+};

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { esdocs } from './esdocs';
-import { timelion } from './timelion';
+import  { renderFunctionsRegistry } from './render_functions_registry';
 
-export const serverFunctions = [esdocs, timelion];
+export { renderFunctionsRegistry };
