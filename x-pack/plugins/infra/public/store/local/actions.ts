@@ -10,3 +10,4 @@ export { logPositionActions } from './log_position';
 export { logTextviewActions } from './log_textview';
 export { waffleFilterActions } from './waffle_filter';
 export { waffleTimeActions } from './waffle_time';
+export { waffleMetricsActions } from './waffle_metrics';

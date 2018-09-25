@@ -5,11 +5,12 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import { last } from 'lodash';
+import { get, last } from 'lodash';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import { InfraPathType } from '../../../common/graphql/types';
+import { InfraMetricType } from '../../../common/graphql/types';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
@@ -30,17 +31,12 @@ interface Props {
   bounds: InfraWaffleMapBounds;
 }
 
-interface LABELS {
-  [key: string]: string;
-}
-
-const LABELS = {
-  count: 'Count',
-  cpu: 'CPU',
-  memory: 'Memory',
-  load: 'Load',
-  tx: 'TX Rate',
-  rx: 'RX Rate',
+const METRIC_LABELS = {
+  [InfraMetricType.count]: 'Count',
+  [InfraMetricType.cpu]: 'CPU Usage',
+  [InfraMetricType.memory]: 'Memory Usage',
+  [InfraMetricType.rx]: 'Inbound Traffic',
+  [InfraMetricType.tx]: 'Outbound Traffic',
 };
 
 function convertInfraPathTypeToNodeType(type: InfraPathType) {
@@ -59,12 +55,13 @@ function convertInfraPathTypeToNodeType(type: InfraPathType) {
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { node, formatter, options, squareSize, bounds } = this.props;
+    const { node, options, squareSize, bounds, formatter } = this.props;
     const { isPopoverOpen } = this.state;
     const metric = last(node.metrics);
     const nodeType = convertInfraPathTypeToNodeType(last(options.path).type);
+    const metricModel = last(options.metrics);
     const valueMode = squareSize > 110;
-    const label = LABELS[metric.name];
+    const label = get(METRIC_LABELS, metricModel.type, 'Count');
     const color = colorFromValue(options.legend, metric.value, bounds);
     const value = metric != null ? formatter(metric.value) : 'n/a';
 

@@ -9,9 +9,11 @@
  *       package includes them.
  */
 
+import { CommonProps, EuiToolTipPosition } from '@elastic/eui';
 import { Moment } from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
 import { ReactDatePickerProps } from 'react-datepicker';
+import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
   export interface EuiBreadcrumbDefinition {
@@ -131,4 +133,15 @@ declare module '@elastic/eui' {
   };
 
   export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
+
+  type EuiComboBoxProps = CommonProps & {
+    placeholder?: string;
+    options?: any[];
+    selectedOptions?: any[];
+    onChange?: (arg: any) => void;
+    fullWidth?: boolean;
+    isClearable?: boolean;
+    singleSelection?: boolean;
+  };
+  export const EuiComboBox: React.SFC<EuiComboBoxProps>;
 }

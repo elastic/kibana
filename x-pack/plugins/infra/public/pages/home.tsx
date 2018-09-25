@@ -12,12 +12,14 @@ import { Toolbar } from '../components/eui/toolbar';
 import { Header } from '../components/header';
 import { ColumnarPage, PageContent } from '../components/page';
 import { Waffle } from '../components/waffle';
+import { WaffleMetricControls } from '../components/waffle/waffle_metric_controls';
 import { WaffleTimeControls } from '../components/waffle/waffle_time_controls';
 
 import {
   WithWaffleFilter,
   WithWaffleFilterUrlState,
 } from '../containers/waffle/with_waffle_filters';
+import { WithWaffleMetrics } from '../containers/waffle/with_waffle_metrics';
 import { WithWaffleNodes } from '../containers/waffle/with_waffle_nodes';
 import { WithWaffleTime, WithWaffleTimeUrlState } from '../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../containers/with_kuery_autocompletion';
@@ -57,6 +59,21 @@ export class HomePage extends React.PureComponent {
                 )}
               </WithKueryAutocompletion>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <WithOptions>
+                {({ wafflemap: { path } }) => (
+                  <WithWaffleMetrics>
+                    {({ changeMetrics, metrics }) => (
+                      <WaffleMetricControls
+                        metrics={metrics}
+                        path={path}
+                        onChange={changeMetrics}
+                      />
+                    )}
+                  </WithWaffleMetrics>
+                )}
+              </WithOptions>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <WithWaffleTime resetOnUnmount>
                 {({
@@ -80,27 +97,31 @@ export class HomePage extends React.PureComponent {
         </Toolbar>
         <PageContent>
           <WithOptions>
-            {({ wafflemap, sourceId, timerange }) => (
+            {({ wafflemap, sourceId }) => (
               <WithWaffleFilter>
                 {({ filterQueryAsJson }) => (
                   <WithWaffleTime>
                     {({ currentTimeRange }) => (
-                      <WithWaffleNodes
-                        filterQuery={filterQueryAsJson}
-                        metrics={wafflemap.metrics}
-                        path={wafflemap.path}
-                        sourceId={sourceId}
-                        timerange={currentTimeRange}
-                      >
-                        {({ nodes, loading, refetch }) => (
-                          <Waffle
-                            map={nodes}
-                            loading={loading}
-                            options={wafflemap}
-                            reload={refetch}
-                          />
+                      <WithWaffleMetrics>
+                        {({ metrics }) => (
+                          <WithWaffleNodes
+                            filterQuery={filterQueryAsJson}
+                            metrics={metrics}
+                            path={wafflemap.path}
+                            sourceId={sourceId}
+                            timerange={currentTimeRange}
+                          >
+                            {({ nodes, loading, refetch }) => (
+                              <Waffle
+                                map={nodes}
+                                loading={loading}
+                                options={{ ...wafflemap, metrics }}
+                                reload={refetch}
+                              />
+                            )}
+                          </WithWaffleNodes>
                         )}
-                      </WithWaffleNodes>
+                      </WithWaffleMetrics>
                     )}
                   </WithWaffleTime>
                 )}
