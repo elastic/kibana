@@ -6,6 +6,6 @@
 
 export const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 1,
   });
 };

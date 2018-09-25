@@ -7,8 +7,10 @@
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
+import { InfraMetricModel } from '../metrics/adapter_types';
 
 export * from '../../../../common/graphql/typed_resolvers';
+import { JsonObject } from '../../../../common/typed_json';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -50,6 +52,12 @@ export interface InfraBackendFrameworkAdapter {
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
   getIndexPatternsService(req: InfraFrameworkRequest<any>): InfraFrameworkIndexPatternsService;
+  makeTSVBRequest(
+    req: InfraFrameworkRequest,
+    model: InfraMetricModel,
+    timerange: { min: number; max: number },
+    filters: JsonObject[]
+  ): Promise<InfraTSVBResponse>;
 }
 
 export interface InfraFrameworkRequest<
@@ -179,3 +187,19 @@ export interface InfraFrameworkIndexPatternsService {
     pattern: string[];
   }): Promise<InfraFrameworkIndexFieldDescriptor[]>;
 }
+
+export interface InfraTSVBResponse {
+  [key: string]: InfraTSVBPanel;
+}
+
+export interface InfraTSVBPanel {
+  id: string;
+  series: InfraTSVBSeries[];
+}
+
+export interface InfraTSVBSeries {
+  id: string;
+  data: InfraTSVBDataPoint[];
+}
+
+export type InfraTSVBDataPoint = [number, number];

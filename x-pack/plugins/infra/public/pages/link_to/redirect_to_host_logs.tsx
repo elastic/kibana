@@ -25,7 +25,7 @@ export const RedirectToHostLogs = ({
       }
 
       const searchString = compose(
-        replaceLogFilterInQueryString(`${configuredFields.hostname}: ${match.params.hostname}`),
+        replaceLogFilterInQueryString(`${configuredFields.host}: ${match.params.hostname}`),
         replaceLogPositionInQueryString(getTimeFromLocation(location))
       )('');
 

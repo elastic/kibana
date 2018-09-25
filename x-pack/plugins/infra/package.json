@@ -9,6 +9,7 @@
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
+    "@types/color": "^3.0.0",
     "lodash": "^4.17.10"
   }
 }

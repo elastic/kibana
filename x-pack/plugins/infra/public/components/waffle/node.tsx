@@ -9,6 +9,8 @@ import { last } from 'lodash';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
+import { InfraPathType } from '../../../common/graphql/types';
+import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -41,12 +43,26 @@ const LABELS = {
   rx: 'RX Rate',
 };
 
+function convertInfraPathTypeToNodeType(type: InfraPathType) {
+  switch (type) {
+    case InfraPathType.hosts:
+      return InfraNodeType.host;
+    case InfraPathType.containers:
+      return InfraNodeType.container;
+    case InfraPathType.pods:
+      return InfraNodeType.pod;
+    default:
+      throw new Error('Incompatible path type.');
+  }
+}
+
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { node, formatter, options, squareSize, bounds } = this.props;
     const { isPopoverOpen } = this.state;
     const metric = last(node.metrics);
+    const nodeType = convertInfraPathTypeToNodeType(last(options.path).type);
     const valueMode = squareSize > 110;
     const label = LABELS[metric.name];
     const color = colorFromValue(options.legend, metric.value, bounds);
@@ -55,13 +71,14 @@ export class Node extends React.PureComponent<Props, State> {
     return (
       <NodeContextMenu
         node={node}
+        nodeType={nodeType}
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
           <NodeContainer
-            style={{ width: squareSize, height: squareSize }}
+            style={{ width: squareSize || 0, height: squareSize || 0 }}
             onClick={this.togglePopover}
           >
             <SquareOuter color={color}>

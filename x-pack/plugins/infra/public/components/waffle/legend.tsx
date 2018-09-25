@@ -5,14 +5,14 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { InfraWaffleMapBounds, InfraWaffleMapFormatter, InfraWaffleMapLegend } from '../../lib/lib';
+import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';
 import { isInfraWaffleMapGradientLegend, isInfraWaffleMapStepLegend } from './lib/type_guards';
 import { StepLegend } from './steps_legend';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;
-  formatter: InfraWaffleMapFormatter;
+  formatter: InfraFormatter;
 }
 
 export const Legend: React.SFC<Props> = ({ legend, bounds, formatter }) => {

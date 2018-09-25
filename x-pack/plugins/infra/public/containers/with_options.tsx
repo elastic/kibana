@@ -9,8 +9,8 @@ import React from 'react';
 
 import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
 import {
+  InfraFormatterType,
   InfraOptions,
-  InfraWaffleMapFormatterType,
   InfraWaffleMapLegendMode,
   // InfraWaffleMapRuleOperator,
 } from '../lib/lib';
@@ -18,20 +18,20 @@ import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
   options: {
+    sourceId: 'default',
+    timerange: {
+      interval: '1m',
+      to: moment.utc().valueOf(),
+      from: moment
+        .utc()
+        .subtract(1, 'h')
+        .valueOf(),
+    },
     wafflemap: {
-      sourceId: 'default',
-      timerange: {
-        interval: '1m',
-        to: moment.utc().valueOf(),
-        from: moment
-          .utc()
-          .subtract(1, 'h')
-          .valueOf(),
-      },
-      formatter: InfraWaffleMapFormatterType.percent,
+      formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
       metrics: [{ type: InfraMetricType.cpu }],
-      path: [{ type: InfraPathType.hosts }, { type: InfraPathType.containers }],
+      path: [{ type: InfraPathType.hosts }],
       /*
       legend: {
         type: InfraWaffleMapLegendMode.step,

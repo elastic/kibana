@@ -165,9 +165,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  sourceId: string;
-  timerange: InfraTimerangeInput;
-  formatter: InfraWaffleMapFormatterType;
+  formatter: InfraFormatterType;
   formatTemplate: string;
   metrics: InfraMetricInput[];
   path: InfraPathInput[];
@@ -175,6 +173,8 @@ export interface InfraWaffleMapOptions {
 }
 
 export interface InfraOptions {
+  sourceId: string;
+  timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
 }
 
@@ -185,9 +185,10 @@ export interface InfraWaffleMapBounds {
   max: number;
 }
 
-export type InfraWaffleMapFormatter = (value: string | number) => string;
-export enum InfraWaffleMapFormatterType {
+export type InfraFormatter = (value: string | number) => string;
+export enum InfraFormatterType {
   number = 'number',
+  abvNumber = 'abvNumber',
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',
@@ -200,4 +201,5 @@ export enum InfraWaffleMapDataFormat {
   bitsDecimal = 'bitsDecimal',
   bitsBinaryIEC = 'bitsBinaryIEC',
   bitsBinaryJEDEC = 'bitsBinaryJEDEC',
+  abbreviatedNumber = 'abbreviatedNumber',
 }

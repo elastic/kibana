@@ -21,7 +21,7 @@
  * WARNING: these typings are incomplete
  */
 
-import { StaticIndexPattern } from '../../index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 export type KueryNode = any;
 
@@ -38,7 +38,7 @@ interface JsonObject {
   [key: string]: JsonValue;
 }
 
-interface JsonArray extends Array<JsonValue> {}
+interface JsonArray extends Array<JsonValue> { }
 
 export function fromKueryExpression(
   expression: string,

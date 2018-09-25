@@ -7,8 +7,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
+  InfraFormatter,
   InfraWaffleMapBounds,
-  InfraWaffleMapFormatter,
   InfraWaffleMapGradientLegend,
   InfraWaffleMapGradientRule,
 } from '../../lib/lib';
@@ -16,10 +16,10 @@ import {
 interface Props {
   legend: InfraWaffleMapGradientLegend;
   bounds: InfraWaffleMapBounds;
-  formatter: InfraWaffleMapFormatter;
+  formatter: InfraFormatter;
 }
 
-const createTickRender = (bounds: InfraWaffleMapBounds, formatter: InfraWaffleMapFormatter) => (
+const createTickRender = (bounds: InfraWaffleMapBounds, formatter: InfraFormatter) => (
   rule: InfraWaffleMapGradientRule,
   index: number
 ) => {

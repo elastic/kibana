@@ -5,22 +5,22 @@
  */
 
 import Mustache from 'mustache';
-import { InfraWaffleMapDataFormat, InfraWaffleMapFormatterType } from '../../lib/lib';
+import { InfraFormatterType, InfraWaffleMapDataFormat } from '../../lib/lib';
 import { createDataFormatter } from './data';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
 
 export const FORMATTERS = {
-  [InfraWaffleMapFormatterType.number]: formatNumber,
-  [InfraWaffleMapFormatterType.bytes]: createDataFormatter(InfraWaffleMapDataFormat.bytesDecimal),
-  [InfraWaffleMapFormatterType.bits]: createDataFormatter(InfraWaffleMapDataFormat.bitsDecimal),
-  [InfraWaffleMapFormatterType.percent]: formatPercent,
+  [InfraFormatterType.number]: formatNumber,
+  [InfraFormatterType.abvNumber]: createDataFormatter(InfraWaffleMapDataFormat.abbreviatedNumber),
+  [InfraFormatterType.bytes]: createDataFormatter(InfraWaffleMapDataFormat.bytesDecimal),
+  [InfraFormatterType.bits]: createDataFormatter(InfraWaffleMapDataFormat.bitsDecimal),
+  [InfraFormatterType.percent]: formatPercent,
 };
 
-export const createFormatter = (
-  format: InfraWaffleMapFormatterType,
-  template: string = '{{value}}'
-) => (val: string | number) => {
+export const createFormatter = (format: InfraFormatterType, template: string = '{{value}}') => (
+  val: string | number
+) => {
   if (val == null) {
     return '';
   }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import RouteManager from './route_manager';
+import RouteManager from 'ui/routes/route_manager';
 
 interface DefaultRouteManager extends RouteManager {
   enable(): void;

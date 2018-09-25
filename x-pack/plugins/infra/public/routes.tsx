@@ -12,6 +12,7 @@ import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
+import { MetricDetail } from './pages/metrics';
 
 interface RouterProps {
   history: History;
@@ -25,6 +26,7 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
         <Route path="/logs" component={LogsPage} />
         <Route path="/home" component={HomePage} />
         <Route path="/link-to" component={LinkToPage} />
+        <Route path="/metrics/:type/:node" component={MetricDetail} />
         <Route component={NotFoundPage} />
       </Switch>
     </Router>

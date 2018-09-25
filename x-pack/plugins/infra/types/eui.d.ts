@@ -9,9 +9,8 @@
  *       package includes them.
  */
 
-import { EuiToolTipPosition } from '@elastic/eui';
 import { Moment } from 'moment';
-import { ChangeEventHandler, MouseEventHandler, ReactType, Ref, SFC } from 'react';
+import { MouseEventHandler, ReactType, Ref } from 'react';
 import { ReactDatePickerProps } from 'react-datepicker';
 
 declare module '@elastic/eui' {
@@ -112,6 +111,20 @@ declare module '@elastic/eui' {
     append?: React.ReactNode;
   };
   export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
+
+  type EuiSideNavProps = CommonProps & {
+    style?: any;
+    items: Array<{
+      id: string | number;
+      name: string;
+      items: Array<{
+        id: string;
+        name: string;
+        onClick: () => void;
+      }>;
+    }>;
+  };
+  export const EuiSideNav: React.SFC<EuiSideNavProps>;
 
   type EuiErrorBoundaryProps = CommonProps & {
     children: React.ReactNode;

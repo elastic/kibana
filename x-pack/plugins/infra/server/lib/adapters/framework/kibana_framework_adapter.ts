@@ -7,11 +7,13 @@
 import { GraphQLSchema } from 'graphql';
 import { IStrictReply, Request, Server } from 'hapi';
 
+import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkIndexPatternsService,
   InfraFrameworkRequest,
   InfraFrameworkRouteOptions,
+  InfraTSVBResponse,
   InfraWrappableRequest,
   internalInfraFrameworkRequest,
 } from './adapter_types';
@@ -92,6 +94,34 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
     return this.server.indexPatternsServiceFactory({
       callCluster: (...args) => this.callWithRequest(request, ...args),
+    });
+  }
+
+  public async makeTSVBRequest(
+    req: InfraFrameworkRequest<Request>,
+    model: InfraMetricModel,
+    timerange: { min: number; max: number },
+    filters: any[]
+  ) {
+    const internalRequest = req[internalInfraFrameworkRequest];
+    const server = internalRequest.server;
+    return new Promise<InfraTSVBResponse>((resolve, reject) => {
+      const request = {
+        url: '/api/metrics/vis/data',
+        method: 'POST',
+        headers: internalRequest.headers,
+        payload: {
+          timerange,
+          panels: [model],
+          filters,
+        },
+      };
+      server.inject(request, res => {
+        if (res.statusCode !== 200) {
+          return reject(res);
+        }
+        resolve(res.result);
+      });
     });
   }
 }

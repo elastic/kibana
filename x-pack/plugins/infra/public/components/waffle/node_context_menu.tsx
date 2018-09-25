@@ -6,12 +6,14 @@
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import React from 'react';
+import { InfraNodeType } from '../../../common/graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getContainerLogsUrl, getHostLogsUrl, getPodLogsUrl } from '../../pages/link_to';
 
 interface Props {
   options: InfraWaffleMapOptions;
   node: InfraWaffleMapNode;
+  nodeType: InfraNodeType;
   isPopoverOpen: boolean;
   closePopover: () => void;
 }
@@ -21,10 +23,8 @@ export const NodeContextMenu: React.SFC<Props> = ({
   node,
   isPopoverOpen,
   closePopover,
+  nodeType,
 }) => {
-  // TODO: This needs to be change to be dynamic based on the options passed in.
-  const nodeType = 'host';
-
   const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -35,13 +35,17 @@ export const NodeContextMenu: React.SFC<Props> = ({
         ...(nodeLogsUrl
           ? [
               {
-                name: `View logs for this ${nodeType}`,
+                name: `View logs`,
                 href: nodeLogsUrl,
               },
             ]
           : []),
         {
-          name: `View APM Traces for this ${nodeType}`,
+          name: `View metrics`,
+          href: `#/metrics/${nodeType}/${node.name}`,
+        },
+        {
+          name: `View APM Traces`,
           href: `/app/apm`,
         },
       ],

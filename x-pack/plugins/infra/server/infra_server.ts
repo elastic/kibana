@@ -8,6 +8,7 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { schemas } from './graphql';
 import { createCapabilitiesResolvers } from './graphql/capabilities';
 import { createLogEntriesResolvers } from './graphql/log_entries';
+import { createMetricResolvers } from './graphql/metrics/resolvers';
 import { createNodeResolvers } from './graphql/nodes';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
@@ -22,6 +23,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
       createNodeResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
+      createMetricResolvers(libs) as IResolvers,
     ],
     typeDefs: schemas,
   });
