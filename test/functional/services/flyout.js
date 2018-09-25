@@ -20,7 +20,7 @@
 import { By } from 'selenium-webdriver';
 export function FlyoutProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const remote = getService('remote');
 
   class Flyout {
 
@@ -28,7 +28,7 @@ export function FlyoutProvider({ getService }) {
       if (testSubj) {
         return await testSubjects.find(testSubj);
       } else {
-        return await find.byCssSelector('.euiFlyout');
+        return await remote.findElement(By.css('.euiFlyout'));
       }
     }
 

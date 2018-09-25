@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export default function(selector: string): string;
+export default function (selector: string): string;

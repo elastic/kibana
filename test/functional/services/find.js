@@ -59,24 +59,24 @@ export function FindProvider({ getService }) {
       }
     }
 
-    async byName(selector, timeout = defaultFindTimeout) {
-      log.debug(`find.byName(${selector})`);
+    async byName(name, timeout = defaultFindTimeout) {
+      log.debug(`find.byName(${name})`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findByName(selector);
+        return await remote.findElement(By.name(name));
       });
     }
 
-    async byCssSelector(selector, timeout = defaultFindTimeout) {
-      log.debug(`findByCssSelector ${selector}`);
+    async byCssSelector(selectorObj, timeout = defaultFindTimeout) {
+      // log.debug(`findByCssSelector ${selector}`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findByCssSelector(selector);
+        return await remote.findElement(selectorObj);
       });
     }
 
-    async byClassName(selector, timeout = defaultFindTimeout) {
-      log.debug(`findByCssSelector ${selector}`);
+    async byClassName(className, timeout = defaultFindTimeout) {
+      log.debug(`findByCssSelector ${className}`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findByClassName(selector);
+        return await remote.findElement(By.className(className));
       });
     }
 

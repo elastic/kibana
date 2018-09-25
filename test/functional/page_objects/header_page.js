@@ -113,7 +113,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     // async isAbsoluteSectionShowing() {
     //   log.debug('isAbsoluteSectionShowing');
-    //   const absoluteFrom = await find.byCssSelector('input[ng-model=\'absolute.from\']');
+    //   const absoluteFrom = await findElement(By.css('input[ng-model=\'absolute.from\']'));
     //   return await absoluteFrom.isEnabled();
     // }
 
@@ -247,7 +247,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('clickToastOK');
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('button[ng-if="notif.accept"]')
+        await remote.findElement(By.css('button[ng-if="notif.accept"]'))
           .click();
       });
     }

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { By } from 'selenium-webdriver';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -573,7 +574,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
-      const element = await find.byCssSelector(`[${attributeName}]`);
+      const element = await remote.findElement(By.css(`[${attributeName}]`));
       if (element) {
         return await element.getAttribute(attributeName);
       }
@@ -589,7 +590,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSharedContainerData() {
       log.debug('getSharedContainerData');
-      const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
+      const sharedContainer = await remote.findElement(By.css('[data-shared-items-container]'));
       return {
         title: await sharedContainer.getAttribute('data-title'),
         description: await sharedContainer.getAttribute('data-description'),

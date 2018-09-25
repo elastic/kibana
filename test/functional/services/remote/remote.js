@@ -102,34 +102,16 @@ export async function RemoteProvider({ getService }) {
     }
 
     return {
-      async findByCssSelector(selector) {
-        await updateFindTimeout();
-        return await driver.findElement(By.css(selector));
+      async findElement(selectorObj, timeout) {
+        await updateFindTimeout(timeout);
+        await this.waitForElementPresent(selectorObj);
+        return await driver.findElement(selectorObj);
       },
 
-      async findAllByCssSelector(selector) {
-        await updateFindTimeout();
-        return await driver.findElements(By.css(selector));
-      },
-
-      async findByName(name) {
-        await updateFindTimeout();
-        return await driver.findElement(By.name(name));
-      },
-
-      async findByLinkText(text) {
-        await updateFindTimeout();
-        return await driver.findElement(By.linkText(text));
-      },
-
-      async findByPartialLinkText(text) {
-        await updateFindTimeout();
-        return await driver.findElement(By.partialLinkText(text));
-      },
-
-      async findByClassName(className) {
-        await updateFindTimeout();
-        return await driver.findElement(By.className(className));
+      async findElements(selectorObj, timeout) {
+        await updateFindTimeout(timeout);
+        await this.waitForElementPresent(selectorObj);
+        return await driver.findElements(selectorObj);
       },
 
       async setWindowSize(x, y) {
@@ -140,8 +122,8 @@ export async function RemoteProvider({ getService }) {
         return await this.findByCssSelector(selector).isDisplayed();
       },
 
-      async click(selector) {
-        await this.findByCssSelector(selector).click();
+      async click(selectorObj) {
+        await this.findElement(selectorObj).click();
       },
 
       // async append(selector, text) {
@@ -205,9 +187,9 @@ export async function RemoteProvider({ getService }) {
         await driver.sleep(milliseconds);
       },
 
-      async descendantExistsByCssSelector(selector, parentElement) {
-        return await parentElement.findElement(selector).isDisplayed();
-      },
+      // async descendantExistsByCssSelector(selector, parentElement) {
+      //   return await parentElement.findElement(selector).isDisplayed();
+      // },
 
       async getPageSource() {
         return await driver.getPageSource();

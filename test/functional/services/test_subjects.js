@@ -23,6 +23,7 @@ import {
   filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
+import { By } from 'selenium-webdriver';
 
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
@@ -35,7 +36,7 @@ export function TestSubjectsProvider({ getService }) {
   class TestSubjects {
     async exists(selector, timeout = 1000) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
+      return await remote.findElements(testSubjSelector(selector), timeout).length > 0;
     }
 
     async existOrFail(selector, timeout = 1000) {
@@ -67,7 +68,7 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.click(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
+        // await remote.moveMouseTo(element);
         await element.click();
       });
     }
@@ -76,7 +77,7 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
+        // await remote.moveMouseTo(element);
         await remote.doubleClick();
       });
     }
@@ -96,12 +97,12 @@ export function TestSubjectsProvider({ getService }) {
 
     async find(selector, timeout = 1000) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.byCssSelector(testSubjSelector(selector), timeout);
+      return await find.byCssSelector(By.css(testSubjSelector(selector)), timeout);
     }
 
     async findAll(selector, timeout) {
       log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
+      const all = await remote.findAll(By.css(testSubjSelector(selector)), timeout);
       return await filterAsync(all, el => el.isDisplayed());
     }
 
