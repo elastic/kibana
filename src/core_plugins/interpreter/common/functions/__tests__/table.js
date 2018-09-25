@@ -19,9 +19,7 @@
 
 import expect from 'expect.js';
 import { table } from '../table';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
-import { testTable } from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
-import { fontStyle } from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_styles';
+import { functionWrapper, testTable, fontStyle } from '@kbn/interpreter/test_utils';
 
 describe('table', () => {
   const fn = functionWrapper(table);

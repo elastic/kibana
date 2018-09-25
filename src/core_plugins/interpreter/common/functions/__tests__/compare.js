@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { compare } from '../compare';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('compare', () => {
   const fn = functionWrapper(compare);
@@ -30,7 +30,7 @@ describe('compare', () => {
         expect(fn(0, { op: 'lt', to: 1 })).to.be(true);
       });
 
-      it("defaults to 'eq'", () => {
+      it('defaults to \'eq\'', () => {
         expect(fn(0, { to: 1 })).to.be(false);
         expect(fn(0, { to: 0 })).to.be(true);
       });
@@ -122,7 +122,7 @@ describe('compare', () => {
   });
 
   describe('different type comparisons', () => {
-    it("returns true for 'ne' only", () => {
+    it('returns true for \'ne\' only', () => {
       expect(fn(0, { op: 'ne', to: '0' })).to.be(true);
     });
 

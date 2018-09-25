@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { commonFunctions } from '../../common/functions';
 import { clientFunctions } from '../functions';
-import { functionsRegistry } from './functions_registry';
 
 /*
   Functions loaded here use PRIVATE APIs

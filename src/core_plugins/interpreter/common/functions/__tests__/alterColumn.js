@@ -19,8 +19,8 @@
 
 import expect from 'expect.js';
 import { alterColumn } from '../alterColumn';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
+import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
+import { emptyTable, testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
 
 describe('alterColumn', () => {
   const fn = functionWrapper(alterColumn);

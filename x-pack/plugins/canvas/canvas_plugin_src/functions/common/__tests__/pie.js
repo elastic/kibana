@@ -5,10 +5,14 @@
  */
 
 import expect from 'expect.js';
+import {
+  functionWrapper,
+  fontStyle,
+  grayscalePalette,
+  seriesStyle,
+} from '@kbn/interpreter/test_utils';
 import { pie } from '../pie';
-import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
 import { testPie } from './fixtures/test_pointseries';
-import { fontStyle, grayscalePalette, seriesStyle } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_styles';
 
 describe('pie', () => {
   const fn = functionWrapper(pie);

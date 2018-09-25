@@ -7,7 +7,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { get } from 'lodash';
-import { fromExpression, toExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
+import { fromExpression, toExpression } from '@kbn/interpreter/common/lib/ast';
 import { DropdownFilter } from './component';
 
 export const dropdownFilter = () => ({

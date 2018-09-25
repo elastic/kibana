@@ -19,8 +19,13 @@
 
 import expect from 'expect.js';
 import { exactly } from '../exactly';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyFilter } from '../../../../../../x-pack/plugins/canvas/canvas_plugin_src/functions/common/__tests__/fixtures/test_filters';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
+
+const emptyFilter = {
+  type: 'filter',
+  meta: {},
+  and: [],
+};
 
 describe('exactly', () => {
   const fn = functionWrapper(exactly);
@@ -30,7 +35,7 @@ describe('exactly', () => {
     expect(fn(emptyFilter, args)).to.have.property('type', 'filter');
   });
 
-  it("adds an exactly object to 'and'", () => {
+  it('adds an exactly object to \'and\'', () => {
     const result = fn(emptyFilter, { column: 'name', value: 'product2' });
     expect(result.and[0]).to.have.property('type', 'exactly');
   });

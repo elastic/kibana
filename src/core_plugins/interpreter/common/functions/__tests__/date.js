@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { date } from '../date';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('date', () => {
   const fn = functionWrapper(date);
