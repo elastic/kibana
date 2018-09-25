@@ -15,8 +15,16 @@ interface BulkCreateTest {
   response: (resp: any) => void;
 }
 
+interface BulkCreateCustomTest extends BulkCreateTest {
+  description: string;
+  requestBody: {
+    [key: string]: any;
+  };
+}
+
 interface BulkCreateTests {
   default: BulkCreateTest;
+  custom?: BulkCreateCustomTest;
 }
 
 interface BulkCreateTestDefinition {
@@ -155,6 +163,17 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
+
+      if (tests.custom) {
+        it(tests.custom!.description, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
+            .auth(auth.username, auth.password)
+            .send(tests.custom!.requestBody)
+            .expect(tests.custom!.statusCode)
+            .then(tests.custom!.response);
+        });
+      }
     });
   };
 

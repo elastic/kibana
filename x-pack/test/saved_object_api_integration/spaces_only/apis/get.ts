@@ -15,6 +15,7 @@ export default function({ getService }: TestInvoker) {
 
   const {
     createExpectDoesntExistNotFound,
+    createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
     getTest,
@@ -45,6 +46,25 @@ export default function({ getService }: TestInvoker) {
         spaceAware: {
           statusCode: 200,
           response: createExpectSpaceAwareResults(SPACES.SPACE_1.spaceId),
+        },
+        notSpaceAware: {
+          statusCode: 200,
+          response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
+        },
+        doesntExist: {
+          statusCode: 404,
+          response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
+        },
+      },
+    });
+
+    getTest(`can't access space aware objects belonging to another space (space_1)`, {
+      spaceId: SPACES.DEFAULT.spaceId,
+      otherSpaceId: SPACES.SPACE_1.spaceId,
+      tests: {
+        spaceAware: {
+          statusCode: 404,
+          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
         },
         notSpaceAware: {
           statusCode: 200,

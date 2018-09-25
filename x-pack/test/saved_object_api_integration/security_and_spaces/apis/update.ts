@@ -17,10 +17,10 @@ export default function({ getService }: TestInvoker) {
   describe('update', () => {
     const {
       createExpectLegacyForbidden,
+      createExpectDoesntExistNotFound,
       expectDoesntExistRbacForbidden,
       expectNotSpaceAwareResults,
       expectNotSpaceAwareRbacForbidden,
-      expectNotFound,
       expectSpaceAwareRbacForbidden,
       expectSpaceAwareResults,
       updateTest,
@@ -99,7 +99,7 @@ export default function({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFound,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });
@@ -121,7 +121,7 @@ export default function({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFound,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });
@@ -165,7 +165,7 @@ export default function({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFound,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });
@@ -209,7 +209,7 @@ export default function({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFound,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });
@@ -253,7 +253,7 @@ export default function({ getService }: TestInvoker) {
           },
           doesntExist: {
             statusCode: 404,
-            response: expectNotFound,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });

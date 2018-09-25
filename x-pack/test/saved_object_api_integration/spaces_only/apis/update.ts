@@ -15,14 +15,15 @@ export default function({ getService }: TestInvoker) {
 
   describe('update', () => {
     const {
+      createExpectSpaceAwareNotFound,
       expectSpaceAwareResults,
-      expectNotFound,
+      createExpectDoesntExistNotFound,
       expectNotSpaceAwareResults,
       updateTest,
     } = updateTestSuiteFactory(esArchiver, supertest);
 
     updateTest(`in the default space`, {
-      ...SPACES.DEFAULT,
+      spaceId: SPACES.DEFAULT.spaceId,
       tests: {
         spaceAware: {
           statusCode: 200,
@@ -34,13 +35,13 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(SPACES.DEFAULT.spaceId),
         },
       },
     });
 
     updateTest('in the current space (space_1)', {
-      ...SPACES.SPACE_1,
+      spaceId: SPACES.SPACE_1.spaceId,
       tests: {
         spaceAware: {
           statusCode: 200,
@@ -52,7 +53,26 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
+        },
+      },
+    });
+
+    updateTest('objects that exist in another space (space_1)', {
+      spaceId: SPACES.DEFAULT.spaceId,
+      otherSpaceId: SPACES.SPACE_1.spaceId,
+      tests: {
+        spaceAware: {
+          statusCode: 404,
+          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
+        },
+        notSpaceAware: {
+          statusCode: 200,
+          response: expectNotSpaceAwareResults,
+        },
+        doesntExist: {
+          statusCode: 404,
+          response: createExpectDoesntExistNotFound(),
         },
       },
     });

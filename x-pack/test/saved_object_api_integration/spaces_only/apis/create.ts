@@ -4,9 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
 import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { createTestSuiteFactory } from '../../common/suites/create';
+
+const expectNamespaceSpecifiedBadRequest = (resp: any) => {
+  expect(resp.body).to.eql({
+    error: 'Bad Request',
+    message: '"namespace" is not allowed',
+    statusCode: 400,
+    validation: {
+      keys: ['namespace'],
+      source: 'payload',
+    },
+  });
+};
 
 // tslint:disable:no-default-export
 export default function({ getService }: TestInvoker) {
@@ -32,6 +45,18 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
+        custom: {
+          description: 'when a namespace is specified on the saved object',
+          type: 'visualization',
+          requestBody: {
+            namespace: 'space_1',
+            attributes: {
+              title: 'something',
+            },
+          },
+          statusCode: 400,
+          response: expectNamespaceSpecifiedBadRequest,
+        },
       },
     });
 
@@ -45,6 +70,18 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
+        },
+        custom: {
+          description: 'when a namespace is specified on the saved object',
+          type: 'visualization',
+          requestBody: {
+            namespace: 'space_1',
+            attributes: {
+              title: 'something',
+            },
+          },
+          statusCode: 400,
+          response: expectNamespaceSpecifiedBadRequest,
         },
       },
     });

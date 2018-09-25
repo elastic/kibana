@@ -23,6 +23,7 @@ interface GetTests {
 interface GetTestDefinition {
   auth?: TestDefinitionAuthentication;
   spaceId?: string;
+  otherSpaceId?: string;
   tests: GetTests;
 }
 
@@ -110,7 +111,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     description: string,
     definition: GetTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -122,7 +123,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         await supertest
           .get(
             `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}${spaceAwareId}`
           )
           .auth(auth.username, auth.password)
@@ -145,7 +146,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           await supertest
             .get(
               `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-                spaceId
+                otherSpaceId || spaceId
               )}${doesntExistId}`
             )
             .auth(auth.username, auth.password)

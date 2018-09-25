@@ -24,6 +24,7 @@ interface DeleteTests {
 interface DeleteTestDefinition {
   auth?: TestDefinitionAuthentication;
   spaceId?: string;
+  otherSpaceId?: string;
   tests: DeleteTests;
 }
 
@@ -53,6 +54,10 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
+    createExpectNotFound(spaceId, 'dashboard', 'be3733a0-9efe-11e7-acb3-3dab96693fab')(resp);
+  };
+
   const createExpectUnknownDocNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
     createExpectNotFound(spaceId, 'dashboard', `not-a-real-id`)(resp);
   };
@@ -71,7 +76,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     description: string,
     definition: DeleteTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -81,7 +86,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .delete(
             `${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}be3733a0-9efe-11e7-acb3-3dab96693fab`
           )
           .auth(auth.username, auth.password)
@@ -105,7 +110,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .delete(
             `${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}not-a-real-id`
           )
           .auth(auth.username, auth.password)
@@ -120,6 +125,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectLegacyForbidden,
+    createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,
     expectEmpty,

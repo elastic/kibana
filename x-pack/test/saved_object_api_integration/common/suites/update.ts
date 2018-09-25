@@ -24,6 +24,7 @@ interface UpdateTests {
 interface UpdateTestDefinition {
   auth?: TestDefinitionAuthentication;
   spaceId?: string;
+  otherSpaceId?: string;
   tests: UpdateTests;
 }
 
@@ -37,6 +38,24 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (
+    resp: any
+  ) => {
+    expect(resp.body).eql({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
+    });
+  };
+
+  const createExpectDoesntExistNotFound = (spaceId?: string) => {
+    return createExpectNotFound('visualization', 'not an id', spaceId);
+  };
+
+  const createExpectSpaceAwareNotFound = (spaceId?: string) => {
+    return createExpectNotFound('visualization', 'dd7caf20-9efd-11e7-acb3-3dab96693fab', spaceId);
+  };
+
   const createExpectRbacForbidden = (type: string) => (resp: any) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -44,15 +63,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       message: `Unable to update ${type}, missing action:saved_objects/${type}/update`,
     });
   };
-  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
-  const expectNotFound = (resp: any) => {
-    expect(resp.body).eql({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Saved object [visualization/not an id] not found',
-    });
-  };
+  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
 
@@ -106,7 +118,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     description: string,
     definition: UpdateTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -115,7 +127,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .put(
             `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}dd7caf20-9efd-11e7-acb3-3dab96693fab`
           )
           .auth(auth.username, auth.password)
@@ -132,7 +144,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .put(
             `${getUrlPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}/api/saved_objects/globaltype/8121a00-8efd-21e7-1cb3-34ab966434445`
           )
           .auth(auth.username, auth.password)
@@ -148,7 +160,11 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       describe('unknown id', () => {
         it(`should return ${tests.doesntExist.statusCode}`, async () => {
           await supertest
-            .put(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/not an id`)
+            .put(
+              `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
+                spaceId
+              )}not an id`
+            )
             .auth(auth.username, auth.password)
             .send({
               attributes: {
@@ -168,8 +184,9 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   return {
     createExpectLegacyForbidden,
+    createExpectDoesntExistNotFound,
+    createExpectSpaceAwareNotFound,
     expectDoesntExistRbacForbidden,
-    expectNotFound,
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,

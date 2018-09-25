@@ -14,9 +14,16 @@ interface CreateTest {
   response: (resp: any) => void;
 }
 
+interface CreateCustomTest extends CreateTest {
+  type: string;
+  description: string;
+  requestBody: any;
+}
+
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
+  custom?: CreateCustomTest;
 }
 
 interface CreateTestDefinition {
@@ -153,6 +160,17 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
       });
+
+      if (tests.custom) {
+        it(tests.custom.description, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${tests.custom!.type}`)
+            .auth(auth.username, auth.password)
+            .send(tests.custom!.requestBody)
+            .expect(tests.custom!.statusCode)
+            .then(tests.custom!.response);
+        });
+      }
     });
   };
 
