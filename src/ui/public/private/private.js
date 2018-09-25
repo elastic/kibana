@@ -138,7 +138,7 @@ uiModules.get('kibana/private')
 
     provider.$get = ['$injector', function PrivateFactory($injector) {
 
-    // prevent circular deps by tracking where we came from
+      // prevent circular deps by tracking where we came from
       const privPath = [];
       const pathToString = function () {
         return privPath.map(name).join(' -> ');
