@@ -31,7 +31,7 @@ const initialState = {
       formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
       metrics: [{ type: InfraMetricType.cpu }],
-      path: [{ type: InfraPathType.hosts }, { type: InfraPathType.containers }],
+      path: [{ type: InfraPathType.hosts }],
       /*
       legend: {
         type: InfraWaffleMapLegendMode.step,
