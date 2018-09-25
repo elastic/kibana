@@ -33,6 +33,26 @@ export default function ({ getService }) {
       });
     });
 
+    describe('6_4', () => {
+      before(async () => {
+        await reportingAPI.deleteAllReportingIndexes();
+      });
+
+      // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
+      // more efficient to post them all up front, then sequentially.
+      it('multiple jobs posted', async () => {
+        const reportPaths = [];
+        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_4));
+
+        await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
+      }).timeout(1540000);
+
+      it('jobs completed successfully', async () => {
+        const stats = await usageAPI.getUsageStats();
+        reportingAPI.expectCompletedReportCount(stats, 1);
+      });
+    });
+
     // 6.3 urls currently being tested as part of the "bwc_existing_indexes" test suite. Reports are time consuming,
     // don't replicate tests if we don't need to, so no specific 6_3 url tests here.
   });
