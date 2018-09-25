@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface UpdateTests {
@@ -29,7 +29,7 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -38,9 +38,9 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (
-    resp: any
-  ) => {
+  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).eql({
       statusCode: 404,
       error: 'Not Found',
@@ -56,7 +56,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     return createExpectNotFound('visualization', 'dd7caf20-9efd-11e7-acb3-3dab96693fab', spaceId);
   };
 
-  const createExpectRbacForbidden = (type: string) => (resp: any) => {
+  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -68,7 +68,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
 
-  const expectNotSpaceAwareResults = (resp: any) => {
+  const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     // loose uuid validation
     expect(resp.body)
       .to.have.property('id')
@@ -92,7 +92,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
 
-  const expectSpaceAwareResults = (resp: any) => {
+  const expectSpaceAwareResults = (resp: { [key: string]: any }) => {
     // loose uuid validation ignoring prefix
     expect(resp.body)
       .to.have.property('id')

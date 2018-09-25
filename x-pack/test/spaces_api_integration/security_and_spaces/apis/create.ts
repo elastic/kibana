@@ -54,7 +54,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      createTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.noAccess.USERNAME,
@@ -76,7 +76,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.superuser.USERNAME,
@@ -98,7 +98,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.allGlobally.USERNAME,
@@ -120,7 +120,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`dual-privileges user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.dualAll.USERNAME,
@@ -142,7 +142,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.legacyAll.USERNAME,
@@ -164,7 +164,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.readGlobally.USERNAME,
@@ -186,7 +186,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.dualRead.USERNAME,
@@ -208,7 +208,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`legacy readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.legacyRead.USERNAME,
@@ -230,7 +230,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         },
       });
 
-      createTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      createTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.allAtSpace.USERNAME,

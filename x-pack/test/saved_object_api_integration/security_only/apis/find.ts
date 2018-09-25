@@ -24,7 +24,7 @@ export default function({ getService }: TestInvoker) {
       findTest,
     } = findTestSuiteFactory(esArchiver, supertest);
 
-    findTest(`not a kibana user`, {
+    findTest(`user with no access`, {
       auth: {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -102,7 +102,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana legacy user`, {
+    findTest(`legacy user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -141,7 +141,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana legacy dashboard only user`, {
+    findTest(`legacy readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -180,7 +180,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana dual-privileges user`, {
+    findTest(`dual-privileges user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -219,7 +219,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana dual-privileges dashboard only user`, {
+    findTest(`dual-privileges readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -258,7 +258,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac user`, {
+    findTest(`rbac user with all globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -297,7 +297,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac dashboard only user`, {
+    findTest(`rbac user with read globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -336,7 +336,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac default space all user`, {
+    findTest(`rbac user with all at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
@@ -385,7 +385,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac default space read user`, {
+    findTest(`rbac user with read at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
@@ -434,7 +434,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac space 1 all user`, {
+    findTest(`rbac user with all at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
@@ -483,7 +483,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    findTest(`kibana rbac space 1 readonly user`, {
+    findTest(`rbac user with read at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,

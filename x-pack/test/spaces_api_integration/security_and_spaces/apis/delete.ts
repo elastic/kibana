@@ -55,7 +55,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      deleteTest(`${scenario.users.noAccess.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.noAccess.USERNAME,
@@ -77,7 +77,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.superuser.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.superuser.USERNAME,
@@ -99,7 +99,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.allGlobally.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.allGlobally.USERNAME,
@@ -121,7 +121,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.dualAll.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`dual-privileges user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.dualAll.USERNAME,
@@ -143,7 +143,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.legacyAll.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.legacyAll.USERNAME,
@@ -165,7 +165,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.readGlobally.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.readGlobally.USERNAME,
@@ -187,7 +187,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.dualRead.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.dualRead.USERNAME,
@@ -209,7 +209,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.legacyRead.USERNAME} from the ${scenario.spaceId} space`, {
+      deleteTest(`legacy readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.legacyRead.USERNAME,
@@ -234,7 +234,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      deleteTest(`${scenario.users.allAtSpace} from the ${scenario.spaceId} space`, {
+      deleteTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.allAtSpace.USERNAME,

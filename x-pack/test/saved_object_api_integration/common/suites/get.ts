@@ -11,7 +11,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface GetTests {
@@ -36,7 +36,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(doesntExistId, spaceId);
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -45,7 +45,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       message: `Saved object [visualization/${getIdPrefix(spaceId)}${id}] not found`,
@@ -57,7 +59,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
-  const createExpectNotSpaceAwareRbacForbidden = () => (resp: any) => {
+  const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
       message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
@@ -65,7 +67,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const createExpectNotSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectNotSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       id: `${notSpaceAwareId}`,
       type: 'globaltype',
@@ -81,7 +85,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
-  const createExpectSpaceAwareRbacForbidden = () => (resp: any) => {
+  const createExpectSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
       message: `Unable to get visualization, missing action:saved_objects/visualization/get`,
@@ -89,7 +93,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
       type: 'visualization',

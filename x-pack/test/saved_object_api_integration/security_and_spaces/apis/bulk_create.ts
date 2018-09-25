@@ -57,7 +57,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      bulkCreateTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`user with no access within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.noAccess.USERNAME,
           password: scenario.users.noAccess.PASSWORD,
@@ -71,7 +71,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`superuser within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.superuser.USERNAME,
           password: scenario.users.superuser.PASSWORD,
@@ -85,7 +85,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`legacy user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyAll.USERNAME,
           password: scenario.users.legacyAll.PASSWORD,
@@ -99,7 +99,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`legacy readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyRead.USERNAME,
           password: scenario.users.legacyRead.PASSWORD,
@@ -113,7 +113,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualAll.USERNAME,
           password: scenario.users.dualAll.PASSWORD,
@@ -127,7 +127,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualRead.USERNAME,
           password: scenario.users.dualRead.PASSWORD,
@@ -141,41 +141,35 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(
-        `${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.allGlobally.USERNAME,
-            password: scenario.users.allGlobally.PASSWORD,
+      bulkCreateTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 200,
-              response: createExpectResults(scenario.spaceId),
-            },
-          },
-        }
-      );
+        },
+      });
 
-      bulkCreateTest(
-        `${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.readGlobally.USERNAME,
-            password: scenario.users.readGlobally.PASSWORD,
+      bulkCreateTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        }
-      );
+        },
+      });
 
-      bulkCreateTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkCreateTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allAtSpace.USERNAME,
           password: scenario.users.allAtSpace.PASSWORD,
@@ -189,39 +183,33 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkCreateTest(
-        `${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.readAtSpace.USERNAME,
-            password: scenario.users.readAtSpace.PASSWORD,
+      bulkCreateTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.readAtSpace.USERNAME,
+          password: scenario.users.readAtSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        }
-      );
+        },
+      });
 
-      bulkCreateTest(
-        `${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.allAtOtherSpace.USERNAME,
-            password: scenario.users.allAtOtherSpace.PASSWORD,
+      bulkCreateTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allAtOtherSpace.USERNAME,
+          password: scenario.users.allAtOtherSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        }
-      );
+        },
+      });
     });
   });
 }

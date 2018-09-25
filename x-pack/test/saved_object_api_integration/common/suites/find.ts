@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 interface FindTest {
   statusCode: number;
   description: string;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface FindTests {
@@ -31,7 +31,9 @@ interface FindTestDefinition {
 }
 
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: any) => {
+  const createExpectEmpty = (page: number, perPage: number, total: number) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       page,
       per_page: perPage,
@@ -40,7 +42,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectRbacForbidden = (type?: string) => (resp: any) => {
+  const createExpectRbacForbidden = (type?: string) => (resp: { [key: string]: any }) => {
     const message = type
       ? `Unable to find ${type}, missing action:saved_objects/${type}/find`
       : `Not authorized to find saved_object`;
@@ -52,7 +54,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -61,7 +63,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const expectNotSpaceAwareResults = (resp: any) => {
+  const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       page: 1,
       per_page: 20,
@@ -79,7 +81,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const expectTypeRequired = (resp: any) => {
+  const expectTypeRequired = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Bad Request',
       message: 'child "type" fails because ["type" is required]',
@@ -91,7 +93,9 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+  const createExpectVisualizationResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       page: 1,
       per_page: 20,

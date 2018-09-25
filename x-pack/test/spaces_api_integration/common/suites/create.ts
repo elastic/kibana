@@ -11,7 +11,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface CreateTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface CreateTests {
@@ -27,7 +27,9 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbiddenResponse = (username: string) => (resp: any) => {
+  const createExpectLegacyForbiddenResponse = (username: string) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -35,14 +37,14 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectConflictResponse = (resp: any) => {
+  const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
     expect(resp.body.statusCode).to.equal(409);
     expect(resp.body.message).to.match(new RegExp(`A space with the identifier .*`));
   };
 
-  const expectNewSpaceResult = (resp: any) => {
+  const expectNewSpaceResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       name: 'marketing',
       id: 'marketing',
@@ -51,7 +53,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectRbacForbiddenResponse = (resp: any) => {
+  const expectRbacForbiddenResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -59,7 +61,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectReservedSpecifiedResult = (resp: any) => {
+  const expectReservedSpecifiedResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       name: 'reserved space',
       id: 'reserved',

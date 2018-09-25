@@ -10,7 +10,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface GetTests {
@@ -27,11 +27,11 @@ interface GetTestDefinition {
 const nonExistantSpaceId = 'not-a-space';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
-  const createExpectEmptyResult = () => (resp: any) => {
+  const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -39,14 +39,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     });
   };
 
-  const createExpectNotFoundResult = () => (resp: any) => {
+  const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
     });
   };
 
-  const createExpectRbacForbidden = (spaceId: string) => (resp: any) => {
+  const createExpectRbacForbidden = (spaceId: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -54,7 +54,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     });
   };
 
-  const createExpectResults = (spaceId: string) => (resp: any) => {
+  const createExpectResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     const allSpaces = [
       {
         id: 'default',

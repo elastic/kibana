@@ -56,215 +56,183 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      updateTest(
-        `${scenario.users.noAccess.USERNAME} can't update space_1 from
-        the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.noAccess.USERNAME,
-            password: scenario.users.noAccess.PASSWORD,
+      updateTest(`user with no access from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
-            },
-            defaultSpace: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
-            },
-            newSpace: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
-            },
+          defaultSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
           },
-        }
-      );
+          newSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.superuser.USERNAME} can update space_1 from
-        the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.superuser.USERNAME,
-            password: scenario.users.superuser.PASSWORD,
+      updateTest(`superuser from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 200,
-              response: expectAlreadyExistsResult,
-            },
-            defaultSpace: {
-              statusCode: 200,
-              response: expectDefaultSpaceResult,
-            },
-            newSpace: {
-              statusCode: 404,
-              response: expectNotFound,
-            },
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.allGlobally.USERNAME} can update space_1 from
-        the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.allGlobally.USERNAME,
-            password: scenario.users.allGlobally.PASSWORD,
+      updateTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 200,
-              response: expectAlreadyExistsResult,
-            },
-            defaultSpace: {
-              statusCode: 200,
-              response: expectDefaultSpaceResult,
-            },
-            newSpace: {
-              statusCode: 404,
-              response: expectNotFound,
-            },
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.dualAll.USERNAME} can update space_1 from
-        the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.dualAll.USERNAME,
-            password: scenario.users.dualAll.PASSWORD,
+      updateTest(`dual-privileges used from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 200,
-              response: expectAlreadyExistsResult,
-            },
-            defaultSpace: {
-              statusCode: 200,
-              response: expectDefaultSpaceResult,
-            },
-            newSpace: {
-              statusCode: 404,
-              response: expectNotFound,
-            },
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.legacyAll.USERNAME} can update space_1 from
-        the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.legacyAll.USERNAME,
-            password: scenario.users.legacyAll.PASSWORD,
+      updateTest(`legacy user from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 200,
-              response: expectAlreadyExistsResult,
-            },
-            defaultSpace: {
-              statusCode: 200,
-              response: expectDefaultSpaceResult,
-            },
-            newSpace: {
-              statusCode: 404,
-              response: expectNotFound,
-            },
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 404,
+            response: expectNotFound,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.readGlobally.USERNAME} cannot update space_1
-        from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.readGlobally.USERNAME,
-            password: scenario.users.readGlobally.PASSWORD,
+      updateTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            defaultSpace: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            newSpace: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
+          defaultSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.dualRead.USERNAME} cannot update space_1
-        from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.dualRead.USERNAME,
-            password: scenario.users.dualRead.PASSWORD,
+      updateTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            defaultSpace: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            newSpace: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
+          defaultSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-        }
-      );
+          newSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
 
-      updateTest(
-        `${scenario.users.legacyRead.USERNAME} cannot update space_1
-        from the ${scenario.spaceId} space`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.legacyRead.USERNAME,
-            password: scenario.users.legacyRead.PASSWORD,
+      updateTest(`legacy readonly user from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
+        },
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
           },
-          tests: {
-            alreadyExists: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
-            },
-            defaultSpace: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
-            },
-            newSpace: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
-            },
+          defaultSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
           },
-        }
-      );
+          newSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+          },
+        },
+      });
 
-      updateTest(`${scenario.users.allAtSpace.USERNAME} cannot update space_1`, {
+      updateTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.allAtSpace.USERNAME,
@@ -286,7 +254,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.users.readAtSpace.USERNAME} cannot update space_1`, {
+      updateTest(`rbac user with read at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         auth: {
           username: scenario.users.readAtSpace.USERNAME,

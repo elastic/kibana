@@ -10,7 +10,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetAllTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface GetAllTests {
@@ -24,7 +24,7 @@ interface GetAllTestDefinition {
 }
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -32,7 +32,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectResults = (...spaceIds: string[]) => (resp: any) => {
+  const createExpectResults = (...spaceIds: string[]) => (resp: { [key: string]: any }) => {
     const expectedBody = [
       {
         id: 'default',
@@ -54,7 +54,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql(expectedBody);
   };
 
-  const expectEmptyResult = (resp: any) => {
+  const expectEmptyResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
 

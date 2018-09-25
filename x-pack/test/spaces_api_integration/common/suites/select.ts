@@ -12,7 +12,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface SelectTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface SelectTests {
@@ -29,11 +29,11 @@ interface SelectTestDefinition {
 const nonExistantSpaceId = 'not-a-space';
 
 export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectEmptyResult = () => (resp: any) => {
+  const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -41,14 +41,14 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectNotFoundResult = () => (resp: any) => {
+  const createExpectNotFoundResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
     });
   };
 
-  const createExpectRbacForbidden = (spaceId: any) => (resp: any) => {
+  const createExpectRbacForbidden = (spaceId: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -56,7 +56,7 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectResults = (spaceId: string) => (resp: any) => {
+  const createExpectResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     const allSpaces = [
       {
         id: 'default',
@@ -78,7 +78,7 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
   };
 
-  const createExpectSpaceResponse = (spaceId: string) => (resp: any) => {
+  const createExpectSpaceResponse = (spaceId: string) => (resp: { [key: string]: any }) => {
     if (spaceId === DEFAULT_SPACE_ID) {
       expectDefaultSpaceResponse(resp);
     } else {
@@ -88,7 +88,7 @@ export function selectTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }
   };
 
-  const expectDefaultSpaceResponse = (resp: any) => {
+  const expectDefaultSpaceResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       location: `/app/kibana`,
     });

@@ -27,7 +27,6 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
     // Tests with users that have privileges globally in Kibana
     [
       {
-        // Select the spaceId with the user in the currentSpaceId with the following users
         currentSpaceId: SPACES.DEFAULT.spaceId,
         selectSpaceId: SPACES.SPACE_1.spaceId,
         users: {
@@ -42,7 +41,6 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         },
       },
       {
-        // Select the spaceId when the user is the currentSpaceId with the following users
         currentSpaceId: SPACES.SPACE_1.spaceId,
         selectSpaceId: SPACES.DEFAULT.spaceId,
         users: {
@@ -57,84 +55,107 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      selectTest(`${scenario.users.noAccess.USERNAME} selects ${scenario.selectSpaceId}`, {
-        currentSpaceId: scenario.currentSpaceId,
-        selectSpaceId: scenario.selectSpaceId,
-        auth: {
-          username: scenario.users.noAccess.USERNAME,
-          password: scenario.users.noAccess.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+      selectTest(
+        `user with no access selects ${scenario.selectSpaceId} space from the ${
+          scenario.currentSpaceId
+        } space`,
+        {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.noAccess.USERNAME,
+            password: scenario.users.noAccess.PASSWORD,
           },
-        },
-      });
-
-      selectTest(`${scenario.users.superuser.USERNAME} selects ${scenario.selectSpaceId}`, {
-        currentSpaceId: scenario.currentSpaceId,
-        selectSpaceId: scenario.selectSpaceId,
-        auth: {
-          username: scenario.users.superuser.USERNAME,
-          password: scenario.users.superuser.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectSpaceResponse(scenario.selectSpaceId),
+          tests: {
+            default: {
+              statusCode: 403,
+              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            },
           },
-        },
-      });
-
-      selectTest(`${scenario.users.allGlobally.USERNAME} selects ${scenario.selectSpaceId}`, {
-        currentSpaceId: scenario.currentSpaceId,
-        selectSpaceId: scenario.selectSpaceId,
-        auth: {
-          username: scenario.users.allGlobally.USERNAME,
-          password: scenario.users.allGlobally.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectSpaceResponse(scenario.selectSpaceId),
-          },
-        },
-      });
-
-      selectTest(`${scenario.users.dualAll.USERNAME} selects ${scenario.selectSpaceId}`, {
-        currentSpaceId: scenario.currentSpaceId,
-        selectSpaceId: scenario.selectSpaceId,
-        auth: {
-          username: scenario.users.dualAll.USERNAME,
-          password: scenario.users.dualAll.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectSpaceResponse(scenario.selectSpaceId),
-          },
-        },
-      });
-
-      selectTest(`${scenario.users.legacyAll.USERNAME} selects ${scenario.selectSpaceId}`, {
-        currentSpaceId: scenario.currentSpaceId,
-        selectSpaceId: scenario.selectSpaceId,
-        auth: {
-          username: scenario.users.legacyAll.USERNAME,
-          password: scenario.users.legacyAll.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectSpaceResponse(scenario.selectSpaceId),
-          },
-        },
-      });
+        }
+      );
 
       selectTest(
-        `${scenario.users.readGlobally.USERNAME} selects ${scenario.selectSpaceId} from
-        ${scenario.currentSpaceId}`,
+        `superuser selects ${scenario.selectSpaceId} space from the ${
+          scenario.currentSpaceId
+        } space`,
+        {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.superuser.USERNAME,
+            password: scenario.users.superuser.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 200,
+              response: createExpectSpaceResponse(scenario.selectSpaceId),
+            },
+          },
+        }
+      );
+
+      selectTest(
+        `rbac user with all globally selects ${scenario.selectSpaceId} space from the ${
+          scenario.currentSpaceId
+        } space`,
+        {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.allGlobally.USERNAME,
+            password: scenario.users.allGlobally.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 200,
+              response: createExpectSpaceResponse(scenario.selectSpaceId),
+            },
+          },
+        }
+      );
+
+      selectTest(
+        `dual-privileges user selects ${scenario.selectSpaceId} space from the ${
+          scenario.currentSpaceId
+        }`,
+        {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.dualAll.USERNAME,
+            password: scenario.users.dualAll.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 200,
+              response: createExpectSpaceResponse(scenario.selectSpaceId),
+            },
+          },
+        }
+      );
+
+      selectTest(
+        `legacy user selects ${scenario.selectSpaceId} space from the ${scenario.currentSpaceId}`,
+        {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.legacyAll.USERNAME,
+            password: scenario.users.legacyAll.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 200,
+              response: createExpectSpaceResponse(scenario.selectSpaceId),
+            },
+          },
+        }
+      );
+
+      selectTest(
+        `user with read globally selects ${scenario.selectSpaceId} space from the
+        ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -152,8 +173,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.dualRead.USERNAME} selects ${scenario.selectSpaceId} from
-        ${scenario.currentSpaceId}`,
+        `dual-privileges readonly user selects ${scenario.selectSpaceId} space from
+        the ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -171,8 +192,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.legacyRead.USERNAME} can select ${scenario.selectSpaceId}
-        from ${scenario.currentSpaceId}`,
+        `legacy readonly user selects ${scenario.selectSpaceId} space
+        from the ${scenario.currentSpaceId} space`,
         {
           currentSpaceId: scenario.currentSpaceId,
           selectSpaceId: scenario.selectSpaceId,
@@ -211,8 +232,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       },
     ].forEach(scenario => {
       selectTest(
-        `${scenario.users.allAtSpace.USERNAME} can select ${scenario.spaceId}
-        from ${scenario.spaceId}`,
+        `rbac user with all at space can select ${scenario.spaceId}
+        from the same space`,
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
@@ -230,8 +251,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.readAtSpace.USERNAME} can select ${scenario.spaceId}
-        from ${scenario.spaceId}`,
+        `rbac user with read at space can select ${scenario.spaceId}
+        from the same space`,
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
@@ -249,8 +270,8 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.allAtOtherSpace.USERNAME} cannot select ${scenario.spaceId}
-        from ${scenario.spaceId}`,
+        `rbac user with all at other space cannot select ${scenario.spaceId}
+        from the same space`,
         {
           currentSpaceId: scenario.spaceId,
           selectSpaceId: scenario.spaceId,
@@ -283,7 +304,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       },
     ].forEach(scenario => {
       selectTest(
-        `${scenario.users.userWithAllAtSpace.USERNAME} can select ${scenario.selectSpaceId}
+        `rbac user with all at ${scenario.selectSpaceId} can select ${scenario.selectSpaceId}
         from ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
@@ -302,7 +323,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.userWithAllAtBothSpaces.USERNAME} can select ${scenario.selectSpaceId}
+        `rbac user with all at both spaces can select ${scenario.selectSpaceId}
         from ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
@@ -321,7 +342,9 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       selectTest(
-        `${scenario.users.userWithAllAtOtherSpace.USERNAME} cannot select ${scenario.selectSpaceId}
+        `rbac user with all at ${scenario.currentSpaceId} space cannot select ${
+          scenario.selectSpaceId
+        }
         from ${scenario.currentSpaceId}`,
         {
           currentSpaceId: scenario.currentSpaceId,
@@ -360,41 +383,35 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
           },
         },
       ].forEach(scenario => {
-        selectTest(
-          `${scenario.users.userWithAllGlobally.USERNAME} cannot access non-existant space`,
-          {
-            currentSpaceId: scenario.currentSpaceId,
-            selectSpaceId: scenario.selectSpaceId,
-            auth: {
-              username: scenario.users.userWithAllGlobally.USERNAME,
-              password: scenario.users.userWithAllGlobally.PASSWORD,
+        selectTest(`rbac user with all globally cannot access non-existent space`, {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.userWithAllGlobally.USERNAME,
+            password: scenario.users.userWithAllGlobally.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 404,
+              response: createExpectNotFoundResult(),
             },
-            tests: {
-              default: {
-                statusCode: 404,
-                response: createExpectNotFoundResult(),
-              },
-            },
-          }
-        );
+          },
+        });
 
-        selectTest(
-          `${scenario.users.userWithAllAtSpace.USERNAME} cannot access non-existant space`,
-          {
-            currentSpaceId: scenario.currentSpaceId,
-            selectSpaceId: scenario.selectSpaceId,
-            auth: {
-              username: scenario.users.userWithAllAtSpace.USERNAME,
-              password: scenario.users.userWithAllAtSpace.PASSWORD,
+        selectTest(`rbac user with all at space cannot access non-existent space`, {
+          currentSpaceId: scenario.currentSpaceId,
+          selectSpaceId: scenario.selectSpaceId,
+          auth: {
+            username: scenario.users.userWithAllAtSpace.USERNAME,
+            password: scenario.users.userWithAllAtSpace.PASSWORD,
+          },
+          tests: {
+            default: {
+              statusCode: 403,
+              response: createExpectRbacForbidden(scenario.selectSpaceId),
             },
-            tests: {
-              default: {
-                statusCode: 403,
-                response: createExpectRbacForbidden(scenario.selectSpaceId),
-              },
-            },
-          }
-        );
+          },
+        });
       });
     });
   });

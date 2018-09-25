@@ -10,7 +10,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface DeleteTests {
@@ -26,7 +26,9 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string, action: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string, action: string) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -34,11 +36,11 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const createExpectResult = (expectedResult: any) => (resp: any) => {
+  const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
 
-  const expectEmptyResult = async (resp: any) => {
+  const expectEmptyResult = async (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
 
     // Query ES to ensure that we deleted everything we expected, and nothing we didn't
@@ -109,14 +111,14 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(buckets).to.eql(expectedBuckets);
   };
 
-  const expectNotFound = (resp: any) => {
+  const expectNotFound = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
     });
   };
 
-  const expectRbacForbidden = (resp: any) => {
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -124,7 +126,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const expectReservedSpaceResult = (resp: any) => {
+  const expectReservedSpaceResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Bad Request',
       statusCode: 400,

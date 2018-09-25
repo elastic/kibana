@@ -56,7 +56,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      bulkGetTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`user with no access within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.noAccess.USERNAME,
           password: scenario.users.noAccess.PASSWORD,
@@ -70,7 +70,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`superuser within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.superuser.USERNAME,
           password: scenario.users.superuser.PASSWORD,
@@ -84,7 +84,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`legacy user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyAll.USERNAME,
           password: scenario.users.legacyAll.PASSWORD,
@@ -98,7 +98,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`legacy readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.legacyRead.USERNAME,
           password: scenario.users.legacyRead.PASSWORD,
@@ -112,7 +112,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualAll.USERNAME,
           password: scenario.users.dualAll.PASSWORD,
@@ -126,7 +126,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.dualRead.USERNAME,
           password: scenario.users.dualRead.PASSWORD,
@@ -140,7 +140,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allGlobally.USERNAME,
           password: scenario.users.allGlobally.PASSWORD,
@@ -154,7 +154,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.readGlobally.USERNAME,
           password: scenario.users.readGlobally.PASSWORD,
@@ -168,7 +168,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allAtSpace.USERNAME,
           password: scenario.users.allAtSpace.PASSWORD,
@@ -182,7 +182,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(`${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      bulkGetTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.readAtSpace.USERNAME,
           password: scenario.users.readAtSpace.PASSWORD,
@@ -196,22 +196,19 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      bulkGetTest(
-        `${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`,
-        {
-          auth: {
-            username: scenario.users.allAtOtherSpace.USERNAME,
-            password: scenario.users.allAtOtherSpace.PASSWORD,
+      bulkGetTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
+        auth: {
+          username: scenario.users.allAtOtherSpace.USERNAME,
+          password: scenario.users.allAtOtherSpace.PASSWORD,
+        },
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-          },
-        }
-      );
+        },
+      });
     });
   });
 }

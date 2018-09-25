@@ -60,7 +60,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      getTest(`${scenario.users.noAccess.USERNAME}`, {
+      getTest(`user with no access`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -75,7 +75,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.superuser.USERNAME}`, {
+      getTest(`superuser`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -90,7 +90,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.allGlobally.USERNAME}`, {
+      getTest(`rbac user with all globally`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -105,7 +105,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.dualAll.USERNAME}`, {
+      getTest(`dual-privileges user`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -120,7 +120,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.legacyAll.USERNAME}`, {
+      getTest(`legacy user`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -135,7 +135,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.readGlobally.USERNAME}`, {
+      getTest(`rbac user with read globally`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -150,7 +150,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.dualRead.USERNAME}`, {
+      getTest(`dual-privileges readonly user`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -165,7 +165,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.legacyRead.USERNAME}`, {
+      getTest(`legacy readonly`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -180,7 +180,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.readAtSpace.USERNAME} at ${scenario.spaceId}`, {
+      getTest(`rbac user with read at space from the ${scenario.spaceId} space`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
@@ -195,20 +195,25 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.users.allAtOtherSpace.USERNAME} at a different space`, {
-        currentSpaceId: scenario.otherSpaceId,
-        spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allAtOtherSpace.USERNAME,
-          password: scenario.users.allAtOtherSpace.PASSWORD,
-        },
-        tests: {
-          default: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(scenario.spaceId),
+      getTest(
+        `rbac user with all at other space from the ${scenario.otherSpaceId} getting the ${
+          scenario.spaceId
+        }`,
+        {
+          currentSpaceId: scenario.otherSpaceId,
+          spaceId: scenario.spaceId,
+          auth: {
+            username: scenario.users.allAtOtherSpace.USERNAME,
+            password: scenario.users.allAtOtherSpace.PASSWORD,
           },
-        },
-      });
+          tests: {
+            default: {
+              statusCode: 403,
+              response: createExpectRbacForbidden(scenario.spaceId),
+            },
+          },
+        }
+      );
     });
 
     describe('non-existant space', () => {
@@ -227,7 +232,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         },
       ].forEach(scenario => {
-        getTest(`${scenario.users.allGlobally.USERNAME}`, {
+        getTest(`rbac user with all globally`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -242,7 +247,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.dualAll.USERNAME}`, {
+        getTest(`dual-privileges user`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -257,7 +262,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.legacyAll.USERNAME}`, {
+        getTest(`legacy user`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -272,7 +277,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.readGlobally.USERNAME}`, {
+        getTest(`rbac user with read globally`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -287,7 +292,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.dualRead.USERNAME}`, {
+        getTest(`dual-privileges readonly user`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -302,7 +307,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.legacyRead.USERNAME}`, {
+        getTest(`legacy readonly user`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
@@ -317,7 +322,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.users.allAtDefaultSpace.USERNAME}`, {
+        getTest(`rbac user with all at default space`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {

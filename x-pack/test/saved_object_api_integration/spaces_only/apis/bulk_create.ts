@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
-const expectNamespaceSpecifiedBadRequest = (resp: any) => {
+const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   expect(resp.body).to.eql({
     error: 'Bad Request',
     message:

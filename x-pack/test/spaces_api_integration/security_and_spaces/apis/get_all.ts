@@ -56,178 +56,148 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      getAllTest(
-        `${scenario.users.noAccess.USERNAME} can't access any spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.noAccess.USERNAME,
-            password: scenario.users.noAccess.PASSWORD,
+      getAllTest(`user with no access can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
           },
-          tests: {
-            exists: {
-              statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
-            },
+        },
+      });
+
+      getAllTest(`superuser can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
           },
-        }
-      );
+        },
+      });
+
+      getAllTest(`rbac user with all globally can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`dual-privileges user can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`legacy user can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`rbac user with read globally can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`dual-privileges readonly user can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`legacy readonly user can access all spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+        },
+      });
+
+      getAllTest(`rbac user with all at space_1 can access space_1 from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.allAtSpace_1.USERNAME,
+          password: scenario.users.allAtSpace_1.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('space_1'),
+          },
+        },
+      });
+
+      getAllTest(`rbac user with read at space_1 can access space_1 from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        auth: {
+          username: scenario.users.readAtSpace_1.USERNAME,
+          password: scenario.users.readAtSpace_1.PASSWORD,
+        },
+        tests: {
+          exists: {
+            statusCode: 200,
+            response: createExpectResults('space_1'),
+          },
+        },
+      });
 
       getAllTest(
-        `${scenario.users.superuser.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.superuser.USERNAME,
-            password: scenario.users.superuser.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.allGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.allGlobally.USERNAME,
-            password: scenario.users.allGlobally.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.dualAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.dualAll.USERNAME,
-            password: scenario.users.dualAll.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.legacyAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.legacyAll.USERNAME,
-            password: scenario.users.legacyAll.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.readGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.readGlobally.USERNAME,
-            password: scenario.users.readGlobally.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.dualRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.dualRead.USERNAME,
-            password: scenario.users.dualRead.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.legacyRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.legacyRead.USERNAME,
-            password: scenario.users.legacyRead.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('default', 'space_1', 'space_2'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.allAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.allAtSpace_1.USERNAME,
-            password: scenario.users.allAtSpace_1.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('space_1'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.readAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
-        {
-          spaceId: scenario.spaceId,
-          auth: {
-            username: scenario.users.readAtSpace_1.USERNAME,
-            password: scenario.users.readAtSpace_1.PASSWORD,
-          },
-          tests: {
-            exists: {
-              statusCode: 200,
-              response: createExpectResults('space_1'),
-            },
-          },
-        }
-      );
-
-      getAllTest(
-        `${scenario.users.allAtDefaultSpace.USERNAME} can access default from ${scenario.spaceId}`,
+        `rbac user with all at default space can access default from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
@@ -244,7 +214,7 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.users.readAtDefaultSpace.USERNAME} can access default from ${scenario.spaceId}`,
+        `rbac user with read at default space can access default from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {

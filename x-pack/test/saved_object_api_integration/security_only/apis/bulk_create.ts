@@ -22,7 +22,7 @@ export default function({ getService }: TestInvoker) {
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
-    bulkCreateTest(`not a kibana user`, {
+    bulkCreateTest(`user with no access`, {
       auth: {
         username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
         password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -48,7 +48,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana legacy user`, {
+    bulkCreateTest(`legacy user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -61,7 +61,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana legacy dashboard only user`, {
+    bulkCreateTest(`legacy readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -76,7 +76,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana dual-privileges user`, {
+    bulkCreateTest(`dual-privileges user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -89,7 +89,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana dual-privileges dashboard only user`, {
+    bulkCreateTest(`dual-privileges readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -102,7 +102,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac user`, {
+    bulkCreateTest(`rbac user with all globally`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -115,7 +115,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac dashboard only user`, {
+    bulkCreateTest(`rbac readonly user`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -128,7 +128,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac default space all user`, {
+    bulkCreateTest(`rbac user with all at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
@@ -143,7 +143,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac default space read user`, {
+    bulkCreateTest(`rbac user with read at default space`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
@@ -158,7 +158,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac space 1 all user`, {
+    bulkCreateTest(`rbac user with all at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
@@ -173,7 +173,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    bulkCreateTest(`kibana rbac space 1 readonly user`, {
+    bulkCreateTest(`rbac user with read at space_1`, {
       auth: {
         username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
         password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,

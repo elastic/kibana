@@ -59,7 +59,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      findTest(`${scenario.users.noAccess.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`user with no access within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
           password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
@@ -99,7 +99,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.superuser.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`superuser within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.SUPERUSER.USERNAME,
           password: AUTHENTICATION.SUPERUSER.PASSWORD,
@@ -139,7 +139,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.legacyAll.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`legacy user within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
@@ -179,7 +179,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.legacyRead.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`legacy readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
@@ -219,7 +219,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.dualAll.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
@@ -259,7 +259,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.dualRead.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
@@ -299,7 +299,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.allGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
@@ -339,7 +339,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.readGlobally.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
         auth: {
           username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
           password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
@@ -379,7 +379,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.allAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allAtSpace.USERNAME,
           password: scenario.users.allAtSpace.PASSWORD,
@@ -419,7 +419,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.readAtSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.readAtSpace.USERNAME,
           password: scenario.users.readAtSpace.PASSWORD,
@@ -459,7 +459,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      findTest(`${scenario.users.allAtOtherSpace.USERNAME} within the ${scenario.spaceId} space`, {
+      findTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
         auth: {
           username: scenario.users.allAtOtherSpace.USERNAME,
           password: scenario.users.allAtOtherSpace.PASSWORD,

@@ -10,7 +10,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface UpdateTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface UpdateTests {
@@ -26,7 +26,7 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectRbacForbidden = (resp: any) => {
+  const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -34,7 +34,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -42,14 +42,14 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectNotFound = (resp: any) => {
+  const expectNotFound = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
     });
   };
 
-  const expectDefaultSpaceResult = (resp: any) => {
+  const expectDefaultSpaceResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       name: 'the new default',
       id: 'default',
@@ -59,7 +59,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectAlreadyExistsResult = (resp: any) => {
+  const expectAlreadyExistsResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       name: 'space 1',
       id: 'space_1',
@@ -76,19 +76,21 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.alreadyExists.statusCode}`, async () => {
-        return supertest
-          .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
-          .auth(auth.username, auth.password)
-          .send({
-            name: 'space 1',
-            id: 'space_1',
-            description: 'a description',
-            color: '#5c5959',
-            _reserved: true,
-          })
-          .expect(tests.alreadyExists.statusCode)
-          .then(tests.alreadyExists.response);
+      describe('space_1', () => {
+        it(`should return ${tests.alreadyExists.statusCode}`, async () => {
+          return supertest
+            .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
+            .auth(auth.username, auth.password)
+            .send({
+              name: 'space 1',
+              id: 'space_1',
+              description: 'a description',
+              color: '#5c5959',
+              _reserved: true,
+            })
+            .expect(tests.alreadyExists.statusCode)
+            .then(tests.alreadyExists.response);
+        });
       });
 
       describe(`default space`, () => {

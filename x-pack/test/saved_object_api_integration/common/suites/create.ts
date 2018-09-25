@@ -11,7 +11,7 @@ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface CreateTest {
   statusCode: number;
-  response: (resp: any) => void;
+  response: (resp: { [key: string]: any }) => void;
 }
 
 interface CreateCustomTest extends CreateTest {
@@ -36,7 +36,7 @@ const spaceAwareType = 'visualization';
 const notSpaceAwareType = 'globaltype';
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -45,7 +45,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const createExpectRbacForbidden = (type: string) => (resp: any) => {
+  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
@@ -53,7 +53,9 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: any) => {
+  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body)
       .to.have.property('id')
       .match(/^[0-9a-f-]{36}$/);
@@ -93,7 +95,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden(notSpaceAwareType);
 
-  const expectNotSpaceAwareResults = async (resp: any) => {
+  const expectNotSpaceAwareResults = async (resp: { [key: string]: any }) => {
     expect(resp.body)
       .to.have.property('id')
       .match(/^[0-9a-f-]{36}$/);
