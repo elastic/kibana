@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { parse } from 'url';
 import { get } from 'lodash';
 import 'ui/autoload/styles';
-import 'plugins/security/views/login/login.less';
 import chrome from 'ui/chrome';
 import { parseNext } from 'plugins/security/lib/parse_next';
-import template from 'plugins/security/views/login/login.html';
-
+import template from 'plugins/security/views/login/login_react.html';
+import { LoginPage } from 'plugins/security/views/login/components/login_page';
+import './login.less';
 const messageMap = {
   SESSION_EXPIRED: 'Your session has expired. Please log in again.'
 };
@@ -19,32 +21,25 @@ const messageMap = {
 chrome
   .setVisible(false)
   .setRootTemplate(template)
-  .setRootController('login', function ($http, $window, secureCookies, loginState) {
+  .setRootController('login', function ($scope, $http, $window, secureCookies, loginState) {
     const basePath = chrome.getBasePath();
     const next = parseNext($window.location.href, basePath);
     const isSecure = !!$window.location.protocol.match(/^https/);
-    const self = this;
 
-    function setupScope() {
-      self.layout = loginState.layout;
-      self.allowLogin = loginState.allowLogin;
-      self.loginMessage = loginState.loginMessage;
-      self.infoMessage = get(messageMap, parse($window.location.href, true).query.msg);
-      self.isDisabled = !isSecure && secureCookies;
-      self.isLoading = false;
-      self.submit = (username, password) => {
-        self.isLoading = true;
-        self.error = false;
-        $http.post('./api/security/v1/login', { username, password }).then(
-          () => $window.location.href = next,
-          () => {
-            setupScope();
-            self.error = true;
-            self.isLoading = false;
-          }
-        );
-      };
-    }
+    $scope.$$postDigest(() => {
+      const domNode = document.getElementById('reactLoginRoot');
 
-    setupScope();
+      render((
+        <LoginPage
+          http={$http}
+          window={$window}
+          infoMessage={get(messageMap, parse($window.location.href, true).query.msg)}
+          loginState={loginState}
+          isSecureConnection={isSecure}
+          requiresSecureConnection={secureCookies}
+          next={next}
+        />
+      ), domNode);
+    });
+
   });
