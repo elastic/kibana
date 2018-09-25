@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Registry } from '../../../../../packages/kbn-interpreter/common/lib/registry';
+import { Registry } from '@kbn/interpreter/common/lib/registry';
 import { Transition } from '../transitions/transition';
 
 class TransitionsRegistry extends Registry {

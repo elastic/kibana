@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { socketInterpreterProvider } from '../../../../packages/kbn-interpreter/common/interpreter/socket_interpret';
-import { serializeProvider } from '../../../../packages/kbn-interpreter/common/lib/serialize';
+import { socketInterpreterProvider } from '@kbn/interpreter/common/interpreter/socket_interpret';
+import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { socket } from './socket';
-import { typesRegistry } from '../../../../packages/kbn-interpreter/common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from '../../../../x-pack/plugins/canvas/public/lib/functions_registry';
 import { loadBrowserPlugins } from '../../../../x-pack/plugins/canvas/public/lib/load_browser_plugins';
 
 // Create the function list

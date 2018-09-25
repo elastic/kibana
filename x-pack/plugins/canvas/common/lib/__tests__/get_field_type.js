@@ -5,11 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { emptyTable, testTable } from '@kbn/interpreter/test_utils';
 import { getFieldType } from '../get_field_type';
-import {
-  emptyTable,
-  testTable,
-} from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
 
 describe('getFieldType', () => {
   it('returns type of a field in a datatable', () => {

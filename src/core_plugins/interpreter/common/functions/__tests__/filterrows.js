@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 import { filterrows } from '../filterrows';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
-import { testTable } from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
+import { functionWrapper, testTable } from '@kbn/interpreter/test_utils';
 
 const inStock = datatable => datatable.rows[0].in_stock;
 const returnFalse = () => false;

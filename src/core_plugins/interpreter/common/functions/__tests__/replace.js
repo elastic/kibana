@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { replace } from '../replace';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('replace', () => {
   const fn = functionWrapper(replace);
@@ -75,7 +75,7 @@ describe('replace', () => {
         expect(fn('AaBbAaBb', { pattern: 'a', flags: '', replacement: '_' })).to.be('A_BbAaBb');
       });
 
-      it("defaults to 'g' if flag is not provided", () => {
+      it('defaults to \'g\' if flag is not provided', () => {
         expect(fn('This,is,a,test!', { pattern: ',', replacement: ' ' })).to.be('This is a test!');
       });
     });

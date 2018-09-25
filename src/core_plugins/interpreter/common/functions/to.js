@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { castProvider } from '../../../../../packages/kbn-interpreter/common/interpreter/cast';
+import { castProvider } from '@kbn/interpreter/common/interpreter/cast';
 
 export const to = () => ({
   name: 'to',

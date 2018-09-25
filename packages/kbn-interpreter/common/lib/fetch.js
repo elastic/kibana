@@ -18,7 +18,7 @@
  */
 
 import axios from 'axios';
-import { FETCH_TIMEOUT } from '../../../../x-pack/plugins/canvas/common/lib/constants';
+import { FETCH_TIMEOUT } from './constants';
 
 export const fetch = axios.create({
   headers: {

@@ -18,9 +18,9 @@
  */
 
 import expect from 'expect.js';
-import { openSans } from '../../../../../../packages/kbn-interpreter/common/lib/fonts';
+import { openSans } from '@kbn/interpreter/common/lib/fonts';
 import { font } from '../font';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('font', () => {
   const fn = functionWrapper(font);
@@ -110,7 +110,7 @@ describe('font', () => {
         expect(result.css).to.contain('font-weight:400');
       });
 
-      it("defaults to 'normal'", () => {
+      it('defaults to \'normal\'', () => {
         const result = fn(null);
         expect(result.spec).to.have.property('fontWeight', 'normal');
         expect(result.css).to.contain('font-weight:normal');

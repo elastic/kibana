@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { lte } from '../lte';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('lte', () => {
   const fn = functionWrapper(lte);

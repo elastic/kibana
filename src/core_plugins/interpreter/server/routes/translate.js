@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '../../../../../packages/kbn-interpreter/common/lib/ast';
+import { fromExpression, toExpression } from '@kbn/interpreter/common/lib/ast';
 
 export function translate(server) {
   /*

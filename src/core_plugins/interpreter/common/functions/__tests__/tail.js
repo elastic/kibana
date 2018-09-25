@@ -19,8 +19,7 @@
 
 import expect from 'expect.js';
 import { tail } from '../tail';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from '../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
+import { functionWrapper, emptyTable, testTable } from '@kbn/interpreter/test_utils';
 
 describe('tail', () => {
   const fn = functionWrapper(tail);

@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import io from 'socket.io-client';
-import { functionsRegistry } from '../../../../packages/kbn-interpreter/common/lib/functions_registry';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { loadBrowserPlugins } from '../../../../x-pack/plugins/canvas/public/lib/load_browser_plugins';
 
 const basePath = chrome.getBasePath();

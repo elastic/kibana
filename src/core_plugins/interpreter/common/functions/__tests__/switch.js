@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { switchFn } from '../switch';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('switch', () => {
   const fn = functionWrapper(switchFn);

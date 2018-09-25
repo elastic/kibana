@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { asFn } from '../as';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('as', () => {
   const fn = functionWrapper(asFn);
@@ -50,7 +50,7 @@ describe('as', () => {
         expect(fn(null, { name: 'foo' }).columns[0].name).to.eql('foo');
       });
 
-      it("returns a datatable with the column name 'value'", () => {
+      it('returns a datatable with the column name \'value\'', () => {
         expect(fn(null).columns[0].name).to.eql('value');
       });
     });

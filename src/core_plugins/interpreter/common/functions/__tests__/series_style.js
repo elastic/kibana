@@ -18,8 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { seriesStyle } from '../seriesStyle';
-import { functionWrapper } from '../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { seriesStyle } from '../series_style';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 
 describe('seriesStyle', () => {
   const fn = functionWrapper(seriesStyle);
