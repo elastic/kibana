@@ -65,6 +65,8 @@ module.directive('mlExplorerChartsContainer', function (
         element[0]
       );
     }
+
+    mlExplorerDashboardService.chartsInitDone.changed();
   }
 
   return {
