@@ -42,7 +42,7 @@ node ../scripts/functional_test_runner.js --config test/reporting/configs/[test_
 
 The functional version of the reporting tests create a few pdf reports and do a snapshot comparison against a couple baselines.  The baseline images are stored in `./functional/reports/baseline`.
 
-*Note* The snapshot comparisons use a threshold due to expected visual difference when running on different browsers and different Operating Systems. This threshold is currently very high because of differences between Chromium and Phantom versions, and also because of some slight bugs with the Phantom version. The bug is [here](https://github.com/elastic/kibana/issues/21485), the issue tracking this very high threshold is [here](https://github.com/elastic/kibana/issues/21486). Once we remove Phantom support in 7.0, we can drop this threshold and hopefully catch more bugs!
+*Note:* The snapshot comparisons use a threshold due to expected visual difference when running on different browsers and different Operating Systems. This threshold is currently very high because of differences between Chromium and Phantom versions, and also because of some slight bugs with the Phantom version. The bug is [here](https://github.com/elastic/kibana/issues/21485), the issue tracking this very high threshold is [here](https://github.com/elastic/kibana/issues/21486). Once we remove Phantom support in 7.0, we can drop this threshold and hopefully catch more bugs!
 
 #### Updating the baselines
 
@@ -56,8 +56,8 @@ node scripts/functional_tests_server.js --config test/reporting/configs/chromium
   ```
   node ../scripts/functional_test_runner.js --config test/reporting/configs/chromium_functional.js
   ```
-  3. This will create new report snapshots in `functional/reports/session/`.
-  4. After manually verifying the new reports in the `session` folder, copy them into `functional/reports/baseline/`
+  3. This will create new report snapshots in [functional/reports/session/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/session).
+  4. After manually verifying the new reports in the `session` folder, copy them into [functional/reports/baseline/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/baseline)
   5. Create a new PR with the new snapshots in the baseline folder.
 
 *Note* Dashboard has some snapshot testing too, in `_dashboard_snapshots.js`. This test watches for a command line flag `--updateBaselines` which automates updating the baselines. Probably worthwhile to do some similar here in the long run.
@@ -86,13 +86,13 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 6. Log in, pick any index to be the default to get page the management screen (doesn’t matter)
 7. Generate some reporting URLs
   - Use a mixture of Visualize, Discover (CSV), Dashboard
-  - Can view the current test coverage by checkout out `api/generation_urls.js`. You can use different ones for better test coverage (e.g. different dashboards, different visualizations).
+  - Can view the current test coverage by checkout out [api/generation_urls.js](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/api/generation_urls.js). You can use different ones for better test coverage (e.g. different dashboards, different visualizations).
   - Don’t generate urls from huge dashboards since this is time consuming.  
   - Use dashboards that have time saved with them if you wish to have data included.
 8. Save these reporting urls.
 9. Navigate back to the main branch via `git checkout master`. Then create, or work off your branch as usual to add the extra test coverage.
 10. Copy the urls into `api/generation_urls.js`, stripping out the domain, port and base path (if they have it).
-11. Write your new tests in `api/bwc_generation_urls.js`
+11. Write your new tests in [api/bwc_generation_urls.js](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/api/bwc_generation_urls.js)
 12. Run tests via the mechanism above.
 
 Note: We may at some point wish to push most of these tests into an integration suite, as testing BWC of urls generated in every single minor, especially if there were not notable changes, may be overkill, especially given the time they add to the ci.
