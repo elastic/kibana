@@ -82,6 +82,8 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 ```
 ^^ That loads the data indices.
 
+*Note:* Depending on your kibana.yml configuration, you may need to adjust the username, pw, and port in the urls above.
+
 5. Navigate to Kibana in the browser (`http://localhost:5601`)
 6. Log in, pick any index to be the default to get page the management screen (doesn’t matter)
 7. Generate some reporting URLs
@@ -107,7 +109,7 @@ As Kibana development progresses, our existing data indices often fail to cover 
 
  Every now and then we should expand our test coverage to include new features. This is how you go about doing that in the context of reporting:
 
- 1. Checkout the `[version].x` branch, where `version` is the currently working minor version (not `master`, which is development on the next major version). This is because we don't want to tests on a minor version to be running against data generated on a master version, but the opposite works fine - tests on master can run against data generated from the last minor.
+ 1. Checkout the `[version].x` branch, where `version` is the currently working minor version (e.g. 6.x, not `master`). This is because we don't want to run tests from data generated from a master version. The opposite works fine however - tests on master can run against data generated from the last minor.  At least generally, though major version upgrades may require updating archived data (or be run through the appropriate migration scripts).
 
  2. Load the current archives via:
  ```
@@ -122,13 +124,13 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 l
 
 *Note*: Your es-url parameter might be different, but those are the default ports if running via `yarn start` and `yarn es snapshot --license trial`.
 
-Now generate the new data. Injest new data, create new visualizations, create new dashboards using those visualizations. All the fun stuff that you may want to use in your tests.
+3. Now generate the new data, create new index patterns, create new visualizations, and create new dashboards using those visualizations. All the fun stuff that you may want to use in your tests.
 
-*Note* This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_embedddable_rendering.js.  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_dashboard_filtering.js
+*Note:* This data is used in open source dashboard testing.  All visualizations and saved searches that have `Rendering Test` in their name are dynamically added to a new dashboard and their rendering is confirmed in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_embedddable_rendering.js.  You may need to adjust the expectations if you add new tests (which will be a good thing anyway, help extend the basic rendering tests - this way issues are caught before it gets to reporting tests!).  Similarly all visualizations and saved searches that have `Filter Bytes Test` in their name are tested in https://github.com/elastic/kibana/tree/master/test/functional/apps/dashboard/_dashboard_filtering.js
 
-The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
+*Note:* The current reporting tests add visualizations from what is in `PageObjects.dashboard.getTestVisualizationNames`.  We should probably instead use a saved dashboard we generate this report from. Then you can add any new visualizations, re-save the dashboard, and re-generate the snapshot above.
 
-3. After adding more visualizations to a test dashboard, update tests if neccessary, update snapshots, then **save the new archives**!
+4. After adding more visualizations to a test dashboard, update tests if neccessary, update snapshots, then **save the new archives**!
  ```
 node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 save ../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana
 ```
@@ -139,7 +141,7 @@ node ../scripts/es_archiver.js --es-url http://elastic:changeme@localhost:9200 s
 ```
 ^^ That saves the data indices.  The last parameter is a list of indices you want archived. You don't want to include the `.kibana` one in there (this way you can use a custom `.kibana`, but can reuse the data archive, for tests, and `.kibana` archive is small, but the data archives are larger and should be reused).
 
-4. Create your PR with test updates, and the larger archive.
+5. Create your PR with test updates, and the larger archive.
 
 
 
