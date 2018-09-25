@@ -1,4 +1,8 @@
 .visEditor--vega {
+  .visEditorSidebar__config {
+    padding: 0;
+  }
+
   // The following is necessary for the Vega editor to expand to full height of the editor panel
   .visEditorSidebar__config,
   .visEditorSidebar__options {
@@ -20,7 +24,10 @@
 .vgaEditor {
   @include flex-parent(1, 1, auto);
   position: relative;
-  min-height: $euiSize * 10;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    min-height: $euiSize * 15;
+  }
 
   // SASSTODO: Update from other PR
   #editor_actions {

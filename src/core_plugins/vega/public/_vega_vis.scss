@@ -26,7 +26,10 @@
 .vgaVis__controls {
   display: flex;
   @include euiFontSizeS;
-  padding: $euiSizeS 0; // Adding a little bit of padding helps with the unnecessary scrollbars
+
+  &:not(:empty) {
+    padding: $euiSizeS 0; // Adding a little bit of padding helps with the unnecessary scrollbars
+  }
 
   &.vgaVis__controls--column {
     flex-direction: column;
