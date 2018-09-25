@@ -57,6 +57,7 @@ module.exports = {
       {
         from: `${sourceDir}/functions/server/`,
         to: `${buildDir}/functions/server/`,
+        ignore: '**/__tests__/**',
       },
     ]),
   ],
