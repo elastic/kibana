@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { esdocs } from './esdocs';
-import { timelion } from './timelion';
+import { browser } from './browser';
+import { location } from './location';
+import { urlparam } from './urlparam';
 
-export const serverFunctions = [esdocs, timelion];
+export const clientFunctions = [browser, location, urlparam];
