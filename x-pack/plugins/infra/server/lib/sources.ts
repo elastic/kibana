@@ -36,7 +36,7 @@ export interface InfraSourceConfiguration {
   logAlias: string;
   fields: {
     container: string;
-    hostname: string;
+    host: string;
     message: string[];
     pod: string;
     tiebreaker: string;

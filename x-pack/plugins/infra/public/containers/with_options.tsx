@@ -28,10 +28,10 @@ const initialState = {
           .subtract(1, 'h')
           .valueOf(),
       },
-      formatter: InfraWaffleMapFormatterType.bytes,
+      formatter: InfraWaffleMapFormatterType.percent,
       formatTemplate: '{{value}}',
-      metrics: [{ type: InfraMetricType.count }],
-      path: [{ type: InfraPathType.hosts }],
+      metrics: [{ type: InfraMetricType.cpu }],
+      path: [{ type: InfraPathType.hosts }, { type: InfraPathType.containers }],
       /*
       legend: {
         type: InfraWaffleMapLegendMode.step,
@@ -53,6 +53,10 @@ const initialState = {
       */
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
+        boundsOverride: {
+          min: 0,
+          max: 1,
+        },
         rules: [
           {
             value: 0,

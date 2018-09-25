@@ -32,7 +32,7 @@ export interface InfraSourceConfiguration {
 /** A mapping of semantic fields to their document counterparts */
 export interface InfraSourceFields {
   container: string /** The field to identify a container by */;
-  hostname: string /** The fields to identify a host by */;
+  host: string /** The fields to identify a host by */;
   message: string[] /** The fields that may contain the log event message. The first field found win. */;
   pod: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
@@ -122,7 +122,7 @@ export interface InfraNodePath {
 }
 
 export interface InfraNodeMetric {
-  name: string;
+  name: InfraMetricType;
   value: number;
 }
 
@@ -211,7 +211,7 @@ export namespace InfraSourceConfigurationResolvers {
 export namespace InfraSourceFieldsResolvers {
   export interface Resolvers {
     container?: ContainerResolver /** The field to identify a container by */;
-    hostname?: HostnameResolver /** The fields to identify a host by */;
+    host?: HostResolver /** The fields to identify a host by */;
     message?: MessageResolver /** The fields that may contain the log event message. The first field found win. */;
     pod?: PodResolver /** The field to identify a pod by */;
     tiebreaker?: TiebreakerResolver /** The field to use as a tiebreaker for log events that have identical timestamps */;
@@ -219,7 +219,7 @@ export namespace InfraSourceFieldsResolvers {
   }
 
   export type ContainerResolver = Resolver<string>;
-  export type HostnameResolver = Resolver<string>;
+  export type HostResolver = Resolver<string>;
   export type MessageResolver = Resolver<string[]>;
   export type PodResolver = Resolver<string>;
   export type TiebreakerResolver = Resolver<string>;
@@ -379,7 +379,7 @@ export namespace InfraNodeResolvers {
   export type PathResolver = Resolver<InfraNodePath[]>;
   export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
   export interface MetricsArgs {
-    metrics?: InfraMetricInput[] | null;
+    metrics: InfraMetricInput[];
   }
 }
 
@@ -397,7 +397,7 @@ export namespace InfraNodeMetricResolvers {
     value?: ValueResolver;
   }
 
-  export type NameResolver = Resolver<string>;
+  export type NameResolver = Resolver<InfraMetricType>;
   export type ValueResolver = Resolver<number>;
 }
 
@@ -430,22 +430,6 @@ export interface InfraPathFilterInput {
 
 export interface InfraMetricInput {
   type: InfraMetricType /** The type of metric */;
-  aggs?: InfraMetricAggInput[] | null /** The aggregations for custom metrics */;
-}
-
-export interface InfraMetricAggInput {
-  id: string /** The UUID of the metric, this is used by pipeline aggregations to back reference an InfraMetricAggInput */;
-  type: InfraMetricAggregationType /** The type of aggregation */;
-  field?:
-    | string
-    | null /** The field to use for the aggregation, this is only used for metric aggregations */;
-  metric?:
-    | string
-    | null /** The metric to referece for the aggregation, this is only used for pipeline aggreations */;
-  settings?:
-    | string
-    | null /** Additional settings for pipeline aggregations in a key:value comma delimited format */;
-  script?: string | null /** Script field for bucket_script aggregations */;
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
@@ -484,7 +468,7 @@ export interface NodesInfraResponseArgs {
   path?: InfraPathInput[] | null;
 }
 export interface MetricsInfraNodeArgs {
-  metrics?: InfraMetricInput[] | null;
+  metrics: InfraMetricInput[];
 }
 
 export enum InfraIndexType {
@@ -510,22 +494,10 @@ export enum InfraPathType {
 export enum InfraMetricType {
   count = 'count',
   cpu = 'cpu',
+  load = 'load',
   memory = 'memory',
   tx = 'tx',
   rx = 'rx',
-  disk = 'disk',
-  custom = 'custom',
-}
-
-export enum InfraMetricAggregationType {
-  avg = 'avg',
-  min = 'min',
-  max = 'max',
-  sum = 'sum',
-  bucket_script = 'bucket_script',
-  derivative = 'derivative',
-  moving_average = 'moving_average',
-  positive_only = 'positive_only',
 }
 
 export enum InfraOperator {
@@ -543,8 +515,8 @@ export namespace WaffleNodesQuery {
     sourceId: string;
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
-    metrics?: InfraMetricInput[] | null;
-    path?: InfraPathInput[] | null;
+    metrics: InfraMetricInput[];
+    path: InfraPathInput[];
   };
 
   export type Query = {
@@ -576,7 +548,7 @@ export namespace WaffleNodesQuery {
 
   export type Metrics = {
     __typename?: 'InfraNodeMetric';
-    name: string;
+    name: InfraMetricType;
     value: number;
   };
 }

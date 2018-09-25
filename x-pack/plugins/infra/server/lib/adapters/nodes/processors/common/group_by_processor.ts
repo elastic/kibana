@@ -11,16 +11,11 @@ import {
   InfraESQueryStringQuery,
   InfraESSearchBody,
   InfraProcesorRequestOptions,
-  InfraProcessor,
-  InfraProcessorChainFn,
-  InfraProcessorTransformer,
 } from '../../adapter_types';
 import { isGroupByFilters, isGroupByTerms } from '../../lib/type_guards';
 
-export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, InfraESSearchBody> = (
-  options: InfraProcesorRequestOptions
-): InfraProcessorChainFn<InfraESSearchBody> => {
-  return (next: InfraProcessorTransformer<InfraESSearchBody>) => (doc: InfraESSearchBody) => {
+export const groupByProcessor = (options: InfraProcesorRequestOptions) => {
+  return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const { groupBy } = options.nodeOptions;
     let aggs = {};
@@ -58,6 +53,6 @@ export const groupByProcessor: InfraProcessor<InfraProcesorRequestOptions, Infra
         aggs = filtersAgg.aggs;
       }
     });
-    return next(result);
+    return result;
   };
 };

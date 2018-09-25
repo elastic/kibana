@@ -35,7 +35,7 @@ export const sourcesSchema = gql`
     "The field to identify a container by"
     container: String!
     "The fields to identify a host by"
-    hostname: String!
+    host: String!
     "The fields that may contain the log event message. The first field found win."
     message: [String!]!
     "The field to identify a pod by"

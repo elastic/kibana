@@ -9,6 +9,7 @@ import { times } from 'lodash';
 import {
   InfraESMSearchBody,
   InfraNodeRequestOptions,
+  InfraNodeType,
   InfraProcesorRequestOptions,
 } from '../adapter_types';
 import { NODE_REQUEST_PARTITION_SIZE } from '../constants';
@@ -16,6 +17,7 @@ import { createNodeRequestBody } from './create_node_request_body';
 
 export function createPartitionBodies(
   totalNodes: number,
+  nodeType: InfraNodeType,
   nodeField: string,
   nodeOptions: InfraNodeRequestOptions
 ): InfraESMSearchBody[] {
@@ -26,6 +28,7 @@ export function createPartitionBodies(
     numberOfPartitions,
     (partitionId: number): void => {
       const processorOptions: InfraProcesorRequestOptions = {
+        nodeType,
         nodeField,
         nodeOptions,
         numberOfPartitions,

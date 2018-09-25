@@ -28,6 +28,19 @@ interface Props {
   bounds: InfraWaffleMapBounds;
 }
 
+interface LABELS {
+  [key: string]: string;
+}
+
+const LABELS = {
+  count: 'Count',
+  cpu: 'CPU',
+  memory: 'Memory',
+  load: 'Load',
+  tx: 'TX Rate',
+  rx: 'RX Rate',
+};
+
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
@@ -35,7 +48,7 @@ export class Node extends React.PureComponent<Props, State> {
     const { isPopoverOpen } = this.state;
     const metric = last(node.metrics);
     const valueMode = squareSize > 110;
-    const label = 'Count';
+    const label = LABELS[metric.name];
     const color = colorFromValue(options.legend, metric.value, bounds);
     const value = metric != null ? formatter(metric.value) : 'n/a';
 
