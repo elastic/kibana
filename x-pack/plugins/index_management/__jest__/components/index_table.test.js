@@ -17,6 +17,7 @@ import axios from 'axios';
 import { setHttpClient } from '../../public/services/api';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
+
 jest.mock('react-ace', () => {
   const { PureComponent } = require('react');
   return class extends PureComponent {
@@ -33,6 +34,7 @@ jest.mock('react-ace', () => {
   };
 });
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
+jest.mock('brace/ext/language_tools', () => 'brace/ext/language_tools');
 
 setHttpClient(axios.create());
 let server = null;

@@ -61,6 +61,12 @@
           <a ng-if="monitoringMain.instance" class="kuiLocalTab">{{ monitoringMain.instance }}</a>
         </div>
 
+        <div ng-if="monitoringMain.inApm" class="kuiLocalTabs" role="navigation">
+          <a ng-if="!monitoringMain.instance" kbn-href="#/apm" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}">Overview</a>
+          <a ng-if="!monitoringMain.instance" kbn-href="#/apm/instances" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('apms')}">Instances</a>
+          <a ng-if="monitoringMain.instance" class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+        </div>
+
         <div ng-if="monitoringMain.inBeats" class="kuiLocalTabs" role="navigation">
           <a
             ng-if="!monitoringMain.instance"

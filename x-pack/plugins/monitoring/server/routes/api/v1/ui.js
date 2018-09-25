@@ -42,6 +42,11 @@ export {
   kibanaOverviewRoute
 } from './kibana';
 export {
+  apmInstanceRoute,
+  apmInstancesRoute,
+  apmOverviewRoute
+} from './apm';
+export {
   logstashClusterPipelinesRoute,
   logstashNodePipelinesRoute,
   logstashNodeRoute,
