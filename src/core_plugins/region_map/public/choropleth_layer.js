@@ -143,7 +143,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
         let errorMessage;
         if (e.status === 404) {
-          errorMessage = `Server responding with '404' when attempting to fetch ${geojsonUrl}. 
+          errorMessage = `Server responding with '404' when attempting to fetch ${geojsonUrl}.
                           Make sure the file exists at that location.`;
         } else {
           errorMessage = `Cannot download ${geojsonUrl} file. Please ensure the
@@ -323,7 +323,7 @@ CORS configuration of the server permits requests from the Kibana application on
     }
 
     const titleText = this._metricsAgg.makeLabel();
-    const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+    const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
     this._legendColors.forEach((color) => {

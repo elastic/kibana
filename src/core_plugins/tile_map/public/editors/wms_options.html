@@ -43,10 +43,11 @@
       </div>
     </div>
 
-    <div ng-show="options.enabled" class="well">
-      <div class="vis-option-item form-group">
+    <div ng-show="options.enabled">
+      <div class="form-group">
         <p>WMS is an OGC standard for map image services. For more information, go <a
           href="http://www.opengeospatial.org/standards/wms">here</a>.</p>
+        <br>
         <label>
           WMS url*
           <icon-tip
@@ -59,7 +60,7 @@
                ng-model="options.url">
       </div>
 
-      <div class="vis-option-item form-group">
+      <div class="form-group">
         <label>
           WMS layers*
           <icon-tip
@@ -73,7 +74,7 @@
                ng-model="options.options.layers">
       </div>
 
-      <div class="vis-option-item form-group">
+      <div class="form-group">
         <label>
           WMS version*
           <icon-tip
@@ -86,7 +87,7 @@
                ng-model="options.options.version">
       </div>
 
-      <div class="vis-option-item form-group">
+      <div class="form-group">
         <label>
           WMS format*
           <icon-tip
@@ -99,7 +100,7 @@
                ng-model="options.options.format">
       </div>
 
-      <div class="vis-option-item form-group">
+      <div class="form-group">
         <label>
           WMS attribution
           <icon-tip
@@ -112,7 +113,7 @@
                ng-model="options.options.attribution">
       </div>
 
-      <div class="vis-option-item form-group">
+      <div class="form-group">
         <label>
           WMS styles*
           <icon-tip

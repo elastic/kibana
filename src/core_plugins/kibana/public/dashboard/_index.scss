@@ -14,8 +14,8 @@
 //   dshChart__legend-isLoading
 
 /**
-  * 1. Don't duplicate styles in dark mode
-  */
+ * 1. Don't duplicate styles in dark mode
+ */
 .tab-dashboard.theme-light { /* 1 */
   @import 'dashboard_app';
   @import 'grid/index';
@@ -31,7 +31,7 @@
 
 // DARK THEME
 // EUI global scope -- dark
-@import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
+@import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
 .tab-dashboard.theme-dark {
   background-color: $euiColorEmptyShade;
@@ -40,4 +40,7 @@
   @import 'grid/index';
   @import 'panel/index';
   @import 'viewport/index';
+
+  // Vis imports
+  @import 'src/ui/public/vis/map/index';
 }
