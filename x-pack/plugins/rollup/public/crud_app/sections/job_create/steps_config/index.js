@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import cloneDeep from 'lodash/lang/cloneDeep';
+
 import { WEEK } from '../../../services';
 
 import { validateId } from './validate_id';
@@ -133,3 +135,19 @@ export const stepIdToStepConfigMap = {
   },
   [STEP_REVIEW]: {},
 };
+
+export function getAffectedStepsFields(fields, stepsFields) {
+  const { indexPattern } = fields;
+
+  const affectedStepsFields = cloneDeep(stepsFields);
+
+  // A new index pattern means we have to clear all of the fields which depend upon it.
+  if (indexPattern) {
+    affectedStepsFields[STEP_DATE_HISTOGRAM].dateHistogramField = undefined;
+    affectedStepsFields[STEP_TERMS].terms = [];
+    affectedStepsFields[STEP_HISTOGRAM].histogram = [];
+    affectedStepsFields[STEP_METRICS].metrics = [];
+  }
+
+  return affectedStepsFields;
+}

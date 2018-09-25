@@ -50,6 +50,7 @@ import {
   STEP_REVIEW,
   stepIds,
   stepIdToStepConfigMap,
+  getAffectedStepsFields,
 } from './steps_config';
 
 const stepIdToTitleMap = {
@@ -96,7 +97,6 @@ export class JobCreateUi extends Component {
   componentDidUpdate(prevProps, prevState) {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
-
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
@@ -307,13 +307,15 @@ export class JobCreateUi extends Component {
     const { stepsFields } = this.state;
     const prevFields = stepsFields[currentStepId];
 
+    const affectedStepsFields = getAffectedStepsFields(fields, stepsFields);
+
     const newFields = {
       ...prevFields,
       ...fields,
     };
 
     const newStepsFields = {
-      ...cloneDeep(stepsFields),
+      ...affectedStepsFields,
       [currentStepId]: newFields,
     };
 
