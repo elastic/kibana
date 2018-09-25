@@ -5,5 +5,7 @@
  */
 
 export declare class Poller {
+  constructor(options: any);
+
   public start(): void;
 }

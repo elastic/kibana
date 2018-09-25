@@ -16,7 +16,7 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
 import { downloadReport } from '../lib/download_report';
-import { jobQueueClient } from '../lib/job_queue_client';
+import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
 
 import {
@@ -252,8 +252,8 @@ export class ReportListing extends Component<Props, State> {
       this.setState({ isLoading: true });
     }
 
-    let jobs;
-    let total;
+    let jobs: JobQueueEntry[];
+    let total: number;
     try {
       jobs = await jobQueueClient.list(this.state.page);
       total = await jobQueueClient.total();
@@ -278,7 +278,7 @@ export class ReportListing extends Component<Props, State> {
       this.setState({
         isLoading: false,
         total,
-        jobs: jobs.map((job: any) => {
+        jobs: jobs.map((job: JobQueueEntry) => {
           return {
             id: job._id,
             type: job._source.jobtype,

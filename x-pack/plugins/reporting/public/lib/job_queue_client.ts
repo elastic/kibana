@@ -10,8 +10,18 @@ import { addSystemApiHeader } from 'ui/system_api';
 
 const API_BASE_URL = '/api/reporting/jobs';
 
+export interface JobQueueEntry {
+  _id: string;
+  _source: any;
+}
+
+export interface JobContent {
+  content: string;
+  content_type: boolean;
+}
+
 class JobQueueClient {
-  public list = (page = 0, jobIds?: string[]) => {
+  public list = (page = 0, jobIds?: string[]): Promise<JobQueueEntry[]> => {
     const query = { page } as any;
     if (jobIds && jobIds.length > 0) {
       // Only getting the first 10, to prevent URL overflows
@@ -25,7 +35,7 @@ class JobQueueClient {
     });
   };
 
-  public total() {
+  public total(): Promise<number> {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/count`,
@@ -33,7 +43,7 @@ class JobQueueClient {
     });
   }
 
-  public getContent(jobId: string) {
+  public getContent(jobId: string): Promise<JobContent> {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/output/${jobId}`,

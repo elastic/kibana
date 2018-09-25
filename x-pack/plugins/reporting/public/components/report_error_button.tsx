@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import React, { Component } from 'react';
-import { jobQueueClient } from '../lib/job_queue_client';
+import { JobContent, jobQueueClient } from '../lib/job_queue_client';
 
 interface Props {
   jobId: string;
@@ -81,9 +81,11 @@ export class ReportErrorButton extends Component<Props, State> {
 
   private loadError = async () => {
     this.setState({ isLoading: true });
-    let reportContent;
     try {
-      reportContent = await jobQueueClient.getContent(this.props.jobId);
+      const reportContent: JobContent = await jobQueueClient.getContent(this.props.jobId);
+      if (this.mounted) {
+        this.setState({ isLoading: false, error: reportContent.content });
+      }
     } catch (kfetchError) {
       if (this.mounted) {
         this.setState({
@@ -92,10 +94,6 @@ export class ReportErrorButton extends Component<Props, State> {
           error: kfetchError.message,
         });
       }
-    }
-
-    if (this.mounted) {
-      this.setState({ isLoading: false, error: reportContent.content });
     }
   };
 }
