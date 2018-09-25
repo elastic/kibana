@@ -75,11 +75,11 @@ function createDisplayItems(results) {
     });
   }
 
-  if (results.timestamp_formats !== undefined) {
-    const s = (results.timestamp_formats.length > 1) ? 's' : '';
+  if (results.joda_timestamp_formats !== undefined) {
+    const s = (results.joda_timestamp_formats.length > 1) ? 's' : '';
     items.push({
       title: `Time format${s}`,
-      description: results.timestamp_formats.join(', '),
+      description: results.joda_timestamp_formats.join(', '),
     });
   }
 

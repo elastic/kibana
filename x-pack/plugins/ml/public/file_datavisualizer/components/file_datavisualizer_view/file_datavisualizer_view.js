@@ -305,21 +305,15 @@ function createUrlOverrides(overrides, originalSettings) {
 }
 
 function processResults(results) {
-  let timestampFormat = results.timestamp_format;
-  if (
-    timestampFormat === undefined &&
-    results.timestamp_formats !== undefined &&
-    results.timestamp_formats.length
-  ) {
-    timestampFormat = results.timestamp_formats[0];
-  }
+  const timestampFormat = (results.joda_timestamp_formats !== undefined && results.joda_timestamp_formats.length) ?
+    results.joda_timestamp_formats[0] : undefined;
 
   return {
     format: results.format,
     delimiter: results.delimiter,
     timestampField: results.timestamp_field,
     timestampFormat,
-    quote: '"', //results.quote,
+    quote: results.quote,
     hasHeaderRow: results.has_header_row,
     shouldTrimFields: results.should_trim_fields,
     charset: results.charset,
