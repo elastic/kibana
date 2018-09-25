@@ -17,7 +17,7 @@ Reporting tests have their own top level test folder because:
   - test/reporting/configs/chromium_functional.js 
   - test/reporting/configs/phantom_functional.js 
 
-  The `_api` versions hit the reporting api and ensure report generation completes successfully, but does not verify the output of the reports. This is done in the `_functional` test versions, which does a snapshot comparison of the generated URL against a baseline to determine success.
+  The `api` versions hit the reporting api and ensure report generation completes successfully, but does not verify the output of the reports. This is done in the `functional` test versions, which does a snapshot comparison of the generated URL against a baseline to determine success.
 
   To run the tests in a single command. :
 1. cd into x-pack directory.
@@ -37,6 +37,20 @@ node scripts/functional_tests_server.js --config test/reporting/configs/[test_co
   ```
 node ../scripts/functional_test_runner.js --config test/reporting/configs/[test_config_name_here].js
   ```
+
+**Prerequisites**
+The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisions between generated reports and baseline reports.
+pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up by running the following.
+
+```sh
+//OSX
+brew install imagemagick ghostscript poppler
+
+//Ubutnu
+sudo apt-get install imagemagick ghostscript poppler-utils
+```
+
+**Note:** Configurations from `kibana.dev.yml` are picked up when running the tests. Ensure that `kibana.dev.yml` does not contain any `xpack.reporting` configurations.
 
 ### Reporting baseline snapshots
 
