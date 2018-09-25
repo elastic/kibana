@@ -758,8 +758,8 @@ module.controller('MlNewJob',
     function setFieldDelimiterControlsFromText() {
       if ($scope.job.data_description && $scope.job.data_description.field_delimiter) {
 
-      // if the data format has not been set and fieldDelimiter exists,
-      // assume the format is delimited
+        // if the data format has not been set and fieldDelimiter exists,
+        // assume the format is delimited
         if ($scope.job.data_description.format === undefined) {
           $scope.job.data_description.format = 'delimited';
         }
