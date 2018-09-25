@@ -65,7 +65,7 @@ export function TOCEntry({ layer, openLayerPanel, toggleVisible, zoom }) {
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        className={layer.isVisible() && layer.showAtZoomLevel(zoom) ? 'visible' : 'notvisible'}
+        className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.hasLoadError() ? 'visible' : 'notvisible'}
       >
         <EuiFlexItem grow={false} className="layerEntry--visibility">
           {visibilityIndicator}
