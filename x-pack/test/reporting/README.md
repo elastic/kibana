@@ -56,8 +56,8 @@ node scripts/functional_tests_server.js --config test/reporting/configs/chromium
   ```
   node ../scripts/functional_test_runner.js --config test/reporting/configs/chromium_functional.js
   ```
-  3. This will create new report snapshots in [functional/reports/session/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/session).
-  4. After manually verifying the new reports in the `session` folder, copy them into [functional/reports/baseline/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/baseline)
+  3. This will create new report snapshots in `./functional/reports/session/`.
+  4. After manually verifying the new reports in the `session` folder, copy them into [./functional/reports/baseline/](https://github.com/elastic/kibana/blob/master/x-pack/test/reporting/functional/reports/baseline)
   5. Create a new PR with the new snapshots in the baseline folder.
 
 *Note* Dashboard has some snapshot testing too, in `_dashboard_snapshots.js`. This test watches for a command line flag `--updateBaselines` which automates updating the baselines. Probably worthwhile to do some similar here in the long run.
