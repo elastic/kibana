@@ -26,7 +26,7 @@ export class LogsPage extends React.Component {
       <ColumnarPage>
         <WithSource>
           {({ logIndicesExist }) =>
-            false ? (
+            logIndicesExist ? (
               <>
                 <WithLogFilterUrlState />
                 <WithLogPositionUrlState />
@@ -40,9 +40,9 @@ export class LogsPage extends React.Component {
               <WithKibanaChrome>
                 {({ basePath }) => (
                   <EmptyPage
-                    title="You have no log indices."
-                    message="..."
-                    actionLabel="Add log data"
+                    title="Looks like you don't have any logging indices."
+                    message="Let's add some!"
+                    actionLabel="Setup Instructions"
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                   />
                 )}

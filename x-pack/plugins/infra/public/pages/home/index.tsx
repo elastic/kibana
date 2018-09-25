@@ -24,7 +24,7 @@ export class HomePage extends React.PureComponent {
       <ColumnarPage>
         <WithSource>
           {({ metricIndicesExist }) =>
-            false ? (
+            metricIndicesExist ? (
               <>
                 <WithWaffleTimeUrlState />
                 <WithWaffleFilterUrlState />
@@ -36,9 +36,9 @@ export class HomePage extends React.PureComponent {
               <WithKibanaChrome>
                 {({ basePath }) => (
                   <EmptyPage
-                    title="You have no metric indices."
-                    message="..."
-                    actionLabel="Add metric data"
+                    title="Looks like you don't have any metrics indices."
+                    message="Let's add some!"
+                    actionLabel="Setup Instructions"
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                   />
                 )}
