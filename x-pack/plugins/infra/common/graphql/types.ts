@@ -43,6 +43,8 @@ export interface InfraSourceFields {
 export interface InfraSourceStatus {
   metricAliasExists: boolean /** Whether the configured metric alias exists */;
   logAliasExists: boolean /** Whether the configured log alias exists */;
+  metricIndicesExist: boolean /** Whether the configured alias or wildcard pattern resolve to any metric indices */;
+  logIndicesExist: boolean /** Whether the configured alias or wildcard pattern resolve to any log indices */;
   metricIndices: string[] /** The list of indices in the metric alias */;
   logIndices: string[] /** The list of indices in the log alias */;
   indexFields: InfraIndexField[] /** The list of fields defined in the index mappings */;
@@ -255,6 +257,8 @@ export namespace InfraSourceStatusResolvers {
   export interface Resolvers {
     metricAliasExists?: MetricAliasExistsResolver /** Whether the configured metric alias exists */;
     logAliasExists?: LogAliasExistsResolver /** Whether the configured log alias exists */;
+    metricIndicesExist?: MetricIndicesExistResolver /** Whether the configured alias or wildcard pattern resolve to any metric indices */;
+    logIndicesExist?: LogIndicesExistResolver /** Whether the configured alias or wildcard pattern resolve to any log indices */;
     metricIndices?: MetricIndicesResolver /** The list of indices in the metric alias */;
     logIndices?: LogIndicesResolver /** The list of indices in the log alias */;
     indexFields?: IndexFieldsResolver /** The list of fields defined in the index mappings */;
@@ -262,6 +266,8 @@ export namespace InfraSourceStatusResolvers {
 
   export type MetricAliasExistsResolver = Resolver<boolean>;
   export type LogAliasExistsResolver = Resolver<boolean>;
+  export type MetricIndicesExistResolver = Resolver<boolean>;
+  export type LogIndicesExistResolver = Resolver<boolean>;
   export type MetricIndicesResolver = Resolver<string[]>;
   export type LogIndicesResolver = Resolver<string[]>;
   export type IndexFieldsResolver = Resolver<InfraIndexField[], IndexFieldsArgs>;
@@ -811,6 +817,8 @@ export namespace SourceQuery {
   export type Status = {
     __typename?: 'InfraSourceStatus';
     indexFields: IndexFields[];
+    logIndicesExist: boolean;
+    metricIndicesExist: boolean;
   };
 
   export type IndexFields = {

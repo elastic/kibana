@@ -25,6 +25,8 @@ export const sourceQuery = gql`
           searchable
           aggregatable
         }
+        logIndicesExist
+        metricIndicesExist
       }
     }
   }
