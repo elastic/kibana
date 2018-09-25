@@ -293,6 +293,20 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         }
       });
     }
+
+    async clearAllToasts() {
+      const toasts = await find.allByCssSelector('.euiToast');
+      for (const toastElement of toasts) {
+        try {
+          await remote.moveMouseTo(toastElement);
+          const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+          await closeBtn.click();
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
+      }
+    }
+
   }
 
   return new CommonPage();
