@@ -58,7 +58,10 @@ export function explorerChartsContainerServiceFactory(
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     const chartsContainerWidth = Math.floor($chartContainer.width());
-    const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    if (allSeriesRecords.length === 1) {
+      chartsPerRow = 1;
+    }
 
     data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
 
@@ -71,8 +74,15 @@ export function explorerChartsContainerServiceFactory(
 
     // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
     data.tooManyBuckets = false;
-    const { chartRange, tooManyBuckets } = calculateChartRange(seriesConfigs, earliestMs, latestMs,
-      Math.floor(chartsContainerWidth / chartsPerRow), recordsToPlot, data.timeFieldName);
+    const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
+    const { chartRange, tooManyBuckets } = calculateChartRange(
+      seriesConfigs,
+      earliestMs,
+      latestMs,
+      chartWidth,
+      recordsToPlot,
+      data.timeFieldName
+    );
     data.tooManyBuckets = tooManyBuckets;
 
     // initialize the charts with loading indicators

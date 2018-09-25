@@ -74,3 +74,79 @@ describe('start.getLegacyMetadata()', () => {
     }).toThrowError();
   });
 });
+
+describe('start.getInjectedVar()', () => {
+  it('returns values from injectedMetadata.vars', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: '1',
+          },
+          'baz:box': {
+            foo: 2,
+          },
+        },
+      },
+    } as any).start();
+
+    expect(start.getInjectedVar('foo')).toEqual({
+      bar: '1',
+    });
+    expect(start.getInjectedVar('foo.bar')).toBe('1');
+    expect(start.getInjectedVar('baz:box')).toEqual({
+      foo: 2,
+    });
+    expect(start.getInjectedVar('')).toBe(undefined);
+  });
+
+  it('returns read-only values', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: 1,
+          },
+        },
+      },
+    } as any).start();
+
+    const foo: any = start.getInjectedVar('foo');
+    expect(() => {
+      foo.bar = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'bar' of object '#<Object>'"`
+    );
+    expect(() => {
+      foo.newProp = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot add property newProp, object is not extensible"`
+    );
+  });
+});
+
+describe('start.getInjectedVars()', () => {
+  it('returns all injected vars, readonly', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: 1,
+          },
+        },
+      },
+    } as any).start();
+
+    const vars: any = start.getInjectedVars();
+    expect(() => {
+      vars.foo = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'foo' of object '#<Object>'"`
+    );
+    expect(() => {
+      vars.newProp = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot add property newProp, object is not extensible"`
+    );
+  });
+});

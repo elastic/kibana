@@ -73,6 +73,7 @@ const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotif
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+  this.stop = jest.fn();
 });
 jest.mock('./loading_count', () => ({
   LoadingCountService: MockLoadingCountService,
@@ -197,16 +198,50 @@ describe('constructor', () => {
 });
 
 describe('#stop', () => {
-  it('call legacyPlatform.stop()', () => {
+  it('calls legacyPlatform.stop()', () => {
     const coreSystem = new CoreSystem({
       ...defaultCoreSystemParams,
     });
 
-    const legacyPlatformService = MockLegacyPlatformService.mock.instances[0];
-
+    const [legacyPlatformService] = MockLegacyPlatformService.mock.instances;
     expect(legacyPlatformService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(legacyPlatformService.stop).toHaveBeenCalled();
+  });
+
+  it('calls notifications.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [notificationsService] = MockNotificationsService.mock.instances;
+    expect(notificationsService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(notificationsService.stop).toHaveBeenCalled();
+  });
+
+  it('calls loadingCount.stop()', () => {
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+    });
+
+    const [loadingCountService] = MockLoadingCountService.mock.instances;
+    expect(loadingCountService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(loadingCountService.stop).toHaveBeenCalled();
+  });
+
+  it('clears the rootDomElement', () => {
+    const rootDomElement = document.createElement('div');
+    const coreSystem = new CoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
+    });
+
+    coreSystem.start();
+    expect(rootDomElement.innerHTML).not.toBe('');
+    coreSystem.stop();
+    expect(rootDomElement.innerHTML).toBe('');
   });
 });
 
