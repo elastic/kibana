@@ -58,6 +58,11 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
     const field = { agg: getKibanaAggName(func) };
     if (d.field_name) {
       field.fieldName = d.field_name;
+    } else if (func === 'distinct_count' && job.analysis_config.summary_count_field_name !== undefined) {
+      const fieldMatch = job.analysis_config.summary_count_field_name.match(/^dc_(.+)/);
+      if (fieldMatch[1] !== undefined) {
+        field.fieldName = fieldMatch[1];
+      }
     }
 
     jobSettings.fields = [field];
