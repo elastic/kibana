@@ -7,7 +7,7 @@ Summarize your PR. If it includes design elements include a screenshot or gif.
 Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
 
 - [ ] This was checked for cross-browser compatability, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
-- [ ] Any text added follows [EUI's writing guidelines](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) and uses sentence case text
+- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing) and uses sentence case text
 - [ ] Any code added follows our [style guides](https://github.com/elastic/kibana/blob/master/style_guides/)
 - [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
 - [ ] This was checked for breaking API changes and was [labeled appropriately]()
