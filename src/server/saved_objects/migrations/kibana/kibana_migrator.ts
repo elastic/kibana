@@ -22,7 +22,7 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { SavedObjectsSchema, UIExportsSavedObjectsSchema } from '../../schema';
+import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
@@ -35,7 +35,7 @@ export interface KbnServer {
     savedObjectMappings: any[];
     savedObjectMigrations: any;
     savedObjectValidations: any;
-    savedObjectSchemas: UIExportsSavedObjectsSchema;
+    savedObjectSchemas: SavedObjectsSchemaDefinition;
   };
 }
 

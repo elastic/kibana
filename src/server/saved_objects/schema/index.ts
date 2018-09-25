@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SavedObjectsSchema, UIExportsSavedObjectsSchema } from './schema';
+export { SavedObjectsSchema, SavedObjectsSchemaDefinition } from './schema';
