@@ -59,10 +59,8 @@ export function initGisApp(resolve) {
         description: 'Save Visualization',
         testId: 'visualizeSaveButton',
         run: async () => {
-          const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          const onSave = () => {
             return new Promise(resolve => {
-              console.log({ newTitle, newCopyOnSave,
-                isTitleDuplicateConfirmed, onTitleDuplicate });
               resolve({ id: 'id' });
             });
           };
