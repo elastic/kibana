@@ -7,6 +7,7 @@
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+const xPackBase = `${ELASTIC_WEBSITE_URL}guide/en/x-pack/${DOC_LINK_VERSION}`;
 
 export const logisticalDetailsUrl = `${esBase}/rollup-job-config.html#_logistical_details`;
 export const dateHistogramDetailsUrl = `${esBase}/rollup-job-config.html#_date_histogram_2`;
@@ -15,3 +16,4 @@ export const histogramDetailsUrl = `${esBase}/rollup-job-config.html#_histogram_
 export const metricsDetailsUrl = `${esBase}/rollup-job-config.html#rollup-metrics-config`;
 
 export const dateHistogramAggregationUrl = `${esBase}/search-aggregations-bucket-datehistogram-aggregation.html`;
+export const cronUrl = `${xPackBase}/trigger-schedule.html#_cron_expressions`;

@@ -10,7 +10,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescribedFormGroup,
@@ -22,7 +21,6 @@ import {
   EuiLink,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
@@ -64,107 +62,9 @@ export class StepDateHistogramUi extends Component {
   constructor(props) {
     super(props);
 
-    const {
-      dateHistogramDelay,
-      dateHistogramTimeZone,
-    } = props.fields;
-
     this.state = {
       dateHistogramFieldOptions: [],
-      isCustomizingDataStorage: dateHistogramDelay || dateHistogramTimeZone !== 'UTC',
     };
-  }
-
-  onClickCustomizeDataStorage = () => {
-    this.setState({
-      isCustomizingDataStorage: true,
-    });
-  }
-
-  renderDataStorage() {
-    const {
-      fields,
-      onFieldsChange,
-      areStepErrorsVisible,
-      fieldErrors,
-    } = this.props;
-
-    const {
-      dateHistogramDelay,
-      dateHistogramTimeZone,
-    } = fields;
-
-    const {
-      dateHistogramDelay: errorDateHistogramDelay,
-      dateHistogramTimeZone: errorDateHistogramTimeZone,
-    } = fieldErrors;
-
-    const {
-      isCustomizingDataStorage,
-    } = this.state;
-
-    if (isCustomizingDataStorage) {
-      return (
-        <Fragment>
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
-                defaultMessage="Delay (optional)"
-              />
-            )}
-            error={errorDateHistogramDelay}
-            isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
-            helpText={(
-              <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
-                    defaultMessage="Example delay values: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
-                  />
-                </p>
-              </Fragment>
-            )}
-            fullWidth
-          >
-            <EuiFieldText
-              value={dateHistogramDelay || ''}
-              onChange={e => onFieldsChange({ dateHistogramDelay: e.target.value })}
-              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramDelay)}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
-                defaultMessage="Time zone"
-              />
-            )}
-            error={errorDateHistogramTimeZone || ''}
-            isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
-            fullWidth
-          >
-            <EuiSelect
-              options={timeZoneOptions}
-              value={dateHistogramTimeZone}
-              onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
-              fullWidth
-            />
-          </EuiFormRow>
-        </Fragment>
-      );
-    }
-
-    // Return a div because the parent element has display: flex, which will resize the child.
-    return (
-      <div>
-        <EuiButton onClick={this.onClickCustomizeDataStorage}>
-          Customize data storage
-        </EuiButton>
-      </div>
-    );
   }
 
   renderIntervalHelpText() {
@@ -275,11 +175,13 @@ export class StepDateHistogramUi extends Component {
     const {
       dateHistogramInterval,
       dateHistogramField,
+      dateHistogramTimeZone,
     } = fields;
 
     const {
       dateHistogramInterval: errorDateHistogramInterval,
       dateHistogramField: errorDateHistogramField,
+      dateHistogramTimeZone: errorDateHistogramTimeZone,
     } = fieldErrors;
 
     const {
@@ -298,27 +200,6 @@ export class StepDateHistogramUi extends Component {
                 />
               </h3>
             </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.description"
-                  defaultMessage="Define how {link} will operate on your rollup data."
-                  values={{
-                    link: (
-                      <EuiLink href={dateHistogramAggregationUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.rollupJobs.create.stepDateHistogram.descriptio"
-                          defaultMessage="date histogram aggregations"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -341,24 +222,38 @@ export class StepDateHistogramUi extends Component {
 
         <EuiForm>
           <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.title"
-                    defaultMessage="Data source"
-                  />
-                </h4>
-              </EuiTitle>
-            )}
+            title={<div />}
             description={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.description"
-                defaultMessage={`
-                  Which field contains the date histogram data and how large should its time buckets be?
-                  Note that smaller, more granular intervals take up proportionally more space.
-                `}
-              />
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.description"
+                    defaultMessage="Define how {link} will operate on your rollup data."
+                    values={{
+                      link: (
+                        <EuiLink href={dateHistogramAggregationUrl} target="_blank">
+                          <FormattedMessage
+                            id="xpack.rollupJobs.create.stepDateHistogram.descriptio"
+                            defaultMessage="date histogram aggregations"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+
+                <p>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.description"
+                    defaultMessage={`
+                      Which field contains the date histogram data and how large should its time buckets be?
+                      Note that smaller, more granular intervals take up proportionally more space.
+                      You can also customize the time zone stored with the rolled-up documents.
+                      The default time zone is UTC.
+                    `}
+                  />
+                </p>
+              </Fragment>
             )}
             fullWidth
           >
@@ -401,32 +296,25 @@ export class StepDateHistogramUi extends Component {
                 fullWidth
               />
             </EuiFormRow>
-          </EuiDescribedFormGroup>
 
-          <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.title"
-                    defaultMessage="Data storage (optional)"
-                  />
-                </h4>
-              </EuiTitle>
-            )}
-            description={(
-              <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.sectionDataStorage.description"
-                defaultMessage={`
-                  How long should we wait before rolling up new documents? By default, the indexer
-                  attempts to roll up all data that is available. You can also customize the time
-                  zone stored with the rolled-up documents. The default time zone is UTC.
-                `}
+            <EuiFormRow
+              label={(
+                <FormattedMessage
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
+                  defaultMessage="Time zone"
+                />
+              )}
+              error={errorDateHistogramTimeZone || ''}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
+              fullWidth
+            >
+              <EuiSelect
+                options={timeZoneOptions}
+                value={dateHistogramTimeZone}
+                onChange={e => onFieldsChange({ dateHistogramTimeZone: e.target.value })}
+                fullWidth
               />
-            )}
-            fullWidth
-          >
-            {this.renderDataStorage()}
+            </EuiFormRow>
           </EuiDescribedFormGroup>
         </EuiForm>
 
