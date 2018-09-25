@@ -17,7 +17,7 @@ export default function ({ getService }) {
       });
 
       // The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before
-      // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414 */
+      // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
       it('job posted successfully', async () => {
         const path = await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_PRE_6_2);
         await reportingAPI.waitForJobToFinish(path);
