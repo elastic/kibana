@@ -60,24 +60,15 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
         tests: {
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(
-              scenario.users.noAccess.username,
-              'read/search'
-            ),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(
-              scenario.users.noAccess.username,
-              'read/search'
-            ),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
           reservedSpecified: {
             statusCode: 403,
-            response: createExpectLegacyForbiddenResponse(
-              scenario.users.noAccess.username,
-              'read/search'
-            ),
+            response: createExpectLegacyForbiddenResponse(scenario.users.noAccess.username),
           },
         },
       });
