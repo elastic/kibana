@@ -286,21 +286,27 @@ export async function loadMapResources(dispatch) {
   await dispatch(replaceLayerList(
     [
       {
-        "dataDirty": false,
-        "id": "0hmz5",
-        "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
-        "visible": true,
-        "temporary": false,
-        "style": {},
-        "type": "TILE"
+        dataDirty: false,
+        id: "0hmz5",
+        sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
+        visible: true,
+        temporary: false,
+        style: {},
+        type: "TILE",
+        showAtAllZoomLevels: true,
+        minZoom: 0,
+        maxZoom: 24,
       },
       {
-        "id": "0pmk0",
-        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-        "visible": false,
-        "temporary": false,
-        "style": {},
-        "type": "TILE"
+        id: "0pmk0",
+        sourceDescriptor: { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
+        visible: false,
+        temporary: false,
+        style: {},
+        type: "TILE",
+        showAtAllZoomLevels: true,
+        minZoom: 0,
+        maxZoom: 24,
       },
       // {
       //   "id": "1pnwt",

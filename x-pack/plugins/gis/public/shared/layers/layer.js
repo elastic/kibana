@@ -63,6 +63,14 @@ export class ALayer {
     return false;
   }
 
+  getZoomConfig() {
+    return {
+      showAtAllZoomLevels: this._descriptor.showAtAllZoomLevels,
+      minZoom: this._descriptor.minZoom,
+      maxZoom: this._descriptor.maxZoom,
+    };
+  }
+
   isTemporary() {
     return this._descriptor.temporary;
   }

@@ -70,8 +70,8 @@ export class VectorLayer extends ALayer {
     startLoading({ timeFilters: dataFilters.timeFilters });
     try {
       const data = await this._source.getGeoJson({
-        layerId: this._descriptor.id,
-        layerName: this._descriptor.label,
+        layerId: this.getId(),
+        layerName: this.getDisplayName(),
       }, dataFilters);
       stopLoading(data);
     } catch(error) {
