@@ -42,8 +42,10 @@ export const createJob = (jobConfig) => async (dispatch) => {
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
-            error: `A job with ID '${jobConfig.id}' already exists.`
-          }
+            error: {
+              messsge: `A job with ID '${jobConfig.id}' already exists.`,
+            },
+          },
         });
         break;
 
@@ -51,8 +53,11 @@ export const createJob = (jobConfig) => async (dispatch) => {
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
-            error: `Request failed with a ${status} error. ${data.message}`,
-          }
+            error: {
+              message: `Request failed with a ${status} error. ${data.message}`,
+              cause: data.cause,
+            },
+          },
         });
     }
 

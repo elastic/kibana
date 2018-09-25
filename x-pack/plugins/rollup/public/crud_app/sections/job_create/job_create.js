@@ -80,7 +80,6 @@ export class JobCreateUi extends Component {
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      stepsFieldErrorsAsync: {},
       areStepErrorsVisible: false,
       stepsFields,
       isValidatingIndexPattern: false,
@@ -415,13 +414,33 @@ export class JobCreateUi extends Component {
     let saveErrorFeedback;
 
     if (saveError) {
+      const { message, cause } = saveError;
+
+      let errorBody;
+
+      if (cause) {
+        if (cause.length === 1) {
+          errorBody = (
+            <p>{cause[0]}</p>
+          );
+        } else {
+          errorBody = (
+            <ul>
+              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+            </ul>
+          );
+        }
+      }
+
       saveErrorFeedback = (
         <Fragment>
           <EuiCallOut
-            title={saveError}
+            title={message}
             icon="cross"
             color="danger"
-          />
+          >
+            {errorBody}
+          </EuiCallOut>
 
           <EuiSpacer />
         </Fragment>
