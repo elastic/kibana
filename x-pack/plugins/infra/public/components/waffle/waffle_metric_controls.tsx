@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { get, last } from 'lodash';
 import React from 'react';
 import {
@@ -21,22 +21,22 @@ interface Props {
 
 const OPTIONS = {
   [InfraPathType.pods]: [
-    { label: 'CPU Usage', metric: { type: InfraMetricType.cpu } },
-    { label: 'Memory Usage', metric: { type: InfraMetricType.memory } },
-    { label: 'Inbound Traffic', metric: { type: InfraMetricType.rx } },
-    { label: 'Outbound Traffic', metric: { type: InfraMetricType.tx } },
+    { text: 'CPU Usage', value: InfraMetricType.cpu },
+    { text: 'Memory Usage', value: InfraMetricType.memory },
+    { text: 'Inbound Traffic', value: InfraMetricType.rx },
+    { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
   [InfraPathType.containers]: [
-    { label: 'CPU Usage', metric: { type: InfraMetricType.cpu } },
-    { label: 'Memory Usage', metric: { type: InfraMetricType.memory } },
-    { label: 'Inbound Traffic', metric: { type: InfraMetricType.rx } },
-    { label: 'Outbound Traffic', metric: { type: InfraMetricType.tx } },
+    { text: 'CPU Usage', value: InfraMetricType.cpu },
+    { text: 'Memory Usage', value: InfraMetricType.memory },
+    { text: 'Inbound Traffic', value: InfraMetricType.rx },
+    { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
   [InfraPathType.hosts]: [
-    { label: 'CPU Usage', metric: { type: InfraMetricType.cpu } },
-    { label: 'Memory Usage', metric: { type: InfraMetricType.memory } },
-    { label: 'Inbound Traffic', metric: { type: InfraMetricType.rx } },
-    { label: 'Outbound Traffic', metric: { type: InfraMetricType.tx } },
+    { text: 'CPU Usage', value: InfraMetricType.cpu },
+    { text: 'Memory Usage', value: InfraMetricType.memory },
+    { text: 'Inbound Traffic', value: InfraMetricType.rx },
+    { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
 };
 
@@ -50,21 +50,13 @@ export class WaffleMetricControls extends React.PureComponent<Props> {
     const nodePart = last(this.props.path);
     const currentMetric = last(this.props.metrics);
     const options = get(OPTIONS, nodePart.type, [] as OptionsItem[]);
-    const selectedOptions = options.filter(o => o.metric.type === currentMetric.type);
-    if (!options.length || !selectedOptions) {
-      return null;
+    const value = currentMetric.type;
+    if (!options.length || !value) {
+      throw Error('Unable to select options or value for metric.');
     }
-    return (
-      <EuiComboBox
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={this.handleChange}
-        isClearable={false}
-        singleSelection={true}
-      />
-    );
+    return <EuiSelect options={options} value={value} onChange={this.handleChange} />;
   }
-  private handleChange = (value: OptionsItem[]) => {
-    this.props.onChange(value.map(v => v.metric));
+  private handleChange = (e: { target: { value: InfraMetricType } }) => {
+    this.props.onChange([{ type: e.target.value }]);
   };
 }

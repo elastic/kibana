@@ -144,4 +144,11 @@ declare module '@elastic/eui' {
     singleSelection?: boolean;
   };
   export const EuiComboBox: React.SFC<EuiComboBoxProps>;
+
+  type EuiSelectProps = CommonProps & {
+    options?: any[];
+    value: any;
+    onChange?: (arg: any) => void;
+  };
+  export const EuiSelect: React.SFC<EuiSelectProps>;
 }

@@ -62,9 +62,9 @@ export class Node extends React.PureComponent<Props, State> {
     const metricModel = last(options.metrics);
     const valueMode = squareSize > 110;
     const label = get(METRIC_LABELS, metricModel.type, 'Count');
-    const color = colorFromValue(options.legend, metric.value, bounds);
-    const value = metric != null ? formatter(metric.value) : 'n/a';
-
+    const rawValue = (metric && metric.value) || 0;
+    const color = colorFromValue(options.legend, rawValue, bounds);
+    const value = formatter(rawValue);
     return (
       <NodeContextMenu
         node={node}

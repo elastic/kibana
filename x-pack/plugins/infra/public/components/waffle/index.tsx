@@ -13,9 +13,9 @@ import {
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
 import {
+  InfraFormatterType,
   InfraWaffleData,
   InfraWaffleMapBounds,
-  InfraWaffleMapFormatterType,
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
 } from '../../lib/lib';
@@ -35,7 +35,7 @@ interface Props {
 }
 
 interface MetricFormatter {
-  formatter: InfraWaffleMapFormatterType;
+  formatter: InfraFormatterType;
   template: string;
   bounds?: { min: number; max: number };
 }
@@ -45,19 +45,19 @@ interface MetricFormatters {
 }
 
 const METRIC_FORMATTERS: MetricFormatters = {
-  [InfraMetricType.count]: { formatter: InfraWaffleMapFormatterType.number, template: '{{value}}' },
+  [InfraMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
   [InfraMetricType.cpu]: {
-    formatter: InfraWaffleMapFormatterType.percent,
+    formatter: InfraFormatterType.percent,
     template: '{{value}}',
     bounds: { min: 0, max: 1 },
   },
   [InfraMetricType.memory]: {
-    formatter: InfraWaffleMapFormatterType.percent,
+    formatter: InfraFormatterType.percent,
     template: '{{value}}',
     bounds: { min: 0, max: 1 },
   },
-  [InfraMetricType.rx]: { formatter: InfraWaffleMapFormatterType.bits, template: '{{value}}/s' },
-  [InfraMetricType.tx]: { formatter: InfraWaffleMapFormatterType.bits, template: '{{value}}/s' },
+  [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
 };
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
@@ -66,7 +66,12 @@ const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = 
       return acc.concat(extractValuesFromMap(group.groups, values));
     }
     if (isWaffleMapGroupWithNodes(group)) {
-      return acc.concat(group.nodes.map(node => last(node.metrics).value));
+      return acc.concat(
+        group.nodes.map(node => {
+          const lastMetric = last(node.metrics);
+          return (lastMetric && lastMetric.value) || 0;
+        })
+      );
     }
     return acc;
   }, values);
