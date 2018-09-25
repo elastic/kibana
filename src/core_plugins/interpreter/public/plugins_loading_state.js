@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import uuid from 'uuid/v4';
+
 class PluginsLoadingState {
   constructor() {
     this.states = {};
@@ -24,7 +26,7 @@ class PluginsLoadingState {
   }
 
   setLoading() {
-    const id = '';
+    const id = uuid();
     this.states[id] = true;
     return id;
   }
