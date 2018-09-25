@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Size } from '../../../types';
 
-export { checkIfPdfsMatch } from './compare_pdfs';
-export { checkIfPngsMatch } from './compare_pngs';
+export interface CaptureConfig {
+  zoom: number;
+  viewport: Size;
+}

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`headers it fails if it can't decrypt the headers 1`] = `undefined`;
+
+exports[`sessionCookie it fails if if cookie name can't be determined 1`] = `"server.plugins.security.getSessionCookieOptions is not a function"`;
+
+exports[`sessionCookie it fails if it can't decrypt the session 1`] = `"Failed to decrypt report job data. Please re-generate this report."`;
