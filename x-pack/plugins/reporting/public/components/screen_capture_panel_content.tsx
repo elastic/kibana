@@ -45,17 +45,25 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   }
 
   private renderOptions = () => {
-    return (
-      <Fragment>
-        <EuiSwitch
-          label="Optimize for printing"
-          checked={this.state.usePrintLayout}
-          onChange={this.handlePrintLayoutChange}
-          data-test-subj="usePrintLayout"
-        />
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
+    if (this.props.reportType === 'png') {
+      return (
+        <Fragment>
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <EuiSwitch
+            label="Optimize for printing"
+            checked={this.state.usePrintLayout}
+            onChange={this.handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    }
   };
 
   private handlePrintLayoutChange = (evt: any) => {

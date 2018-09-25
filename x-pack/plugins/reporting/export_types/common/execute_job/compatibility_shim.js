@@ -7,7 +7,7 @@
 import url from 'url';
 import cookie from 'cookie';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory } from '../../../server/lib/crypto';
 
 export function compatibilityShimFactory(server) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
