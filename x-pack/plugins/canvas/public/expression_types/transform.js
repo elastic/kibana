@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import { Registry } from '../../common/lib/registry';
+import { Registry } from '../../../../../packages/kbn-interpreter/common/lib/registry';
 import { FunctionForm } from './function_form';
 
 export class Transform extends FunctionForm {

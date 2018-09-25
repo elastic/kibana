@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromExpression } from '../../common/lib/ast';
-import { typesRegistry } from '../../common/lib/types_registry';
+import { fromExpression } from '../../../../../packages/kbn-interpreter/common/lib/ast';
+import { typesRegistry } from '../../../../../packages/kbn-interpreter/common/lib/types_registry';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
-import { interpretAst } from '../lib/interpreter';
+import { interpretAst } from '../../../../../src/core_plugins/interpreter/public/interpreter';
 
 export const filters = () => ({
   name: 'filters',

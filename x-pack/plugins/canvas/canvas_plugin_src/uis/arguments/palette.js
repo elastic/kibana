@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { PalettePicker } from '../../../public/components/palette_picker';
-import { getType } from '../../../common/lib/get_type';
+import { getType } from '../../../../../../packages/kbn-interpreter/common/lib/get_type';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {

@@ -6,9 +6,9 @@
 
 import expect from 'expect.js';
 import { pie } from '../pie';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
 import { testPie } from './fixtures/test_pointseries';
-import { fontStyle, grayscalePalette, seriesStyle } from './fixtures/test_styles';
+import { fontStyle, grayscalePalette, seriesStyle } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_styles';
 
 describe('pie', () => {
   const fn = functionWrapper(pie);

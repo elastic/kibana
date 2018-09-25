@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { fromExpression } from '../../../../../common/lib/ast';
+import { fromExpression } from '../../../../../../../../packages/kbn-interpreter/common/lib/ast';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';
 
