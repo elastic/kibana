@@ -38,11 +38,11 @@ export default function ({ getService }) {
         await reportingAPI.deleteAllReportingIndexes();
       });
 
-      // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
-      // more efficient to post them all up front, then sequentially.
+      /*The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before
+        preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414 */
       it('multiple jobs posted', async () => {
         const reportPaths = [];
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_4));
+        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_PRE_6_2));
 
         await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
       }).timeout(1540000);
