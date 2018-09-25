@@ -14,12 +14,24 @@ export {
 } from './api';
 
 export {
+  cronExpressionToParts,
+  cronPartsToExpression,
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH,
+  YEAR,
+} from './cron';
+
+export {
   logisticalDetailsUrl,
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,
   termsDetailsUrl,
   histogramDetailsUrl,
   metricsDetailsUrl,
+  cronUrl,
 } from './documentation_links';
 
 export {
@@ -38,6 +50,12 @@ export {
   setHttp,
   getHttp,
 } from './http_provider';
+
+export {
+  getOrdinalValue,
+  getDayName,
+  getMonthName,
+} from './humanized_numbers';
 
 export {
   serializeJob,

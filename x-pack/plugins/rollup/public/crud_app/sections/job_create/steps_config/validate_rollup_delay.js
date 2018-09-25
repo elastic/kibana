@@ -12,19 +12,19 @@ import {
   parseEsInterval,
 } from 'ui/utils/parse_es_interval';
 
-export function validateDateHistogramDelay(dateHistogramDelay) {
+export function validateRollupDelay(rollupDelay) {
   // This field is optional, so if nothing has been provided we can skip validation.
-  if (!dateHistogramDelay || !dateHistogramDelay.trim()) {
+  if (!rollupDelay || !rollupDelay.trim()) {
     return undefined;
   }
 
   try {
-    parseEsInterval(dateHistogramDelay);
+    parseEsInterval(rollupDelay);
   } catch(error) {
     if (error instanceof ParseEsIntervalInvalidFormatError) {
       return [(
         <FormattedMessage
-          id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidFormat"
+          id="xpack.rollupJobs.create.errors.rollupDelayInvalidFormat"
           defaultMessage="Invalid delay format"
         />
       )];
@@ -34,14 +34,14 @@ export function validateDateHistogramDelay(dateHistogramDelay) {
       const { unit } = error;
       return [(
         <FormattedMessage
-          id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidCalendarInterval"
+          id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarInterval"
           defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
           values={{
             unit,
             suggestion: (
               <strong>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.errors.dateHistogramDelayInvalidCalendarInterval.suggestion"
+                  id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarInterval.suggestion"
                   defaultMessage="1{unit}"
                   values={{ unit }}
                 />

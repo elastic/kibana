@@ -130,8 +130,8 @@ export class TabSummaryUi extends Component {
       indexPattern,
       rollupIndex,
       rollupCron,
+      rollupDelay,
       dateHistogramInterval,
-      dateHistogramDelay,
       dateHistogramTimeZone,
       dateHistogramField,
     } = job;
@@ -200,6 +200,24 @@ export class TabSummaryUi extends Component {
                 {rollupCron}
               </EuiDescriptionListDescription>
             </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.label"
+                  defaultMessage="Delay"
+                />
+              </EuiDescriptionListTitle>
+
+              <EuiDescriptionListDescription>
+                {rollupDelay || (
+                  <FormattedMessage
+                    id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.none"
+                    defaultMessage="None"
+                  />
+                )}
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiDescriptionList>
 
@@ -246,24 +264,6 @@ export class TabSummaryUi extends Component {
           </EuiFlexGroup>
 
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.label"
-                  defaultMessage="Delay"
-                />
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription>
-                {dateHistogramDelay || (
-                  <FormattedMessage
-                    id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.none"
-                    defaultMessage="None"
-                  />
-                )}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage

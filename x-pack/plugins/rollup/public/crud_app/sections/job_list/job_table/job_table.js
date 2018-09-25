@@ -63,8 +63,8 @@ const COLUMNS = [{
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.delayHeader', {
     defaultMessage: 'Delay',
   }),
-  fieldName: 'dateHistogramDelay',
-  render: ({ dateHistogramDelay }) => dateHistogramDelay || 'None',
+  fieldName: 'rollupDelay',
+  render: ({ rollupDelay }) => rollupDelay || 'None',
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.intervalHeader', {
     defaultMessage: 'Interval',

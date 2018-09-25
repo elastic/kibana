@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-function removeUndefinedValues(object) {
+function removeEmptyValues(object) {
   Object.keys(object).forEach(key => {
-    if (object[key] == null) {
+    if (object[key] == null || object[key].trim() === '') {
       delete object[key];
     }
   });
@@ -21,7 +21,7 @@ export function serializeJob(jobConfig) {
     rollupIndex,
     rollupCron,
     dateHistogramInterval,
-    dateHistogramDelay,
+    rollupDelay,
     rollupPageSize,
     dateHistogramTimeZone,
     dateHistogramField,
@@ -37,11 +37,10 @@ export function serializeJob(jobConfig) {
     rollup_index: rollupIndex,
     cron: rollupCron,
     page_size: rollupPageSize,
-    metrics,
     groups: {
-      date_histogram: removeUndefinedValues({
+      date_histogram: removeEmptyValues({
         interval: dateHistogramInterval,
-        delay: dateHistogramDelay,
+        delay: rollupDelay,
         time_zone: dateHistogramTimeZone,
         field: dateHistogramField,
       }),
@@ -88,7 +87,7 @@ export function deserializeJob(job) {
       groups: {
         date_histogram: {
           interval: dateHistogramInterval,
-          delay: dateHistogramDelay,
+          delay: rollupDelay,
           time_zone: dateHistogramTimeZone,
           field: dateHistogramField,
         },
@@ -115,7 +114,7 @@ export function deserializeJob(job) {
     rollupIndex,
     rollupCron,
     dateHistogramInterval,
-    dateHistogramDelay,
+    rollupDelay,
     dateHistogramTimeZone,
     dateHistogramField,
     status,
