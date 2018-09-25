@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
-import { fonts } from '../../../common/lib/fonts';
+import { fonts } from '../../../../../../packages/kbn-interpreter/common/lib/fonts';
 import { Popover } from '../popover';
 import { FauxSelect } from '../faux_select';
 

@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 import { ply } from '../ply';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from './fixtures/test_tables';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { testTable } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
 
 const averagePrice = datatable => {
   const average = datatable.rows.reduce((sum, row) => sum + row.price, 0) / datatable.rows.length;

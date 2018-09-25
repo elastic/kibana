@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
-import { getType } from '../../../../common/lib/get_type';
+import { getType } from '../../../../../../../packages/kbn-interpreter/common/lib/get_type';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';

@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { pointseries } from '../pointseries';
-import { emptyTable, testTable } from '../../common/__tests__/fixtures/test_tables';
+import { emptyTable, testTable } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
 
 describe('pointseries', () => {
   const fn = pointseries().fn;

@@ -5,7 +5,7 @@
  */
 
 import { get, pick } from 'lodash';
-import { Registry } from '../../common/lib/registry';
+import { Registry } from '../../../../../packages/kbn-interpreter/common/lib/registry';
 import { FunctionForm } from './function_form';
 
 const NO_NEXT_EXP = 'no next expression';

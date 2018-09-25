@@ -7,8 +7,8 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
-import { interpretAst } from '../../lib/interpreter';
-import { toExpression } from '../../../common/lib/ast';
+import { interpretAst } from '../../../../../../src/core_plugins/interpreter/public/interpreter';
+import { toExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {

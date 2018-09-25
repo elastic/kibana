@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { browser } from './browser';
-import { location } from './location';
-import { urlparam } from './urlparam';
+import { browser } from '../../../../../../src/core_plugins/interpreter/public/functions/browser';
+import { location } from '../../../../../../src/core_plugins/interpreter/public/functions/location';
+import { urlparam } from '../../../../../../src/core_plugins/interpreter/public/functions/urlparam';
 import { markdown } from './markdown';
 
 export const functions = [browser, location, urlparam, markdown];

@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import uniqBy from 'lodash.uniqby';
 import { createStore } from '../../state/store';
 import { getInitialState } from '../../state/initial_state';
-import { functionsRegistry } from '../../../common/lib/functions_registry';
+import { functionsRegistry } from '../../../../../../packages/kbn-interpreter/common/lib/functions_registry';
 
 const app = uiModules.get('apps/canvas');
 app.service('canvasStore', (kbnVersion, basePath, reportingBrowserType, serverFunctions) => {

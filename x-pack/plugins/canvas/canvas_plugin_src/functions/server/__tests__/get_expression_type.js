@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { getExpressionType } from '../pointseries/lib/get_expression_type';
-import { emptyTable, testTable } from '../../common/__tests__/fixtures/test_tables';
+import { emptyTable, testTable } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
 
 describe('getExpressionType', () => {
   it('returns the result type of an evaluated math expression', () => {
