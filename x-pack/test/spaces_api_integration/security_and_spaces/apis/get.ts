@@ -24,60 +24,63 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
   } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('get', () => {
-    // valid spaces
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
         otherSpaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
         otherSpaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithAllAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
     ].forEach(scenario => {
-      getTest(`${scenario.notAKibanaUser.USERNAME}`, {
+      getTest(`${scenario.users.noAccess.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.notAKibanaUser.USERNAME,
-          password: scenario.notAKibanaUser.PASSWORD,
+          username: scenario.users.noAccess.USERNAME,
+          password: scenario.users.noAccess.PASSWORD,
         },
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
           },
         },
       });
 
-      getTest(`${scenario.superuser.USERNAME}`, {
+      getTest(`${scenario.users.superuser.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.superuser.USERNAME,
-          password: scenario.superuser.PASSWORD,
+          username: scenario.users.superuser.USERNAME,
+          password: scenario.users.superuser.PASSWORD,
         },
         tests: {
           default: {
@@ -87,12 +90,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithAllGlobally.USERNAME}`, {
+      getTest(`${scenario.users.allGlobally.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithAllGlobally.USERNAME,
-          password: scenario.userWithAllGlobally.PASSWORD,
+          username: scenario.users.allGlobally.USERNAME,
+          password: scenario.users.allGlobally.PASSWORD,
         },
         tests: {
           default: {
@@ -102,12 +105,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithDualAll.USERNAME}`, {
+      getTest(`${scenario.users.dualAll.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithDualAll.USERNAME,
-          password: scenario.userWithDualAll.PASSWORD,
+          username: scenario.users.dualAll.USERNAME,
+          password: scenario.users.dualAll.PASSWORD,
         },
         tests: {
           default: {
@@ -117,12 +120,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithLegacyAll.USERNAME}`, {
+      getTest(`${scenario.users.legacyAll.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyAll.USERNAME,
-          password: scenario.userWithLegacyAll.PASSWORD,
+          username: scenario.users.legacyAll.USERNAME,
+          password: scenario.users.legacyAll.PASSWORD,
         },
         tests: {
           default: {
@@ -132,12 +135,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithReadGlobally.USERNAME}`, {
+      getTest(`${scenario.users.readGlobally.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithReadGlobally.USERNAME,
-          password: scenario.userWithReadGlobally.PASSWORD,
+          username: scenario.users.readGlobally.USERNAME,
+          password: scenario.users.readGlobally.PASSWORD,
         },
         tests: {
           default: {
@@ -147,12 +150,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userwithDualRead.USERNAME}`, {
+      getTest(`${scenario.users.dualRead.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userwithDualRead.USERNAME,
-          password: scenario.userwithDualRead.PASSWORD,
+          username: scenario.users.dualRead.USERNAME,
+          password: scenario.users.dualRead.PASSWORD,
         },
         tests: {
           default: {
@@ -162,12 +165,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithLegacyRead.USERNAME}`, {
+      getTest(`${scenario.users.legacyRead.USERNAME}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithLegacyRead.USERNAME,
-          password: scenario.userWithLegacyRead.PASSWORD,
+          username: scenario.users.legacyRead.USERNAME,
+          password: scenario.users.legacyRead.PASSWORD,
         },
         tests: {
           default: {
@@ -177,12 +180,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithReadAtSpace.USERNAME} at ${scenario.spaceId}`, {
+      getTest(`${scenario.users.readAtSpace.USERNAME} at ${scenario.spaceId}`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithReadAtSpace.USERNAME,
-          password: scenario.userWithReadAtSpace.PASSWORD,
+          username: scenario.users.readAtSpace.USERNAME,
+          password: scenario.users.readAtSpace.PASSWORD,
         },
         tests: {
           default: {
@@ -192,12 +195,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      getTest(`${scenario.userWithAllAtOtherSpace.USERNAME} at a different space`, {
+      getTest(`${scenario.users.allAtOtherSpace.USERNAME} at a different space`, {
         currentSpaceId: scenario.otherSpaceId,
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithAllAtOtherSpace.USERNAME,
-          password: scenario.userWithAllAtOtherSpace.PASSWORD,
+          username: scenario.users.allAtOtherSpace.USERNAME,
+          password: scenario.users.allAtOtherSpace.PASSWORD,
         },
         tests: {
           default: {
@@ -213,21 +216,23 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         {
           spaceId: SPACES.DEFAULT.spaceId,
           otherSpaceId: nonExistantSpaceId,
-          userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-          userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-          userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-          userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-          userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          users: {
+            allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+            readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+            allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+            legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+            legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+            dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+            dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          },
         },
       ].forEach(scenario => {
-        getTest(`${scenario.userWithAllGlobally.USERNAME}`, {
+        getTest(`${scenario.users.allGlobally.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithAllGlobally.USERNAME,
-            password: scenario.userWithAllGlobally.PASSWORD,
+            username: scenario.users.allGlobally.USERNAME,
+            password: scenario.users.allGlobally.PASSWORD,
           },
           tests: {
             default: {
@@ -237,12 +242,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userWithDualAll.USERNAME}`, {
+        getTest(`${scenario.users.dualAll.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithDualAll.USERNAME,
-            password: scenario.userWithDualAll.PASSWORD,
+            username: scenario.users.dualAll.USERNAME,
+            password: scenario.users.dualAll.PASSWORD,
           },
           tests: {
             default: {
@@ -252,12 +257,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userWithLegacyAll.USERNAME}`, {
+        getTest(`${scenario.users.legacyAll.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithLegacyAll.USERNAME,
-            password: scenario.userWithLegacyAll.PASSWORD,
+            username: scenario.users.legacyAll.USERNAME,
+            password: scenario.users.legacyAll.PASSWORD,
           },
           tests: {
             default: {
@@ -267,12 +272,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userWithReadGlobally.USERNAME}`, {
+        getTest(`${scenario.users.readGlobally.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithReadGlobally.USERNAME,
-            password: scenario.userWithReadGlobally.PASSWORD,
+            username: scenario.users.readGlobally.USERNAME,
+            password: scenario.users.readGlobally.PASSWORD,
           },
           tests: {
             default: {
@@ -282,12 +287,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userwithDualRead.USERNAME}`, {
+        getTest(`${scenario.users.dualRead.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userwithDualRead.USERNAME,
-            password: scenario.userwithDualRead.PASSWORD,
+            username: scenario.users.dualRead.USERNAME,
+            password: scenario.users.dualRead.PASSWORD,
           },
           tests: {
             default: {
@@ -297,12 +302,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userWithLegacyRead.USERNAME}`, {
+        getTest(`${scenario.users.legacyRead.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithLegacyRead.USERNAME,
-            password: scenario.userWithLegacyRead.PASSWORD,
+            username: scenario.users.legacyRead.USERNAME,
+            password: scenario.users.legacyRead.PASSWORD,
           },
           tests: {
             default: {
@@ -312,12 +317,12 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           },
         });
 
-        getTest(`${scenario.userWithAllAtSpace.USERNAME}`, {
+        getTest(`${scenario.users.allAtDefaultSpace.USERNAME}`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           auth: {
-            username: scenario.userWithAllAtSpace.USERNAME,
-            password: scenario.userWithAllAtSpace.PASSWORD,
+            username: scenario.users.allAtDefaultSpace.USERNAME,
+            password: scenario.users.allAtDefaultSpace.PASSWORD,
           },
           tests: {
             default: {

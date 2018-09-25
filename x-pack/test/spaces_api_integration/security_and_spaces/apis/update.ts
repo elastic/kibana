@@ -16,7 +16,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     updateTest,
-    expectNewSpaceNotFound,
+    expectNotFound,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectRbacForbidden,
@@ -27,65 +27,69 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userWithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
     ].forEach(scenario => {
       updateTest(
-        `${scenario.notAKibanaUser.USERNAME} can't update space_1 from
+        `${scenario.users.noAccess.USERNAME} can't update space_1 from
         the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.notAKibanaUser.USERNAME,
-            password: scenario.notAKibanaUser.PASSWORD,
+            username: scenario.users.noAccess.USERNAME,
+            password: scenario.users.noAccess.PASSWORD,
           },
           tests: {
             alreadyExists: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
             },
             defaultSpace: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
             },
             newSpace: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
             },
           },
         }
       );
 
       updateTest(
-        `${scenario.superuser.USERNAME} can update space_1 from
+        `${scenario.users.superuser.USERNAME} can update space_1 from
         the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.superuser.USERNAME,
-            password: scenario.superuser.PASSWORD,
+            username: scenario.users.superuser.USERNAME,
+            password: scenario.users.superuser.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -98,20 +102,20 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
       );
 
       updateTest(
-        `${scenario.userWithAllGlobally.USERNAME} can update space_1 from
+        `${scenario.users.allGlobally.USERNAME} can update space_1 from
         the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithAllGlobally.USERNAME,
-            password: scenario.userWithAllGlobally.PASSWORD,
+            username: scenario.users.allGlobally.USERNAME,
+            password: scenario.users.allGlobally.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -124,20 +128,20 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
       );
 
       updateTest(
-        `${scenario.userWithDualAll.USERNAME} can update space_1 from
+        `${scenario.users.dualAll.USERNAME} can update space_1 from
         the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithDualAll.USERNAME,
-            password: scenario.userWithDualAll.PASSWORD,
+            username: scenario.users.dualAll.USERNAME,
+            password: scenario.users.dualAll.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -150,20 +154,20 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
       );
 
       updateTest(
-        `${scenario.userWithLegacyAll.USERNAME} can update space_1 from
+        `${scenario.users.legacyAll.USERNAME} can update space_1 from
         the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithLegacyAll.USERNAME,
-            password: scenario.userWithLegacyAll.PASSWORD,
+            username: scenario.users.legacyAll.USERNAME,
+            password: scenario.users.legacyAll.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -176,20 +180,20 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
             },
             newSpace: {
               statusCode: 404,
-              response: expectNewSpaceNotFound,
+              response: expectNotFound,
             },
           },
         }
       );
 
       updateTest(
-        `${scenario.userWithReadGlobally.USERNAME} cannot update space_1
+        `${scenario.users.readGlobally.USERNAME} cannot update space_1
         from the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithReadGlobally.USERNAME,
-            password: scenario.userWithReadGlobally.PASSWORD,
+            username: scenario.users.readGlobally.USERNAME,
+            password: scenario.users.readGlobally.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -209,13 +213,13 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       updateTest(
-        `${scenario.userWithDualRead.USERNAME} cannot update space_1
+        `${scenario.users.dualRead.USERNAME} cannot update space_1
         from the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithDualRead.USERNAME,
-            password: scenario.userWithDualRead.PASSWORD,
+            username: scenario.users.dualRead.USERNAME,
+            password: scenario.users.dualRead.PASSWORD,
           },
           tests: {
             alreadyExists: {
@@ -235,36 +239,36 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
       );
 
       updateTest(
-        `${scenario.userWithLegacyRead.USERNAME} cannot update space_1
+        `${scenario.users.legacyRead.USERNAME} cannot update space_1
         from the ${scenario.spaceId} space`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithLegacyRead.USERNAME,
-            password: scenario.userWithLegacyRead.PASSWORD,
+            username: scenario.users.legacyRead.USERNAME,
+            password: scenario.users.legacyRead.PASSWORD,
           },
           tests: {
             alreadyExists: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
             },
             defaultSpace: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
             },
             newSpace: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.userWithLegacyRead.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
             },
           },
         }
       );
 
-      updateTest(`${scenario.userWithAllAtSpace.USERNAME} cannot update space_1`, {
+      updateTest(`${scenario.users.allAtSpace.USERNAME} cannot update space_1`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithAllAtSpace.USERNAME,
-          password: scenario.userWithAllAtSpace.PASSWORD,
+          username: scenario.users.allAtSpace.USERNAME,
+          password: scenario.users.allAtSpace.PASSWORD,
         },
         tests: {
           alreadyExists: {
@@ -282,11 +286,11 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
-      updateTest(`${scenario.userWithReadAtSpace.USERNAME} cannot update space_1`, {
+      updateTest(`${scenario.users.readAtSpace.USERNAME} cannot update space_1`, {
         spaceId: scenario.spaceId,
         auth: {
-          username: scenario.userWithReadAtSpace.USERNAME,
-          password: scenario.userWithReadAtSpace.PASSWORD,
+          username: scenario.users.readAtSpace.USERNAME,
+          password: scenario.users.readAtSpace.PASSWORD,
         },
         tests: {
           alreadyExists: {

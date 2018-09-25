@@ -24,27 +24,13 @@ interface GetAllTestDefinition {
 }
 
 export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const makeGetAllTest = (describeFn: DescribeFn) => (
-    description: string,
-    { auth = {}, spaceId, tests }: GetAllTestDefinition
-  ) => {
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${tests.exists.statusCode}`, async () => {
-        return supertest
-          .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-          .auth(auth.username, auth.password)
-          .expect(tests.exists.statusCode)
-          .then(tests.exists.response);
-      });
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
     });
   };
-
-  const getAllTest = makeGetAllTest(describe);
-  // @ts-ignore
-  getAllTest.only = makeGetAllTest(describe.only);
 
   const createExpectResults = (...spaceIds: string[]) => (resp: any) => {
     const expectedBody = [
@@ -72,18 +58,32 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql('');
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
+  const makeGetAllTest = (describeFn: DescribeFn) => (
+    description: string,
+    { auth = {}, spaceId, tests }: GetAllTestDefinition
+  ) => {
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+
+      it(`should return ${tests.exists.statusCode}`, async () => {
+        return supertest
+          .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
+          .auth(auth.username, auth.password)
+          .expect(tests.exists.statusCode)
+          .then(tests.exists.response);
+      });
     });
   };
 
+  const getAllTest = makeGetAllTest(describe);
+  // @ts-ignore
+  getAllTest.only = makeGetAllTest(describe.only);
+
   return {
-    getAllTest,
     createExpectResults,
     createExpectLegacyForbidden,
+    getAllTest,
     expectEmptyResult,
   };
 }

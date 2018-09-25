@@ -27,6 +27,47 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectLegacyForbiddenResponse = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/write/index] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/index] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const expectConflictResponse = (resp: any) => {
+    expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
+    expect(resp.body.error).to.equal('Conflict');
+    expect(resp.body.statusCode).to.equal(409);
+    expect(resp.body.message).to.match(new RegExp(`A space with the identifier .*`));
+  };
+
+  const expectNewSpaceResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      name: 'marketing',
+      id: 'marketing',
+      description: 'a description',
+      color: '#5c5959',
+    });
+  };
+
+  const expectRbacForbiddenResponse = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Unauthorized to create spaces',
+    });
+  };
+
+  const expectReservedSpecifiedResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      name: 'reserved space',
+      id: 'reserved',
+      description: 'a description',
+      color: '#5c5959',
+    });
+  };
+
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
     { auth = {}, spaceId, tests }: CreateTestDefinition
@@ -88,53 +129,12 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   // @ts-ignore
   createTest.only = makeCreateTest(describe.only);
 
-  const expectConflictResponse = (resp: any) => {
-    expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
-    expect(resp.body.error).to.equal('Conflict');
-    expect(resp.body.statusCode).to.equal(409);
-    expect(resp.body.message).to.match(new RegExp(`A space with the identifier .*`));
-  };
-
-  const expectRbacForbiddenResponse = (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: 'Unauthorized to create spaces',
-    });
-  };
-
-  const createExpectLegacyForbiddenResponse = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/write/index] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/index] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectNewSpaceResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      name: 'marketing',
-      id: 'marketing',
-      description: 'a description',
-      color: '#5c5959',
-    });
-  };
-
-  const expectReservedSpecifiedResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      name: 'reserved space',
-      id: 'reserved',
-      description: 'a description',
-      color: '#5c5959',
-    });
-  };
-
   return {
-    createTest,
-    expectNewSpaceResult,
-    expectReservedSpecifiedResult,
-    expectConflictResponse,
-    expectRbacForbiddenResponse,
     createExpectLegacyForbiddenResponse,
+    createTest,
+    expectConflictResponse,
+    expectNewSpaceResult,
+    expectRbacForbiddenResponse,
+    expectReservedSpecifiedResult,
   };
 }

@@ -26,6 +26,48 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const expectRbacForbidden = (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Unauthorized to update spaces',
+    });
+  };
+
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const expectNotFound = (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Not Found',
+      statusCode: 404,
+    });
+  };
+
+  const expectDefaultSpaceResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      name: 'the new default',
+      id: 'default',
+      description: 'a description',
+      color: '#ffffff',
+      _reserved: true,
+    });
+  };
+
+  const expectAlreadyExistsResult = (resp: any) => {
+    expect(resp.body).to.eql({
+      name: 'space 1',
+      id: 'space_1',
+      description: 'a description',
+      color: '#5c5959',
+    });
+  };
+
   const makeUpdateTest = (describeFn: DescribeFn) => (
     description: string,
     { auth = {}, spaceId, tests }: UpdateTestDefinition
@@ -88,56 +130,12 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   // @ts-ignore
   updateTest.only = makeUpdateTest(describe.only);
 
-  const createExpectNotFoundResult = (spaceId: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Not Found',
-      statusCode: 404,
-    });
-  };
-
-  const expectRbacForbidden = (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: 'Unauthorized to update spaces',
-    });
-  };
-
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectNewSpaceNotFound = createExpectNotFoundResult('marketing');
-
-  const expectDefaultSpaceResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      name: 'the new default',
-      id: 'default',
-      description: 'a description',
-      color: '#ffffff',
-      _reserved: true,
-    });
-  };
-
-  const expectAlreadyExistsResult = (resp: any) => {
-    expect(resp.body).to.eql({
-      name: 'space 1',
-      id: 'space_1',
-      description: 'a description',
-      color: '#5c5959',
-    });
-  };
-
   return {
-    updateTest,
-    expectNewSpaceNotFound,
-    expectRbacForbidden,
     createExpectLegacyForbidden,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
+    expectNotFound,
+    expectRbacForbidden,
+    updateTest,
   };
 }

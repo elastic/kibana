@@ -14,9 +14,16 @@ interface CreateTest {
   response: (resp: any) => void;
 }
 
+interface CreateCustomTest extends CreateTest {
+  type: string;
+  description: string;
+  requestBody: any;
+}
+
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
+  custom?: CreateCustomTest;
 }
 
 interface CreateTestDefinition {
@@ -25,50 +32,10 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
+const spaceAwareType = 'visualization';
+const notSpaceAwareType = 'globaltype';
+
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const spaceAwareType = 'visualization';
-  const notSpaceAwareType = 'globaltype';
-
-  const makeCreateTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: CreateTestDefinition
-  ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-      it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${spaceAwareType}`)
-          .auth(auth.username, auth.password)
-          .send({
-            attributes: {
-              title: 'My favorite vis',
-            },
-          })
-          .expect(tests.spaceAware.statusCode)
-          .then(tests.spaceAware.response);
-      });
-
-      it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${notSpaceAwareType}`)
-          .auth(auth.username, auth.password)
-          .send({
-            attributes: {
-              name: `Can't be contained to a space`,
-            },
-          })
-          .expect(tests.notSpaceAware.statusCode)
-          .then(tests.notSpaceAware.response);
-      });
-    });
-  };
-
-  const createTest = makeCreateTest(describe);
-  // @ts-ignore
-  createTest.only = makeCreateTest(describe.only);
-
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -124,6 +91,8 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     }
   };
 
+  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden(notSpaceAwareType);
+
   const expectNotSpaceAwareResults = async (resp: any) => {
     expect(resp.body)
       .to.have.property('id')
@@ -156,12 +125,65 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(actualNamespace).to.eql(undefined);
   };
 
+  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(spaceAwareType);
+
+  const makeCreateTest = (describeFn: DescribeFn) => (
+    description: string,
+    definition: CreateTestDefinition
+  ) => {
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+      it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${spaceAwareType}`)
+          .auth(auth.username, auth.password)
+          .send({
+            attributes: {
+              title: 'My favorite vis',
+            },
+          })
+          .expect(tests.spaceAware.statusCode)
+          .then(tests.spaceAware.response);
+      });
+
+      it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${notSpaceAwareType}`)
+          .auth(auth.username, auth.password)
+          .send({
+            attributes: {
+              name: `Can't be contained to a space`,
+            },
+          })
+          .expect(tests.notSpaceAware.statusCode)
+          .then(tests.notSpaceAware.response);
+      });
+
+      if (tests.custom) {
+        it(tests.custom.description, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${tests.custom!.type}`)
+            .auth(auth.username, auth.password)
+            .send(tests.custom!.requestBody)
+            .expect(tests.custom!.statusCode)
+            .then(tests.custom!.response);
+        });
+      }
+    });
+  };
+
+  const createTest = makeCreateTest(describe);
+  // @ts-ignore
+  createTest.only = makeCreateTest(describe.only);
+
   return {
-    createTest,
     createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
+    createTest,
+    expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
-    expectNotSpaceAwareRbacForbidden: createExpectRbacForbidden(notSpaceAwareType),
-    expectSpaceAwareRbacForbidden: createExpectRbacForbidden(spaceAwareType),
+    expectSpaceAwareRbacForbidden,
   };
 }

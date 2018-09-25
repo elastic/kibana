@@ -14,10 +14,12 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
-    const { createExpectUnknownDocNotFound, deleteTest, expectEmpty } = deleteTestSuiteFactory(
-      esArchiver,
-      supertest
-    );
+    const {
+      createExpectSpaceAwareNotFound,
+      createExpectUnknownDocNotFound,
+      deleteTest,
+      expectEmpty,
+    } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`in the default space`, {
       ...SPACES.DEFAULT,
@@ -51,6 +53,25 @@ export default function({ getService }: TestInvoker) {
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
+        },
+      },
+    });
+
+    deleteTest(`in another space (space_2)`, {
+      spaceId: SPACES.SPACE_1.spaceId,
+      otherSpaceId: SPACES.SPACE_2.spaceId,
+      tests: {
+        spaceAware: {
+          statusCode: 404,
+          response: createExpectSpaceAwareNotFound(SPACES.SPACE_2.spaceId),
+        },
+        notSpaceAware: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        invalidId: {
+          statusCode: 404,
+          response: createExpectUnknownDocNotFound(SPACES.SPACE_2.spaceId),
         },
       },
     });

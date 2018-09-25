@@ -23,67 +23,18 @@ interface GetTests {
 interface GetTestDefinition {
   auth?: TestDefinitionAuthentication;
   spaceId?: string;
+  otherSpaceId?: string;
   tests: GetTests;
 }
 
-// TODO: add space unaware type
+const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
+const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
+const doesntExistId = 'foobar';
+
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
-  const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
-  const doesntExistId = 'foobar';
-  const makeGetTest = (describeFn: DescribeFn) => (
-    description: string,
-    definition: GetTestDefinition
-  ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
-
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      it(`should return ${
-        tests.spaceAware.statusCode
-      } when getting a space aware doc`, async () => {
-        await supertest
-          .get(
-            `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-              spaceId
-            )}${spaceAwareId}`
-          )
-          .auth(auth.username, auth.password)
-          .expect(tests.spaceAware.statusCode)
-          .then(tests.spaceAware.response);
-      });
-
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
-          .auth(auth.username, auth.password)
-          .expect(tests.notSpaceAware.statusCode)
-          .then(tests.notSpaceAware.response);
-      });
-
-      describe('document does not exist', () => {
-        it(`should return ${tests.doesntExist.statusCode}`, async () => {
-          await supertest
-            .get(
-              `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-                spaceId
-              )}${doesntExistId}`
-            )
-            .auth(auth.username, auth.password)
-            .expect(tests.doesntExist.statusCode)
-            .then(tests.doesntExist.response);
-        });
-      });
-    });
+  const createExpectDoesntExistNotFound = (spaceId = DEFAULT_SPACE_ID) => {
+    return createExpectNotFound(doesntExistId, spaceId);
   };
-
-  const getTest = makeGetTest(describe);
-  // @ts-ignore
-  getTest.only = makeGetTest(describe.only);
 
   const createExpectLegacyForbidden = (username: string) => (resp: any) => {
     expect(resp.body).to.eql({
@@ -102,15 +53,31 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const createExpectDoesntExistNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound(doesntExistId, spaceId);
-  };
-
-  const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
+  const createExpectNotSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
-  const createExpectNotSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
+  const createExpectNotSpaceAwareRbacForbidden = () => (resp: any) => {
+    expect(resp.body).to.eql({
+      error: 'Forbidden',
+      message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
+      statusCode: 403,
+    });
+  };
+
+  const createExpectNotSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
+    expect(resp.body).to.eql({
+      id: `${notSpaceAwareId}`,
+      type: 'globaltype',
+      updated_at: '2017-09-21T18:59:16.270Z',
+      version: resp.body.version,
+      attributes: {
+        name: 'My favorite global object',
+      },
+    });
+  };
+
+  const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
@@ -118,14 +85,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       error: 'Forbidden',
       message: `Unable to get visualization, missing action:saved_objects/visualization/get`,
-      statusCode: 403,
-    });
-  };
-
-  const createExpectNotSpaceAwareRbacForbidden = () => (resp: any) => {
-    expect(resp.body).to.eql({
-      error: 'Forbidden',
-      message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
       statusCode: 403,
     });
   };
@@ -148,27 +107,69 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const createExpectNotSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: any) => {
-    expect(resp.body).to.eql({
-      id: `${notSpaceAwareId}`,
-      type: 'globaltype',
-      updated_at: '2017-09-21T18:59:16.270Z',
-      version: resp.body.version,
-      attributes: {
-        name: 'My favorite global object',
-      },
+  const makeGetTest = (describeFn: DescribeFn) => (
+    description: string,
+    definition: GetTestDefinition
+  ) => {
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+
+    describeFn(description, () => {
+      before(() => esArchiver.load('saved_objects/spaces'));
+      after(() => esArchiver.unload('saved_objects/spaces'));
+
+      it(`should return ${
+        tests.spaceAware.statusCode
+      } when getting a space aware doc`, async () => {
+        await supertest
+          .get(
+            `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
+              otherSpaceId || spaceId
+            )}${spaceAwareId}`
+          )
+          .auth(auth.username, auth.password)
+          .expect(tests.spaceAware.statusCode)
+          .then(tests.spaceAware.response);
+      });
+
+      it(`should return ${
+        tests.notSpaceAware.statusCode
+      } when deleting a non-space-aware doc`, async () => {
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
+          .auth(auth.username, auth.password)
+          .expect(tests.notSpaceAware.statusCode)
+          .then(tests.notSpaceAware.response);
+      });
+
+      describe('document does not exist', () => {
+        it(`should return ${tests.doesntExist.statusCode}`, async () => {
+          await supertest
+            .get(
+              `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
+                otherSpaceId || spaceId
+              )}${doesntExistId}`
+            )
+            .auth(auth.username, auth.password)
+            .expect(tests.doesntExist.statusCode)
+            .then(tests.doesntExist.response);
+        });
+      });
     });
   };
 
+  const getTest = makeGetTest(describe);
+  // @ts-ignore
+  getTest.only = makeGetTest(describe.only);
+
   return {
+    createExpectDoesntExistNotFound,
+    createExpectLegacyForbidden,
     createExpectNotSpaceAwareNotFound,
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,
-    createExpectSpaceAwareResults,
-    createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
-    createExpectLegacyForbidden,
     createExpectSpaceAwareRbacForbidden,
+    createExpectSpaceAwareResults,
     getTest,
   };
 }

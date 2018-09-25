@@ -37,7 +37,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
     ].forEach(scenario => {
       selectTest(`can select ${scenario.otherSpaceId} from ${scenario.spaceId}`, {
         currentSpaceId: scenario.spaceId,
-        spaceId: scenario.otherSpaceId,
+        selectSpaceId: scenario.otherSpaceId,
         tests: {
           default: {
             statusCode: 200,
@@ -60,7 +60,7 @@ export default function selectSpaceTestSuite({ getService }: TestInvoker) {
       ].forEach(scenario => {
         selectTest(`cannot select non-existant space from ${scenario.spaceId}`, {
           currentSpaceId: scenario.spaceId,
-          spaceId: scenario.otherSpaceId,
+          selectSpaceId: scenario.otherSpaceId,
           tests: {
             default: {
               statusCode: 404,

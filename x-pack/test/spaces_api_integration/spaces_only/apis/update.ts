@@ -17,7 +17,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     updateTest,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
-    expectNewSpaceNotFound,
+    expectNotFound,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('update', () => {
@@ -42,7 +42,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
           },
           newSpace: {
             statusCode: 404,
-            response: expectNewSpaceNotFound,
+            response: expectNotFound,
           },
         },
       });

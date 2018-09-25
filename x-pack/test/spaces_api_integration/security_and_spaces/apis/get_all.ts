@@ -23,73 +23,63 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithAllAtDefault: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithReadAtDefault: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
       {
         spaceId: SPACES.SPACE_1.spaceId,
-        notAKibanaUser: AUTHENTICATION.NOT_A_KIBANA_USER,
-        superuser: AUTHENTICATION.SUPERUSER,
-        userWithAllGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-        userWithReadGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-        userWithAllAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        userWithReadAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-        userWithAllAtDefault: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        userWithReadAtDefault: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-        userWithLegacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-        userWithLegacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
-        userWithDualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-        userwithDualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
+          allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
       },
     ].forEach(scenario => {
       getAllTest(
-        `${scenario.notAKibanaUser.USERNAME} can't access any spaces from ${scenario.spaceId}`,
+        `${scenario.users.noAccess.USERNAME} can't access any spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.notAKibanaUser.USERNAME,
-            password: scenario.notAKibanaUser.PASSWORD,
+            username: scenario.users.noAccess.USERNAME,
+            password: scenario.users.noAccess.PASSWORD,
           },
           tests: {
             exists: {
               statusCode: 403,
-              response: createExpectLegacyForbidden(scenario.notAKibanaUser.USERNAME),
+              response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
             },
           },
         }
       );
 
-      getAllTest(`${scenario.superuser.USERNAME} can access all spaces from ${scenario.spaceId}`, {
-        spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.superuser.USERNAME,
-          password: scenario.superuser.PASSWORD,
-        },
-        tests: {
-          exists: {
-            statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
-          },
-        },
-      });
-
       getAllTest(
-        `${scenario.userWithAllGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.superuser.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithAllGlobally.USERNAME,
-            password: scenario.userWithAllGlobally.PASSWORD,
+            username: scenario.users.superuser.USERNAME,
+            password: scenario.users.superuser.PASSWORD,
           },
           tests: {
             exists: {
@@ -101,12 +91,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithDualAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.allGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithDualAll.USERNAME,
-            password: scenario.userWithDualAll.PASSWORD,
+            username: scenario.users.allGlobally.USERNAME,
+            password: scenario.users.allGlobally.PASSWORD,
           },
           tests: {
             exists: {
@@ -118,12 +108,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithLegacyAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.dualAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithLegacyAll.USERNAME,
-            password: scenario.userWithLegacyAll.PASSWORD,
+            username: scenario.users.dualAll.USERNAME,
+            password: scenario.users.dualAll.PASSWORD,
           },
           tests: {
             exists: {
@@ -135,12 +125,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithReadGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.legacyAll.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithReadGlobally.USERNAME,
-            password: scenario.userWithReadGlobally.PASSWORD,
+            username: scenario.users.legacyAll.USERNAME,
+            password: scenario.users.legacyAll.PASSWORD,
           },
           tests: {
             exists: {
@@ -152,12 +142,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userwithDualRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.readGlobally.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userwithDualRead.USERNAME,
-            password: scenario.userwithDualRead.PASSWORD,
+            username: scenario.users.readGlobally.USERNAME,
+            password: scenario.users.readGlobally.PASSWORD,
           },
           tests: {
             exists: {
@@ -169,12 +159,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithLegacyRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
+        `${scenario.users.dualRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithLegacyRead.USERNAME,
-            password: scenario.userWithLegacyRead.PASSWORD,
+            username: scenario.users.dualRead.USERNAME,
+            password: scenario.users.dualRead.PASSWORD,
           },
           tests: {
             exists: {
@@ -186,12 +176,29 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithAllAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
+        `${scenario.users.legacyRead.USERNAME} can access all spaces from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithAllAtSpace_1.USERNAME,
-            password: scenario.userWithAllAtSpace_1.PASSWORD,
+            username: scenario.users.legacyRead.USERNAME,
+            password: scenario.users.legacyRead.PASSWORD,
+          },
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('default', 'space_1', 'space_2'),
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `${scenario.users.allAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          auth: {
+            username: scenario.users.allAtSpace_1.USERNAME,
+            password: scenario.users.allAtSpace_1.PASSWORD,
           },
           tests: {
             exists: {
@@ -203,12 +210,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithReadAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
+        `${scenario.users.readAtSpace_1.USERNAME} can access space_1 from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithReadAtSpace_1.USERNAME,
-            password: scenario.userWithReadAtSpace_1.PASSWORD,
+            username: scenario.users.readAtSpace_1.USERNAME,
+            password: scenario.users.readAtSpace_1.PASSWORD,
           },
           tests: {
             exists: {
@@ -220,12 +227,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithAllAtDefault.USERNAME} can access default from ${scenario.spaceId}`,
+        `${scenario.users.allAtDefaultSpace.USERNAME} can access default from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithAllAtDefault.USERNAME,
-            password: scenario.userWithAllAtDefault.PASSWORD,
+            username: scenario.users.allAtDefaultSpace.USERNAME,
+            password: scenario.users.allAtDefaultSpace.PASSWORD,
           },
           tests: {
             exists: {
@@ -237,12 +244,12 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       );
 
       getAllTest(
-        `${scenario.userWithReadAtDefault.USERNAME} can access default from ${scenario.spaceId}`,
+        `${scenario.users.readAtDefaultSpace.USERNAME} can access default from ${scenario.spaceId}`,
         {
           spaceId: scenario.spaceId,
           auth: {
-            username: scenario.userWithReadAtDefault.USERNAME,
-            password: scenario.userWithReadAtDefault.PASSWORD,
+            username: scenario.users.readAtDefaultSpace.USERNAME,
+            password: scenario.users.readAtDefaultSpace.PASSWORD,
           },
           tests: {
             exists: {

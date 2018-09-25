@@ -15,11 +15,11 @@ export default function({ getService }: TestInvoker) {
 
   describe('update', () => {
     const {
+      createExpectDoesntExistNotFound,
       createExpectLegacyForbidden,
       expectDoesntExistRbacForbidden,
       expectNotSpaceAwareResults,
       expectNotSpaceAwareRbacForbidden,
-      expectNotFound,
       expectSpaceAwareRbacForbidden,
       expectSpaceAwareResults,
       updateTest,
@@ -62,7 +62,7 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(),
         },
       },
     });
@@ -83,7 +83,7 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(),
         },
       },
     });
@@ -131,7 +131,7 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(),
         },
       },
     });
@@ -173,7 +173,7 @@ export default function({ getService }: TestInvoker) {
         },
         doesntExist: {
           statusCode: 404,
-          response: expectNotFound,
+          response: createExpectDoesntExistNotFound(),
         },
       },
     });

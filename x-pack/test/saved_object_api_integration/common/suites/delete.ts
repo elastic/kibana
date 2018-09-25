@@ -24,15 +24,59 @@ interface DeleteTests {
 interface DeleteTestDefinition {
   auth?: TestDefinitionAuthentication;
   spaceId?: string;
+  otherSpaceId?: string;
   tests: DeleteTests;
 }
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      // eslint-disable-next-line max-len
+      message: `action [indices:data/write/delete] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/delete] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
+    });
+  };
+
+  const createExpectRbacForbidden = (type: string) => (resp: any) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to delete ${type}, missing action:saved_objects/${type}/delete`,
+    });
+  };
+
+  const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
+    createExpectNotFound(spaceId, 'dashboard', 'be3733a0-9efe-11e7-acb3-3dab96693fab')(resp);
+  };
+
+  const createExpectUnknownDocNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
+    createExpectNotFound(spaceId, 'dashboard', `not-a-real-id`)(resp);
+  };
+
+  const expectEmpty = (resp: any) => {
+    expect(resp.body).to.eql({});
+  };
+
+  const expectRbacInvalidIdForbidden = createExpectRbacForbidden('dashboard');
+
+  const expectRbacNotSpaceAwareForbidden = createExpectRbacForbidden('globaltype');
+
+  const expectRbacSpaceAwareForbidden = createExpectRbacForbidden('dashboard');
+
   const makeDeleteTest = (describeFn: DescribeFn) => (
     description: string,
     definition: DeleteTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -42,7 +86,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .delete(
             `${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}be3733a0-9efe-11e7-acb3-3dab96693fab`
           )
           .auth(auth.username, auth.password)
@@ -66,7 +110,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .delete(
             `${getUrlPrefix(spaceId)}/api/saved_objects/dashboard/${getIdPrefix(
-              spaceId
+              otherSpaceId || spaceId
             )}not-a-real-id`
           )
           .auth(auth.username, auth.password)
@@ -79,46 +123,14 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   // @ts-ignore
   deleteTest.only = makeDeleteTest(describe.only);
 
-  const createExpectLegacyForbidden = (username: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/delete] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/delete] is unauthorized for user [${username}]`,
-    });
-  };
-
-  const expectEmpty = (resp: any) => {
-    expect(resp.body).to.eql({});
-  };
-
-  const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 404,
-      error: 'Not Found',
-      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
-    });
-  };
-
-  const createExpectUnknownDocNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: any) => {
-    createExpectNotFound(spaceId, 'dashboard', `not-a-real-id`)(resp);
-  };
-
-  const createExpectRbacForbidden = (type: string) => (resp: any) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to delete ${type}, missing action:saved_objects/${type}/delete`,
-    });
-  };
-
   return {
     createExpectLegacyForbidden,
+    createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,
     expectEmpty,
-    expectRbacSpaceAwareForbidden: createExpectRbacForbidden('dashboard'),
-    expectRbacNotSpaceAwareForbidden: createExpectRbacForbidden('globaltype'),
-    expectRbacInvalidIdForbidden: createExpectRbacForbidden('dashboard'),
+    expectRbacInvalidIdForbidden,
+    expectRbacNotSpaceAwareForbidden,
+    expectRbacSpaceAwareForbidden,
   };
 }
