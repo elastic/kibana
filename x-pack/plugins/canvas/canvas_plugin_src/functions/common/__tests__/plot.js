@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { plot } from '../plot';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
 import { testPlot } from './fixtures/test_pointseries';
 import {
   fontStyle,
@@ -16,7 +16,7 @@ import {
   xAxisConfig,
   seriesStyle,
   defaultStyle,
-} from './fixtures/test_styles';
+} from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_styles';
 
 describe('plot', () => {
   const fn = functionWrapper(plot);

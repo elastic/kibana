@@ -16,7 +16,7 @@ import {
 } from 'recompose';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
-import { fromExpression } from '../../../common/lib/ast';
+import { fromExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 

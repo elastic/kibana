@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 import { axisConfig } from '../axisConfig';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from '../__tests__/fixtures/test_tables';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { testTable } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
 
 describe('axisConfig', () => {
   const fn = functionWrapper(axisConfig);

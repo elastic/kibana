@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
-import { fetch } from '../../common/lib/fetch';
+import { fetch } from '../../../../../packages/kbn-interpreter/common/lib/fetch';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;

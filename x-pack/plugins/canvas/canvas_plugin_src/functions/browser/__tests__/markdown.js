@@ -6,9 +6,9 @@
 
 import expect from 'expect.js';
 import { markdown } from '../markdown';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from '../../common/__tests__/fixtures/test_tables';
-import { fontStyle } from '../../common/__tests__/fixtures/test_styles';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
+import { testTable } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_tables';
+import { fontStyle } from '../../../../../../../packages/kbn-interpreter/common/__tests__/fixtures/test_styles';
 
 describe('markdown', () => {
   const fn = functionWrapper(markdown);

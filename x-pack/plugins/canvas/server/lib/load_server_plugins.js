@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { typesRegistry } from '../../common/lib/types_registry';
-import { functionsRegistry as serverFunctions } from '../../common/lib/functions_registry';
+import { typesRegistry } from '../../../../../packages/kbn-interpreter/common/lib/types_registry';
+import { functionsRegistry as serverFunctions } from '../../../../../packages/kbn-interpreter/common/lib/functions_registry';
 import { getPluginPaths } from './get_plugin_paths';
 
 const types = {

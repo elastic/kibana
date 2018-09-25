@@ -5,7 +5,7 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib/functions_registry';
+import { functionsRegistry } from '../../../packages/kbn-interpreter/common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
 import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';

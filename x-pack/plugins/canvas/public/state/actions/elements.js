@@ -11,10 +11,10 @@ import { get, pick, cloneDeep, without } from 'lodash';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
+import { toExpression, safeElementFromExpression } from '../../../../../../packages/kbn-interpreter/common/lib/ast';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
-import { interpretAst } from '../../lib/interpreter';
+import { interpretAst } from '../../../../../../src/core_plugins/interpreter/public/interpreter';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
 

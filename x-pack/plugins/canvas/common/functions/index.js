@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { to } from './to';
+import { to } from '../../../../../src/core_plugins/interpreter/common/functions/to';
 
 export const commonFunctions = [to];

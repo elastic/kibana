@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { palette } from '../palette';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../../../../../packages/kbn-interpreter/common/__tests__/helpers/function_wrapper';
 import { palettes } from '../../../../common/lib/palettes';
 
 describe('palette', () => {
