@@ -28,7 +28,7 @@ export function getAuth(server) {
   server.route({
     method: 'GET',
     path: insecureAuthRoute,
-    handler: function(request, reply) {
+    handler: function (request, reply) {
       reply(request.headers.authorization);
     },
   });

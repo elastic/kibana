@@ -40,7 +40,8 @@ export const date = () => ({
       types: ['string', 'null'],
       help:
         'An optional date string to parse into milliseconds since epoch. ' +
-        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
+        'Can be either a valid Javascript Date input or a string to parse using the format argument. ' +
+        'Must be an ISO 8601 string or you must provide the format.',
     },
     format: {
       types: ['string'],

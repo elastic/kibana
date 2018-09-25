@@ -48,10 +48,11 @@ export function Type(config) {
 
   this.to = (node, toTypeName, types) => {
     const typeName = getType(node);
-    if (typeName !== this.name)
+    if (typeName !== this.name) {
       throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
-    else if (!this.castsTo(toTypeName))
+    } else if (!this.castsTo(toTypeName)) {
       throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
+    }
 
     return getToFn(toTypeName)(node, types);
   };

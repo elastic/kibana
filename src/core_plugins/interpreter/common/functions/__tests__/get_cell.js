@@ -18,9 +18,8 @@
  */
 
 import expect from 'expect.js';
-import { getCell } from '../getCell';
-import { functionWrapper } from '@kbn/interpreter/common/__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from '@kbn/interpreter/common/__tests__/fixtures/test_tables';
+import { getCell } from '../get_cell';
+import { functionWrapper, emptyTable, testTable } from '@kbn/interpreter/test_utils';
 
 describe('getCell', () => {
   const fn = functionWrapper(getCell);

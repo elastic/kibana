@@ -53,8 +53,9 @@ export function socketInterpreterProvider({
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!getByAlias(referableFunctionMap, functionName))
+        if (!getByAlias(referableFunctionMap, functionName)) {
           throw new Error(`Function not found: ${functionName}`);
+        }
 
         // set a unique message ID so the code knows what response to process
         const id = uuid();
