@@ -17,7 +17,7 @@
   height: 100%;
   overflow: hidden;
 
-  // BUG: TODO: Make sure Vega doesn't display the controls in two places
+  // BUG #23514: Make sure Vega doesn't display the controls in two places
   .vega-bindings {
     display: none !important;
   }
