@@ -303,67 +303,67 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
   },
 ];
 
-// const outputConfig: YamlConfigSchema[] = [
-//   {
-//     id: 'output',
-//     ui: {
-//       label: 'Output Type',
-//       type: 'select',
-//     },
-//     options: [
-//       {
-//         value: 'elasticsearch',
-//         text: 'Elasticsearch',
-//       },
-//       {
-//         value: 'logstash',
-//         text: 'Logstash',
-//       },
-//       {
-//         value: 'kafka',
-//         text: 'Kafka',
-//       },
-//       {
-//         value: 'console',
-//         text: 'Console',
-//       },
-//     ],
-//     error: 'Please select an output type',
-//     required: true,
-//   },
-//   {
-//     id: 'hosts',
-//     ui: {
-//       label: 'Hosts',
-//       type: 'multi-input',
-//     },
-//     validations: 'isHost',
-//     error: 'One file host per line',
-//     parseValidResult: v => v.split('\n'),
-//   },
-//   {
-//     id: 'username',
-//     ui: {
-//       label: 'Username',
-//       type: 'input',
-//     },
-//     validations: 'isString',
-//     error: 'Unprocessable username',
-//   },
-//   {
-//     id: 'password',
-//     ui: {
-//       label: 'Password',
-//       type: 'input',
-//     },
-//     validations: 'isString',
-//     error: 'Unprocessable password',
-//   },
-// ];
+const outputConfig: YamlConfigSchema[] = [
+  {
+    id: 'output',
+    ui: {
+      label: 'Output Type',
+      type: 'select',
+    },
+    options: [
+      {
+        value: 'elasticsearch',
+        text: 'Elasticsearch',
+      },
+      {
+        value: 'logstash',
+        text: 'Logstash',
+      },
+      {
+        value: 'kafka',
+        text: 'Kafka',
+      },
+      {
+        value: 'console',
+        text: 'Console',
+      },
+    ],
+    error: 'Please select an output type',
+    required: true,
+  },
+  {
+    id: 'hosts',
+    ui: {
+      label: 'Hosts',
+      type: 'multi-input',
+    },
+    validations: 'isHosts',
+    error: 'One file host per line',
+    parseValidResult: v => v.split('\n'),
+  },
+  {
+    id: 'username',
+    ui: {
+      label: 'Username',
+      type: 'input',
+    },
+    validations: 'isString',
+    error: 'Unprocessable username',
+  },
+  {
+    id: 'password',
+    ui: {
+      label: 'Password',
+      type: 'input',
+    },
+    validations: 'isString',
+    error: 'Unprocessable password',
+  },
+];
 
 export const supportedConfigs = [
   { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
   { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
   { text: 'Metricbeat Module', value: 'metricbeat.modules', config: metricbeatModuleConfig },
-  // { text: 'Output', value: 'output', config: outputConfig },
+  { text: 'Output', value: 'output', config: outputConfig },
 ];

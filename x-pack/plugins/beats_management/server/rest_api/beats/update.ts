@@ -33,6 +33,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
         host_name: Joi.string(),
         local_configuration_yml: Joi.string(),
         metadata: Joi.object(),
+        name: Joi.string(),
         type: Joi.string(),
         version: Joi.string(),
       }),

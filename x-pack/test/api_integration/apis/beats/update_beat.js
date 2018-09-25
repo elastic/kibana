@@ -35,6 +35,7 @@ export default function ({ getService }) {
       beat = {
         type: `${chance.word()}beat`,
         host_name: `www.${chance.word()}.net`,
+        name: chance.word(),
         version,
         ephemeral_id: chance.word(),
       };
@@ -77,6 +78,7 @@ export default function ({ getService }) {
       expect(beatInEs._source.beat.host_name).to.be(beat.host_name);
       expect(beatInEs._source.beat.version).to.be(beat.version);
       expect(beatInEs._source.beat.ephemeral_id).to.be(beat.ephemeral_id);
+      expect(beatInEs._source.beat.name).to.be(beat.name);
     });
 
     it('should return an error for an invalid access token', async () => {

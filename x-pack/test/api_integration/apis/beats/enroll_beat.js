@@ -33,6 +33,7 @@ export default function ({ getService }) {
       beat = {
         type: 'filebeat',
         host_name: 'foo.bar.com',
+        name: chance.word(),
         version,
       };
 

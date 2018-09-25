@@ -25,7 +25,7 @@ export interface YamlConfigSchema {
   id: string;
   ui: {
     label: string;
-    type: 'input' | 'multi-input' | 'select' | 'code';
+    type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
     helpText?: string;
   };
   options?: Array<{ value: string; text: string }>;
