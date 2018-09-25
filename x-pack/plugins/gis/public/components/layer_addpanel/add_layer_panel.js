@@ -16,13 +16,11 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
   EuiTitle,
-  EuiTextColor,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -204,6 +202,7 @@ export class AddLayerPanel extends React.Component {
     return (
       <EuiFormRow
         label="Source"
+        compressed
       >
         <EuiSuperSelect
           itemClassName="sourceSelectItem"
@@ -250,6 +249,7 @@ export class AddLayerPanel extends React.Component {
       <Fragment>
         <EuiFormRow
           label="Min zoom"
+          compressed
         >
           <EuiRange
             min={0}
@@ -262,6 +262,7 @@ export class AddLayerPanel extends React.Component {
 
         <EuiFormRow
           label="Max zoom"
+          compressed
         >
           <EuiRange
             min={0}
@@ -280,6 +281,7 @@ export class AddLayerPanel extends React.Component {
       <EuiForm>
         <EuiFormRow
           label="Label"
+          compressed
         >
           <EuiFieldText
             value={this.state.label}
@@ -288,7 +290,7 @@ export class AddLayerPanel extends React.Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow>
+        <EuiFormRow compressed>
           <EuiSwitch
             label="Show layer at all zoom levels"
             checked={this.state.showAtAllZoomLevels}
@@ -310,17 +312,9 @@ export class AddLayerPanel extends React.Component {
     return (
       <EuiFlyout onClose={this.props.closeFlyout} size="s">
         <EuiFlyoutHeader>
-          <EuiTitle size="l">
-            <h2>Add layer</h2>
+          <EuiTitle size="s">
+            <h1>Add layer</h1>
           </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiTextColor color="subdued">
-            <EuiText size="s">
-              <p>Choose a source from one of the following options, then click Add to map to continue.</p>
-            </EuiText>
-          </EuiTextColor>
-          <EuiSpacer/>
-          <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>

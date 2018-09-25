@@ -32,8 +32,8 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
       style={{ maxWidth: 768 }}
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="l">
-          <h2>{selectedLayer.getDisplayName()}</h2>
+        <EuiTitle size="s">
+          <h1>{selectedLayer.getDisplayName()}</h1>
         </EuiTitle>
         <EuiSpacer size="m"/>
         <EuiSpacer/>

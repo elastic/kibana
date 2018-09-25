@@ -263,6 +263,7 @@ class Editor extends React.Component {
     return (
       <EuiFormRow
         label="Geospatial field"
+        compressed
       >
         <SingleFieldSelect
           placeholder="Select geo field"
@@ -282,6 +283,7 @@ class Editor extends React.Component {
         <EuiFormRow
           label="Limit"
           helpText="Maximum documents retrieved from elasticsearch."
+          compressed
         >
           <EuiFieldNumber
             placeholder="10"
@@ -291,7 +293,7 @@ class Editor extends React.Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow>
+        <EuiFormRow compressed>
           <EuiSwitch
             label="Filter by map bounds"
             checked={this.state.filterByMapBounds}
@@ -301,6 +303,7 @@ class Editor extends React.Component {
 
         <EuiFormRow
           label="Index pattern"
+          compressed
         >
           <IndexPatternSelect
             indexPatternId={this.state.indexPatternId}
