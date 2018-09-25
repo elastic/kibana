@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare class Poller {
+export declare class Poller {
   public start(): void;
 }
-
-declare const poller: Poller;
-
-export default poller;

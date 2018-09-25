@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React, { Component } from 'react';
 import { jobQueueClient } from '../lib/job_queue_client';
 
@@ -14,6 +14,7 @@ interface Props {
 
 interface State {
   isLoading: boolean;
+  isPopoverOpen: boolean;
   calloutTitle: string;
   error?: string;
 }
@@ -26,30 +27,33 @@ export class ReportErrorButton extends Component<Props, State> {
 
     this.state = {
       isLoading: false,
+      isPopoverOpen: false,
       calloutTitle: 'Unable to generate report',
     };
   }
 
   public render() {
-    if (this.state.error) {
-      return (
-        <EuiCallOut color="danger" title={this.state.calloutTitle}>
-          <p>{this.state.error}</p>
-        </EuiCallOut>
-      );
-    }
-
-    if (this.state.isLoading) {
-      return <EuiLoadingSpinner size="m" />;
-    }
-
-    return (
+    const button = (
       <EuiButtonIcon
-        onClick={() => this.loadError()}
+        onClick={this.togglePopover}
         iconType="alert"
         color={'danger'}
         aria-label="Show report error"
       />
+    );
+
+    return (
+      <EuiPopover
+        id="popover"
+        button={button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover}
+        anchorPosition="downRight"
+      >
+        <EuiCallOut color="danger" title={this.state.calloutTitle}>
+          <p>{this.state.error}</p>
+        </EuiCallOut>
+      </EuiPopover>
     );
   }
 
@@ -60,6 +64,20 @@ export class ReportErrorButton extends Component<Props, State> {
   public componentDidMount() {
     this.mounted = true;
   }
+
+  private togglePopover = () => {
+    this.setState(prevState => {
+      return { isPopoverOpen: !prevState.isPopoverOpen };
+    });
+
+    if (!this.state.error) {
+      this.loadError();
+    }
+  };
+
+  private closePopover = () => {
+    this.setState({ isPopoverOpen: false });
+  };
 
   private loadError = async () => {
     this.setState({ isLoading: true });
