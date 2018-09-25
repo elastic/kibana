@@ -38,18 +38,36 @@
       </div>
 
       <div ng-if="noInfluencersConfigured === false" class="column col-xs-2 euiText">
+        <div class="euiPanel euiPanel--paddingSmall euiPanel--ml">
         <span class="panel-title">
           Top Influencers
         </span>
         <ml-influencers-list
           influencers="influencers"
         />
+        </div>
       </div>
 
       <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
+        <div class="euiPanel euiPanel--paddingSmall euiPanel--ml">
         <span class="panel-title euiText">
           Anomaly timeline
         </span>
+
+        <div
+          class="ml-explorer-swimlane euiText"
+          ng-mouseenter="setSwimlaneSelectActive(true)"
+          ng-mouseleave="setSwimlaneSelectActive(false)"
+        >
+          <ml-explorer-swimlane
+            swimlane-type="overall"
+            swimlane-data="overallSwimlaneData"
+            selected-job-ids="selectedJobIds"
+            chart-width="swimlaneWidth"
+            app-state="appState"
+            style="width: 100%; height: 250px;">
+          </ml-explorer-swimlane>
+        </div>
 
         <div ng-if="viewBySwimlaneOptions.length > 0">
           <div class="ml-controls">
@@ -64,9 +82,9 @@
                 </li>
               </ul>
             </div>
-
+        
             <ml-select-limit />
-
+        
             <span ng-if="viewByLoadedForTimeFormatted" class="panel-sub-title">
               (Sorted by max anomaly score for {{viewByLoadedForTimeFormatted}})
             </span>
@@ -76,15 +94,17 @@
           </div>
         </div>
 
-        <div class="euiPanel euiPanel--paddingSmall euiPanel--ml">
+
+        <div ng-if="viewBySwimlaneOptions.length > 0">
           <div
             class="ml-explorer-swimlane euiText"
+            ng-if="showViewBySwimlane()"
             ng-mouseenter="setSwimlaneSelectActive(true)"
             ng-mouseleave="setSwimlaneSelectActive(false)"
           >
             <ml-explorer-swimlane
-              swimlane-type="overall"
-              swimlane-data="overallSwimlaneData"
+              swimlane-type="viewBy"
+              swimlane-data="viewBySwimlaneData"
               selected-job-ids="selectedJobIds"
               chart-width="swimlaneWidth"
               app-state="appState"
@@ -92,36 +112,20 @@
             </ml-explorer-swimlane>
           </div>
 
-          <div ng-if="viewBySwimlaneOptions.length > 0">
-            <div
-              class="ml-explorer-swimlane euiText"
-              ng-if="showViewBySwimlane()"
-              ng-mouseenter="setSwimlaneSelectActive(true)"
-              ng-mouseleave="setSwimlaneSelectActive(false)"
-            >
-              <ml-explorer-swimlane
-                swimlane-type="viewBy"
-                swimlane-data="viewBySwimlaneData"
-                selected-job-ids="selectedJobIds"
-                chart-width="swimlaneWidth"
-                app-state="appState"
-                style="width: 100%; height: 250px;">
-              </ml-explorer-swimlane>
+          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+            <div class="item top"></div>
+            <div class="item">
+              <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
             </div>
-
-            <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
-              <div class="item top"></div>
-              <div class="item">
-                <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
-              </div>
-              <div class="item bottom"></div>
-            </div>
-
+            <div class="item bottom"></div>
           </div>
+
+        </div>
         </div>
 
         <div class="euiSpacer euiSpacer--m"></div>
 
+        <div class="euiPanel euiPanel--paddingSmall euiPanel--ml">
         <span class="panel-title euiText">
           Anomalies
         </span>
@@ -162,6 +166,7 @@
         <ml-anomalies-table
           table-data="tableData"
         />
+        <div>
 
       </div>
 

@@ -390,7 +390,7 @@ class AnomaliesTable extends Component {
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
         <EuiInMemoryTable
-          className="ml-anomalies-table eui-textBreakWord euiPanel euiPanel--ml"
+          className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
           pagination={{
