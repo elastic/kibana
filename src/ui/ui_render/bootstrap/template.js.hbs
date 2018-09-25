@@ -1,57 +1,58 @@
 window.onload = function () {
-  function createAnchor(href) {
-    var anchor = document.createElement('a');
-    anchor.setAttribute('href', href);
-    return anchor.href;
-  }
-
   var files = [
-    createAnchor('{{bundlePath}}/vendors.style.css'),
-    createAnchor('{{bundlePath}}/commons.style.css'),
-    createAnchor('{{bundlePath}}/{{appId}}.style.css'),
-
-    createAnchor('{{bundlePath}}/vendors.bundle.js'),
-    createAnchor('{{bundlePath}}/commons.bundle.js'),
-    createAnchor('{{bundlePath}}/{{appId}}.bundle.js')
+    '{{bundlePath}}/vendors.bundle.js',
+    '{{bundlePath}}/commons.bundle.js',
+    '{{bundlePath}}/{{appId}}.bundle.js'
   ];
 
-  if ('{{styleSheetPath}}' !== '') {
-    files.push(createAnchor('{{styleSheetPath}}'));
+  var failure = function () {
+    // make subsequent calls to failure() noop
+    failure = function () {};
+
+    var err = document.createElement('h1');
+    err.style['color'] = 'white';
+    err.style['font-family'] = 'monospace';
+    err.style['text-align'] = 'center';
+    err.style['background'] = '#F44336';
+    err.style['padding'] = '25px';
+    err.innerText = '{{i18n 'common.ui.welcomeError' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
+
+    document.body.innerHTML = err.outerHTML;
   }
+
+  function loadStyleSheet(path) {
+    var dom = document.createElement('link');
+
+    dom.addEventListener('error', failure);
+    dom.setAttribute('rel', 'stylesheet');
+    dom.setAttribute('href', path);
+    document.head.appendChild(dom);
+  }
+
+  function createJavascriptElement(path) {
+    var dom = document.createElement('script');
+
+    dom.setAttribute('async', '');
+    dom.addEventListener('error', failure);
+    dom.setAttribute('src', file);
+    dom.addEventListener('load', next);
+    document.head.appendChild(dom);
+  }
+
+  {{#each styleSheetPaths}}
+    loadStyleSheet('{{this}}');
+  {{/each}}
 
   (function next() {
     var file = files.shift();
     if (!file) return;
 
-    var failure = function () {
-      // make subsequent calls to failure() noop
-      failure = function () {};
+    var dom = document.createElement('script');
 
-      var err = document.createElement('h1');
-      err.style['color'] = 'white';
-      err.style['font-family'] = 'monospace';
-      err.style['text-align'] = 'center';
-      err.style['background'] = '#F44336';
-      err.style['padding'] = '25px';
-      err.innerText = '{{i18n 'common.ui.welcomeError' '{"defaultMessage": "Kibana did not load properly. Check the server output for more information."}'}}';
-
-      document.body.innerHTML = err.outerHTML;
-    }
-
-    var type = /\.js(\?.+)?$/.test(file) ? 'script' : 'link';
-    var dom = document.createElement(type);
     dom.setAttribute('async', '');
     dom.addEventListener('error', failure);
-
-    if (type === 'script') {
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
-    } else {
-      dom.setAttribute('rel', 'stylesheet');
-      dom.setAttribute('href', file);
-      document.head.appendChild(dom);
-      next();
-    }
+    dom.setAttribute('src', file);
+    dom.addEventListener('load', next);
+    document.head.appendChild(dom);
   }());
 };

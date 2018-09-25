@@ -27,6 +27,7 @@ export default function (kibana) {
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: 'plugins/timelion/app',
+        styleSheetPath: `${__dirname}/public/index.scss`,
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',

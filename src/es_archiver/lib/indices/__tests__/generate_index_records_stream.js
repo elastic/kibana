@@ -101,7 +101,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
   it('understands aliases', async () => {
     const stats = createStubStats();
-    const client = createStubClient(['index1'], { index1: { foo: {} } });
+    const client = createStubClient(['index1'], { foo: 'index1' });
 
     const indexRecords = await createPromiseFromStreams([
       createListStream(['index1']),

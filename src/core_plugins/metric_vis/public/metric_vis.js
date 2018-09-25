@@ -25,7 +25,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { MetricVisComponent } from './metric_vis_controller';
-import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -41,7 +40,7 @@ function MetricVisProvider(Private) {
   return VisFactory.createReactVisualization({
     name: 'metric',
     title: 'Metric',
-    image,
+    icon: 'visMetric',
     description: 'Display a calculation as a single number',
     category: CATEGORY.DATA,
     visConfig: {
@@ -99,8 +98,7 @@ function MetricVisProvider(Private) {
           aggFilter: ['!geohash_grid', '!filter']
         }
       ])
-    },
-    responseHandler: 'tabify',
+    }
   });
 }
 
