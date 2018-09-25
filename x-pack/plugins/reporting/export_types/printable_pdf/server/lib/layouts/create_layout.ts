@@ -14,7 +14,7 @@ interface LayoutParams {
   dimensions: Size;
 }
 
-export function createLayout(server: KbnServer, layoutParams: LayoutParams): Layout {
+export function createLayout(server: KbnServer, layoutParams?: LayoutParams): Layout {
   if (layoutParams && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }
