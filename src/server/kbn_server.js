@@ -162,6 +162,10 @@ export default class KbnServer {
   }
 
   async close() {
+    if (!this.server) {
+      return;
+    }
+
     await fromNode(cb => this.server.stop(cb));
   }
 
