@@ -15,6 +15,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -132,11 +133,13 @@ export function InfluencersList({ influencers }) {
   }
 
   const influencersByName = Object.keys(influencers).map(influencerFieldName => (
-    <InfluencersByName
-      key={influencerFieldName}
-      influencerFieldName={influencerFieldName}
-      fieldValues={influencers[influencerFieldName]}
-    />
+    <EuiPanel paddingSize="s" style={{ marginBottom: '10px' }} className="euiPanel--ml">
+      <InfluencersByName
+        key={influencerFieldName}
+        influencerFieldName={influencerFieldName}
+        fieldValues={influencers[influencerFieldName]}
+      />
+    </EuiPanel>
   ));
 
   return (

@@ -50,20 +50,6 @@
         <span class="panel-title euiText">
           Anomaly timeline
         </span>
-        <div
-          class="ml-explorer-swimlane euiText"
-          ng-mouseenter="setSwimlaneSelectActive(true)"
-          ng-mouseleave="setSwimlaneSelectActive(false)"
-        >
-          <ml-explorer-swimlane
-            swimlane-type="overall"
-            swimlane-data="overallSwimlaneData"
-            selected-job-ids="selectedJobIds"
-            chart-width="swimlaneWidth"
-            app-state="appState"
-            style="width: 100%; height: 250px;">
-          </ml-explorer-swimlane>
-        </div>
 
         <div ng-if="viewBySwimlaneOptions.length > 0">
           <div class="ml-controls">
@@ -88,16 +74,17 @@
               (Sorted by max anomaly score)
             </span>
           </div>
+        </div>
 
+        <div class="euiPanel euiPanel--paddingSmall euiPanel--ml">
           <div
             class="ml-explorer-swimlane euiText"
-            ng-if="showViewBySwimlane()"
             ng-mouseenter="setSwimlaneSelectActive(true)"
             ng-mouseleave="setSwimlaneSelectActive(false)"
           >
             <ml-explorer-swimlane
-              swimlane-type="viewBy"
-              swimlane-data="viewBySwimlaneData"
+              swimlane-type="overall"
+              swimlane-data="overallSwimlaneData"
               selected-job-ids="selectedJobIds"
               chart-width="swimlaneWidth"
               app-state="appState"
@@ -105,15 +92,35 @@
             </ml-explorer-swimlane>
           </div>
 
-          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
-            <div class="item top"></div>
-            <div class="item">
-              <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
+          <div ng-if="viewBySwimlaneOptions.length > 0">
+            <div
+              class="ml-explorer-swimlane euiText"
+              ng-if="showViewBySwimlane()"
+              ng-mouseenter="setSwimlaneSelectActive(true)"
+              ng-mouseleave="setSwimlaneSelectActive(false)"
+            >
+              <ml-explorer-swimlane
+                swimlane-type="viewBy"
+                swimlane-data="viewBySwimlaneData"
+                selected-job-ids="selectedJobIds"
+                chart-width="swimlaneWidth"
+                app-state="appState"
+                style="width: 100%; height: 250px;">
+              </ml-explorer-swimlane>
             </div>
-            <div class="item bottom"></div>
-          </div>
 
+            <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+              <div class="item top"></div>
+              <div class="item">
+                <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
+              </div>
+              <div class="item bottom"></div>
+            </div>
+
+          </div>
         </div>
+
+        <div class="euiSpacer euiSpacer--m"></div>
 
         <span class="panel-title euiText">
           Anomalies
@@ -148,6 +155,9 @@
         <div class="euiText explorer-charts">
           <ml-explorer-charts-container />
         </div>
+
+        <div class="clearfix"></div>
+        <div class="euiSpacer euiSpacer--m"></div>
 
         <ml-anomalies-table
           table-data="tableData"

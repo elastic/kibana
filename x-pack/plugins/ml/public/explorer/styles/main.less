@@ -2,6 +2,19 @@
   width: 100%;
   display: inline-block;
   color: #555;
+  background-color: #fbfbfb;
+
+  .euiSelect, .euiComboBox__inputWrap {
+    background-color: #fff;
+  }
+
+  .euiPanel--ml {
+    -webkit-box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.2), 0 1px 5px -2px rgba(153, 153, 153, 0.2);
+    box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.2), 0 1px 5px -2px rgba(153, 153, 153, 0.2);
+    background-color: #FFF;
+    border: 1px solid #f4f4f4;
+    border-radius: 3px;
+  }
 
   .visualize-error {
     h4 {
@@ -131,8 +144,19 @@
     -moz-user-select: none;
     -ms-user-select: none;
 
-    padding: 0px 0px 0px 0px;
-    margin-bottom: 10px;
+    padding: 15px 0px 0px 0px;
+
+    ml-explorer-swimlane[swimlane-type="overall"] {
+      .lane-label {
+        font-weight: 800;
+      }
+
+      .time-tick-labels {
+        display: none;
+      }
+
+      margin-bottom: 0px;
+    }
 
     ml-explorer-swimlane {
       & > .title {
@@ -220,6 +244,7 @@
         div.lane-label {
           display: inline-block;
           font-size: 13px;
+          line-height: 27px;
           height: 30px;
           text-align: right;
           vertical-align: middle;
