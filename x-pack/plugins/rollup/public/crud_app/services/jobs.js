@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-function removeUndefinedValues(object) {
+function removeEmptyValues(object) {
   Object.keys(object).forEach(key => {
-    if (object[key] == null) {
+    if (object[key] == null || object[key].trim() === '') {
       delete object[key];
     }
   });
@@ -38,7 +38,7 @@ export function serializeJob(jobConfig) {
     cron: rollupCron,
     page_size: rollupPageSize,
     groups: {
-      date_histogram: removeUndefinedValues({
+      date_histogram: removeEmptyValues({
         interval: dateHistogramInterval,
         delay: rollupDelay,
         time_zone: dateHistogramTimeZone,

@@ -70,7 +70,6 @@ export class StepLogisticsUi extends Component {
       // Restore the last value of the simple cron editor.
       rollupCron: simpleRollupCron,
     });
-    // hideAdvancedCron();
   };
 
   renderIndexPatternHelpText() {

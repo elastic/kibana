@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  CRUD_APP_BASE_PATH,
-} from './paths';
+export const CRUD_APP_BASE_PATH = '/management/elasticsearch/rollup_jobs';

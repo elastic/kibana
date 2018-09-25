@@ -39,8 +39,12 @@ export const stepIdToStepConfigMap = {
       id: '',
       indexPattern: '',
       rollupIndex: '',
-      rollupCron: '0 0 0 * * 7', // Every week on Saturday, at 00:00:00
+      // Every week on Saturday, at 00:00:00
+      rollupCron: '0 0 0 * * 7',
       rollupPageSize: '',
+      // Though the API doesn't require a delay, in many real-world cases, servers will go down for
+      // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
+      // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
       rollupDelay: '1d',
       cronFrequency: WEEK,
       isAdvancedCronVisible: false,
