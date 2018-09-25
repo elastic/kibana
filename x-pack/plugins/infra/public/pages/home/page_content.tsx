@@ -17,7 +17,7 @@ import { WithOptions } from '../../containers/with_options';
 export const HomePageContent: React.SFC = () => (
   <PageContent>
     <WithOptions>
-      {({ wafflemap }) => (
+      {({ wafflemap, sourceId }) => (
         <WithWaffleFilter>
           {({ filterQueryAsJson }) => (
             <WithWaffleTime>
@@ -26,7 +26,7 @@ export const HomePageContent: React.SFC = () => (
                   filterQuery={filterQueryAsJson}
                   metrics={wafflemap.metrics}
                   path={wafflemap.path}
-                  sourceId={wafflemap.sourceId}
+                  sourceId={sourceId}
                   timerange={currentTimeRange}
                 >
                   {({ nodes, loading, refetch }) => (
