@@ -14,7 +14,7 @@ import { addElement } from '../../state/actions/elements';
 import { WorkpadHeader as Component } from './workpad_header';
 
 const mapStateToProps = state => ({
-  readOnly: getReadOnly(state),
+  readOnly: getReadOnly(state) || getReadOnlyUser(state),
   readOnlyUser: getReadOnlyUser(state),
   workpadName: getWorkpadName(state),
   selectedPage: getSelectedPage(state),

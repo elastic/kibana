@@ -63,8 +63,6 @@ export const WorkpadHeader = ({
   if (readOnlyUser) readOnlyToolTip = "You don't have permission to edit this workpad";
   else readOnlyToolTip = readOnly ? 'Show editing controls' : 'Hide editing controls';
 
-  const isEditing = !(readOnly || readOnlyUser);
-
   return (
     <div>
       {showElementModal ? elementAdd : null}
@@ -96,7 +94,7 @@ export const WorkpadHeader = ({
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={isEditing ? 'eye' : 'eyeClosed'}
+                  iconType={readOnly ? 'eye' : 'eyeClosed'}
                   onClick={() => {
                     toggleReadOnly();
                   }}
@@ -108,7 +106,7 @@ export const WorkpadHeader = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {isEditing ? (
+        {readOnly ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {hasAssets && (
