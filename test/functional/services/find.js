@@ -187,8 +187,8 @@ export function FindProvider({ getService }) {
       return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
     }
 
-    async clickWhenNotDisabled(element, options = { doubleClick: false }) {
-      log.debug(`clickWhenNotDisabled`);
+    async clickByCssSelectorWhenNotDisabled(element, options = { doubleClick: false }) {
+      log.debug(`Find.clickByCssSelectorWhenNotDisabled`);
       // Don't wrap this code in a retry, or stale element checks may get caught here and the element
       // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
       // it's gone.

@@ -65,12 +65,12 @@ export function TestSubjectsProvider({ getService }) {
 
     async clickWhenNotDisabled(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      await find.clickWhenNotDisabled(testSubjSelector(selector), timeout);
+      await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), timeout);
     }
 
     async click(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      await find.click(testSubjSelector(selector), timeout);
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async doubleClick(selector, timeout = defaultFindTimeout) {
