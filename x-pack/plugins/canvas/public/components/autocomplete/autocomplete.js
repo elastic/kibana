@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, keyCodes } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, keyCodes } from '@elastic/eui';
 import { startCase } from 'lodash';
 
 /**
@@ -202,9 +202,9 @@ export class Autocomplete extends React.Component {
                     {this.props.items.map((item, i, items) => (
                       <div key={i}>
                         {i === 0 || items[i - 1].type !== item.type ? (
-                          <EuiText className="autocompleteType">
+                          <EuiTitle className="autocompleteType" size="xs">
                             <h3>{startCase(item.type)}</h3>
-                          </EuiText>
+                          </EuiTitle>
                         ) : (
                           ''
                         )}

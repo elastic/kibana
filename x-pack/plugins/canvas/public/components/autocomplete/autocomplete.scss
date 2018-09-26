@@ -4,24 +4,28 @@
 
 .autocompletePopup {
   position: absolute;
-  top: -300px;
-  height: 300px;
+  top: -262px;
+  height: 260px;
   width: 100%;
 }
 
+.autocompleteItems {
+  border-right: $euiBorderThin;
+}
+
 .autocompleteItems, .autocompleteReference {
-  height: 298px;
+  height: 258px;
   overflow: auto;
   @include euiScrollBar;
 }
 
 .autocompleteReference {
-  padding: $euiSizeS;
-  border-left: $euiBorderThin;
+  padding: $euiSizeS $euiSizeM;
+  background-color: tintOrShade($euiColorLightestShade, 65%, 20%);
 }
 
 .autocompleteItem {
-  padding: $euiSizeS;
+  padding: $euiSizeS $euiSizeM;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -36,4 +40,12 @@
 
 .autocompleteType {
   padding: $euiSizeS;
+}
+
+.autocompleteTable .euiTable {
+  background-color: transparent;
+}
+
+.autocompleteDescList .euiDescriptionList__description {
+  margin-right: $euiSizeS;
 }
