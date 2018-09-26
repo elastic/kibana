@@ -24,7 +24,6 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
@@ -38,7 +37,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
     title: 'Coordinate Map',
-    image,
+    icon: 'visMapCoordinate',
     description: 'Plot latitude and longitude coordinates on a map',
     category: CATEGORY.MAP,
     visConfig: {
@@ -57,6 +56,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     responseHandler: makeGeoJsonResponseHandler(),
+    requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {

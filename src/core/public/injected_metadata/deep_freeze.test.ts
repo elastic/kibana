@@ -75,28 +75,15 @@ it('prevents reassigning items in a frozen array', () => {
 });
 
 it('types return values to prevent mutations in typescript', async () => {
-  const result = await execa.stdout(
-    'tsc',
-    [
-      '--noEmit',
-      '--project',
-      resolve(__dirname, '__fixtures__/frozen_object_mutation.tsconfig.json'),
-    ],
-    {
-      cwd: resolve(__dirname, '__fixtures__'),
-      reject: false,
-    }
-  );
+  await expect(
+    execa.stdout('tsc', ['--noEmit'], {
+      cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
+    })
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`
+"Command failed: tsc --noEmit
 
-  const errorCodeRe = /\serror\s(TS\d{4}):/g;
-  const errorCodes = [];
-  while (true) {
-    const match = errorCodeRe.exec(result);
-    if (!match) {
-      break;
-    }
-    errorCodes.push(match[1]);
-  }
-
-  expect(errorCodes).toEqual(['TS2704', 'TS2540', 'TS2540', 'TS2339']);
+index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a constant or a read-only property.
+index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a constant or a read-only property.
+"
+`);
 });

@@ -9,11 +9,11 @@ import React from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
+import { getExploreSeriesLink } from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
 export function ExplorerChartsContainer({
-  exploreSeries,
   seriesToPlot,
   layoutCellsPerChart,
   tooManyBuckets,
@@ -37,10 +37,10 @@ export function ExplorerChartsContainer({
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
               <div className="explorer-chart-label">
                 <div className="explorer-chart-label-fields">
-                  {(entityFields.length > 0) && (
+                  {(detectorLabel.length > 0 && entityFields.length > 0) && (
                     <span>{detectorLabel} - </span>
                   )}
-                  {(entityFields.length === 0) && (
+                  {(detectorLabel.length > 0 && entityFields.length === 0) && (
                     <span>{detectorLabel}</span>
                   )}
                   {entityFields.map((entity, j) => {
@@ -60,11 +60,12 @@ export function ExplorerChartsContainer({
                     color="warning"
                   />
                 )}
-                <a className="kuiLink" onClick={() => exploreSeries(series)}>
+                <a className="euiLink" onClick={() => window.open(getExploreSeriesLink(series), '_blank')}>
                   View <i className="fa fa-external-link" aria-hidden="true" />
                 </a>
               </div>
               <ExplorerChart
+                tooManyBuckets={tooManyBuckets}
                 seriesConfig={series}
                 mlSelectSeverityService={mlSelectSeverityService}
               />
@@ -76,7 +77,6 @@ export function ExplorerChartsContainer({
   );
 }
 ExplorerChartsContainer.propTypes = {
-  exploreSeries: PropTypes.func.isRequired,
   seriesToPlot: PropTypes.array.isRequired,
   layoutCellsPerChart: PropTypes.number.isRequired,
   tooManyBuckets: PropTypes.bool.isRequired,

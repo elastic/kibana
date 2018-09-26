@@ -91,6 +91,20 @@ describe('RangeFilterManager', function () {
       expect(value).to.have.property('max');
       expect(value.max).to.be(3);
     });
+
+    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
+      filterManager.setMockFilters([
+        {
+          range: {
+            myFieldWhichIsNotField1: {
+              gte: 1,
+              lte: 3
+            }
+          }
+        }
+      ]);
+      expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
+    });
   });
 
 });
