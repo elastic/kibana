@@ -38,7 +38,12 @@ const specs = new PluginPack({
             'plugin/test/visType1',
             'plugin/test/visType2',
             'plugin/test/visType3',
-          ]
+          ],
+          savedObjectSchemas: {
+            foo: {
+              isNamespaceAgnostic: true
+            }
+          }
         }
       }),
       new Plugin({
@@ -48,7 +53,12 @@ const specs = new PluginPack({
             'plugin/test2/visType1',
             'plugin/test2/visType2',
             'plugin/test2/visType3',
-          ]
+          ],
+          savedObjectSchemas: {
+            bar: {
+              isNamespaceAgnostic: true
+            }
+          }
         }
       }),
     ];
@@ -70,6 +80,15 @@ describe('plugin discovery', () => {
         'plugin/test2/visType2',
         'plugin/test2/visType3'
       ]);
+
+      expect(uiExports.savedObjectSchemas).to.eql({
+        foo: {
+          isNamespaceAgnostic: true
+        },
+        bar: {
+          isNamespaceAgnostic: true
+        },
+      });
     });
   });
 });
