@@ -8,7 +8,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiIconTip
+  EuiButtonIcon,
+  EuiIconTip,
+  EuiToolTip
 } from '@elastic/eui';
 
 import {
@@ -18,6 +20,10 @@ import {
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
+
+const textTooManyBuckets = 'This selection contains too many buckets to be displayed.' +
+  'The dashboard is best viewed over a shorter time range.';
+const textViewButton = 'Open in Single Metric Viewer';
 
 export function ExplorerChartsContainer({
   seriesToPlot,
@@ -43,26 +49,44 @@ export function ExplorerChartsContainer({
 
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
-              <div className="explorer-chart-label">
+              <span className="ml-explorer-chart-icons">
+                {wrapLabel && (<br />)}
+                {tooManyBuckets && (
+                  <span className="ml-explorer-chart-icon">
+                    <EuiIconTip
+                      content={textTooManyBuckets}
+                      position="top"
+                      size="s"
+                      type="alert"
+                      color="warning"
+                    />
+                  </span>
+                )}
+                <EuiToolTip
+                  position="top"
+                  content={textViewButton}
+                >
+                  <EuiButtonIcon
+                    href={getExploreSeriesLink(series)}
+                    target="_BLANK"
+                    iconType="stats"
+                    aria-label={textViewButton}
+                  />
+                </EuiToolTip>
+              </span>
+              <div className="ml-explorer-chart-label">
                 <ExplorerChartLabel
                   detectorLabel={detectorLabel}
                   entityFields={entityFields}
                   wrapLabel={wrapLabel}
                 />
-                <EuiIconTip content={<ExplorerChartTooltip {...series.infoTooltip} />} position="left" size="s" />
-                {tooManyBuckets && (
+                <span className="ml-explorer-chart-icon">
                   <EuiIconTip
-                    content={'This selection contains too many buckets to be displayed.' +
-                     'The dashboard is best viewed over a shorter time range.'}
-                    position="bottom"
+                    content={<ExplorerChartTooltip {...series.infoTooltip} />}
+                    position="top"
                     size="s"
-                    type="alert"
-                    color="warning"
                   />
-                )}
-                <a className="euiLink" onClick={() => window.open(getExploreSeriesLink(series), '_blank')}>
-                  View <i className="fa fa-external-link" aria-hidden="true" />
-                </a>
+                </span>
               </div>
               <ExplorerChart
                 tooManyBuckets={tooManyBuckets}

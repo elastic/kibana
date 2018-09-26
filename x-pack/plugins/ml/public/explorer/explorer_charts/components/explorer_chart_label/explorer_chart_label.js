@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './styles/explorer_chart_label_badge.less';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -13,7 +15,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, wrapLabel }) {
   const labelSeparator = (wrapLabel === true) ? <br /> : ' - ';
 
   return (
-    <div className="explorer-chart-label-fields">
+    <span className="explorer-chart-label-fields">
       {(detectorLabel.length > 0 && entityFields.length > 0) && (
         <span>{detectorLabel} {labelSeparator} </span>
       )}
@@ -25,7 +27,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, wrapLabel }) {
           <span key={j}><ExplorerChartLabelBadge entity={entity} /> </span>
         );
       })}
-    </div>
+    </span>
   );
 }
 ExplorerChartLabel.propTypes = {
