@@ -1,6 +1,6 @@
 ### Summary
 
-Summarize your PR. If it includes design elements include a screenshot or gif.
+Summarize your PR. If it involves visual changes include a screenshot or gif.
 
 ### Checklist
 
