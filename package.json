@@ -19,6 +19,11 @@
   "bin": {
     "backport": "./dist/cli/index.js"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "license": "MIT",
   "scripts": {
     "build": "tsc",
@@ -26,7 +31,6 @@
     "format": "prettier \"./src/**/*.ts\" --write",
     "lint": "npx tsc -p ./test/tsconfig.json && tslint \"./src/**/*.ts\"",
     "postinstall": "node scripts/postinstall.js",
-    "precommit": "lint-staged",
     "prepublishOnly": "npx tsc",
     "prepush": "yarn lint",
     "publish-dry-run": "tar -tf $(npm pack)",
