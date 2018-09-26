@@ -353,8 +353,9 @@ describe('#delete', () => {
       actions: mockActions,
     });
     const id = Symbol();
+    const options = Symbol();
 
-    await expect(client.delete(type, id)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.delete(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -366,6 +367,7 @@ describe('#delete', () => {
       {
         type,
         id,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -390,15 +392,17 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
       type,
       id,
+      options,
     });
   });
 
@@ -422,11 +426,12 @@ describe('#delete', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.delete(type, id);
+    const result = await client.delete(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -675,8 +680,9 @@ describe('#bulkGet', () => {
       { type: type1 },
       { type: type2 },
     ];
+    const options = Symbol();
 
-    await expect(client.bulkGet(objects)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.bulkGet(objects, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([
       mockActions.getSavedObjectAction(type1, 'bulk_get'),
@@ -689,7 +695,8 @@ describe('#bulkGet', () => {
       [type1, type2],
       [mockActions.getSavedObjectAction(type1, 'bulk_get')],
       {
-        objects
+        objects,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -718,14 +725,16 @@ describe('#bulkGet', () => {
       { type: type1, id: 'foo-id' },
       { type: type2, id: 'bar-id' },
     ];
+    const options = Symbol();
 
-    const result = await client.bulkGet(objects);
+    const result = await client.bulkGet(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'bulk_get', [type1, type2], {
       objects,
+      options,
     });
   });
 
@@ -753,11 +762,12 @@ describe('#bulkGet', () => {
       { type: type1, id: 'foo-id' },
       { type: type2, id: 'bar-id' },
     ];
+    const options = Symbol();
 
-    const result = await client.bulkGet(objects);
+    const result = await client.bulkGet(objects, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+    expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
@@ -805,8 +815,9 @@ describe('#get', () => {
       actions: mockActions,
     });
     const id = Symbol();
+    const options = Symbol();
 
-    await expect(client.get(type, id)).rejects.toThrowError(mockErrors.forbiddenError);
+    await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
     expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'get')]);
     expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
@@ -818,6 +829,7 @@ describe('#get', () => {
       {
         type,
         id,
+        options,
       }
     );
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -842,15 +854,17 @@ describe('#get', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.get(type, id);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
       type,
       id,
+      options,
     });
   });
 
@@ -874,11 +888,12 @@ describe('#get', () => {
       actions: createMockActions(),
     });
     const id = Symbol();
+    const options = Symbol();
 
-    const result = await client.get(type, id);
+    const result = await client.get(type, id, options);
 
     expect(result).toBe(returnValue);
-    expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+    expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
     expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
     expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
