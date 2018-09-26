@@ -71,6 +71,9 @@ function defaultMapping(): IndexMapping {
         type: {
           type: 'keyword',
         },
+        namespace: {
+          type: 'keyword',
+        },
         updated_at: {
           type: 'date',
         },

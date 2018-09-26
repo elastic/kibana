@@ -27,6 +27,8 @@ import {
   DocumentMigrator,
   IndexMigrator,
 } from '../../../../src/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');
@@ -248,6 +250,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     mappingProperties,
     pollInterval: 50,
     scrollDuration: '5m',
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema())
   });
 
   return await migrator.migrate();
