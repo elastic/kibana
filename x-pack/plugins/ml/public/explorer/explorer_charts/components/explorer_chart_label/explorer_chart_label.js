@@ -21,11 +21,11 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
     Depending on whether we wrap the entityField badges to a new line, we render this differently:
 
     1. All in one line:
-        <detectorLabel> - <entityBadge1> <entityBadge1> ... <infoIcon>
+        <detectorLabel> - <entityBadge1> <entityBadge2> ... <infoIcon>
 
     2. Multiple lines:
         <detectorLabel> <infoIcon> <br />
-        <entityBadge1> <entityBadge1> ...
+        <entityBadge1> <entityBadge2> ...
   */
 
   const labelSeparator = (wrapLabel === true) ? <br /> : ' - ';
