@@ -167,7 +167,7 @@ export class Config {
           // true if there's a match
           if (child.schema._type === 'object') {
             if (has(key, child.schema, path.concat([child.key]))) return true;
-            // if the child matches, return true
+          // if the child matches, return true
           } else if (path.concat([child.key]).join('.') === key) {
             return true;
           }

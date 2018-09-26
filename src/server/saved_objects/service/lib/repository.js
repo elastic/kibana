@@ -354,10 +354,8 @@ export class SavedObjectsRepository {
       }
     });
 
-    const { docs } = response;
-
     return {
-      saved_objects: docs.map((doc, i) => {
+      saved_objects: response.docs.map((doc, i) => {
         const { id, type } = objects[i];
 
         if (!doc.found) {
@@ -369,7 +367,7 @@ export class SavedObjectsRepository {
         }
 
         const time = doc._source.updated_at;
-        const savedObject = {
+        return {
           id,
           type,
           ...time && { updated_at: time },
@@ -377,8 +375,6 @@ export class SavedObjectsRepository {
           attributes: doc._source[type],
           migrationVersion: doc._source.migrationVersion,
         };
-
-        return savedObject;
       })
     };
   }

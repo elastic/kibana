@@ -268,12 +268,11 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
-      await savedObjectsRepository.create('index-pattern',
-        {
-          title: 'Logstash'
-        }, {
-          id: 'logstash-*',
-        });
+      await savedObjectsRepository.create('index-pattern', {
+        title: 'Logstash'
+      }, {
+        id: 'logstash-*',
+      });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWith(callAdminCluster, 'create');
