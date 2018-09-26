@@ -67,6 +67,7 @@
     "fetch_exceptions": [],
     "time_since_last_fetch_millis": 19886
   },
+  "timestamp": "2018-09-19T20:01:00.440Z",
   "oldestStat": {
     "number_of_failed_fetches": 0,
     "number_of_operations_indexed": 1
