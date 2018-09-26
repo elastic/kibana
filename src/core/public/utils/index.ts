@@ -18,3 +18,4 @@
  */
 
 export { modifyUrl } from './modify_url';
+export { shareWeakReplay } from './share_weak_replay';
