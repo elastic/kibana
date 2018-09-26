@@ -20,26 +20,25 @@ const primaryUpdate = state => state.primaryUpdate;
 
 // dispatch the various types of actions
 const rawCursorPosition = select(
-  action => (action && action.type === 'cursorPosition' ? action.payload : null)
+  action => (action.type === 'cursorPosition' ? action.payload : null)
 )(primaryUpdate);
 
-const mouseButtonEvent = select(
-  action => (action && action.type === 'mouseEvent' ? action.payload : null)
-)(primaryUpdate);
+const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action.payload : null))(
+  primaryUpdate
+);
 
-const keyboardEvent = select(
-  action => (action && action.type === 'keyboardEvent' ? action.payload : null)
-)(primaryUpdate);
+const keyboardEvent = select(action => (action.type === 'keyboardEvent' ? action.payload : null))(
+  primaryUpdate
+);
 
 const keyInfoFromMouseEvents = select(
-  action =>
-    (action && action.type === 'cursorPosition') || action.type === 'mouseEvent'
-      ? { altKey: action.payload.altKey, metaKey: action.payload.metaKey }
-      : null
+  ({ type, payload: { altKey, metaKey, shiftKey } }) =>
+    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey } : null
 )(primaryUpdate);
 
 const altTest = key => key.slice(0, 3).toLowerCase() === 'alt' || key === 'KeyALT';
 const metaTest = key => key.slice(0, 4).toLowerCase() === 'meta';
+const shiftTest = key => key === 'KeySHIFT' || key.slice(0, 5) === 'Shift';
 const deadKey1 = 'KeyDEAD';
 const deadKey2 = 'Key†';
 
@@ -65,6 +64,10 @@ const updateKeyLookupFromMouseEvent = (lookup, keyInfoFromMouseEvent) => {
       if (value) lookup.alt = true;
       else delete lookup.alt;
     }
+    if (shiftTest(key)) {
+      if (value) lookup.shift = true;
+      else delete lookup.shift;
+    }
   });
   return lookup;
 };
@@ -83,6 +86,8 @@ const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
 
   if (metaTest(next.code)) code = 'meta';
 
+  if (shiftTest(next.code)) code = 'shift';
+
   if (next.event === 'keyDown') {
     return { ...lookup, [code]: true };
   } else {
@@ -96,6 +101,7 @@ const keyUp = select(keys => Object.keys(keys).length === 0)(pressedKeys);
 
 const metaHeld = select(lookup => Boolean(lookup.meta))(pressedKeys);
 const optionHeld = select(lookup => Boolean(lookup.alt))(pressedKeys);
+const shiftHeld = select(lookup => Boolean(lookup.shift))(pressedKeys);
 
 const cursorPosition = selectReduce((previous, position) => position || previous, { x: 0, y: 0 })(
   rawCursorPosition
@@ -198,4 +204,5 @@ module.exports = {
   mouseIsDown,
   optionHeld,
   pressedKeys,
+  shiftHeld,
 };
