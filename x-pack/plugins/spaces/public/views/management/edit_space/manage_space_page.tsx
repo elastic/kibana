@@ -102,6 +102,7 @@ export class ManageSpacePage extends Component<Props, State> {
           <EuiPageContent className="manageSpacePage__content">
             <EuiPageContentBody>{content}</EuiPageContentBody>
           </EuiPageContent>
+          {this.maybeGetSecureSpacesMessage()}
         </EuiPageBody>
       </EuiPage>
     );
@@ -182,8 +183,6 @@ export class ManageSpacePage extends Component<Props, State> {
             onChange={this.onDescriptionChange}
           />
         </EuiFormRow>
-
-        {this.maybeGetSecureSpacesMessage()}
 
         <EuiHorizontalRule />
 

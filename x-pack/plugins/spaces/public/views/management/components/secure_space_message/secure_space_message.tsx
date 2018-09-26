@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { UserProfile } from 'plugins/xpack_main/services/user_profile';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 interface Props {
   userProfile: UserProfile;
@@ -15,12 +15,15 @@ interface Props {
 export const SecureSpaceMessage = (props: Props) => {
   if (props.userProfile.hasCapability('manageSecurity')) {
     return (
-      <EuiText>
-        <p>
-          Want to assign a role to a space? Go to Management and select{' '}
-          <EuiLink href="#/management/security/roles">Roles</EuiLink>.
-        </p>
-      </EuiText>
+      <Fragment>
+        <EuiSpacer />
+        <EuiText className="eui-textCenter">
+          <p>
+            Want to assign a role to a space? Go to Management and select{' '}
+            <EuiLink href="#/management/security/roles">Roles</EuiLink>.
+          </p>
+        </EuiText>
+      </Fragment>
     );
   }
   return null;

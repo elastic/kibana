@@ -67,6 +67,7 @@ export class SpacesGridPage extends Component<Props, State> {
       <EuiPage restrictWidth className="spacesGridPage">
         <EuiPageBody>
           <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+          <SecureSpaceMessage userProfile={this.props.userProfile} />
         </EuiPageBody>
         {this.getConfirmDeleteModal()}
       </EuiPage>
@@ -85,7 +86,6 @@ export class SpacesGridPage extends Component<Props, State> {
             <EuiText>
               <h1>Spaces</h1>
             </EuiText>
-            <SecureSpaceMessage userProfile={this.props.userProfile} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
