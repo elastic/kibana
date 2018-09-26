@@ -434,7 +434,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // order they are added.
       await this.toggleOpenEditor(index);
       const aggSelect = await remote
-        .findElement(By.css(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`));
+        .findElement(By.css(
+          `#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`));
       // open agg selection list
       await aggSelect.click();
       // select our agg
