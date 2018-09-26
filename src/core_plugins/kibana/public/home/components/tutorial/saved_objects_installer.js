@@ -111,9 +111,9 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
     const statusMsg = hasErrors
       ? this.props.intl.formatMessage(
         { id: 'kbn.home.tutorial.savedObject.unableToAddErrorMessage',
-          defaultMessage: 'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: ${errors[0].error.message}'
+          defaultMessage: 'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: {errorMessage}'
         },
-        { errorsLength: errors.length, savedObjectsLength: this.props.savedObjects.length })
+        { errorsLength: errors.length, savedObjectsLength: this.props.savedObjects.length, errorMessage: errors[0].error.message })
       : this.props.intl.formatMessage(
         { id: 'kbn.home.tutorial.savedObject.addedLabel',
           defaultMessage: '{savedObjectsLength} saved objects successfully added'

@@ -81,15 +81,13 @@ export function* extractHandlebarsMessages(buffer) {
 
     const valuesObject = properties.values;
 
-    if (valuesObject) {
-      if (typeof valuesObject !== 'object') {
-        throw createFailError(
-          `"values" value should be an object in Handlebars i18n ("${messageId}").`
-        );
-      }
-
-      checkValuesProperty(Object.keys(valuesObject), message, messageId);
+    if (valuesObject !== undefined && typeof valuesObject !== 'object') {
+      throw createFailError(
+        `"values" value should be an object in Handlebars i18n ("${messageId}").`
+      );
     }
+
+    checkValuesProperty(Object.keys(valuesObject || {}), message, messageId);
 
     yield [messageId, { message, context }];
   }

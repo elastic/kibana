@@ -68,10 +68,11 @@ export function extractI18nCallMessages(node) {
     );
   }
 
-  if (valuesProperty) {
-    const valuesKeys = extractValuesKeysFromNode(valuesProperty.value, messageId);
-    checkValuesProperty(valuesKeys, message, messageId);
-  }
+  const valuesKeys = valuesProperty
+    ? extractValuesKeysFromNode(valuesProperty.value, messageId)
+    : [];
+
+  checkValuesProperty(valuesKeys, message, messageId);
 
   return [messageId, { message, context }];
 }

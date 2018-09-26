@@ -38,7 +38,7 @@ import { createFailError } from '../../run';
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractIntlMessages(node) {
-  const options = node.arguments[0];
+  const [options, valuesNode] = node.arguments;
 
   if (!isObjectExpression(options)) {
     throw createFailError(
@@ -46,11 +46,10 @@ export function extractIntlMessages(node) {
     );
   }
 
-  const [messageIdProperty, messageProperty, contextProperty, valuesProperty] = [
+  const [messageIdProperty, messageProperty, contextProperty] = [
     'id',
     DEFAULT_MESSAGE_KEY,
     CONTEXT_KEY,
-    VALUES_KEY,
   ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
 
   const messageId = messageIdProperty
@@ -75,10 +74,9 @@ export function extractIntlMessages(node) {
     );
   }
 
-  if (valuesProperty) {
-    const valuesKeys = extractValuesKeysFromNode(valuesProperty.value, messageId);
-    checkValuesProperty(valuesKeys, message, messageId);
-  }
+  const valuesKeys = valuesNode ? extractValuesKeysFromNode(valuesNode, messageId) : [];
+
+  checkValuesProperty(valuesKeys, message, messageId);
 
   return [messageId, { message, context }];
 }
@@ -118,19 +116,21 @@ export function extractFormattedMessages(node) {
     );
   }
 
-  if (valuesAttribute) {
-    if (
-      !isJSXExpressionContainer(valuesAttribute.value) ||
-      !isObjectExpression(valuesAttribute.value.expression)
-    ) {
-      throw createFailError(
-        `"values" value in <FormattedMessage> should be an object ("${messageId}").`
-      );
-    }
-
-    const valuesKeys = extractValuesKeysFromNode(valuesAttribute.value.expression, messageId);
-    checkValuesProperty(valuesKeys, message, messageId);
+  if (
+    valuesAttribute &&
+    (!isJSXExpressionContainer(valuesAttribute.value) ||
+      !isObjectExpression(valuesAttribute.value.expression))
+  ) {
+    throw createFailError(
+      `"values" value in <FormattedMessage> should be an object ("${messageId}").`
+    );
   }
+
+  const valuesKeys = valuesAttribute
+    ? extractValuesKeysFromNode(valuesAttribute.value.expression, messageId)
+    : [];
+
+  checkValuesProperty(valuesKeys, message, messageId);
 
   return [messageId, { message, context }];
 }

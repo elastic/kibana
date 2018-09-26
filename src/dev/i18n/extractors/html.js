@@ -45,7 +45,8 @@ const I18N_FILTER_MARKER = '| i18n: ';
 /**
  * Extract default message from an angular filter expression argument
  * @param {string} expression JavaScript code containing a filter object
- * @returns {string} Default message
+ * @param {string} messageId id of the message
+ * @returns {{ message?: string, context?: string, valuesKeys: string[]] }}
  */
 function parseFilterObjectExpression(expression, messageId) {
   let ast;
@@ -85,12 +86,12 @@ function parseFilterObjectExpression(expression, messageId) {
 
     const valuesKeys = valuesProperty
       ? extractValuesKeysFromNode(valuesProperty.value, messageId)
-      : undefined;
+      : [];
 
     return { message, context, valuesKeys };
   }
 
-  return null;
+  return {};
 }
 
 function parseIdExpression(expression) {
@@ -142,8 +143,10 @@ function* getFilterMessages(htmlContent) {
       throw createFailError(`Empty "id" value in angular filter expression is not allowed.`);
     }
 
-    const { message, context, valuesKeys } =
-      parseFilterObjectExpression(filterObjectExpression, messageId) || {};
+    const { message, context, valuesKeys } = parseFilterObjectExpression(
+      filterObjectExpression,
+      messageId
+    );
 
     if (!message) {
       throw createFailError(
@@ -151,9 +154,7 @@ function* getFilterMessages(htmlContent) {
       );
     }
 
-    if (valuesKeys) {
-      checkValuesProperty(valuesKeys, message, messageId);
-    }
+    checkValuesProperty(valuesKeys, message, messageId);
 
     yield [messageId, { message, context }];
   }

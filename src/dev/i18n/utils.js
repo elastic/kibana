@@ -129,10 +129,37 @@ export function createParserErrorMessage(content, error) {
  *
  * @param {string[]} valuesKeys array of "values" property keys
  * @param {string} defaultMessage "defaultMessage" value
+ * @param {string} messageId message id for fail errors
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
 export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
-  const defaultMessageAst = parser.parse(defaultMessage);
+  // skip validation if defaultMessage doesn't use ICU and values prop has no keys
+  if (!valuesKeys.length && !defaultMessage.includes('{')) {
+    return;
+  }
+
+  let defaultMessageAst;
+
+  try {
+    defaultMessageAst = parser.parse(defaultMessage);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      const errorWithContext = createParserErrorMessage(defaultMessage, {
+        loc: {
+          line: error.location.start.line,
+          column: error.location.start.column - 1,
+        },
+        message: error.message,
+      });
+
+      throw createFailError(
+        `Couldn't parse default message with intl-messageformat-parser ("${messageId}"):\n${errorWithContext}`
+      );
+    }
+
+    throw error;
+  }
+
   const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 
   if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
@@ -144,23 +171,20 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
       keys.push(element.id);
     }
     return keys;
-  },
-  []);
+  }, []);
 
   const missingValuesKeys = difference(defaultMessageReferencesKeys, valuesKeys);
   const unusedValuesKeys = difference(valuesKeys, defaultMessageReferencesKeys);
 
   if (unusedValuesKeys.length) {
     throw createFailError(
-      `"values" object contains unused properties ("${messageId}"):
-[${unusedValuesKeys}].`
+      `"values" object contains unused properties ("${messageId}"):\n[${unusedValuesKeys}].`
     );
   }
 
   if (missingValuesKeys.length) {
     throw createFailError(
-      `some properties are missing in "values" object ("${messageId}"):
-[${missingValuesKeys}].`
+      `some properties are missing in "values" object ("${messageId}"):\n[${missingValuesKeys}].`
     );
   }
 }
