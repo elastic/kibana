@@ -152,7 +152,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickVerticalBarChart() {
-      await find.clickByPartialLinkText('Vertical Bar');
+      const vertBar = await remote.findElement(By.partialLinkText('Vertical Bar'));
+      await vertBar.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -190,11 +191,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLabTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Lab)');
+      return await remote.findElements(By.partialLinkText('(Lab)'));
     }
 
     async getExperimentalTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Experimental)');
+      return await remote.findElements(By.partialLinkText('(Experimental)'));
     }
 
     async isExperimentalInfoShown() {
@@ -231,7 +232,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVegaSpec() {
       // Adapted from console_page.js:getTextFromAceEditor(). Is there a common utilities file?
       const editor = await testSubjects.find('vega-editor');
-      const lines = await editor.findAllByClassName('ace_line_group');
+      const lines = await editor.findElements(By.className('ace_line_group'));
       const linesText = await Bluebird.map(lines, l => l.getText());
       return linesText.join('\n');
     }
@@ -818,7 +819,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the chart-wrapper elements
-      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
+      const chartTypes = await remote.findElements(By.css(`svg > g > g.series > rect[data-label="${dataLabel}"]`));
 
       async function getChartType(chart) {
         const barHeight = await chart.getAttribute('height');
@@ -841,7 +842,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await
-        remote.findElement(By.css('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2)) > g > g:nth-child(1).tick'));
+        remote.findElement(By.css('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
       const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
@@ -894,9 +895,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
       // Convert the data into a nested array format:
       // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
+      const rows = await tableBody.findElements(By.tagName('tr'));
       return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
+        const cells = await row.findElements(By.tagName('td'));
         return await Promise.all(cells.map(async cell => cell.getText()));
       }));
     }
@@ -905,9 +906,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const dataTableHeader = await retry.try(async () => {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
-        return await inspectorPanel.findByTagName('thead');
+        return await inspectorPanel.findElements(By.tagName('thead'));
       });
-      const cells = await dataTableHeader.findAllByTagName('th');
+      const cells = await dataTableHeader.findElements(By.tagName('th'));
       return await Promise.all(cells.map(async (cell) => {
         const untrimmed = await cell.getText();
         return untrimmed.trim();

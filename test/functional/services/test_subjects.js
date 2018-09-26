@@ -29,14 +29,14 @@ export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
-  const find = getService('find');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await remote.findElements(testSubjSelector(selector), timeout).length > 0;
+      const dataTestSubj = testSubjSelector(selector);
+      return await remote.exists(By.css(dataTestSubj));
     }
 
     async existOrFail(selector, timeout = 1000) {
@@ -68,7 +68,7 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.click(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        // await remote.moveMouseTo(element);
+        //await remote.moveMouseTo(element);
         await element.click();
       });
     }
@@ -77,32 +77,34 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        // await remote.moveMouseTo(element);
+        await remote.moveMouseTo(element);
         await remote.doubleClick();
       });
     }
 
 
-    async descendantExists(selector, parentElement) {
-      return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async descendantExists(selector, parentElement) {
+    //   return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
-    async findDescendant(selector, parentElement) {
-      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async findDescendant(selector, parentElement) {
+    //   return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
-    async findAllDescendant(selector, parentElement) {
-      return await find.allDescendantByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async findAllDescendant(selector, parentElement) {
+    //   return await find.allDescendantByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
     async find(selector, timeout = 1000) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.byCssSelector(By.css(testSubjSelector(selector)), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      return await remote.findElement(By.css(dataTestSubj), timeout);
     }
 
     async findAll(selector, timeout) {
       log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await remote.findAll(By.css(testSubjSelector(selector)), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      const all = await remote.findElements(By.css(dataTestSubj), timeout);
       return await filterAsync(all, el => el.isDisplayed());
     }
 

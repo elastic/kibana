@@ -97,7 +97,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       const timePicker = await testSubjects.find('globalTimepickerButton');
       timePicker.click();
       await wait.forElementPresent(quickButtonSelector);
-      await wait.forElementVisible(quickButtonSelector);
+      const quickButton = await remote.findElement(quickButtonSelector);
+      await wait.forElementVisible(quickButton);
     }
 
     async clickQuickButton() {
@@ -121,7 +122,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('showAbsoluteSection');
       await testSubjects.click('timepicker-absolute-button');
       await wait.forElementPresent(absoluteFromInputSelector);
-      await wait.forElementVisible(absoluteFromInputSelector);
+      const absoluteFromInput = await remote.findElement(absoluteFromInputSelector);
+      await wait.forElementVisible(absoluteFromInput);
     }
 
     async getFromTime() {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { By, Key } from 'selenium-webdriver';
+import { Key } from 'selenium-webdriver';
 
 const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
@@ -104,13 +104,12 @@ export async function RemoteProvider({ getService }) {
     return {
       async findElement(selectorObj, timeout) {
         await updateFindTimeout(timeout);
-        await this.waitForElementPresent(selectorObj);
+        log.debug(`Searching for one instance of ${selectorObj.toString()}`);
         return await driver.findElement(selectorObj);
       },
 
       async findElements(selectorObj, timeout) {
         await updateFindTimeout(timeout);
-        await this.waitForElementPresent(selectorObj);
         return await driver.findElements(selectorObj);
       },
 
@@ -118,12 +117,14 @@ export async function RemoteProvider({ getService }) {
         await driver.manage().window().setRect({ width: x, height: y });
       },
 
-      async exists(selector) {
-        return await this.findByCssSelector(selector).isDisplayed();
+      async exists(selectorObj) {
+        const possibleElements = await this.findElements(selectorObj, 0);
+        return await possibleElements.length > 0;
       },
 
-      async click(selectorObj) {
-        await this.findElement(selectorObj).click();
+      async click(selectorObj, timeout) {
+        const element = await this.findElement(selectorObj, timeout);
+        await element.click();
       },
 
       // async append(selector, text) {
@@ -211,24 +212,24 @@ export async function RemoteProvider({ getService }) {
         await driver.wait(conditionFunc);
       },
 
-      async waitForElementPresent(selector) {
-        await driver.wait(until.elementLocated(By.css(selector)));
+      async waitForElementPresent(selectorObj) {
+        await driver.wait(until.elementLocated(selectorObj));
       },
 
-      async waitForElementEnabled(selector) {
-        await driver.wait(until.elementIsEnabled(By.css(selector)));
+      async waitForElementEnabled(selectorObj) {
+        await driver.wait(until.elementIsEnabled(selectorObj));
       },
 
-      async waitForElementToContainText(selector, substring) {
-        await driver.wait(until.elementTextContains(By.css(selector), substring));
+      async waitForElementToContainText(selectorObj, substring) {
+        await driver.wait(until.elementTextContains(selectorObj, substring));
       },
 
-      async waitForElementTextEquals(selector, text) {
-        await driver.wait(until.elementTextIs(By.css(selector), text));
+      async waitForElementTextEquals(selectorObj, text) {
+        await driver.wait(until.elementTextIs(selectorObj, text));
       },
 
-      async waitForElementVisible(selector) {
-        await driver.wait(until.elementIsVisible(By.css(selector)));
+      async waitForElementVisible(element) {
+        await driver.wait(until.elementIsVisible(element));
       },
 
       async getLogsFor(logType) {

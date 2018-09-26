@@ -410,7 +410,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
+      const dashboardTitles = await remote.findElements(By.css('[data-test-subj^="dashboardListingTitleLink"]'));
       return dashboardTitles.length;
     }
 
@@ -418,7 +418,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await remote.findElements(By.linkText(dashName));
       return links.length;
     }
 

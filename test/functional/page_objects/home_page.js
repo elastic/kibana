@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { By } from 'selenium-webdriver';
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
+  const remote = getService('remote');
   const wait = getService('wait');
 
   class HomePage {
 
     async clickKibanaIcon() {
+      await wait.forElementPresent(By.css('[data-test-subj="kibanaLogo"]'));
       await testSubjects.click('kibanaLogo');
     }
 
     async clickSynopsis(title) {
+      await wait.forElementPresent(By.css(`[data-test-subj=homeSynopsisLink${title}]`));
       await testSubjects.click(`homeSynopsisLink${title}`);
     }
 
@@ -69,7 +72,7 @@ export function HomePageProvider({ getService }) {
         // before action is complete
         //await sampleDataCard.waitForDeletedByClassName('euiLoadingSpinner');
         await wait.forCondition(async () => {
-          const spinner = await find.allByCssSelector(`[data-test-subj="sampleDataSetCard${id}"] > .euiLoadingSpinner`);
+          const spinner = await remote.findElements(By.css(`[data-test-subj="sampleDataSetCard${id}"] > .euiLoadingSpinner`));
           return spinner.length === 0;
         });
       });

@@ -18,6 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
+import { By } from 'selenium-webdriver';
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -32,7 +33,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickByCssSelector('.app-link:nth-child(5) a');
+      const navLink = await remote.findElement(By.css('.app-link:nth-child(5) a'));
+      await navLink.click();
     }
     async clickKibanaSettings() {
       await testSubjects.click('settings');
@@ -147,7 +149,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getConfigureHeader() {
-      return await find.byCssSelector('h1');
+      return await remote.findElement(By.css('h1'));
     }
 
     async getTableHeader() {
@@ -186,7 +188,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getScriptedFieldsTabCount() {
       const selector = '[data-test-subj="tab-count-scriptedFields"]';
       return await retry.try(async () => {
-        const theText = await (await find.byCssSelector(selector))
+        const theText = await (await remote.findElement(By.css(selector)))
           .getText();
         return theText.replace(/\((.*)\)/, '$1');
       });
@@ -280,7 +282,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        const createIndexPatternButton = await this.getCreateIndexPatternCreateButton();
+        remote.waitForElementPresent(By.css('[data-test-subj="createIndexPatternCreateButton"]'));
+        const createIndexPatternButton = await testSubjects.find('createIndexPatternCreateButton');
+        remote.waitForElementVisible(createIndexPatternButton);
         createIndexPatternButton.click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();

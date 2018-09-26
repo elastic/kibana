@@ -18,6 +18,7 @@
  */
 
 import { delay } from 'bluebird';
+import { By } from 'selenium-webdriver';
 import expect from 'expect.js';
 
 import getUrl from '../../../src/test_utils/get_url';
@@ -70,7 +71,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async loginIfPrompted(appUrl) {
       let currentUrl = await remote.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
+      // await remote.findElement(By.css('[data-test-subj="kibanaChrome"]'), defaultTryTimeout * 2);
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -80,8 +81,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           config.get('servers.kibana.username'),
           config.get('servers.kibana.password')
         );
-        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)', 20000);
-        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        await remote.findElement(By.css('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)'), 20000);
+        await remote.findElement(By.css('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)'), 20000);
         await remote.get(appUrl);
         currentUrl = await remote.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -244,7 +245,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getSharedItemTitleAndDescription() {
-      const element = await find.byCssSelector('[data-shared-item]');
+      const element = await remote.findElement(By.css('[data-shared-item]'));
       return {
         title: await element.getAttribute('data-title'),
         description: await element.getAttribute('data-description')
@@ -307,6 +308,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('top-nav');
     }
 
+    //#TODO: Remove this repeated function. Already handled by selenium
     async doesCssSelectorExist(selector) {
       log.debug(`doesCssSelectorExist ${selector}`);
 
@@ -327,6 +329,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return globalNavShown && topNavShown;
     }
 
+    //#TODO: Just use Selenium's wait for condition here.
     async waitForTopNavToBeVisible() {
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
@@ -337,20 +340,20 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
+      const toast = await remote.findElement(By.css('.euiToast'));
       await remote.moveMouseTo(toast);
-      const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+      const title = await (await remote.findElement(By.css('.euiToastHeader__title'))).getVisibleText();
       log.debug(title);
-      await find.clickByCssSelector('.euiToast__closeButton');
+      await remote.click(By.css('.euiToast__closeButton'));
       return title;
     }
 
     async clearAllToasts() {
-      const toasts = await find.allByCssSelector('.euiToast');
+      const toasts = await remote.findElements(By.css('.euiToast'));
       for (const toastElement of toasts) {
         try {
           await remote.moveMouseTo(toastElement);
-          const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+          const closeBtn = await toastElement.findElement(By.css('.euiToast__closeButton'));
           await closeBtn.click();
         } catch (err) {
           // ignore errors, toast clear themselves after timeout
