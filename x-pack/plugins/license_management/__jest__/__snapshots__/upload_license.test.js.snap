@@ -33,483 +33,474 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <div
-        className="licenseManagement__contain"
+      <EuiTitle
+        className="eui-textCenter"
+        size="l"
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceAround"
-          responsive={true}
-          wrap={false}
+        <h1
+          className="euiTitle euiTitle--large eui-textCenter"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              component="div"
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiTitle
-                  size="l"
-                >
-                  <h1
-                    className="euiTitle euiTitle--large"
-                  >
-                    Upload your license
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="l"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
+          Upload your license
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="l"
+      >
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
+        verticalPosition="center"
+      >
         <EuiPanel
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           grow={true}
           hasShadow={false}
-          paddingSize="m"
+          paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           >
-            <EuiOverlayMask>
-              <EuiConfirmModal
-                buttonColor="primary"
-                cancelButtonText="Cancel"
-                confirmButtonText="Confirm"
-                onCancel={[Function]}
-                onConfirm={[Function]}
-                title="Confirm License Upload"
+            <EuiPageContentBody>
+              <div
+                className="euiPageContentBody"
               >
-                <EuiModal
-                  className="euiModal--confirmation"
-                  maxWidth={true}
-                  onClose={[Function]}
-                >
-                  <Component
-                    focusTrapOptions={
-                      Object {
-                        "fallbackFocus": [Function],
-                      }
-                    }
+                <EuiOverlayMask>
+                  <EuiConfirmModal
+                    buttonColor="primary"
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                    title="Confirm License Upload"
                   >
-                    <div>
-                      <div
-                        className="euiModal euiModal--maxWidth-default euiModal--confirmation"
-                        onKeyDown={[Function]}
-                        tabIndex={0}
+                    <EuiModal
+                      className="euiModal--confirmation"
+                      maxWidth={true}
+                      onClose={[Function]}
+                    >
+                      <Component
+                        focusTrapOptions={
+                          Object {
+                            "fallbackFocus": [Function],
+                          }
+                        }
                       >
-                        <EuiButtonIcon
-                          aria-label="Closes this modal window"
-                          className="euiModal__closeIcon"
-                          color="text"
-                          iconSize="m"
-                          iconType="cross"
-                          onClick={[Function]}
-                          type="button"
-                        >
-                          <button
-                            aria-label="Closes this modal window"
-                            className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
-                            onClick={[Function]}
-                            type="button"
+                        <div>
+                          <div
+                            className="euiModal euiModal--maxWidth-default euiModal--confirmation"
+                            onKeyDown={[Function]}
+                            tabIndex={0}
                           >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiButtonIcon__icon"
-                              size="m"
-                              type="cross"
+                            <EuiButtonIcon
+                              aria-label="Closes this modal window"
+                              className="euiModal__closeIcon"
+                              color="text"
+                              iconSize="m"
+                              iconType="cross"
+                              onClick={[Function]}
+                              type="button"
                             >
-                              <cross
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                                xmlnsXlink="http://www.w3.org/1999/xlink"
+                              <button
+                                aria-label="Closes this modal window"
+                                className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <svg
+                                <EuiIcon
                                   aria-hidden="true"
-                                  className="euiIcon euiIcon--medium euiButtonIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
+                                  className="euiButtonIcon__icon"
+                                  size="m"
+                                  type="cross"
+                                >
+                                  <cross
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
                                     }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  xmlnsXlink="http://www.w3.org/1999/xlink"
-                                >
-                                  <defs>
-                                    <path
-                                      d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
-                                      id="cross-a"
-                                    />
-                                  </defs>
-                                  <use
-                                    fillRule="nonzero"
-                                    xlinkHref="#cross-a"
-                                  />
-                                </svg>
-                              </cross>
-                            </EuiIcon>
-                          </button>
-                        </EuiButtonIcon>
-                        <div
-                          className="euiModal__flex"
-                        >
-                          <EuiModalHeader>
-                            <div
-                              className="euiModalHeader"
-                            >
-                              <EuiModalHeaderTitle
-                                data-test-subj="confirmModalTitleText"
-                              >
-                                <div
-                                  className="euiModalHeader__title"
-                                  data-test-subj="confirmModalTitleText"
-                                >
-                                  Confirm License Upload
-                                </div>
-                              </EuiModalHeaderTitle>
-                            </div>
-                          </EuiModalHeader>
-                          <EuiModalBody>
-                            <div
-                              className="euiModalBody"
-                            >
-                              <EuiText
-                                data-test-subj="confirmModalBodyText"
-                                grow={true}
-                              >
-                                <div
-                                  className="euiText"
-                                  data-test-subj="confirmModalBodyText"
-                                >
-                                  <div>
-                                    <EuiText
-                                      grow={true}
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--medium euiButtonIcon__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      xmlnsXlink="http://www.w3.org/1999/xlink"
                                     >
-                                      <div
-                                        className="euiText"
-                                      >
-                                        Some functionality will be lost if you replace your 
+                                      <defs>
+                                        <path
+                                          d="M7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0-.708-.708L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8z"
+                                          id="cross-a"
+                                        />
+                                      </defs>
+                                      <use
+                                        fillRule="nonzero"
+                                        xlinkHref="#cross-a"
+                                      />
+                                    </svg>
+                                  </cross>
+                                </EuiIcon>
+                              </button>
+                            </EuiButtonIcon>
+                            <div
+                              className="euiModal__flex"
+                            >
+                              <EuiModalHeader>
+                                <div
+                                  className="euiModalHeader"
+                                >
+                                  <EuiModalHeaderTitle
+                                    data-test-subj="confirmModalTitleText"
+                                  >
+                                    <div
+                                      className="euiModalHeader__title"
+                                      data-test-subj="confirmModalTitleText"
+                                    >
+                                      Confirm License Upload
+                                    </div>
+                                  </EuiModalHeaderTitle>
+                                </div>
+                              </EuiModalHeader>
+                              <EuiModalBody>
+                                <div
+                                  className="euiModalBody"
+                                >
+                                  <EuiText
+                                    data-test-subj="confirmModalBodyText"
+                                    grow={true}
+                                  >
+                                    <div
+                                      className="euiText"
+                                      data-test-subj="confirmModalBodyText"
+                                    >
+                                      <div>
+                                        <EuiText
+                                          grow={true}
+                                        >
+                                          <div
+                                            className="euiText"
+                                          >
+                                            Some functionality will be lost if you replace your 
         TRIAL license with a
         BASIC license.  Review the list of features below.
-                                      </div>
-                                    </EuiText>
-                                    <EuiText
-                                      grow={true}
-                                    >
-                                      <div
-                                        className="euiText"
-                                      >
-                                        <ul>
-                                          <li
-                                            key="Watcher will be disabled"
+                                          </div>
+                                        </EuiText>
+                                        <EuiText
+                                          grow={true}
+                                        >
+                                          <div
+                                            className="euiText"
                                           >
-                                            Watcher will be disabled
-                                          </li>
-                                        </ul>
+                                            <ul>
+                                              <li
+                                                key="Watcher will be disabled"
+                                              >
+                                                Watcher will be disabled
+                                              </li>
+                                            </ul>
+                                          </div>
+                                        </EuiText>
                                       </div>
-                                    </EuiText>
-                                  </div>
+                                    </div>
+                                  </EuiText>
                                 </div>
-                              </EuiText>
-                            </div>
-                          </EuiModalBody>
-                          <EuiModalFooter>
-                            <div
-                              className="euiModalFooter"
-                            >
-                              <EuiButtonEmpty
-                                buttonRef={[Function]}
-                                color="primary"
-                                data-test-subj="confirmModalCancelButton"
-                                iconSide="left"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary"
-                                  data-test-subj="confirmModalCancelButton"
-                                  onClick={[Function]}
-                                  type="button"
+                              </EuiModalBody>
+                              <EuiModalFooter>
+                                <div
+                                  className="euiModalFooter"
                                 >
-                                  <span
-                                    className="euiButtonEmpty__content"
+                                  <EuiButtonEmpty
+                                    buttonRef={[Function]}
+                                    color="primary"
+                                    data-test-subj="confirmModalCancelButton"
+                                    iconSide="left"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButtonEmpty__text"
+                                    <button
+                                      className="euiButtonEmpty euiButtonEmpty--primary"
+                                      data-test-subj="confirmModalCancelButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Cancel
-                                    </span>
-                                  </span>
-                                </button>
-                              </EuiButtonEmpty>
-                              <EuiButton
-                                buttonRef={[Function]}
-                                color="primary"
-                                data-test-subj="confirmModalConfirmButton"
-                                fill={true}
-                                iconSide="left"
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <button
-                                  className="euiButton euiButton--primary euiButton--fill"
-                                  data-test-subj="confirmModalConfirmButton"
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <span
-                                    className="euiButton__content"
+                                      <span
+                                        className="euiButtonEmpty__content"
+                                      >
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          Cancel
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                  <EuiButton
+                                    buttonRef={[Function]}
+                                    color="primary"
+                                    data-test-subj="confirmModalConfirmButton"
+                                    fill={true}
+                                    iconSide="left"
+                                    onClick={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButton__text"
+                                    <button
+                                      className="euiButton euiButton--primary euiButton--fill"
+                                      data-test-subj="confirmModalConfirmButton"
+                                      onClick={[Function]}
+                                      type="button"
                                     >
-                                      Confirm
-                                    </span>
-                                  </span>
-                                </button>
-                              </EuiButton>
+                                      <span
+                                        className="euiButton__content"
+                                      >
+                                        <span
+                                          className="euiButton__text"
+                                        >
+                                          Confirm
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </EuiButton>
+                                </div>
+                              </EuiModalFooter>
                             </div>
-                          </EuiModalFooter>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </Component>
-                </EuiModal>
-              </EuiConfirmModal>
-            </EuiOverlayMask>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Your license key is a JSON file with a signature attached.
-              </div>
-            </EuiText>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Uploading a license will replace your current
-                 
-                <strong />
-                 license.
-              </div>
-            </EuiText>
-            <EuiSpacer
-              size="l"
-            >
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </EuiSpacer>
-            <EuiForm
-              error={null}
-              isInvalid={false}
-            >
-              <div
-                className="euiForm"
-              >
+                      </Component>
+                    </EuiModal>
+                  </EuiConfirmModal>
+                </EuiOverlayMask>
                 <EuiText
                   grow={true}
                 >
                   <div
                     className="euiText"
                   >
-                    <EuiFilePicker
-                      compressed={false}
-                      id="licenseFile"
-                      initialPromptText="Select or drag your license file"
-                      onChange={[Function]}
-                    >
-                      <div
-                        className="euiFilePicker"
-                      >
-                        <div
-                          className="euiFilePicker__wrap"
-                        >
-                          <input
-                            className="euiFilePicker__input"
-                            id="licenseFile"
-                            onChange={[Function]}
-                            onDragLeave={[Function]}
-                            onDragOver={[Function]}
-                            onDrop={[Function]}
-                            type="file"
-                          />
-                          <div
-                            className="euiFilePicker__prompt"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiFilePicker__icon"
-                              size="l"
-                              type="importAction"
-                            >
-                              <importAction
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--large euiFilePicker__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  className="euiIcon euiIcon--large euiFilePicker__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
-                                    }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                  />
-                                </svg>
-                              </importAction>
-                            </EuiIcon>
-                            <div
-                              className="euiFilePicker__promptText"
-                            >
-                              Select or drag your license file
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiFilePicker>
+                    <p>
+                      Your license key is a JSON file with a signature attached.
+                    </p>
+                    <p>
+                      Uploading a license will replace your current
+                       
+                      <strong />
+                       license.
+                    </p>
                   </div>
                 </EuiText>
                 <EuiSpacer
-                  size="m"
+                  size="l"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
-                  justifyContent="spaceBetween"
-                  responsive={true}
-                  wrap={false}
+                <EuiForm
+                  error={null}
+                  isInvalid={false}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    className="euiForm"
                   >
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    <EuiText
+                      grow={true}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiText"
                       >
-                        <EuiButtonEmpty
-                          color="primary"
-                          href="#/management/elasticsearch/license_management/home"
-                          iconSide="left"
-                          type="button"
+                        <EuiFilePicker
+                          compressed={false}
+                          id="licenseFile"
+                          initialPromptText="Select or drag your license file"
+                          onChange={[Function]}
                         >
-                          <a
-                            className="euiButtonEmpty euiButtonEmpty--primary"
-                            href="#/management/elasticsearch/license_management/home"
+                          <div
+                            className="euiFilePicker"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
+                            <div
+                              className="euiFilePicker__wrap"
                             >
-                              <span
-                                className="euiButtonEmpty__text"
+                              <input
+                                className="euiFilePicker__input"
+                                id="licenseFile"
+                                onChange={[Function]}
+                                onDragLeave={[Function]}
+                                onDragOver={[Function]}
+                                onDrop={[Function]}
+                                type="file"
+                              />
+                              <div
+                                className="euiFilePicker__prompt"
                               >
-                                Cancel
-                              </span>
-                            </span>
-                          </a>
-                        </EuiButtonEmpty>
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
+                                >
+                                  <importAction
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--large euiFilePicker__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
+                                    }
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--large euiFilePicker__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                      />
+                                    </svg>
+                                  </importAction>
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  Select or drag your license file
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFilePicker>
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    </EuiText>
+                    <EuiSpacer
+                      size="m"
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <TelemetryOptIn />
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiFlexGroup
+                      alignItems="stretch"
+                      component="div"
+                      direction="row"
+                      gutterSize="l"
+                      justifyContent="spaceBetween"
+                      responsive={true}
+                      wrap={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                        <EuiButton
-                          color="primary"
-                          data-test-subj="uploadLicenseButton"
-                          fill={true}
-                          iconSide="left"
-                          isLoading={false}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="uploadLicenseButton"
-                            onClick={[Function]}
-                            type="button"
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            <span
-                              className="euiButton__content"
+                            <EuiButtonEmpty
+                              color="primary"
+                              href="#/management/elasticsearch/license_management/home"
+                              iconSide="left"
+                              type="button"
                             >
-                              <span
-                                className="euiButton__text"
+                              <a
+                                className="euiButtonEmpty euiButtonEmpty--primary"
+                                href="#/management/elasticsearch/license_management/home"
                               >
-                                Upload
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButton>
+                                <span
+                                  className="euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </a>
+                            </EuiButtonEmpty>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="uploadLicenseButton"
+                              fill={true}
+                              iconSide="left"
+                              isLoading={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="uploadLicenseButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Upload
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </EuiFlexItem>
                       </div>
-                    </EuiFlexItem>
+                    </EuiFlexGroup>
                   </div>
-                </EuiFlexGroup>
+                </EuiForm>
               </div>
-            </EuiForm>
+            </EuiPageContentBody>
           </div>
         </EuiPanel>
-      </div>
+      </EuiPageContent>
     </UploadLicense>
   </Connect(UploadLicense)>
 </Provider>
@@ -538,304 +529,295 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <div
-        className="licenseManagement__contain"
+      <EuiTitle
+        className="eui-textCenter"
+        size="l"
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceAround"
-          responsive={true}
-          wrap={false}
+        <h1
+          className="euiTitle euiTitle--large eui-textCenter"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              component="div"
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiTitle
-                  size="l"
-                >
-                  <h1
-                    className="euiTitle euiTitle--large"
-                  >
-                    Upload your license
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="l"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
+          Upload your license
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="l"
+      >
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
+        verticalPosition="center"
+      >
         <EuiPanel
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           grow={true}
           hasShadow={false}
-          paddingSize="m"
+          paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           >
-            <EuiText
-              grow={true}
-            >
+            <EuiPageContentBody>
               <div
-                className="euiText"
+                className="euiPageContentBody"
               >
-                Your license key is a JSON file with a signature attached.
-              </div>
-            </EuiText>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Uploading a license will replace your current
-                 
-                <strong />
-                 license.
-              </div>
-            </EuiText>
-            <EuiSpacer
-              size="l"
-            >
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </EuiSpacer>
-            <EuiForm
-              error={
-                Array [
-                  "The supplied license has expired.",
-                ]
-              }
-              isInvalid={true}
-            >
-              <div
-                className="euiForm"
-              >
-                <EuiCallOut
-                  className="euiForm__errors"
-                  color="danger"
-                  size="m"
-                  title="Please address the errors in your form."
-                >
-                  <div
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the errors in your form.
-                      </span>
-                    </div>
-                    <EuiText
-                      grow={true}
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <ul>
-                          <li
-                            className="euiForm__error"
-                            key="The supplied license has expired."
-                          >
-                            The supplied license has expired.
-                          </li>
-                        </ul>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
                 <EuiText
                   grow={true}
                 >
                   <div
                     className="euiText"
                   >
-                    <EuiFilePicker
-                      compressed={false}
-                      id="licenseFile"
-                      initialPromptText="Select or drag your license file"
-                      onChange={[Function]}
-                    >
-                      <div
-                        className="euiFilePicker"
-                      >
-                        <div
-                          className="euiFilePicker__wrap"
-                        >
-                          <input
-                            className="euiFilePicker__input"
-                            id="licenseFile"
-                            onChange={[Function]}
-                            onDragLeave={[Function]}
-                            onDragOver={[Function]}
-                            onDrop={[Function]}
-                            type="file"
-                          />
-                          <div
-                            className="euiFilePicker__prompt"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiFilePicker__icon"
-                              size="l"
-                              type="importAction"
-                            >
-                              <importAction
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--large euiFilePicker__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  className="euiIcon euiIcon--large euiFilePicker__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
-                                    }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                  />
-                                </svg>
-                              </importAction>
-                            </EuiIcon>
-                            <div
-                              className="euiFilePicker__promptText"
-                            >
-                              Select or drag your license file
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiFilePicker>
+                    <p>
+                      Your license key is a JSON file with a signature attached.
+                    </p>
+                    <p>
+                      Uploading a license will replace your current
+                       
+                      <strong />
+                       license.
+                    </p>
                   </div>
                 </EuiText>
                 <EuiSpacer
-                  size="m"
+                  size="l"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
-                  justifyContent="spaceBetween"
-                  responsive={true}
-                  wrap={false}
+                <EuiForm
+                  error={
+                    Array [
+                      "The supplied license has expired.",
+                    ]
+                  }
+                  isInvalid={true}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    className="euiForm"
                   >
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    <EuiCallOut
+                      className="euiForm__errors"
+                      color="danger"
+                      size="m"
+                      title="Please address the errors in your form."
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiCallOut euiCallOut--danger euiForm__errors"
                       >
-                        <EuiButtonEmpty
-                          color="primary"
-                          href="#/management/elasticsearch/license_management/home"
-                          iconSide="left"
-                          type="button"
+                        <div
+                          className="euiCallOutHeader"
                         >
-                          <a
-                            className="euiButtonEmpty euiButtonEmpty--primary"
-                            href="#/management/elasticsearch/license_management/home"
+                          <span
+                            className="euiCallOutHeader__title"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
+                            Please address the errors in your form.
+                          </span>
+                        </div>
+                        <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <ul>
+                              <li
+                                className="euiForm__error"
+                                key="The supplied license has expired."
                               >
-                                Cancel
-                              </span>
-                            </span>
-                          </a>
-                        </EuiButtonEmpty>
+                                The supplied license has expired.
+                              </li>
+                            </ul>
+                          </div>
+                        </EuiText>
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    </EuiCallOut>
+                    <EuiText
+                      grow={true}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiText"
                       >
-                        <EuiButton
-                          color="primary"
-                          data-test-subj="uploadLicenseButton"
-                          fill={true}
-                          iconSide="left"
-                          isLoading={false}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiFilePicker
+                          compressed={false}
+                          id="licenseFile"
+                          initialPromptText="Select or drag your license file"
+                          onChange={[Function]}
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="uploadLicenseButton"
-                            onClick={[Function]}
-                            type="button"
+                          <div
+                            className="euiFilePicker"
                           >
-                            <span
-                              className="euiButton__content"
+                            <div
+                              className="euiFilePicker__wrap"
                             >
-                              <span
-                                className="euiButton__text"
+                              <input
+                                className="euiFilePicker__input"
+                                id="licenseFile"
+                                onChange={[Function]}
+                                onDragLeave={[Function]}
+                                onDragOver={[Function]}
+                                onDrop={[Function]}
+                                type="file"
+                              />
+                              <div
+                                className="euiFilePicker__prompt"
                               >
-                                Upload
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButton>
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
+                                >
+                                  <importAction
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--large euiFilePicker__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
+                                    }
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--large euiFilePicker__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                      />
+                                    </svg>
+                                  </importAction>
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  Select or drag your license file
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFilePicker>
                       </div>
-                    </EuiFlexItem>
+                    </EuiText>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <TelemetryOptIn />
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiFlexGroup
+                      alignItems="stretch"
+                      component="div"
+                      direction="row"
+                      gutterSize="l"
+                      justifyContent="spaceBetween"
+                      responsive={true}
+                      wrap={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButtonEmpty
+                              color="primary"
+                              href="#/management/elasticsearch/license_management/home"
+                              iconSide="left"
+                              type="button"
+                            >
+                              <a
+                                className="euiButtonEmpty euiButtonEmpty--primary"
+                                href="#/management/elasticsearch/license_management/home"
+                              >
+                                <span
+                                  className="euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </a>
+                            </EuiButtonEmpty>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="uploadLicenseButton"
+                              fill={true}
+                              iconSide="left"
+                              isLoading={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="uploadLicenseButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Upload
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
                   </div>
-                </EuiFlexGroup>
+                </EuiForm>
               </div>
-            </EuiForm>
+            </EuiPageContentBody>
           </div>
         </EuiPanel>
-      </div>
+      </EuiPageContent>
     </UploadLicense>
   </Connect(UploadLicense)>
 </Provider>
@@ -864,304 +846,295 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <div
-        className="licenseManagement__contain"
+      <EuiTitle
+        className="eui-textCenter"
+        size="l"
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceAround"
-          responsive={true}
-          wrap={false}
+        <h1
+          className="euiTitle euiTitle--large eui-textCenter"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              component="div"
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiTitle
-                  size="l"
-                >
-                  <h1
-                    className="euiTitle euiTitle--large"
-                  >
-                    Upload your license
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="l"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
+          Upload your license
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="l"
+      >
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
+        verticalPosition="center"
+      >
         <EuiPanel
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           grow={true}
           hasShadow={false}
-          paddingSize="m"
+          paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           >
-            <EuiText
-              grow={true}
-            >
+            <EuiPageContentBody>
               <div
-                className="euiText"
+                className="euiPageContentBody"
               >
-                Your license key is a JSON file with a signature attached.
-              </div>
-            </EuiText>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Uploading a license will replace your current
-                 
-                <strong />
-                 license.
-              </div>
-            </EuiText>
-            <EuiSpacer
-              size="l"
-            >
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </EuiSpacer>
-            <EuiForm
-              error={
-                Array [
-                  "The supplied license is not valid for this product.",
-                ]
-              }
-              isInvalid={true}
-            >
-              <div
-                className="euiForm"
-              >
-                <EuiCallOut
-                  className="euiForm__errors"
-                  color="danger"
-                  size="m"
-                  title="Please address the errors in your form."
-                >
-                  <div
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the errors in your form.
-                      </span>
-                    </div>
-                    <EuiText
-                      grow={true}
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <ul>
-                          <li
-                            className="euiForm__error"
-                            key="The supplied license is not valid for this product."
-                          >
-                            The supplied license is not valid for this product.
-                          </li>
-                        </ul>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
                 <EuiText
                   grow={true}
                 >
                   <div
                     className="euiText"
                   >
-                    <EuiFilePicker
-                      compressed={false}
-                      id="licenseFile"
-                      initialPromptText="Select or drag your license file"
-                      onChange={[Function]}
-                    >
-                      <div
-                        className="euiFilePicker"
-                      >
-                        <div
-                          className="euiFilePicker__wrap"
-                        >
-                          <input
-                            className="euiFilePicker__input"
-                            id="licenseFile"
-                            onChange={[Function]}
-                            onDragLeave={[Function]}
-                            onDragOver={[Function]}
-                            onDrop={[Function]}
-                            type="file"
-                          />
-                          <div
-                            className="euiFilePicker__prompt"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiFilePicker__icon"
-                              size="l"
-                              type="importAction"
-                            >
-                              <importAction
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--large euiFilePicker__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  className="euiIcon euiIcon--large euiFilePicker__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
-                                    }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                  />
-                                </svg>
-                              </importAction>
-                            </EuiIcon>
-                            <div
-                              className="euiFilePicker__promptText"
-                            >
-                              Select or drag your license file
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiFilePicker>
+                    <p>
+                      Your license key is a JSON file with a signature attached.
+                    </p>
+                    <p>
+                      Uploading a license will replace your current
+                       
+                      <strong />
+                       license.
+                    </p>
                   </div>
                 </EuiText>
                 <EuiSpacer
-                  size="m"
+                  size="l"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
-                  justifyContent="spaceBetween"
-                  responsive={true}
-                  wrap={false}
+                <EuiForm
+                  error={
+                    Array [
+                      "The supplied license is not valid for this product.",
+                    ]
+                  }
+                  isInvalid={true}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    className="euiForm"
                   >
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    <EuiCallOut
+                      className="euiForm__errors"
+                      color="danger"
+                      size="m"
+                      title="Please address the errors in your form."
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiCallOut euiCallOut--danger euiForm__errors"
                       >
-                        <EuiButtonEmpty
-                          color="primary"
-                          href="#/management/elasticsearch/license_management/home"
-                          iconSide="left"
-                          type="button"
+                        <div
+                          className="euiCallOutHeader"
                         >
-                          <a
-                            className="euiButtonEmpty euiButtonEmpty--primary"
-                            href="#/management/elasticsearch/license_management/home"
+                          <span
+                            className="euiCallOutHeader__title"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
+                            Please address the errors in your form.
+                          </span>
+                        </div>
+                        <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <ul>
+                              <li
+                                className="euiForm__error"
+                                key="The supplied license is not valid for this product."
                               >
-                                Cancel
-                              </span>
-                            </span>
-                          </a>
-                        </EuiButtonEmpty>
+                                The supplied license is not valid for this product.
+                              </li>
+                            </ul>
+                          </div>
+                        </EuiText>
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    </EuiCallOut>
+                    <EuiText
+                      grow={true}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiText"
                       >
-                        <EuiButton
-                          color="primary"
-                          data-test-subj="uploadLicenseButton"
-                          fill={true}
-                          iconSide="left"
-                          isLoading={false}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiFilePicker
+                          compressed={false}
+                          id="licenseFile"
+                          initialPromptText="Select or drag your license file"
+                          onChange={[Function]}
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="uploadLicenseButton"
-                            onClick={[Function]}
-                            type="button"
+                          <div
+                            className="euiFilePicker"
                           >
-                            <span
-                              className="euiButton__content"
+                            <div
+                              className="euiFilePicker__wrap"
                             >
-                              <span
-                                className="euiButton__text"
+                              <input
+                                className="euiFilePicker__input"
+                                id="licenseFile"
+                                onChange={[Function]}
+                                onDragLeave={[Function]}
+                                onDragOver={[Function]}
+                                onDrop={[Function]}
+                                type="file"
+                              />
+                              <div
+                                className="euiFilePicker__prompt"
                               >
-                                Upload
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButton>
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
+                                >
+                                  <importAction
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--large euiFilePicker__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
+                                    }
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--large euiFilePicker__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                      />
+                                    </svg>
+                                  </importAction>
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  Select or drag your license file
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFilePicker>
                       </div>
-                    </EuiFlexItem>
+                    </EuiText>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <TelemetryOptIn />
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiFlexGroup
+                      alignItems="stretch"
+                      component="div"
+                      direction="row"
+                      gutterSize="l"
+                      justifyContent="spaceBetween"
+                      responsive={true}
+                      wrap={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButtonEmpty
+                              color="primary"
+                              href="#/management/elasticsearch/license_management/home"
+                              iconSide="left"
+                              type="button"
+                            >
+                              <a
+                                className="euiButtonEmpty euiButtonEmpty--primary"
+                                href="#/management/elasticsearch/license_management/home"
+                              >
+                                <span
+                                  className="euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </a>
+                            </EuiButtonEmpty>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="uploadLicenseButton"
+                              fill={true}
+                              iconSide="left"
+                              isLoading={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="uploadLicenseButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Upload
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
                   </div>
-                </EuiFlexGroup>
+                </EuiForm>
               </div>
-            </EuiForm>
+            </EuiPageContentBody>
           </div>
         </EuiPanel>
-      </div>
+      </EuiPageContent>
     </UploadLicense>
   </Connect(UploadLicense)>
 </Provider>
@@ -1190,304 +1163,295 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <div
-        className="licenseManagement__contain"
+      <EuiTitle
+        className="eui-textCenter"
+        size="l"
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceAround"
-          responsive={true}
-          wrap={false}
+        <h1
+          className="euiTitle euiTitle--large eui-textCenter"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              component="div"
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiTitle
-                  size="l"
-                >
-                  <h1
-                    className="euiTitle euiTitle--large"
-                  >
-                    Upload your license
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="l"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
+          Upload your license
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="l"
+      >
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
+        verticalPosition="center"
+      >
         <EuiPanel
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           grow={true}
           hasShadow={false}
-          paddingSize="m"
+          paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           >
-            <EuiText
-              grow={true}
-            >
+            <EuiPageContentBody>
               <div
-                className="euiText"
+                className="euiPageContentBody"
               >
-                Your license key is a JSON file with a signature attached.
-              </div>
-            </EuiText>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Uploading a license will replace your current
-                 
-                <strong />
-                 license.
-              </div>
-            </EuiText>
-            <EuiSpacer
-              size="l"
-            >
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </EuiSpacer>
-            <EuiForm
-              error={
-                Array [
-                  "Error encountered uploading license: Check your license file.",
-                ]
-              }
-              isInvalid={true}
-            >
-              <div
-                className="euiForm"
-              >
-                <EuiCallOut
-                  className="euiForm__errors"
-                  color="danger"
-                  size="m"
-                  title="Please address the errors in your form."
-                >
-                  <div
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the errors in your form.
-                      </span>
-                    </div>
-                    <EuiText
-                      grow={true}
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <ul>
-                          <li
-                            className="euiForm__error"
-                            key="Error encountered uploading license: Check your license file."
-                          >
-                            Error encountered uploading license: Check your license file.
-                          </li>
-                        </ul>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
                 <EuiText
                   grow={true}
                 >
                   <div
                     className="euiText"
                   >
-                    <EuiFilePicker
-                      compressed={false}
-                      id="licenseFile"
-                      initialPromptText="Select or drag your license file"
-                      onChange={[Function]}
-                    >
-                      <div
-                        className="euiFilePicker"
-                      >
-                        <div
-                          className="euiFilePicker__wrap"
-                        >
-                          <input
-                            className="euiFilePicker__input"
-                            id="licenseFile"
-                            onChange={[Function]}
-                            onDragLeave={[Function]}
-                            onDragOver={[Function]}
-                            onDrop={[Function]}
-                            type="file"
-                          />
-                          <div
-                            className="euiFilePicker__prompt"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiFilePicker__icon"
-                              size="l"
-                              type="importAction"
-                            >
-                              <importAction
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--large euiFilePicker__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  className="euiIcon euiIcon--large euiFilePicker__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
-                                    }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                  />
-                                </svg>
-                              </importAction>
-                            </EuiIcon>
-                            <div
-                              className="euiFilePicker__promptText"
-                            >
-                              Select or drag your license file
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiFilePicker>
+                    <p>
+                      Your license key is a JSON file with a signature attached.
+                    </p>
+                    <p>
+                      Uploading a license will replace your current
+                       
+                      <strong />
+                       license.
+                    </p>
                   </div>
                 </EuiText>
                 <EuiSpacer
-                  size="m"
+                  size="l"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
-                  justifyContent="spaceBetween"
-                  responsive={true}
-                  wrap={false}
+                <EuiForm
+                  error={
+                    Array [
+                      "Error encountered uploading license: Check your license file.",
+                    ]
+                  }
+                  isInvalid={true}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    className="euiForm"
                   >
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    <EuiCallOut
+                      className="euiForm__errors"
+                      color="danger"
+                      size="m"
+                      title="Please address the errors in your form."
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiCallOut euiCallOut--danger euiForm__errors"
                       >
-                        <EuiButtonEmpty
-                          color="primary"
-                          href="#/management/elasticsearch/license_management/home"
-                          iconSide="left"
-                          type="button"
+                        <div
+                          className="euiCallOutHeader"
                         >
-                          <a
-                            className="euiButtonEmpty euiButtonEmpty--primary"
-                            href="#/management/elasticsearch/license_management/home"
+                          <span
+                            className="euiCallOutHeader__title"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
+                            Please address the errors in your form.
+                          </span>
+                        </div>
+                        <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <ul>
+                              <li
+                                className="euiForm__error"
+                                key="Error encountered uploading license: Check your license file."
                               >
-                                Cancel
-                              </span>
-                            </span>
-                          </a>
-                        </EuiButtonEmpty>
+                                Error encountered uploading license: Check your license file.
+                              </li>
+                            </ul>
+                          </div>
+                        </EuiText>
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    </EuiCallOut>
+                    <EuiText
+                      grow={true}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiText"
                       >
-                        <EuiButton
-                          color="primary"
-                          data-test-subj="uploadLicenseButton"
-                          fill={true}
-                          iconSide="left"
-                          isLoading={false}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiFilePicker
+                          compressed={false}
+                          id="licenseFile"
+                          initialPromptText="Select or drag your license file"
+                          onChange={[Function]}
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="uploadLicenseButton"
-                            onClick={[Function]}
-                            type="button"
+                          <div
+                            className="euiFilePicker"
                           >
-                            <span
-                              className="euiButton__content"
+                            <div
+                              className="euiFilePicker__wrap"
                             >
-                              <span
-                                className="euiButton__text"
+                              <input
+                                className="euiFilePicker__input"
+                                id="licenseFile"
+                                onChange={[Function]}
+                                onDragLeave={[Function]}
+                                onDragOver={[Function]}
+                                onDrop={[Function]}
+                                type="file"
+                              />
+                              <div
+                                className="euiFilePicker__prompt"
                               >
-                                Upload
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButton>
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
+                                >
+                                  <importAction
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--large euiFilePicker__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
+                                    }
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--large euiFilePicker__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                      />
+                                    </svg>
+                                  </importAction>
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  Select or drag your license file
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFilePicker>
                       </div>
-                    </EuiFlexItem>
+                    </EuiText>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <TelemetryOptIn />
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiFlexGroup
+                      alignItems="stretch"
+                      component="div"
+                      direction="row"
+                      gutterSize="l"
+                      justifyContent="spaceBetween"
+                      responsive={true}
+                      wrap={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButtonEmpty
+                              color="primary"
+                              href="#/management/elasticsearch/license_management/home"
+                              iconSide="left"
+                              type="button"
+                            >
+                              <a
+                                className="euiButtonEmpty euiButtonEmpty--primary"
+                                href="#/management/elasticsearch/license_management/home"
+                              >
+                                <span
+                                  className="euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </a>
+                            </EuiButtonEmpty>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="uploadLicenseButton"
+                              fill={true}
+                              iconSide="left"
+                              isLoading={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="uploadLicenseButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Upload
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
                   </div>
-                </EuiFlexGroup>
+                </EuiForm>
               </div>
-            </EuiForm>
+            </EuiPageContentBody>
           </div>
         </EuiPanel>
-      </div>
+      </EuiPageContent>
     </UploadLicense>
   </Connect(UploadLicense)>
 </Provider>
@@ -1516,304 +1480,295 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <div
-        className="licenseManagement__contain"
+      <EuiTitle
+        className="eui-textCenter"
+        size="l"
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceAround"
-          responsive={true}
-          wrap={false}
+        <h1
+          className="euiTitle euiTitle--large eui-textCenter"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              component="div"
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiTitle
-                  size="l"
-                >
-                  <h1
-                    className="euiTitle euiTitle--large"
-                  >
-                    Upload your license
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="l"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
+          Upload your license
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="l"
+      >
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiPageContent
+        horizontalPosition="center"
+        panelPaddingSize="l"
+        verticalPosition="center"
+      >
         <EuiPanel
+          className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           grow={true}
           hasShadow={false}
-          paddingSize="m"
+          paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingMedium"
+            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
           >
-            <EuiText
-              grow={true}
-            >
+            <EuiPageContentBody>
               <div
-                className="euiText"
+                className="euiPageContentBody"
               >
-                Your license key is a JSON file with a signature attached.
-              </div>
-            </EuiText>
-            <EuiText
-              grow={true}
-            >
-              <div
-                className="euiText"
-              >
-                Uploading a license will replace your current
-                 
-                <strong />
-                 license.
-              </div>
-            </EuiText>
-            <EuiSpacer
-              size="l"
-            >
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </EuiSpacer>
-            <EuiForm
-              error={
-                Array [
-                  "Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled",
-                ]
-              }
-              isInvalid={true}
-            >
-              <div
-                className="euiForm"
-              >
-                <EuiCallOut
-                  className="euiForm__errors"
-                  color="danger"
-                  size="m"
-                  title="Please address the errors in your form."
-                >
-                  <div
-                    className="euiCallOut euiCallOut--danger euiForm__errors"
-                  >
-                    <div
-                      className="euiCallOutHeader"
-                    >
-                      <span
-                        className="euiCallOutHeader__title"
-                      >
-                        Please address the errors in your form.
-                      </span>
-                    </div>
-                    <EuiText
-                      grow={true}
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                      >
-                        <ul>
-                          <li
-                            className="euiForm__error"
-                            key="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
-                          >
-                            Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                          </li>
-                        </ul>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiCallOut>
                 <EuiText
                   grow={true}
                 >
                   <div
                     className="euiText"
                   >
-                    <EuiFilePicker
-                      compressed={false}
-                      id="licenseFile"
-                      initialPromptText="Select or drag your license file"
-                      onChange={[Function]}
-                    >
-                      <div
-                        className="euiFilePicker"
-                      >
-                        <div
-                          className="euiFilePicker__wrap"
-                        >
-                          <input
-                            className="euiFilePicker__input"
-                            id="licenseFile"
-                            onChange={[Function]}
-                            onDragLeave={[Function]}
-                            onDragOver={[Function]}
-                            onDrop={[Function]}
-                            type="file"
-                          />
-                          <div
-                            className="euiFilePicker__prompt"
-                          >
-                            <EuiIcon
-                              aria-hidden="true"
-                              className="euiFilePicker__icon"
-                              size="l"
-                              type="importAction"
-                            >
-                              <importAction
-                                aria-hidden="true"
-                                className="euiIcon euiIcon--large euiFilePicker__icon"
-                                focusable="false"
-                                height="16"
-                                style={
-                                  Object {
-                                    "fill": undefined,
-                                  }
-                                }
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  className="euiIcon euiIcon--large euiFilePicker__icon"
-                                  focusable="false"
-                                  height="16"
-                                  style={
-                                    Object {
-                                      "fill": undefined,
-                                    }
-                                  }
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
-                                  />
-                                </svg>
-                              </importAction>
-                            </EuiIcon>
-                            <div
-                              className="euiFilePicker__promptText"
-                            >
-                              Select or drag your license file
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiFilePicker>
+                    <p>
+                      Your license key is a JSON file with a signature attached.
+                    </p>
+                    <p>
+                      Uploading a license will replace your current
+                       
+                      <strong />
+                       license.
+                    </p>
                   </div>
                 </EuiText>
                 <EuiSpacer
-                  size="m"
+                  size="l"
                 >
                   <div
-                    className="euiSpacer euiSpacer--m"
+                    className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
-                  justifyContent="spaceBetween"
-                  responsive={true}
-                  wrap={false}
+                <EuiForm
+                  error={
+                    Array [
+                      "Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled",
+                    ]
+                  }
+                  isInvalid={true}
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    className="euiForm"
                   >
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    <EuiCallOut
+                      className="euiForm__errors"
+                      color="danger"
+                      size="m"
+                      title="Please address the errors in your form."
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiCallOut euiCallOut--danger euiForm__errors"
                       >
-                        <EuiButtonEmpty
-                          color="primary"
-                          href="#/management/elasticsearch/license_management/home"
-                          iconSide="left"
-                          type="button"
+                        <div
+                          className="euiCallOutHeader"
                         >
-                          <a
-                            className="euiButtonEmpty euiButtonEmpty--primary"
-                            href="#/management/elasticsearch/license_management/home"
+                          <span
+                            className="euiCallOutHeader__title"
                           >
-                            <span
-                              className="euiButtonEmpty__content"
-                            >
-                              <span
-                                className="euiButtonEmpty__text"
+                            Please address the errors in your form.
+                          </span>
+                        </div>
+                        <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <div
+                            className="euiText euiText--small"
+                          >
+                            <ul>
+                              <li
+                                className="euiForm__error"
+                                key="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
                               >
-                                Cancel
-                              </span>
-                            </span>
-                          </a>
-                        </EuiButtonEmpty>
+                                Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                              </li>
+                            </ul>
+                          </div>
+                        </EuiText>
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      component="div"
-                      grow={false}
+                    </EuiCallOut>
+                    <EuiText
+                      grow={true}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        className="euiText"
                       >
-                        <EuiButton
-                          color="primary"
-                          data-test-subj="uploadLicenseButton"
-                          fill={true}
-                          iconSide="left"
-                          isLoading={false}
-                          onClick={[Function]}
-                          type="button"
+                        <EuiFilePicker
+                          compressed={false}
+                          id="licenseFile"
+                          initialPromptText="Select or drag your license file"
+                          onChange={[Function]}
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--fill"
-                            data-test-subj="uploadLicenseButton"
-                            onClick={[Function]}
-                            type="button"
+                          <div
+                            className="euiFilePicker"
                           >
-                            <span
-                              className="euiButton__content"
+                            <div
+                              className="euiFilePicker__wrap"
                             >
-                              <span
-                                className="euiButton__text"
+                              <input
+                                className="euiFilePicker__input"
+                                id="licenseFile"
+                                onChange={[Function]}
+                                onDragLeave={[Function]}
+                                onDragOver={[Function]}
+                                onDrop={[Function]}
+                                type="file"
+                              />
+                              <div
+                                className="euiFilePicker__prompt"
                               >
-                                Upload
-                              </span>
-                            </span>
-                          </button>
-                        </EuiButton>
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiFilePicker__icon"
+                                  size="l"
+                                  type="importAction"
+                                >
+                                  <importAction
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--large euiFilePicker__icon"
+                                    focusable="false"
+                                    height="16"
+                                    style={
+                                      Object {
+                                        "fill": undefined,
+                                      }
+                                    }
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      className="euiIcon euiIcon--large euiFilePicker__icon"
+                                      focusable="false"
+                                      height="16"
+                                      style={
+                                        Object {
+                                          "fill": undefined,
+                                        }
+                                      }
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M9 10.114l1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558zM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18zM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6z"
+                                      />
+                                    </svg>
+                                  </importAction>
+                                </EuiIcon>
+                                <div
+                                  className="euiFilePicker__promptText"
+                                >
+                                  Select or drag your license file
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFilePicker>
                       </div>
-                    </EuiFlexItem>
+                    </EuiText>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <TelemetryOptIn />
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiFlexGroup
+                      alignItems="stretch"
+                      component="div"
+                      direction="row"
+                      gutterSize="l"
+                      justifyContent="spaceBetween"
+                      responsive={true}
+                      wrap={false}
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButtonEmpty
+                              color="primary"
+                              href="#/management/elasticsearch/license_management/home"
+                              iconSide="left"
+                              type="button"
+                            >
+                              <a
+                                className="euiButtonEmpty euiButtonEmpty--primary"
+                                href="#/management/elasticsearch/license_management/home"
+                              >
+                                <span
+                                  className="euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </a>
+                            </EuiButtonEmpty>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="div"
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButton
+                              color="primary"
+                              data-test-subj="uploadLicenseButton"
+                              fill={true}
+                              iconSide="left"
+                              isLoading={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <button
+                                className="euiButton euiButton--primary euiButton--fill"
+                                data-test-subj="uploadLicenseButton"
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButton__content"
+                                >
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Upload
+                                  </span>
+                                </span>
+                              </button>
+                            </EuiButton>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
                   </div>
-                </EuiFlexGroup>
+                </EuiForm>
               </div>
-            </EuiForm>
+            </EuiPageContentBody>
           </div>
         </EuiPanel>
-      </div>
+      </EuiPageContent>
     </UploadLicense>
   </Connect(UploadLicense)>
 </Provider>

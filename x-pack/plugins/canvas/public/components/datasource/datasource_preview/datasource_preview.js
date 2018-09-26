@@ -21,7 +21,7 @@ import { Error } from '../../error';
 
 export const DatasourcePreview = ({ done, datatable }) => (
   <EuiOverlayMask>
-    <EuiModal onClose={done}>
+    <EuiModal onClose={done} maxWidth="1000px">
       <EuiModalHeader>
         <EuiModalHeaderTitle>Datasource Preview</EuiModalHeaderTitle>
       </EuiModalHeader>
