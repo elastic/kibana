@@ -550,6 +550,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             histogramFields={indexPatternHistogramFields}
           />
