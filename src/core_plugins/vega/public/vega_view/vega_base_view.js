@@ -96,6 +96,8 @@ export class VegaBaseView {
       }
 
       this._$container = $('<div class="vgaVis__view">')
+        // Force a height here because css is not loaded in mocha test
+        .css('height', '100%')
         .appendTo(this._$parentEl);
       this._$controls = $(`<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`)
         .appendTo(this._$parentEl);
