@@ -31,7 +31,7 @@ import {
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
 import { FormLabelWithIconTip } from './form_label_with_icon_tip';
-import { PIPELINE_EDITOR } from '../../../common/constants';
+import { PIPELINE_EDITOR } from './constants';
 
 export class PipelineEditor extends React.Component {
   constructor(props) {

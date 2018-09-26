@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import { PIPELINE_LIST } from '../../../common/constants';
+import { PIPELINE_LIST } from './constants';
 
 function getColumns(openPipeline, clonePipeline) {
   return [

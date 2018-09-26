@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { PIPELINE_LIST } from '../../../common/constants';
+import { PIPELINE_LIST } from './constants';
 
 export function AlertCallOut(props) {
   return (

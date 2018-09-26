@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, EuiOverlayMask } from '@elastic/eui';
-import { PIPELINE_EDITOR } from '../../../common/constants';
+import { PIPELINE_EDITOR } from './constants';
 
 export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDeletePipeline }) {
   return (
