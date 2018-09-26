@@ -20,7 +20,7 @@ interface BulkGetTests {
 }
 
 interface BulkGetTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   otherSpaceId?: string;
   tests: BulkGetTests;
@@ -134,7 +134,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     description: string,
     definition: BulkGetTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -143,7 +143,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       it(`should return ${tests.default.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send(createBulkRequests(otherSpaceId || spaceId))
           .expect(tests.default.statusCode)
           .then(tests.default.response);

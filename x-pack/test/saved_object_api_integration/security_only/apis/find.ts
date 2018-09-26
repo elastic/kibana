@@ -25,35 +25,32 @@ export default function({ getService }: TestInvoker) {
     } = findTestSuiteFactory(esArchiver, supertest);
 
     findTest(`user with no access`, {
-      auth: {
-        username: AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME,
-        password: AUTHENTICATION.NOT_A_KIBANA_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         spaceAwareType: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         notSpaceAwareType: {
           description: 'forbidden legacy message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
-          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.USERNAME),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         noType: {
           description: 'bad request, type is required',
@@ -64,10 +61,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`superuser`, {
-      auth: {
-        username: AUTHENTICATION.SUPERUSER.USERNAME,
-        password: AUTHENTICATION.SUPERUSER.PASSWORD,
-      },
+      user: AUTHENTICATION.SUPERUSER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -103,10 +97,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`legacy user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -142,10 +133,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`legacy readonly user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -181,10 +169,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`dual-privileges user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -220,10 +205,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`dual-privileges readonly user`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -259,10 +241,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with all globally`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -298,10 +277,7 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with read globally`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
@@ -337,44 +313,41 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with all at default space`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
         notSpaceAwareType: {
           description: 'only the globaltype',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
         unknownType: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
         pageBeyondTotal: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
         unknownSearchField: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username
           ),
         },
         noType: {
@@ -386,44 +359,41 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with read at default space`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
         notSpaceAwareType: {
           description: 'only the globaltype',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
         unknownType: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
         pageBeyondTotal: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
         unknownSearchField: {
           description: 'empty result',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username
           ),
         },
         noType: {
@@ -435,44 +405,41 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with all at space_1`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
       tests: {
         spaceAwareType: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
         notSpaceAwareType: {
           description: 'only the globaltype',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username
           ),
         },
         noType: {
@@ -484,44 +451,41 @@ export default function({ getService }: TestInvoker) {
     });
 
     findTest(`rbac user with read at space_1`, {
-      auth: {
-        username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME,
-        password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.PASSWORD,
-      },
+      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
       tests: {
         spaceAwareType: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
         notSpaceAwareType: {
           description: 'only the globaltype',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
         unknownType: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
         pageBeyondTotal: {
           description: 'forbidden login and find visualization message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
         unknownSearchField: {
           description: 'forbidden login and find wigwags message',
           statusCode: 403,
           response: createExpectLegacyForbidden(
-            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.USERNAME
+            AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username
           ),
         },
         noType: {

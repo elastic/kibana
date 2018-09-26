@@ -22,7 +22,7 @@ interface DeleteTests {
 }
 
 interface DeleteTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   otherSpaceId?: string;
   tests: DeleteTests;
@@ -82,7 +82,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     description: string,
     definition: DeleteTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -95,7 +95,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               otherSpaceId || spaceId
             )}be3733a0-9efe-11e7-acb3-3dab96693fab`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response));
 
@@ -108,7 +108,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               spaceId
             )}/api/saved_objects/globaltype/8121a00-8efd-21e7-1cb3-34ab966434445`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response));
 
@@ -119,7 +119,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               otherSpaceId || spaceId
             )}not-a-real-id`
           )
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.invalidId.statusCode)
           .then(tests.invalidId.response));
     });

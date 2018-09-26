@@ -20,7 +20,7 @@ interface DeleteTests {
 }
 
 interface DeleteTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: DeleteTests;
 }
@@ -136,7 +136,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
   const makeDeleteTest = (describeFn: DescribeFn) => (
     description: string,
-    { auth = {}, spaceId, tests }: DeleteTestDefinition
+    { user = {}, spaceId, tests }: DeleteTestDefinition
   ) => {
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -145,7 +145,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       it(`should return ${tests.exists.statusCode}`, async () => {
         return supertest
           .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_2`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.exists.statusCode)
           .then(tests.exists.response);
       });
@@ -154,7 +154,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         it(`should return ${tests.reservedSpace.statusCode}`, async () => {
           return supertest
             .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.reservedSpace.statusCode)
             .then(tests.reservedSpace.response);
         });
@@ -164,7 +164,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         it(`should return ${tests.doesntExist.statusCode}`, async () => {
           return supertest
             .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_3`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.doesntExist.statusCode)
             .then(tests.doesntExist.response);
         });

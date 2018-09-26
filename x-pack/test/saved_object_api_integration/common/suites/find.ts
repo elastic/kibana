@@ -25,7 +25,7 @@ interface FindTests {
 }
 
 interface FindTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   tests: FindTests;
 }
@@ -117,7 +117,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     description: string,
     definition: FindTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -128,7 +128,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       }`, async () =>
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=visualization&fields=title`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
@@ -137,7 +137,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       }`, async () =>
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=globaltype&fields=name`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .expect(tests.notSpaceAwareType.statusCode)
           .then(tests.notSpaceAwareType.response));
 
@@ -147,7 +147,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         }`, async () =>
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.unknownType.statusCode)
             .then(tests.unknownType.response));
       });
@@ -162,7 +162,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
                 spaceId
               )}/api/saved_objects/_find?type=visualization&page=100&per_page=100`
             )
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.pageBeyondTotal.statusCode)
             .then(tests.pageBeyondTotal.response));
       });
@@ -173,7 +173,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         }`, async () =>
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));
       });
@@ -182,7 +182,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         it(`should return ${tests.noType.statusCode} with ${tests.noType.description}`, async () =>
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .expect(tests.noType.statusCode)
             .then(tests.noType.response));
       });

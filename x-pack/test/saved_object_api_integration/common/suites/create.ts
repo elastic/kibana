@@ -27,7 +27,7 @@ interface CreateTests {
 }
 
 interface CreateTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   tests: CreateTests;
 }
@@ -133,14 +133,14 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     description: string,
     definition: CreateTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
       it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${spaceAwareType}`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send({
             attributes: {
               title: 'My favorite vis',
@@ -153,7 +153,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${notSpaceAwareType}`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send({
             attributes: {
               name: `Can't be contained to a space`,
@@ -167,7 +167,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         it(tests.custom.description, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${tests.custom!.type}`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send(tests.custom!.requestBody)
             .expect(tests.custom!.statusCode)
             .then(tests.custom!.response);

@@ -20,7 +20,7 @@ interface UpdateTests {
 }
 
 interface UpdateTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: UpdateTests;
 }
@@ -70,7 +70,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeUpdateTest = (describeFn: DescribeFn) => (
     description: string,
-    { auth = {}, spaceId, tests }: UpdateTestDefinition
+    { user = {}, spaceId, tests }: UpdateTestDefinition
   ) => {
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -80,7 +80,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.alreadyExists.statusCode}`, async () => {
           return supertest
             .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               name: 'space 1',
               id: 'space_1',
@@ -97,7 +97,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.defaultSpace.statusCode}`, async () => {
           return supertest
             .put(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               name: 'the new default',
               id: 'default',
@@ -114,7 +114,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.newSpace.statusCode}`, async () => {
           return supertest
             .put(`${getUrlPrefix(spaceId)}/api/spaces/space/marketing`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send({
               name: 'marketing',
               id: 'marketing',

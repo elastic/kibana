@@ -58,32 +58,26 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     ].forEach(scenario => {
       updateTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.noAccess.USERNAME,
-          password: scenario.users.noAccess.PASSWORD,
-        },
+        user: scenario.users.noAccess,
         tests: {
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           defaultSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
 
       updateTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.superuser.USERNAME,
-          password: scenario.users.superuser.PASSWORD,
-        },
+        user: scenario.users.superuser,
         tests: {
           alreadyExists: {
             statusCode: 200,
@@ -102,10 +96,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allGlobally.USERNAME,
-          password: scenario.users.allGlobally.PASSWORD,
-        },
+        user: scenario.users.allGlobally,
         tests: {
           alreadyExists: {
             statusCode: 200,
@@ -124,10 +115,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`dual-privileges used from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualAll.USERNAME,
-          password: scenario.users.dualAll.PASSWORD,
-        },
+        user: scenario.users.dualAll,
         tests: {
           alreadyExists: {
             statusCode: 200,
@@ -146,10 +134,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyAll.USERNAME,
-          password: scenario.users.legacyAll.PASSWORD,
-        },
+        user: scenario.users.legacyAll,
         tests: {
           alreadyExists: {
             statusCode: 200,
@@ -168,10 +153,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.readGlobally.USERNAME,
-          password: scenario.users.readGlobally.PASSWORD,
-        },
+        user: scenario.users.readGlobally,
         tests: {
           alreadyExists: {
             statusCode: 403,
@@ -190,10 +172,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.dualRead.USERNAME,
-          password: scenario.users.dualRead.PASSWORD,
-        },
+        user: scenario.users.dualRead,
         tests: {
           alreadyExists: {
             statusCode: 403,
@@ -212,32 +191,26 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`legacy readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.legacyRead.USERNAME,
-          password: scenario.users.legacyRead.PASSWORD,
-        },
+        user: scenario.users.legacyRead,
         tests: {
           alreadyExists: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
           defaultSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
           newSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.USERNAME),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
         },
       });
 
       updateTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.allAtSpace.USERNAME,
-          password: scenario.users.allAtSpace.PASSWORD,
-        },
+        user: scenario.users.allAtSpace,
         tests: {
           alreadyExists: {
             statusCode: 403,
@@ -256,10 +229,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
 
       updateTest(`rbac user with read at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
-        auth: {
-          username: scenario.users.readAtSpace.USERNAME,
-          password: scenario.users.readAtSpace.PASSWORD,
-        },
+        user: scenario.users.readAtSpace,
         tests: {
           alreadyExists: {
             statusCode: 403,

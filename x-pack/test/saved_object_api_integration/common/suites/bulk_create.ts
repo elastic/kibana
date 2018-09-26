@@ -28,7 +28,7 @@ interface BulkCreateTests {
 }
 
 interface BulkCreateTestDefinition {
-  auth?: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId?: string;
   tests: BulkCreateTests;
 }
@@ -151,7 +151,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     description: string,
     definition: BulkCreateTestDefinition
   ) => {
-    const { auth = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
@@ -160,7 +160,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
       it(`should return ${tests.default.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
-          .auth(auth.username, auth.password)
+          .auth(user.username, user.password)
           .send(createBulkRequests(spaceId))
           .expect(tests.default.statusCode)
           .then(tests.default.response);
@@ -170,7 +170,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         it(tests.custom!.description, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
-            .auth(auth.username, auth.password)
+            .auth(user.username, user.password)
             .send(tests.custom!.requestBody)
             .expect(tests.custom!.statusCode)
             .then(tests.custom!.response);
