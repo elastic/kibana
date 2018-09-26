@@ -1,0 +1,11 @@
+$mchColorCritical: #fe5050;
+$mchColorMajor: #fba740;
+$mchColorMinor: #fdec25;
+$mchColorWarning: #8bc8fb;
+$mchColorUnknown: #c0c0c0;
+
+$mchColorCriticalText: makeHighContrastColor($mchColorCritical, $euiColorEmptyShade);
+$mchColorMajorText: makeHighContrastColor($mchColorMajor, $euiColorEmptyShade);
+$mchColorMinorText: makeHighContrastColor($mchColorMinor, $euiColorEmptyShade);
+$mchColorWarningText: makeHighContrastColor($mchColorWarning, $euiColorEmptyShade);
+$mchColorUnknownText: $euiColorDarkShade;

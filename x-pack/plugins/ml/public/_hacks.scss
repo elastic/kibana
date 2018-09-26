@@ -9,23 +9,23 @@
 }
 
 .ml-icon-severity-critical {
-  color: #fe5050;
+  color: $mchColorCriticalText;
 }
 
 .ml-icon-severity-major {
-  color: #fba740;
+  color: $mchColorMajorText;
 }
 
 .ml-icon-severity-minor {
-  color: #fdec25;
+  color: $mchColorMinorText;
 }
 
 .ml-icon-severity-warning {
-  color: #8bc8fb;
+  color: $mchColorWarningText;
 }
 
 .ml-icon-severity-unknown {
-  color: #c0c0c0;
+  color: $mchColorUnknownText;
 }
 
 .tab-jobs,

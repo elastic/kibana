@@ -41,37 +41,37 @@
   // SASSTODO: This range of color is too large, needs to be rewritten and variablized
   .progress.critical {
     .progress-bar {
-      background-color: #fe5050;
+      background-color: $mchColorCritical;
     }
     .score-label {
-      border-color: #fe5050;
+      border-color: $mchColorCritical;
     }
   }
 
   .progress.major {
     .progress-bar {
-      background-color: #fba740;
+      background-color: $mchColorMajor;
     }
     .score-label {
-      border-color: #fba740;
+      border-color: $mchColorMajor;
     }
   }
 
   .progress.minor {
     .progress-bar {
-      background-color: #ffdd00;
+      background-color: $mchColorMinor;
     }
     .score-label {
-      border-color: #ffdd00;
+      border-color: $mchColorMinor;
     }
   }
 
   .progress.warning {
     .progress-bar {
-      background-color: #8bc8fb;
+      background-color: $mchColorWarning;
     }
     .score-label {
-      border-color: #8bc8fb;
+      border-color: $mchColorWarning;
     }
   }
 
@@ -88,14 +88,14 @@
     width: 32px;
     vertical-align: top;
     text-align: center;
-    color: #555;
+    color: $euiColorDarkShade;
     font-size: 11px;
     line-height: 14px;
     border-radius: 4px;
     padding: 2px;
     margin-top: 1px;
     display: inline-block;
-    border: 1px solid #bbbbbb;
+    border: $euiBorderThin;
   }
 }
 

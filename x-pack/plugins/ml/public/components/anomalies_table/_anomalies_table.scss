@@ -12,31 +12,31 @@
   // SASSTODO: Should only be three options, logic moved to the JS, where EuiIcon accepts a color
   .ml-icon-severity-critical {
     .euiIcon {
-      fill: $euiColorDanger;
+      fill: $mchColorCriticalText;
     }
   }
 
   .ml-icon-severity-major {
     .euiIcon {
-      fill: $euiColorWarning;
+      fill: $mchColorMajorText;
     }
   }
 
   .ml-icon-severity-minor {
     .euiIcon {
-      fill: tintOrShade($euiColorWarning, 10%, 10%);
+      fill: $mchColorMinorText;
     }
   }
 
   .ml-icon-severity-warning {
     .euiIcon {
-      fill: $euiColorPrimary;
+      fill: $mchColorWarningText;
     }
   }
 
   .ml-icon-severity-unknown {
     .euiIcon {
-      fill: $euiColorMediumShade;
+      fill: $mchColorUnknownText;
     }
   }
 

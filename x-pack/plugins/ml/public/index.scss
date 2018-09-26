@@ -1,6 +1,8 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
 @import 'ui/public/styles/styling_constants';
 
+// ML has it's own variables for coloring
+@import 'variables';
 
 // Protect the rest of Kibana from ML generic namespacing 
 // SASSTODO: Prefix ml selectors instead
