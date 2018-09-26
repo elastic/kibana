@@ -13,7 +13,7 @@ import { WorkpadHeader } from '../../../components/workpad_header';
 
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {
-    isEditing: PropTypes.bool,
+    readOnly: PropTypes.bool.isRequired,
     deselectElement: PropTypes.func,
     initializeWorkpad: PropTypes.func.isRequired,
   };
@@ -23,7 +23,7 @@ export class WorkpadApp extends React.PureComponent {
   }
 
   render() {
-    const { isEditing, deselectElement } = this.props;
+    const { readOnly, deselectElement } = this.props;
 
     return (
       <div className="canvasLayout">
@@ -42,7 +42,7 @@ export class WorkpadApp extends React.PureComponent {
               </div>
             </div>
 
-            {isEditing && (
+            {!readOnly && (
               <div className="canvasLayout__sidebar hide-for-sharing">
                 <Sidebar />
               </div>

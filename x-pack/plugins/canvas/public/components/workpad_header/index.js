@@ -6,15 +6,15 @@
 
 import { compose, withState } from 'recompose';
 import { connect } from 'react-redux';
-import { getEditing, getReadOnlyUser } from '../../state/selectors/app';
-import { getWorkpadName, getSelectedPage } from '../../state/selectors/workpad';
-import { setEditing } from '../../state/actions/transient';
+import { getReadOnlyUser } from '../../state/selectors/app';
+import { getWorkpadName, getSelectedPage, getReadOnly } from '../../state/selectors/workpad';
+import { setReadOnly } from '../../state/actions/workpad';
 import { getAssets } from '../../state/selectors/assets';
 import { addElement } from '../../state/actions/elements';
 import { WorkpadHeader as Component } from './workpad_header';
 
 const mapStateToProps = state => ({
-  isEditing: getEditing(state),
+  readOnly: getReadOnly(state),
   readOnlyUser: getReadOnlyUser(state),
   workpadName: getWorkpadName(state),
   selectedPage: getSelectedPage(state),
@@ -22,7 +22,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  setEditing: isEditing => dispatch(setEditing(isEditing)),
+  setReadOnly: readOnly => dispatch(setReadOnly(readOnly)),
   addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
 });
 
@@ -31,7 +31,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...dispatchProps,
   ...ownProps,
   addElement: dispatchProps.addElement(stateProps.selectedPage),
-  toggleEditing: () => dispatchProps.setEditing(!stateProps.isEditing),
+  toggleReadOnly: () => dispatchProps.setReadOnly(!stateProps.readOnly),
 });
 
 export const WorkpadHeader = compose(

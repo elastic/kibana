@@ -14,7 +14,7 @@ import { PagePreview } from '../page_preview';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {
-    isEditing: PropTypes.bool.isRequired,
+    readOnly: PropTypes.bool.isRequired,
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
@@ -96,11 +96,11 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { isEditing, selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const { readOnly, selectedPage, workpadId, movePage, duplicatePage } = this.props;
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isEditing}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={readOnly}>
         {provided => (
           <div
             key={page.id}
@@ -127,7 +127,7 @@ export class PageManager extends React.PureComponent {
                   aria-label={`Load page number ${pageNumber}`}
                 >
                   <PagePreview
-                    isEditing={isEditing}
+                    readOnly={readOnly}
                     page={page}
                     height={100}
                     pageNumber={pageNumber}
@@ -146,7 +146,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isEditing } = this.props;
+    const { pages, addPage, deleteId, readOnly } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -173,7 +173,7 @@ export class PageManager extends React.PureComponent {
               </Droppable>
             </DragDropContext>
           </EuiFlexItem>
-          {isEditing && (
+          {!readOnly && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 anchorClassName="canvasPageManager__addPageTip"

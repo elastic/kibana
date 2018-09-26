@@ -28,10 +28,6 @@ export const transientReducer = handleActions(
       );
     },
 
-    [actions.setEditing]: (transientState, { payload }) => {
-      return set(transientState, 'editing', Boolean(payload && !transientState.readOnlyUser));
-    },
-
     [actions.setReadOnlyUser]: (transientState, { payload }) => {
       return set(transientState, 'readOnlyUser', Boolean(payload));
     },

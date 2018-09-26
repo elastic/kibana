@@ -5,15 +5,14 @@
  */
 
 import PropTypes from 'prop-types';
-import { compose, withState, withHandlers } from 'recompose';
+import { compose, withHandlers } from 'recompose';
 import { getId } from '../../../lib/get_id';
 import { notify } from '../../../lib/notify';
 import { WorkpadDropzone as Component } from './workpad_dropzone';
 
 export const WorkpadDropzone = compose(
-  withState('isDropping', 'setDropping', false),
   withHandlers({
-    onDropAccepted: ({ onUpload, setDropping }) => ([file]) => {
+    onDropAccepted: ({ onUpload }) => ([file]) => {
       // TODO: Clean up this file, this loading stuff can, and should be, abstracted
       const reader = new FileReader();
 
@@ -30,13 +29,11 @@ export const WorkpadDropzone = compose(
 
       // read the uploaded file
       reader.readAsText(file);
-      setDropping(false);
     },
-    onDropRejected: ({ setDropping }) => ([file]) => {
+    onDropRejected: () => ([file]) => {
       notify.warning('Only JSON files are accepted', {
         title: `Couldn't upload '${file.name || 'file'}'`,
       });
-      setDropping(false);
     },
   })
 )(Component);

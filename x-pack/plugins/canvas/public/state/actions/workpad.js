@@ -12,6 +12,7 @@ import { fetchAllRenderables } from './elements';
 
 export const sizeWorkpad = createAction('sizeWorkpad');
 export const setName = createAction('setName');
+export const setReadOnly = createAction('setReadOnly');
 export const setColors = createAction('setColors');
 export const setRefreshInterval = createAction('setRefreshInterval');
 

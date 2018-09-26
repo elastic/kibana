@@ -10,12 +10,13 @@ import { compose, withState, withProps, getContext, withHandlers } from 'recompo
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { getFullscreen, getEditing } from '../../state/selectors/app';
+import { getFullscreen } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
   getAllElements,
   getWorkpad,
   getPages,
+  getReadOnly,
 } from '../../state/selectors/workpad';
 import { Workpad as Component } from './workpad';
 
@@ -25,7 +26,7 @@ const mapStateToProps = state => ({
   totalElementCount: getAllElements(state).length,
   workpad: getWorkpad(state),
   isFullscreen: getFullscreen(state),
-  isEditing: getEditing(state),
+  readOnly: getReadOnly(state),
 });
 
 const mapDispatchToProps = {

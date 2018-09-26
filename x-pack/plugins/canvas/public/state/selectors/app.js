@@ -7,10 +7,6 @@
 import { get } from 'lodash';
 
 // page getters
-export function getEditing(state) {
-  return get(state, 'transient.editing', false);
-}
-
 export function getReadOnlyUser(state) {
   return get(state, 'transient.readOnlyUser', false);
 }
