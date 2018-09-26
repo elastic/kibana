@@ -6,13 +6,14 @@
     width: 60px;
   }
 
+  // SASSTODO: Proper calcs
   .view-forecast-btn {
     width: 35px;
     min-width: 35px;
     height: 24px;
 
     .euiButton__content {
-      padding: 0px 8px;
+      padding: 0px $euiSizeS;
     }
   }
 }
