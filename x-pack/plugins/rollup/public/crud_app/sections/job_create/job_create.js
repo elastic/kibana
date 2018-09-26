@@ -51,6 +51,7 @@ import {
   stepIds,
   stepIdToStepConfigMap,
   getAffectedStepsFields,
+  hasErrors,
 } from './steps_config';
 
 const stepIdToTitleMap = {
@@ -513,6 +514,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             isValidatingIndexPattern={isValidatingIndexPattern}
             indexPatternAsyncErrors={indexPatternAsyncErrors}
@@ -527,6 +529,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             dateFields={indexPatternDateFields}
           />

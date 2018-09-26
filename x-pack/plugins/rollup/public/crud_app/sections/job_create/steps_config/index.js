@@ -151,3 +151,8 @@ export function getAffectedStepsFields(fields, stepsFields) {
 
   return affectedStepsFields;
 }
+
+export function hasErrors(fieldErrors) {
+  const errorValues = Object.values(fieldErrors);
+  return errorValues.some(error => error !== undefined);
+}
