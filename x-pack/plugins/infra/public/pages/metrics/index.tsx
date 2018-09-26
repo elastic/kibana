@@ -93,12 +93,12 @@ class MetricDetailPage extends React.PureComponent<Props> {
                   return (
                     <EuiPage style={{ flex: '1 0 auto' }}>
                       <EuiPageSideBar>
-                        <EuiHideFor sizes={['xs']}>
+                        <EuiHideFor sizes={['xs', 's']}>
                           <EuiSideNavContainer>
                             <EuiSideNav items={sideNav} />
                           </EuiSideNavContainer>
                         </EuiHideFor>
-                        <EuiShowFor sizes={['xs']}>
+                        <EuiShowFor sizes={['xs', 's']}>
                           <EuiSideNav
                             items={sideNav}
                             mobileTitle={nodeName}
