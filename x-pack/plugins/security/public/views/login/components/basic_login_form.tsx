@@ -33,56 +33,50 @@ export class BasicLoginForm extends Component<Props, State> {
     message: '',
   };
 
-  public componentDidMount() {
-    document.addEventListener('keydown', this.submitOnEnter);
-  }
-
-  public componentWillUnmount() {
-    document.removeEventListener('keydown', this.submitOnEnter);
-  }
-
   public render() {
     return (
       <Fragment>
         {this.renderMessage()}
         <EuiPanel>
-          <EuiFormRow label="Username">
-            <EuiFieldText
-              name="username"
-              title="username"
-              data-test-subj="loginUsername"
-              value={this.state.username}
-              onChange={this.onUsernameChange}
-              disabled={this.state.isLoading}
-              aria-required={true}
-              inputRef={this.setUsernameInputRef}
-            />
-          </EuiFormRow>
+          <form onSubmit={this.submit}>
+            <EuiFormRow label="Username">
+              <EuiFieldText
+                name="username"
+                data-test-subj="loginUsername"
+                value={this.state.username}
+                onChange={this.onUsernameChange}
+                disabled={this.state.isLoading}
+                isInvalid={false}
+                required
+                inputRef={this.setUsernameInputRef}
+              />
+            </EuiFormRow>
 
-          <EuiFormRow label="Password">
-            <EuiFieldText
-              name="password"
-              title="password"
-              data-test-subj="loginPassword"
-              type="password"
-              value={this.state.password}
-              onChange={this.onPasswordChange}
-              disabled={this.state.isLoading}
-              aria-required={true}
-            />
-          </EuiFormRow>
+            <EuiFormRow label="Password">
+              <EuiFieldText
+                name="password"
+                data-test-subj="loginPassword"
+                type="password"
+                value={this.state.password}
+                onChange={this.onPasswordChange}
+                disabled={this.state.isLoading}
+                isInvalid={false}
+                required
+              />
+            </EuiFormRow>
 
-          <EuiSpacer />
-          <EuiButton
-            fill
-            color="primary"
-            onClick={this.submit}
-            isLoading={this.state.isLoading}
-            isDisabled={!this.isFormValid()}
-            data-test-subj="loginSubmit"
-          >
-            Log in
-          </EuiButton>
+            <EuiButton
+              fill
+              type="submit"
+              color="primary"
+              onClick={this.submit}
+              isLoading={this.state.isLoading}
+              isDisabled={!this.isFormValid()}
+              data-test-subj="loginSubmit"
+            >
+              Log in
+            </EuiButton>
+          </form>
         </EuiPanel>
       </Fragment>
     );
@@ -97,6 +91,7 @@ export class BasicLoginForm extends Component<Props, State> {
             color="danger"
             data-test-subj="loginErrorMessage"
             title={this.state.message}
+            role="alert"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -111,6 +106,7 @@ export class BasicLoginForm extends Component<Props, State> {
             color="primary"
             data-test-subj="loginInfoMessage"
             title={this.props.infoMessage}
+            role="status"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -141,12 +137,6 @@ export class BasicLoginForm extends Component<Props, State> {
     this.setState({
       password: e.target.value,
     });
-  };
-
-  private submitOnEnter = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      this.submit();
-    }
   };
 
   private submit = () => {
