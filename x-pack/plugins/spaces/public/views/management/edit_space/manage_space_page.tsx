@@ -31,6 +31,7 @@ import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
+import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
@@ -101,6 +102,7 @@ export class ManageSpacePage extends Component<Props, State> {
           <EuiPageContent className="manageSpacePage__content">
             <EuiPageContentBody>{content}</EuiPageContentBody>
           </EuiPageContent>
+          {this.maybeGetSecureSpacesMessage()}
         </EuiPageBody>
       </EuiPage>
     );
@@ -182,8 +184,6 @@ export class ManageSpacePage extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiSpacer />
-
         <EuiHorizontalRule />
 
         {this.getFormButtons()}
@@ -206,6 +206,13 @@ export class ManageSpacePage extends Component<Props, State> {
       return `Edit space`;
     }
     return `Create space`;
+  };
+
+  public maybeGetSecureSpacesMessage = () => {
+    if (this.editingExistingSpace()) {
+      return <SecureSpaceMessage userProfile={this.props.userProfile} />;
+    }
+    return null;
   };
 
   public getFormButtons = () => {
