@@ -14,13 +14,14 @@ import {
 
 export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
-    id: 'systemOverview',
-    label: 'System Overview',
+    id: 'hostOverview',
+    label: 'Host',
     requires: ['system'],
     sections: [
       {
         id: InfraMetric.hostSystemOverview,
-        label: 'System Overview',
+        linkToId: 'hostOverview',
+        label: 'Overview',
         requires: ['system.cpu', 'system.load', 'system.memory', 'system.network'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
@@ -122,12 +123,13 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   },
   {
     id: 'k8sOverview',
-    label: 'Kubernetes Overview',
+    label: 'Kubernetes',
     requires: ['kubernetes'],
     sections: [
       {
         id: InfraMetric.hostK8sOverview,
-        label: 'Kuberntes Overview',
+        linkToId: 'k8sOverview',
+        label: 'Overview',
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {

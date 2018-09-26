@@ -38,7 +38,7 @@ export class Metrics extends React.PureComponent<Props> {
       <React.Fragment key={layout.id}>
         <EuiPageContentBody>
           <EuiTitle size="m">
-            <h2>{layout.label}</h2>
+            <h2 id={layout.id}>{`${layout.label} Overview`}</h2>
           </EuiTitle>
         </EuiPageContentBody>
         {layout.sections.map(this.renderSection(layout))}
