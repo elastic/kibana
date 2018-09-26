@@ -32,6 +32,10 @@ export class VectorLayer extends ALayer {
     return layerDescriptor;
   }
 
+  isJoinable() {
+    return true;
+  }
+
   getSupportedStyles() {
     return [VectorStyle];
   }

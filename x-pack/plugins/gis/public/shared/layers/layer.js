@@ -31,6 +31,10 @@ export class ALayer {
     return layerDescriptor;
   }
 
+  isJoinable() {
+    return false;
+  }
+
   getDisplayName() {
     if (this._descriptor.label) {
       return this._descriptor.label;
