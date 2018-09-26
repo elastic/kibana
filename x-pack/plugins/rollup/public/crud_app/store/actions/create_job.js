@@ -35,15 +35,16 @@ export const createJob = (jobConfig) => async (dispatch) => {
       new Promise(resolve => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
-    const { status, data } = error;
+    const { statusCode, data } = error;
 
-    switch (status) {
+    // Some errors have statusCode directly available but some are under a data property.
+    switch (statusCode || data.statusCode) {
       case 409:
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              messsge: `A job with ID '${jobConfig.id}' already exists.`,
+              message: `A job with ID '${jobConfig.id}' already exists.`,
             },
           },
         });
@@ -54,7 +55,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              message: `Request failed with a ${status} error. ${data.message}`,
+              message: `Request failed with a ${statusCode} error. ${data.message}`,
               cause: data.cause,
             },
           },

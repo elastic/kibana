@@ -42,7 +42,7 @@ export class JobListUi extends Component {
     loadJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
     jobs: PropTypes.array,
-    isLoading: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool,
   }
 
   static getDerivedStateFromProps(props) {
