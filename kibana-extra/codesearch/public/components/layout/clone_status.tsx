@@ -18,7 +18,9 @@ interface Props {
 export const CloneStatus = (props: Props) => {
   const { progress: progressRate, cloneProgress } = props;
   let progress = `Receiving objects: ${progressRate.toFixed(2)}%`;
-  if (cloneProgress) {
+  if (progressRate < 0) {
+    progress = 'Clone Failed';
+  } else if (cloneProgress) {
     const { receivedObjects, totalObjects, indexedObjects } = cloneProgress;
 
     if (receivedObjects === totalObjects) {

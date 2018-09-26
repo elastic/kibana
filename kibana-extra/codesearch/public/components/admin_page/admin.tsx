@@ -98,12 +98,17 @@ const RepositoryItem = (props: RepositoryItemProps) => {
     <EuiButtonIcon iconType="play" aria-label="run init command" onClick={props.initRepoCommand} />
   );
 
+  const progressPrompt = props.status
+    ? `${
+        props.status.progress < 0
+          ? 'Clone Failed'
+          : `Cloning...${props.status.progress.toFixed(2)}%`
+      }`
+    : '';
+
   const progress = props.status &&
     !RepositoryUtils.hasFullyCloned(props.status.cloneProgress) && (
-      <Progress progress={props.status.progress}>
-        Cloning...
-        {props.status.progress.toFixed(2)}%
-      </Progress>
+      <Progress progress={props.status.progress}>{progressPrompt}</Progress>
     );
 
   return (
