@@ -148,9 +148,9 @@ export const spaces = (kibana: any) =>
         let manageSecurity = false;
 
         if (server.plugins.security) {
-          const { allowRbac = false } =
+          const { showLinks = false } =
             xpackMainPlugin.info.feature('security').getLicenseCheckResults() || {};
-          manageSecurity = allowRbac;
+          manageSecurity = showLinks;
         }
 
         return {
