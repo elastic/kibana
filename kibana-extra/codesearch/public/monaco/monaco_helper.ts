@@ -132,7 +132,7 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          inlineClassName: 'highlightInline',
+          className: 'highlightLine',
           linesDecorationsClassName: 'markLineNumber',
         },
       },
@@ -149,7 +149,7 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          inlineClassName: 'highlightInline',
+          className: 'highlightLine',
           linesDecorationsClassName: 'markLineNumber',
         },
       },

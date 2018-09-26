@@ -5,3 +5,7 @@
 textarea.inputarea {
   display: none !important;
 }
+
+.monaco-editor.mac .margin-view-overlays .line-numbers {
+  cursor: pointer;
+}
