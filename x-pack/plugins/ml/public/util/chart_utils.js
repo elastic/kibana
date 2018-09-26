@@ -228,6 +228,16 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
   return tickValues;
 }
 
+export function getXTransform(t) {
+  const regexResult = /translate\(\s*([^\s,)]+)([ ,]([^\s,)]+))?\)/.exec(t);
+  if (Array.isArray(regexResult) && regexResult.length >= 2) {
+    // return as number
+    return +regexResult[1];
+  } else {
+    return NaN;
+  }
+}
+
 // This removes overlapping x-axis labels by starting off from a specific label
 // that is required/wanted to show up. The code then traverses to both sides along the axis
 // and decides which labels to keep or remove. All vertical tick lines will be kept visible,
@@ -270,7 +280,7 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
       // So this uses a regex variant because we definitely want test coverage for the label removal.
       // Once JSDOM supports SVGAnimatedTransformList we can use the simpler version.
       // const xTransform = d3.transform(tick.attr('transform')).translate[0];
-      const xTransform = +(/translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)\)/.exec(tick.attr('transform'))[1]);
+      const xTransform = getXTransform(tick.attr('transform'));
       const xMinOffset = xTransform - (tickWidth / 2 + padding);
       const xMaxOffset = xTransform + (tickWidth / 2 + padding);
 
