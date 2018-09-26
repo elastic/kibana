@@ -26,7 +26,7 @@ export class JoinEditor extends React.Component {
 
   _renderJoins() {
     const joins = this.state.joins.map((join, index) => {
-      return (<EuiFlexItem key={index}><Join join={join} /></EuiFlexItem>);
+      return (<EuiFlexItem key={index}><Join join={join} layer={this.props.layer}/></EuiFlexItem>);
     });
 
     return (

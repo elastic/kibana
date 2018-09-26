@@ -44,6 +44,11 @@ export class VectorLayer extends ALayer {
     return !!this._descriptor.dataDirty;
   }
 
+  async getStringFields() {
+    const stringFields = await this._source.getStringFields();
+    return stringFields;
+  }
+
   async getOrdinalFields() {
     //best effort to avoid PEBCAK
     const numberFields = await this._source.getNumberFieldNames();

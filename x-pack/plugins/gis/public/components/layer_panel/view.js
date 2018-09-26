@@ -48,6 +48,7 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody style={{ paddingTop: 0 }}>
+        <EuiHorizontalRule margin="none"/>
         <EuiSpacer size="l"/>
         <JoinEditor layer={selectedLayer}/>
         <EuiSpacer size="l"/>

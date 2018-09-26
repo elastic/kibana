@@ -308,30 +308,21 @@ export async function loadMapResources(dispatch) {
         minZoom: 0,
         maxZoom: 24,
       },
-      // {
-      //   "id": "1pnwt",
-      //   "label": null,
-      //   "sourceDescriptor": {
-      //     "type": "ES_SEARCH",
-      //     "indexPatternId": "6e853b20-bbb5-11e8-88aa-9d8656848e00",
-      //     "geoField": "geometry",
-      //     "limit": 256
-      //   },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {
-      //     "type": "VECTOR",
-      //     "properties": {
-      //       fillAndOutline: {
-      //         type: 'STATIC',
-      //         options: {
-      //           color: "#e6194b"
-      //         }
-      //       }
-      //     }
-      //   },
-      //   "type": "VECTOR"
-      // }
+      {
+        "id": "giflh",
+        "label": null,
+        "showAtAllZoomLevels": true,
+        "minZoom": 0,
+        "maxZoom": 24,
+        "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
+        "visible": true,
+        "temporary": false,
+        "style": {
+          "type": "VECTOR",
+          "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
+        },
+        "type": "VECTOR"
+      }
     ]
   ));
 

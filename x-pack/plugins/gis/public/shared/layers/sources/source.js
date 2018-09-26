@@ -102,6 +102,11 @@ export class VectorSource extends ASource {
     return [];
   }
 
+  async getStringFields() {
+    console.warn('Should implement VectorSource@getStringFields');
+    return [];
+  }
+
   async getGeoJson() {
     throw new Error('Should implement VectorSource#getGeoJson');
   }
