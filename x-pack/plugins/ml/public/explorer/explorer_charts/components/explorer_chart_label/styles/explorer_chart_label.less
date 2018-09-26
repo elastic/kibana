@@ -1,10 +1,8 @@
 .ml-explorer-chart-label {
-  display: block;
-  font-size: 13px;
   font-weight: normal;
 }
 
-.ml-explorer-chart-label-fields {
+.ml-explorer-chart-label-detector {
   vertical-align: middle;
   /* account 80px for the "View" link */
   max-width: calc(~"100% - 80px");
@@ -12,4 +10,12 @@
   overflow: hidden;
   white-space: nowrap;
   display: inline-block;
+}
+
+/* only used when the field badges get wrapped to a new line */
+.ml-explorer-chart-label-fields {
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }

@@ -14,7 +14,20 @@ import { ExplorerChartLabel } from './explorer_chart_label';
 
 describe('ExplorerChartLabelBadge', () => {
 
-  test('Render the chart label.', () => {
+  test('Render the chart label in one line.', () => {
+
+    const wrapper = shallow(
+      <ExplorerChartLabel
+        detectorLabel={seriesConfig.detectorLabel}
+        entityFields={seriesConfig.entityFields}
+        wrapLabel={false}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+
+  });
+
+  test('Render the chart label in two lines.', () => {
 
     const wrapper = shallow(
       <ExplorerChartLabel

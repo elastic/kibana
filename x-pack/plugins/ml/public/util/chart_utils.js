@@ -228,7 +228,7 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
   return tickValues;
 }
 
-const LABEL_WRAP_THRESHOLD = 100;
+const LABEL_WRAP_THRESHOLD = 60;
 
 // Checks if the string length of a chart label (detector description
 // and entity fields) is above LABEL_WRAP_THRESHOLD.

@@ -1,28 +1,89 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExplorerChartLabelBadge Render the chart label. 1`] = `
-<span
-  className="explorer-chart-label-fields"
->
-  <span>
-    high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-     
-    <br />
-     
-  </span>
+exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
+<React.Fragment>
   <span
-    key="0"
+    className="ml-explorer-chart-label-detector"
   >
-    <ExplorerChartLabelBadge
-      entity={
-        Object {
-          "$$hashKey": "object:813",
-          "fieldName": "nginx.access.remote_ip",
-          "fieldValue": "72.57.0.53",
+    <span>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+    </span>
+    <React.Fragment>
+       
+       - 
+       
+    </React.Fragment>
+    <span
+      key="0"
+    >
+      <ExplorerChartLabelBadge
+        entity={
+          Object {
+            "$$hashKey": "object:813",
+            "fieldName": "nginx.access.remote_ip",
+            "fieldValue": "72.57.0.53",
+          }
         }
-      }
-    />
-     
+      />
+       
+    </span>
+    <span
+      className="ml-explorer-chart-icon"
+    >
+      <EuiIconTip
+        aria-label="Info"
+        content={<ExplorerChartTooltip />}
+        position="top"
+        size="s"
+        type="questionInCircle"
+      />
+    </span>
   </span>
-</span>
+</React.Fragment>
+`;
+
+exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
+<React.Fragment>
+  <span
+    className="ml-explorer-chart-label-detector"
+  >
+    <span>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+    </span>
+    <React.Fragment>
+      <span
+        className="ml-explorer-chart-icon"
+      >
+        <EuiIconTip
+          aria-label="Info"
+          content={<ExplorerChartTooltip />}
+          position="top"
+          size="s"
+          type="questionInCircle"
+        />
+      </span>
+       
+      <br />
+       
+    </React.Fragment>
+  </span>
+  <div
+    className="ml-explorer-chart-label-fields"
+  >
+    <span
+      key="0"
+    >
+      <ExplorerChartLabelBadge
+        entity={
+          Object {
+            "$$hashKey": "object:813",
+            "fieldName": "nginx.access.remote_ip",
+            "fieldValue": "72.57.0.53",
+          }
+        }
+      />
+       
+    </span>
+  </div>
+</React.Fragment>
 `;

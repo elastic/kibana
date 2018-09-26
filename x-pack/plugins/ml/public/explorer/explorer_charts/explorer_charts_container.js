@@ -18,7 +18,6 @@ import {
   isLabelLengthAboveThreshold
 } from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
-import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 const textTooManyBuckets = 'This selection contains too many buckets to be displayed.' +
@@ -79,15 +78,9 @@ export function ExplorerChartsContainer({
                 <ExplorerChartLabel
                   detectorLabel={detectorLabel}
                   entityFields={entityFields}
+                  infoTooltip={series.infoTooltip}
                   wrapLabel={wrapLabel}
                 />
-                <span className="ml-explorer-chart-icon">
-                  <EuiIconTip
-                    content={<ExplorerChartTooltip {...series.infoTooltip} />}
-                    position="top"
-                    size="s"
-                  />
-                </span>
               </div>
               <ExplorerChart
                 tooManyBuckets={tooManyBuckets}
