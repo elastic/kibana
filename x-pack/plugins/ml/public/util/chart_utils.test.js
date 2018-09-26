@@ -47,6 +47,7 @@ import { timefilter } from 'ui/timefilter';
 import {
   getExploreSeriesLink,
   getTickValues,
+  isLabelLengthAboveThreshold,
   removeLabelOverlap
 } from './chart_utils';
 
@@ -131,6 +132,23 @@ describe('getTickValues', () => {
       1519257600000
     ]);
   });
+});
+
+describe('isLabelLengthAboveThreshold', () => {
+
+  test('short label', () => {
+    const isLongLabel = isLabelLengthAboveThreshold({
+      detectorLabel: 'count',
+      entityFields: seriesConfig.entityFields
+    });
+    expect(isLongLabel).toBeFalsy();
+  });
+
+  test('long label', () => {
+    const isLongLabel = isLabelLengthAboveThreshold(seriesConfig);
+    expect(isLongLabel).toBeTruthy();
+  });
+
 });
 
 describe('removeLabelOverlap', () => {

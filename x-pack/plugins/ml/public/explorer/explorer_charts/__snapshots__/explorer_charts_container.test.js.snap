@@ -4,7 +4,7 @@ exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
 <div
   className="explorer-chart-label"
 >
-  <ChartLabel
+  <ExplorerChartLabel
     detectorLabel="high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)"
     entityFields={
       Array [
@@ -15,6 +15,7 @@ exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
         },
       ]
     }
+    wrapLabel={true}
   />
   <EuiIconTip
     aria-label="Info"

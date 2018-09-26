@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartLabelBadge Render the chart label. 1`] = `
+<div
+  className="explorer-chart-label-fields"
+>
+  <span>
+    high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+     
+    <br />
+     
+  </span>
+  <span
+    key="0"
+  >
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        }
+      }
+    />
+     
+  </span>
+</div>
+`;

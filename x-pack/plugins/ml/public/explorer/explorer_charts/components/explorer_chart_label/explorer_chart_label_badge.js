@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './styles/explorer_chart_label_badge.less';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import {
 
 export function ExplorerChartLabelBadge({ entity }) {
   return (
-    <EuiBadge color="hollow" className="ml-chart-label-badge">
+    <EuiBadge color="hollow" className="ml-explorer-chart-label-badge">
       {entity.fieldName} <strong>{entity.fieldValue}</strong>
     </EuiBadge>
   );
