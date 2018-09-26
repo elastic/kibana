@@ -17,9 +17,9 @@ import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
 
 const LABEL_SPLIT_THRESHOLD = 100;
-
-function getLabelCharLength(detectorLabel, entityFields) {
-  return detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length;
+function isLabelLengthAboveThreshold({ detectorLabel, entityFields }) {
+  const labelLength = (detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length);
+  return (labelLength > LABEL_SPLIT_THRESHOLD);
 }
 
 function ChartLabelBadge({ entity }) {
@@ -30,11 +30,8 @@ function ChartLabelBadge({ entity }) {
   );
 }
 
-function ChartLabel({ detectorLabel, entityFields }) {
-  let labelSeparator = ' - ';
-  if (getLabelCharLength(detectorLabel, entityFields) > LABEL_SPLIT_THRESHOLD) {
-    labelSeparator = <br />;
-  }
+function ChartLabel({ detectorLabel, entityFields, wrapLabel }) {
+  const labelSeparator = (wrapLabel === true) ? <br /> : ' - ';
 
   return (
     <div className="explorer-chart-label-fields">
@@ -59,6 +56,8 @@ export function ExplorerChartsContainer({
   tooManyBuckets,
   mlSelectSeverityService
 }) {
+  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+
   return (
     <div className="explorer-charts">
       {(seriesToPlot.length > 0) &&
@@ -76,7 +75,11 @@ export function ExplorerChartsContainer({
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
               <div className="explorer-chart-label">
-                <ChartLabel detectorLabel={detectorLabel} entityFields={entityFields} />
+                <ChartLabel
+                  detectorLabel={detectorLabel}
+                  entityFields={entityFields}
+                  wrapLabel={wrapLabel}
+                />
                 <EuiIconTip content={<ExplorerChartTooltip {...series.infoTooltip} />} position="left" size="s" />
                 {tooManyBuckets && (
                   <EuiIconTip
