@@ -251,7 +251,7 @@ export class PipelineEditor extends React.Component {
                   name="pipelineId"
                   onBlur={this.onPipelineIdChange}
                   onChange={this.onPipelineIdChange}
-                  value={this.state.pipeline.id}
+                  value={this.state.pipeline.id || ''}
                 />
               </EuiFormRow>
             )}
@@ -261,7 +261,7 @@ export class PipelineEditor extends React.Component {
                 fullWidth
                 name="pipelineDescription"
                 onChange={this.onPipelineDescriptionChange}
-                value={this.state.pipeline.description}
+                value={this.state.pipeline.description || ''}
               />
             </EuiFormRow>
             <EuiFormRow fullWidth label="Pipeline">
