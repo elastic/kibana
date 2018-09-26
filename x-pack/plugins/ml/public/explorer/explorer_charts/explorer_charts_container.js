@@ -8,47 +8,16 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiBadge,
   EuiIconTip
 } from '@elastic/eui';
 
-import { getExploreSeriesLink } from '../../util/chart_utils';
+import {
+  getExploreSeriesLink,
+  isLabelLengthAboveThreshold
+} from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartTooltip } from './explorer_chart_tooltip';
-
-const LABEL_SPLIT_THRESHOLD = 100;
-function isLabelLengthAboveThreshold({ detectorLabel, entityFields }) {
-  const labelLength = (detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length);
-  return (labelLength > LABEL_SPLIT_THRESHOLD);
-}
-
-function ChartLabelBadge({ entity }) {
-  return (
-    <EuiBadge color="hollow" className="ml-chart-label-badge">
-      {entity.fieldName} <strong>{entity.fieldValue}</strong>
-    </EuiBadge>
-  );
-}
-
-function ChartLabel({ detectorLabel, entityFields, wrapLabel }) {
-  const labelSeparator = (wrapLabel === true) ? <br /> : ' - ';
-
-  return (
-    <div className="explorer-chart-label-fields">
-      {(detectorLabel.length > 0 && entityFields.length > 0) && (
-        <span>{detectorLabel} {labelSeparator} </span>
-      )}
-      {(detectorLabel.length > 0 && entityFields.length === 0) && (
-        <span>{detectorLabel}</span>
-      )}
-      {entityFields.map((entity, j) => {
-        return (
-          <span key={j}><ChartLabelBadge entity={entity} /> </span>
-        );
-      })}
-    </div>
-  );
-}
+import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 export function ExplorerChartsContainer({
   seriesToPlot,
@@ -75,7 +44,7 @@ export function ExplorerChartsContainer({
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
               <div className="explorer-chart-label">
-                <ChartLabel
+                <ExplorerChartLabel
                   detectorLabel={detectorLabel}
                   entityFields={entityFields}
                   wrapLabel={wrapLabel}

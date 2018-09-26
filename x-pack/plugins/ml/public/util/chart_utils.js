@@ -228,6 +228,15 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
   return tickValues;
 }
 
+const LABEL_WRAP_THRESHOLD = 100;
+
+// Checks if the string length of a chart label (detector description
+// and entity fields) is above LABEL_WRAP_THRESHOLD.
+export function isLabelLengthAboveThreshold({ detectorLabel, entityFields }) {
+  const labelLength = (detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length);
+  return (labelLength > LABEL_WRAP_THRESHOLD);
+}
+
 // This removes overlapping x-axis labels by starting off from a specific label
 // that is required/wanted to show up. The code then traverses to both sides along the axis
 // and decides which labels to keep or remove. All vertical tick lines will be kept visible,
