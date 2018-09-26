@@ -134,7 +134,7 @@ export class ReportListing extends Component<Props, State> {
           if (record.created_by) {
             return (
               <div>
-                <div>this.formatDate(createdAt)</div>
+                <div>{this.formatDate(createdAt)}</div>
                 <span>{record.created_by}</span>
               </div>
             );
