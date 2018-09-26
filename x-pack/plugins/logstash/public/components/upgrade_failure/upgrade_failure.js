@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiPage, EuiPageContent } from '@elastic/eui';
 import { UpgradeFailureTitle } from './upgrade_failure_title';
 import { UpgradeFailureActions } from './upgrade_failure_actions';
-import { UPGRADE_FAILURE } from '../../../common/constants';
+import { UPGRADE_FAILURE } from './constants';
 
 export function UpgradeFailure({ isNewPipeline, isManualUpgrade, onClose, onRetry }) {
   const titleText = isManualUpgrade

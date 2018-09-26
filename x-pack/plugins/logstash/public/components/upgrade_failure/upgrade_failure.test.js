@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { UpgradeFailure } from './upgrade_failure';
-import { UPGRADE_FAILURE } from '../../../common/constants';
+import { UPGRADE_FAILURE } from './constants';
 
 describe('UpgradeFailure component', () => {
   let props;
