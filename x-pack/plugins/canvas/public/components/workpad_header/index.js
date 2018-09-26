@@ -6,7 +6,7 @@
 
 import { compose, withState } from 'recompose';
 import { connect } from 'react-redux';
-import { getEditing, getReadOnly } from '../../state/selectors/app';
+import { getEditing, getReadOnlyUser } from '../../state/selectors/app';
 import { getWorkpadName, getSelectedPage } from '../../state/selectors/workpad';
 import { setEditing } from '../../state/actions/transient';
 import { getAssets } from '../../state/selectors/assets';
@@ -15,7 +15,7 @@ import { WorkpadHeader as Component } from './workpad_header';
 
 const mapStateToProps = state => ({
   isEditing: getEditing(state),
-  readOnly: getReadOnly(state),
+  readOnlyUser: getReadOnlyUser(state),
   workpadName: getWorkpadName(state),
   selectedPage: getSelectedPage(state),
   hasAssets: Object.keys(getAssets(state)).length ? true : false,

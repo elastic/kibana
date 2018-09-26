@@ -13,7 +13,7 @@ import * as transientActions from '../actions/transient';
 import * as resolvedArgsActions from '../actions/resolved_args';
 import { update } from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
-import { getReadOnly } from '../selectors/app';
+import { getReadOnlyUser } from '../selectors/app';
 
 const workpadChanged = (before, after) => {
   const workpad = getWorkpad(before);
@@ -45,7 +45,7 @@ export const esPersistMiddleware = ({ getState }) => {
     const newState = getState();
 
     // skips the update request if in read only mode
-    if (getReadOnly(newState)) return;
+    if (getReadOnlyUser(newState)) return;
 
     // if the workpad changed, save it to elasticsearch
     if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {

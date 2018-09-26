@@ -11,8 +11,8 @@ export function getEditing(state) {
   return get(state, 'transient.editing', false);
 }
 
-export function getReadOnly(state) {
-  return get(state, 'transient.readOnly', false);
+export function getReadOnlyUser(state) {
+  return get(state, 'transient.readOnlyUser', false);
 }
 
 export function getFullscreen(state) {

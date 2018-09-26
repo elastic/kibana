@@ -11,7 +11,7 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { gotoPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { setReadOnly, setEditing } from '../../state/actions/transient';
+import { setReadOnlyUser, setEditing } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -53,7 +53,7 @@ export const routes = [
               // tests if user has permissions to write to workpads
               workpadService.update(params.id, fetchedWorkpad).catch(err => {
                 if (err.response.status === 403) {
-                  dispatch(setReadOnly(true));
+                  dispatch(setReadOnlyUser(true));
                   dispatch(setEditing(false));
                 }
               });

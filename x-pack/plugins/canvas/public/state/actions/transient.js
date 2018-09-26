@@ -7,6 +7,6 @@
 import { createAction } from 'redux-actions';
 
 export const setEditing = createAction('setEditing');
-export const setReadOnly = createAction('setReadOnly');
+export const setReadOnlyUser = createAction('setReadOnlyUser');
 export const setFullscreen = createAction('setFullscreen');
 export const selectElement = createAction('selectElement');

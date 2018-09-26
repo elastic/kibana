@@ -26,7 +26,7 @@ import { RefreshControl } from '../refresh_control';
 export const WorkpadHeader = ({
   isEditing,
   toggleEditing,
-  readOnly,
+  readOnlyUser,
   hasAssets,
   addElement,
   setShowElementModal,
@@ -83,7 +83,7 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <WorkpadExport />
             </EuiFlexItem>
-            {!readOnly && (
+            {!readOnlyUser && (
               <EuiFlexItem grow={false}>
                 <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
                 <EuiToolTip
