@@ -47,7 +47,7 @@ export class BasicLoginForm extends Component<Props, State> {
                 onChange={this.onUsernameChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                required
+                aria-required
                 inputRef={this.setUsernameInputRef}
               />
             </EuiFormRow>
@@ -61,7 +61,7 @@ export class BasicLoginForm extends Component<Props, State> {
                 onChange={this.onPasswordChange}
                 disabled={this.state.isLoading}
                 isInvalid={false}
-                required
+                aria-required
               />
             </EuiFormRow>
 
