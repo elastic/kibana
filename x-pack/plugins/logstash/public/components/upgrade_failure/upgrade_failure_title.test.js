@@ -17,6 +17,5 @@ describe('UpgradeFailureTitle component', () => {
   it('renders component as expected', () => {
     const wrapper = shallow(<UpgradeFailureTitle {...props} />);
     expect(wrapper).toMatchSnapshot();
-    expect(wrapper.find('h2').text()).toEqual('the Title');
   });
 });

@@ -39,9 +39,4 @@ describe('UpgradeFailureActions component', () => {
     wrapper.find('EuiButtonEmpty').simulate('click');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-
-  it('renders the correct upgrade button text', () => {
-    const wrapper = mount(<UpgradeFailureActions {...props} />);
-    expect(wrapper.find('EuiButton').text()).toBe('upgrade button text');
-  });
 });

@@ -7,7 +7,6 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { UpgradeFailure } from './upgrade_failure';
-import { UPGRADE_FAILURE } from './constants';
 
 describe('UpgradeFailure component', () => {
   let props;
@@ -33,36 +32,19 @@ describe('UpgradeFailure component', () => {
 
   it('passes expected text for new pipeline', () => {
     const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('p')).toHaveLength(1);
-    expect(wrapper.find('p').text()).toEqual(UPGRADE_FAILURE.MESSAGE.IS_NEW_PIPELINE);
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('passes expected text for not new pipeline', () => {
     props.isNewPipeline = false;
     const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('p')).toHaveLength(1);
-    expect(wrapper.find('p').text()).toEqual(UPGRADE_FAILURE.MESSAGE.NOT_NEW_PIPELINE);
-  });
-
-  it('passes expected text for manual upgrade', () => {
-    const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText).toEqual(
-      UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.IS_MANUAL_UPGRADE
-    );
-    expect(wrapper.find('UpgradeFailureTitle').props().titleText).toEqual(
-      UPGRADE_FAILURE.TITLE.IS_MANUAL_UPGRADE
-    );
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('passes expected text for not manual upgrade', () => {
     props.isManualUpgrade = false;
     const wrapper = mount(<UpgradeFailure {...props} />);
-    expect(wrapper.find('UpgradeFailureActions').props().upgradeButtonText).toEqual(
-      UPGRADE_FAILURE.UPGRADE_BUTTON_TEXT.NOT_MANUAL_UPGRADE
-    );
-    expect(wrapper.find('UpgradeFailureTitle').props().titleText).toEqual(
-      UPGRADE_FAILURE.TITLE.NOT_MANUAL_UPGRADE
-    );
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('propogates onClose and onRetry functions to child', () => {
