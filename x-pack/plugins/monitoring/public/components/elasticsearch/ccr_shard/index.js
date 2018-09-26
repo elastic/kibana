@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import React, { Fragment, PureComponent } from 'react';
 import {
   EuiPage,
@@ -82,16 +83,22 @@ export class CcrShard extends PureComponent {
   }
 
   renderLatestStat() {
-    const { stat } = this.props;
+    const { stat, timestamp } = this.props;
 
     return (
       <EuiAccordion
         buttonContent={<EuiTitle><h2>Advanced</h2></EuiTitle>}
         paddingSize="l"
       >
-        <EuiCodeBlock language="json">
-          {JSON.stringify(stat, null, 2)}
-        </EuiCodeBlock>
+        <Fragment>
+          <EuiTitle size="s">
+            <h4>{moment(timestamp).calendar()}</h4>
+          </EuiTitle>
+          <EuiHorizontalRule/>
+          <EuiCodeBlock language="json">
+            {JSON.stringify(stat, null, 2)}
+          </EuiCodeBlock>
+        </Fragment>
       </EuiAccordion>
     );
   }
