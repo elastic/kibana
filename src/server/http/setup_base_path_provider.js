@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import { UiNavLink } from './ui_nav_link';
+export function setupBasePathProvider(server, config) {
 
-export function uiNavLinksMixin(kbnServer, server) {
-  const uiApps = server.getAllUiApps();
+  server.decorate('request', 'setBasePath', function (basePath) {
+    const request = this;
+    if (request.app._basePath) {
+      throw new Error(`Request basePath was previously set. Setting multiple times is not supported.`);
+    }
+    request.app._basePath = basePath;
+  });
 
-  const { navLinkSpecs = [] } = kbnServer.uiExports;
+  server.decorate('request', 'getBasePath', function () {
+    const request = this;
 
-  const fromSpecs = navLinkSpecs
-    .map(navLinkSpec => new UiNavLink(navLinkSpec));
+    const serverBasePath = config.get('server.basePath');
+    const requestBasePath = request.app._basePath || '';
 
-  const fromApps = uiApps
-    .map(app => app.getNavLink())
-    .filter(Boolean);
-
-  const uiNavLinks = fromSpecs
-    .concat(fromApps)
-    .sort((a, b) => a.getOrder() - b.getOrder());
-
-  server.decorate('server', 'getUiNavLinks', () => (
-    uiNavLinks.slice(0)
-  ));
+    return `${serverBasePath}${requestBasePath}`;
+  });
 }

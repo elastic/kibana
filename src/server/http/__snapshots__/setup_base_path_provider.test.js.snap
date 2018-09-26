@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setupBasePathProvider getBasePath/setBasePath should not allow request.setBasePath to be called more than once 1`] = `"Request basePath was previously set. Setting multiple times is not supported."`;
