@@ -148,10 +148,6 @@ export interface InfraWaffleMapStepLegend {
 export interface InfraWaffleMapGradientLegend {
   type: InfraWaffleMapLegendMode.gradient;
   rules: InfraWaffleMapGradientRule[];
-  boundsOverride?: {
-    min: number;
-    max: number;
-  };
 }
 
 export type InfraWaffleMapLegend = InfraWaffleMapStepLegend | InfraWaffleMapGradientLegend;

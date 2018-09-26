@@ -11,6 +11,7 @@ import { Waffle } from '../../components/waffle';
 
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
+import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../containers/with_options';
 
@@ -22,17 +23,26 @@ export const HomePageContent: React.SFC = () => (
           {({ filterQueryAsJson }) => (
             <WithWaffleTime>
               {({ currentTimeRange }) => (
-                <WithWaffleNodes
-                  filterQuery={filterQueryAsJson}
-                  metrics={wafflemap.metrics}
-                  path={wafflemap.path}
-                  sourceId={sourceId}
-                  timerange={currentTimeRange}
-                >
-                  {({ nodes, loading, refetch }) => (
-                    <Waffle map={nodes} loading={loading} options={wafflemap} reload={refetch} />
+                <WithWaffleOptions>
+                  {({ metrics }) => (
+                    <WithWaffleNodes
+                      filterQuery={filterQueryAsJson}
+                      metrics={metrics}
+                      path={wafflemap.path}
+                      sourceId={sourceId}
+                      timerange={currentTimeRange}
+                    >
+                      {({ nodes, loading, refetch }) => (
+                        <Waffle
+                          map={nodes}
+                          loading={loading}
+                          options={{ ...wafflemap, metrics }}
+                          reload={refetch}
+                        />
+                      )}
+                    </WithWaffleNodes>
                   )}
-                </WithWaffleNodes>
+                </WithWaffleOptions>
               )}
             </WithWaffleTime>
           )}

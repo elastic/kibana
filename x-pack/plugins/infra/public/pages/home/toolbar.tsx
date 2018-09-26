@@ -11,9 +11,12 @@ import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui/toolbar';
 import { WaffleTimeControls } from '../../components/waffle/waffle_time_controls';
 
+import { WaffleMetricControls } from '../../components/waffle/waffle_metric_controls';
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
+import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { WithOptions } from '../../containers/with_options';
 
 export const HomeToolbar: React.SFC = () => (
   <Toolbar>
@@ -42,6 +45,17 @@ export const HomeToolbar: React.SFC = () => (
             </WithWaffleFilter>
           )}
         </WithKueryAutocompletion>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <WithOptions>
+          {({ wafflemap: { path } }) => (
+            <WithWaffleOptions>
+              {({ changeMetrics, metrics }) => (
+                <WaffleMetricControls metrics={metrics} path={path} onChange={changeMetrics} />
+              )}
+            </WithWaffleOptions>
+          )}
+        </WithOptions>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <WithWaffleTime resetOnUnmount>

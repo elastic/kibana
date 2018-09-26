@@ -7,9 +7,9 @@ import { InfraNodeType } from '../adapter_types';
 import { rate } from './rate';
 
 const FIELDS = {
-  [InfraNodeType.host]: 'system.memory.actual.used.pct',
-  [InfraNodeType.pod]: 'kubernetes.pod.memory.usage.node.pct',
-  [InfraNodeType.container]: 'docker.memory.usage.pct',
+  [InfraNodeType.host]: 'system.network.in.bytes',
+  [InfraNodeType.pod]: 'kubernetes.pod.network.rx.bytes',
+  [InfraNodeType.container]: 'docker.network.in.bytes',
 };
 
 export const rx = rate('rx', FIELDS);

@@ -30,7 +30,7 @@ export const rate = (id: string, fields: Fields): InfraNodeMetricFn => (
         bucket_script: {
           buckets_path: { value: `${id}_deriv` },
           script: {
-            source: 'params.value > 0 ? params.value : 0',
+            source: 'params.value > 0.0 ? params.value : 0.0',
             lang: 'painless',
           },
           gap_policy: 'skip',

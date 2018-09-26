@@ -30,19 +30,6 @@ interface Props {
   bounds: InfraWaffleMapBounds;
 }
 
-interface LABELS {
-  [key: string]: string;
-}
-
-const LABELS = {
-  count: 'Count',
-  cpu: 'CPU',
-  memory: 'Memory',
-  load: 'Load',
-  tx: 'TX Rate',
-  rx: 'RX Rate',
-};
-
 function convertInfraPathTypeToNodeType(type: InfraPathType) {
   switch (type) {
     case InfraPathType.hosts:
@@ -59,15 +46,14 @@ function convertInfraPathTypeToNodeType(type: InfraPathType) {
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { node, formatter, options, squareSize, bounds } = this.props;
+    const { node, options, squareSize, bounds, formatter } = this.props;
     const { isPopoverOpen } = this.state;
     const metric = last(node.metrics);
     const nodeType = convertInfraPathTypeToNodeType(last(options.path).type);
     const valueMode = squareSize > 110;
-    const label = LABELS[metric.name];
-    const color = colorFromValue(options.legend, metric.value, bounds);
-    const value = metric != null ? formatter(metric.value) : 'n/a';
-
+    const rawValue = (metric && metric.value) || 0;
+    const color = colorFromValue(options.legend, rawValue, bounds);
+    const value = formatter(rawValue);
     return (
       <NodeContextMenu
         node={node}
@@ -85,7 +71,7 @@ export class Node extends React.PureComponent<Props, State> {
               <SquareInner color={color}>
                 {valueMode && (
                   <ValueInner>
-                    <Label color={color}>{label}</Label>
+                    <Label color={color}>{node.name}</Label>
                     <Value color={color}>{value}</Value>
                   </ValueInner>
                 )}

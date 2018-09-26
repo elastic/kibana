@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { last, max, min } from 'lodash';
+import { get, last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { InfraMetricType } from '../../../common/graphql/types';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
 import {
+  InfraFormatterType,
   InfraWaffleData,
   InfraWaffleMapBounds,
   InfraWaffleMapGroup,
@@ -32,13 +34,44 @@ interface Props {
   reload: () => void;
 }
 
+interface MetricFormatter {
+  formatter: InfraFormatterType;
+  template: string;
+  bounds?: { min: number; max: number };
+}
+
+interface MetricFormatters {
+  [key: string]: MetricFormatter;
+}
+
+const METRIC_FORMATTERS: MetricFormatters = {
+  [InfraMetricType.count]: { formatter: InfraFormatterType.number, template: '{{value}}' },
+  [InfraMetricType.cpu]: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+    bounds: { min: 0, max: 1 },
+  },
+  [InfraMetricType.memory]: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+    bounds: { min: 0, max: 1 },
+  },
+  [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+};
+
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
   return groups.reduce((acc: number[], group: InfraWaffleMapGroup) => {
     if (isWaffleMapGroupWithGroups(group)) {
       return acc.concat(extractValuesFromMap(group.groups, values));
     }
     if (isWaffleMapGroupWithNodes(group)) {
-      return acc.concat(group.nodes.map(node => last(node.metrics).value));
+      return acc.concat(
+        group.nodes.map(node => {
+          const lastMetric = last(node.metrics);
+          return (lastMetric && lastMetric.value) || 0;
+        })
+      );
     }
     return acc;
   }, values);
@@ -75,7 +108,13 @@ export class Waffle extends React.Component<Props, {}> {
         />
       );
     }
-    const bounds = calculateBoundsFromMap(map);
+    const metric = last(this.props.options.metrics);
+    const metricFormatter = get(
+      METRIC_FORMATTERS,
+      metric.type,
+      METRIC_FORMATTERS[InfraMetricType.count]
+    );
+    const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromMap(map);
     return (
       <AutoSizer content>
         {({ measureRef, content: { width = 0, height = 0 } }) => {
@@ -99,11 +138,16 @@ export class Waffle extends React.Component<Props, {}> {
 
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
   private formatter = (val: string | number) => {
+    const metric = last(this.props.options.metrics);
+    const metricFormatter = get(
+      METRIC_FORMATTERS,
+      metric.type,
+      METRIC_FORMATTERS[InfraMetricType.count]
+    );
     if (val == null) {
       return '';
     }
-    const { options } = this.props;
-    const formatter = createFormatter(options.formatter, options.formatTemplate);
+    const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
     return formatter(val);
   };
 
