@@ -17,22 +17,31 @@
  * under the License.
  */
 
-/**
- * Provides an array of paths for ES source filtering
- *
- * @param {string} type
- * @param {string|array} fields
- * @returns {array}
- */
-export function includedFields(type, fields) {
-  if (!fields || fields.length === 0) return;
+interface SavedObjectsSchemaTypeDefinition {
+  isNamespaceAgnostic: boolean;
+}
 
-  // convert to an array
-  const sourceFields = typeof fields === 'string' ? [fields] : fields;
-  const sourceType = type || '*';
+export interface SavedObjectsSchemaDefinition {
+  [key: string]: SavedObjectsSchemaTypeDefinition;
+}
 
-  return sourceFields.map(f => `${sourceType}.${f}`)
-    .concat('namespace')
-    .concat('type')
-    .concat(fields); // v5 compatibility
+export class SavedObjectsSchema {
+  private readonly definition?: SavedObjectsSchemaDefinition;
+  constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
+    this.definition = schemaDefinition;
+  }
+
+  public isNamespaceAgnostic(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and no types are namespace agnostic
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return Boolean(typeSchema.isNamespaceAgnostic);
+  }
 }
