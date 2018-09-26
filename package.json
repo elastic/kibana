@@ -200,6 +200,9 @@
     "x-pack": "link:x-pack",
     "yauzl": "2.7.0"
   },
+  "resolutions": {
+    "@types/react": "16.3.14"
+  },
   "devDependencies": {
     "@babel/parser": "7.0.0-beta.52",
     "@babel/types": "7.0.0-beta.31",

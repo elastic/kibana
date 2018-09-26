@@ -20,6 +20,9 @@
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
     }
   },
+  "resolutions": {
+    "@types/react": "16.3.14"
+  },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
     "@kbn/es": "link:../packages/kbn-es",
