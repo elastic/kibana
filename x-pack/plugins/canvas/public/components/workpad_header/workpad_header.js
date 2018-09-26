@@ -94,7 +94,7 @@ export const WorkpadHeader = ({
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={readOnly ? 'eye' : 'eyeClosed'}
+                  iconType={!readOnly ? 'eye' : 'eyeClosed'}
                   onClick={() => {
                     toggleReadOnly();
                   }}
@@ -106,7 +106,7 @@ export const WorkpadHeader = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {readOnly ? (
+        {!readOnly ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {hasAssets && (
