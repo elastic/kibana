@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { StyleTabs } from './style_tabs';
+import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 
 import {
@@ -45,6 +46,12 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
 
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
+
+      <EuiFlyoutBody style={{ paddingTop: 0 }}>
+        <EuiSpacer size="l"/>
+        <JoinEditor layer={selectedLayer}/>
+        <EuiSpacer size="l"/>
+      </EuiFlyoutBody>
 
       <EuiFlyoutBody style={{ paddingTop: 0 }}>
         <EuiSpacer size="l"/>
