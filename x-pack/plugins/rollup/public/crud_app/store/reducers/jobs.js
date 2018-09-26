@@ -8,6 +8,7 @@ import {
   LOAD_JOBS_START,
   LOAD_JOBS_SUCCESS,
   LOAD_JOBS_FAILURE,
+  REFRESH_JOBS_SUCCESS,
   CREATE_JOB_SUCCESS,
 } from '../action_types';
 
@@ -16,6 +17,18 @@ const initialState = {
   byId: {},
   allIds: [],
 };
+
+function mapJobsToIds(jobs) {
+  const jobsById = {};
+  jobs.forEach(job => {
+    jobsById[job.id] = job;
+  });
+  return jobsById;
+}
+
+function getJobsIds(jobs) {
+  return jobs.map(job => job.id);
+}
 
 export function jobs(state = initialState, action) {
   const { type, payload } = action;
@@ -28,17 +41,16 @@ export function jobs(state = initialState, action) {
       };
 
     case LOAD_JOBS_SUCCESS:
-      const { jobs } = payload;
-
-      const newById = {};
-      jobs.forEach(job => {
-        newById[job.id] = job;
-      });
-
       return {
-        byId: newById,
-        allIds: jobs.map(job => job.id),
+        byId: mapJobsToIds(payload.jobs),
+        allIds: getJobsIds(payload.jobs),
         isLoading: false,
+      };
+
+    case REFRESH_JOBS_SUCCESS:
+      return {
+        byId: mapJobsToIds(payload.jobs),
+        allIds: getJobsIds(payload.jobs),
       };
 
     case LOAD_JOBS_FAILURE:

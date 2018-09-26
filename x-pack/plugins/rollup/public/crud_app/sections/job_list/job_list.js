@@ -40,6 +40,7 @@ const REFRESH_RATE_MS = 30000;
 export class JobListUi extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
+    refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
     jobs: PropTypes.array,
     isLoading: PropTypes.bool,
@@ -74,7 +75,7 @@ export class JobListUi extends Component {
   }
 
   componentDidMount() {
-    this.interval = setInterval(this.props.loadJobs, REFRESH_RATE_MS);
+    this.interval = setInterval(this.props.refreshJobs, REFRESH_RATE_MS);
   }
 
   componentWillUnmount() {
