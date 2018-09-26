@@ -174,12 +174,10 @@ export class JobListUi extends Component {
 
           <EuiPageContentHeaderSection>
             <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.createButton.label"
-                  defaultMessage="Create rollup job"
-                />
-              </h1>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.createButton.label"
+                defaultMessage="Create rollup job"
+              />
             </EuiButton>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
