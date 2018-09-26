@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiBasicTable,
   EuiButton,
+  EuiFieldSearch,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-
-import {
-  SearchSelect,
-} from 'ui/search_select';
 
 export class FieldChooser extends Component {
   static propTypes = {
@@ -21,15 +24,29 @@ export class FieldChooser extends Component {
     columns: PropTypes.array.isRequired,
     fields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
+    columns: PropTypes.array.isRequired,
+    prompt: PropTypes.string,
   }
 
+  static defaultProps = {
+    prompt: 'Search',
+  }
+
+  const
   constructor(props) {
     super(props);
 
     this.state = {
       isOpen: false,
+      searchValue: '',
     };
   }
+
+  onSearch = (e) => {
+    this.setState({
+      searchValue: e.target.value,
+    });
+  };
 
   onButtonClick = () => {
     this.setState(state => ({
@@ -43,41 +60,77 @@ export class FieldChooser extends Component {
     });
   };
 
-  onSelect = (field) => {
-    this.props.onSelectField(field);
-  }
-
   render() {
     const {
       buttonLabel,
       columns,
       fields,
+      prompt,
+      onSelectField,
     } = this.props;
 
-    const { isOpen } = this.state;
+    const { isOpen, searchValue } = this.state;
 
-    const button = (
-      <EuiButton
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.onButtonClick}
-      >
-        {buttonLabel}
-      </EuiButton>
-    );
+    const getRowProps = (item) => {
+      return {
+        onClick: () => {
+          onSelectField(item);
+        },
+      };
+    };
+
+    const searchedItems = searchValue ? fields.filter(item => (
+      item.name.toLowerCase().includes(searchValue.trim().toLowerCase())
+    )) : fields;
+
+    let flyout;
+
+    if (isOpen) {
+      flyout = (
+        <EuiFlyout
+          onClose={this.close}
+          aria-labelledby="fieldChooserFlyoutTitle"
+          size="m"
+          maxWidth={400}
+        >
+          <EuiFlyoutHeader>
+            <EuiTitle size="m" id="fieldChooserFlyoutTitle">
+              <h2>{buttonLabel}</h2>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            <EuiFieldSearch
+              placeholder={prompt}
+              value={searchValue}
+              onChange={this.onSearch}
+              aria-label={prompt}
+              fullWidth
+            />
+          </EuiFlyoutHeader>
+
+          <EuiFlyoutBody>
+            <EuiBasicTable
+              items={searchedItems}
+              columns={columns}
+              rowProps={getRowProps}
+              responsive={false}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      );
+    }
 
     return (
-      <SearchSelect
-        button={button}
-        columns={columns}
-        items={fields}
-        isOpen={isOpen}
-        close={this.close}
-        onSelectItem={this.onSelect}
-        searchField="name"
-        prompt="Search fields"
-        anchorPosition="downRight"
-      />
+      <Fragment>
+        <EuiButton
+          onClick={this.onButtonClick}
+        >
+          {buttonLabel}
+        </EuiButton>
+
+        {flyout}
+      </Fragment>
     );
   }
 }
