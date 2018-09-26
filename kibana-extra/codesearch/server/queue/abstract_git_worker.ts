@@ -15,6 +15,7 @@ import {
   RepositoryReserviedField,
   RepositoryTypeName,
 } from '../indexer/schema';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { AbstractWorker } from './abstract_worker';
 import { Job } from './job';
@@ -25,7 +26,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    protected readonly objectsClient: any,
+    protected readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient
   ) {
     super(queue, log);
@@ -54,7 +55,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       }),
     });
 
-    // Update the clone status.
+    // Update the git operation status.
     try {
       return await this.objectsClient.update(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri, {
         revision,

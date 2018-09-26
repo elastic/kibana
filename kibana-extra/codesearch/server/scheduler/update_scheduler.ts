@@ -8,6 +8,7 @@ import { EsClient } from '@codesearch/esqueue';
 
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { UpdateWorker } from '../queue';
 import { ServerOptions } from '../server_options';
@@ -17,7 +18,7 @@ export class UpdateScheduler extends AbstractScheduler {
   constructor(
     private readonly updateWorker: UpdateWorker,
     private readonly serverOptions: ServerOptions,
-    private readonly objectsClient: any,
+    private readonly objectsClient: SavedObjectsClient,
     client: EsClient,
     protected readonly log: Log
   ) {

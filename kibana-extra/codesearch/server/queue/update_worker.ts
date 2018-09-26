@@ -7,6 +7,7 @@
 import { EsClient, Esqueue } from '@codesearch/esqueue';
 
 import { CloneWorkerResult } from '../../model';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractGitWorker } from './abstract_git_worker';
@@ -15,7 +16,12 @@ import { Job } from './job';
 export class UpdateWorker extends AbstractGitWorker {
   public id: string = 'update';
 
-  constructor(queue: Esqueue, protected readonly log: Log, objectsClient: any, client: EsClient) {
+  constructor(
+    queue: Esqueue,
+    protected readonly log: Log,
+    objectsClient: SavedObjectsClient,
+    client: EsClient
+  ) {
     super(queue, log, objectsClient, client);
   }
 

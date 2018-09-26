@@ -9,6 +9,7 @@ import { EsClient, Esqueue } from '@codesearch/esqueue';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractGitWorker } from './abstract_git_worker';
@@ -21,7 +22,7 @@ export class CloneWorker extends AbstractGitWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    protected readonly objectsClient: any,
+    protected readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
     private readonly indexWorker: IndexWorker
   ) {

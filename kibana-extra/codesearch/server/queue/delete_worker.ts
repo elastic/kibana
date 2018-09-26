@@ -15,6 +15,7 @@ import {
 import { RepositoryUri } from '../../model';
 import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
@@ -26,7 +27,7 @@ export class DeleteWorker extends AbstractWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    private readonly objectsClient: any,
+    private readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient
   ) {
     super(queue, log);

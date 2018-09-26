@@ -5,13 +5,17 @@
  */
 
 import Boom from 'boom';
-import { Server } from '../kibana_types';
+import { SavedObjectsClient, Server } from '../kibana_types';
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 
-export function workspaceRoute(server: Server, serverOptions: ServerOptions, objectsClient: any) {
+export function workspaceRoute(
+  server: Server,
+  serverOptions: ServerOptions,
+  objectsClient: SavedObjectsClient
+) {
   server.route({
     path: '/api/cs/workspace',
     method: 'GET',

@@ -12,6 +12,7 @@ import {
 } from '../../mappings';
 import { IndexWorkerResult, WorkerProgress } from '../../model/repository';
 import { Indexer, IndexProgress } from '../indexer';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { AbstractWorker } from './abstract_worker';
 import { Job } from './job';
@@ -22,7 +23,7 @@ export class IndexWorker extends AbstractWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    protected readonly objectsClient: any,
+    protected readonly objectsClient: SavedObjectsClient,
     protected readonly indexers: Indexer[]
   ) {
     super(queue, log);
@@ -32,7 +33,7 @@ export class IndexWorker extends AbstractWorker {
     const { uri, revision } = job.payload;
 
     const progressReporter = async (progress: IndexProgress) => {
-      let statusIndex;
+      let statusIndex = '';
       if (progress.type === 'lsp') {
         statusIndex = REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE;
       } else if (progress.type === 'repository') {

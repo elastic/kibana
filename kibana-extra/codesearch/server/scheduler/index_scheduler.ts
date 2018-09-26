@@ -12,6 +12,7 @@ import {
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
 import { ServerOptions } from '../server_options';
@@ -21,7 +22,7 @@ export class IndexScheduler extends AbstractScheduler {
   constructor(
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
-    private readonly objectsClient: any,
+    private readonly objectsClient: SavedObjectsClient,
     client: EsClient,
     protected readonly log: Log
   ) {
