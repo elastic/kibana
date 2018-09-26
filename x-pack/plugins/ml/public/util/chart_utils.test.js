@@ -6,6 +6,9 @@
 
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
+// A copy of these mocks for ui/chrome and ui/timefilter are also
+// used in explorer_charts_container.test.js.
+// TODO: Refactor the involved tests to avoid this duplication
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => {

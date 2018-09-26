@@ -2,7 +2,7 @@
 
 exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
 <div
-  className="explorer-chart-label"
+  className="ml-explorer-chart-label"
 >
   <ExplorerChartLabel
     detectorLabel="high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)"
@@ -17,36 +17,30 @@ exports[`ExplorerChartsContainer Initialization with chart data 1`] = `
     }
     wrapLabel={true}
   />
-  <EuiIconTip
-    aria-label="Info"
-    content={
-      <ExplorerChartTooltip
-        aggregationInterval="1h"
-        chartFunction="sum nginx.access.body_sent.bytes"
-        entityFields={
-          Array [
-            Object {
-              "fieldName": "nginx.access.remote_ip",
-              "fieldValue": "72.57.0.53",
-            },
-          ]
-        }
-        jobId="population-03"
-      />
-    }
-    position="left"
-    size="s"
-    type="questionInCircle"
-  />
-  <a
-    className="euiLink"
-    onClick={[Function]}
+  <span
+    className="ml-explorer-chart-icon"
   >
-    View 
-    <i
-      aria-hidden="true"
-      className="fa fa-external-link"
+    <EuiIconTip
+      aria-label="Info"
+      content={
+        <ExplorerChartTooltip
+          aggregationInterval="1h"
+          chartFunction="sum nginx.access.body_sent.bytes"
+          entityFields={
+            Array [
+              Object {
+                "fieldName": "nginx.access.remote_ip",
+                "fieldValue": "72.57.0.53",
+              },
+            ]
+          }
+          jobId="population-03"
+        />
+      }
+      position="top"
+      size="s"
+      type="questionInCircle"
     />
-  </a>
+  </span>
 </div>
 `;
