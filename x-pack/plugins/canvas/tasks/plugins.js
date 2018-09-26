@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import webpack from 'webpack';
 import webpackConfig from './helpers/webpack.plugins';
 
@@ -26,7 +27,7 @@ export default function pluginsTasks(gulp, { log, colors }) {
 
   // eslint-disable-next-line no-unused-vars
   gulp.task('canvas:plugins:dev', function(done /* added to make gulp async */) {
-    log('Starting initial build of plugins. This will take awhile.');
+    log(`${colors.green.bold('canvas:plugins')} Starting initial build, this will take a while`);
     webpack({ ...webpackConfig, devtool, watch: true }, (err, stats) => {
       onComplete()(err, stats);
     });

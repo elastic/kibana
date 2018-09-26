@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { jsdom } from 'jsdom';
+import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
 import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
 
@@ -160,34 +160,42 @@ function* getFilterMessages(htmlContent) {
 }
 
 function* getDirectiveMessages(htmlContent) {
-  const document = jsdom(htmlContent, {
-    features: { ProcessExternalResources: false },
-  }).defaultView.document;
+  const $ = cheerio.load(htmlContent);
 
-  for (const element of document.querySelectorAll('[i18n-id]')) {
-    const messageId = formatHTMLString(element.getAttribute('i18n-id'));
+  const elements = $('[i18n-id]')
+    .map(function (idx, el) {
+      const $el = $(el);
+      return {
+        id: $el.attr('i18n-id'),
+        defaultMessage: $el.attr('i18n-default-message'),
+        context: $el.attr('i18n-context'),
+        values: $el.attr('i18n-values'),
+      };
+    })
+    .toArray();
+
+  for (const element of elements) {
+    const messageId = formatHTMLString(element.id);
     if (!messageId) {
       throw createFailError(`Empty "i18n-id" value in angular directive is not allowed.`);
     }
 
-    const message = formatHTMLString(element.getAttribute('i18n-default-message'));
+    const message = formatHTMLString(element.defaultMessage);
     if (!message) {
       throw createFailError(
         `Empty defaultMessage in angular directive is not allowed ("${messageId}").`
       );
     }
 
-    const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
-
-    if (element.hasAttribute('i18n-values')) {
-      const nodes = parse(`+${element.getAttribute('i18n-values')}`).program.body;
+    if (element.values) {
+      const nodes = parse(`+${element.values}`).program.body;
       const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
       checkValuesProperty(valuesKeys, message, messageId);
     }
 
-    yield [messageId, { message, context }];
+    yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];
   }
 }
 
