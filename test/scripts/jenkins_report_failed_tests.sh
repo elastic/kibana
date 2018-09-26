@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-
-###
-### "install" yarn into this shell
-###
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
-yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-yarnDir="$cacheDir/yarn/$yarnVersion"
-export PATH="$yarnDir/bin:$PATH"
-yarnGlobalDir="$(yarn global bin)"
-export PATH="$PATH:$yarnGlobalDir"
-hash -r
+source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
 
 xvfb-run "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:report;
