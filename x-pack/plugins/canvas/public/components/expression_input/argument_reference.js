@@ -7,19 +7,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'markdown-it';
-import { EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 
 const md = new Markdown();
 
 export const ArgumentReference = ({ argDef }) => (
   <div>
-    <EuiText>
+    <EuiTitle size="xs">
       <h3>{argDef.name}</h3>
-    </EuiText>
-    <EuiSpacer />
+    </EuiTitle>
+    <EuiSpacer size="s" />
 
     <EuiText dangerouslySetInnerHTML={getHelp(argDef)} />
-    <EuiSpacer />
+    <EuiSpacer size="s" />
 
     <EuiDescriptionList type="inline" compressed listItems={getArgListItems(argDef)} />
   </div>

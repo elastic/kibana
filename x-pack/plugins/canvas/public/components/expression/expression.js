@@ -6,14 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiPanel,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
 export const Expression = ({
@@ -32,7 +25,6 @@ export const Expression = ({
         value={formState.expression}
         onChange={updateValue}
       />
-      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>

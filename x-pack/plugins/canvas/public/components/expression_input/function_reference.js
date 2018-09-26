@@ -7,25 +7,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'markdown-it';
-import { EuiText, EuiSpacer, EuiBasicTable, EuiDescriptionList } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer, EuiBasicTable, EuiDescriptionList } from '@elastic/eui';
 import { startCase } from 'lodash';
 
 const md = new Markdown();
 
 export const FunctionReference = ({ fnDef }) => (
   <div>
-    <EuiText>
+    <EuiTitle size="xs">
       <h3>{fnDef.name}</h3>
-    </EuiText>
-    <EuiSpacer />
+    </EuiTitle>
+    <EuiSpacer size="s" />
 
     <EuiText dangerouslySetInnerHTML={getHelp(fnDef)} />
-    <EuiSpacer />
+    <EuiSpacer size="m" />
 
-    <EuiDescriptionList type="inline" compressed listItems={getFnListItems(fnDef)} />
-    <EuiSpacer />
+    <EuiDescriptionList
+      type="inline"
+      className="autocompleteDescList"
+      compressed
+      listItems={getFnListItems(fnDef)}
+    />
+    <EuiSpacer size="m" />
 
-    <EuiBasicTable items={getArgItems(fnDef.args)} columns={getArgColumns()} />
+    <EuiBasicTable
+      className="autocompleteTable"
+      items={getArgItems(fnDef.args)}
+      columns={getArgColumns()}
+    />
   </div>
 );
 
