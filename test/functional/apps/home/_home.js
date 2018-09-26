@@ -26,14 +26,14 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Kibana takes you home', function describeIndexTests() {
 
-    it('clicking on kibana logo should take you to home page', async ()=> {
+    it('clicking on kibana logo should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.home.clickKibanaIcon();
       const url = await remote.getCurrentUrl();
       expect(url.includes('/app/kibana#/home')).to.be(true);
     });
 
-    it('clicking on console on homepage should take you to console app', async ()=> {
+    it('clicking on console on home page should take you to console application', async () => {
       await PageObjects.home.clickSynopsis('console');
       const url = await remote.getCurrentUrl();
       expect(url.includes('/app/kibana#/dev_tools/console')).to.be(true);

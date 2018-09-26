@@ -69,7 +69,7 @@ export function GrokDebuggerProvider({ getService }) {
       expect(highlightedElements.length).to.be(expectedHighlights.length);
       await Promise.all(highlightedElements.map(async (element, index) => {
         const highlightClass = await element.getAttribute('class');
-        const highlightedContent = await element.getVisibleText();
+        const highlightedContent = await element.getText();
 
         const expectedHighlight = expectedHighlights[index];
         const expectedHighlightClass = `ace_${expectedHighlight.token}`;

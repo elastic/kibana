@@ -20,7 +20,7 @@
 import {
   KibanaSupertestProvider,
   ElasticsearchSupertestProvider,
-  ChanceProvider,
+  ChanceProvider
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -37,7 +37,7 @@ export default async function ({ readConfigFile }) {
       retry: commonConfig.get('services.retry'),
       supertest: KibanaSupertestProvider,
       esSupertest: ElasticsearchSupertestProvider,
-      chance: ChanceProvider,
+      chance: ChanceProvider
     },
     servers: commonConfig.get('servers'),
     junit: {

@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
 
       // get the timestamp of the first row
       const firstTimestamp = await (await docTable.getFields(firstRow))[0]
-        .getVisibleText();
+        .getText();
 
       // navigate to the context view
       await (await docTable.getRowExpandToggle(firstRow)).click();
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         const contextDocTable = await docTable.getTable();
         const anchorRow = await docTable.getAnchorRow(contextDocTable);
         const anchorTimestamp = await (await docTable.getFields(anchorRow))[0]
-          .getVisibleText();
+          .getText();
         expect(anchorTimestamp).to.equal(firstTimestamp);
       });
     });
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async () => {
         const headerFields = await docTable.getHeaderFields(table);
         const columnNames = await Promise.all(headerFields.map((headerField) => (
-          headerField.getVisibleText()
+          headerField.getText()
         )));
         expect(columnNames).to.eql([
           'Time',

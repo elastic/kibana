@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { By } from 'selenium-webdriver';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -265,7 +266,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isDarkThemeOn');
       await this.openOptions();
       const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
+      return await darkThemeCheckbox.getCssValue('checked');
     }
 
     async useDarkTheme(on) {
@@ -281,7 +282,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isMarginsOn');
       await this.openOptions();
       const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await marginsCheckbox.getCssValue('checked');
     }
 
     async useMargins(on = true) {
@@ -406,10 +407,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
-        await searchFilter.clearValue();
+        await searchFilter.clear();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-', ' '));
+        await searchFilter.sendKeys(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
       });
 
@@ -417,7 +418,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
+      const dashboardTitles = await remote.findElements(By.css('[data-test-subj^="dashboardListingTitleLink"]'));
       return dashboardTitles.length;
     }
 
@@ -425,7 +426,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await remote.findElements(By.linkText(dashName));
       return links.length;
     }
 
@@ -453,7 +454,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
       function getTitles(chart) {
-        return chart.getVisibleText();
+        return chart.getText();
       }
       const getTitlePromises = _.map(titleObjects, getTitles);
       return Promise.all(getTitlePromises);
@@ -553,7 +554,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const filters = await find.allByCssSelector(
         '.filter-bar > .filter > .filter-description',
         timeout);
-      return _.map(filters, async (filter) => await filter.getVisibleText());
+      return _.map(filters, async (filter) => await filter.getText());
     }
 
     async getPieSliceCount(timeout) {
@@ -581,7 +582,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
-      const element = await find.byCssSelector(`[${attributeName}]`);
+      const element = await remote.findElement(By.css(`[${attributeName}]`));
       if (element) {
         return await element.getAttribute(attributeName);
       }
@@ -597,7 +598,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSharedContainerData() {
       log.debug('getSharedContainerData');
-      const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
+      const sharedContainer = await remote.findElement(By.css('[data-shared-items-container]'));
       return {
         title: await sharedContainer.getAttribute('data-title'),
         description: await sharedContainer.getAttribute('data-description'),

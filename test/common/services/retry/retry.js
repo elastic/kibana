@@ -24,6 +24,7 @@ export function RetryProvider({ getService }) {
   const config = getService('config');
   const log = getService('log');
 
+
   return new class Retry {
     async tryForTime(timeout, block) {
       return await retryForSuccess(log, {
@@ -59,7 +60,6 @@ export function RetryProvider({ getService }) {
         block
       });
     }
-
     async waitFor(description, block) {
       await retryForTruthy(log, {
         timeout: config.get('timeouts.waitFor'),

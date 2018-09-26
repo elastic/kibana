@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 function selectorToTerms(selector) {
   return selector
     .replace(/\s*&\s*/g, '&') // remove all whitespace around joins

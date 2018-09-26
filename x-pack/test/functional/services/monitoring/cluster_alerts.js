@@ -23,10 +23,10 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
   const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} alertAction`;
   const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} viewAllAlerts`;
 
-  const SUBJ_LISTING_PAGE  = 'clusterAlertsListingPage';
-  const SUBJ_TABLE_BODY    = 'alertsTableBody';
-  const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} alertIcon`;
-  const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} alertText`;
+  const SUBJ_LISTING_PAGE = 'clusterAlertsListingPage';
+  const SUBJ_TABLE_BODY = 'alertsTableBody';
+  const SUBJ_TABLE_ICONS = `${SUBJ_TABLE_BODY} alertIcon`;
+  const SUBJ_TABLE_TEXTS = `${SUBJ_TABLE_BODY} alertText`;
   const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} alertAction`;
 
   return new class ClusterAlerts {
@@ -65,7 +65,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const alertIcons = await retry.try(async () => {
         const elements = await find.allByCssSelector(SUBJ_OVERVIEW_ICONS);
         return await mapAsync(elements, async (element) => {
-          return await element.getVisibleText();
+          return await element.getText();
         });
       });
 

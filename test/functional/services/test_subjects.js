@@ -23,19 +23,20 @@ import {
   filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
+import { By } from 'selenium-webdriver';
 
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
-  const find = getService('find');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      return await remote.exists(By.css(dataTestSubj));
     }
 
     async existOrFail(selector, timeout = 1000) {
@@ -67,7 +68,7 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.click(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
+        //await remote.moveMouseTo(element);
         await element.click();
       });
     }
@@ -82,26 +83,28 @@ export function TestSubjectsProvider({ getService }) {
     }
 
 
-    async descendantExists(selector, parentElement) {
-      return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async descendantExists(selector, parentElement) {
+    //   return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
-    async findDescendant(selector, parentElement) {
-      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async findDescendant(selector, parentElement) {
+    //   return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
-    async findAllDescendant(selector, parentElement) {
-      return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
-    }
+    // async findAllDescendant(selector, parentElement) {
+    //   return await find.allDescendantByCssSelector(testSubjSelector(selector), parentElement);
+    // }
 
     async find(selector, timeout = 1000) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.byCssSelector(testSubjSelector(selector), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      return await remote.findElement(By.css(dataTestSubj), timeout);
     }
 
     async findAll(selector, timeout) {
       log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      const all = await remote.findElements(By.css(dataTestSubj), timeout);
       return await filterAsync(all, el => el.isDisplayed());
     }
 
@@ -138,8 +141,12 @@ export function TestSubjectsProvider({ getService }) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await remote.getActiveElement();
-        await input.clearValue();
-        await input.type(text);
+        await input.clear();
+        const textArray = text.split('');
+        for (let i = 0; i < textArray.length; i++) {
+          remote.sleep(50);
+          await input.sendKeys(text);
+        }
       });
     }
 
@@ -166,13 +173,13 @@ export function TestSubjectsProvider({ getService }) {
     async getVisibleText(selector) {
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 
     async getVisibleTextAll(selectorAll) {
       return await this._mapAll(selectorAll, async (element) => {
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 

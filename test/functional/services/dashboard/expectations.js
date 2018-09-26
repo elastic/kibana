@@ -90,7 +90,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const elements = await getElementsFn();
         const elementTexts = [];
         await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
+          elementTexts.push(await element.getText());
         }));
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {
@@ -119,7 +119,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const elements = await getElementsFn();
         const elementTexts = [];
         await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
+          elementTexts.push(await element.getText());
         }));
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {

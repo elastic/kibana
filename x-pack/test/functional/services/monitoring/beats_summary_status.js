@@ -10,7 +10,7 @@ export function MonitoringBeatsSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY = 'beatsSummaryStatus';
   const SUBJ_TYPES_COUNTS = `${SUBJ_SUMMARY} typeCount`;
 
-  const SUBJ_TOTAL_EVENTS   = `${SUBJ_SUMMARY} totalEvents`;
+  const SUBJ_TOTAL_EVENTS = `${SUBJ_SUMMARY} totalEvents`;
   const SUBJ_BYTES_SENT = `${SUBJ_SUMMARY} bytesSent`;
 
   return new class BeatsSummaryStatus {
@@ -19,7 +19,7 @@ export function MonitoringBeatsSummaryStatusProvider({ getService }) {
       const counts = await testSubjects.getAttributeAll(SUBJ_TYPES_COUNTS, 'data-test-type-count');
 
       const countsByType = counts.reduce((accum, text) => {
-        const [ type, count ] = text.split(':');
+        const [type, count] = text.split(':');
         return {
           ...accum,
           [type.toLowerCase()]: parseInt(count, 10)

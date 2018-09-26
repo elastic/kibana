@@ -24,6 +24,7 @@ import {
   EsProvider,
   EsArchiverProvider,
   RetryProvider,
+  WaitProvider
 } from './services';
 
 export default function () {
@@ -43,7 +44,7 @@ export default function () {
     },
 
     kbnTestServer: {
-      buildArgs: [ '--optimize.useBundleCache=true' ],
+      buildArgs: ['--optimize.useBundleCache=true'],
       sourceArgs: [
         '--no-base-path',
         `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
@@ -67,6 +68,7 @@ export default function () {
       retry: RetryProvider,
       es: EsProvider,
       esArchiver: EsArchiverProvider,
+      wait: WaitProvider
     }
   };
 }

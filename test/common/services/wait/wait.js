@@ -16,4 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export default function(selector: string): string;
+
+
+export function WaitProvider({ getService }) {
+  const remote = getService('remote');
+  return new class Wait {
+    async forCondition(conditionFunc) {
+      await remote.waitForCondition(conditionFunc);
+    }
+
+    async forElementPresent(selector) {
+      await remote.waitForElementPresent(selector);
+    }
+
+    async forElementEnabled(selector) {
+      await remote.waitForElementEnabled(selector);
+    }
+
+    async forElementToContainText(selector, substring) {
+      await remote.waitForElementToContainText(selector, substring);
+    }
+
+    async forElementTextEquals(selector, text) {
+      await remote.waitForElementTextEquals(selector, text);
+    }
+
+    async forElementVisible(selector) {
+      await remote.waitForElementVisible(selector);
+    }
+  };
+
+
+}

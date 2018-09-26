@@ -23,6 +23,7 @@
         class="kuiTextInput fullWidth"
         input-datetime="{{format}}"
         ng-model="absolute.from"
+        data-test-subj="absolute-datetime-input-from"
       >
       <div ng-show="!absolute.from"><em>Invalid Date</em></div>
 
@@ -55,6 +56,7 @@
         class="kuiTextInput fullWidth"
         input-datetime="{{format}}"
         ng-model="absolute.to"
+        data-test-subj="absolute-datetime-input-to"
       >
 
       <div>
