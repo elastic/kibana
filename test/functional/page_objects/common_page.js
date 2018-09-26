@@ -53,7 +53,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appConfig = {
         ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
-        hash: `${appName}/${subUrl}`,
+        hash: `/${appName}/${subUrl}`,
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);

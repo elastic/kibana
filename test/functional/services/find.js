@@ -110,14 +110,14 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async allByLinkText(selector, timeout = defaultFindTimeout) {
-      log.debug('find.allByLinkText: ' + selector);
-      return await this.allByCustom(remote => remote.findAllByLinkText(selector), timeout);
+    async allByLinkText(text, timeout = defaultFindTimeout) {
+      log.debug('find.allByLinkText: ' + text);
+      return await this.allByCustom(remote => remote.findElements(By.linkText(text)), timeout);
     }
 
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in findAllByCssSelector: ' + selector);
-      return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
+      return await this.allByCustom(remote => remote.findElements(By.css(selector)), timeout);
     }
 
     async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {
@@ -133,24 +133,24 @@ export function FindProvider({ getService }) {
       );
     }
 
-    async byLinkText(selector, timeout = defaultFindTimeout) {
-      log.debug('Find.byLinkText: ' + selector);
+    async byLinkText(text, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + text);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findByLinkText(selector);
+        return await remote.findElement(By.linkText(text));
       });
     }
 
-    async findDisplayedByLinkText(selector, timeout = defaultFindTimeout) {
-      log.debug('Find.byLinkText: ' + selector);
+    async findDisplayedByLinkText(text, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + text);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findDisplayedByLinkText(selector);
+        return await remote.findElement(By.linkText(text), timeout);
       });
     }
 
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findByPartialLinkText(partialLinkText);
+        return await remote.findElement(By.partialLinkText(partialLinkText));
       });
     }
 
@@ -167,7 +167,7 @@ export function FindProvider({ getService }) {
 
     async existsByLinkText(linkText, timeout = 1000) {
       log.debug(`existsByLinkText ${linkText}`);
-      return await this.exists(async remote => await remote.findByLinkText(linkText), timeout);
+      return await this.exists(async remote => await remote.findElement(By.css(linkText)), timeout);
     }
 
     async existsByCssSelector(selector) {
@@ -196,7 +196,7 @@ export function FindProvider({ getService }) {
     async byButtonText(buttonText, element = remote, timeout = defaultFindTimeout) {
       log.debug(`byButtonText(${buttonText})`);
       return await retry.tryForTime(timeout, async () => {
-        const allButtons = await element.findAllByTagName('button');
+        const allButtons = await element.findElements(By.tagName('button'));
         const buttonTexts = await Promise.all(allButtons.map(async (el) => {
           return el.getText();
         }));
