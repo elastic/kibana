@@ -36,8 +36,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
-        + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
-      await esArchiver.load('empty_kibana');
+      + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
+      await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });

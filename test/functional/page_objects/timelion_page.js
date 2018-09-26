@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { By } from 'selenium-webdriver';
 export function TimelionPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const remote = getService('remote');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
   const esArchiver = getService('esArchiver');
@@ -56,12 +56,12 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
     }
 
     async getSuggestionItemsText() {
-      const elements = await find.allByCssSelector('.suggestions .suggestion');
+      const elements = await remote.findElements(By.css('[data-test-subj="timelionSuggestionListItem"]'));
       return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
-      const elements = await find.allByCssSelector('.suggestions .suggestion');
+      const elements = await remote.findElements(By.css('[data-test-subj="timelionSuggestionListItem"]'));
       if (suggestionIndex > elements.length) {
         throw new Error(`Unable to select suggestion ${suggestionIndex}, only ${elements.length} suggestions available.`);
       }
