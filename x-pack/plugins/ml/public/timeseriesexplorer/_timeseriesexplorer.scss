@@ -1,54 +1,53 @@
 .ml-time-series-explorer {
   width: 100%;
   display: inline-block;
-  color: #555;
+  color: $euiColorDarkShade;
 
   .no-results-container {
     text-align: center;
-    font-size: 17px;
-    padding-top: 60px;
+    font-size: $euiFontSizeL;
+    padding-top: 60px; // SASSTODO: variabalize
 
     .no-results {
-      background-color: aliceblue;
-      border: 1px solid #DDEFFF;
-      padding: 15px;
-      border-radius: 4px;
+      background-color: $euiFocusBackgroundColor;
+      padding: $euiSize;
+      border-radius: $euiBorderRadius;
       display: inline-block;
 
       i {
-        color: #5a9bd6;
-        margin-right: 5px;
+        color: $euiColorPrimary;
+        margin-right: $euiSizeXS;
       }
 
       div:nth-child(2) {
-        margin-top: 10px;
-        font-size: 13px;
+        margin-top: $euiSizeS;
+        font-size: $euiFontSizeXS;
       }
     }
   }
 
   .results-container {
-    padding: 15px;
+    padding: $euiSize;
 
     .panel-title {
-      color: #7b8a8b;
+      color: $euiTitleColor;
     }
 
     .entity-count-text {
-      color: #7b8a8b;
-      font-size: 13px;
+      color: $euiColorSecondary;
+      font-size: $euiFontSizeS;
     }
   }
 
   .series-controls {
-    padding: 15px 15px 0px 15px;
+    padding: $euiSize $euiSize 0px $euiSize;
 
     div.entity-controls {
       display: inline-block;
-      padding-left: 10px;
+      padding-left: $euiSize;
 
       input.entity-input-blank {
-        border-color: red;
+        border-color: $euiColorDanger;
       }
 
       .entity-input {
@@ -57,7 +56,7 @@
     }
 
     button {
-      margin-left: 5px;
+      margin-left: $euiSizeXS;
     }
   }
 
@@ -68,12 +67,12 @@
 
     div {
       display: inline;
-      padding-left: 15px;
+      padding-left: $euiSize;
     }
 
     .kuiCheckBoxLabel {
       display: inline-block;
-      font-size: 12px;
+      font-size: $euiFontSizeXS;
     }
   }
 
@@ -82,23 +81,23 @@
   }
 
   .ml-anomalies-controls {
-    padding-top: 5px;
+    padding-top: $euiSizeXS;
   }
 
   .ml-timeseries-chart {
     svg {
-      font-size: 12px;
-      font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+      font-size: $euiFontSizeXS;
+      font-family: $euiFontFamily;
     }
 
     .axis path, .axis line {
       fill: none;
-      stroke: #cccccc;
+      stroke: $euiBorderColor;
       shape-rendering: crispEdges;
     }
 
     .axis text {
-      fill: #000;
+      fill: $euiTextColor;
     }
 
     .axis .tick line {
@@ -106,14 +105,14 @@
     }
 
     .chart-border {
-      stroke: #cccccc;
+      stroke: $euiBorderColor;
       fill: none;
       stroke-width: 1;
       shape-rendering: crispEdges;
     }
 
     .chart-border-highlight {
-      stroke: #6A6A6A;
+      stroke: $euiColorDarkShade;
       stroke-width: 2;
     }
     .chart-border-highlight:hover {
@@ -125,21 +124,21 @@
     }
 
     .area.bounds {
-      fill: rgba(50, 167, 194, 0.25);
+      fill: rgba(50, 167, 194, 0.25); // Needs variable
     }
 
     .values-line {
       fill: none;
-      stroke: #32a7c2;
+      stroke: #32a7c2; // Needs variable
       stroke-width: 2;
     }
 
     .values-line.forecast {
-      stroke: #cca300;
+      stroke: #cca300; // Needs variable
     }
 
     .values-dots circle {
-      fill: #32a7c2;
+      fill: #32a7c2; // Needs variable
       stroke-width: 0;
     }
 
@@ -148,7 +147,7 @@
     }
 
     .area.forecast {
-      fill: rgba(204, 163, 0, 0.25);
+      fill: rgba(204, 163, 0, 0.25); // Needs variable
     }
 
     .metric-value {
@@ -160,27 +159,27 @@
 
     .anomaly-marker {
       stroke-width: 1px;
-      stroke: #aaaaaa;
+      stroke: #aaaaaa; // Needs variable
     }
 
     .metric-value.critical {
-      fill: #fe5050;
+      fill: $mchColorCritical;
     }
 
     .metric-value.major {
-      fill: #ff7e00;
+      fill: $mchColorMajor;
     }
 
     .metric-value.minor {
-      fill: #ffdd00;
+      fill: $mchColorMinor;
     }
 
     .metric-value.warning {
-      fill: #8bc8fb;
+      fill: $mchColorWarning;
     }
 
     .metric-value.low {
-      fill: #d2e9f7;
+      fill: #d2e9f7; // Needs variable
     }
 
     .metric-value:hover,
@@ -199,15 +198,21 @@
 
     rect.scheduled-event-marker {
       stroke-width: 1px;
-      stroke: #999999;
-      fill: #cccccc;
+      stroke: $euiColorMediumShade;
+      fill: $euiColorLightShade;
       pointer-events: none;
     }
 
     .forecast {
+<<<<<<< HEAD:x-pack/plugins/ml/public/timeseriesexplorer/styles/main.less
       .metric-value,
       .metric-value:hover {
         stroke: #cca300;
+=======
+      circle.metric-value,
+      circle.metric-value:hover {
+        stroke: #cca300; // Needs variable
+>>>>>>> timeseries explorer:x-pack/plugins/ml/public/timeseriesexplorer/_timeseriesexplorer.scss
       }
     }
 
@@ -216,20 +221,20 @@
         line {
           fill: none;
           shape-rendering: crispEdges;
-          stroke: #cccccc;
+          stroke: $euiColorLightestShade;
         }
 
         rect {
-          fill: #f1f1f1;
+          fill: $euiColorLightestShade;
         }
       }
 
       .focus-zoom {
-        fill: #555555;
+        fill: $euiColorDarkShade;
 
         a {
           text {
-            fill: #328caa;
+            fill: $euiColorPrimary;
             cursor: pointer;
           }
         }
@@ -248,11 +253,11 @@
 
       .axis text {
         font-size: 10px;
-        fill: #333333;
+        fill: $euiTextColor;
       }
 
       .area.context {
-        fill: rgba(50, 167, 194, 0.25);
+        fill: rgba(50, 167, 194, 0.25); // Needs variable
       }
 
       .values-line {
@@ -260,7 +265,7 @@
       }
 
       .area.context.forecast {
-        fill: rgba(204, 163, 0, 0.25);
+        fill: rgba(204, 163, 0, 0.25); // Needs variable
       }
 
       .mask {
@@ -300,7 +305,7 @@
     }
 
     .brush .extent {
-      stroke: #6A6A6A;
+      stroke: $euiColorDarkShade;
       stroke-width: 2;
       cursor: move;
     }
@@ -310,7 +315,7 @@
     }
 
     .top-border {
-      fill: #FFFFFF;
+      fill: $euiColorEmptyShade;
     }
 
     foreignObject.brush-handle {
@@ -319,8 +324,8 @@
     }
 
     div.brush-handle-inner {
-      border: 1px solid #6A6A6A;
-      background-color: #CCCCCC;
+      border: 1px solid $euiColorDarkShade;
+      background-color: $euiColorLightShade;
       height: 70px;
       width: 10px;
       text-align: center;
@@ -333,16 +338,16 @@
     }
 
     div.brush-handle-inner-left {
-      border-radius: 4px 0px 0px 4px;
+      border-radius: $euiBorderRadius 0px 0px $euiBorderRadius;
     }
     div.brush-handle-inner-right {
-      border-radius: 0px 4px 4px 0px;
+      border-radius: 0px $euiBorderRadius $euiBorderRadius 0px;
     }
 
     rect.brush-handle {
       stroke-width: 1;
-      stroke: #6A6A6A;
-      fill: #CCCCCC;
+      stroke: $euiColorDarkShade;
+      fill: $euiColorLightShade;
       pointer-events: none;
     }
 

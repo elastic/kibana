@@ -41,11 +41,11 @@
     background-color: #bfa180;
   }
 
+  // Use euiPanel styling
+  @include euiPanel($selector: 'card-contents');
+
   .card-contents {
     height: 393px;
-    border-color: $euiColorLightestShade;
-    border-style: solid;
-    border-width: 0px 1px 1px 1px;
     border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
     overflow: hidden;
   }

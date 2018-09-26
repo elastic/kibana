@@ -1,6 +1,10 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
 @import 'ui/public/styles/styling_constants';
 
+// ML needs EUI card styling till it fully adopts React components
+@import '@elastic/eui/src/components/panel/variables';
+@import '@elastic/eui/src/components/panel/mixins';
+
 // ML has it's own variables for coloring
 @import 'variables';
 
@@ -38,6 +42,7 @@
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
   @import 'jobs/index'; // SASSTODO: This collection of sass files has multiple problems
   @import 'settings/index';
+  @import 'timeseriesexplorer/index';
 
   @import 'hacks';
 
