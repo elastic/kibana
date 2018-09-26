@@ -85,9 +85,11 @@ class MetricDetailPage extends React.PureComponent<Props> {
                     return <ErrorPageBody message={error} />;
                   }
                   return (
-                    <EuiPage style={{ flex: '1 0 auto' }}>
+                    <EuiPage style={{ flex: '1 0 auto', paddingLeft: '0px' }}>
                       <EuiPageSideBar>
-                        <EuiSideNav items={sideNav} style={{ position: 'fixed' }} />
+                        <EuiSideNavContainer>
+                          <EuiSideNav items={sideNav} />
+                        </EuiSideNavContainer>
                       </EuiPageSideBar>
                       <EuiPageBody>
                         <EuiPageHeader style={{ flex: '0 0 auto' }}>
@@ -98,7 +100,12 @@ class MetricDetailPage extends React.PureComponent<Props> {
                           </EuiPageHeaderSection>
                         </EuiPageHeader>
                         <EuiPageContentWithRelative>
-                          <Metrics layout={layout} metrics={metrics} loading={loading} />
+                          <Metrics
+                            nodeName={nodeName}
+                            layout={layout}
+                            metrics={metrics}
+                            loading={loading}
+                          />
                         </EuiPageContentWithRelative>
                       </EuiPageBody>
                     </EuiPage>
@@ -121,3 +128,11 @@ class MetricDetailPage extends React.PureComponent<Props> {
 }
 
 export const MetricDetail = withTheme(MetricDetailPage);
+
+const EuiSideNavContainer = styled.div`
+  position: fixed;
+  z-index: 1;
+  height: 100vh;
+  background-color: #f5f5f5;
+  padding-left: 16px;
+`;
