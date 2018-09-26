@@ -72,7 +72,7 @@ export class GaugesSection extends React.PureComponent<Props> {
             );
             return (
               <EuiFlexItem key={`${section.id}-${series.id}`}>
-                <EuiPanel>
+                <EuiPanel style={{ minWidth: '160px' }}>
                   <EuiText style={{ textAlign: 'right' }} size="s">
                     {name}
                   </EuiText>
