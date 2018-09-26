@@ -624,6 +624,19 @@ describe('saved object conversion', () => {
         ).toBeFalsy();
       });
 
+      test(`is false if the type prefix omits the :`, () => {
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+        expect(
+          serializer.isRawSavedObject({
+            _id: 'helloworld',
+            _source: {
+              type: 'hello',
+              hello: {},
+            },
+          })
+        ).toBeFalsy();
+      });
+
       test('is false if the type attribute does not match the id', () => {
         const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
         expect(
@@ -700,6 +713,20 @@ describe('saved object conversion', () => {
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:world',
+            _source: {
+              type: 'hello',
+              hello: {},
+              namespace: 'foo',
+            },
+          })
+        ).toBeFalsy();
+      });
+
+      test(`is false if the id prefix omits the trailing :`, () => {
+        const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+        expect(
+          serializer.isRawSavedObject({
+            _id: 'foo:helloworld',
             _source: {
               type: 'hello',
               hello: {},
@@ -807,6 +834,22 @@ describe('saved object conversion', () => {
         expect(
           serializer.isRawSavedObject({
             _id: 'foo:hello:world',
+            _source: {
+              type: 'hello',
+              hello: {},
+              namespace: 'foo',
+            },
+          })
+        ).toBeFalsy();
+      });
+
+      test(`is false if the type prefix omits the :`, () => {
+        const serializer = new SavedObjectsSerializer(
+          new SavedObjectsSchema({ hello: { isNamespaceAgnostic: true } })
+        );
+        expect(
+          serializer.isRawSavedObject({
+            _id: 'helloworld',
             _source: {
               type: 'hello',
               hello: {},

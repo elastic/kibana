@@ -89,7 +89,7 @@ export class SavedObjectsSerializer {
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
     return (
       type &&
-      rawDoc._id.startsWith(`${namespacePrefix}${type}`) &&
+      rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
       rawDoc._source.hasOwnProperty(type)
     );
   }
