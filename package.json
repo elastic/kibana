@@ -105,7 +105,7 @@
     "@types/strip-json-comments": "^0.0.30",
     "@types/yargs": "^12.0.0",
     "axios-mock-adapter": "^1.15.0",
-    "husky": "^0.14.3",
+    "husky": "^1.0.0",
     "jest": "^23.4.1",
     "lint-staged": "^7.2.0",
     "lodash.last": "^3.0.0",
