@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiIconTip,
   EuiToolTip
 } from '@elastic/eui';
@@ -49,8 +49,7 @@ export function ExplorerChartsContainer({
 
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
-              <span className="ml-explorer-chart-icons">
-                {wrapLabel && (<br />)}
+              <div className="ml-explorer-chart-icons">
                 {tooManyBuckets && (
                   <span className="ml-explorer-chart-icon">
                     <EuiIconTip
@@ -66,14 +65,16 @@ export function ExplorerChartsContainer({
                   position="top"
                   content={textViewButton}
                 >
-                  <EuiButtonIcon
-                    href={getExploreSeriesLink(series)}
-                    target="_BLANK"
-                    iconType="stats"
-                    aria-label={textViewButton}
-                  />
+                  <EuiButtonEmpty
+                    iconSide="right"
+                    iconType="popout"
+                    size="xs"
+                    onClick={() => getExploreSeriesLink(series)}
+                  >
+                    View
+                  </EuiButtonEmpty>
                 </EuiToolTip>
-              </span>
+              </div>
               <div className="ml-explorer-chart-label">
                 <ExplorerChartLabel
                   detectorLabel={detectorLabel}
