@@ -259,6 +259,19 @@
     });
 
     /**
+     * Perform a [shield.getUserPrivileges](Retrieve a user's list of privileges) request
+     *
+     */
+    shield.getUserPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_xpack/security/user/_privileges'
+        }
+      ]
+    });
+
+    /**
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
      *
