@@ -79,7 +79,7 @@ export const WorkpadPage = ({
               default:
                 return [];
             }
-          } else {
+          } else if (element.subtype !== 'adHocGroup') {
             return <ElementWrapper key={element.id} element={element} />;
           }
         })
