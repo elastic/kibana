@@ -13,7 +13,7 @@ import { WaffleTimeControls } from '../../components/waffle/waffle_time_controls
 
 import { WaffleMetricControls } from '../../components/waffle/waffle_metric_controls';
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
-import { WithWaffleMetrics } from '../../containers/waffle/with_waffle_metrics';
+import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { WithOptions } from '../../containers/with_options';
@@ -49,11 +49,11 @@ export const HomeToolbar: React.SFC = () => (
       <EuiFlexItem grow={false}>
         <WithOptions>
           {({ wafflemap: { path } }) => (
-            <WithWaffleMetrics>
+            <WithWaffleOptions>
               {({ changeMetrics, metrics }) => (
                 <WaffleMetricControls metrics={metrics} path={path} onChange={changeMetrics} />
               )}
-            </WithWaffleMetrics>
+            </WithWaffleOptions>
           )}
         </WithOptions>
       </EuiFlexItem>

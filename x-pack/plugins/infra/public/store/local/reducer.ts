@@ -12,10 +12,10 @@ import { initialLogPositionState, logPositionReducer, LogPositionState } from '.
 import { initialLogTextviewState, logTextviewReducer, LogTextviewState } from './log_textview';
 import { initialWaffleFilterState, waffleFilterReducer, WaffleFilterState } from './waffle_filter';
 import {
-  initialWaffleMetricsState,
-  waffleMetricsReducer,
-  WaffleMetricsState,
-} from './waffle_metrics';
+  initialWaffleOptionsState,
+  waffleOptionsReducer,
+  WaffleOptionsState,
+} from './waffle_options';
 import { initialWaffleTimeState, waffleTimeReducer, WaffleTimeState } from './waffle_time';
 
 export interface LocalState {
@@ -25,7 +25,7 @@ export interface LocalState {
   logTextview: LogTextviewState;
   waffleFilter: WaffleFilterState;
   waffleTime: WaffleTimeState;
-  waffleMetrics: WaffleMetricsState;
+  waffleMetrics: WaffleOptionsState;
 }
 
 export const initialLocalState: LocalState = {
@@ -35,7 +35,7 @@ export const initialLocalState: LocalState = {
   logTextview: initialLogTextviewState,
   waffleFilter: initialWaffleFilterState,
   waffleTime: initialWaffleTimeState,
-  waffleMetrics: initialWaffleMetricsState,
+  waffleMetrics: initialWaffleOptionsState,
 };
 
 export const localReducer = combineReducers<LocalState>({
@@ -45,5 +45,5 @@ export const localReducer = combineReducers<LocalState>({
   logTextview: logTextviewReducer,
   waffleFilter: waffleFilterReducer,
   waffleTime: waffleTimeReducer,
-  waffleMetrics: waffleMetricsReducer,
+  waffleMetrics: waffleOptionsReducer,
 });

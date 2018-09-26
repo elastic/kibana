@@ -11,6 +11,6 @@ export {
   logTextviewActions,
   waffleFilterActions,
   waffleTimeActions,
-  waffleMetricsActions,
+  waffleOptionsActions,
 } from './local';
 export { logEntriesActions, logSummaryActions } from './remote';

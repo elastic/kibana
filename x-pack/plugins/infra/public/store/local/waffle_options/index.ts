@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as waffleMetricsActions from './actions';
-import * as waffleMetricsSelectors from './selector';
+import * as waffleOptionsActions from './actions';
+import * as waffleOptionsSelectors from './selector';
 
-export { waffleMetricsActions, waffleMetricsSelectors };
+export { waffleOptionsActions, waffleOptionsSelectors };
 export * from './reducer';

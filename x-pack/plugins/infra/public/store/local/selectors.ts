@@ -11,7 +11,7 @@ import { logPositionSelectors as innerLogPositionSelectors } from './log_positio
 import { logTextviewSelectors as innerLogTextviewSelectors } from './log_textview';
 import { LocalState } from './reducer';
 import { waffleFilterSelectors as innerWaffleFilterSelectors } from './waffle_filter';
-import { waffleMetricsSelectors as innerWaffleMetricsSelectors } from './waffle_metrics';
+import { waffleOptionsSelectors as innerWaffleOptionsSelectors } from './waffle_options';
 import { waffleTimeSelectors as innerWaffleTimeSelectors } from './waffle_time';
 
 export const logFilterSelectors = globalizeSelectors(
@@ -44,7 +44,7 @@ export const waffleTimeSelectors = globalizeSelectors(
   innerWaffleTimeSelectors
 );
 
-export const waffleMetricsSelectors = globalizeSelectors(
+export const waffleOptionsSelectors = globalizeSelectors(
   (state: LocalState) => state.waffleMetrics,
-  innerWaffleMetricsSelectors
+  innerWaffleOptionsSelectors
 );

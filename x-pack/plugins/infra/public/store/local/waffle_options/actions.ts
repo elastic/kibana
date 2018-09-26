@@ -7,6 +7,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { InfraMetricInput } from '../../../../common/graphql/types';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_metrics');
+const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');
 
 export const changeMetrics = actionCreator<InfraMetricInput[]>('CHANGE_METRICS');

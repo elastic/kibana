@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { WaffleMetricsState } from './reducer';
+import { WaffleOptionsState } from './reducer';
 
-export const selectMetrics = (state: WaffleMetricsState) => state.metrics;
+export const selectMetrics = (state: WaffleOptionsState) => state.metrics;

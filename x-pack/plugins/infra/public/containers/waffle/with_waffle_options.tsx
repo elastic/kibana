@@ -6,38 +6,38 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { State, waffleMetricsActions, waffleMetricsSelectors } from '../../store';
-import { initialWaffleMetricsState } from '../../store/local/waffle_metrics/reducer';
+import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
+import { initialWaffleOptionsState } from '../../store/local/waffle_options/reducer';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
 
-export const withWaffleMetrics = connect(
+export const withWaffleOptions = connect(
   (state: State) => ({
-    metrics: waffleMetricsSelectors.selectMetrics(state),
-    urlState: { metrics: waffleMetricsSelectors.selectMetrics(state) },
+    metrics: waffleOptionsSelectors.selectMetrics(state),
+    urlState: { metrics: waffleOptionsSelectors.selectMetrics(state) },
   }),
   bindPlainActionCreators({
-    changeMetrics: waffleMetricsActions.changeMetrics,
+    changeMetrics: waffleOptionsActions.changeMetrics,
   })
 );
 
-export const WithWaffleMetrics = asChildFunctionRenderer(withWaffleMetrics);
+export const WithWaffleOptions = asChildFunctionRenderer(withWaffleOptions);
 
 /**
  * Url State
  */
 
-interface WaffleMetricsUrlState {
-  metrics?: ReturnType<typeof waffleMetricsSelectors.selectMetrics>;
+interface WaffleOptionsUrlState {
+  metrics?: ReturnType<typeof waffleOptionsSelectors.selectMetrics>;
 }
 
 export const WithWaffleMetricsUrlState = () => (
-  <WithWaffleMetrics>
+  <WithWaffleOptions>
     {({ changeMetrics, urlState }) => (
       <UrlStateContainer
         urlState={urlState}
-        urlStateKey="waffleMetrics"
+        urlStateKey="waffleOptions"
         mapToUrlState={mapToUrlState}
         onChange={newUrlState => {
           if (newUrlState && newUrlState.metrics) {
@@ -46,15 +46,15 @@ export const WithWaffleMetricsUrlState = () => (
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState) {
-            changeMetrics(initialUrlState.metrics || initialWaffleMetricsState.metrics);
+            changeMetrics(initialUrlState.metrics || initialWaffleOptionsState.metrics);
           }
         }}
       />
     )}
-  </WithWaffleMetrics>
+  </WithWaffleOptions>
 );
 
-const mapToUrlState = (value: any): WaffleMetricsUrlState | undefined =>
+const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
   value
     ? {
         metrics: mapToMetricsUrlState(value.metrics),

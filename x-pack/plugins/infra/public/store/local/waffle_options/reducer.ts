@@ -10,19 +10,19 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { InfraMetricInput, InfraMetricType } from '../../../../common/graphql/types';
 import { changeMetrics } from './actions';
 
-export interface WaffleMetricsState {
+export interface WaffleOptionsState {
   metrics: InfraMetricInput[];
 }
 
-export const initialWaffleMetricsState: WaffleMetricsState = {
+export const initialWaffleOptionsState: WaffleOptionsState = {
   metrics: [{ type: InfraMetricType.cpu }],
 };
 
-const currentMetricsReducer = reducerWithInitialState(initialWaffleMetricsState.metrics).case(
+const currentMetricsReducer = reducerWithInitialState(initialWaffleOptionsState.metrics).case(
   changeMetrics,
   (currentMetrics, targetMetrics) => targetMetrics
 );
 
-export const waffleMetricsReducer = combineReducers<WaffleMetricsState>({
+export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metrics: currentMetricsReducer,
 });

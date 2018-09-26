@@ -10,8 +10,8 @@ import { PageContent } from '../../components/page';
 import { Waffle } from '../../components/waffle';
 
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
-import { WithWaffleMetrics } from '../../containers/waffle/with_waffle_metrics';
 import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
+import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../containers/with_options';
 
@@ -23,7 +23,7 @@ export const HomePageContent: React.SFC = () => (
           {({ filterQueryAsJson }) => (
             <WithWaffleTime>
               {({ currentTimeRange }) => (
-                <WithWaffleMetrics>
+                <WithWaffleOptions>
                   {({ metrics }) => (
                     <WithWaffleNodes
                       filterQuery={filterQueryAsJson}
@@ -42,7 +42,7 @@ export const HomePageContent: React.SFC = () => (
                       )}
                     </WithWaffleNodes>
                   )}
-                </WithWaffleMetrics>
+                </WithWaffleOptions>
               )}
             </WithWaffleTime>
           )}
