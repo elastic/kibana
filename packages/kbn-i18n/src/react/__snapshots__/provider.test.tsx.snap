@@ -133,6 +133,7 @@ Object {
   "messages": Object {},
   "now": [Function],
   "textComponent": "span",
+  "timeZone": null,
 }
 `;
 

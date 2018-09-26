@@ -336,6 +336,7 @@ describe('I18n engine', () => {
       expect(i18n.getFormats()).toEqual({
         ...formats,
         number: {
+          ...formats.number,
           currency: {
             style: 'currency',
             currency: 'EUR',
