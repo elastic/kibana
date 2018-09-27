@@ -66,11 +66,6 @@
   }
  }
 
- .ui-select-container input[type="search"] {
-   padding-left: $euiSize;
-   padding-top: $euiSizeXS;
-  }
-
 .ui-select-container input[type="search"]::placeholder {
   color: $euiColorDarkShade;
 }
