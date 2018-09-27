@@ -33,18 +33,21 @@ class SymbolTreeComponent extends React.PureComponent<Props> {
   );
 
   public symbolsToSideNavItems = (symbolsWithMembers: SymbolWithMembers[]) => {
-    return symbolsWithMembers.sort(sortSymbol).map((s: SymbolWithMembers, index: number) => {
-      const item = {
-        name: s.name,
-        id: `${s.name}_${index}`,
-        renderItem: this.getStructureTreeItemRenderer(s.location, s.name),
-      };
-      if (s.members) {
-        item.items = this.symbolsToSideNavItems(Array.from(s.members));
-        item.forceOpen = true;
-      }
-      return item;
-    });
+    return symbolsWithMembers
+      .map((s: SymbolWithMembers, index: number) => {
+        const item = {
+          location: s.location,
+          name: s.name,
+          id: `${s.name}_${index}`,
+          renderItem: this.getStructureTreeItemRenderer(s.location, s.name),
+        };
+        if (s.members) {
+          item.items = this.symbolsToSideNavItems(Array.from(s.members));
+          item.forceOpen = true;
+        }
+        return item;
+      })
+      .sort(sortSymbol);
   };
 
   public render() {
