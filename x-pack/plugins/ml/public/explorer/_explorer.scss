@@ -19,7 +19,6 @@
 
     .no-results {
       background-color: $euiFocusBackgroundColor;
-      border: 1px solid darken($euiColorDarkShade, 5%);
       padding: $euiSize;
       border-radius: $euiBorderRadius;
       display: inline-block;
@@ -133,13 +132,17 @@
     }
   }
 
-  // SASSTODO: This entire selector needs to be rewritten. It looks extremely brittle with mixed sizing
+  // SASSTODO: This entire selector needs to be rewritten. 
+  // It looks extremely brittle with very specific sizing units
   .ml-explorer-swimlane {
     user-select: none;
     padding: 0;
     margin-bottom: $euiSizeS;
 
     ml-explorer-swimlane {
+      width: 100%;
+      height: 250px;
+
       & > .title {
         background-color: $euiColorMediumShade;
         color: $euiColorEmptyShade;
@@ -148,9 +151,6 @@
         border-radius: $euiSizeXS/ 2;
         margin-bottom: $euiSizeXS;
       }
-
-      width: 100%;
-      height: 250px;
     }
 
     ml-explorer-swimlane.ml-dragselect-dragging {
@@ -251,7 +251,7 @@
           background-color: $euiColorEmptyShade;
 
           .sl-cell {
-            color: #FFF;
+            color: $euiColorEmptyShade;
             cursor: default;
             display: inline-block;
             height: 29px;

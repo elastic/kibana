@@ -1,32 +1,5 @@
 // These are hacks that were near ML's root. Unsure if they still need to be here.
 
-.ml-icon-severity-critical,
-.ml-icon-severity-major,
-.ml-icon-severity-minor,
-.ml-icon-severity-warning,
-.ml-icon-severity-unknown {
-  text-shadow: 1px 1px 1px $euiColorLightestShade;
-}
-
-.ml-icon-severity-critical {
-  color: $mchColorCriticalText;
-}
-
-.ml-icon-severity-major {
-  color: $mchColorMajorText;
-}
-
-.ml-icon-severity-minor {
-  color: $mchColorMinorText;
-}
-
-.ml-icon-severity-warning {
-  color: $mchColorWarningText;
-}
-
-.ml-icon-severity-unknown {
-  color: $mchColorUnknownText;
-}
 
 .tab-jobs,
 .edit-job-modal,
@@ -40,6 +13,7 @@
   }
 }
 
+// ML specific bootstrap hacks
 .button-wrapper {
   display: inline;
 }
@@ -52,6 +26,8 @@
   cursor: not-allowed;
 }
 
+// ML bootstrap-select hacks that sit on top of Kibana hacks that often fight with KUI
+// Should go away when EUI is fully adopted
 .ui-select-match {
   .btn-default[disabled],
   .btn-default[disabled]:hover,
@@ -72,4 +48,15 @@
 
 .ui-select-container input[type="search"]:focus {
   box-shadow: none;
+}
+
+.ui-select-multiple.ui-select-bootstrap input.ui-select-search {
+  font-size: $euiFontSizeS;
+  padding: 5px 10px;
+}
+
+
+// SASSTODO: Remove all the floats
+.clear, .clearfix {
+  clear: both;
 }
