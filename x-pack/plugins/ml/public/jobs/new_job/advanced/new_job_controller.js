@@ -194,6 +194,7 @@ module.controller('MlNewJob',
         scrollSizeDefault: 1000,
         indicesText: '',
         typesText: '',
+        scriptFields: [],
       },
       saveStatus: {
         job: 0,
@@ -709,7 +710,16 @@ module.controller('MlNewJob',
         });
 
         const indicesText = datafeedConfig.indices.join(',');
-        $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
+
+        const scriptFields = (datafeedConfig.script_fields !== undefined) ? Object.keys(datafeedConfig.script_fields) : [];
+
+        let fieldsUpToDate = true;
+        if (indicesText !== $scope.ui.datafeed.indicesText || _.isEqual(scriptFields, $scope.ui.datafeed.scriptFields) === false) {
+          fieldsUpToDate = false;
+        }
+
+        $scope.ui.fieldsUpToDate = fieldsUpToDate;
+
         const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
 
         $scope.ui.datafeed = {
@@ -722,6 +732,7 @@ module.controller('MlNewJob',
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
           typesText: types.join(','),
+          scriptFields,
         };
 
         if ($scope.ui.fieldsUpToDate === false) {

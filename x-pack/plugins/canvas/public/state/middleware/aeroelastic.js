@@ -9,7 +9,7 @@ import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import {
   addElement,
-  removeElement,
+  removeElements,
   duplicateElement,
   elementLayer,
   setPosition,
@@ -212,7 +212,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
         break;
 
-      case removeElement.toString():
+      case removeElements.toString():
       case addElement.toString():
       case duplicateElement.toString():
       case elementLayer.toString():
