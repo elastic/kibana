@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceResolvers } from '../../../common/graphql/types';
+import { InfraNodeType, InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
 import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
 import { extractPathsAndMetrics } from '../../lib/adapters/nodes/extract_paths_and_metrics';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -35,7 +36,16 @@ export const createNodeResolvers = (
     async map(source, args, { req }, info) {
       const { metrics, path } = extractPathsAndMetrics(info);
       const { groupBy, nodeType } = extractGroupByAndNodeFromPath(path);
-
+      switch (nodeType) {
+        case InfraNodeType.pod:
+          UsageCollector.countKubernetes();
+          break;
+        case InfraNodeType.container:
+          UsageCollector.countDocker();
+          break;
+        default:
+          UsageCollector.countHost();
+      }
       const options: InfraNodeRequestOptions = {
         filterQuery: parseFilterQuery(args.filterQuery),
         nodeType,
