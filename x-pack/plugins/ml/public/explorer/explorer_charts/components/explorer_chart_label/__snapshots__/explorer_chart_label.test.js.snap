@@ -13,31 +13,34 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
        - 
        
     </React.Fragment>
-    <span
-      key="0"
-    >
-      <ExplorerChartLabelBadge
-        entity={
-          Object {
-            "$$hashKey": "object:813",
-            "fieldName": "nginx.access.remote_ip",
-            "fieldValue": "72.57.0.53",
+    <React.Fragment>
+      <span
+        key="nginx.access.remote_ip 72.57.0.53"
+      >
+        <ExplorerChartLabelBadge
+          entity={
+            Object {
+              "$$hashKey": "object:813",
+              "fieldName": "nginx.access.remote_ip",
+              "fieldValue": "72.57.0.53",
+            }
           }
-        }
-      />
+        />
+         
+      </span>
        
-    </span>
-    <span
-      className="ml-explorer-chart-icon"
-    >
-      <EuiIconTip
-        aria-label="Info"
-        content={<ExplorerChartTooltip />}
-        position="top"
-        size="s"
-        type="questionInCircle"
-      />
-    </span>
+      <span
+        className="ml-explorer-chart-icon"
+      >
+        <EuiIconTip
+          aria-label="Info"
+          content={<ExplorerChartTooltip />}
+          position="top"
+          size="s"
+          type="questionInCircle"
+        />
+      </span>
+    </React.Fragment>
   </span>
 </React.Fragment>
 `;
@@ -71,7 +74,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
     className="ml-explorer-chart-label-fields"
   >
     <span
-      key="0"
+      key="nginx.access.remote_ip 72.57.0.53"
     >
       <ExplorerChartLabelBadge
         entity={
