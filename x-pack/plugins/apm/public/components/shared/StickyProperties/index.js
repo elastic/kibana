@@ -7,17 +7,20 @@
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-
+import TooltipOverlay from '../../shared/TooltipOverlay';
 import {
   unit,
   units,
   px,
+  fontFamilyCode,
   fontSizes,
   colors,
   truncate
 } from '../../../style/variables';
 
-import TooltipOverlay, { fieldNameHelper } from '../../shared/TooltipOverlay';
+const TooltipFieldName = styled.span`
+  font-family: ${fontFamilyCode};
+`;
 
 const PropertiesContainer = styled.div`
   display: flex;
@@ -56,6 +59,15 @@ const PropertyValueTruncated = styled.span`
   line-height: ${px(unit)};
   ${truncate('100%')};
 `;
+
+function fieldNameHelper(name) {
+  return (
+    <span>
+      Field name: <br />
+      <TooltipFieldName>{name}</TooltipFieldName>
+    </span>
+  );
+}
 
 function TimestampValue({ timestamp }) {
   const time = moment(timestamp);
@@ -98,7 +110,7 @@ function getPropertyValue({ val, fieldName, truncated = false }) {
     );
   }
 
-  return <PropertyValue>{String(val)}</PropertyValue>;
+  return <PropertyValue>{val}</PropertyValue>;
 }
 
 export function StickyProperties({ stickyProperties }) {

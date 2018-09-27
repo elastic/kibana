@@ -11,7 +11,3 @@ declare module '*.json' {
   const json: any;
   export default json;
 }
-
-interface StringMap<T> {
-  [key: string]: T;
-}
