@@ -552,7 +552,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getFilterDescriptions(timeout = defaultFindTimeout) {
       const filters = await remote.findElements(By.css(
         '.filter-bar > .filter > .filter-description'),
-        timeout);
+      timeout);
       return _.map(filters, async (filter) => await filter.getText());
     }
 
