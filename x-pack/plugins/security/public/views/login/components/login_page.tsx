@@ -99,13 +99,13 @@ export class LoginPage extends Component<Props, {}> {
           title={
             <FormattedMessage
               id="kbn.login.requiresSecureConnectionTitle"
-              defaultMessage="A secure connection is required."
+              defaultMessage="A secure connection is required for log in"
             />
           }
           message={
             <FormattedMessage
               id="kbn.login.requiresSecureConnectionMessage"
-              defaultMessage="Logging in requires a secure connection. Please contact your administrator."
+              defaultMessage="Contact your system administrator."
             />
           }
         />
@@ -122,13 +122,13 @@ export class LoginPage extends Component<Props, {}> {
             title={
               <FormattedMessage
                 id="kbn.login.esUnavailableTitle"
-                defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
+                defaultMessage="Cannot connect to the Elastiscearch cluster"
               />
             }
             message={
               <FormattedMessage
                 id="kbn.login.esUnavailableMessage"
-                defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
+                defaultMessage="See the Kibana logs for details and try reloading the page."
               />
             }
           />

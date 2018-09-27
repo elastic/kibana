@@ -41,6 +41,7 @@ export class BasicLoginForm extends Component<Props, State> {
           <form onSubmit={this.submit}>
             <EuiFormRow label="Username">
               <EuiFieldText
+                id="username"
                 name="username"
                 data-test-subj="loginUsername"
                 value={this.state.username}
@@ -54,6 +55,7 @@ export class BasicLoginForm extends Component<Props, State> {
 
             <EuiFormRow label="Password">
               <EuiFieldText
+                id="password"
                 name="password"
                 data-test-subj="loginPassword"
                 type="password"
@@ -160,7 +162,7 @@ export class BasicLoginForm extends Component<Props, State> {
 
         let message = 'Oops! Error. Try again.';
         if (statusCode === 401) {
-          message = 'Oops! Invalid username/password. Try again.';
+          message = 'Invalid username or password. Please try again.';
         }
 
         this.setState({

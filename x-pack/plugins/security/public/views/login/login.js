@@ -15,7 +15,7 @@ import template from 'plugins/security/views/login/login_react.html';
 import { LoginPage } from 'plugins/security/views/login/components/login_page';
 import './login.less';
 const messageMap = {
-  SESSION_EXPIRED: 'Your session has expired. Please log in again.'
+  SESSION_EXPIRED: 'Your session has timed out. Please log in again.'
 };
 
 chrome
