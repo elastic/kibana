@@ -28,6 +28,7 @@ const matrix2d = require('./matrix2d');
 const config = require('./config');
 
 const {
+  applyTolerance,
   disjunctiveUnion,
   identity,
   flatten,
@@ -904,23 +905,19 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
   // fixme left active: snap wobble. right active: opposite side wobble.
   const a = snappedA(properShape);
   const b = snappedB(properShape);
-  const portraitTolerance = 1 / 1000;
   const groupedShape = shape =>
     shape.parent === properShape.id &&
     shape.type !== 'annotation' &&
     shape.subtype !== config.adHocGroupName;
-  const portraitShape = shape =>
+  // fixme broaden resizableChild to other multiples of 90 degrees
+  const resizableChild = shape =>
     shallowEqual(
-      matrix
-        .compositeComponent(shape.localTransformMatrix)
-        .map(d => Math.round(d / portraitTolerance) * portraitTolerance),
+      matrix.compositeComponent(shape.localTransformMatrix).map(applyTolerance),
       matrix.UNITMATRIX
     );
   const allowResize =
     properShape.type !== 'group' ||
-    (config.groupResize &&
-      properShape.type === 'group' &&
-      shapes.filter(groupedShape).every(portraitShape));
+    (config.groupResize && shapes.filter(groupedShape).every(resizableChild));
   const resizeVertices = allowResize
     ? [
         [-1, -1, 315],
@@ -1214,7 +1211,7 @@ const resizeGroup = (shapes, selectedShapes, elements) => {
   if (e.subtype !== 'adHocGroup') return { shapes, selectedShapes };
   if (!e.baseAB) {
     return {
-      shapes: shapes.map(s => ({ ...s, baseab: null, baseLocalTransformMatrix: null })),
+      shapes: shapes.map(s => ({ ...s, childBaseAB: null, baseLocalTransformMatrix: null })),
       selectedShapes,
     };
   }
@@ -1224,8 +1221,8 @@ const resizeGroup = (shapes, selectedShapes, elements) => {
   return {
     shapes: shapes.map(s => {
       if (s.parent !== e.id || s.type === 'annotation') return s;
-      const baseab = s.baseab || [s.a, s.b];
-      const impliedScale = matrix.scale(...baseab, 1);
+      const childBaseAB = s.childBaseAB || [s.a, s.b];
+      const impliedScale = matrix.scale(...childBaseAB, 1);
       const inverseImpliedScale = matrix.invert(impliedScale);
       const baseLocalTransformMatrix = s.baseLocalTransformMatrix || s.localTransformMatrix;
       const normalizedBaseLocalTransformMatrix = matrix.multiply(
@@ -1235,16 +1232,16 @@ const resizeGroup = (shapes, selectedShapes, elements) => {
       const T = matrix.multiply(groupScale, normalizedBaseLocalTransformMatrix);
       const backScaler = groupScale.map(d => Math.abs(d));
       const transformShit = matrix.invert(backScaler);
-      const abShit = matrix.mvMultiply(matrix.multiply(backScaler, impliedScale), [1, 1, 1, 1]);
+      const abTuple = matrix.mvMultiply(matrix.multiply(backScaler, impliedScale), [1, 1, 1, 1]);
       return {
         ...s,
         localTransformMatrix: matrix.multiply(
           T,
           matrix.multiply(inverseImpliedScale, transformShit)
         ),
-        a: abShit[0],
-        b: abShit[1],
-        baseab,
+        a: abTuple[0],
+        b: abTuple[1],
+        childBaseAB,
         baseLocalTransformMatrix,
       };
     }),
