@@ -37,9 +37,7 @@ export default function () {
 
     esTestCluster: {
       license: 'oss',
-      from: 'snapshot',
-      serverArgs: [
-      ],
+      serverArgs: [],
     },
 
     kbnTestServer: {
