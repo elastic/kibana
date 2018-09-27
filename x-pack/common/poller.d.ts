@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-var */
-require('jquery');
-require('angular');
-require('angular-paging/dist/paging');
+export declare class Poller {
+  constructor(options: any);
 
-var uiModules = require('ui/modules').uiModules;
-uiModules.get('kibana', ['bw.paging']);
+  public start(): void;
+}
