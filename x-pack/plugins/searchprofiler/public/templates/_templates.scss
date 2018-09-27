@@ -4,6 +4,7 @@
     display: flex;
     flex-flow: row wrap;
     position: absolute;
+    width: 99%; // SASSTODO Short-term fix (incl IE11) until markup can be re-arranged
     height: 100%;
   }
 
@@ -23,7 +24,6 @@
 
   .sense {
     height: 100%;
-    min-width: 300px;
     flex: 1;
     order: 1;
 

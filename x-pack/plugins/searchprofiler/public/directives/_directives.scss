@@ -24,6 +24,12 @@
   .shard-details {
     float: left;
     margin-bottom: $euiSizeXS;
+
+    .fa {
+      width: $euiSizeM;
+      height: $euiSizeM;
+      cursor: pointer;
+    }
   }
 
   .shard-details-right {
@@ -124,8 +130,9 @@
 
   .bar {
     height: 20px; /* Not 30px because the 1px top-border brings it up to 30px to match #graph */
-    background: rgba($euiColorAccent, .1);
-    background: linear-gradient(to top, rgba($euiColorAccent, .1) 0%,rgba(euiColorAccent, .4) 100%);
+    // SASSTODO This pink color is hardcoded elsewhere in the javascript and in tests, needs an overall redesign
+    background: rgba(255, 175, 175, .1);
+    background: linear-gradient(to top, rgba(255, 175, 175, .3) 0%, rgba(255, 175, 175, .6) 100%);
     vertical-align: middle;
     float: right;
   }
