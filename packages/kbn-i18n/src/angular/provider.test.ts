@@ -20,7 +20,7 @@
 import angular from 'angular';
 import 'angular-mocks';
 
-import * as i18n from '../core/i18n';
+import * as i18nCore from '../core/i18n';
 import { I18nProvider, I18nServiceType } from './provider';
 
 angular.module('app', []).provider('i18n', I18nProvider);
@@ -32,26 +32,24 @@ describe('i18nProvider', () => {
   beforeEach(
     angular.mock.module('app', [
       'i18nProvider',
-      // tslint:disable-next-line:no-shadowed-variable
       (i18n: I18nProvider) => {
         provider = i18n;
       },
     ])
   );
   beforeEach(
-    // tslint:disable-next-line:no-shadowed-variable
     angular.mock.inject((i18n: I18nServiceType) => {
       service = i18n;
     })
   );
 
   test('provides wrapper around i18n engine', () => {
-    expect(service).toEqual(i18n.translate);
+    expect(service).toEqual(i18nCore.translate);
   });
 
   test('provides service wrapper around i18n engine', () => {
     const serviceMethodNames = Object.keys(provider);
-    const pluginMethodNames = Object.keys(i18n);
+    const pluginMethodNames = Object.keys(i18nCore);
 
     expect([...serviceMethodNames, 'translate'].sort()).toEqual(
       [...pluginMethodNames, '$get'].sort()

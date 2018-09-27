@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFormats } from 'kbn-i18n-formats';
+import { Formats } from './core/formats';
 
 /**
  * Messages tree, where leafs are translated strings
@@ -35,5 +35,5 @@ export interface PlainMessages {
   /**
    * set of options to the underlying formatter
    */
-  formats?: IFormats;
+  formats?: Formats;
 }

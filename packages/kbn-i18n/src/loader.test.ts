@@ -20,7 +20,7 @@
 import { join } from 'path';
 
 describe('I18n loader', () => {
-  let i18nLoader: any;
+  let i18nLoader: typeof import('./loader');
 
   beforeEach(() => {
     i18nLoader = require('./loader');
@@ -33,7 +33,9 @@ describe('I18n loader', () => {
 
   describe('registerTranslationFile', () => {
     test('should throw error if path to translation file is not specified', () => {
-      expect(() => i18nLoader.registerTranslationFile()).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        i18nLoader.registerTranslationFile(undefined as any)
+      ).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if path to translation file is not an absolute', () => {
@@ -230,7 +232,7 @@ describe('I18n loader', () => {
     });
 
     test('should return empty object if there are no translation files', async () => {
-      expect(await i18nLoader.getAllTranslationsFromPaths()).toEqual({});
+      expect(await i18nLoader.getAllTranslationsFromPaths(undefined as any)).toEqual({});
     });
   });
 });

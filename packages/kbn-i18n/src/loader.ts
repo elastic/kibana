@@ -69,7 +69,7 @@ function getLocaleFromFileName(fullFileName: string) {
  * @param pathToFile
  * @returns
  */
-async function loadFile(pathToFile: string) {
+async function loadFile(pathToFile: string): Promise<PlainMessages> {
   return JSON5.parse(await asyncReadFile(pathToFile, 'utf8'));
 }
 
@@ -79,7 +79,7 @@ async function loadFile(pathToFile: string) {
  * @returns
  */
 async function loadAndCacheFiles(files: string[]) {
-  const translations: PlainMessages[] = await Promise.all(files.map(loadFile));
+  const translations = await Promise.all(files.map(loadFile));
 
   files.forEach((file, index) => {
     loadedFiles[file] = translations[index];
@@ -171,9 +171,7 @@ export async function getAllTranslations(): Promise<{ [key: string]: Messages }>
  * @returns A Promise object where
  * keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslationsFromPaths(
-  paths: string[]
-): Promise<{ [key: string]: Messages }> {
+export async function getAllTranslationsFromPaths(paths: string[]) {
   registerTranslationFiles(paths);
 
   return await getAllTranslations();

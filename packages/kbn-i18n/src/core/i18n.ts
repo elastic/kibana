@@ -20,10 +20,9 @@
 import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
-import { IFormats } from 'kbn-i18n-formats';
 
 import { Messages, PlainMessages } from '../messages';
-import { formats as EN_FORMATS } from './formats';
+import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 
 // Add all locale data to `IntlMessageFormat`.
@@ -36,7 +35,7 @@ const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
-let formats: IFormats = EN_FORMATS;
+let formats = EN_FORMATS;
 
 IntlMessageFormat.defaultLocale = defaultLocale;
 IntlRelativeFormat.defaultLocale = defaultLocale;
@@ -46,7 +45,7 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * @param id - path to the message
  * @returns message - translated message from messages tree
  */
-function getMessageById(id: string) {
+function getMessageById(id: string): string {
   return getMessages()[id];
 }
 
@@ -125,10 +124,6 @@ export function setDefaultLocale(locale: string) {
   IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
-/**
- * Returns the default locale
- * @returns defaultLocale
- */
 export function getDefaultLocale() {
   return defaultLocale;
 }
@@ -144,7 +139,7 @@ export function getDefaultLocale() {
  * @param [newFormats.date]
  * @param [newFormats.time]
  */
-export function setFormats(newFormats: IFormats) {
+export function setFormats(newFormats: Formats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
@@ -168,7 +163,7 @@ export function getRegisteredLocales() {
   return Object.keys(messages);
 }
 
-interface ITranslateArguments {
+interface TranslateArguments {
   values?: { [key: string]: string | number | Date };
   defaultMessage?: string;
 }
@@ -183,11 +178,11 @@ interface ITranslateArguments {
  */
 export function translate(
   id: string,
-  { values = {}, defaultMessage = '' }: ITranslateArguments = {
+  { values = {}, defaultMessage = '' }: TranslateArguments = {
     values: {},
     defaultMessage: '',
   }
-): string {
+) {
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }

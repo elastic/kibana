@@ -17,41 +17,35 @@
  * under the License.
  */
 
-module.exports = function(api) {
-  api.cache(true);
-
-  return {
-    plugins: [
-      '@babel/plugin-proposal-class-properties',
-      '@babel/plugin-proposal-object-rest-spread',
-    ],
-    presets: ['@babel/preset-react', '@babel/typescript'],
-    env: {
-      web: {
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              targets: {
-                browsers: ['last 2 versions', '> 5%', 'Safari 7'],
-              },
+// We can't use common Kibana presets here because of babel versions incompatibility
+module.exports = {
+  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
+  presets: ['@babel/preset-react', '@babel/typescript'],
+  env: {
+    web: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
             },
-          ],
+          },
         ],
-      },
-      node: {
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              targets: {
-                node: 'current',
-              },
-            },
-          ],
-        ],
-      },
+      ],
     },
-    ignore: ['**/*.test.ts', '**/*.test.tsx'],
-  };
+    node: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              node: 'current',
+            },
+          },
+        ],
+      ],
+    },
+  },
+  ignore: ['**/*.test.ts', '**/*.test.tsx'],
 };
