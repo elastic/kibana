@@ -145,4 +145,23 @@ export function fileRoute(server: Server, options: ServerOptions) {
       }
     },
   });
+
+  server.route({
+    path: '/api/cs/repo/{uri*3}/diff/{revision}',
+    method: 'GET',
+    async handler(req, reply) {
+      const gitOperations = new GitOperations(options.repoPath);
+      const { uri, revision } = req.params;
+      try {
+        const diff = await gitOperations.getCommitDiff(uri, revision);
+        reply(diff);
+      } catch (e) {
+        if (e.isBoom) {
+          reply(e);
+        } else {
+          reply(Boom.internal(e.message || e.name));
+        }
+      }
+    },
+  });
 }

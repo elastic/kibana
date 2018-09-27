@@ -7,8 +7,10 @@
 import Boom from 'boom';
 import { Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
+import { CommitDiff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
+import { detectLanguage } from './utils/detect_language';
 
 const HEAD = 'HEAD';
 const REFS_HEADS = 'refs/heads/';
@@ -124,6 +126,87 @@ export class GitOperations {
         depth
       );
     }
+  }
+
+  public async getCommitDiff(uri: string, revision: string): Promise<CommitDiff> {
+    const repo = await this.openRepo(uri);
+    const commit = await this.getCommit(repo, revision);
+    const diffs = await commit.getDiff();
+
+    const commitDiff: CommitDiff = {
+      additions: 0,
+      deletions: 0,
+      files: [],
+    };
+    for (const diff of diffs) {
+      const patches = await diff.patches();
+      for (const patch of patches) {
+        const { total_deletions, total_additions } = patch.lineStats();
+        commitDiff.additions += total_additions;
+        commitDiff.deletions += total_deletions;
+        if (patch.isAdded()) {
+          const path = patch.newFile().path();
+          const modifiedCode = await this.getModifiedCode(commit, path);
+          const language = await detectLanguage(path, modifiedCode);
+          commitDiff.files.push({
+            language,
+            path,
+            modifiedCode,
+            kind: DiffKind.ADDED,
+          });
+        } else if (patch.isDeleted()) {
+          const path = patch.oldFile().path();
+          const originCode = await this.getOriginCode(commit, repo, path);
+          const language = await detectLanguage(path, originCode);
+          commitDiff.files.push({
+            language,
+            path,
+            originCode,
+            kind: DiffKind.DELETED,
+          });
+        } else if (patch.isModified()) {
+          const path = patch.newFile().path();
+          const modifiedCode = await this.getModifiedCode(commit, path);
+          const originPath = patch.oldFile().path();
+          const originCode = await this.getOriginCode(commit, repo, originPath);
+          const language = await detectLanguage(patch.newFile().path(), modifiedCode);
+          commitDiff.files.push({
+            language,
+            path,
+            originPath,
+            originCode,
+            modifiedCode,
+            kind: DiffKind.MODIFIED,
+          });
+        } else if (patch.isRenamed()) {
+          const path = patch.newFile().path();
+          commitDiff.files.push({
+            path,
+            originPath: patch.oldFile().path(),
+            kind: DiffKind.RENAMED,
+          });
+        }
+      }
+    }
+    return commitDiff;
+  }
+
+  private async getOriginCode(commit: Commit, repo: Repository, path: string) {
+    for (const oid of commit.parents()) {
+      const parentCommit = await repo.getCommit(oid);
+      if (parentCommit) {
+        const entry = await parentCommit.getEntry(path);
+        if (entry) {
+          return (await entry.getBlob()).content().toString('utf8');
+        }
+      }
+    }
+    return '';
+  }
+
+  private async getModifiedCode(commit: Commit, path: string) {
+    const entry = await commit.getEntry(path);
+    return (await entry.getBlob()).content().toString('utf8');
   }
 
   private async walkTree(file: FileTree, tree: Tree, depth: number): Promise<FileTree> {
