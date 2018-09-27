@@ -47,6 +47,7 @@ import { timefilter } from 'ui/timefilter';
 import {
   getExploreSeriesLink,
   getTickValues,
+  getXTransform,
   removeLabelOverlap
 } from './chart_utils';
 
@@ -130,6 +131,28 @@ describe('getTickValues', () => {
       1518652800000,
       1519257600000
     ]);
+  });
+});
+
+describe('getXTransform', () => {
+  const expectedXTransform = 0.007167499999999999;
+
+  test('Chrome/Safari/Firefox String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999,0)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('IE11 String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('Invalid String.', () => {
+    const transformStr = 'translate()';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(NaN);
   });
 });
 
