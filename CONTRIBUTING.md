@@ -407,9 +407,9 @@ README for getting the docs tooling set up.
 node scripts/docs.js --open
 ```
 
-### Release Notes Process For Maintainers
+### Release Notes Process
 
-This process only applied to maintainers, since it requires access to Github labels.
+Part of this process only applies to maintainers, since it requires access to Github labels.
 
 Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
 
