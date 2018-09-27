@@ -4,73 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface DbContext {
-  statement: string;
-  type: string;
-  user: string;
+import { APMDoc, ContextService, Stackframe } from './APMDoc';
+
+export interface DbContext {
+  instance?: string;
+  statement?: string;
+  type?: string;
+  user?: string;
 }
 
-interface Stackframe {
-  abs_path: string;
-  colno: number;
-  context_line: string;
-  filename: string;
-  function: string;
-  library_frame: boolean;
-  lineno: number;
-  module: string;
-  post_context: string[];
-  pre_context: string[];
-  vars: any;
-}
-
-interface Context {
-  process?: {
-    pid: string;
-  };
-  db?: DbContext;
-  service: {
-    name: string;
-    agent: {
-      version: string;
-      name: string;
-    };
-  };
-}
-
-interface Span {
-  '@timestamp': string;
-  beat: {
-    version: string;
-    name: string;
-    hostname: string;
-  };
-  context: Context;
-  host: {
-    name: string;
-  };
-  parent: {
-    id: string;
-  };
+export interface Span extends APMDoc {
   processor: {
     name: 'transaction';
     event: 'span';
+  };
+  context: {
+    db?: DbContext;
+    service: ContextService;
   };
   span: {
     duration: {
       us: number;
     };
-    hex_id: string;
-    name: string;
-    parent: string;
-    stacktrace: Stackframe[];
     start: {
       us: number;
     };
+    name: string;
     type: string;
-  };
-  trace: {
-    id: string;
+    id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
+    hex_id?: string; // hex_id not available in v1
+    parent?: string; // parent deprecated in v2
+    stacktrace?: Stackframe[];
   };
   transaction: {
     id: string;

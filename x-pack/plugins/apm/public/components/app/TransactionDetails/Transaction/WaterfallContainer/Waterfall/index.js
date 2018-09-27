@@ -110,7 +110,7 @@ class Waterfall extends Component {
 }
 
 Waterfall.propTypes = {
-  // TODO:
+  // TODO: the agent marks and note about dropped spans were removed. Need to be re-added
   //   agentMarks: PropTypes.array,
   //   agentName: PropTypes.string.isRequired,
   //   droppedSpans: PropTypes.number.isRequired,

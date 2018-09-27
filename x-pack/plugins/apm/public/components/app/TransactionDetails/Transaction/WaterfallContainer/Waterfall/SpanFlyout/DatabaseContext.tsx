@@ -26,6 +26,7 @@ import { xcode } from 'react-syntax-highlighter/dist/styles';
 // @ts-ignore
 import sql from 'react-syntax-highlighter/dist/languages/sql';
 
+import { DbContext } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import { HeaderXSmall } from '../../../../../../shared/UIComponents';
 

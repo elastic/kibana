@@ -11,6 +11,8 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
+import { Transaction } from '../../../../../../../../typings/Transaction';
+
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
 
@@ -28,7 +30,7 @@ function getDiscoverQuery(id: string) {
 
 interface Props {
   onClose: () => {};
-  transaction: Transaction;
+  transaction?: Transaction;
 }
 
 export function TransactionFlyout({ transaction, onClose }: Props) {

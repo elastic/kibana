@@ -4,40 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Transaction {
-  '@timestamp': string;
-  beat: {
-    hostname: string;
-    name: string;
-    version: string;
-  };
-  context: Context;
-  host: {
-    name: string;
-  };
-  parent?: {
-    id: string;
-  };
+import { APMDoc, ContextService } from './APMDoc';
+
+export interface Transaction extends APMDoc {
   processor: {
     name: 'transaction';
     event: 'transaction';
   };
-  // trace ID is not available in v1
-  trace?: {
-    id: string;
+  context: {
+    process?: {
+      pid: number;
+    };
+    service: ContextService;
   };
   transaction: {
     duration: {
       us: number;
     };
     id: string;
-    name: string;
-    result: string;
+    name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
+    result?: string;
     sampled: boolean;
-    span_count: {
-      started: number;
-      dropped: {
-        total: number;
+
+    // span_count.started not available in v1
+    span_count?: {
+      started?: number;
+      dropped?: {
+        total?: number;
       };
     };
     type: string;

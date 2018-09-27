@@ -5,6 +5,8 @@
  */
 
 import { groupBy, sortBy } from 'lodash';
+import { Span } from '../../../../../../../../typings/Span';
+import { Transaction } from '../../../../../../../../typings/Transaction';
 
 interface WaterfallItem {
   transaction?: Transaction;
@@ -39,8 +41,8 @@ export function getSpanItem(span: Span): WaterfallItem {
   const timestamp = span['@timestamp'];
 
   return {
-    id: span.span.hex_id, // TODO: change to span.id if hex_id is being deprecated
-    parentId: span.parent.id,
+    id: span.span.hex_id!, // TODO: make sure this is compatible with v1
+    parentId: span.parent && span.parent.id,
     serviceName: span.context.service.name,
     name: span.span.name,
     duration: span.span.duration.us,

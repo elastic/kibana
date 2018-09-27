@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 // @ts-ignore
+import { Span } from '../../../../../../../../typings/Span';
 import { units } from '../../../../../../../style/variables';
 // @ts-ignore
 import { asMillis } from '../../../../../../../utils/formatters';

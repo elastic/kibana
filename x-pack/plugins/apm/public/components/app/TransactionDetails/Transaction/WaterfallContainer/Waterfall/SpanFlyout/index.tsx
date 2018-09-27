@@ -24,6 +24,7 @@ import Stacktrace from '../../../../../../shared/Stacktrace';
 import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
+import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
 
@@ -31,20 +32,20 @@ const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
 `;
 
-function getDiscoverQuery(hexId: string) {
+function getDiscoverQuery(id: number) {
   return {
     _a: {
       interval: 'auto',
       query: {
         language: 'lucene',
-        query: `span.hex_id:${hexId}`
+        query: `span.hex_id:${id}`
       }
     }
   };
 }
 
 interface Props {
-  span: Span;
+  span?: Span;
   totalDuration: number;
   onClose: () => {};
 }
@@ -64,7 +65,7 @@ export function SpanFlyout({ span, totalDuration, onClose }: Props) {
           <h2>Span details</h2>
         </EuiTitle>
 
-        <DiscoverButton query={getDiscoverQuery(span.span.hex_id)}>
+        <DiscoverButton query={getDiscoverQuery(span.span.id)}>
           {`View span in Discover`}
         </DiscoverButton>
       </EuiFlyoutHeader>

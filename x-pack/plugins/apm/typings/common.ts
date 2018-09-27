@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { StringMap } from '../../../../typings/common';
 
-export type KeySorter = (data: StringMap<any>, parentKey?: string) => string[];
+export interface StringMap<T> {
+  [key: string]: T;
+}
