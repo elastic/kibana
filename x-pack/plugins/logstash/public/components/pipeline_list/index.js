@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './pipeline_table';
+export { PipelineList } from './pipeline_list';
