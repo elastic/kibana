@@ -1,21 +1,21 @@
-.euiFilterGroup {
-  max-width: 500px;
+.mchJobFilterBar {
+  .euiFilterGroup {
+    .euiPopover .euiPanel {
+      .group-item {
+        padding: $euiSizeS $euiSize;
+      }
 
-  .euiPopover .euiPanel {
-    .group-item {
-      padding: 6px 12px;
-    }
-
-    .inline-group {
-      border: 1px solid $euiColorEmptyShade;
-      border-radius: 3px;
-    }
-
-    .euiFilterSelectItem:hover, .euiFilterSelectItem:focus {
-      text-decoration: none;
       .inline-group {
-        border: 1px solid $euiColorDarkShade;
-        box-shadow: 0px 1px 2px $euiColorMediumShade;
+        border: 1px solid $euiColorEmptyShade;
+        border-radius: $euiBorderRadius;
+      }
+
+      .euiFilterSelectItem:hover, .euiFilterSelectItem:focus {
+        text-decoration: none;
+        .inline-group {
+          border: 1px solid $euiColorDarkShade;
+          box-shadow: 0px 1px 2px $euiColorMediumShade;
+        }
       }
     }
   }

@@ -255,7 +255,7 @@ module.directive('mlMetricDistributionChart', function () {
           contents = `${bar.percent}% of documents have<br>a value of ${minValFormatted}`;
         }
 
-        contents = `<div class='centered-text'>${contents}</div>`;
+        contents = `<div class='eui-textCenter'>${contents}</div>`;
 
         if (path.length && path[0].length) {
           mlChartTooltipService.show(contents, path[0][0], {

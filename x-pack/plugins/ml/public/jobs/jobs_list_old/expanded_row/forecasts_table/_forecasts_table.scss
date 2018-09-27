@@ -30,14 +30,14 @@ ml-forecasts-table {
    }
  
  
-   // SASSTODO: Proper calcs
+   // SASSTODO: Dangerous EUI overwrites
    .view-forecast-btn {
      width: 35px;
      min-width: 35px;
      height: $euiSizeXL;
  
      .euiButton__content {
-       padding: 0px 8px;
+       padding: 0px $euiSizeS;
      }
    }
  }

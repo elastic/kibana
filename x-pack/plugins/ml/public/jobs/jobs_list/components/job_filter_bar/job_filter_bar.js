@@ -99,6 +99,7 @@ export class JobFilterBar extends Component {
         }}
         filters={filters}
         onChange={this.onChange}
+        className="mchJobFilterBar"
       />
     );
   }

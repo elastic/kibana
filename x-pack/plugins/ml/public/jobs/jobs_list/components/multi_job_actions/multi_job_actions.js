@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, {
-  Component
+  Component, Fragment
 } from 'react';
 
 import { ResultLinks } from '../job_actions';
@@ -24,9 +24,9 @@ export class MultiJobActions extends Component {
   render() {
     const s = (this.props.selectedJobs.length > 1) ? 's' : '';
     return (
-      <div className="multi-select-actions">
+      <Fragment>
         {this.props.selectedJobs.length > 0 &&
-          <React.Fragment>
+          <div className="multi-select-actions">
             <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
             <div className="actions-border-large" />
             <ResultLinks jobs={this.props.selectedJobs} />
@@ -43,9 +43,9 @@ export class MultiJobActions extends Component {
               showDeleteJobModal={this.props.showDeleteJobModal}
               refreshJobs={this.props.refreshJobs}
             />
-          </React.Fragment>
+          </div>
         }
-      </div>
+      </Fragment>
     );
   }
 }

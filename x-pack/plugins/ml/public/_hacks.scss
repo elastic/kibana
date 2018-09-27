@@ -1,6 +1,4 @@
 // These are hacks that were near ML's root. Unsure if they still need to be here.
-
-
 .tab-jobs,
 .edit-job-modal,
 .create-watch-modal {
@@ -52,7 +50,7 @@
 
 .ui-select-multiple.ui-select-bootstrap input.ui-select-search {
   font-size: $euiFontSizeS;
-  padding: 5px 10px;
+  padding: 5px 10px; // Matches current padding hacks from other parts of Kibana
 }
 
 
