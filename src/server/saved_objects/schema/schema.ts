@@ -17,12 +17,31 @@
  * under the License.
  */
 
-export {
-  assignSearchRequestsToSearchStrategies,
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-} from './search_strategy_registry';
+interface SavedObjectsSchemaTypeDefinition {
+  isNamespaceAgnostic: boolean;
+}
 
-export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
+export interface SavedObjectsSchemaDefinition {
+  [key: string]: SavedObjectsSchemaTypeDefinition;
+}
 
-export { SearchError } from './search_error';
+export class SavedObjectsSchema {
+  private readonly definition?: SavedObjectsSchemaDefinition;
+  constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
+    this.definition = schemaDefinition;
+  }
+
+  public isNamespaceAgnostic(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and no types are namespace agnostic
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+}
