@@ -83,6 +83,7 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
           isOpen={this.state.isPopoverOpen}
           id="metricsPanel"
           button={button}
+          panelPaddingSize="none"
           closePopover={this.handleClose}
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />

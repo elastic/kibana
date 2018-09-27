@@ -57,7 +57,7 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'firstPanel',
-        title: '',
+        title: 'Select up to two groupings',
         items: options.map(o => {
           const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
           const panel = { name: o.text, onClick: this.handleClick(o.field), icon };
@@ -95,6 +95,7 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
           isOpen={this.state.isPopoverOpen}
           id="groupByPanel"
           button={button}
+          panelPaddingSize="none"
           closePopover={this.handleClose}
         >
           <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
