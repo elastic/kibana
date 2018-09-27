@@ -4,59 +4,102 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSelect } from '@elastic/eui';
-import { get, last } from 'lodash';
-import React from 'react';
 import {
-  InfraMetricInput,
-  InfraMetricType,
-  InfraPathInput,
-  InfraPathType,
-} from '../../../common/graphql/types';
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+} from '@elastic/eui';
+import { last } from 'lodash';
+import React from 'react';
+import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
 interface Props {
-  path: InfraPathInput[];
+  nodeType: InfraNodeType;
   metrics: InfraMetricInput[];
   onChange: (metrics: InfraMetricInput[]) => void;
 }
 
 const OPTIONS = {
-  [InfraPathType.pods]: [
+  [InfraNodeType.pod]: [
     { text: 'CPU Usage', value: InfraMetricType.cpu },
     { text: 'Memory Usage', value: InfraMetricType.memory },
     { text: 'Inbound Traffic', value: InfraMetricType.rx },
     { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
-  [InfraPathType.containers]: [
+  [InfraNodeType.container]: [
     { text: 'CPU Usage', value: InfraMetricType.cpu },
     { text: 'Memory Usage', value: InfraMetricType.memory },
     { text: 'Inbound Traffic', value: InfraMetricType.rx },
     { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
-  [InfraPathType.hosts]: [
+  [InfraNodeType.host]: [
     { text: 'CPU Usage', value: InfraMetricType.cpu },
     { text: 'Memory Usage', value: InfraMetricType.memory },
+    { text: 'Load', value: InfraMetricType.load },
     { text: 'Inbound Traffic', value: InfraMetricType.rx },
     { text: 'Outbound Traffic', value: InfraMetricType.tx },
   ],
 };
 
-interface OptionsItem {
-  label: string;
-  metric: InfraMetricInput;
-}
+const initialState = {
+  isPopoverOpen: false,
+};
+type State = Readonly<typeof initialState>;
 
-export class WaffleMetricControls extends React.PureComponent<Props> {
+export class WaffleMetricControls extends React.PureComponent<Props, State> {
+  public readonly state: State = initialState;
   public render() {
-    const nodePart = last(this.props.path);
     const currentMetric = last(this.props.metrics);
-    const options = get(OPTIONS, nodePart.type, [] as OptionsItem[]);
+    const options = OPTIONS[this.props.nodeType];
     const value = currentMetric.type;
     if (!options.length || !value) {
       throw Error('Unable to select options or value for metric.');
     }
-    return <EuiSelect options={options} value={value} onChange={this.handleChange} />;
+    const currentLabel = options.find(o => o.value === currentMetric.type);
+    if (!currentLabel) {
+      return 'null';
+    }
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: '',
+        items: options.map(o => {
+          const icon = o.value === currentMetric.type ? 'check' : 'empty';
+          const panel = { name: o.text, onClick: this.handleClick(o.value), icon };
+          return panel;
+        }),
+      },
+    ];
+    const button = (
+      <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
+        {currentLabel.text}
+      </EuiFilterButton>
+    );
+
+    return (
+      <EuiFilterGroup>
+        <EuiPopover
+          isOpen={this.state.isPopoverOpen}
+          id="metricsPanel"
+          button={button}
+          closePopover={this.handleClose}
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      </EuiFilterGroup>
+    );
   }
-  private handleChange = (e: { target: { value: InfraMetricType } }) => {
-    this.props.onChange([{ type: e.target.value }]);
+  private handleClose = () => {
+    this.setState({ isPopoverOpen: false });
+  };
+
+  private handleToggle = () => {
+    this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
+  };
+
+  private handleClick = (value: InfraMetricType) => () => {
+    this.props.onChange([{ type: value }]);
+    this.handleClose();
   };
 }

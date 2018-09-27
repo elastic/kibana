@@ -10,9 +10,11 @@ import { Query } from 'react-apollo';
 import {
   InfraMetricInput,
   InfraPathInput,
+  InfraPathType,
   InfraTimerangeInput,
   WaffleNodesQuery,
 } from '../../../common/graphql/types';
+import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { InfraWaffleMapGroup } from '../../lib/lib';
 import { nodesToWaffleMap } from './nodes_to_wafflemap';
 import { waffleNodesQuery } from './waffle_nodes.gql_query';
@@ -27,16 +29,24 @@ interface WithWaffleNodesProps {
   children: (args: WithWaffleNodesArgs) => React.ReactNode;
   filterQuery: string | null | undefined;
   metrics: InfraMetricInput[];
-  path: InfraPathInput[];
+  groupBy: InfraPathInput[];
+  nodeType: InfraNodeType;
   sourceId: string;
   timerange: InfraTimerangeInput;
 }
+
+const NODE_TYPE_TO_PATH_TYPE = {
+  [InfraNodeType.container]: InfraPathType.containers,
+  [InfraNodeType.host]: InfraPathType.hosts,
+  [InfraNodeType.pod]: InfraPathType.pods,
+};
 
 export const WithWaffleNodes = ({
   children,
   filterQuery,
   metrics,
-  path,
+  groupBy,
+  nodeType,
   sourceId,
   timerange,
 }: WithWaffleNodesProps) => (
@@ -47,7 +57,7 @@ export const WithWaffleNodes = ({
     variables={{
       sourceId,
       metrics,
-      path,
+      path: [...groupBy, { type: NODE_TYPE_TO_PATH_TYPE[nodeType] }],
       timerange,
       filterQuery,
     }}

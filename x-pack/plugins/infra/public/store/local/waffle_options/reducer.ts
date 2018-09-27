@@ -5,24 +5,45 @@
  */
 
 import { combineReducers } from 'redux';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { InfraMetricInput, InfraMetricType } from '../../../../common/graphql/types';
-import { changeMetrics } from './actions';
+import {
+  InfraMetricInput,
+  InfraMetricType,
+  InfraPathInput,
+} from '../../../../common/graphql/types';
+import { InfraNodeType } from '../../../../server/lib/adapters/nodes';
+import { changeGroupBy, changeMetrics, changeNodeType } from './actions';
 
 export interface WaffleOptionsState {
   metrics: InfraMetricInput[];
+  groupBy: InfraPathInput[];
+  nodeType: InfraNodeType;
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
   metrics: [{ type: InfraMetricType.cpu }],
+  groupBy: [],
+  nodeType: InfraNodeType.host,
 };
 
 const currentMetricsReducer = reducerWithInitialState(initialWaffleOptionsState.metrics).case(
   changeMetrics,
-  (currentMetrics, targetMetrics) => targetMetrics
+  (current, target) => target
+);
+
+const currentGroupByReducer = reducerWithInitialState(initialWaffleOptionsState.groupBy).case(
+  changeGroupBy,
+  (current, target) => target
+);
+
+const currentNodeTypeReducer = reducerWithInitialState(initialWaffleOptionsState.nodeType).case(
+  changeNodeType,
+  (current, target) => target
 );
 
 export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metrics: currentMetricsReducer,
+  groupBy: currentGroupByReducer,
+  nodeType: currentNodeTypeReducer,
 });
