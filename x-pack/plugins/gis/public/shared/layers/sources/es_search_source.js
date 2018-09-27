@@ -45,7 +45,9 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.filterByMapBounds
+      filterByMapBounds: descriptor.filterByMapBounds,
+      showTooltip: _.get(descriptor, 'showTooltip', false),
+      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
     window._ess = this;
   }
@@ -131,6 +133,36 @@ export class ESSearchSource extends VectorSource {
     } catch(error) {
       throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
     }
+  }
+
+  areFeatureTooltipsEnabled() {
+    return this._descriptor.showTooltip && this._descriptor.tooltipProperties.length > 0;
+  }
+
+  async filterAndFormatProperties(properties) {
+    const filteredProperties = {};
+    this._descriptor.tooltipProperties.forEach(propertyName => {
+      filteredProperties[propertyName] = _.get(properties, propertyName, '-');
+    });
+
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPatternService();
+    } catch(error) {
+      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
+      return filteredProperties;
+    }
+
+    this._descriptor.tooltipProperties.forEach(propertyName => {
+      const field = indexPattern.fields.byName[propertyName];
+      if (!field) {
+        return;
+      }
+
+      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+    });
+
+    return filteredProperties;
   }
 
   getDisplayName() {

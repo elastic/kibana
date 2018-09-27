@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 
-export function FeatureTooltip({ feature, propertyNames }) {
+export function FeatureTooltip({ properties }) {
 
-  return propertyNames.map(propertyName => {
+  return Object.keys(properties).map(propertyName => {
     return (
       <div key={propertyName}>
         <strong>{propertyName}</strong>
         {' '}
-        {_.get(feature, ['properties', propertyName], '-')}
+        {properties[propertyName]}
       </div>
     );
   });

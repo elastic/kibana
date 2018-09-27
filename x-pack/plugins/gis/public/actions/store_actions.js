@@ -321,12 +321,12 @@ export async function loadMapResources(dispatch) {
           "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
           "geoField": "geo.coordinates",
           "limit": 1000,
-          "filterByMapBounds": true
+          "filterByMapBounds": true,
+          "showTooltip": true,
+          "tooltipProperties": ["timestamp", "clientip", "response"],
         },
         "visible": true,
         "temporary": false,
-        "showTooltip": true,
-        "tooltipProperties": ["timestamp", "clientip", "response"],
         "style": {
           "type": "VECTOR",
           "properties": {

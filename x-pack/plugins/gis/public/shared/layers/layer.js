@@ -66,15 +66,9 @@ export class ALayer {
   addEventListenerForMbLayer(mbMap, mbLayerId, eventType, handler) {
     mbMap.on(eventType, mbLayerId, handler);
 
-    let eventHandlersMap;
-    if (!this._listenersMap.has(mbLayerId)) {
-      eventHandlersMap = new Map();
-      eventHandlersMap.set(eventType, handler);
-      this._listenersMap.set(mbLayerId, eventHandlersMap);
-    } else {
-      eventHandlersMap = this._listenersMap.get(mbLayerId);
-    }
-
+    const eventHandlersMap = !this._listenersMap.has(mbLayerId)
+      ? new Map()
+      : this._listenersMap.get(mbLayerId);
     eventHandlersMap.set(eventType, handler);
     this._listenersMap.set(mbLayerId, eventHandlersMap);
   }

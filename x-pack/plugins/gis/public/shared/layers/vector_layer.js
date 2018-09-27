@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -30,8 +29,6 @@ export class VectorLayer extends ALayer {
   static createDescriptor(options) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
-    layerDescriptor.showTooltip = _.get(options, 'showTooltip', false);
-    layerDescriptor.tooltipProperties = _.get(options, 'tooltipProperties', []);
     defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
     if (!options.style) {
       layerDescriptor.style = VectorStyle.createDescriptor({
@@ -173,11 +170,11 @@ export class VectorLayer extends ALayer {
   addToolipListeners(mbMap, mbLayerId) {
     this.removeAllListenersForMbLayer(mbMap, mbLayerId);
 
-    if (!this._descriptor.showTooltip || this._descriptor.tooltipProperties.length === 0) {
+    if (!this._source.areFeatureTooltipsEnabled()) {
       return;
     }
 
-    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseenter', (e) => {
+    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseenter', async (e) => {
       mbMap.getCanvas().style.cursor = 'pointer';
 
       const feature = e.features[0];
@@ -196,11 +193,12 @@ export class VectorLayer extends ALayer {
         popupAnchorLocation = coordinates;
       }
 
+      const properties = await this._source.filterAndFormatProperties(e.features[0].properties);
+
       ReactDOM.render(
         React.createElement(
           FeatureTooltip, {
-            feature: e.features[0],
-            propertyNames: this._descriptor.tooltipProperties,
+            properties: properties,
           }
         ),
         VectorLayer.tooltipContainer
