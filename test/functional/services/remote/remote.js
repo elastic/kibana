@@ -78,8 +78,8 @@ export async function RemoteProvider({ getService }) {
     driver.setNetworkConditions({
       offline: false,
       latency: 50, // Additional latency (ms).
-      download_throughput: 1000 * 1024, // Maximal aggregated download throughput.
-      upload_throughput: 1000 * 1024 // Maximal aggregated upload throughput. }
+      download_throughput: 1000 * 1024, // These speeds are in bites per second, not kilobytes.
+      upload_throughput: 1000 * 1024
     });
   }
 
