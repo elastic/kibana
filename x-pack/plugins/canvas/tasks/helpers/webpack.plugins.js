@@ -10,6 +10,7 @@ const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
 
 module.exports = {
+  mode: 'none',
   entry: {
     'elements/all': path.join(sourceDir, 'elements/register.js'),
     'renderers/all': path.join(sourceDir, 'renderers/register.js'),

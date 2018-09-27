@@ -103,7 +103,7 @@
     "angular-sanitize": "1.4.9",
     "angular-ui-ace": "0.2.3",
     "axios": "^0.18.0",
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-preset-es2015": "^6.24.1",
     "babel-runtime": "^6.26.0",
     "base64-js": "^1.2.1",
