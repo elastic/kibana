@@ -8,12 +8,13 @@ import React from 'react';
 import {
   uiModules
 } from 'ui/modules';
+import './shared/services/gis_workspace_provider';
 import chrome from 'ui/chrome';
 import 'ui/autoload/all';
 import {
   timefilter
 } from 'ui/timefilter';
-import { getStore } from './store/store';
+import { getStore, gisStateSync } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
@@ -44,46 +45,64 @@ export function initGisApp(resolve) {
 
   uiModules
     .get('app/gis', [])
-    .controller('TimePickerController', ($scope) => {
-      $scope.topNavMenu = [{
-        key: 'inspect',
-        description: 'Open Inspector',
-        testId: 'openInspectorButton',
-        run() {
-          Inspector.open(inspectorAdapters, {
-            title: 'Layer requests'
-          });
-        }
-      }, {
-        key: 'save',
-        description: 'Save Visualization',
-        testId: 'visualizeSaveButton',
-        run: async () => {
-          const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-            return new Promise(resolve => {
-              console.log({ newTitle, newCopyOnSave,
-                isTitleDuplicateConfirmed, onTitleDuplicate });
-              resolve({ id: 'id' });
+    .controller('TimePickerController',
+      ($scope, gisWorkspace) => {
+
+        $scope.topNavMenu = [{
+          key: 'inspect',
+          description: 'Open Inspector',
+          testId: 'openInspectorButton',
+          run() {
+            Inspector.open(inspectorAdapters, {
+              title: 'Layer requests'
             });
-          };
+          }
+        }, {
+          key: 'save',
+          description: 'Save Visualization',
+          testId: 'visualizeSaveButton',
+          run: async () => {
+            const currentMapState = await getCurrentMapState();
+            console.log(currentMapState);
+            const saveSettings = () => {
+              return gisWorkspace.save({ mapState: currentMapState })
+                .then(({ id }) => {
+                  // TODO: Consider routing token for id
+                  if (id) gisStateSync.set('workspaceId', id);
+                  return { id };
+                });
+            };
+            const saveModal = (
+              <SavedObjectSaveModal
+                onSave={saveSettings}
+                onClose={() => {}}
+                title={'Save map settings'}
+                showCopyOnSave={false}
+                objectType={gisWorkspace.getType()}
+              />);
+            showSaveModal(saveModal);
+          }
+        }];
+        timefilter.enableTimeRangeSelector();
+        timefilter.enableAutoRefreshSelector();
 
-          const saveModal = (
-            <SavedObjectSaveModal
-              onSave={onSave}
-              onClose={() => {}}
-              title={'Save map settings'}
-              showCopyOnSave={false}
-              objectType="visualization"
-            />);
-          showSaveModal(saveModal);
-        }
-      }];
-      timefilter.enableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
-
-      Promise.all([waitForAngularReady]).then(resolve());
-    });
+        Promise.all([waitForAngularReady]).then(resolve());
+      });
 }
+
+async function getCurrentMapState() {
+  const store = await getStore();
+  const customReplacer = (key, value) => {
+    if (typeof value === 'number') {
+      return value.toString();
+    }
+    return value;
+  };
+  const { map } = store.getState();
+  const stringMap = JSON.stringify(map, customReplacer);
+  return (stringMap);
+}
+
 
 getStore().then(store => {
   timefilter.on('timeUpdate', () => {

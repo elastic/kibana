@@ -11,7 +11,16 @@ import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
 import { loadMapResources } from "../actions/store_actions";
+import _ from 'lodash';
 import config from './config';
+
+const getMapInitState = attributes => {
+  if (attributes && !_.isEmpty(attributes)) {
+    return { map: { mapState: attributes } };
+  } else {
+    return {};
+  }
+};
 
 const rootReducer = combineReducers({
   map,
@@ -23,12 +32,20 @@ const enhancers = [ applyMiddleware(thunk) ];
 window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
+export let gisStateSync;
 let initConfig = null;
 uiModules
   .get('kibana')
-  .run(() => {
-    //leave this for now. we still may want to load Kibana modules.
-    initConfig = {};
+  .run((AppState, gisWorkspace) => {
+    gisStateSync = new AppState().makeStateful('gis');
+    // Load saved workspace if present
+    const workspaceId = gisStateSync.get('workspaceId');
+    gisWorkspace.get(workspaceId).then(({ id, attributes }) => {
+      if (id && id !== workspaceId) {
+        gisStateSync.set('workSpaceId', id);
+      }
+      initConfig = getMapInitState(attributes);
+    });
   });
 
 let storePromise;
