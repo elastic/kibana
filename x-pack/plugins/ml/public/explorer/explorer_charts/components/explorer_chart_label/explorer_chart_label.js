@@ -25,10 +25,12 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   // 2. Multiple lines:
   //   <detectorLabel> <infoIcon>
   //   <entityBadge1> <entityBadge2> ...
+
+  // Using &nbsp;s here to make sure those spaces get rendered.
   const labelSeparator = (
     wrapLabel === true ||
     (entityFields.length === 0 || detectorLabel.length === 0)
-  ) ? '' : (<React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>);
+  ) ? (<React.Fragment>&nbsp;</React.Fragment>) : (<React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>);
 
   const entityFieldBadges = entityFields.map((entity) => {
     return (
