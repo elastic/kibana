@@ -23,9 +23,9 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   //   <detectorLabel> - <entityBadge1> <entityBadge2> ... <infoIcon>
   //
   // 2. Multiple lines:
-  //   <detectorLabel> <infoIcon> <br />
+  //   <detectorLabel> <infoIcon>
   //   <entityBadge1> <entityBadge2> ...
-  const labelSeparator = (wrapLabel === true) ? <br /> : ' - ';
+  const labelSeparator = (wrapLabel === true) ? '' : ' - ';
 
   const entityFieldBadges = entityFields.map((entity) => {
     return <span key={`${entity.fieldName} ${entity.fieldValue}`}><ExplorerChartLabelBadge entity={entity} /> </span>;
