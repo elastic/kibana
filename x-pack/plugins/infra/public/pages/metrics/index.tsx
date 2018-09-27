@@ -7,17 +7,20 @@
 import React from 'react';
 
 import {
+  EuiHideFor,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPageSideBar,
+  EuiShowFor,
   EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
 import styled, { withTheme } from 'styled-components';
 import { InfraNodeType } from '../../../common/graphql/types';
+import { AutoSizer } from '../../components/auto_sizer';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { ColumnarPage, PageContent } from '../../components/page';
@@ -47,6 +50,10 @@ interface Props {
 }
 
 class MetricDetailPage extends React.PureComponent<Props> {
+  public readonly state = {
+    isSideNavOpenOnMobile: false,
+  };
+
   public render() {
     const nodeName = this.props.match.params.node;
     const nodeType = this.props.match.params.type as InfraNodeType;
@@ -87,20 +94,47 @@ class MetricDetailPage extends React.PureComponent<Props> {
                   return (
                     <EuiPage style={{ flex: '1 0 auto' }}>
                       <EuiPageSideBar>
-                        <EuiSideNav items={sideNav} style={{ position: 'fixed' }} />
+                        <EuiHideFor sizes={['xs', 's']}>
+                          <EuiSideNavContainer>
+                            <EuiSideNav items={sideNav} />
+                          </EuiSideNavContainer>
+                        </EuiHideFor>
+                        <EuiShowFor sizes={['xs', 's']}>
+                          <EuiSideNav
+                            items={sideNav}
+                            mobileTitle={nodeName}
+                            toggleOpenOnMobile={this.toggleOpenOnMobile}
+                            isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+                          />
+                        </EuiShowFor>
                       </EuiPageSideBar>
-                      <EuiPageBody>
-                        <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                          <EuiPageHeaderSection>
-                            <EuiTitle size="m">
-                              <h1>{nodeName}</h1>
-                            </EuiTitle>
-                          </EuiPageHeaderSection>
-                        </EuiPageHeader>
-                        <EuiPageContentWithRelative>
-                          <Metrics layout={layout} metrics={metrics} loading={loading} />
-                        </EuiPageContentWithRelative>
-                      </EuiPageBody>
+                      <AutoSizer content={false} bounds detectAnyWindowResize>
+                        {({ measureRef, bounds: { width = 0 } }) => {
+                          return (
+                            <MetricsDetailsPageColumn innerRef={measureRef}>
+                              <EuiPageBody style={{ width: `${width}px` }}>
+                                <EuiHideFor sizes={['xs', 's']}>
+                                  <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                    <EuiPageHeaderSection>
+                                      <EuiTitle size="m">
+                                        <h1>{nodeName}</h1>
+                                      </EuiTitle>
+                                    </EuiPageHeaderSection>
+                                  </EuiPageHeader>
+                                </EuiHideFor>
+                                <EuiPageContentWithRelative>
+                                  <Metrics
+                                    nodeName={nodeName}
+                                    layout={layout}
+                                    metrics={metrics}
+                                    loading={loading}
+                                  />
+                                </EuiPageContentWithRelative>
+                              </EuiPageBody>
+                            </MetricsDetailsPageColumn>
+                          );
+                        }}
+                      </AutoSizer>
                     </EuiPage>
                   );
                 }}
@@ -113,11 +147,35 @@ class MetricDetailPage extends React.PureComponent<Props> {
   }
 
   private handleClick = (section: InfraMetricLayoutSection) => () => {
-    const el = document.getElementById(section.id);
+    const id = section.linkToId || section.id;
+    const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView();
     }
   };
+
+  private toggleOpenOnMobile = () => {
+    this.setState({
+      isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,
+    });
+  };
 }
 
 export const MetricDetail = withTheme(MetricDetailPage);
+
+const EuiSideNavContainer = styled.div`
+  position: fixed;
+  z-index: 1;
+  height: 88vh;
+  background-color: #f5f5f5;
+  padding-left: 16px;
+  margin-left: -16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+`;
+
+const MetricsDetailsPageColumn = styled.div`
+  flex: 1 0 0;
+  display: flex;
+  flex-direction: column;
+`;

@@ -41,6 +41,7 @@ export interface InfraMetricLayoutVisualizationConfig {
 
 export interface InfraMetricLayoutSection {
   id: InfraMetric;
+  linkToId?: string;
   label: string;
   requires: string[];
   visConfig: InfraMetricLayoutVisualizationConfig;

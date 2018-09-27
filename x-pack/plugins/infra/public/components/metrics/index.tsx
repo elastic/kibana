@@ -4,26 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingChart, EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+
 import { InfraMetricData } from '../../../common/graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 
 interface Props {
   metrics: InfraMetricData[];
   layout: InfraMetricLayout[];
   loading: boolean;
+  nodeName: string;
 }
 
 export class Metrics extends React.PureComponent<Props> {
   public render() {
     if (this.props.loading) {
       return (
-        <LoadingContainer>
-          <EuiLoadingChart />
-        </LoadingContainer>
+        <InfraLoadingPanel
+          height="100vh"
+          width="auto"
+          text={`Loading data for ${this.props.nodeName}`}
+        />
       );
     }
     return <React.Fragment>{this.props.layout.map(this.renderLayout)}</React.Fragment>;
@@ -34,7 +38,7 @@ export class Metrics extends React.PureComponent<Props> {
       <React.Fragment key={layout.id}>
         <EuiPageContentBody>
           <EuiTitle size="m">
-            <h2>{layout.label}</h2>
+            <h2 id={layout.id}>{`${layout.label} Overview`}</h2>
           </EuiTitle>
         </EuiPageContentBody>
         {layout.sections.map(this.renderSection(layout))}
@@ -48,16 +52,3 @@ export class Metrics extends React.PureComponent<Props> {
     );
   };
 }
-
-const LoadingContainer = styled.div`
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-`;

@@ -5,7 +5,7 @@
  */
 
 import isEqual from 'lodash/fp/isEqual';
-import * as React from 'react';
+import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
@@ -19,6 +19,7 @@ interface Measurements {
 }
 
 interface AutoSizerProps {
+  detectAnyWindowResize?: boolean;
   bounds?: boolean;
   content?: boolean;
   onResize?: (size: Measurements) => void;
@@ -35,6 +36,7 @@ interface AutoSizerState {
 export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerState> {
   public element: HTMLElement | null = null;
   public resizeObserver: ResizeObserver | null = null;
+  public windowWidth: number = -1;
 
   public readonly state = {
     boundsMeasurement: {
@@ -49,7 +51,9 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
 
   constructor(props: AutoSizerProps) {
     super(props);
-
+    if (this.props.detectAnyWindowResize) {
+      window.addEventListener('resize', this.updateMeasurement);
+    }
     this.resizeObserver = new ResizeObserver(entries => {
       entries.forEach(entry => {
         if (entry.target === this.element) {
@@ -64,9 +68,12 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+    if (this.props.detectAnyWindowResize) {
+      window.removeEventListener('resize', this.updateMeasurement);
+    }
   }
 
-  public measure = (entry: ResizeObserverEntry) => {
+  public measure = (entry: ResizeObserverEntry | null) => {
     if (!this.element) {
       return;
     }
@@ -85,13 +92,25 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
         }
       : previousBoundsMeasurement;
 
-    const contentRect = content ? entry.contentRect : null;
-    const contentMeasurement = contentRect
-      ? {
-          height: entry.contentRect.height,
-          width: entry.contentRect.width,
-        }
-      : previousContentMeasurement;
+    if (
+      this.props.detectAnyWindowResize &&
+      boundsMeasurement &&
+      boundsMeasurement.width &&
+      this.windowWidth !== -1 &&
+      this.windowWidth > window.innerWidth
+    ) {
+      const gap = this.windowWidth - window.innerWidth;
+      boundsMeasurement.width = boundsMeasurement.width - gap;
+    }
+    this.windowWidth = window.innerWidth;
+    const contentRect = content && entry ? entry.contentRect : null;
+    const contentMeasurement =
+      contentRect && entry
+        ? {
+            height: entry.contentRect.height,
+            width: entry.contentRect.width,
+          }
+        : previousContentMeasurement;
 
     if (
       isEqual(boundsMeasurement, previousBoundsMeasurement) &&
@@ -126,6 +145,12 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
       measureRef: this.storeRef,
     });
   }
+
+  private updateMeasurement = () => {
+    window.setTimeout(() => {
+      this.measure(null);
+    }, 0);
+  };
 
   private storeRef = (element: HTMLElement | null) => {
     if (this.element && this.resizeObserver) {

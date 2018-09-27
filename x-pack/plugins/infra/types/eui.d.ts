@@ -125,6 +125,9 @@ declare module '@elastic/eui' {
         onClick: () => void;
       }>;
     }>;
+    mobileTitle?: React.ReactNode;
+    toggleOpenOnMobile?: () => void;
+    isOpenOnMobile?: boolean;
   };
   export const EuiSideNav: React.SFC<EuiSideNavProps>;
 
@@ -151,4 +154,14 @@ declare module '@elastic/eui' {
     onChange?: (arg: any) => void;
   };
   export const EuiSelect: React.SFC<EuiSelectProps>;
+
+  type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
+  type EuiResponsiveProps = CommonProps & {
+    children: React.ReactNode;
+    sizes: EuiSizesResponsive[];
+  };
+
+  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
+
+  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 }
