@@ -22,13 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 
-export function serializeToJson5(defaultMessages) {
+export function serializeToJson5(messages, formats = i18n.formats) {
   // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
+  let jsonBuffer = Buffer.from(JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1));
 
-  for (const [mapKey, mapValue] of defaultMessages) {
+  for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
     const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
     const formattedContext = mapValue.context
       ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')

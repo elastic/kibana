@@ -19,19 +19,13 @@
 
 import path from 'path';
 
-import {
-  difference,
-  globAsync,
-  normalizePath,
-  readFileAsync,
-  writeFileAsync,
-  accessAsync,
-  makeDirAsync,
-} from './utils';
+import { difference, readFileAsync, writeFileAsync, accessAsync, makeDirAsync } from './utils';
 import { paths } from '../../../.i18nrc.json';
 import { getDefaultMessagesMap } from './extract_default_translations';
+import { createFailError } from '../run';
+import { serializeToJson } from './serializers/json';
 
-export function verifyMessages(localizedMessagesMap, defaultMessagesMap, filePath) {
+export function verifyMessages(localizedMessagesMap, defaultMessagesMap) {
   let errorMessage = '';
 
   const defaultMessagesIds = [...defaultMessagesMap.keys()];
@@ -49,67 +43,52 @@ export function verifyMessages(localizedMessagesMap, defaultMessagesMap, filePat
   }
 
   if (errorMessage) {
-    throw new Error(`Error in ${filePath}:${errorMessage}.`);
+    throw createFailError(`${errorMessage}`);
   }
 }
 
-export async function integrateLocaleFiles(localesPath) {
+export async function integrateLocaleFiles(filePath, log) {
   const defaultMessagesMap = await getDefaultMessagesMap(['.']);
-  const globOptions = {
-    cwd: path.resolve(localesPath),
-  };
+  const localizedMessages = JSON.parse((await readFileAsync(filePath)).toString());
 
-  const filePaths = (await globAsync('./*.json', globOptions)).map(filePath =>
-    path.resolve(localesPath, filePath)
+  if (!localizedMessages.formats) {
+    throw createFailError(`Locale file should contain formats object.`);
+  }
+
+  const localizedMessagesMap = new Map(
+    Object.entries(localizedMessages).filter(([key]) => key !== 'formats')
   );
 
-  for (const filePath of filePaths) {
-    const normalizedFilePath = normalizePath(filePath);
-    const localizedMessages = JSON.parse((await readFileAsync(filePath)).toString());
+  verifyMessages(localizedMessagesMap, defaultMessagesMap);
 
-    if (!localizedMessages.formats) {
-      throw new Error(
-        `Error in ${normalizedFilePath}:\nLocale file should contain formats object.`
-      );
+  const localizedMessagesByNamespace = new Map();
+  const knownNamespaces = Object.keys(paths);
+
+  for (const [messageId, messageValue] of localizedMessagesMap) {
+    const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
+
+    if (!namespace) {
+      throw createFailError(`Unknown namespace in id ${messageId}.`);
     }
 
-    const localizedMessagesMap = new Map(
-      Object.entries(localizedMessages).filter(([key]) => key !== 'formats')
-    );
-
-    verifyMessages(localizedMessagesMap, defaultMessagesMap, normalizedFilePath);
-
-    const localizedMessagesByNamespace = new Map();
-    const knownNamespaces = Object.keys(paths);
-
-    for (const [messageId, messageValue] of localizedMessagesMap) {
-      const namespace = knownNamespaces.find(key => messageId.startsWith(`${key}.`));
-
-      if (!namespace) {
-        throw new Error(`Error in ${normalizedFilePath}:\nUnknown namespace in id ${messageId}.`);
-      }
-
-      if (!localizedMessagesByNamespace.has(namespace)) {
-        localizedMessagesByNamespace.set(namespace, {
-          formats: localizedMessages.formats,
-        });
-      }
-
-      localizedMessagesByNamespace.get(namespace)[messageId] = messageValue;
+    if (!localizedMessagesByNamespace.has(namespace)) {
+      localizedMessagesByNamespace.set(namespace, {});
     }
 
-    for (const [namespace, messages] of localizedMessagesByNamespace) {
-      const destPath = paths[namespace];
-      try {
-        await accessAsync(path.resolve(destPath, 'translations'));
-      } catch (_) {
-        await makeDirAsync(path.resolve(destPath, 'translations'));
-      }
+    localizedMessagesByNamespace.get(namespace)[messageId] = { message: messageValue };
+  }
 
-      await writeFileAsync(
-        path.resolve(destPath, 'translations', path.basename(filePath)),
-        JSON.stringify(messages, undefined, 2)
-      );
+  for (const [namespace, messages] of localizedMessagesByNamespace) {
+    const destPath = paths[namespace];
+
+    try {
+      await accessAsync(path.resolve(destPath, 'translations'));
+    } catch (_) {
+      await makeDirAsync(path.resolve(destPath, 'translations'));
     }
+
+    const writePath = path.resolve(destPath, 'translations', path.basename(filePath));
+    await writeFileAsync(writePath, serializeToJson(messages, localizedMessages.formats));
+    log.success(`Translations have been integrated to ${path.relative('./', writePath)}`);
   }
 }

@@ -19,6 +19,7 @@
 
 import path from 'path';
 import chalk from 'chalk';
+import normalize from 'normalize-path';
 
 import {
   extractHtmlMessages,
@@ -26,10 +27,14 @@ import {
   extractPugMessages,
   extractHandlebarsMessages,
 } from './extractors';
-import { globAsync, normalizePath, readFileAsync } from './utils';
+import { globAsync, readFileAsync } from './utils';
 
 import { paths, exclude } from '../../../.i18nrc.json';
 import { createFailError, isFailError } from '../run';
+
+function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);

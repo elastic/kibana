@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { run } from './run';
+import chalk from 'chalk';
+
+import { createFailError, run } from './run';
 import { integrateLocaleFiles } from './i18n/integrate_locale_files';
 
-run(async ({ flags: { path } }) => {
-  if (!path) {
-    throw new Error(`--path option isn't provided.`);
+run(async ({ flags: { path }, log }) => {
+  if (!path || typeof path === 'boolean') {
+    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --path option isn't provided.`);
   }
 
-  await integrateLocaleFiles(path);
+  if (Array.isArray(path)) {
+    throw createFailError(
+      `${chalk.white.bgRed(' I18N ERROR ')} --path value should be a single string`
+    );
+  }
+
+  await integrateLocaleFiles(path, log);
 });
