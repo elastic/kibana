@@ -34,6 +34,9 @@ export async function RemoteProvider({ getService }) {
   const log = getService('log');
   const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+  const throttleOption = process.env.TEST_THROTTLE_NETWORK;
+
+
 
   if (!possibleBrowsers.includes(browserType)) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` + possibleBrowsers.join(','));
@@ -49,6 +52,7 @@ export async function RemoteProvider({ getService }) {
 
   log.debug(chromeDriver.path);
   log.debug(geckoDriver.path);
+
 
   const chromeService = new chrome.ServiceBuilder(chromeDriver.path)
     // .loggingTo(process.stdout)
@@ -70,7 +74,14 @@ export async function RemoteProvider({ getService }) {
     .setFirefoxService(firefoxService)
     .build();
 
-
+  if (throttleOption === 'true') {
+    driver.setNetworkConditions({
+      offline: false,
+      latency: 50, // Additional latency (ms).
+      download_throughput: 1000 * 1024, // Maximal aggregated download throughput.
+      upload_throughput: 1000 * 1024 // Maximal aggregated upload throughput. }
+    });
+  }
 
   const actions = driver.actions();
   const mouse = actions.mouse();
