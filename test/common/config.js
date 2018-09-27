@@ -37,6 +37,7 @@ export default function () {
 
     esTestCluster: {
       license: 'oss',
+      from: process.env.TEST_ES_FROM || 'snapshot',
       serverArgs: [],
     },
 
