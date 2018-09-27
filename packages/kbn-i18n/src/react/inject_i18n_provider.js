@@ -28,7 +28,7 @@ export const injectI18nProvider = WrappedComponent => {
     );
   };
 
-  I18nProviderWrapper.PropTypes = WrappedComponent.PropTypes;
+  I18nProviderWrapper.propTypes = WrappedComponent.propTypes;
 
   return I18nProviderWrapper;
 };
