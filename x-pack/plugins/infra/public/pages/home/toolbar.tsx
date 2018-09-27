@@ -4,22 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui/toolbar';
 import { WaffleTimeControls } from '../../components/waffle/waffle_time_controls';
 
+import { InfraNodeType } from '../../../common/graphql/types';
 import { WaffleGroupByControls } from '../../components/waffle/waffle_group_by_controls';
 import { WaffleMetricControls } from '../../components/waffle/waffle_metric_controls';
+import { WaffleNodeTypeSwitcher } from '../../components/waffle/waffle_node_type_switcher';
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
+const TITLES = {
+  [InfraNodeType.host]: 'Hosts',
+  [InfraNodeType.pod]: 'Kubernetes Pods',
+  [InfraNodeType.container]: 'Docker Containers',
+};
+
 export const HomeToolbar: React.SFC = () => (
   <Toolbar>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <WithWaffleOptions>
+          {({ nodeType }) => (
+            <EuiTitle size="m">
+              <h1>{TITLES[nodeType]}</h1>
+            </EuiTitle>
+          )}
+        </WithWaffleOptions>
+        <EuiText color="subdued">
+          <p>Showing the last 1 minute of data from the time period</p>
+        </EuiText>
+      </EuiFlexItem>
+      <WithWaffleOptions>
+        {({ nodeType, changeNodeType, changeGroupBy, changeMetrics }) => (
+          <EuiFlexItem grow={false}>
+            <WaffleNodeTypeSwitcher
+              nodeType={nodeType}
+              changeNodeType={changeNodeType}
+              changeMetrics={changeMetrics}
+              changeGroupBy={changeGroupBy}
+            />
+          </EuiFlexItem>
+        )}
+      </WithWaffleOptions>
+    </EuiFlexGroup>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem>
         <WithKueryAutocompletion>

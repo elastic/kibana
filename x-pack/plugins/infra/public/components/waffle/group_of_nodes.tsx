@@ -6,6 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { InfraNodeType } from '../../../common/graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -21,6 +22,7 @@ interface Props {
   formatter: (val: number) => string;
   isChild: boolean;
   bounds: InfraWaffleMapBounds;
+  nodeType: InfraNodeType;
 }
 
 export const GroupOfNodes: React.SFC<Props> = ({
@@ -30,6 +32,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
   onDrilldown,
   isChild = false,
   bounds,
+  nodeType,
 }) => {
   const width = group.width > 200 ? group.width : 200;
   return (
@@ -45,6 +48,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
             onDrilldown={onDrilldown}
             formatter={formatter}
             bounds={bounds}
+            nodeType={nodeType}
           />
         ))}
       </Nodes>
