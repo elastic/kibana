@@ -228,7 +228,6 @@ export function ccrRoute(server) {
           stat.shards = get(bucket, 'by_shard_id.buckets').reduce((accum, shardBucket) => {
             const fullStat = get(fullStats[`${bucket.key}:${shardBucket.key}`], '[0]', {});
             const shardStat = {
-              ...stat,
               shardId: shardBucket.key,
               error: fullStat.fetch_exceptions.length ? fullStat.fetch_exceptions[0].exception.type : null,
               opsSynced: get(shardBucket, 'ops_synced.value'),
@@ -245,8 +244,6 @@ export function ccrRoute(server) {
           stat.opsSynced = stat.shards.reduce((sum, { opsSynced }) => sum + opsSynced, 0);
           stat.syncLagTime = stat.shards.reduce((max, { syncLagTime }) => Math.max(max, syncLagTime), 0);
           stat.syncLagOps = stat.shards.reduce((max, { syncLagOps }) => Math.max(max, syncLagOps), 0);
-          stat.syncLagOpsLeader = stat.shards.reduce((max, { syncLagOpsLeader }) => Math.max(max, syncLagOpsLeader), 0);
-          stat.syncLagOpsFollower = stat.shards.reduce((max, { syncLagOpsFollower }) => Math.max(max, syncLagOpsFollower), 0);
 
           accum.push(stat);
           return accum;
