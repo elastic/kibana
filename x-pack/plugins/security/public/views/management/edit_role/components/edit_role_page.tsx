@@ -291,7 +291,7 @@ export class EditRolePage extends Component<Props, State> {
           this.backToRoleList();
         })
         .catch((error: any) => {
-          toastNotifications.addDanger(error.data.message || 'Error saving role');
+          toastNotifications.addDanger(get(error, 'data.message'));
         });
     }
   };
@@ -305,7 +305,7 @@ export class EditRolePage extends Component<Props, State> {
         this.backToRoleList();
       })
       .catch((error: any) => {
-        toastNotifications.addDanger(error.data.message || 'Error deleting role');
+        toastNotifications.addDanger(get(error, 'data.message'));
       });
   };
 
