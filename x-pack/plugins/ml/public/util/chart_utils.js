@@ -235,7 +235,7 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
 export function getXTransform(t) {
   const regexResult = /translate\(\s*([^\s,)]+)([ ,]([^\s,)]+))?\)/.exec(t);
   if (Array.isArray(regexResult) && regexResult.length >= 2) {
-    Number(regexResult[1]);
+    return Number(regexResult[1]);
   }
 
   // fall back to NaN if regex didn't return any results.
