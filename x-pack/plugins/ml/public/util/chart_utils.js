@@ -228,6 +228,15 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
   return tickValues;
 }
 
+const LABEL_WRAP_THRESHOLD = 60;
+
+// Checks if the string length of a chart label (detector description
+// and entity fields) is above LABEL_WRAP_THRESHOLD.
+export function isLabelLengthAboveThreshold({ detectorLabel, entityFields }) {
+  const labelLength = (detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length);
+  return (labelLength > LABEL_WRAP_THRESHOLD);
+}
+
 // To get xTransform it would be nicer to use d3.transform, but that doesn't play well with JSDOM.
 // So this uses a regex variant because we definitely want test coverage for the label removal.
 // Once JSDOM supports SVGAnimatedTransformList we can use this simpler inline version:
