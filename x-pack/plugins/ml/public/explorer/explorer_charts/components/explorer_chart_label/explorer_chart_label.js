@@ -45,7 +45,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
     <React.Fragment>
       <span className="ml-explorer-chart-label-detector">
         <span>{detectorLabel}</span>
-        {(detectorLabel.length > 0 && entityFields.length > 0) && (
+        {(detectorLabel.length > 0 && entityFields.length > 0 || wrapLabel === true) && (
           <React.Fragment>{wrapLabel && infoIcon} {labelSeparator} </React.Fragment>
         )}
         {!wrapLabel && (

@@ -15,6 +15,9 @@
 /* only used when the field badges get wrapped to a new line */
 .ml-explorer-chart-label-fields {
   width: 100%;
+  /* use a fixed height to avoid layout issues when
+     only some charts don't have entity fields */
+  height: 22px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
