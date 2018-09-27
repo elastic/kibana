@@ -113,7 +113,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                           return (
                             <MetricsDetailsPageColumn innerRef={measureRef}>
                               <EuiPageBody style={{ width: `${width}px` }}>
-                                <EuiHideFor sizes={['xs']}>
+                                <EuiHideFor sizes={['xs', 's']}>
                                   <EuiPageHeader style={{ flex: '0 0 auto' }}>
                                     <EuiPageHeaderSection>
                                       <EuiTitle size="m">
@@ -124,7 +124,6 @@ class MetricDetailPage extends React.PureComponent<Props> {
                                 </EuiHideFor>
                                 <EuiPageContentWithRelative>
                                   <Metrics
-                                    width={width - 48}
                                     nodeName={nodeName}
                                     layout={layout}
                                     metrics={metrics}
@@ -172,6 +171,7 @@ const EuiSideNavContainer = styled.div`
   padding-left: 16px;
   margin-left: -16px;
   overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 const MetricsDetailsPageColumn = styled.div`
