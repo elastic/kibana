@@ -345,10 +345,6 @@ ammo@2.x.x:
     boom "5.x.x"
     hoek "4.x.x"
 
-angular-paging@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.1.tgz#8090864f71bc4c9b89307b02ab02afb205983c43"
-
 angular-resource@1.4.9:
   version "1.4.9"
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.4.9.tgz#67f09382b623fd7e61540b0d127dba99fda99d45"
