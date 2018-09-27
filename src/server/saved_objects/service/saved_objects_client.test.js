@@ -26,9 +26,9 @@ test(`#create`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const attributes = {};
-  const options = {};
+  const type = Symbol();
+  const attributes = Symbol();
+  const options = Symbol();
   const result = await client.create(type, attributes, options);
 
   expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
@@ -42,8 +42,8 @@ test(`#bulkCreate`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const objects = [];
-  const options = {};
+  const objects = Symbol();
+  const options = Symbol();
   const result = await client.bulkCreate(objects, options);
 
   expect(mockRepository.bulkCreate).toHaveBeenCalledWith(objects, options);
@@ -57,11 +57,12 @@ test(`#delete`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const result = await client.delete(type, id);
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.delete(type, id, options);
 
-  expect(mockRepository.delete).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.delete).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });
 
@@ -72,7 +73,7 @@ test(`#find`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const options = { type: 'foo' };
+  const options = Symbol();
   const result = await client.find(options);
 
   expect(mockRepository.find).toHaveBeenCalledWith(options);
@@ -86,10 +87,11 @@ test(`#bulkGet`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const objects = {};
-  const result = await client.bulkGet(objects);
+  const objects = Symbol();
+  const options = Symbol();
+  const result = await client.bulkGet(objects, options);
 
-  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects);
+  expect(mockRepository.bulkGet).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
@@ -100,11 +102,12 @@ test(`#get`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const result = await client.get(type, id);
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.get(type, id, options);
 
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });
 
@@ -115,10 +118,10 @@ test(`#update`, async () => {
   };
   const client = new SavedObjectsClient(mockRepository);
 
-  const type = 'foo';
-  const id = 1;
-  const attributes = {};
-  const options = {};
+  const type = Symbol();
+  const id = Symbol();
+  const attributes = Symbol();
+  const options = Symbol();
   const result = await client.update(type, id, attributes, options);
 
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
