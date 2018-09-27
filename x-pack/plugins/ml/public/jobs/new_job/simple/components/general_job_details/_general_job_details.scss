@@ -38,7 +38,7 @@
 
   .card {
     background-color: $euiColorEmptyShade;
-    border-radius: 3px;
+    border-radius: $euiBorderRadius;
     border: $euiBorderThin;
     z-index: 10;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);

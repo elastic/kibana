@@ -1,5 +1,5 @@
+  // SASSTODO: proper calcs all through this. Replace shadows
 .group-list {
-  // SASSTODO: proper calc
   max-height: 350px;
   overflow: auto;
 
@@ -16,8 +16,8 @@
     }
 
     .inline-group {
-      border: 1px soli $euiColorEmptyShade;
-      border-radius: 3px;
+      border: 1px solid $euiColorEmptyShade;
+      border-radius: $euiBorderRadius;
     }
   }
   .group-item:hover {
