@@ -88,14 +88,19 @@ export function getWaterfall(
   services: string[],
   entryTransaction: Transaction
 ): Waterfall {
-  const items = hits.map(hit => {
-    const eventType = hit.processor.event;
-    if (eventType === 'span') {
-      return getSpanItem(hit as Span);
-    }
-
-    return getTransactionItem(hit as Transaction);
-  });
+  const items = hits
+    .map(hit => {
+      const eventType = hit.processor.event;
+      switch (eventType) {
+        case 'span':
+          return getSpanItem(hit as Span);
+        case 'transaction':
+          return getTransactionItem(hit as Transaction);
+        default:
+          return null;
+      }
+    })
+    .filter(removeEmpty);
 
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const root = getWaterfallRoot(items, entryTransactionItem);
@@ -105,4 +110,8 @@ export function getWaterfall(
     childrenCount: hits.length,
     root
   };
+}
+
+function removeEmpty<T>(value: T | null): value is T {
+  return value !== null;
 }

@@ -40,7 +40,7 @@ export function TransactionFlyout({ transaction, onClose }: Props) {
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>Span details</h2>
+          <h2>Transaction details</h2>
         </EuiTitle>
 
         <DiscoverButton query={getDiscoverQuery(transaction.transaction.id)}>
