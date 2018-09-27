@@ -51,6 +51,7 @@ import {
   getExploreSeriesLink,
   getTickValues,
   isLabelLengthAboveThreshold,
+  getXTransform,
   removeLabelOverlap
 } from './chart_utils';
 
@@ -152,6 +153,28 @@ describe('isLabelLengthAboveThreshold', () => {
     expect(isLongLabel).toBeTruthy();
   });
 
+});
+
+describe('getXTransform', () => {
+  const expectedXTransform = 0.007167499999999999;
+
+  test('Chrome/Safari/Firefox String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999,0)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('IE11 String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('Invalid String.', () => {
+    const transformStr = 'translate()';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(NaN);
+  });
 });
 
 describe('removeLabelOverlap', () => {

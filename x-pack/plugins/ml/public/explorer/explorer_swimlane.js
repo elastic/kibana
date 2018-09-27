@@ -202,8 +202,6 @@ export class ExplorerSwimlane extends React.Component {
   }
 
   clearSelection() {
-    const { mlExplorerDashboardService } = this.props;
-
     // This selects both overall and viewby swimlane
     const wrapper = d3.selectAll('.ml-explorer-swimlane');
 
@@ -212,8 +210,6 @@ export class ExplorerSwimlane extends React.Component {
     wrapper.selectAll('.sl-cell-inner.sl-cell-inner-selected').classed('sl-cell-inner-selected', false);
     wrapper.selectAll('.sl-cell-inner-dragselect.sl-cell-inner-selected').classed('sl-cell-inner-selected', false);
     wrapper.selectAll('.ds-selected').classed('sl-cell-inner-selected', false);
-
-    mlExplorerDashboardService.swimlaneCellClick.changed({});
   }
 
   renderSwimlane() {
