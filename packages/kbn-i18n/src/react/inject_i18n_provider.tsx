@@ -17,10 +17,11 @@
  * under the License.
  */
 import React from 'react';
+
 import { I18nProvider } from './provider';
 
-export const injectI18nProvider = WrappedComponent => {
-  const I18nProviderWrapper = props => {
+export const injectI18nProvider = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
+  const I18nProviderWrapper: React.SFC<P> = props => {
     return (
       <I18nProvider>
         <WrappedComponent {...props} />
