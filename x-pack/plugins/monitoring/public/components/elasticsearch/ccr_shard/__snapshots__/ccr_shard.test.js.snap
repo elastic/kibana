@@ -172,7 +172,7 @@ exports[`CcrShard that it renders normally 1`] = `
           size="s"
         >
           <h4>
-            Today at 9:32 AM
+            September 27, 2018 9:32:09 AM
           </h4>
         </EuiTitle>
         <EuiHorizontalRule

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React, { Fragment, PureComponent } from 'react';
 import {
   EuiPage,
@@ -22,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
+import { formatDateTimeLocal } from '../../../../common/formatting';
 
 export class CcrShard extends PureComponent {
   renderCharts() {
@@ -93,7 +93,7 @@ export class CcrShard extends PureComponent {
       >
         <Fragment>
           <EuiTitle size="s">
-            <h4>{moment(timestamp).calendar()}</h4>
+            <h4>{formatDateTimeLocal(timestamp)}</h4>
           </EuiTitle>
           <EuiHorizontalRule/>
           <EuiCodeBlock language="json">
