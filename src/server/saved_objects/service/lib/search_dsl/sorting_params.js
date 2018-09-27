@@ -26,24 +26,29 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
     return {};
   }
 
-  if (Array.isArray(type)) {
-    const rootField = getProperty(mappings, sortField);
-    if (!rootField) {
-      throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
-    }
+  let typeField = type;
 
-    return {
-      sort: [{
-        [sortField]: {
-          order: sortOrder,
-          unmapped_type: rootField.type
-        }
-      }]
-    };
+  if (Array.isArray(type)) {
+    if (type.length === 1) {
+      typeField = type[0];
+    } else {
+      const rootField = getProperty(mappings, sortField);
+      if (!rootField) {
+        throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
+      }
+
+      return {
+        sort: [{
+          [sortField]: {
+            order: sortOrder,
+            unmapped_type: rootField.type
+          }
+        }]
+      };
+    }
   }
 
-
-  const key = `${type}.${sortField}`;
+  const key = `${typeField}.${sortField}`;
   const field = getProperty(mappings, key);
   if (!field) {
     throw Boom.badRequest(`Unknown sort field ${sortField}`);
