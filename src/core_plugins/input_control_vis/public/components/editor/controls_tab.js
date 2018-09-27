@@ -40,17 +40,6 @@ class ControlsTabUi extends Component {
     type: 'list'
   }
 
-  getIndexPatterns = async (search) => {
-    const resp = await this.props.scope.vis.API.savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      search: `${search}*`,
-      search_fields: ['title'],
-      perPage: 100
-    });
-    return resp.savedObjects;
-  }
-
   getIndexPattern = async (indexPatternId) => {
     return await this.props.scope.vis.API.indexPatterns.get(indexPatternId);
   }
@@ -127,7 +116,6 @@ class ControlsTabUi extends Component {
           handleRemoveControl={this.handleRemoveControl}
           handleIndexPatternChange={this.handleIndexPatternChange}
           handleFieldNameChange={this.handleFieldNameChange}
-          getIndexPatterns={this.getIndexPatterns}
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}

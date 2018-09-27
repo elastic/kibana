@@ -701,24 +701,24 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
-      let isOpen = await testSubjects.exists('saveVisualizationButton');
+      let isOpen = await testSubjects.exists('savedObjectSaveModal');
       await retry.try(async () => {
         while (!isOpen) {
           await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('saveVisualizationButton');
+          isOpen = await testSubjects.exists('savedObjectSaveModal');
         }
       });
     }
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
-      await testSubjects.setValue('visTitleInput', vizName);
+      await testSubjects.setValue('savedObjectTitle', vizName);
       if (saveAsNew) {
         log.debug('Check save as new visualization');
         await testSubjects.click('saveAsNewCheckbox');
       }
       log.debug('Click Save Visualization button');
-      await testSubjects.click('saveVisualizationButton');
+      await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
@@ -869,8 +869,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
 
       // 2). get the minimum chart Y-Axis marker value and Y position
-      const minYAxisChartMarker = await
-        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick');
+      const minYAxisChartMarker = await find.byCssSelector(
+        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
+      );
       const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));

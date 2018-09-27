@@ -395,7 +395,7 @@ module.exports = {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            packageDir: resolve(__dirname, 'x-pack/package.json'),
+            packageDir: './x-pack/',
           },
         ],
       },
@@ -414,7 +414,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: resolve(__dirname, 'x-pack/package.json'),
+            packageDir: './x-pack/',
           },
         ],
       },
@@ -426,7 +426,7 @@ module.exports = {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            packageDir: resolve(__dirname, 'x-pack/package.json'),
+            packageDir: './x-pack/',
           },
         ],
         'import/no-unresolved': [

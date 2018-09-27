@@ -72,7 +72,7 @@ export class LegacyLoggingServer extends EventEmitter {
     this.emit('log', {
       data: error || message,
       tags: [level.id.toLowerCase(), ...context.split('.'), ...(meta.tags || [])],
-      timestamp: timestamp.getMilliseconds(),
+      timestamp: timestamp.getTime(),
     });
   }
 
