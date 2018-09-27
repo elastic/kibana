@@ -233,9 +233,10 @@ export function getXTransform(t) {
   if (Array.isArray(regexResult) && regexResult.length >= 2) {
     // return as number
     return +regexResult[1];
-  } else {
-    return NaN;
   }
+
+  // fall back to NaN if regex didn't return any results.
+  return NaN;
 }
 
 // This removes overlapping x-axis labels by starting off from a specific label
