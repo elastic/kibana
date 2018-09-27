@@ -3,18 +3,18 @@
 exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
 <React.Fragment>
   <span
-    className="ml-explorer-chart-label-detector"
+    className="ml-explorer-chart-label"
   >
-    <span>
+    <span
+      className="ml-explorer-chart-label-detector"
+    >
       high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+      <React.Fragment>
+         – 
+      </React.Fragment>
     </span>
     <React.Fragment>
-       
-       - 
-       
-    </React.Fragment>
-    <React.Fragment>
-      <span
+      <React.Fragment
         key="nginx.access.remote_ip 72.57.0.53"
       >
         <ExplorerChartLabelBadge
@@ -26,15 +26,29 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
             }
           }
         />
-         
-      </span>
+         
+      </React.Fragment>
        
       <span
-        className="ml-explorer-chart-icon"
+        className="ml-explorer-chart-info-icon"
       >
         <EuiIconTip
           aria-label="Info"
-          content={<ExplorerChartTooltip />}
+          content={
+            <ExplorerChartTooltip
+              aggregationInterval="1h"
+              chartFunction="sum nginx.access.body_sent.bytes"
+              entityFields={
+                Array [
+                  Object {
+                    "fieldName": "nginx.access.remote_ip",
+                    "fieldValue": "72.57.0.53",
+                  },
+                ]
+              }
+              jobId="population-03"
+            />
+          }
           position="top"
           size="s"
           type="questionInCircle"
@@ -48,31 +62,43 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
 exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
 <React.Fragment>
   <span
-    className="ml-explorer-chart-label-detector"
+    className="ml-explorer-chart-label"
   >
-    <span>
+    <span
+      className="ml-explorer-chart-label-detector"
+    >
       high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
     </span>
-    <React.Fragment>
-      <span
-        className="ml-explorer-chart-icon"
-      >
-        <EuiIconTip
-          aria-label="Info"
-          content={<ExplorerChartTooltip />}
-          position="top"
-          size="s"
-          type="questionInCircle"
-        />
-      </span>
-       
-       
-    </React.Fragment>
+    <span
+      className="ml-explorer-chart-info-icon"
+    >
+      <EuiIconTip
+        aria-label="Info"
+        content={
+          <ExplorerChartTooltip
+            aggregationInterval="1h"
+            chartFunction="sum nginx.access.body_sent.bytes"
+            entityFields={
+              Array [
+                Object {
+                  "fieldName": "nginx.access.remote_ip",
+                  "fieldValue": "72.57.0.53",
+                },
+              ]
+            }
+            jobId="population-03"
+          />
+        }
+        position="top"
+        size="s"
+        type="questionInCircle"
+      />
+    </span>
   </span>
   <div
     className="ml-explorer-chart-label-fields"
   >
-    <span
+    <React.Fragment
       key="nginx.access.remote_ip 72.57.0.53"
     >
       <ExplorerChartLabelBadge
@@ -84,8 +110,8 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
           }
         }
       />
-       
-    </span>
+       
+    </React.Fragment>
   </div>
 </React.Fragment>
 `;

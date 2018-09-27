@@ -20,6 +20,7 @@ describe('ExplorerChartLabelBadge', () => {
       <ExplorerChartLabel
         detectorLabel={seriesConfig.detectorLabel}
         entityFields={seriesConfig.entityFields}
+        infoTooltip={seriesConfig.infoTooltip}
         wrapLabel={false}
       />
     );
@@ -33,6 +34,7 @@ describe('ExplorerChartLabelBadge', () => {
       <ExplorerChartLabel
         detectorLabel={seriesConfig.detectorLabel}
         entityFields={seriesConfig.entityFields}
+        infoTooltip={seriesConfig.infoTooltip}
         wrapLabel={true}
       />
     );

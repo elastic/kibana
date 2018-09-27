@@ -102,8 +102,8 @@ describe('ExplorerChartsContainer', () => {
       mlChartTooltipService={mlChartTooltipService}
     />);
 
-    // Only do a snapshot of the label section, the included
-    // ExplorerChart component does that in its own tests anyway.
-    expect(wrapper.find('.ml-explorer-chart-label')).toMatchSnapshot();
+    // We test child components with snapshots separately
+    // so we just do some high level sanity check here.
+    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(3);
   });
 });

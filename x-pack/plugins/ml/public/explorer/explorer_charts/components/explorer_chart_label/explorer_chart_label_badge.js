@@ -15,9 +15,11 @@ import {
 
 export function ExplorerChartLabelBadge({ entity }) {
   return (
-    <EuiBadge color="hollow" className="ml-explorer-chart-label-badge">
-      {entity.fieldName} <strong>{entity.fieldValue}</strong>
-    </EuiBadge>
+    <span className="ml-explorer-chart-label-badge">
+      <EuiBadge color="hollow">
+        {entity.fieldName} <strong>{entity.fieldValue}</strong>
+      </EuiBadge>
+    </span>
   );
 }
 ExplorerChartLabelBadge.propTypes = {

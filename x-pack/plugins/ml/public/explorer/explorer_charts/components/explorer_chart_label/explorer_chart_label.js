@@ -25,14 +25,21 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   // 2. Multiple lines:
   //   <detectorLabel> <infoIcon>
   //   <entityBadge1> <entityBadge2> ...
-  const labelSeparator = (wrapLabel === true) ? '' : ' - ';
+  const labelSeparator = (
+    wrapLabel === true ||
+    (entityFields.length === 0 || detectorLabel.length === 0)
+  ) ? '' : (<React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>);
 
   const entityFieldBadges = entityFields.map((entity) => {
-    return <span key={`${entity.fieldName} ${entity.fieldValue}`}><ExplorerChartLabelBadge entity={entity} /> </span>;
+    return (
+      <React.Fragment key={`${entity.fieldName} ${entity.fieldValue}`}>
+        <ExplorerChartLabelBadge entity={entity} />&nbsp;
+      </React.Fragment>
+    );
   });
 
   const infoIcon = (
-    <span className="ml-explorer-chart-icon">
+    <span className="ml-explorer-chart-info-icon">
       <EuiIconTip
         content={<ExplorerChartTooltip {...infoTooltip} />}
         position="top"
@@ -43,11 +50,11 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
 
   return (
     <React.Fragment>
-      <span className="ml-explorer-chart-label-detector">
-        <span>{detectorLabel}</span>
-        {(detectorLabel.length > 0 && entityFields.length > 0 || wrapLabel === true) && (
-          <React.Fragment>{wrapLabel && infoIcon} {labelSeparator} </React.Fragment>
-        )}
+      <span className="ml-explorer-chart-label">
+        <span className="ml-explorer-chart-label-detector">
+          {detectorLabel}{labelSeparator}
+        </span>
+        {wrapLabel && infoIcon}
         {!wrapLabel && (
           <React.Fragment>{entityFieldBadges} {infoIcon}</React.Fragment>
         )}
@@ -60,10 +67,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
 }
 ExplorerChartLabel.propTypes = {
   detectorLabel: PropTypes.string.isRequired,
-  entityFields: PropTypes.arrayOf(PropTypes.shape({
-    fieldName: PropTypes.string.isRequired,
-    fieldValue: PropTypes.string.isRequired
-  })),
-  infoTooltip: PropTypes.object,
+  entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
+  infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool
 };

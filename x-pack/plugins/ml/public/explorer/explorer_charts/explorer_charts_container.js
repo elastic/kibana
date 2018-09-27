@@ -74,14 +74,12 @@ export function ExplorerChartsContainer({
                   </EuiButtonEmpty>
                 </EuiToolTip>
               </div>
-              <div className="ml-explorer-chart-label">
-                <ExplorerChartLabel
-                  detectorLabel={detectorLabel}
-                  entityFields={entityFields}
-                  infoTooltip={series.infoTooltip}
-                  wrapLabel={wrapLabel}
-                />
-              </div>
+              <ExplorerChartLabel
+                detectorLabel={detectorLabel}
+                entityFields={entityFields}
+                infoTooltip={series.infoTooltip}
+                wrapLabel={wrapLabel}
+              />
               <ExplorerChart
                 tooManyBuckets={tooManyBuckets}
                 seriesConfig={series}

@@ -1,15 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExplorerChartLabelBadge Render entity label badge. 1`] = `
-<EuiBadge
+<span
   className="ml-explorer-chart-label-badge"
-  color="hollow"
-  iconSide="left"
 >
-  nginx.access.remote_ip
-   
-  <strong>
-    72.57.0.53
-  </strong>
-</EuiBadge>
+  <EuiBadge
+    color="hollow"
+    iconSide="left"
+  >
+    nginx.access.remote_ip
+     
+    <strong>
+      72.57.0.53
+    </strong>
+  </EuiBadge>
+</span>
 `;

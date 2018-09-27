@@ -1,14 +1,23 @@
 .ml-explorer-chart-label {
   font-weight: normal;
+  /* account 80px for the "View" link and potential alert icon */
+  max-width: calc(~"100% - 80px");
+  overflow: hidden;
 }
 
 .ml-explorer-chart-label-detector {
   vertical-align: middle;
-  /* account 80px for the "View" link */
-  max-width: calc(~"100% - 80px");
+  /* account 100px for the "View" link and info icon */
+  max-width: calc(~"100% - 100px");
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  display: inline-block;
+}
+
+.ml-explorer-chart-info-icon {
+  margin: 0;
+  vertical-align: middle;
   display: inline-block;
 }
 
@@ -18,7 +27,7 @@
   /* use a fixed height to avoid layout issues when
      only some charts don't have entity fields */
   height: 22px;
-  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  line-height: 0;
 }
