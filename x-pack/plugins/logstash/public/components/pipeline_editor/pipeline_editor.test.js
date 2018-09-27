@@ -136,4 +136,41 @@ describe('PipelineEditor component', () => {
     wrapper.find(`[data-test-subj="btnDeletePipeline"]`).simulate('click');
     expect(wrapper.instance().state.showConfirmDeleteModal).toBe(true);
   });
+
+  it('only matches pipeline names that fit the acceptable parameters', () => {
+    const wrapper = shallow(<PipelineEditor {...props} />);
+    const pattern = wrapper.instance().state.pipelineIdPattern;
+
+    expect(pattern.test('_startwithunderscore')).toBe(true);
+    expect(pattern.test('startwithloweralpha')).toBe(true);
+    expect(pattern.test('Startwithupperalpha')).toBe(true);
+    expect(pattern.test('_us-with-dashes')).toBe(true);
+    expect(pattern.test('_us-With-UPPER-alpha')).toBe(true);
+    expect(pattern.test('contains a space')).toBe(false);
+    expect(pattern.test('8startswithnum')).toBe(false);
+    expect(pattern.test(' startswithspace')).toBe(false);
+    expect(pattern.test('endswithspace ')).toBe(false);
+    expect(pattern.test('a?')).toBe(false);
+    expect(pattern.test('?')).toBe(false);
+    expect(pattern.test('+')).toBe(false);
+    expect(pattern.test('f+')).toBe(false);
+  });
+
+  it('invalidates form for invalid pipeline id input', () => {
+    const wrapper = shallow(<PipelineEditor {...props} isNewPipeline={true} />);
+    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: '$invalid-pipeline-name' } });
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('invalidates form for pipeline id with spaces', () => {
+    const wrapper = shallow(<PipelineEditor {...props} isNewPipeline={true} />);
+    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: 'pipeline id with spaces' } });
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('includes required error message for falsy pipeline id', () => {
+    const wrapper = shallow(<PipelineEditor {...props} isNewPipeline={true} />);
+    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: '' } });
+    expect(wrapper).toMatchSnapshot();
+  });
 });

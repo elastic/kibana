@@ -42,11 +42,11 @@ export class PipelineEditor extends React.Component {
       username,
     } = this.props;
 
-    this.pipelineIdPattern = /[a-zA-Z_][a-zA-Z0-9_\-]*/;
-
     const pipelineWorkers = settings['pipeline.workers'] ? settings['pipeline.workers'] : 1;
 
     this.state = {
+      maxBytesNumber: settings['queue.max_bytes.number'],
+      maxBytesUnit: settings['queue.max_bytes.units'],
       pipeline: {
         id,
         description,
@@ -62,10 +62,9 @@ export class PipelineEditor extends React.Component {
         username,
       },
       pipelineIdErrors: [],
+      pipelineIdPattern: /^[A-Za-z\_][A-Za-z0-9\-\_]*$/,
       showConfirmDeleteModal: false,
       showPipelineIdError: false,
-      maxBytesNumber: settings['queue.max_bytes.number'],
-      maxBytesUnit: settings['queue.max_bytes.units'],
     };
   }
 
@@ -96,7 +95,7 @@ export class PipelineEditor extends React.Component {
     if (!value) {
       pipelineIdErrors.push(PIPELINE_EDITOR.ID_REQUIRED_ERR_MSG);
     }
-    if (!value.match(this.pipelineIdPattern)) {
+    if (!this.state.pipelineIdPattern.test(value)) {
       pipelineIdErrors.push(PIPELINE_EDITOR.ID_FORMAT_ERR_MSG);
     }
 
