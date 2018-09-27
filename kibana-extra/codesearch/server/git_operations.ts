@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
-import { Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
+import { Blame, Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
+import { GitBlame } from '../common/git_blame';
 import { CommitDiff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
@@ -88,6 +89,37 @@ export class GitOperations {
         throw e;
       }
     }
+  }
+
+  public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
+    const repo = await this.openRepo(uri);
+    const newestCommit = (await this.getCommit(repo, revision)).id();
+    const blame = await Blame.file(repo, path, { newestCommit });
+    const results: GitBlame[] = [];
+    for (let i = 0; i < blame.getHunkCount(); i++) {
+      const hunk = blame.getHunkByIndex(i);
+      // @ts-ignore wrong definition in nodegit
+      const commit = await repo.getCommit(hunk.finalCommitId());
+      results.push({
+        committer: {
+          // @ts-ignore wrong definition in nodegit
+          name: hunk.finalSignature().name(),
+          // @ts-ignore wrong definition in nodegit
+          email: hunk.finalSignature().email(),
+        },
+        // @ts-ignore wrong definition in nodegit
+        startLine: hunk.finalStartLineNumber(),
+        // @ts-ignore wrong definition in nodegit
+        lines: hunk.linesInHunk(),
+        commit: {
+          id: commit.sha(),
+          message: commit.message(),
+          date: commit.date().toISOString(),
+        },
+      });
+    }
+    blame.free();
+    return results;
   }
 
   public async openRepo(uri: RepositoryUri): Promise<Repository> {

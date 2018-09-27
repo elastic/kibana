@@ -164,4 +164,23 @@ export function fileRoute(server: Server, options: ServerOptions) {
       }
     },
   });
+
+  server.route({
+    path: '/api/cs/repo/{uri*3}/blame/{revision}/{path*}',
+    method: 'GET',
+    async handler(req, reply) {
+      const gitOperations = new GitOperations(options.repoPath);
+      const { uri, path, revision } = req.params;
+      try {
+        const blames = await gitOperations.blame(uri, revision, path);
+        reply(blames);
+      } catch (e) {
+        if (e.isBoom) {
+          reply(e);
+        } else {
+          reply(Boom.internal(e.message || e.name));
+        }
+      }
+    },
+  });
 }
