@@ -27,7 +27,6 @@ export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
-  const find = getService('find');
   const retry = getService('retry');
   const config = getService('config');
   const remote = getService('remote');
@@ -132,7 +131,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
+      await remote.click(By.css(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`));
     }
 
     async gotoDashboardLandingPage() {
@@ -461,7 +460,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getPanelDimensions() {
-      const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+      const panels = await remote.findElements(By.css('.react-grid-item')); // These are gridster-defined elements and classes
       async function getPanelDimensions(panel) {
         const size = await panel.getSize();
         return {
@@ -547,12 +546,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar .filter', timeout);
+      return await remote.findElements(By.css('.filter-bar .filter'), timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {
-      const filters = await find.allByCssSelector(
-        '.filter-bar > .filter > .filter-description',
+      const filters = await remote.findElements(By.css(
+        '.filter-bar > .filter > .filter-description'),
         timeout);
       return _.map(filters, async (filter) => await filter.getText());
     }
@@ -560,7 +559,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPieSliceCount(timeout) {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
+        const slices = await remote.findElements(By.css('svg > g > g.arcs > path.slice'), timeout);
         return slices.length;
       });
     }
@@ -572,7 +571,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       } else {
         // If no pie slice has been provided, find the first one available.
         await retry.try(async () => {
-          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+          const slices = await remote.findElements(By.css('svg > g > g.arcs > path.slice'));
           log.debug('Slices found:' + slices.length);
           return slices[0].click();
         });
@@ -608,7 +607,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
-      const sharedItems = await find.allByCssSelector('[data-shared-item]');
+      const sharedItems = await remote.findElements(By.css('[data-shared-item]'));
       return await Promise.all(sharedItems.map(async sharedItem => {
         return {
           title: await sharedItem.getAttribute('data-title'),
