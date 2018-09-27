@@ -20,8 +20,8 @@ import {
 import { ExplorerChart } from './explorer_chart';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
-const textTooManyBuckets = 'This selection contains too many buckets to be displayed.' +
-  'The dashboard is best viewed over a shorter time range.';
+const textTooManyBuckets = `This selection contains too many buckets to be displayed.
+ The dashboard is best viewed over a shorter time range.`;
 const textViewButton = 'Open in Single Metric Viewer';
 
 export function ExplorerChartsContainer({
