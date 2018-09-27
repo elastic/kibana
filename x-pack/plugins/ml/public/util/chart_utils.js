@@ -228,11 +228,14 @@ export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
   return tickValues;
 }
 
+// To get xTransform it would be nicer to use d3.transform, but that doesn't play well with JSDOM.
+// So this uses a regex variant because we definitely want test coverage for the label removal.
+// Once JSDOM supports SVGAnimatedTransformList we can use this simpler inline version:
+// const xTransform = d3.transform(tick.attr('transform')).translate[0];
 export function getXTransform(t) {
   const regexResult = /translate\(\s*([^\s,)]+)([ ,]([^\s,)]+))?\)/.exec(t);
   if (Array.isArray(regexResult) && regexResult.length >= 2) {
-    // return as number
-    return +regexResult[1];
+    Number(regexResult[1]);
   }
 
   // fall back to NaN if regex didn't return any results.
@@ -277,10 +280,6 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
 
       const tickWidth = textNode.getBBox().width;
       const padding = 15;
-      // To get xTransform it would be nicer to use d3.transform, but that doesn't play well with JSDOM.
-      // So this uses a regex variant because we definitely want test coverage for the label removal.
-      // Once JSDOM supports SVGAnimatedTransformList we can use the simpler version.
-      // const xTransform = d3.transform(tick.attr('transform')).translate[0];
       const xTransform = getXTransform(tick.attr('transform'));
       const xMinOffset = xTransform - (tickWidth / 2 + padding);
       const xMaxOffset = xTransform + (tickWidth / 2 + padding);
