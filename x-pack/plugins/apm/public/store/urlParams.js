@@ -50,7 +50,7 @@ function urlParams(state = {}, action) {
         sortDirection,
         sortField,
         page: toNumber(page) || 0,
-        transactionId,
+        transactionId: toString(transactionId),
         detailTab,
         spanId: toNumber(spanId),
         kuery: legacyDecodeURIComponent(kuery),
@@ -76,6 +76,13 @@ function toNumber(value) {
   if (value != null) {
     return parseInt(value, 10);
   }
+}
+
+function toString(string) {
+  if (string === '' || string === 'null' || string === 'undefined') {
+    return;
+  }
+  return string;
 }
 
 function getPathAsArray(pathname) {

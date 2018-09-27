@@ -6,6 +6,8 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
+import { StringMap } from '../../../../typings/common';
 // @ts-ignore
 import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore

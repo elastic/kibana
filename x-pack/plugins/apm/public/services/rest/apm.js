@@ -100,14 +100,19 @@ export async function loadTransactionDistribution({
   });
 }
 
-export async function loadSpans({ serviceName, start, end, transactionId }) {
-  return callApi({
-    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
-    query: {
-      start,
-      end
+export async function loadTrace({ traceId, start, end }) {
+  return callApi(
+    {
+      pathname: `/api/apm/traces/${traceId}`,
+      query: {
+        start,
+        end
+      }
+    },
+    {
+      camelcase: false
     }
-  });
+  );
 }
 
 export async function loadTransaction({
@@ -130,11 +135,7 @@ export async function loadTransaction({
       camelcase: false
     }
   );
-  const camelizedRes = camelizeKeys(res);
-  if (res.context) {
-    camelizedRes.context = res.context;
-  }
-  return camelizedRes;
+  return res;
 }
 
 export async function loadCharts({

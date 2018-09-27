@@ -6,6 +6,7 @@
 
 import { EuiProgress } from '@elastic/eui';
 import React from 'react';
+import { StringMap } from '../../../../typings/common';
 
 // TODO: extend from EUI's EuiProgress prop interface
 interface Props extends StringMap<any> {

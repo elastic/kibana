@@ -8,6 +8,7 @@
 import { EuiBasicTable } from '@elastic/eui';
 import { get, sortByOrder } from 'lodash';
 import React, { Component } from 'react';
+import { StringMap } from '../../../../typings/common';
 
 // TODO: this should really be imported from EUI
 interface TableColumn {

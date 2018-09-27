@@ -24,6 +24,9 @@ export const SPAN_TYPE = 'span.type';
 export const SPAN_NAME = 'span.name';
 export const SPAN_ID = 'span.id';
 export const SPAN_SQL = 'context.db.statement';
+export const SPAN_HEX_ID = 'span.hex_id';
+
+export const TRACE_ID = 'trace.id';
 
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';

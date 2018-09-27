@@ -6,6 +6,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
+
+import { StringMap } from '../../../../typings/common';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';

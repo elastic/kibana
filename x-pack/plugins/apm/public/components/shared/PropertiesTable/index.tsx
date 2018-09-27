@@ -8,12 +8,15 @@ import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+
+import { StringMap } from '../../../../typings/common';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';
 import { getFeatureDocs } from '../../../utils/documentation';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { NestedKeyValueTable } from './NestedKeyValueTable';
 import PROPERTY_CONFIG from './propertyConfig.json';
+import { KeySorter } from './types';
 
 const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
 
