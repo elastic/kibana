@@ -50,6 +50,19 @@ brew install imagemagick ghostscript poppler
 sudo apt-get install imagemagick ghostscript poppler-utils
 ```
 
+For windows:
+
+ImageMagick-6.9.9-37-Q16-HDRI-x64-dll.exe
+from
+https://sourceforge.net/projects/imagemagick/postdownload
+Install with all default options
+
+gs925w64.exe
+from
+https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs925/gs925w64.exe
+Install with all default options
+
+
 **Note:** Configurations from `kibana.dev.yml` are picked up when running the tests. Ensure that `kibana.dev.yml` does not contain any `xpack.reporting` configurations.
 
 ### Reporting baseline snapshots
