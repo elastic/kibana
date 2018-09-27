@@ -24,11 +24,12 @@ export const HomePageContent: React.SFC = () => (
             <WithWaffleTime>
               {({ currentTimeRange }) => (
                 <WithWaffleOptions>
-                  {({ metrics }) => (
+                  {({ metrics, groupBy, nodeType }) => (
                     <WithWaffleNodes
                       filterQuery={filterQueryAsJson}
                       metrics={metrics}
-                      path={wafflemap.path}
+                      groupBy={groupBy}
+                      nodeType={nodeType}
                       sourceId={sourceId}
                       timerange={currentTimeRange}
                     >

@@ -58,6 +58,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
       id={`${node.id}-popover`}
       isOpen={isPopoverOpen}
       button={children}
+      panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

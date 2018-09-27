@@ -11,12 +11,12 @@ import { AutocompleteField } from '../../components/autocomplete_field';
 import { Toolbar } from '../../components/eui/toolbar';
 import { WaffleTimeControls } from '../../components/waffle/waffle_time_controls';
 
+import { WaffleGroupByControls } from '../../components/waffle/waffle_group_by_controls';
 import { WaffleMetricControls } from '../../components/waffle/waffle_metric_controls';
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
-import { WithOptions } from '../../containers/with_options';
 
 export const HomeToolbar: React.SFC = () => (
   <Toolbar>
@@ -46,17 +46,26 @@ export const HomeToolbar: React.SFC = () => (
           )}
         </WithKueryAutocompletion>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <WithOptions>
-          {({ wafflemap: { path } }) => (
-            <WithWaffleOptions>
-              {({ changeMetrics, metrics }) => (
-                <WaffleMetricControls metrics={metrics} path={path} onChange={changeMetrics} />
-              )}
-            </WithWaffleOptions>
-          )}
-        </WithOptions>
-      </EuiFlexItem>
+      <WithWaffleOptions>
+        {({ changeMetrics, changeGroupBy, groupBy, metrics, nodeType }) => (
+          <React.Fragment>
+            <EuiFlexItem grow={false}>
+              <WaffleMetricControls
+                metrics={metrics}
+                nodeType={nodeType}
+                onChange={changeMetrics}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WaffleGroupByControls
+                groupBy={groupBy}
+                nodeType={nodeType}
+                onChange={changeGroupBy}
+              />
+            </EuiFlexItem>
+          </React.Fragment>
+        )}
+      </WithWaffleOptions>
       <EuiFlexItem grow={false}>
         <WithWaffleTime resetOnUnmount>
           {({ currentTime, isAutoReloading, jumpToTime, startAutoReload, stopAutoReload }) => (
