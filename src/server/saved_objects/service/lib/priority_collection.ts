@@ -26,19 +26,16 @@ export class PriorityCollection<T> {
   private readonly array: Array<PriorityCollectionEntry<T>> = [];
 
   public add(priority: number, value: T) {
-    let i = 0;
-    while (i < this.array.length) {
-      const current = this.array[i];
+    const foundIndex = this.array.findIndex(current => {
       if (priority === current.priority) {
         throw new Error('Already have entry with this priority');
       }
 
-      if (priority < current.priority) {
-        break;
-      }
-      ++i;
-    }
-    this.array.splice(i, 0, { priority, value });
+      return priority < current.priority;
+    });
+
+    const spliceIndex = foundIndex === -1 ? this.array.length : foundIndex;
+    this.array.splice(spliceIndex, 0, { priority, value });
   }
 
   public toPrioritizedArray(): T[] {
