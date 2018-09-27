@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiFlexGroup,
   EuiFlexItem,
   EuiPageContentBody,
   EuiPanel,
@@ -16,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
+import styled from 'styled-components';
 import { InfraMetricData } from '../../../../common/graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
@@ -51,7 +51,7 @@ export class GaugesSection extends React.PureComponent<Props> {
     return (
       <EuiPageContentBody>
         <EuiSpacer size="m" />
-        <EuiFlexGroup>
+        <GroupBox>
           {metric.series.map(series => {
             const lastDataPoint = last(series.data);
             if (!lastDataPoint) {
@@ -71,7 +71,7 @@ export class GaugesSection extends React.PureComponent<Props> {
               dataMax
             );
             return (
-              <EuiFlexItem key={`${section.id}-${series.id}`}>
+              <EuiFlexItem key={`${section.id}-${series.id}`} style={{ margin: '0.4rem' }}>
                 <EuiPanel style={{ minWidth: '160px' }}>
                   <EuiText style={{ textAlign: 'right' }} size="s">
                     {name}
@@ -89,9 +89,15 @@ export class GaugesSection extends React.PureComponent<Props> {
               </EuiFlexItem>
             );
           })}
-        </EuiFlexGroup>
+        </GroupBox>
         <EuiSpacer size="m" />
       </EuiPageContentBody>
     );
   }
 }
+
+const GroupBox = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-evenly;
+`;

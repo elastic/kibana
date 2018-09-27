@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import styled, { withTheme } from 'styled-components';
 import { InfraNodeType } from '../../../common/graphql/types';
+import { AutoSizer } from '../../components/auto_sizer';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { ColumnarPage, PageContent } from '../../components/page';
@@ -107,25 +108,34 @@ class MetricDetailPage extends React.PureComponent<Props> {
                           />
                         </EuiShowFor>
                       </EuiPageSideBar>
-                      <EuiPageBody>
-                        <EuiHideFor sizes={['xs']}>
-                          <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                            <EuiPageHeaderSection>
-                              <EuiTitle size="m">
-                                <h1>{nodeName}</h1>
-                              </EuiTitle>
-                            </EuiPageHeaderSection>
-                          </EuiPageHeader>
-                        </EuiHideFor>
-                        <EuiPageContentWithRelative>
-                          <Metrics
-                            nodeName={nodeName}
-                            layout={layout}
-                            metrics={metrics}
-                            loading={loading}
-                          />
-                        </EuiPageContentWithRelative>
-                      </EuiPageBody>
+                      <AutoSizer content={false} bounds detectAnyWindowResize>
+                        {({ measureRef, bounds: { width = 0 } }) => {
+                          return (
+                            <MetricsDetailsPageColumn innerRef={measureRef}>
+                              <EuiPageBody style={{ width: `${width}px` }}>
+                                <EuiHideFor sizes={['xs']}>
+                                  <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                    <EuiPageHeaderSection>
+                                      <EuiTitle size="m">
+                                        <h1>{nodeName}</h1>
+                                      </EuiTitle>
+                                    </EuiPageHeaderSection>
+                                  </EuiPageHeader>
+                                </EuiHideFor>
+                                <EuiPageContentWithRelative>
+                                  <Metrics
+                                    width={width - 48}
+                                    nodeName={nodeName}
+                                    layout={layout}
+                                    metrics={metrics}
+                                    loading={loading}
+                                  />
+                                </EuiPageContentWithRelative>
+                              </EuiPageBody>
+                            </MetricsDetailsPageColumn>
+                          );
+                        }}
+                      </AutoSizer>
                     </EuiPage>
                   );
                 }}
@@ -162,4 +172,10 @@ const EuiSideNavContainer = styled.div`
   padding-left: 16px;
   margin-left: -16px;
   overflow-y: auto;
+`;
+
+const MetricsDetailsPageColumn = styled.div`
+  flex: 1 0 0;
+  display: flex;
+  flex-direction: column;
 `;
