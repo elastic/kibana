@@ -1,4 +1,4 @@
-### Summary
+## Summary
 
 Summarize your PR. If it involves visual changes include a screenshot or gif.
 
@@ -10,11 +10,11 @@ Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable t
 - [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)
 - [ ] Any code added follows our [style guides](https://github.com/elastic/kibana/blob/master/style_guides/)
 - [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
-- [ ] This includes a feature additition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
 - [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
 - [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
 
-### Contributor acknowledgement
+### For maintainers
 
-When making this PR, I signed the [contributor license agreement](https://www.elastic.co/contributor-agreement) and followed the [contributor guidelines](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md).
+- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
+- [ ] This includes a feature additition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
+
