@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './tooltip';
+export { UpgradeFailure } from './upgrade_failure';
