@@ -1,0 +1,141 @@
+.profilerDevTool {
+  
+  .panel {
+    background-color: inherit;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid $euiColorDarkShade;
+  }
+
+  .shard-body {
+    padding-top: $euiSizeXS;
+    margin: 0;
+    margin-left: $euiSizeXS;
+  }
+
+  .panel-body-underline {
+    padding: $euiSize $euiSizeXS $euiSizeXS;
+    margin-top: $euiSize;
+    margin-left: $euiSizeS;
+  }
+
+  // Profile details treeview
+  .shard-details {
+    float: left;
+    margin-bottom: $euiSizeXS;
+  }
+
+  .shard-details-right {
+    color: $euiColorDarkShade;
+    float: right;
+    text-align: right;
+    margin-bottom: $euiSizeXS;
+  }
+
+  .shard {
+    margin-top: $euiSizeS;
+    min-width: 100%;
+    display:inline-block;
+    border: none;
+  }
+
+  .index {
+    margin-top: $euiSize;
+    min-width: 100%;
+    padding: $euiSizeS;
+    display: inline-block;
+  }
+
+  .tv-row:hover {
+    outline: solid 1px $euiColorMediumShade;
+  }
+
+  .tv-row-last-hover {
+    outline: solid 1px $euiColorMediumShade;
+  }
+
+  .tv-row,
+  .tv-row-header {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .tv-row-header {
+    margin-bottom: $euiSizeS;
+
+     > .cell {
+      color: $euiColorDarkShade;
+    }
+  }
+
+  .cell {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+
+    > .detail {
+      font-style: italic;
+      font-size: $euiFontSizeXS;
+      padding-left: $euiSize;
+    }
+  }
+
+  .description {
+    background-color: $euiColorEmptyShade;
+    text-align: left;
+  }
+
+  .time, 
+  .totaltime {
+    width: 10%;
+  }
+  
+  .percentage {
+    width: 15%;
+    background-color: $euiColorEmptyShade;
+  }
+
+  .fa-bars {
+    padding-left: $euiSizeS;
+  }
+
+  // Progressbar
+  .graph {
+    height: 20px;
+    border: 1px solid $euiColorMediumShade;
+    background: linear-gradient(to top, $euiColorLightShade, $euiColorLightestShade 23%);
+    position: relative;
+    vertical-align: middle;
+    margin: $euiSizeXS;
+
+    p {
+      position: absolute;
+      text-align: center;
+      width: 100%;
+      margin: 0;
+      line-height: $euiFontSizeM;
+      vertical-align: middle;
+      font-size: $euiFontSizeXS;
+      order: 5;
+    }
+  }
+
+  .bar {
+    height: 20px; /* Not 30px because the 1px top-border brings it up to 30px to match #graph */
+    background: rgba($euiColorAccent, .1);
+    background: linear-gradient(to top, rgba($euiColorAccent, .1) 0%,rgba(euiColorAccent, .4) 100%);
+    vertical-align: middle;
+    float: right;
+  }
+
+  // Breakdown table
+  .breakdown {
+    width:100%
+  }
+
+  .breakdown td {
+    padding-right: $euiSizeXS;
+  }
+}
