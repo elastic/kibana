@@ -39,7 +39,7 @@ export default function pluginsTasks(gulp, { log, colors }) {
     );
   });
 
-  gulp.task('canvas:plugins:build-prod', done =>
-    del(buildDir).then(() => webpack(webpackConfig, onComplete(done)))
-  );
+  gulp.task('canvas:plugins:build-prod', function(done) {
+    del(buildDir).then(() => webpack(webpackConfig, onComplete(done)));
+  });
 }
