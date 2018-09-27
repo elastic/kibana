@@ -119,18 +119,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getBarChartData() {
-      const yAxisLabel = 0;
-      let yAxisHeight;
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       const y = await remote.findElement(By.css('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
       const yLabel = await y.getText();
-      yAxisLabel = yLabel.replace(',', '');
+      const yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
 
       const chartAreaObj = await remote.findElement(By.css('rect.background'));
       const theHeight = await chartAreaObj.getAttribute('height');
-      yAxisHeight = theHeight;
+      const yAxisHeight = theHeight;
       log.debug('theHeight = ' + theHeight);
 
       const chartTypes = await remote.findElements(By.css('svg > g > g.series > rect'));
