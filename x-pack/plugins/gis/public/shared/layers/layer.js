@@ -37,11 +37,9 @@ export class ALayer {
   }
 
   removeAllListeners(mbMap) {
-    console.log('before removeAllListeners', this._listenersMap);
     this._listenersMap.forEach((value, mbLayerId) => {
       this.removeAllListenersForMbLayer(mbMap, mbLayerId);
     });
-    console.log('after removeAllListeners', this._listenersMap);
   }
 
   removeAllListenersForMbLayer(mbMap, mbLayerId) {
