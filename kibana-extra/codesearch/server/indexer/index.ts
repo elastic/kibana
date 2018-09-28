@@ -5,5 +5,7 @@
  */
 
 export * from './lsp_indexer';
+export * from './lsp_indexer_factory';
 export * from './indexer';
 export * from './repository_index_initializer';
+export * from './repository_index_initializer_factory';

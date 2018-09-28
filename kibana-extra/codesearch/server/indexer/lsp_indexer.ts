@@ -40,17 +40,19 @@ export class LspIndexer extends AbstractIndexer {
   private PLACEHOLDER_REVISION: string = 'head';
 
   constructor(
+    protected readonly repoUri: RepositoryUri,
+    protected readonly revision: string,
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
     protected readonly client: EsClient,
     protected readonly log: Log
   ) {
-    super(client, log);
+    super(repoUri, revision, client, log);
   }
 
-  protected async prepareIndexCreationRequests(repoUri: RepositoryUri) {
+  protected async prepareIndexCreationRequests() {
     const contentIndexCreationReq: IndexCreationRequest = {
-      index: DocumentIndexName(repoUri),
+      index: DocumentIndexName(this.repoUri),
       type: DocumentTypeName,
       settings: {
         ...DocumentAnalysisSettings,
@@ -60,7 +62,7 @@ export class LspIndexer extends AbstractIndexer {
       schema: DocumentSchema,
     };
     const symbolIndexCreationReq: IndexCreationRequest = {
-      index: SymbolIndexName(repoUri),
+      index: SymbolIndexName(this.repoUri),
       type: SymbolTypeName,
       settings: {
         ...SymbolAnalysisSettings,
@@ -70,7 +72,7 @@ export class LspIndexer extends AbstractIndexer {
       schema: SymbolSchema,
     };
     const referenceIndexCreationReq: IndexCreationRequest = {
-      index: ReferenceIndexName(repoUri),
+      index: ReferenceIndexName(this.repoUri),
       type: ReferenceTypeName,
       settings: {
         number_of_shards: 1,
@@ -81,18 +83,18 @@ export class LspIndexer extends AbstractIndexer {
     return [contentIndexCreationReq, symbolIndexCreationReq, referenceIndexCreationReq];
   }
 
-  protected async prepareRequests(repoUri: RepositoryUri) {
+  protected async prepareRequests() {
     try {
       const {
         workspaceRepo,
         workspaceRevision,
-      } = await this.lspService.workspaceHandler.openWorkspace(repoUri, 'head');
+      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
       const workspaceDir = workspaceRepo.workdir();
       const gitOperator = new GitOperations(this.options.repoPath);
-      const fileTree = await gitOperator.fileTree(repoUri, '');
+      const fileTree = await gitOperator.fileTree(this.repoUri, '');
       return RepositoryUtils.getAllFiles(fileTree).map((filePath: string) => {
         const req: LspIndexRequest = {
-          repoUri,
+          repoUri: this.repoUri,
           localRepoPath: workspaceDir,
           filePath,
           revision: workspaceRevision,

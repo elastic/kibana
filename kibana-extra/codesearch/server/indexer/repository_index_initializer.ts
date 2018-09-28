@@ -21,13 +21,18 @@ import {
 export class RepositoryIndexInitializer extends AbstractIndexer {
   protected type: string = 'repository';
 
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {
-    super(client, log);
+  constructor(
+    protected readonly repoUri: RepositoryUri,
+    protected readonly revision: string,
+    protected readonly client: EsClient,
+    protected readonly log: Log
+  ) {
+    super(repoUri, revision, client, log);
   }
 
-  public async prepareIndexCreationRequests(repoUri: RepositoryUri) {
+  public async prepareIndexCreationRequests() {
     const creationReq: IndexCreationRequest = {
-      index: RepositoryIndexName(repoUri),
+      index: RepositoryIndexName(this.repoUri),
       type: RepositoryTypeName,
       settings: {
         ...RepositoryAnalysisSettings,
@@ -39,8 +44,8 @@ export class RepositoryIndexInitializer extends AbstractIndexer {
     return [creationReq];
   }
 
-  public async init(repoUri: RepositoryUri) {
-    const res = await this.prepareIndex(repoUri);
+  public async init() {
+    const res = await this.prepareIndex();
     if (!res) {
       this.log.error(`Initialize repository index failed.`);
     }

@@ -19,6 +19,7 @@ import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
+import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class DeleteWorker extends AbstractWorker {
@@ -28,13 +29,18 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Log,
     private readonly objectsClient: SavedObjectsClient,
-    protected readonly client: EsClient
+    protected readonly client: EsClient,
+    private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
   }
 
   public async executeJob(job: Job) {
     const { uri, dataPath } = job.payload;
+
+    // Cancel running workers
+    // TODO: Add support for clone/update worker.
+    this.cancellationService.cancelIndexJob(uri);
 
     // 1. Delete repository on local fs.
     const repoService = new RepositoryService(dataPath, this.log);

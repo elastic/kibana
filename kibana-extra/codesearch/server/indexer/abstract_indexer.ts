@@ -13,25 +13,30 @@ import { IndexCreationRequest } from './index_creation_request';
 
 export abstract class AbstractIndexer implements Indexer {
   protected type: string = 'abstract';
+  protected cancelled: boolean = false;
 
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {}
+  constructor(
+    protected readonly repoUri: RepositoryUri,
+    protected readonly revision: string,
+    protected readonly client: EsClient,
+    protected readonly log: Log
+  ) {}
 
-  public async start(
-    repoUri: RepositoryUri,
-    revision: string,
-    progressReporter?: ProgressReporter
-  ) {
-    this.log.info(`Indexer ${this.type} started for repo ${repoUri} with revision ${revision}`);
+  public async start(progressReporter?: ProgressReporter) {
+    this.log.info(
+      `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
+    );
+    this.cancelled = false;
 
     // Prepare the ES index
-    const res = await this.prepareIndex(repoUri);
+    const res = await this.prepareIndex();
     if (!res) {
-      this.log.error(`Prepare index for ${repoUri} error. Skip indexing.`);
+      this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
       return;
     }
 
     // Clean up the index if necessary
-    await this.cleanIndex(repoUri);
+    await this.cleanIndex(this.repoUri);
 
     // Prepare all the index requests
     let reqs;
@@ -41,14 +46,19 @@ export abstract class AbstractIndexer implements Indexer {
     let failCount = 0;
 
     try {
-      reqs = await this.prepareRequests(repoUri);
+      reqs = await this.prepareRequests(this.repoUri);
       totalCount = reqs.length;
     } catch (error) {
-      this.log.error(`Prepare requests for ${repoUri} error.`);
+      this.log.error(`Prepare requests for ${this.repoUri} error.`);
       throw error;
     }
 
     for (const req of reqs) {
+      if (this.isCancelled()) {
+        this.log.info(`Indexer cancelled. Stop right now.`);
+        break;
+      }
+
       try {
         await this.processRequest(req);
         successCount += 1;
@@ -74,6 +84,14 @@ export abstract class AbstractIndexer implements Indexer {
     }
   }
 
+  public cancel() {
+    this.cancelled = true;
+  }
+
+  protected isCancelled(): boolean {
+    return this.cancelled;
+  }
+
   protected async cleanIndex(repoUri: RepositoryUri): Promise<void> {
     // This is the abstract implementation. You should override this.
     return new Promise<void>((resolve, reject) => {
@@ -93,17 +111,15 @@ export abstract class AbstractIndexer implements Indexer {
     return;
   }
 
-  protected async prepareIndexCreationRequests(
-    repoUri: RepositoryUri
-  ): Promise<IndexCreationRequest[]> {
+  protected async prepareIndexCreationRequests(): Promise<IndexCreationRequest[]> {
     // This is the abstract implementation. You should override this.
     return new Promise<IndexCreationRequest[]>((resolve, reject) => {
       resolve();
     });
   }
 
-  protected async prepareIndex(repoUri: RepositoryUri) {
-    const creationReqs = await this.prepareIndexCreationRequests(repoUri);
+  protected async prepareIndex() {
+    const creationReqs = await this.prepareIndexCreationRequests();
     for (const req of creationReqs) {
       try {
         const res = await this.createIndex(req);

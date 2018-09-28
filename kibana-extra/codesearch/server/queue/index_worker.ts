@@ -11,10 +11,11 @@ import {
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { IndexWorkerResult, WorkerProgress } from '../../model/repository';
-import { Indexer, IndexProgress } from '../indexer';
+import { IndexerFactory, IndexProgress } from '../indexer';
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { AbstractWorker } from './abstract_worker';
+import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class IndexWorker extends AbstractWorker {
@@ -24,13 +25,15 @@ export class IndexWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Log,
     protected readonly objectsClient: SavedObjectsClient,
-    protected readonly indexers: Indexer[]
+    protected readonly indexerFactories: IndexerFactory[],
+    private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
   }
 
   public async executeJob(job: Job) {
-    const { uri, revision } = job.payload;
+    const { payload, cancellationToken } = job;
+    const { uri, revision } = payload;
 
     const progressReporter = async (progress: IndexProgress) => {
       let statusIndex = '';
@@ -56,9 +59,17 @@ export class IndexWorker extends AbstractWorker {
       }
     };
 
-    for (const indexer of this.indexers) {
+    for (const indexerFactory of this.indexerFactories) {
+      this.cancellationService.cancelIndexJob(uri);
       // TODO: make indexers run in parallel.
-      await indexer.start(uri, revision, progressReporter);
+      const indexer = indexerFactory.create(uri, revision);
+      indexer.start(progressReporter);
+      if (cancellationToken) {
+        cancellationToken.on(() => {
+          indexer.cancel();
+        });
+        this.cancellationService.registerIndexJobToken(uri, cancellationToken);
+      }
     }
 
     // TODO: populate the actual index result

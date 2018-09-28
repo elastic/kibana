@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CancellationToken } from '@codesearch/esqueue';
+
 export interface Job {
   payload: any;
   options: any;
-  cancellationToken: string | null;
+  cancellationToken?: CancellationToken;
 }

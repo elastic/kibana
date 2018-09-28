@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Esqueue, events as esqueueEvents } from '@codesearch/esqueue';
-import { Job as JobInternal } from '@codesearch/esqueue/job';
+import {
+  CancellationToken,
+  Esqueue,
+  events as esqueueEvents,
+  Job as JobInternal,
+} from '@codesearch/esqueue';
 
 import { WorkerResult } from 'model/repository';
 import { Log } from '../log';
@@ -23,7 +27,6 @@ export abstract class AbstractWorker implements Worker {
     return {
       payload,
       options,
-      cancellationToken: '',
     };
   }
 
@@ -50,7 +53,7 @@ export abstract class AbstractWorker implements Worker {
   }
 
   public bind() {
-    const workerFn = (payload: any, cancellationToken: string) => {
+    const workerFn = (payload: any, cancellationToken: CancellationToken) => {
       const job: Job = {
         ...payload,
         cancellationToken,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './cancellation_service';
 export * from './clone_worker';
 export * from './delete_worker';
 export * from './index_worker';

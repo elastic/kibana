@@ -8,11 +8,17 @@ import { Esqueue } from '@codesearch/esqueue';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
-import { LspIndexer, RepositoryIndexInitializer } from './server/indexer';
+import { LspIndexerFactory, RepositoryIndexInitializerFactory } from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
-import { CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './server/queue';
+import {
+  CancellationSerivce,
+  CloneWorker,
+  DeleteWorker,
+  IndexWorker,
+  UpdateWorker,
+} from './server/queue';
 import { fileRoute } from './server/routes/file';
 import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
 import { monacoRoute } from './server/routes/monaco';
@@ -84,12 +90,22 @@ export default (kibana: any) =>
       );
       const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
 
-      // Initialize indexers
+      // Initialize indexing factories.
       const lspService = new LspService('127.0.0.1', server, serverOptions, objectsClient);
-      const lspIndexer = new LspIndexer(lspService, serverOptions, adminCluster.getClient(), log);
+      const lspIndexerFactory = new LspIndexerFactory(
+        lspService,
+        serverOptions,
+        adminCluster.getClient(),
+        log
+      );
 
-      // Initialize repository index.
-      const repositoryIndexInit = new RepositoryIndexInitializer(adminCluster.getClient(), log);
+      const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(
+        adminCluster.getClient(),
+        log
+      );
+
+      // Initialize queue worker cancellation service.
+      const cancellationService = new CancellationSerivce();
 
       // Initialize queue.
       const queue = new Esqueue(queueIndex, {
@@ -97,7 +113,13 @@ export default (kibana: any) =>
         timeout: queueTimeout,
         doctype: 'esqueue',
       });
-      const indexWorker = new IndexWorker(queue, log, objectsClient, [lspIndexer]).bind();
+      const indexWorker = new IndexWorker(
+        queue,
+        log,
+        objectsClient,
+        [lspIndexerFactory],
+        cancellationService
+      ).bind();
       const cloneWorker = new CloneWorker(
         queue,
         log,
@@ -110,7 +132,8 @@ export default (kibana: any) =>
         queue,
         log,
         objectsClient,
-        adminCluster.getClient()
+        adminCluster.getClient(),
+        cancellationService
       ).bind();
       const updateWorker = new UpdateWorker(
         queue,
@@ -147,7 +170,7 @@ export default (kibana: any) =>
         cloneWorker,
         deleteWorker,
         indexWorker,
-        repositoryIndexInit
+        repoIndexInitializerFactory
       );
       repositorySearchRoute(server, repoSearchClient);
       documentSearchRoute(server, documentSearchClient);

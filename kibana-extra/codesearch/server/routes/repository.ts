@@ -10,7 +10,7 @@ import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
-import { RepositoryIndexInitializer } from '../indexer';
+import { RepositoryIndexInitializerFactory } from '../indexer';
 import {
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
@@ -28,7 +28,7 @@ export function repositoryRoute(
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
-  repoIndexInit: RepositoryIndexInitializer
+  repoIndexInitializerFactory: RepositoryIndexInitializerFactory
 ) {
   // Clone a git repository
   server.route({
@@ -61,7 +61,7 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Create the index for the repository
-          await repoIndexInit.init(repo.uri);
+          await repoIndexInitializerFactory.create(repo.uri, '').init();
 
           // Persist to elasticsearch
           await callWithRequest(req, 'create', {
