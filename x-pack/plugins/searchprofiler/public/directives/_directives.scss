@@ -5,7 +5,7 @@
     margin: 0;
     padding: 0;
     border: none;
-    border-bottom: 1px solid $euiColorDarkShade;
+    border-bottom: $euiBorderThin;
   }
 
   .shard-body {
@@ -53,12 +53,10 @@
     display: inline-block;
   }
 
-  .tv-row:hover {
-    outline: solid 1px $euiColorMediumShade;
-  }
-
+  .tv-row:hover,
   .tv-row-last-hover {
-    outline: solid 1px $euiColorMediumShade;
+    border-bottom: $euiBorderThin;
+    cursor: pointer;
   }
 
   .tv-row,
