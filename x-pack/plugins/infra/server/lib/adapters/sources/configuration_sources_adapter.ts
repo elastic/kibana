@@ -59,6 +59,6 @@ const DEFAULT_FIELDS = {
 
 const DEFAULT_SOURCE = {
   metricAlias: 'metricbeat-*',
-  logAlias: 'filebeat333-*',
+  logAlias: 'filebeat-*',
   fields: DEFAULT_FIELDS,
 };
