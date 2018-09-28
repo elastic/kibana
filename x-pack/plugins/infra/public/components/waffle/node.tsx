@@ -9,7 +9,6 @@ import { last } from 'lodash';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraPathType } from '../../../common/graphql/types';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
@@ -28,28 +27,15 @@ interface Props {
   node: InfraWaffleMapNode;
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
-}
-
-function convertInfraPathTypeToNodeType(type: InfraPathType) {
-  switch (type) {
-    case InfraPathType.hosts:
-      return InfraNodeType.host;
-    case InfraPathType.containers:
-      return InfraNodeType.container;
-    case InfraPathType.pods:
-      return InfraNodeType.pod;
-    default:
-      throw new Error('Incompatible path type.');
-  }
+  nodeType: InfraNodeType;
 }
 
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { node, options, squareSize, bounds, formatter } = this.props;
+    const { nodeType, node, options, squareSize, bounds, formatter } = this.props;
     const { isPopoverOpen } = this.state;
     const metric = last(node.metrics);
-    const nodeType = convertInfraPathTypeToNodeType(last(options.path).type);
     const valueMode = squareSize > 110;
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);

@@ -16,6 +16,7 @@ import {
   InfraNodePath,
   InfraPathInput,
   InfraTimerangeInput,
+  SourceQuery,
 } from '../../common/graphql/types';
 
 export interface InfraFrontendLibs {
@@ -161,6 +162,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
+  fields?: SourceQuery.Fields | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metrics: InfraMetricInput[];

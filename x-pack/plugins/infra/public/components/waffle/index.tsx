@@ -7,7 +7,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { get, last, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraMetricType } from '../../../common/graphql/types';
+import { InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
@@ -29,6 +29,7 @@ import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 
 interface Props {
   options: InfraWaffleMapOptions;
+  nodeType: InfraNodeType;
   map: InfraWaffleData;
   loading: boolean;
   reload: () => void;
@@ -165,6 +166,7 @@ export class Waffle extends React.Component<Props, {}> {
           group={group}
           formatter={this.formatter}
           bounds={bounds}
+          nodeType={this.props.nodeType}
         />
       );
     }
@@ -178,6 +180,7 @@ export class Waffle extends React.Component<Props, {}> {
           formatter={this.formatter}
           isChild={false}
           bounds={bounds}
+          nodeType={this.props.nodeType}
         />
       );
     }

@@ -73,7 +73,7 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
     ];
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        {currentLabel.text}
+        Metric: {currentLabel.text}
       </EuiFilterButton>
     );
 
