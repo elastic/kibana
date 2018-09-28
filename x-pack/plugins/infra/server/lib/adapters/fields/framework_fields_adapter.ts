@@ -18,11 +18,17 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
     request: InfraFrameworkRequest,
     indices: string[]
   ): Promise<IndexFieldDescriptor[]> {
-    const indexPatternsService = this.framework.getIndexPatternsService(request);
-    const response = await indexPatternsService.getFieldsForWildcard({
-      pattern: indices,
-    });
-
-    return response;
+    try {
+      const indexPatternsService = this.framework.getIndexPatternsService(request);
+      const response = await indexPatternsService.getFieldsForWildcard({
+        pattern: indices,
+      });
+      return response;
+    } catch (error) {
+      if (error.status !== 404) {
+        return [];
+      }
+      throw error;
+    }
   }
 }
