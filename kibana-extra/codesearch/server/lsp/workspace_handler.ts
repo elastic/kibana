@@ -14,6 +14,7 @@ import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserv
 import { Full } from '@codesearch/lsp-extension';
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
+import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, LspRequest } from '../../model';
@@ -41,8 +42,8 @@ export class WorkspaceHandler {
   public async openWorkspace(repositoryUri: string, revision: string) {
     try {
       const res = await this.objectsClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repositoryUri);
-      const cloneProgress: CloneWorkerProgress = res.attributes;
-      if (cloneProgress.progress !== 100) {
+      const gitStatus: CloneWorkerProgress = res.attributes;
+      if (!RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) && gitStatus.progress !== 100) {
         throw Boom.internal(`repository has not been fully cloned yet.`);
       }
     } catch (error) {

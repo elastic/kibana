@@ -224,7 +224,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             </p>
             <p>
               &nbsp;&nbsp;&nbsp;&nbsp;
-              {hits} hits from
+              {hits} hits from&nbsp;
               <Link to={fileLinkUrl}>{filePath}</Link>
             </p>
             <CodeBlock
@@ -269,7 +269,7 @@ class SearchPage extends React.PureComponent<Props, State> {
         <div>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiSearchBar defaultQuery={query} onChange={this.onSearchChanged} />
+              <EuiSearchBar defaultQuery={query} query={query} onChange={this.onSearchChanged} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
