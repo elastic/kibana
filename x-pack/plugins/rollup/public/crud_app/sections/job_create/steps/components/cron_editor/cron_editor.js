@@ -144,7 +144,7 @@ const frequencyToBaselineFieldsMap = {
     second: '0',
     minute: '0',
     hour: '0',
-    date: '*',
+    date: '?',
     month: '*',
     day: '7',
   },
