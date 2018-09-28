@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { IDirective, IRootElementService, IScope } from 'angular';
+
 import { I18nServiceType } from './provider';
 
-export function i18nDirective(i18n: I18nServiceType) {
+export function i18nDirective(i18n: I18nServiceType): IDirective {
   return {
     restrict: 'A',
     scope: {
@@ -27,7 +29,7 @@ export function i18nDirective(i18n: I18nServiceType) {
       defaultMessage: '@i18nDefaultMessage',
       values: '=i18nValues',
     },
-    link($scope: angular.IScope, $element: angular.IRootElementService) {
+    link($scope: IScope, $element: IRootElementService) {
       $scope.$watchGroup(
         ['id', 'defaultMessage', 'values'],
         ([id, defaultMessage = '', values = {}]) => {

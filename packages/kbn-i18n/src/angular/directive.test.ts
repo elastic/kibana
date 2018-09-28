@@ -19,6 +19,7 @@
 
 import angular from 'angular';
 import 'angular-mocks';
+
 import { i18nDirective } from './directive';
 import { I18nProvider } from './provider';
 

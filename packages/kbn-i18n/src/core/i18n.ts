@@ -43,7 +43,6 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
 /**
  * Returns message by the given message id.
  * @param id - path to the message
- * @returns message - translated message from messages tree
  */
 function getMessageById(id: string): string {
   return getMessages()[id];
@@ -52,7 +51,6 @@ function getMessageById(id: string): string {
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
- * @returns normalizedLocale
  */
 function normalizeLocale(locale: string) {
   return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
@@ -84,7 +82,6 @@ export function addMessages(newMessages: PlainMessages = {}, locale = newMessage
 
 /**
  * Returns messages for the current language
- * @returns messages
  */
 export function getMessages(): PlainMessages {
   return messages[currentLocale] || {};
@@ -104,7 +101,6 @@ export function setLocale(locale: string) {
 
 /**
  * Returns the current locale
- * @returns locale
  */
 export function getLocale() {
   return currentLocale;
@@ -149,7 +145,6 @@ export function setFormats(newFormats: Formats) {
 
 /**
  * Returns current formats
- * @returns formats
  */
 export function getFormats() {
   return formats;
@@ -157,7 +152,6 @@ export function getFormats() {
 
 /**
  * Returns array of locales having translations
- * @returns locales
  */
 export function getRegisteredLocales() {
   return Object.keys(messages);
@@ -174,7 +168,6 @@ interface TranslateArguments {
  * @param [options]
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
- * @returns
  */
 export function translate(
   id: string,
