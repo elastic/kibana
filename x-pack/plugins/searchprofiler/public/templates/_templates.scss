@@ -1,6 +1,6 @@
-.profilerDevTool {
+.prfDevTool {
 
-  .wrapper {
+  .prfDevTool__wrapper {
     display: flex;
     flex-flow: row wrap;
     position: absolute;
@@ -8,7 +8,7 @@
     height: 100%;
   }
 
-  .main {
+  .prfDevTool__main {
     overflow-y: auto;
     height: 100%;
     padding: 0 $euiSizeS;
@@ -16,13 +16,13 @@
     order: 2;
   }
 
-  .details {
+  .prfDevTool__details {
     padding: $euiSizeS;
     flex: 1;
     order: 3;
   }
 
-  .sense {
+  .prfDevTool__sense {
     height: 100%;
     flex: 1;
     order: 1;
@@ -30,31 +30,31 @@
     .kuiTextInput {
       width: 100%;
     }
-  }
 
-  // Ace Editor
-  .ace_editor {
-    height: 100%;
-    padding-bottom: $euiSizeXXL;
-    outline: solid 1px $euiColorLightShade;
-  }
+    // Ace Editor overrides
+    .ace_editor {
+      height: 100%;
+      padding-bottom: $euiSizeXXL;
+      outline: solid 1px $euiColorLightShade;
+    }
 
-  .errorMarker {
-    position: absolute;
-    background: rgba($euiColorDanger, .5);
-    z-index: 20;
-  }
+    .errorMarker {
+      position: absolute;
+      background: rgba($euiColorDanger, .5);
+      z-index: 20;
+    }
 
-  .error {
-      /* These styles are arbitrary */
-      padding: $euiSize;
-      font-weight: bold;
-      color: $euiColorDanger;
-      border: 1px solid $euiColorDanger;
+    .error {
+        /* These styles are arbitrary */
+        padding: $euiSize;
+        font-weight: bold;
+        color: $euiColorDanger;
+        border: 1px solid $euiColorDanger;
+    }
   }
 }
 
-.profilerDevTool__container {
+.prfDevTool__container {
   overflow: auto;
   height: 100%;
   width: 100%;

@@ -1,6 +1,6 @@
-.profilerDevTool {
+.prfDevTool {
   
-  .panel {
+  .prfDevTool__panel {
     background-color: inherit;
     margin: 0;
     padding: 0;
@@ -8,20 +8,19 @@
     border-bottom: $euiBorderThin;
   }
 
-  .shard-body {
+  .prfDevTool__shardBody {
     padding-top: $euiSizeXS;
-    margin: 0;
-    margin-left: $euiSizeXS;
+    margin: 0 0 0 $euiSizeXS;
   }
 
-  .panel-body-underline {
+  .prfDevTool__panelBody {
     padding: $euiSize $euiSizeXS $euiSizeXS;
     margin-top: $euiSize;
     margin-left: $euiSizeS;
   }
 
   // Profile details treeview
-  .shard-details {
+  .prfDevTool__shardDetails {
     float: left;
     margin-bottom: $euiSizeXS;
 
@@ -32,101 +31,101 @@
     }
   }
 
-  .shard-details-right {
+  .prfDevTool__shardDetails--dim {
     color: $euiColorDarkShade;
     float: right;
     text-align: right;
     margin-bottom: $euiSizeXS;
   }
 
-  .shard {
+  .prfDevTool__shard {
     margin-top: $euiSizeS;
     min-width: 100%;
-    display:inline-block;
+    display: inline-block;
     border: none;
   }
 
-  .index {
+  .prfDevTool__index {
     margin-top: $euiSize;
     min-width: 100%;
     padding: $euiSizeS;
     display: inline-block;
   }
 
-  .tv-row:hover,
-  .tv-row-last-hover {
+  .prfDevTool__tvRow:hover,
+  .prfDevTool__tvRow--last {
     border-bottom: $euiBorderThin;
     cursor: pointer;
   }
 
-  .tv-row,
-  .tv-row-header {
+  .prfDevTool__tvRow,
+  .prfDevTool__tvHeader {
     display: table;
     width: 100%;
     table-layout: fixed;
   }
 
-  .tv-row-header {
+  .prfDevTool__tvHeader {
     margin-bottom: $euiSizeS;
 
-     > .cell {
+     > .prfDevTool__cell {
       color: $euiColorDarkShade;
     }
   }
 
-  .cell {
+  .prfDevTool__cell {
     display: table-cell;
     vertical-align: middle;
     text-align: center;
+  }
 
-    > .detail {
-      font-style: italic;
-      font-size: $euiFontSizeXS;
-      padding-left: $euiSize;
+  .prfDevTool__detail {
+    font-style: italic;
+    font-size: $euiFontSizeXS;
+    padding-left: $euiSize;
+  }
+
+  .prfDevTool__description {
+    background-color: $euiColorEmptyShade;
+    text-align: left;
+  
+    .fa-bars {
+      padding-left: $euiSizeS;
     }
   }
 
-  .description {
-    background-color: $euiColorEmptyShade;
-    text-align: left;
-  }
-
-  .time, 
-  .totaltime {
+  .prfDevTool__time, 
+  .prfDevTool__totalTime {
     width: 10%;
   }
   
-  .percentage {
+  .prfDevTool__percentage {
     width: 15%;
     background-color: $euiColorEmptyShade;
   }
 
-  .fa-bars {
-    padding-left: $euiSizeS;
-  }
-
   // Progressbar
-  .graph {
+  .prfDevTool__graph {
     height: 20px;
     border: 1px solid $euiColorMediumShade;
     background: linear-gradient(to top, $euiColorLightShade, $euiColorLightestShade 23%);
     position: relative;
     vertical-align: middle;
     margin: $euiSizeXS;
-
-    p {
-      position: absolute;
-      text-align: center;
-      width: 100%;
-      margin: 0;
-      line-height: $euiFontSizeM;
-      vertical-align: middle;
-      font-size: $euiFontSizeXS;
-      order: 5;
-    }
   }
 
-  .bar {
+  .prfDevTool__graphLabel {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    margin: 0;
+    line-height: $euiFontSizeM;
+    vertical-align: middle;
+    font-size: $euiFontSizeXS;
+    order: 5;
+  }
+
+  .prfDevTool__bar {
     height: 20px; /* Not 30px because the 1px top-border brings it up to 30px to match #graph */
     // SASSTODO This pink color is hardcoded elsewhere in the javascript and in tests, needs an overall redesign
     background: rgba(255, 175, 175, .1);
@@ -136,11 +135,11 @@
   }
 
   // Breakdown table
-  .breakdown {
-    width:100%
-  }
-
-  .breakdown td {
-    padding-right: $euiSizeXS;
+  .prfDevTool__breakdown {
+    width:100%;
+    
+    td {
+      padding-right: $euiSizeXS;
+    }
   }
 }
