@@ -10,7 +10,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "strict",
         "_meta": {
           "logstash-version": "7.0.0-alpha1"
@@ -59,7 +59,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "config": {
             "dynamic": "true",

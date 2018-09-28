@@ -18,7 +18,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic_templates": [
           {
             "string_fields": {
@@ -385,7 +385,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic_templates": [
           {
             "string_fields": {
