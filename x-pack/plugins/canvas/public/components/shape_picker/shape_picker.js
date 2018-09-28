@@ -7,10 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { shapes } from '../../../canvas_plugin_src/renderers/shape/shapes';
 import { ShapePreview } from '../shape_preview';
 
-export const ShapePicker = ({ onChange }) => {
+export const ShapePicker = ({ shapes, onChange }) => {
   return (
     <EuiFlexGrid gutterSize="s" columns={4}>
       {Object.keys(shapes)
@@ -18,7 +17,7 @@ export const ShapePicker = ({ onChange }) => {
         .map(shapeKey => (
           <EuiFlexItem key={shapeKey}>
             <EuiLink onClick={() => onChange(shapeKey)}>
-              <ShapePreview value={shapeKey} />
+              <ShapePreview shape={shapes[shapeKey]} />
             </EuiLink>
           </EuiFlexItem>
         ))}
@@ -27,6 +26,6 @@ export const ShapePicker = ({ onChange }) => {
 };
 
 ShapePicker.propTypes = {
-  value: PropTypes.string,
+  shapes: PropTypes.object.isRequired,
   onChange: PropTypes.func,
 };
