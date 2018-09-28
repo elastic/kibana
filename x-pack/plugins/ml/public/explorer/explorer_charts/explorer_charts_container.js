@@ -44,10 +44,9 @@ function getChartId(series) {
 function ExplorerChartContainer({
   series,
   tooManyBuckets,
-  mlSelectSeverityService
+  mlSelectSeverityService,
+  wrapLabel
 }) {
-  const wrapLabel = isLabelLengthAboveThreshold(series);
-
   const {
     detectorLabel,
     entityFields,
@@ -55,7 +54,8 @@ function ExplorerChartContainer({
   } = series;
 
   return (
-    <React.Fragment>
+    // Needs to be a div, Using React.Fragment would break the Flex Layout
+    <div>
       <div className="ml-explorer-chart-icons">
         {tooManyBuckets && (
           <span className="ml-explorer-chart-icon">
@@ -115,7 +115,7 @@ function ExplorerChartContainer({
           />
         );
       })()}
-    </React.Fragment>
+    </div>
   );
 }
 
@@ -131,6 +131,8 @@ export function ExplorerChartsContainer({
   const chartsWidth = (chartsPerRow === 1) ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = (chartsPerRow === 1) ? 0 : chartsPerRow;
 
+  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+
   return (
     <EuiFlexGrid columns={chartsColumns}>
       {(seriesToPlot.length > 0) && seriesToPlot.map((series) => (
@@ -139,6 +141,7 @@ export function ExplorerChartsContainer({
             series={series}
             tooManyBuckets={tooManyBuckets}
             mlSelectSeverityService={mlSelectSeverityService}
+            wrapLabel={wrapLabel}
           />
         </EuiFlexItem>
       ))}

@@ -100,6 +100,7 @@ export class ExplorerChartRare extends React.Component {
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement.append('svg')
+        .classed('ml-explorer-chart-svg', true)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
