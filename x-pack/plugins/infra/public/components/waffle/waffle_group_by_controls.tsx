@@ -82,10 +82,10 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
                 {o && o.text}
               </EuiBadge>
             ))
-        : 'Group By';
+        : 'All';
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        {buttonBody}
+        Group By: {buttonBody}
       </EuiFilterButton>
     );
 
