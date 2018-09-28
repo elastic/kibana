@@ -16,10 +16,11 @@ import {
   EuiHorizontalRule,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Popover } from '../popover';
 import { Clipboard } from '../clipboard';
 
-export class WorkpadExport extends React.PureComponent {
+class WorkpadExportUI extends React.PureComponent {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     onCopy: PropTypes.func.isRequired,
@@ -33,11 +34,19 @@ export class WorkpadExport extends React.PureComponent {
 
   renderControls = closePopover => {
     const pdfUrl = this.props.getExportUrl('pdf');
+    const { intl } = this.props;
     return (
       <div>
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow>
-            <EuiFormRow label="Click below to create a PDF. You'll be notified when the export is complete">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.canvas.workpad.export.createPdfButtonLabel"
+                  defaultMessage="Click below to create a PDF. You'll be notified when the export is complete"
+                />
+              }
+            >
               <EuiButton
                 onClick={() => {
                   this.exportPdf();
@@ -50,7 +59,14 @@ export class WorkpadExport extends React.PureComponent {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="half" />
-        <EuiFormRow label="To generate a PDF from a script or with Watcher, use this URL.">
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.workpad.export.generatePdfLinkLabel"
+              defaultMessage="To generate a PDF from a script or with Watcher, use this URL."
+            />
+          }
+        >
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem style={{ overflow: 'auto' }}>
               <EuiCodeBlock style={{ whiteSpace: 'nowrap' }} paddingSize="s">
@@ -66,7 +82,13 @@ export class WorkpadExport extends React.PureComponent {
                   closePopover();
                 }}
               >
-                <EuiButtonIcon aria-label="Copy to clipboard" iconType="copy" />
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage({
+                    id: 'xpack.canvas.workpad.export.copyToClipboardLabel',
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                  iconType="copy"
+                />
               </Clipboard>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -78,8 +100,11 @@ export class WorkpadExport extends React.PureComponent {
   renderDisabled = () => {
     return (
       <div>
-        Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
-        this to your kibana.yml file.
+        <FormattedMessage
+          id="xpack.canvas.workpad.export.renderDisabledMessage"
+          defaultMessage="Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
+          this to your kibana.yml file."
+        />
         <EuiSpacer />
         <EuiCodeBlock paddingSize="s" language="yml">
           xpack.reporting.capture.browser.type: chromium
@@ -89,12 +114,29 @@ export class WorkpadExport extends React.PureComponent {
   };
 
   render() {
+    const { intl } = this.props;
     const exportControl = togglePopover => (
-      <EuiButtonIcon iconType="exportAction" aria-label="Create PDF" onClick={togglePopover} />
+      <EuiButtonIcon
+        iconType="exportAction"
+        aria-label={intl.formatMessage({
+          id: 'xpack.canvas.workpad.export.createPdfAriaLabel',
+          defaultMessage: 'Create PDF',
+        })}
+        onClick={togglePopover}
+      />
     );
 
     return (
-      <Popover button={exportControl} tooltip="Export workpad" tooltipPosition="bottom">
+      <Popover
+        button={exportControl}
+        tooltip={
+          <FormattedMessage
+            id="xpack.canvas.workpad.export.workpadExportButtonTooltip"
+            defaultMessage="Export workpad"
+          />
+        }
+        tooltipPosition="bottom"
+      >
         {({ closePopover }) => (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false} style={{ maxWidth: '300px' }}>
@@ -107,3 +149,5 @@ export class WorkpadExport extends React.PureComponent {
     );
   }
 }
+
+export const WorkpadExport = injectI18n(WorkpadExportUI);

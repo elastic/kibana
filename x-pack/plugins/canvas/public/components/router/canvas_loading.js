@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const CanvasLoading = ({ msg }) => (
   <div className="canvasContainer--loading">
@@ -29,5 +30,7 @@ CanvasLoading.propTypes = {
 };
 
 CanvasLoading.defaultProps = {
-  msg: 'Loading...',
+  msg: i18n.translate('xpack.canvas.router.canvasLoadingTitle', {
+    defaultMessage: 'Loading...',
+  }),
 };

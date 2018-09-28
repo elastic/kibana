@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExpressionInput } from '../expression_input';
 
 export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
@@ -24,7 +25,17 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
-            {formState.dirty ? 'Cancel' : 'Close'}
+            {formState.dirty ? (
+              <FormattedMessage
+                id="xpack.canvas.expression.cancelButtonTitle"
+                defaultMessage="Cancel"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.canvas.expression.closeButtonTitle"
+                defaultMessage="Close"
+              />
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -34,7 +45,7 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
             onClick={() => setExpression(formState.expression)}
             size="s"
           >
-            Run
+            <FormattedMessage id="xpack.canvas.expression.runButtonTitle" defaultMessage="Run" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

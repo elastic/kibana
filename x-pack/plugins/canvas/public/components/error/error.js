@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ShowDebugging } from './show_debugging';
 
 export const Error = ({ payload }) => {
@@ -19,11 +20,37 @@ export const Error = ({ payload }) => {
       style={{ maxWidth: 500 }}
       color="danger"
       iconType="cross"
-      title="Whoops! Expression failed"
+      title={
+        <FormattedMessage
+          id="xpack.canvas.error.expressionErrorTitle"
+          defaultMessage="Whoops! Expression failed"
+        />
+      }
     >
       <p>
-        The function <strong>"{functionName}"</strong> failed
-        {message ? ' with the following message:' : '.'}
+        <FormattedMessage
+          id="xpack.canvas.error.expressionErrorDescription"
+          defaultMessage="The function {strongFunctionName} failed"
+          values={{
+            functionName: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.canvas.error.strongFunctionNameLabel"
+                  defaultMessage="{functionName}"
+                  values={{ functionName }}
+                />
+              </strong>
+            ),
+          }}
+        />
+        {message ? (
+          <FormattedMessage
+            id="xpack.canvas.error.expressionErrorMessage"
+            defaultMessage=" with the following message:"
+          />
+        ) : (
+          '.'
+        )}
       </p>
       {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 

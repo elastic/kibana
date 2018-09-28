@@ -19,7 +19,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-export const WorkpadConfig = ({ size, name, setSize, setName }) => {
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
+const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
 
   const badges = [
@@ -44,18 +46,36 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   return (
     <div>
       <EuiTitle size="xs">
-        <h4>Workpad</h4>
+        <h4>
+          <FormattedMessage id="xpack.canvas.workpad.config.headerTitle" defaultMessage="Workpad" />
+        </h4>
       </EuiTitle>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label="Name" compressed>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.workpad.config.workpadNameLabel"
+            defaultMessage="Name"
+          />
+        }
+        compressed
+      >
         <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
       </EuiFormRow>
 
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow label="Width" compressed>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.canvas.workpad.config.workpadWidthLabel"
+                defaultMessage="Width"
+              />
+            }
+            compressed
+          >
             <EuiFieldNumber
               onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
               value={size.width}
@@ -64,19 +84,38 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiToolTip position="bottom" content="Flip the width and height">
+            <EuiToolTip
+              position="bottom"
+              content={
+                <FormattedMessage
+                  id="xpack.canvas.workpad.config.flipSizeButtonTooltip"
+                  defaultMessage="Flip the width and height"
+                />
+              }
+            >
               <EuiButtonIcon
                 iconType="merge"
                 color="text"
                 onClick={rotate}
-                aria-label="Swap Page Dimensions"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.canvas.workpad.config.flipSizeButtonLabel',
+                  defaultMessage: 'Swap Page Dimensions',
+                })}
                 style={{ marginBottom: 12 }}
               />
             </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Height" compressed>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.canvas.workpad.config.workpadHeightLabel"
+                defaultMessage="Height"
+              />
+            }
+            compressed
+          >
             <EuiFieldNumber
               onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
               value={size.height}
@@ -93,8 +132,20 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
             key={`page-size-badge-${i}`}
             color="hollow"
             onClick={() => setSize(badge.size)}
-            aria-label={`Preset Page Size: ${badge.name}`}
-            onClickAriaLabel={`Set page size to ${badge.name}`}
+            aria-label={intl.formatMessage(
+              {
+                id: 'xpack.canvas.workpad.config.presetPageSizeAriaLabel',
+                defaultMessage: 'Preset Page Size: {badgeName}',
+              },
+              { badgeName: badge.name }
+            )}
+            onClickAriaLabel={intl.formatMessage(
+              {
+                id: 'xpack.canvas.workpad.config.setPageSizeAriaLabel',
+                defaultMessage: 'Set page size to {badgeName}',
+              },
+              { badgeName: badge.name }
+            )}
           >
             {badge.name}
           </EuiBadge>
@@ -104,9 +155,11 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
   );
 };
 
-WorkpadConfig.propTypes = {
+WorkpadConfigUI.propTypes = {
   size: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   setSize: PropTypes.func.isRequired,
   setName: PropTypes.func.isRequired,
 };
+
+export const WorkpadConfig = injectI18n(WorkpadConfigUI);

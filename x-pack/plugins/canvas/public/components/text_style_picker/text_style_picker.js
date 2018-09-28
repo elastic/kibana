@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FontPicker } from '../font_picker';
 import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
@@ -25,17 +26,32 @@ export const TextStylePicker = ({
   const alignmentButtons = [
     {
       id: 'left',
-      label: 'Align left',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.alignLeftLabel"
+          defaultMessage="Align left"
+        />
+      ),
       iconType: 'editorAlignLeft',
     },
     {
       id: 'center',
-      label: 'Align center',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.alignCenterLabel"
+          defaultMessage="Align center"
+        />
+      ),
       iconType: 'editorAlignCenter',
     },
     {
       id: 'right',
-      label: 'Align right',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.alignRightLabel"
+          defaultMessage="Align right"
+        />
+      ),
       iconType: 'editorAlignRight',
     },
   ];
@@ -43,17 +59,32 @@ export const TextStylePicker = ({
   const styleButtons = [
     {
       id: 'bold',
-      label: 'Bold',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.styleBoldLabel"
+          defaultMessage="Bold"
+        />
+      ),
       iconType: 'editorBold',
     },
     {
       id: 'italic',
-      label: 'Italic',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.styleItalicLabel"
+          defaultMessage="Italic"
+        />
+      ),
       iconType: 'editorItalic',
     },
     {
       id: 'underline',
-      label: 'Underline',
+      label: (
+        <FormattedMessage
+          id="xpack.canvas.text.style.picker.styleUnderlineLabel"
+          defaultMessage="Underline"
+        />
+      ),
       iconType: 'editorUnderline',
     },
   ];

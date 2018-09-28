@@ -8,8 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
+import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
 export const AdvancedFailureComponent = props => {
   const {
@@ -49,12 +50,18 @@ export const AdvancedFailureComponent = props => {
       </EuiFormRow>
       <div>
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
-          Apply
+          <FormattedMessage
+            id="xpack.canvas.arg.form.submitInvalidExpressionButtonTitle"
+            defaultMessage="Apply"
+          />
         </EuiButton>
         {defaultValue &&
           defaultValue.length && (
             <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-              Reset
+              <FormattedMessage
+                id="xpack.canvas.arg.form.resetInvalidExpressionButtonTitle"
+                defaultMessage="Reset"
+              />
             </EuiButtonEmpty>
           )}
       </div>

@@ -7,15 +7,18 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import { I18nProvider } from '@kbn/i18n/react';
 import { App } from '../../components/app';
 
 export function CanvasRootController(canvasStore, $scope, $element) {
   const domNode = $element[0];
 
   render(
-    <Provider store={canvasStore}>
-      <App />
-    </Provider>,
+    <I18nProvider>
+      <Provider store={canvasStore}>
+        <App />
+      </Provider>
+    </I18nProvider>,
     domNode
   );
 

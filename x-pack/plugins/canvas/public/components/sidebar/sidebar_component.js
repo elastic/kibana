@@ -15,14 +15,16 @@ import {
   EuiTabbedContent,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Datasource } from '../datasource';
 import { FunctionFormList } from '../function_form_list';
 
-export const SidebarComponent = ({
+const SidebarComponentUI = ({
   selectedElement,
   duplicateElement,
   elementLayer,
   elementIsSelected,
+  intl,
 }) => {
   const tabs = [
     {
@@ -56,7 +58,12 @@ export const SidebarComponent = ({
           <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h3>Selected layer</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.canvas.sidebar.headerTitle"
+                    defaultMessage="Selected layer"
+                  />
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -64,55 +71,107 @@ export const SidebarComponent = ({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="none">
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element to top layer">
+                      <EuiToolTip
+                        position="bottom"
+                        content={
+                          <FormattedMessage
+                            id="xpack.canvas.sidebar.moveElementToTopLayerButtonTooltip"
+                            defaultMessage="Move element to top layer"
+                          />
+                        }
+                      >
                         <EuiButtonIcon
                           color="text"
                           iconType="sortUp"
                           onClick={() => elementLayer(Infinity)}
-                          aria-label="Move element to top layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element up one layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="arrowUp"
-                          onClick={() => elementLayer(1)}
-                          aria-label="Move element up one layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element down one layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="arrowDown"
-                          onClick={() => elementLayer(-1)}
-                          aria-label="Move element down one layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element to bottom layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="sortDown"
-                          onClick={() => elementLayer(-Infinity)}
-                          aria-label="Move element to bottom layer"
+                          aria-label={intl.formatMessage({
+                            id: 'xpack.canvas.sidebar.moveElementToTopLayerButtonAriaLabel',
+                            defaultMessage: 'Move element to top layer',
+                          })}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         position="bottom"
-                        content="Duplicate this element into a new layer"
+                        content={
+                          <FormattedMessage
+                            id="xpack.canvas.sidebar.moveElementUpOneLayerButtonTooltip"
+                            defaultMessage="Move element up one layer"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          iconType="arrowUp"
+                          onClick={() => elementLayer(1)}
+                          aria-label={intl.formatMessage({
+                            id: 'xpack.canvas.sidebar.moveElementUpOneLayerButtonAriaLabel',
+                            defaultMessage: 'Move element up one layer',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="bottom"
+                        content={
+                          <FormattedMessage
+                            id="xpack.canvas.sidebar.moveElementDownOneLayerButtonTooltip"
+                            defaultMessage="Move element down one layer"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          iconType="arrowDown"
+                          onClick={() => elementLayer(-1)}
+                          aria-label={intl.formatMessage({
+                            id: 'xpack.canvas.sidebar.moveElementDownOneLayerButtonAriaLabel',
+                            defaultMessage: 'Move element down one layer',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="bottom"
+                        content={
+                          <FormattedMessage
+                            id="xpack.canvas.sidebar.moveElementToBottomLayerButtonTooltip"
+                            defaultMessage="Move element to bottom layer"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          iconType="sortDown"
+                          onClick={() => elementLayer(-Infinity)}
+                          aria-label={intl.formatMessage({
+                            id: 'xpack.canvas.sidebar.moveElementToBottomLayerButtonAriaLabel',
+                            defaultMessage: 'Move element to bottom layer',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="bottom"
+                        content={
+                          <FormattedMessage
+                            id="xpack.canvas.sidebar.duplicateElementIntoNewLayerButtonTooltip"
+                            defaultMessage="Duplicate this element into a new layer"
+                          />
+                        }
                       >
                         <EuiButtonIcon
                           color="text"
                           iconType="copy"
                           onClick={() => duplicateElement()}
-                          aria-label="Duplicate this element into a new layer"
+                          aria-label={intl.formatMessage({
+                            id: 'xpack.canvas.sidebar.duplicateElementIntoNewLayerButtonAriaLabel',
+                            defaultMessage: 'Duplicate this element into a new layer',
+                          })}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -128,9 +187,11 @@ export const SidebarComponent = ({
   );
 };
 
-SidebarComponent.propTypes = {
+SidebarComponentUI.propTypes = {
   selectedElement: PropTypes.object,
   duplicateElement: PropTypes.func.isRequired,
   elementLayer: PropTypes.func,
   elementIsSelected: PropTypes.bool.isRequired,
 };
+
+export const SidebarComponent = injectI18n(SidebarComponentUI);

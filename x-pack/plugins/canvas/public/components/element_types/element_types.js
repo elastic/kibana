@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import lowerCase from 'lodash.lowercase';
 import { map, includes, sortBy } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
@@ -51,7 +52,12 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
-              placeholder="Filter elements"
+              placeholder={
+                <FormattedMessage
+                  id="xpack.canvas.element.types.searchInputPlaceholder"
+                  defaultMessage="Filter elements"
+                />
+              }
               onChange={e => setSearch(e.target.value)}
               value={search}
             />

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { routes } from '../../apps';
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { Router } from '../router';
@@ -31,8 +32,19 @@ export class App extends React.PureComponent {
 
     return (
       <div>
-        <div>Canvas failed to load :(</div>
-        <div>Message: {this.props.appState.message}</div>
+        <div>
+          <FormattedMessage
+            id="xpack.canvas.app.canvasLoadFailTitle"
+            defaultMessage="Canvas failed to load :("
+          />
+        </div>
+        <div>
+          <FormattedMessage
+            id="xpack.canvas.app.canvasLoadFailDescription"
+            defaultMessage="Message: {message}"
+            values={{ message: this.props.appState.message }}
+          />
+        </div>
       </div>
     );
   };
@@ -45,7 +57,12 @@ export class App extends React.PureComponent {
         <Router
           routes={routes}
           showLoading={this.props.appState.ready === false}
-          loadingMessage="Canvas is loading"
+          loadingMessage={
+            <FormattedMessage
+              id="xpack.canvas..app.canvasLoadingTitle"
+              defaultMessage="Canvas is loading"
+            />
+          }
           onRouteChange={this.props.onRouteChange}
           onLoad={() => this.props.setAppReady(true)}
           onError={err => this.props.setAppError(err)}

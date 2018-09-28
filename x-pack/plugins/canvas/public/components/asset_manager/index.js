@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { notify } from '../../lib/notify';
 import { getAssets } from '../../state/selectors/assets';
 import { removeAsset } from '../../state/actions/assets';
@@ -24,5 +26,14 @@ export const AssetManager = compose(
     mapStateToProps,
     mapDispatchToProps
   ),
-  withProps({ copyAsset: assetId => notify.success(`Copied '${assetId}' to clipboard`) })
+  withProps(({ assetId }) => ({
+    copyAsset: () =>
+      notify.success(
+        <FormattedMessage
+          id="xpack.canvas.asset.manager.assetCopiedToClipboardTitle"
+          defaultMessage="Copied {assetId} to clipboard"
+          values={{ assetId }}
+        />
+      ),
+  }))
 )(Component);

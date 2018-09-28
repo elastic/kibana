@@ -6,9 +6,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const InvalidExpression = ({ selectElement }) => (
-  <h3 onClick={selectElement}>Invalid expression</h3>
+  <h3 onClick={selectElement}>
+    <FormattedMessage
+      id="xpack.canvas.element.content.invalidExpressionHeaderTitle"
+      defaultMessage="Invalid expression"
+    />
+  </h3>
 );
 
 InvalidExpression.propTypes = {

@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiFormRow, EuiTitle, EuiSpacer, EuiSelect } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ColorPickerMini } from '../color_picker_mini';
 
 export const PageConfig = ({
@@ -23,7 +24,14 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background">
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.page.config.backgroundLabel"
+            defaultMessage="Background"
+          />
+        }
+      >
         <ColorPickerMini onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
@@ -31,7 +39,14 @@ export const PageConfig = ({
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
         <div>
-          <EuiFormRow label="Transition">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.canvas.page.config.transitionLabel"
+                defaultMessage="transition"
+              />
+            }
+          >
             <EuiSelect
               defaultValue={transition ? transition.name : ''}
               options={transitions}
@@ -39,7 +54,14 @@ export const PageConfig = ({
             />
           </EuiFormRow>
           {transition ? (
-            <EuiFormRow label="Preview">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.canvas.page.config.previewLabel"
+                  defaultMessage="Preview"
+                />
+              }
+            >
               <EuiCard
                 title=""
                 description=""

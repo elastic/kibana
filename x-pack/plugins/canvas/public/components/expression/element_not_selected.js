@@ -7,14 +7,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ElementNotSelected = ({ done }) => (
   <div>
-    <div>Select an element to show expression input</div>
+    <FormattedMessage
+      id="xpack.canvas.expression.descriptionTitle"
+      defaultMessage="Select an element to show expression input"
+    />
     {done && (
       <EuiButton size="s" onClick={done}>
         {' '}
-        Close
+        <FormattedMessage id="xpack.canvas.expression.closeButtonTitle" defaultMessage="Close" />
       </EuiButton>
     )}
   </div>

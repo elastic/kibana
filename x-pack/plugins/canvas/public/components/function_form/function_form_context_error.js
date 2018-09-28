@@ -6,9 +6,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FunctionFormContextError = ({ context }) => (
-  <div className="canvasFunctionForm canvasFunctionForm--error">ERROR: {context.error}</div>
+  <div className="canvasFunctionForm canvasFunctionForm--error">
+    <FormattedMessage
+      id="xpack.canvas.function.form.contextErrorMessage"
+      defaultMessage="ERROR: {contextError}"
+      values={{ contextError: context.error }}
+    />
+  </div>
 );
 
 FunctionFormContextError.propTypes = {

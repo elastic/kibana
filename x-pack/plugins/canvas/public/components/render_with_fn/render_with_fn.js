@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RenderToDom } from '../render_to_dom';
 
 export class RenderWithFn extends React.Component {
@@ -81,14 +82,40 @@ export class RenderWithFn extends React.Component {
       this.firstRender = false;
     } catch (err) {
       console.error('renderFn threw', err);
-      this.props.onError(err, { title: `Rendering '${functionName || 'function'}' failed` });
+      this.props.onError(err, {
+        title: (
+          <FormattedMessage
+            id="xpack.canvas.render.with.fn.renderErrorMessage"
+            defaultMessage="Rendering {functionName} failed"
+            values={{
+              functionName: functionName ? (
+                functionName
+              ) : (
+                <FormattedMessage
+                  id="xpack.canvas.render.with.fn.emptyFunctionNameTitle"
+                  defaultMessage="function"
+                />
+              ),
+            }}
+          />
+        ),
+      });
     }
   };
 
   resetRenderTarget = domNode => {
     const { handlers } = this.props;
 
-    if (!domNode) throw new Error('RenderWithFn can not reset undefined target node');
+    if (!domNode) {
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.render.with.fn.resetRenderErrorMessage"
+            defaultMessage="RenderWithFn can not reset undefined target node"
+          />
+        )
+      );
+    }
 
     // call destroy on existing element
     if (!this.firstRender) handlers.destroy();

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
 
@@ -47,7 +48,15 @@ export class PendingArgValue extends React.PureComponent {
           expandable={false}
         >
           <div className="canvasArg--pending">
-            <Loading animated text="Loading" />
+            <Loading
+              animated
+              text={
+                <FormattedMessage
+                  id="xpack.canvas.arg.form.pendingValueTitle"
+                  defaultMessage="'Loading"
+                />
+              }
+            />
           </div>
         </ArgLabel>
       </div>

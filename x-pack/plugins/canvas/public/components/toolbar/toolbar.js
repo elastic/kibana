@@ -16,13 +16,14 @@ import {
   EuiModalFooter,
   EuiButton,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Navbar } from '../navbar';
 import { WorkpadLoader } from '../workpad_loader';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
-export const Toolbar = props => {
+const ToolbarUI = props => {
   const {
     editing,
     selectedElement,
@@ -33,6 +34,7 @@ export const Toolbar = props => {
     selectedPageNumber,
     workpadName,
     totalPages,
+    intl,
   } = props;
 
   const elementIsSelected = Boolean(selectedElement);
@@ -50,7 +52,10 @@ export const Toolbar = props => {
         <WorkpadLoader onClose={done} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={done}>
-            Dismiss
+            <FormattedMessage
+              id="xpack.canvas.toolbar.dismissButtonTitle"
+              defaultMessage="Dismiss"
+            />
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -84,13 +89,27 @@ export const Toolbar = props => {
               onClick={previousPage}
               iconType="arrowLeft"
               disabled={selectedPageNumber <= 1}
-              aria-label="Previous Page"
+              aria-label={intl.formatMessage({
+                id: 'xpack.canvas.toolbar.previousPageButtonAriaLabel',
+                defaultMessage: 'Previous Page',
+              })}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="text" onClick={() => showHideTray('pageManager')}>
-              Page {selectedPageNumber}
-              {totalPages > 1 ? ` of ${totalPages}` : null}
+              {totalPages > 1 ? (
+                <FormattedMessage
+                  id="xpack.canvas.toolbar.currentPageOfPagesButtonTitle"
+                  defaultMessage="Page {currentPage} of {totalPages}"
+                  values={{ currentPage: selectedPageNumber, totalPages }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.canvas.toolbar.currentPageButtonTitle"
+                  defaultMessage="Page {currentPage}"
+                  values={{ currentPage: selectedPageNumber }}
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -99,7 +118,10 @@ export const Toolbar = props => {
               onClick={nextPage}
               iconType="arrowRight"
               disabled={selectedPageNumber >= totalPages}
-              aria-label="Next Page"
+              aria-label={intl.formatMessage({
+                id: 'xpack.canvas.toolbar.nextPageButtonAriaLabel',
+                defaultMessage: 'Next Page',
+              })}
             />
           </EuiFlexItem>
           <EuiFlexItem />
@@ -110,7 +132,10 @@ export const Toolbar = props => {
                 iconType="editorCodeBlock"
                 onClick={() => showHideTray('expression')}
               >
-                Expression editor
+                <FormattedMessage
+                  id="xpack.canvas.toolbar.expressionEditorButtonTitle"
+                  defaultMessage="Expression editor"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
@@ -120,7 +145,7 @@ export const Toolbar = props => {
   );
 };
 
-Toolbar.propTypes = {
+ToolbarUI.propTypes = {
   workpadName: PropTypes.string,
   editing: PropTypes.bool,
   tray: PropTypes.node,
@@ -131,3 +156,5 @@ Toolbar.propTypes = {
   totalPages: PropTypes.number.isRequired,
   selectedElement: PropTypes.object,
 };
+
+export const Toolbar = injectI18n(ToolbarUI);

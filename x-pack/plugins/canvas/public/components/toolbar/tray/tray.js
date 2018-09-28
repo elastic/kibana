@@ -7,13 +7,22 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
-export const Tray = ({ children, done }) => {
+const TrayUI = ({ children, done, intl }) => {
   return (
     <Fragment>
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon size="s" onClick={done} aria-label="Dismiss tray" iconType="arrowDown" />
+          <EuiButtonIcon
+            size="s"
+            onClick={done}
+            aria-label={intl.formatMessage({
+              id: 'xpack.canvas.toolbar.tray.dismissButtonAriaLabel',
+              defaultMessage: 'Dismiss tray',
+            })}
+            iconType="arrowDown"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -22,7 +31,9 @@ export const Tray = ({ children, done }) => {
   );
 };
 
-Tray.propTypes = {
+TrayUI.propTypes = {
   children: PropTypes.node,
   done: PropTypes.func,
 };
+
+export const Tray = injectI18n(TrayUI);

@@ -7,15 +7,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiPanel, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NoDatasource = () => (
   <EuiPanel>
     <EuiText>
-      <h4>No data source present</h4>
+      <h4>
+        <FormattedMessage
+          id="xpack.canvas.datasource.noDataHeaderTitle"
+          defaultMessage="No data source present"
+        />
+      </h4>
       <p>
-        This element does not have an attached data source. This is usually because the element is
-        an image or other static asset. If that's not the case you might want to check your
-        expression to make sure it is not malformed.
+        <FormattedMessage
+          id="xpack.canvas.datasource.noDataDescription"
+          defaultMessage=" This element does not have an attached data source. This is usually because the element is
+            an image or other static asset. If that's not the case you might want to check your
+            expression to make sure it is not malformed."
+        />
       </p>
     </EuiText>
   </EuiPanel>

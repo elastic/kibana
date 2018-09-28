@@ -8,6 +8,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const TooltipIcon = ({ icon = 'info', ...rest }) => {
   const icons = {
@@ -16,8 +17,17 @@ export const TooltipIcon = ({ icon = 'info', ...rest }) => {
     info: { type: 'iInCircle', color: 'default' },
   };
 
-  if (!Object.keys(icons).includes(icon)) throw new Error(`Unsupported icon type: ${icon}`);
-
+  if (!Object.keys(icons).includes(icon)) {
+    throw new Error(
+      (
+        <FormattedMessage
+          id="xpack.canvas.tooltip.icon.iconTypeErrorMessage"
+          defaultMessage="Unsupported icon type: {icon}"
+          values={{ icon }}
+        />
+      )
+    );
+  }
   return <EuiIconTip {...rest} type={icons[icon].type} color={icons[icon].color} />;
 };
 

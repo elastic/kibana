@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -116,7 +117,10 @@ export class DatasourceComponent extends PureComponent {
             iconType="sortRight"
             onClick={() => setSelecting(!selecting)}
           >
-            Change your data source
+            <FormattedMessage
+              id="xpack.canvas.datasource.changeSourceButtonTitle"
+              defaultMessage="Change your data source"
+            />
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
           {stateDatasource.render({
@@ -130,7 +134,10 @@ export class DatasourceComponent extends PureComponent {
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => setPreviewing(true)} icon="check">
-                Preview
+                <FormattedMessage
+                  id="xpack.canvas.datasource.previewButtonTitle"
+                  defaultMessage="Preview"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -142,7 +149,10 @@ export class DatasourceComponent extends PureComponent {
                 onClick={this.save}
                 icon="check"
               >
-                Save
+                <FormattedMessage
+                  id="xpack.canvas.datasource.saveButtonTitle"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

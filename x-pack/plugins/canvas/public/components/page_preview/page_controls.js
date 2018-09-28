@@ -7,8 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
+const PageControlsUI = ({ pageId, onDelete, onDuplicate, intl }) => {
   const handleDuplicate = ev => {
     ev.preventDefault();
     onDuplicate(pageId);
@@ -26,20 +27,40 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Duplicate">
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.canvas.page.preview.duplicateButtonTooltip"
+              defaultMessage="Duplicate"
+            />
+          }
+        >
           <EuiButtonIcon
             iconType="document"
-            aria-label="Duplicate Page"
+            aria-label={intl.formatMessage({
+              id: 'xpack.canvas.page.preview.duplicateButtonAriaLabel',
+              defaultMessage: 'Duplicate Page',
+            })}
             onClick={handleDuplicate}
           />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Delete">
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.canvas.page.preview.deleteButtonTooltip"
+              defaultMessage="Delete"
+            />
+          }
+        >
           <EuiButtonIcon
             color="danger"
             iconType="trash"
-            aria-label="Delete Page"
+            aria-label={intl.formatMessage({
+              id: 'xpack.canvas.page.preview.deleteButtonAriaLabel',
+              defaultMessage: 'Delete Page',
+            })}
             onClick={handleDelete}
           />
         </EuiToolTip>
@@ -48,9 +69,11 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
   );
 };
 
-PageControls.propTypes = {
+PageControlsUI.propTypes = {
   pageId: PropTypes.string.isRequired,
   pageNumber: PropTypes.number.isRequired,
   onDelete: PropTypes.func.isRequired,
   onDuplicate: PropTypes.func.isRequired,
 };
+
+export const PageControls = injectI18n(PageControlsUI);

@@ -8,11 +8,12 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
 
-export class PageManager extends React.PureComponent {
+class PageManagerUI extends React.PureComponent {
   static propTypes = {
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
@@ -121,9 +122,20 @@ export class PageManager extends React.PureComponent {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <Link
-                  name="loadWorkpad"
+                  name={
+                    <FormattedMessage
+                      id="xpack.canvas.page.manager.pageNumberLinkTitle"
+                      defaultMessage="loadWorkpad"
+                    />
+                  }
                   params={{ id: workpadId, page: pageNumber }}
-                  aria-label={`Load page number ${pageNumber}`}
+                  aria-label={this.props.intl.formatMessage(
+                    {
+                      id: 'xpack.canvas.page.manager.pageNumberLinkAriaLabel',
+                      defaultMessage: 'Load page number {pageNumber}',
+                    },
+                    { pageNumber }
+                  )}
                 >
                   <PagePreview
                     page={page}
@@ -174,7 +186,12 @@ export class PageManager extends React.PureComponent {
           <EuiFlexItem grow={false}>
             <EuiToolTip
               anchorClassName="canvasPageManager__addPageTip"
-              content="Add a new page to this workpad"
+              content={
+                <FormattedMessage
+                  id="xpack.canvas.page.manager.addPageButtonTooltip"
+                  defaultMessage="Add a new page to this workpad"
+                />
+              }
               position="left"
             >
               <button onClick={addPage} className="canvasPageManager__addPage">
@@ -185,9 +202,24 @@ export class PageManager extends React.PureComponent {
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}
-          title="Remove Page"
-          message="Are you sure you want to remove this page?"
-          confirmButtonText="Remove"
+          title={
+            <FormattedMessage
+              id="xpack.canvas.page.manager.removePageButtonTitle"
+              defaultMessage="Remove Page"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.canvas.page.manager.removePageButtonDescription"
+              defaultMessage="Are you sure you want to remove this page?"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.canvas.page.manager.confirmRemovePageButtonTitle"
+              defaultMessage="Remove"
+            />
+          }
           onConfirm={this.doDelete}
           onCancel={this.resetDelete}
         />
@@ -195,3 +227,5 @@ export class PageManager extends React.PureComponent {
     );
   }
 }
+
+export const PageManager = injectI18n(PageManagerUI);

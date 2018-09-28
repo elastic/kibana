@@ -17,19 +17,21 @@ import {
   EuiModalFooter,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
 import { WorkpadExport } from '../workpad_export';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
-export const WorkpadHeader = ({
+const WorkpadHeaderUI = ({
   editing,
   toggleEditing,
   hasAssets,
   addElement,
   setShowElementModal,
   showElementModal,
+  intl,
 }) => {
   const keyHandler = action => {
     if (action === 'EDITING') toggleEditing();
@@ -50,7 +52,10 @@ export const WorkpadHeader = ({
         />
         <EuiModalFooter>
           <EuiButton size="s" onClick={() => setShowElementModal(false)}>
-            Dismiss
+            <FormattedMessage
+              id="xpack.canvas.workpad.header.dismissButtonTitle"
+              defaultMessage="Dismiss"
+            />
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
@@ -69,10 +74,21 @@ export const WorkpadHeader = ({
             <EuiFlexItem grow={false}>
               <FullscreenControl>
                 {({ toggleFullscreen }) => (
-                  <EuiToolTip position="bottom" content="Toggle fullscreen mode">
+                  <EuiToolTip
+                    position="bottom"
+                    content={
+                      <FormattedMessage
+                        id="xpack.canvas.workpad.header.fullscreenButtonTooltip"
+                        defaultMessage="Toggle fullscreen mode"
+                      />
+                    }
+                  >
                     <EuiButtonIcon
                       iconType="fullScreen"
-                      aria-label="View fullscreen"
+                      aria-label={intl.formatMessage({
+                        id: 'xpack.canvas.workpad.header.fullscreenButtonAriaLabel',
+                        defaultMessage: 'View fullscreen',
+                      })}
                       onClick={toggleFullscreen}
                     />
                   </EuiToolTip>
@@ -86,7 +102,19 @@ export const WorkpadHeader = ({
               <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
               <EuiToolTip
                 position="bottom"
-                content={editing ? 'Hide editing controls' : 'Show editing controls'}
+                content={
+                  editing ? (
+                    <FormattedMessage
+                      id="xpack.canvas.workpad.header.editorOpenButtonTooltip"
+                      defaultMessage="Hide editing controls"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.canvas.workpad.header.editorCloseButtonTooltip"
+                      defaultMessage="Show editing controls"
+                    />
+                  )
+                }
               >
                 <EuiButtonIcon
                   iconType={editing ? 'eye' : 'eyeClosed'}
@@ -94,7 +122,17 @@ export const WorkpadHeader = ({
                     toggleEditing();
                   }}
                   size="s"
-                  aria-label={editing ? 'Hide editing controls' : 'Show editing controls'}
+                  aria-label={
+                    editing
+                      ? intl.formatMessage({
+                          id: 'xpack.canvas.workpad.header.editorOpenButtonAriaLabel',
+                          defaultMessage: 'Hide editing controls',
+                        })
+                      : intl.formatMessage({
+                          id: 'xpack.canvas.workpad.header.editorCloseButtonAriaLabel',
+                          defaultMessage: 'Show editing controls',
+                        })
+                  }
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -126,7 +164,7 @@ export const WorkpadHeader = ({
   );
 };
 
-WorkpadHeader.propTypes = {
+WorkpadHeaderUI.propTypes = {
   editing: PropTypes.bool,
   toggleEditing: PropTypes.func,
   hasAssets: PropTypes.bool,
@@ -134,3 +172,5 @@ WorkpadHeader.propTypes = {
   showElementModal: PropTypes.bool,
   setShowElementModal: PropTypes.func,
 };
+
+export const WorkpadHeader = injectI18n(WorkpadHeaderUI);

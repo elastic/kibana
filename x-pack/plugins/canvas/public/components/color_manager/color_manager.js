@@ -7,9 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { ColorDot } from '../color_dot/color_dot';
 
-export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
+const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
   <EuiFlexGroup gutterSize="xs" alignItems="center">
     <EuiFlexItem grow={1}>
       <ColorDot value={value} />
@@ -18,7 +19,12 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
       <EuiFieldText
         compressed
         value={value || ''}
-        placeholder="#hex color"
+        placeholder={
+          <FormattedMessage
+            id="xpack.canvas.color.manager.inputPlaceholder"
+            defaultMessage="#hex color"
+          />
+        }
         onChange={e => onChange(e.target.value)}
       />
     </EuiFlexItem>
@@ -26,14 +32,20 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
       <EuiFlexItem grow={false}>
         {addColor && (
           <EuiButtonIcon
-            aria-label="Add Color"
+            aria-label={intl.formatMessage({
+              id: 'xpack.canvas.color.manager.addButtonAriaLabel',
+              defaultMessage: 'Add Color',
+            })}
             iconType="plusInCircle"
             onClick={() => addColor(value)}
           />
         )}
         {removeColor && (
           <EuiButtonIcon
-            aria-label="Remove Color"
+            aria-label={intl.formatMessage({
+              id: 'xpack.canvas.color.manager.removeButtonAriaLabel',
+              defaultMessage: 'Remove Color',
+            })}
             iconType="minusInCircle"
             onClick={() => removeColor(value)}
           />
@@ -43,9 +55,11 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
   </EuiFlexGroup>
 );
 
-ColorManager.propTypes = {
+ColorManagerUI.propTypes = {
   value: PropTypes.string,
   addColor: PropTypes.func,
   removeColor: PropTypes.func,
   onChange: PropTypes.func.isRequired,
 };
+
+export const ColorManager = injectI18n(ColorManagerUI);

@@ -7,8 +7,10 @@
 /* eslint import/no-unresolved: 1 */
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
 import { jobCompletionNotifications } from 'plugins/reporting/services/job_completion_notifications';
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getWorkpad, getPages } from '../../state/selectors/workpad';
 import { getReportingBrowserType } from '../../state/selectors/app';
 import { notify } from '../../lib/notify';
@@ -36,31 +38,79 @@ export const WorkpadExport = compose(
     getExportUrl: type => {
       if (type === 'pdf') return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
 
-      throw new Error(`Unknown export type: ${type}`);
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.workpad.export.pdfLinkErrorMessage"
+            defaultMessage="Unknown export type: {errorMessage}"
+            values={{ errorMessage: type }}
+          />
+        )
+      );
     },
     onCopy: type => {
-      if (type === 'pdf')
-        return notify.info('The PDF generation URL was copied to your clipboard.');
-
-      throw new Error(`Unknown export type: ${type}`);
+      if (type === 'pdf') {
+        return notify.info(
+          <FormattedMessage
+            id="xpack.canvas.workpad.export.pdfLinkCopiedToClipboardMessage"
+            defaultMessage="The PDF generation URL was copied to your clipboard."
+          />
+        );
+      }
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.workpad.export.pdfLinkCopiedToClipboardErrorMessage"
+            defaultMessage="Unknown export type: {errorMessage}"
+            values={{ errorMessage: type }}
+          />
+        )
+      );
     },
     onExport: type => {
       if (type === 'pdf') {
         return createPdf(workpad, { pageCount })
           .then(({ data }) => {
-            notify.info('Exporting PDF. You can track the progress in Management.', {
-              title: `PDF export of workpad '${workpad.name}'`,
-            });
+            notify.info(
+              <FormattedMessage
+                id="xpack.canvas.workpad.export.pdfExportedStatusMessage"
+                defaultMessage="Exporting PDF. You can track the progress in Management."
+              />,
+              {
+                title: (
+                  <FormattedMessage
+                    id="xpack.canvas.workpad.export.pdfExportedWorkpadTitle"
+                    defaultMessage="PDF export of workpad {workpadName}"
+                    values={{ workpadName: workpad.name }}
+                  />
+                ),
+              }
+            );
 
             // register the job so a completion notification shows up when it's ready
             jobCompletionNotifications.add(data.job.id);
           })
           .catch(err => {
-            notify.error(err, { title: `Failed to create PDF for '${workpad.name}'` });
+            notify.error(err, {
+              title: (
+                <FormattedMessage
+                  id="xpack.canvas.workpad.export.pdfExportErrorWorkpadTitle"
+                  defaultMessage="Failed to create PDF for {workpadName}"
+                  values={{ workpadName: workpad.name }}
+                />
+              ),
+            });
           });
       }
-
-      throw new Error(`Unknown export type: ${type}`);
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.workpad.export.pdfExportErrorMessage"
+            defaultMessage="Unknown export type: {errorMessage}"
+            values={{ errorMessage: type }}
+          />
+        )
+      );
     },
   }))
 )(Component);

@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Datatable } from '../../datatable';
 import { Error } from '../../error';
 
@@ -23,12 +24,30 @@ export const DatasourcePreview = ({ done, datatable }) => (
   <EuiOverlayMask>
     <EuiModal onClose={done} maxWidth="1000px">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Datasource Preview</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.canvas.datasource.previewHeaderTitle"
+            defaultMessage="Datasource Preview"
+          />
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="canvasDatasourcePreview">
         <EuiText size="s" color="subdued">
           <p>
-            Click <strong>Save</strong> in the sidebar to use this data.
+            <FormattedMessage
+              id="xpack.canvas.datasource.previewModalDescription"
+              defaultMessage="Click {strongSave} in the sidebar to use this data"
+              values={{
+                strongSave: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.canvas.datasource.previewModalStrongSaveLabel"
+                      defaultMessage="Save"
+                    />
+                  </strong>
+                ),
+              }}
+            />
           </p>
         </EuiText>
         {datatable.type === 'error' ? (
@@ -39,12 +58,23 @@ export const DatasourcePreview = ({ done, datatable }) => (
               <Datatable datatable={datatable} showHeader paginate />
             ) : (
               <EuiEmptyPrompt
-                title={<h2>No documents found</h2>}
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.canvas.datasource.noDocumentFoundHeaderTitle"
+                      defaultMessage="No documents found"
+                    />
+                  </h2>
+                }
                 titleSize="s"
                 body={
                   <p>
-                    We couldn't find any documents matching your search criteria.
-                    <br /> Check your datasource settings and try again.
+                    <FormattedMessage
+                      id="xpack.canvas.datasource.noDocumentFoundDescription"
+                      defaultMessage="We couldn't find any documents matching your search criteria.
+                      {br} Check your datasource settings and try again."
+                      values={{ br: <br /> }}
+                    />
                   </p>
                 }
               />

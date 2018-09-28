@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withState } from 'recompose';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Debug } from '../debug';
 
 const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
@@ -17,7 +18,10 @@ const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
         onClick={() => setExpanded(!expanded)}
       >
-        See Details
+        <FormattedMessage
+          id="xpack.canvas.error.showDebuggingButtonTitle"
+          defaultMessage="See Details"
+        />
       </EuiButtonEmpty>
       {expanded && (
         <div style={{ height: 260 }}>

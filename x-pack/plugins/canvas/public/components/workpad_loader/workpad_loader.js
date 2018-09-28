@@ -21,6 +21,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
@@ -32,7 +33,7 @@ import { WorkpadUpload } from './workpad_upload';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
-export class WorkpadLoader extends React.PureComponent {
+class WorkpadLoaderUI extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
     createWorkpad: PropTypes.func.isRequired,
@@ -130,20 +131,40 @@ export class WorkpadLoader extends React.PureComponent {
         render: workpad => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Download">
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.canvas.workpad.loader.downloadButtonTooltip"
+                    defaultMessage="Download"
+                  />
+                }
+              >
                 <EuiButtonIcon
                   iconType="sortDown"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
-                  aria-label="Download Workpad"
+                  aria-label={this.props.intl.formatMessage({
+                    id: 'xpack.canvas.workpad.loader.downloadButtonAriaLabel',
+                    defaultMessage: '"Download Workpad',
+                  })}
                 />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Clone">
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.canvas.workpad.loader.cloneButtonTooltip"
+                    defaultMessage="Clone"
+                  />
+                }
+              >
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
-                  aria-label="Clone Workpad"
+                  aria-label={this.props.intl.formatMessage({
+                    id: 'xpack.canvas.workpad.loader.cloneButtonAriaLabel',
+                    defaultMessage: '"Clone Workpad',
+                  })}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -155,7 +176,12 @@ export class WorkpadLoader extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Workpad Name',
+        name: (
+          <FormattedMessage
+            id="xpack.canvas.workpad.loader.columnNameTitle"
+            defaultMessage="Workpad Name"
+          />
+        ),
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
@@ -163,9 +189,20 @@ export class WorkpadLoader extends React.PureComponent {
 
           return (
             <Link
-              name="loadWorkpad"
+              name={
+                <FormattedMessage
+                  id="xpack.canvas.workpad.loader.loadLinkTitle"
+                  defaultMessage="loadWorkpad"
+                />
+              }
               params={{ id: workpad.id }}
-              aria-label={`Load workpad ${workpadName}`}
+              aria-label={this.props.intl.formatMessage(
+                {
+                  id: 'xpack.canvas.workpad.loader.loadLinkAriaLabel',
+                  defaultMessage: 'Load workpad {workpadName}',
+                },
+                { workpadName }
+              )}
             >
               {workpadName}
             </Link>
@@ -174,7 +211,12 @@ export class WorkpadLoader extends React.PureComponent {
       },
       {
         field: '@created',
-        name: 'Created',
+        name: (
+          <FormattedMessage
+            id="xpack.canvas.workpad.loader.columnCreatedTitle"
+            defaultMessage="Created"
+          />
+        ),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -182,7 +224,12 @@ export class WorkpadLoader extends React.PureComponent {
       },
       {
         field: '@timestamp',
-        name: 'Updated',
+        name: (
+          <FormattedMessage
+            id="xpack.canvas.workpad.loader.columnUpdatedTitle"
+            defaultMessage="Updated"
+          />
+        ),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -206,11 +253,23 @@ export class WorkpadLoader extends React.PureComponent {
     const emptyTable = (
       <EuiEmptyPrompt
         iconType="importAction"
-        title={<h2>Add your first workpad</h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.canvas.workpad.loader.epmtyTableTitle"
+              defaultMessage="Add your first workpad"
+            />
+          </h2>
+        }
         titleSize="s"
         body={
           <Fragment>
-            <p>Create a new workpad or drag and drop previously built workpad JSON files here.</p>
+            <p>
+              <FormattedMessage
+                id="xpack.canvas.workpad.loader.epmtyTableDescription"
+                defaultMessage="Create a new workpad or drag and drop previously built workpad JSON files here."
+              />
+            </p>
           </Fragment>
         }
       />
@@ -252,16 +311,36 @@ export class WorkpadLoader extends React.PureComponent {
     } = this.state;
     const isLoading = this.props.workpads == null;
     const modalTitle =
-      selectedWorkpads.length === 1
-        ? `Delete workpad '${selectedWorkpads[0].name}'?`
-        : `Delete ${selectedWorkpads.length} workpads?`;
+      selectedWorkpads.length === 1 ? (
+        <FormattedMessage
+          id="xpack.canvas.workpad.loader.deleteOneWorkpadButtonTitle"
+          defaultMessage="Delete workpad {workpadName}?"
+          values={{ workpadName: selectedWorkpads[0].name }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.canvas.workpad.loader.deleteWorkpadsButtonTitle"
+          defaultMessage="Delete {workpadCount} workpads?"
+          values={{ workpadCount: selectedWorkpads.length }}
+        />
+      );
 
     const confirmModal = (
       <ConfirmModal
         isOpen={deletingWorkpad}
         title={modalTitle}
-        message="You can't recover deleted workpads."
-        confirmButtonText="Delete"
+        message={
+          <FormattedMessage
+            id="xpack.canvas.workpad.loader.modalWindowDeleteDescription"
+            defaultMessage="You can't recover deleted workpads."
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.canvas.workpad.loader..modalWindowDeleteButtonTitle"
+            defaultMessage="Delete"
+          />
+        }
         onConfirm={this.removeWorkpads}
         onCancel={this.closeRemoveConfirm}
       />
@@ -280,7 +359,12 @@ export class WorkpadLoader extends React.PureComponent {
           <Fragment>
             <EuiModalHeader className="canvasHomeApp__modalHeader">
               <div style={{ width: '100%' }}>
-                <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+                <EuiModalHeaderTitle>
+                  <FormattedMessage
+                    id="xpack.canvas.workpad.loader.modalHeaderTitle"
+                    defaultMessage="Canvas workpads"
+                  />
+                </EuiModalHeaderTitle>
                 <EuiSpacer size="l" />
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem grow={2}>
@@ -294,7 +378,11 @@ export class WorkpadLoader extends React.PureComponent {
                               onClick={this.downloadWorkpads}
                               iconType="sortDown"
                             >
-                              {`Download (${selectedWorkpads.length})`}
+                              <FormattedMessage
+                                id="xpack.canvas.workpad.loader.downloadButtonTitle"
+                                defaultMessage="Download ({workpadCount})"
+                                values={{ workpadCount: selectedWorkpads.length }}
+                              />
                             </EuiButton>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
@@ -304,7 +392,11 @@ export class WorkpadLoader extends React.PureComponent {
                               iconType="trash"
                               onClick={this.openRemoveConfirm}
                             >
-                              {`Delete (${selectedWorkpads.length})`}
+                              <FormattedMessage
+                                id="xpack.canvas.workpad.loader.deleteButtonTitle"
+                                defaultMessage="Delete ({workpadCount})"
+                                values={{ workpadCount: selectedWorkpads.length }}
+                              />
                             </EuiButton>
                           </EuiFlexItem>
                         </Fragment>
@@ -339,9 +431,24 @@ export class WorkpadLoader extends React.PureComponent {
               </div>
             </EuiModalHeader>
             <EuiModalBody>
-              {createPending && <div>Creating Workpad...</div>}
+              {createPending && (
+                <div>
+                  <FormattedMessage
+                    id="xpack.canvas.workpad.loader.createPendingDescription"
+                    defaultMessage="Creating Workpad..."
+                  />
+                </div>
+              )}
 
-              {!createPending && isLoading && <div>Fetching Workpads...</div>}
+              {!createPending &&
+                isLoading && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.canvas.workpad.loader.fetchPendingDescription"
+                      defaultMessage="Fetching Workpads..."
+                    />
+                  </div>
+                )}
 
               {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
 
@@ -353,3 +460,5 @@ export class WorkpadLoader extends React.PureComponent {
     );
   }
 }
+
+export const WorkpadLoader = injectI18n(WorkpadLoaderUI);
