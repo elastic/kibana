@@ -20,21 +20,27 @@ import {
   importRepoSuccess,
 } from '../actions';
 
+export enum CallOutType {
+  danger = 'danger',
+  success = 'success',
+}
+
 export interface RepositoryState {
   repositories: Repository[];
   error?: Error;
   loading: boolean;
   importLoading: boolean;
   repoConfigs?: RepoConfigs;
-  hasImportError: boolean;
-  importError?: Error;
+  showCallOut: boolean;
+  callOutMessage?: string;
+  callOutType?: CallOutType;
 }
 
 const initialState: RepositoryState = {
   repositories: [],
   loading: false,
   importLoading: false,
-  hasImportError: false,
+  showCallOut: false,
 };
 
 export const repository = handleActions(
@@ -69,14 +75,17 @@ export const repository = handleActions(
     [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.importLoading = false;
-        draft.hasImportError = false;
+        draft.showCallOut = true;
+        draft.callOutType = CallOutType.success;
+        draft.callOutMessage = `${action.payload.name} has been successfully imported!`;
         draft.repositories = [...state.repositories, action.payload];
       }),
     [String(importRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         if (action.payload) {
-          draft.importError = action.payload.body;
-          draft.hasImportError = true;
+          draft.callOutMessage = action.payload.body.message;
+          draft.showCallOut = true;
+          draft.callOutType = CallOutType.danger;
           draft.importLoading = false;
         }
       }),

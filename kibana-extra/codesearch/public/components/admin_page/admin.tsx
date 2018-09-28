@@ -36,9 +36,15 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepoConfigs, Repository } from '../../../model';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
+import { CallOutType } from '../../reducers/repository';
 import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
 import { RelativeContainer } from '../../styled_components/relative_container';
 import { InlineProgressContainer } from './inline_progress_container';
+
+const callOutTitle = {
+  [CallOutType.danger]: 'Sorry, there was an error',
+  [CallOutType.success]: 'Successfully Imported!',
+};
 
 enum Tabs {
   GitAddress,
@@ -53,8 +59,9 @@ interface Props {
   importRepo: (uri: string) => void;
   initRepoCommand: (uri: string) => void;
   repoConfigs?: RepoConfigs;
-  hasImportError: boolean;
-  importError?: Error;
+  showCallOut: boolean;
+  callOutMessage?: string;
+  callOutType?: CallOutType;
   status: { [key: string]: any };
 }
 
@@ -190,6 +197,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public importRepo = () => {
     this.props.importRepo(this.state.importRepoAddress);
+    this.setState({ importRepoAddress: '' });
   };
 
   public getTabContent = () => {
@@ -261,14 +269,13 @@ class AdminPage extends React.PureComponent<Props, State> {
     const repos = this.filterRepos();
     const repositoriesCount = repos.length;
     const items = this.getSideNavItems();
-    const { hasImportError, importError, status } = this.props;
+    const { callOutMessage, status, showCallOut, callOutType } = this.props;
 
-    const errorCallOut = hasImportError &&
-      importError && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
-          {importError.message}
-        </EuiCallOut>
-      );
+    const callOut = showCallOut && (
+      <EuiCallOut title={callOutTitle[callOutType!]} color={callOutType} iconType="cross">
+        {callOutMessage}
+      </EuiCallOut>
+    );
 
     const importRepositoryModal = (
       <EuiOverlayMask>
@@ -282,7 +289,7 @@ class AdminPage extends React.PureComponent<Props, State> {
             </EuiFlexItem>
             <FlexGrowContainer>
               <EuiFlexItem className="tabContent">{this.getTabContent()}</EuiFlexItem>
-              {errorCallOut}
+              {callOut}
             </FlexGrowContainer>
           </EuiFlexGroup>
         </EuiModal>
@@ -351,8 +358,9 @@ const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   importLoading: state.repository.importLoading,
   repoConfigs: state.repository.repoConfigs,
-  hasImportError: state.repository.hasImportError,
-  importError: state.repository.importError,
+  showCallOut: state.repository.showCallOut,
+  callOutMessage: state.repository.callOutMessage,
+  callOutType: state.repository.callOutType,
   status: state.status.status,
 });
 
