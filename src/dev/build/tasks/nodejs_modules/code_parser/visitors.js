@@ -69,6 +69,34 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           const importSource = node.source;
           dependenciesAcc.push(importSource.value);
         }
+      },
+      // Visitors to traverse and found dependencies
+      // raw values on export from
+      ExportNamedDeclaration: ({ node }) => {
+        // AST check for supported export from expressions
+        const isExportFrom = (node) => {
+          return node.type === 'ExportNamedDeclaration' && node.source && node.source.type === 'StringLiteral';
+        };
+
+        // Get string values from export from expressions
+        if (isExportFrom(node)) {
+          const exportFromSource = node.source;
+          dependenciesAcc.push(exportFromSource.value);
+        }
+      },
+      // Visitors to traverse and found dependencies
+      // raw values on export * from
+      ExportAllDeclaration: ({ node }) => {
+        // AST check for supported export * from expressions
+        const isExportAllFrom = (node) => {
+          return node.type === 'ExportAllDeclaration' && node.source && node.source.type === 'StringLiteral';
+        };
+
+        // Get string values from export * from expressions
+        if (isExportAllFrom(node)) {
+          const exportAllFromSource = node.source;
+          dependenciesAcc.push(exportAllFromSource.value);
+        }
       }
     };
   })();
