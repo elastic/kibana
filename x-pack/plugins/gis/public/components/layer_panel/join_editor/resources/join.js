@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup
 } from '@elastic/eui';
+import { DataSelector } from './data_selector';
 
 export class Join extends React.Component {
 
@@ -68,6 +69,14 @@ export class Join extends React.Component {
     );
   }
 
+  _renderDataSelector() {
+    if (!this.state.leftField) {
+      return null;
+    }
+
+    return (<DataSelector/>);
+  }
+
   render() {
     this._loadStringFields();
     return (
@@ -76,7 +85,7 @@ export class Join extends React.Component {
           {this._renderJoinFields()}
         </EuiFlexItem>
         <EuiFlexItem>
-          here be data selector
+          {this._renderDataSelector()}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
