@@ -121,6 +121,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
+      deleteByQuery: jest.fn(),
     };
 
     server.savedObjects = {
@@ -132,6 +133,10 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       },
     };
 
+    const mockSchema = {
+      isNamespaceAgnostic: (type: string) => type === 'space',
+    };
+
     server.plugins.spaces = {
       spacesClient: {
         getScopedClient: jest.fn((req: any) => {
@@ -140,7 +145,9 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
             null,
             mockSavedObjectsRepository,
             mockSavedObjectsRepository,
-            req
+            req,
+            mockSchema,
+            ['space', 'foo', 'bar']
           );
         }),
       },

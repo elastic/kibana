@@ -5,11 +5,18 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   // @ts-ignore
   EuiConfirmModal,
   EuiFieldText,
   EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
@@ -29,12 +36,14 @@ interface Props {
 interface State {
   confirmSpaceName: string;
   error: boolean | null;
+  deleteInProgress: boolean;
 }
 
 export class ConfirmDeleteModal extends Component<Props, State> {
   public state = {
     confirmSpaceName: '',
     error: null,
+    deleteInProgress: false,
   };
 
   public render() {
@@ -57,32 +66,59 @@ export class ConfirmDeleteModal extends Component<Props, State> {
       );
     }
 
+    // This is largely the same as the built-in EuiConfirmModal component, but we needed the ability
+    // to disable the buttons since this could be a long-running operation
+
     return (
       <EuiOverlayMask>
-        <EuiConfirmModal
-          buttonColor={'danger'}
-          cancelButtonText={'Cancel'}
-          confirmButtonText={'Delete space'}
-          onCancel={onCancel}
-          onConfirm={this.onConfirm}
-          title={`Delete space '${space.name}'`}
-          defaultFocusedButton={'cancel'}
-        >
-          <p>
-            Deleting a space permanently removes the space and all of its contents. You can't undo
-            this action.
-          </p>
+        <EuiModal onClose={onCancel} className={'euiModal--confirmation'}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+              Delete space {`'${space.name}'`}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText data-test-subj="confirmModalBodyText">
+              <p>
+                Deleting a space permanently removes the space and{' '}
+                <strong>all of its contents</strong>. You can't undo this action.
+              </p>
 
-          <EuiFormRow
-            label={'Confirm space name'}
-            isInvalid={!!this.state.error}
-            error={'Space names do not match.'}
-          >
-            <EuiFieldText value={this.state.confirmSpaceName} onChange={this.onSpaceNameChange} />
-          </EuiFormRow>
+              <EuiFormRow
+                label={'Confirm space name'}
+                isInvalid={!!this.state.error}
+                error={'Space names do not match.'}
+              >
+                <EuiFieldText
+                  value={this.state.confirmSpaceName}
+                  onChange={this.onSpaceNameChange}
+                  disabled={this.state.deleteInProgress}
+                />
+              </EuiFormRow>
 
-          {warning}
-        </EuiConfirmModal>
+              {warning}
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              data-test-subj="confirmModalCancelButton"
+              onClick={onCancel}
+              isDisabled={this.state.deleteInProgress}
+            >
+              Cancel
+            </EuiButtonEmpty>
+
+            <EuiButton
+              data-test-subj="confirmModalConfirmButton"
+              onClick={this.onConfirm}
+              fill
+              color={'danger'}
+              isLoading={this.state.deleteInProgress}
+            >
+              Delete space and all contents
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       </EuiOverlayMask>
     );
   }
@@ -105,7 +141,16 @@ export class ConfirmDeleteModal extends Component<Props, State> {
       const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
       const spacesManager = this.props.spacesManager;
 
+      this.setState({
+        deleteInProgress: true,
+      });
+
       await this.props.onConfirm();
+
+      this.setState({
+        deleteInProgress: false,
+      });
+
       if (needsRedirect) {
         spacesManager.redirectToSpaceSelector();
       }

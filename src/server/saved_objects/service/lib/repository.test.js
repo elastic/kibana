@@ -162,6 +162,21 @@ describe('SavedObjectsRepository', () => {
     }
   };
 
+  const deleteByQueryResults = {
+    took: 27,
+    timed_out: false,
+    total: 23,
+    deleted: 23,
+    batches: 1,
+    version_conflicts: 0,
+    noops: 0,
+    retries: { bulk: 0, search: 0 },
+    throttled_millis: 0,
+    requests_per_second: -1,
+    throttled_until_millis: 0,
+    failures: []
+  };
+
   const mappings = {
     doc: {
       properties: {
@@ -669,6 +684,48 @@ describe('SavedObjectsRepository', () => {
       });
 
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+  });
+
+  describe('#deleteByQuery', () => {
+    it('requires searchFields be an array if defined', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      try {
+        await savedObjectsRepository.deleteByQuery({ searchFields: 'string' });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        sinon.assert.notCalled(callAdminCluster);
+        sinon.assert.notCalled(onBeforeWrite);
+        expect(error.message).toMatch('must be an array');
+      }
+    });
+
+    it('passes mappings, schema, namespace, search, searchFields, and type to getSearchDsl', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      const relevantOpts = {
+        namespace: 'foo-namespace',
+        search: 'foo*',
+        searchFields: ['foo'],
+        type: 'bar',
+      };
+
+      await savedObjectsRepository.deleteByQuery(relevantOpts);
+      sinon.assert.calledOnce(getSearchDsl);
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, relevantOpts);
+    });
+
+    it('merges output of getSearchDsl into es request body', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      getSearchDsl.returns({ query: 1, aggregations: 2 });
+      await savedObjectsRepository.deleteByQuery();
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledOnce(onBeforeWrite);
+      sinon.assert.calledWithExactly(callAdminCluster, 'deleteByQuery', sinon.match({
+        body: sinon.match({
+          query: 1,
+          aggregations: 2,
+        })
+      }));
     });
   });
 

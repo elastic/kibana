@@ -2,52 +2,92 @@
 
 exports[`ConfirmDeleteModal renders as expected 1`] = `
 <EuiOverlayMask>
-  <EuiConfirmModal
-    buttonColor="danger"
-    cancelButtonText="Cancel"
-    confirmButtonText="Delete space"
-    defaultFocusedButton="cancel"
-    onCancel={[MockFunction]}
-    onConfirm={[Function]}
-    title="Delete space 'My Space'"
+  <EuiModal
+    className="euiModal--confirmation"
+    maxWidth={true}
+    onClose={[MockFunction]}
   >
-    <p>
-      Deleting a space permanently removes the space and all of its contents. You can't undo this action.
-    </p>
-    <EuiFormRow
-      describedByIds={Array []}
-      error="Space names do not match."
-      fullWidth={false}
-      hasEmptyLabelSpace={false}
-      isInvalid={false}
-      label="Confirm space name"
-    >
-      <EuiFieldText
-        compressed={false}
-        fullWidth={false}
-        isLoading={false}
-        onChange={[Function]}
-        value=""
-      />
-    </EuiFormRow>
-    <EuiCallOut
-      color="warning"
-      size="m"
-    >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle
+        data-test-subj="confirmModalTitleText"
+      >
+        Delete space 
+        'My Space'
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
       <EuiText
+        data-test-subj="confirmModalBodyText"
         grow={true}
       >
-        You are about to delete your current space 
-        <span>
-          (
+        <p>
+          Deleting a space permanently removes the space and
+           
           <strong>
-            My Space
+            all of its contents
           </strong>
-          )
-        </span>
-        . You will be redirected to choose a different space if you continue.
+          . You can't undo this action.
+        </p>
+        <EuiFormRow
+          describedByIds={Array []}
+          error="Space names do not match."
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          isInvalid={false}
+          label="Confirm space name"
+        >
+          <EuiFieldText
+            compressed={false}
+            disabled={false}
+            fullWidth={false}
+            isLoading={false}
+            onChange={[Function]}
+            value=""
+          />
+        </EuiFormRow>
+        <EuiCallOut
+          color="warning"
+          size="m"
+        >
+          <EuiText
+            grow={true}
+          >
+            You are about to delete your current space 
+            <span>
+              (
+              <strong>
+                My Space
+              </strong>
+              )
+            </span>
+            . You will be redirected to choose a different space if you continue.
+          </EuiText>
+        </EuiCallOut>
       </EuiText>
-    </EuiCallOut>
-  </EuiConfirmModal>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButtonEmpty
+        color="primary"
+        data-test-subj="confirmModalCancelButton"
+        iconSide="left"
+        isDisabled={false}
+        onClick={[MockFunction]}
+        type="button"
+      >
+        Cancel
+      </EuiButtonEmpty>
+      <EuiButton
+        color="danger"
+        data-test-subj="confirmModalConfirmButton"
+        fill={true}
+        iconSide="left"
+        isLoading={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Delete space and all contents
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 </EuiOverlayMask>
 `;

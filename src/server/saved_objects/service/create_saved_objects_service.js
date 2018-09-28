@@ -94,6 +94,7 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
   });
 
   return {
+    schema,
     types: Object.keys(getRootPropertiesObjects(mappings)),
     SavedObjectsClient,
     SavedObjectsRepository,

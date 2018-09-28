@@ -15,19 +15,25 @@ export class SpacesClient {
   private readonly callWithRequestSavedObjectRepository: any;
   private readonly internalSavedObjectRepository: any;
   private readonly request: any;
+  private readonly schema: any;
+  private readonly savedObjectTypes: string[];
 
   constructor(
     auditLogger: SpacesAuditLogger,
     authorization: any,
     callWithRequestSavedObjectRepository: any,
     internalSavedObjectRepository: any,
-    request: any
+    request: any,
+    schema: any,
+    savedObjectTypes: string[]
   ) {
     this.auditLogger = auditLogger;
     this.authorization = authorization;
     this.callWithRequestSavedObjectRepository = callWithRequestSavedObjectRepository;
     this.internalSavedObjectRepository = internalSavedObjectRepository;
     this.request = request;
+    this.schema = schema;
+    this.savedObjectTypes = savedObjectTypes;
   }
 
   public async canEnumerateSpaces(): Promise<boolean> {
@@ -156,6 +162,13 @@ export class SpacesClient {
     }
 
     await repository.delete('space', id);
+
+    // Delete all saved objects that belonged to the deleted space.
+    const typesToDelete = this.savedObjectTypes.filter(
+      (type: string) => !this.schema.isNamespaceAgnostic(type)
+    );
+
+    await repository.deleteByQuery({ namespace: id, type: typesToDelete });
   }
 
   private useRbac(): boolean {
