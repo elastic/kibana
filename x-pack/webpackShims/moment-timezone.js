@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const moment = require('../node_modules/moment-timezone/moment-timezone');
-const momentDurationFormatSetup = require('../node_modules/moment-duration-format/lib/moment-duration-format');
-
-momentDurationFormatSetup(moment);
+const moment = module.exports = require('../node_modules/moment-timezone/moment-timezone');
 moment.tz.load(require('../node_modules/moment-timezone/data/packed/latest.json'));
-
-module.exports = moment;
