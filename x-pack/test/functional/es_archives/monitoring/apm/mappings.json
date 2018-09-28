@@ -12,7 +12,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "false",
         "properties": {
           "beats_state": {

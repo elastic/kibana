@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "message": {
             "type": "text",
@@ -37,7 +37,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"
@@ -59,7 +59,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "message": {
             "type": "text",
@@ -87,7 +87,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "message": {
             "type": "text",
@@ -115,7 +115,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"
@@ -137,7 +137,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"
@@ -159,7 +159,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"
@@ -181,7 +181,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"
@@ -203,7 +203,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "message": {
             "type": "text",
