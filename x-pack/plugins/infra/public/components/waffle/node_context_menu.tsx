@@ -80,7 +80,7 @@ const getNodeLogsUrl = (
       return getHostLogsUrl({ hostname: lastPathSegment.value });
     case 'container':
       return getContainerLogsUrl({ containerId: lastPathSegment.value });
-    case 'host':
+    case 'pod':
       return getPodLogsUrl({ podId: lastPathSegment.value });
     default:
       return undefined;
