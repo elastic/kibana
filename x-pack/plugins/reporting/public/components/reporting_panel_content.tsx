@@ -69,9 +69,7 @@ export class ReportingPanelContent extends Component<Props, State> {
               <FormattedMessage
                 id="xpack.reporting.panelContent.saveWorkDescription"
                 defaultMessage="Please save your work before generating a report."
-              >
-                {(text: string) => text}
-              </FormattedMessage>
+              />
             }
           >
             {this.renderGenerateReportButton(true)}
@@ -110,7 +108,6 @@ export class ReportingPanelContent extends Component<Props, State> {
           <FormattedMessage
             id="xpack.reporting.panelContent.generationWayDescription"
             defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-            tagName="p"
           />
         </EuiText>
         <EuiSpacer size="s" />
@@ -121,9 +118,7 @@ export class ReportingPanelContent extends Component<Props, State> {
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
-              >
-                {(text: string) => text}
-              </FormattedMessage>
+              />
             </EuiButton>
           )}
         </EuiCopy>
@@ -145,9 +140,7 @@ export class ReportingPanelContent extends Component<Props, State> {
           id="xpack.reporting.panelContent.generateButtonLabel"
           defaultMessage="Generate {reportingType}"
           values={{ reportingType: this.prettyPrintReportingType() }}
-        >
-          {(text: string) => text}
-        </FormattedMessage>
+        />
       </EuiButton>
     );
   };
@@ -198,17 +191,13 @@ export class ReportingPanelContent extends Component<Props, State> {
               id="xpack.reporting.panelContent.notification.successTitle"
               defaultMessage="Queued report for {objectType}"
               values={{ objectType: this.props.objectType }}
-            >
-              {(text: string) => text}
-            </FormattedMessage>
+            />
           ),
           text: (
             <FormattedMessage
               id="xpack.reporting.panelContent.notification.successDescription"
               defaultMessage="Track its progress in Management"
-            >
-              {(text: string) => text}
-            </FormattedMessage>
+            />
           ),
           'data-test-subj': 'queueReportSuccess',
         });
@@ -222,17 +211,13 @@ export class ReportingPanelContent extends Component<Props, State> {
                 id="xpack.reporting.panelContent.notification.notExportableTitle"
                 defaultMessage="Only saved {objectType} can be exported"
                 values={{ objectType: this.props.objectType }}
-              >
-                {(text: string) => text}
-              </FormattedMessage>
+              />
             ),
             text: (
               <FormattedMessage
                 id="xpack.reporting.panelContent.notification.notExportableDescription"
                 defaultMessage="Please save your work first"
-              >
-                {(text: string) => text}
-              </FormattedMessage>
+              />
             ),
           });
         }
@@ -242,16 +227,12 @@ export class ReportingPanelContent extends Component<Props, State> {
             <FormattedMessage
               id="xpack.reporting.panelContent.notification.noPermissionDescription"
               defaultMessage="You don't have permission to generate this report."
-            >
-              {(text: string) => text}
-            </FormattedMessage>
+            />
           ) : (
             <FormattedMessage
               id="xpack.reporting.panelContent.notification.cantReachServerDescription"
               defaultMessage="Can't reach the server. Please try again."
-            >
-              {(text: string) => text}
-            </FormattedMessage>
+            />
           );
 
         toastNotifications.addDanger({
@@ -259,9 +240,7 @@ export class ReportingPanelContent extends Component<Props, State> {
             <FormattedMessage
               id="xpack.reporting.panelContent.notification.reportingErrorTitle"
               defaultMessage="Reporting error"
-            >
-              {(text: string) => text}
-            </FormattedMessage>
+            />
           ),
           text: kfetchError.message || defaultMessage,
           'data-test-subj': 'queueReportError',

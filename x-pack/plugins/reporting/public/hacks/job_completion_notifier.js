@@ -53,9 +53,7 @@ uiModules.get('kibana')
               id="xpack.reporting.jobCompletionNotifier.error.couldnotCreateReportTitle"
               defaultMessage="Couldn't create report for {reportObjectType} '{reportObjectTitle}'"
               values={{ reportObjectType, reportObjectTitle }}
-            >
-              {text => text}
-            </FormattedMessage>
+            />
           ),
           text,
         });
@@ -69,24 +67,21 @@ uiModules.get('kibana')
         const managementUrl = chrome.getNavLinkById('kibana:management').url;
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
-          <FormattedMessage
-            id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromDescription"
-            defaultMessage="Pick it up from"
-          >
-            {pickItUpFromDescription => {
-              return (
-                <FormattedMessage
-                  id="xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel"
-                  defaultMessage="Management > Kibana > Reporting"
-                >
-                  {path => (
-                    <p>{pickItUpFromDescription} <a href={reportingSectionUrl}>{path}</a>.</p>
-                  )}
-                </FormattedMessage>
-
-              );
-            }}
-          </FormattedMessage>
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromDescription"
+              defaultMessage="Pick it up from {path}."
+              values={{ path: (
+                <a href={reportingSectionUrl}>
+                  <FormattedMessage
+                    id="xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel"
+                    defaultMessage="Management > Kibana > Reporting"
+                  />
+                </a>
+                ) 
+              }}
+            />
+          </p>
         );
       }
 
@@ -99,9 +94,7 @@ uiModules.get('kibana')
           <FormattedMessage
             id="xpack.reporting.jobCompletionNotifier.downloadReportButtonLabel"
             defaultMessage="Download report"
-          >
-            {text => text}
-          </FormattedMessage>
+          />
         </EuiButton>
       );
 
@@ -114,16 +107,13 @@ uiModules.get('kibana')
               id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportTitle"
               defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
               values={{ reportObjectType, reportObjectTitle }}
-            >
-              {text => text}
-            </FormattedMessage>
+            />
           ),
           text: (
             <div>
               <FormattedMessage
                 id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription"
                 defaultMessage="The report reached the max size and contains partial data."
-                tagName="p"
               />
               {seeReportLink}
               {downloadReportButton}
@@ -139,9 +129,7 @@ uiModules.get('kibana')
             id="xpack.reporting.jobCompletionNotifier.createdReportTitle"
             defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
             values={{ reportObjectType, reportObjectTitle }}
-          >
-            {text => text}
-          </FormattedMessage>
+          />
         ),
         text: (
           <div>
