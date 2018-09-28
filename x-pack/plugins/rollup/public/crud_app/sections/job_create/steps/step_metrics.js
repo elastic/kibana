@@ -169,10 +169,6 @@ export class StepMetricsUi extends Component {
       metrics,
     } = fields;
 
-    const unselectedMetricsFields = metricsFields.filter(metricField => {
-      return !metrics.find(({ name }) => name === metricField.name);
-    });
-
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -233,7 +229,8 @@ export class StepMetricsUi extends Component {
                 />
               )}
               columns={this.chooserColumns}
-              fields={unselectedMetricsFields}
+              fields={metricsFields}
+              selectedFields={metrics}
               onSelectField={this.onSelectField}
             />
           )}
@@ -248,7 +245,9 @@ export class StepMetricsUi extends Component {
     const { areStepErrorsVisible, fieldErrors } = this.props;
     const { metrics: errorMetrics } = fieldErrors;
 
-    if (!areStepErrorsVisible) {
+    // Hide the error if there are no errors, which can occur if the errors are visible
+    // but the user then addresses all of them.
+    if (!areStepErrorsVisible || !errorMetrics) {
       return null;
     }
 

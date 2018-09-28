@@ -37,6 +37,9 @@ export class StepHistogramUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
+    fieldErrors: PropTypes.object.isRequired,
+    hasErrors: PropTypes.bool.isRequired,
+    areStepErrorsVisible: PropTypes.bool.isRequired,
     histogramFields: PropTypes.array.isRequired,
   }
 
@@ -74,10 +77,6 @@ export class StepHistogramUi extends Component {
       truncateText: true,
       sortable: true,
     }];
-
-    const unselectedHistogramFields = histogramFields.filter(histogramField => {
-      return !fields.histogram.includes(histogramField);
-    });
 
     return (
       <Fragment>
@@ -138,7 +137,8 @@ export class StepHistogramUi extends Component {
                 />
               )}
               columns={columns}
-              fields={unselectedHistogramFields}
+              fields={histogramFields}
+              selectedFields={histogram}
               onSelectField={this.onSelectField}
             />
           )}
@@ -216,7 +216,6 @@ export class StepHistogramUi extends Component {
               onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
               fullWidth
-              min="0"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -225,9 +224,9 @@ export class StepHistogramUi extends Component {
   }
 
   renderErrors = () => {
-    const { areStepErrorsVisible } = this.props;
+    const { areStepErrorsVisible, hasErrors } = this.props;
 
-    if (!areStepErrorsVisible) {
+    if (!areStepErrorsVisible || !hasErrors) {
       return null;
     }
 

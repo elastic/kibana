@@ -13,6 +13,9 @@ export const LOAD_JOBS_START = 'LOAD_JOBS_START';
 export const LOAD_JOBS_SUCCESS = 'LOAD_JOBS_SUCCESS';
 export const LOAD_JOBS_FAILURE = 'LOAD_JOBS_FAILURE';
 
+// Refresh jobs
+export const REFRESH_JOBS_SUCCESS = 'REFRESH_JOBS_SUCCESS';
+
 // Create job
 export const CREATE_JOB_START = 'CREATE_JOB_START';
 export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS';
