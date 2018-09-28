@@ -47,7 +47,7 @@ export function InputHighlightRules() {
       { token: 'paren.lparen', regex: '{', next: 'json', push: true }
     ],
     addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep')
-      ,
+    ,
     [
       {
         token: 'whitespace',

@@ -5,6 +5,7 @@
  */
 import path from 'path';
 import { Size } from '../../../../../types';
+import { LayoutTypes } from '../../../common/constants';
 import { Layout, PageSizeParams } from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
@@ -25,8 +26,8 @@ export class PreserveLayout extends Layout {
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
 
-  constructor(id: string, size: Size) {
-    super(id);
+  constructor(size: Size) {
+    super(LayoutTypes.PRESERVE_LAYOUT);
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
