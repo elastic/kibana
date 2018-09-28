@@ -853,10 +853,6 @@ angular-mocks@1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.4.7.tgz#d7343ee0a033f9216770bda573950f6814d95227"
 
-angular-paging@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.1.tgz#8090864f71bc4c9b89307b02ab02afb205983c43"
-
 angular-recursion@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/angular-recursion/-/angular-recursion-1.0.5.tgz#cd405428a0bf55faf52eaa7988c1fe69cd930543"
@@ -4223,9 +4219,9 @@ download@^5.0.3:
     mkdirp "^0.5.1"
     pify "^2.3.0"
 
-dragselect@1.7.17:
-  version "1.7.17"
-  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.7.17.tgz#ab98661d8599286c0ada66ce5f5923b06b4f09fd"
+dragselect@1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
 
 dragula@3.7.0:
   version "3.7.0"

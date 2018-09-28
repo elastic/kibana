@@ -1,11 +1,11 @@
 <kbn-dev-tools-app data-test-subj="console" top-nav-config="topNavController">
-  <div id="editor_output_container">
-    <div id="editor_container">
-      <ul id="autocomplete"></ul>
-      <div id="editor_actions">
+  <div class="conApp">
+    <div class="conApp__editor">
+      <ul class="conApp__autoComplete" id="autocomplete"></ul>
+      <div class="conApp__editorActions" id="ConAppEditorActions">
         <kbn-tooltip text="click to send request">
           <button
-            class="editor_action"
+            class="conApp__editorActionButton conApp__editorActionButton--success"
             ng-click="sendSelected()"
             data-test-subj="send-request-button">
             <i class="fa fa-play"></i>
@@ -14,7 +14,7 @@
         <span dropdown>
           <button
             id="consoleRequestOptions"
-            class="editor_action"
+            class="conApp__editorActionButton"
             dropdown-toggle
             ng-click="getDocumentation()"
             aria-label="Request options"
@@ -28,7 +28,7 @@
             aria-labelledby="consoleRequestOptions"
           >
             <li role="menuitem">
-              <button class="link" id="copy_as_curl">Copy as cURL</button>
+              <button id="ConCopyAsCurl">Copy as cURL</button>
             </li>
             <li role="menuitem" ng-if="documentation">
               <button ng-click="openDocumentation(documentation)">Open documentation</button>
@@ -40,15 +40,15 @@
         </span>
       </div>
 
-      <div id="editor" data-test-subj="request-editor">GET _search
+      <div class="conApp__editorContent" id="ConAppEditor" data-test-subj="request-editor">GET _search
   {
     "query": { "match_all": {} }
   }</div>
 
     </div>
-    <div id="editor_resizer">&#xFE19;</div>
-    <div id="output_container" data-test-subj="response-editor">
-      <div id="output">{}</div>
+    <div class="conApp__resizer" id="ConAppResizer">&#xFE19;</div>
+    <div class="conApp__output" data-test-subj="response-editor">
+      <div class="conApp__outputContent" id="ConAppOutput">{}</div>
     </div>
   </div>
 </kbn-dev-tools-app>
