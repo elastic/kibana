@@ -59,7 +59,8 @@ export function registerJobsRoute(server) {
         reply(results.jobs[0]);
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          const boomError = wrapEsError(err);
+          return reply(boomError);
         }
 
         reply(wrapUnknownError(err));

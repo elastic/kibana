@@ -323,7 +323,7 @@ export class JobTableUi extends Component {
       <EuiTablePagination
         activePage={pager.getCurrentPageIndex()}
         itemsPerPage={pager.itemsPerPage}
-        itemsPerPageOptions={[2, 50, 100]}
+        itemsPerPageOptions={[20, 50, 100]}
         pageCount={pager.getTotalPages()}
         onChangeItemsPerPage={pageSizeChanged}
         onChangePage={pageChanged}

@@ -38,6 +38,7 @@ export class StepLogisticsUi extends Component {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
+    hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     isValidatingIndexPattern: PropTypes.bool.isRequired,
     hasMatchingIndices: PropTypes.bool.isRequired,
@@ -536,9 +537,9 @@ export class StepLogisticsUi extends Component {
   }
 
   renderErrors = () => {
-    const { areStepErrorsVisible } = this.props;
+    const { areStepErrorsVisible, hasErrors } = this.props;
 
-    if (!areStepErrorsVisible) {
+    if (!areStepErrorsVisible || !hasErrors) {
       return null;
     }
 

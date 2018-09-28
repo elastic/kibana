@@ -40,9 +40,10 @@ const REFRESH_RATE_MS = 30000;
 export class JobListUi extends Component {
   static propTypes = {
     loadJobs: PropTypes.func,
+    refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
     jobs: PropTypes.array,
-    isLoading: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool,
   }
 
   static getDerivedStateFromProps(props) {
@@ -74,7 +75,7 @@ export class JobListUi extends Component {
   }
 
   componentDidMount() {
-    this.interval = setInterval(this.props.loadJobs, REFRESH_RATE_MS);
+    this.interval = setInterval(this.props.refreshJobs, REFRESH_RATE_MS);
   }
 
   componentWillUnmount() {
@@ -173,12 +174,10 @@ export class JobListUi extends Component {
 
           <EuiPageContentHeaderSection>
             <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.createButton.label"
-                  defaultMessage="Create rollup job"
-                />
-              </h1>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.createButton.label"
+                defaultMessage="Create rollup job"
+              />
             </EuiButton>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
