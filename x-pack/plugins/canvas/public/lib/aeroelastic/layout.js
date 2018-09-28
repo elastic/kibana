@@ -1261,8 +1261,10 @@ const getLeafs = (descendCondition, allShapes, shapes) =>
 
 const grouping = select((shapes, selectedShapes) => {
   const preexistingAdHocGroups = shapes.filter(isAdHocGroup);
-  const freshSelectedShapes = shapes.filter(idsMatch(selectedShapes));
-  const freshNonSelectedShapes = shapes.filter(not(idsMatch(selectedShapes)));
+  const matcher = idsMatch(selectedShapes);
+  const selectedFn = shape => matcher(shape) && shape.type !== 'annotation';
+  const freshSelectedShapes = shapes.filter(selectedFn);
+  const freshNonSelectedShapes = shapes.filter(not(selectedFn));
   const someSelectedShapesAreGrouped = selectedShapes.some(isOrBelongsToAdHocGroup);
   const selectionOutsideGroup = !someSelectedShapesAreGrouped;
 
@@ -1400,9 +1402,9 @@ const nextScene = select(
     const selectedLeafShapes = getLeafs(
       shape => shape.subtype === config.adHocGroupName,
       shapes,
-      selectionState.shapes.map(
-        s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s)
-      )
+      selectionState.shapes
+        .map(s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s))
+        .filter(identity)
     )
       .filter(shape => shape.type !== 'annotation')
       .map(s => s.id);
