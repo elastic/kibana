@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { KbnServer } from '../kibana.index';
 
 const KIBANA_REPORTING_TYPE = 'infraops';
 
 export class UsageCollector {
-  public static getUsageCollector(server: Server) {
+  public static getUsageCollector(server: KbnServer) {
     const { collectorSet } = server.usage;
 
     return collectorSet.makeUsageCollector({

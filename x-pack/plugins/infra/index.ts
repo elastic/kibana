@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
 
 const APP_ID = 'infra';
 
@@ -49,8 +48,8 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(plugin: Server) {
-      initServerWithKibana(plugin);
+    init(server: KbnServer) {
+      initServerWithKibana(server);
     },
   });
 }
