@@ -174,7 +174,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
-        colorRamp: newParams.colorSchema,
+        colorRamp: newParams.colorSchema.value,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }
