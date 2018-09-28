@@ -14,42 +14,47 @@ import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
 import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../containers/with_options';
+import { WithSource } from '../../containers/with_source';
 
 export const HomePageContent: React.SFC = () => (
   <PageContent>
-    <WithOptions>
-      {({ wafflemap, sourceId }) => (
-        <WithWaffleFilter>
-          {({ filterQueryAsJson }) => (
-            <WithWaffleTime>
-              {({ currentTimeRange }) => (
-                <WithWaffleOptions>
-                  {({ metrics, groupBy, nodeType }) => (
-                    <WithWaffleNodes
-                      filterQuery={filterQueryAsJson}
-                      metrics={metrics}
-                      groupBy={groupBy}
-                      nodeType={nodeType}
-                      sourceId={sourceId}
-                      timerange={currentTimeRange}
-                    >
-                      {({ nodes, loading, refetch }) => (
-                        <Waffle
-                          map={nodes}
-                          loading={loading}
+    <WithSource>
+      {({ configuredFields }) => (
+        <WithOptions>
+          {({ wafflemap, sourceId }) => (
+            <WithWaffleFilter>
+              {({ filterQueryAsJson }) => (
+                <WithWaffleTime>
+                  {({ currentTimeRange }) => (
+                    <WithWaffleOptions>
+                      {({ metrics, groupBy, nodeType }) => (
+                        <WithWaffleNodes
+                          filterQuery={filterQueryAsJson}
+                          metrics={metrics}
+                          groupBy={groupBy}
                           nodeType={nodeType}
-                          options={{ ...wafflemap, metrics }}
-                          reload={refetch}
-                        />
+                          sourceId={sourceId}
+                          timerange={currentTimeRange}
+                        >
+                          {({ nodes, loading, refetch }) => (
+                            <Waffle
+                              map={nodes}
+                              loading={loading}
+                              nodeType={nodeType}
+                              options={{ ...wafflemap, metrics, fields: configuredFields }}
+                              reload={refetch}
+                            />
+                          )}
+                        </WithWaffleNodes>
                       )}
-                    </WithWaffleNodes>
+                    </WithWaffleOptions>
                   )}
-                </WithWaffleOptions>
+                </WithWaffleTime>
               )}
-            </WithWaffleTime>
+            </WithWaffleFilter>
           )}
-        </WithWaffleFilter>
+        </WithOptions>
       )}
-    </WithOptions>
+    </WithSource>
   </PageContent>
 );

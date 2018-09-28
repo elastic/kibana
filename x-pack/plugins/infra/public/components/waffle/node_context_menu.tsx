@@ -19,6 +19,7 @@ interface Props {
 }
 
 export const NodeContextMenu: React.SFC<Props> = ({
+  options,
   children,
   node,
   isPopoverOpen,
@@ -26,7 +27,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
   nodeType,
 }) => {
   const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
-
+  const nodeField = options.fields ? options.fields[nodeType] : null;
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
@@ -44,10 +45,14 @@ export const NodeContextMenu: React.SFC<Props> = ({
           name: `View metrics`,
           href: `#/metrics/${nodeType}/${node.name}`,
         },
-        {
-          name: `View APM Traces`,
-          href: `/app/apm`,
-        },
+        ...(nodeField
+          ? [
+              {
+                name: `View APM Traces`,
+                href: `../app/apm#/?_g=()&kuery=${nodeField}~20~3A~20~22${node.name}~22`,
+              },
+            ]
+          : []),
       ],
     },
   ];
