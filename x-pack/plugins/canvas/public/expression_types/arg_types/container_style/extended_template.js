@@ -7,13 +7,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
 
 export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
   <div>
     <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>Appearance</h6>
+      <h6>
+        <FormattedMessage
+          id="xpack.canvas.expression.types.style.template.appearanceHeaderTitle"
+          defaultMessage="Appearance"
+        />
+      </h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />
@@ -28,7 +34,12 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
     <EuiSpacer size="m" />
 
     <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>Border</h6>
+      <h6>
+        <FormattedMessage
+          id="xpack.canvas.expression.types.style.template.borderHeaderTitle"
+          defaultMessage="Border"
+        />
+      </h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <BorderForm

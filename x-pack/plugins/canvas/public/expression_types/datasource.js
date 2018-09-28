@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Registry } from '../../common/lib/registry';
 import { RenderToDom } from '../components/render_to_dom';
 import { ExpressionFormHandlers } from '../../common/lib/expression_form_handlers';
@@ -13,7 +14,12 @@ import { BaseForm } from './base_form';
 
 const defaultTemplate = () => (
   <div>
-    <p>This datasource has no interface. Use the expression editor to make changes.</p>
+    <p>
+      <FormattedMessage
+        id="xpack.canvas.expression.types.dataSourceNoInterfaceErrorMessage"
+        defaultMessage="This datasource has no interface. Use the expression editor to make changes."
+      />
+    </p>
   </div>
 );
 

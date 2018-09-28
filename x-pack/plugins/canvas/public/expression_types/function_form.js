@@ -7,6 +7,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { isPlainObject, uniq, last, compact } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
@@ -111,7 +112,16 @@ export class FunctionForm extends BaseForm {
       );
     } catch (e) {
       return (
-        <EuiCallOut color="danger" iconType="cross" title="Expression rendering error">
+        <EuiCallOut
+          color="danger"
+          iconType="cross"
+          title={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.expressionRenderingErrorMessage"
+              defaultMessage="Expression rendering error"
+            />
+          }
+        >
           <p>{e.message}</p>
         </EuiCallOut>
       );

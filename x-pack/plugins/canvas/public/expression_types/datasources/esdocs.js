@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
@@ -54,36 +55,121 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
 
   const index = getIndex().toLowerCase();
 
-  const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
+  const sortOptions = [
+    {
+      value: 'asc',
+      text: (
+        <FormattedMessage
+          id="xpack.canvas.expression.types.datasource.ascendingTitle"
+          defaultMessage="Ascending"
+        />
+      ),
+    },
+    {
+      value: 'desc',
+      text: (
+        <FormattedMessage
+          id="xpack.canvas.expression.types.datasource.descendingTitle"
+          defaultMessage="Descending"
+        />
+      ),
+    },
+  ];
 
   return (
     <div>
-      <EuiCallOut size="s" title="Be careful" color="warning">
+      <EuiCallOut
+        size="s"
+        title={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.warningMessageTitle"
+            defaultMessage="Be careful"
+          />
+        }
+        color="warning"
+      >
         <p>
-          The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
-          without the use of aggregations. It is best used with low volume datasets and in
-          situations where you need to view raw documents or plot exact, non-aggregated values on a
-          chart.
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.warningMessageDescription"
+            defaultMessage="The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
+            without the use of aggregations. It is best used with low volume datasets and in
+            situations where you need to view raw documents or plot exact, non-aggregated values on a
+            chart.."
+          />
         </p>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label="Index" helpText="Enter an index name or select an index pattern">
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.indexLabel"
+            defaultMessage="Index"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.indexDescription"
+            defaultMessage="Enter an index name or select an index pattern"
+          />
+        }
+      >
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
       </EuiFormRow>
 
-      <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.queryLabel"
+            defaultMessage="Query"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.queryDescription"
+            defaultMessage="Lucene query string syntax"
+          />
+        }
+        compressed
+      >
         <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
       </EuiFormRow>
-      <EuiFormRow label="Sort Field" helpText="Document sort field">
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.sortFieldLabel"
+            defaultMessage="Sort Field"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.sortFieldDescription"
+            defaultMessage="Document sort field"
+          />
+        }
+      >
         <ESFieldSelect
           index={index}
           value={sortField}
           onChange={field => setArg('sort', [field, sortOrder].join(', '))}
         />
       </EuiFormRow>
-      <EuiFormRow label="Sort Order" helpText="Document sort order" compressed>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.sortOrderLabel"
+            defaultMessage="Sort Order"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.sortOrderDescription"
+            defaultMessage="Document sort order"
+          />
+        }
+        compressed
+      >
         <EuiSelect
           value={sortOrder.toLowerCase()}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
@@ -91,11 +177,24 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label="Fields"
+        label={
+          <FormattedMessage
+            id="xpack.canvas.expression.types.datasource.fieldsLabel"
+            defaultMessage="Fields"
+          />
+        }
         helpText={
-          fields.length <= 10
-            ? 'The fields to extract. Kibana scripted fields are not currently available'
-            : 'This datasource performs best with 10 or fewer fields'
+          fields.length <= 10 ? (
+            <FormattedMessage
+              id="xpack.canvas.expression.types.datasource.fieldsMoreThen10Description"
+              defaultMessage="The fields to extract. Kibana scripted fields are not currently available"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.canvas.expression.types.datasource.fieldsLessThen10Description"
+              defaultMessage="This datasource performs best with 10 or fewer fields"
+            />
+          )
         }
       >
         <ESFieldsSelect
@@ -115,8 +214,18 @@ EsdocsDatasource.propTypes = {
 
 export const esdocs = () => ({
   name: 'esdocs',
-  displayName: 'Elasticsearch Raw Documents',
-  help: 'Pull back raw documents from elasticsearch',
+  displayName: (
+    <FormattedMessage
+      id="xpack.canvas.expression.types.datasource.esdocsTitle"
+      defaultMessage="Elasticsearch Raw Documents"
+    />
+  ),
+  help: (
+    <FormattedMessage
+      id="xpack.canvas.expression.types.datasource.esdocsDescription"
+      defaultMessage="Pull back raw documents from elasticsearch"
+    />
+  ),
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EsdocsDatasource),
 });

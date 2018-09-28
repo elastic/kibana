@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ExtendedTemplate = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
@@ -37,13 +38,31 @@ export const ExtendedTemplate = props => {
     { value: 5, text: '5' },
   ];
 
-  const labelOptions = [{ value: '', text: 'Select Series' }];
+  const labelOptions = [
+    {
+      value: '',
+      text: (
+        <FormattedMessage
+          id="xpack.canvas.expression.types.style.template.selectSeriesTitle"
+          defaultMessage="Select Series"
+        />
+      ),
+    },
+  ];
   labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
 
   return (
     <div>
       {name !== 'defaultStyle' && (
-        <EuiFormRow label="Series Identifier" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.template.seriesIdentifierLabel"
+              defaultMessage="Series Identifier"
+            />
+          }
+          compressed
+        >
           <EuiSelect
             defaultValue={selectedSeries}
             options={labelOptions}
@@ -55,7 +74,15 @@ export const ExtendedTemplate = props => {
         <EuiFlexGroup gutterSize="s">
           {fields.includes('lines') && (
             <EuiFlexItem>
-              <EuiFormRow label="Line" compressed>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.canvas.expression.types.style.template.lineLabel"
+                    defaultMessage="Line"
+                  />
+                }
+                compressed
+              >
                 <EuiSelect
                   defaultValue={get(chainArgs, 'lines.0', 0)}
                   options={values}
@@ -66,7 +93,15 @@ export const ExtendedTemplate = props => {
           )}
           {fields.includes('bars') && (
             <EuiFlexItem>
-              <EuiFormRow label="Bar" compressed>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.canvas.expression.types.style.template.barLabel"
+                    defaultMessage="Bar"
+                  />
+                }
+                compressed
+              >
                 <EuiSelect
                   defaultValue={get(chainArgs, 'bars.0', 0)}
                   options={values}
@@ -77,7 +112,15 @@ export const ExtendedTemplate = props => {
           )}
           {fields.includes('points') && (
             <EuiFlexItem>
-              <EuiFormRow label="Point" compressed>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.canvas.expression.types.style.template.pointLabel"
+                    defaultMessage="Point"
+                  />
+                }
+                compressed
+              >
                 <EuiSelect
                   defaultValue={get(chainArgs, 'points.0', 0)}
                   options={values}

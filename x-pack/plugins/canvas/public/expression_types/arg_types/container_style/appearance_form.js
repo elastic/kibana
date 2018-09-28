@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const opacities = [
   { value: 1, text: '100%' },
@@ -31,17 +32,41 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
   return (
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Padding" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.paddingLabel"
+              defaultMessage="Padding"
+            />
+          }
+          compressed
+        >
           <EuiFieldNumber value={Number(paddingVal)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Opacity" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.opacityLabel"
+              defaultMessage="Opacity"
+            />
+          }
+          compressed
+        >
           <EuiSelect defaultValue={opacity} options={opacities} onChange={namedChange('opacity')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Overflow" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.overflowLabel"
+              defaultMessage="Overflow"
+            />
+          }
+          compressed
+        >
           <EuiSelect
             defaultValue={overflow}
             options={overflows}

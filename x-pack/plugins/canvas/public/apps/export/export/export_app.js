@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { WorkpadPage } from '../../../components/workpad_page';
 import { Link } from '../../../components/link';
 
@@ -33,7 +34,10 @@ export class ExportApp extends React.PureComponent {
         <div className="canvasExport__stage">
           <div className="canvasLayout__stageHeader">
             <Link name="loadWorkpad" params={{ id: this.props.workpad.id }}>
-              Edit Workpad
+              <FormattedMessage
+                id="xpack.canvas.apps.export.editWorkpadLinkTitle"
+                defaultMessage="Edit Workpad"
+              />
             </Link>
           </div>
           <div className="canvasExport__stageContent">

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { get, pick } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
@@ -38,10 +40,16 @@ export class Model extends FunctionForm {
     // if modelArgs are missing, something went wrong here
     if (modelArgs === MISSING_MODEL_ARGS) {
       // if there is a next expression, it is lacking modelArgs, so we throw
-      throw new Error(`${nextExpressionType.displayName} modelArgs Error:
-        The modelArgs value is empty. Either it should contain an arg,
-        or a model should not be used in the expression.
-      `);
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.expression.types.emptyModelErrorMessage"
+            defaultMessage="{nextExpressionType} modelArgs Error: The modelArgs value is empty. Either it should contain an arg,
+            or a model should not be used in the expression."
+            values={{ nextExpressionType: nextExpressionType.displayName }}
+          />
+        )
+      );
     }
 
     // if there is no following expression, argument is skipped

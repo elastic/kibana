@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
@@ -28,7 +30,14 @@ export const routes = [
             dispatch(resetAssets());
             router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
           } catch (err) {
-            notify.error(err, { title: `Couldn't create workpad` });
+            notify.error(err, {
+              title: (
+                <FormattedMessage
+                  id="xpack.canvas.apps.workpad.createWorkpadErrorMessage"
+                  defaultMessage="Couldn't create workpad"
+                />
+              ),
+            });
           }
         },
         meta: {
@@ -49,7 +58,14 @@ export const routes = [
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
             } catch (err) {
-              notify.error(err, { title: `Couldn't load workpad with ID` });
+              notify.error(err, {
+                title: (
+                  <FormattedMessage
+                    id="xpack.canvas.apps.workpad.loadWorkpadErrorMessage"
+                    defaultMessage="Couldn't load workpad with ID"
+                  />
+                ),
+              });
               return router.redirectTo('home');
             }
           }

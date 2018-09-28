@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { pick } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
@@ -14,7 +16,13 @@ export class View extends FunctionForm {
 
     const propNames = ['help', 'modelArgs', 'requiresContext'];
     const defaultProps = {
-      help: `Element: ${props.name}`,
+      help: (
+        <FormattedMessage
+          id="xpack.canvas.expression.types.viewElementDescription"
+          defaultMessage="Element: {elementName}"
+          values={{ elementName: props.name }}
+        />
+      ),
       requiresContext: true,
     };
 
@@ -22,8 +30,17 @@ export class View extends FunctionForm {
 
     this.modelArgs = this.modelArgs || [];
 
-    if (!Array.isArray(this.modelArgs))
-      throw new Error(`${this.name} element is invalid, modelArgs must be an array`);
+    if (!Array.isArray(this.modelArgs)) {
+      throw new Error(
+        (
+          <FormattedMessage
+            id="xpack.canvas.expression.types.viewElementMessageError"
+            defaultMessage="{elementName} element is invalid, modelArgs must be an array"
+            values={{ elementName: this.name }}
+          />
+        )
+      );
+    }
   }
 }
 

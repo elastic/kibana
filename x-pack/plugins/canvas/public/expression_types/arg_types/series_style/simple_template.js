@@ -9,10 +9,11 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
-export const SimpleTemplate = props => {
+const SimpleTemplateUI = ({ intl, ...props }) => {
   const { typeInstance, argValue, onValueChange, labels, workpad } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
@@ -33,18 +34,34 @@ export const SimpleTemplate = props => {
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
+            <label>
+              <FormattedMessage
+                id="xpack.canvas.expression.types.style.template.noColorLabel"
+                defaultMessage="Color"
+              />
+              &nbsp;
+            </label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink onClick={() => handlePlain('color', '#000000')}>
-              Auto <EuiIcon type="bolt" />
+              <FormattedMessage
+                id="xpack.canvas.expression.types.style.template.autoLinkTitle"
+                defaultMessage="Auto"
+              />
+              <EuiIcon type="bolt" />
             </EuiLink>
           </EuiFlexItem>
         </Fragment>
       ) : (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label>Color&nbsp;</label>
+            <label>
+              <FormattedMessage
+                id="xpack.canvas.expression.types.style.template.colorLabel"
+                defaultMessage="Color"
+              />
+              &nbsp;
+            </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
             <ColorPickerMini
@@ -60,7 +77,10 @@ export const SimpleTemplate = props => {
               iconType="cross"
               color="danger"
               onClick={() => handlePlain('color', '')}
-              aria-label="Remove Series Color"
+              aria-label={intl.formatMessage({
+                id: 'xpack.canvas.expression.types.style.template.removeSeriesColorAriaLabel',
+                defaultMessage: 'Remove Series Color',
+              })}
             />
           </EuiFlexItem>
         </Fragment>
@@ -71,7 +91,12 @@ export const SimpleTemplate = props => {
             <TooltipIcon
               position="left"
               icon="warning"
-              content="Data has no series to style, add a color dimension"
+              content={
+                <FormattedMessage
+                  id="xpack.canvas.expression.types.style.template.addColorDimensionDescription"
+                  defaultMessage="Data has no series to style, add a color dimension"
+                />
+              }
             />
           </EuiFlexItem>
         )}
@@ -79,9 +104,9 @@ export const SimpleTemplate = props => {
   );
 };
 
-SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
+SimpleTemplateUI.displayName = 'SeriesStyleArgSimpleInput';
 
-SimpleTemplate.propTypes = {
+SimpleTemplateUI.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   labels: PropTypes.array,
@@ -90,3 +115,5 @@ SimpleTemplate.propTypes = {
   }).isRequired,
   typeInstance: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
 };
+
+export const SimpleTemplate = injectI18n(SimpleTemplateUI);

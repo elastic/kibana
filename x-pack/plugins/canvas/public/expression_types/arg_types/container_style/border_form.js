@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiFieldNumber, EuiSelect } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 
 const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
@@ -38,13 +39,29 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Width" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.widthLabel"
+              defaultMessage="Width"
+            />
+          }
+          compressed
+        >
           <EuiFieldNumber value={Number(borderWidthVal)} onChange={namedChange('borderWidth')} />
         </EuiFormRow>
       </EuiFlexItem>
 
       <EuiFlexItem grow={3}>
-        <EuiFormRow label="Style" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.styleLabel"
+              defaultMessage="Style"
+            />
+          }
+          compressed
+        >
           <EuiSelect
             defaultValue={borderStyle}
             options={options}
@@ -54,13 +71,29 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Radius" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.radiusLabel"
+              defaultMessage="Radius"
+            />
+          }
+          compressed
+        >
           <EuiFieldNumber value={Number(radiusVal)} onChange={namedChange('borderRadius')} />
         </EuiFormRow>
       </EuiFlexItem>
 
       <EuiFlexItem grow={1}>
-        <EuiFormRow label="Color" style={{ fontSize: 0 }}>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.expression.types.style.form.colorLabel"
+              defaultMessage="Color"
+            />
+          }
+          style={{ fontSize: 0 }}
+        >
           <ColorPickerMini
             value={borderColor}
             onChange={borderColorChange}
