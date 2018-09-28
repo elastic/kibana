@@ -20,7 +20,7 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'none',
+  mode: 'production',
   entry: {
     index: './src/index.ts',
   },

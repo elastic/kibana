@@ -30,6 +30,16 @@ module.exports = {
     path: buildDir,
     filename: '[name].js', // Need long paths here.
     libraryTarget: 'umd',
+    // Note: this is needed due to a not yet resolved bug on
+    // webpack 4 with umd modules generation.
+    // For now we have 2 quick workarounds: one is what is implemented
+    // below another is to change the libraryTarget to commonjs
+    //
+    // The issues can be followed on:
+    // https://github.com/webpack/webpack/issues/6642
+    // https://github.com/webpack/webpack/issues/6525
+    // https://github.com/webpack/webpack/issues/6677
+    globalObject: `(typeof self !== 'undefined' ? self : this)`,
   },
 
   resolve: {
@@ -37,23 +47,24 @@ module.exports = {
   },
 
   plugins: [
-    function loaderFailHandler() {
+    new function LoaderFailHandlerPlugin() {
       // bails on error, including loader errors
       // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
-      let isWatch = true;
+      this.isWatch = true;
 
-      this.plugin('run', function(compiler, callback) {
-        isWatch = false;
-        callback.call(compiler);
-      });
+      this.apply = compiler => {
+        compiler.hooks.run.tapPromise('LoaderFailHandlerPlugin', async () => {
+          this.isWatch = false;
+        });
 
-      this.plugin('done', function(stats) {
-        if (stats.compilation.errors && stats.compilation.errors.length) {
-          if (isWatch) console.error(stats.compilation.errors[0]);
-          else throw stats.compilation.errors[0];
-        }
-      });
-    },
+        compiler.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
+          if (stats.compilation.errors && stats.compilation.errors.length) {
+            if (this.isWatch) console.error(stats.compilation.errors[0]);
+            else throw stats.compilation.errors[0];
+          }
+        });
+      };
+    }(),
   ],
 
   module: {
