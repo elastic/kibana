@@ -17,8 +17,6 @@ import config from './config';
 const getMapInitState = attributes => {
   if (attributes && !_.isEmpty(attributes)) {
     return { map: { mapState: attributes } };
-  } else {
-    return {};
   }
 };
 
@@ -33,19 +31,32 @@ window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 export let gisStateSync;
+const updateAppState = id => {
+  if (!gisStateSync) {
+    throw new Error('GIS State not defined');
+  }
+  if (id && id !== workspaceId) {
+    gisStateSync.set('workSpaceId', id);
+  }
+}
+
 let initConfig = null;
 uiModules
   .get('kibana')
-  .run((AppState, gisWorkspace) => {
-    gisStateSync = new AppState().makeStateful('gis');
+  .run(AppState => gisStateSync = new AppState().makeStateful('gis'))
+  .run(gisWorkspace => {
     // Load saved workspace if present
     const workspaceId = gisStateSync.get('workspaceId');
-    gisWorkspace.get(workspaceId).then(({ id, attributes }) => {
-      if (id && id !== workspaceId) {
-        gisStateSync.set('workSpaceId', id);
+    (async () => {
+      const workspace = await gisWorkspace.get(workspaceId) ||
+        await gisWorkspace.find();
+      if (workspace) {
+        updateAppState(id);
+        initConfig = getMapInitState(attributes);
+      } else {
+        initConfig = {};
       }
-      initConfig = getMapInitState(attributes);
-    });
+    })();
   });
 
 let storePromise;

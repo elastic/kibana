@@ -19,18 +19,15 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
     let savedWorkspaceObject;
     if (id) {
       savedWorkspaceObject = await savedObjectsClient.get(this._type, id);
-    } else {
-      savedWorkspaceObject = await this._find();
-    }
-    return savedWorkspaceObject ? savedWorkspaceObject : {};
+    } 
+    return savedWorkspaceObject ? savedWorkspaceObject : null;
   };
 
-  this._find = async () => {
+  this.find = async () => {
     const { savedObjects } = await savedObjectsClient.find({
       type: this._type,
     });
-    console.log(savedObjects);
-    return savedObjects[0];
+    return savedObjects && savedObjects.length && savedObjects[0] || null;
   };
 
   this.save = (gisSettings) => {
