@@ -12,7 +12,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "false",
         "properties": {
           "beats_stats": {
@@ -322,7 +322,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "false",
         "date_detection": false,
         "properties": {
@@ -1250,7 +1250,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "false",
         "properties": {
           "message": {
@@ -1313,7 +1313,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "false",
         "properties": {
           "cluster_uuid": {

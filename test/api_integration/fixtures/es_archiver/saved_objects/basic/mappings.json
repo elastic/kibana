@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "dynamic": "strict",
         "properties": {
           "config": {
