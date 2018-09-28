@@ -169,10 +169,6 @@ export class StepMetricsUi extends Component {
       metrics,
     } = fields;
 
-    const unselectedMetricsFields = metricsFields.filter(metricField => {
-      return !metrics.find(({ name }) => name === metricField.name);
-    });
-
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -233,7 +229,8 @@ export class StepMetricsUi extends Component {
                 />
               )}
               columns={this.chooserColumns}
-              fields={unselectedMetricsFields}
+              fields={metricsFields}
+              selectedFields={metrics}
               onSelectField={this.onSelectField}
             />
           )}

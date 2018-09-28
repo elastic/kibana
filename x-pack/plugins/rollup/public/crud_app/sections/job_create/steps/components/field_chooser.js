@@ -23,6 +23,7 @@ export class FieldChooser extends Component {
     buttonLabel: PropTypes.node.isRequired,
     columns: PropTypes.array.isRequired,
     fields: PropTypes.array.isRequired,
+    selectedFields: PropTypes.array.isRequired,
     onSelectField: PropTypes.func.isRequired,
     columns: PropTypes.array.isRequired,
     prompt: PropTypes.string,
@@ -32,7 +33,6 @@ export class FieldChooser extends Component {
     prompt: 'Search',
   }
 
-  const
   constructor(props) {
     super(props);
 
@@ -65,6 +65,7 @@ export class FieldChooser extends Component {
       buttonLabel,
       columns,
       fields,
+      selectedFields,
       prompt,
       onSelectField,
     } = this.props;
@@ -79,13 +80,19 @@ export class FieldChooser extends Component {
       };
     };
 
-    const searchedItems = searchValue ? fields.filter(item => (
-      item.name.toLowerCase().includes(searchValue.trim().toLowerCase())
-    )) : fields;
-
     let flyout;
 
     if (isOpen) {
+      // Derive the fields which the user can select.
+      const selectedFieldNames = selectedFields.map(({ name }) => name);
+      const unselectedFields = fields.filter(({ name }) => {
+        return !selectedFieldNames.includes(name);
+      });
+
+      const searchedItems = searchValue ? unselectedFields.filter(item => (
+        item.name.toLowerCase().includes(searchValue.trim().toLowerCase())
+      )) : unselectedFields;
+
       flyout = (
         <EuiFlyout
           onClose={this.close}

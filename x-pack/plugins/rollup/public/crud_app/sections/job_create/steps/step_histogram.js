@@ -78,10 +78,6 @@ export class StepHistogramUi extends Component {
       sortable: true,
     }];
 
-    const unselectedHistogramFields = histogramFields.filter(histogramField => {
-      return !fields.histogram.includes(histogramField);
-    });
-
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -141,7 +137,8 @@ export class StepHistogramUi extends Component {
                 />
               )}
               columns={columns}
-              fields={unselectedHistogramFields}
+              fields={histogramFields}
+              selectedFields={histogram}
               onSelectField={this.onSelectField}
             />
           )}
