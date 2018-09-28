@@ -17,9 +17,5 @@
  * under the License.
  */
 
-var moment = require('../node_modules/moment-timezone/moment-timezone');
-var momentDurationFormatSetup = require('../node_modules/moment-duration-format/lib/moment-duration-format');
-momentDurationFormatSetup(moment);
+var moment = module.exports = require('../node_modules/moment-timezone/moment-timezone');
 moment.tz.load(require('../node_modules/moment-timezone/data/packed/latest.json'));
-
-module.exports = moment;
