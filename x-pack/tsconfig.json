@@ -1,5 +1,15 @@
 {
   "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "ui/*": [
+        "src/ui/public/*"
+      ],
+      "plugins/security/*": [
+        "x-pack/plugins/security/public/*"
+      ]
+    },
+  },
   "include": [
     "common/**/*",
     "server/**/*",

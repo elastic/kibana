@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { LoginState } from '../../../../common/login_state';
+import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
   http: any;

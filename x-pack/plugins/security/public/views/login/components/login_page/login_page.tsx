@@ -20,9 +20,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { LoginState } from '../../../../common/login_state';
-import { BasicLoginForm } from './basic_login_form';
-import { DisabledLoginForm } from './disabled_login_form';
+import { LoginState } from '../../../../../common/login_state';
+import { BasicLoginForm } from '../basic_login_form';
+import { DisabledLoginForm } from '../disabled_login_form';
 
 interface Props {
   http: any;
