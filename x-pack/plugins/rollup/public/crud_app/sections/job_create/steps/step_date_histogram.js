@@ -44,6 +44,7 @@ export class StepDateHistogramUi extends Component {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
     fieldErrors: PropTypes.object.isRequired,
+    hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     dateFields: PropTypes.array.isRequired,
   }
@@ -324,9 +325,9 @@ export class StepDateHistogramUi extends Component {
   }
 
   renderErrors = () => {
-    const { areStepErrorsVisible } = this.props;
+    const { areStepErrorsVisible, hasErrors } = this.props;
 
-    if (!areStepErrorsVisible) {
+    if (!areStepErrorsVisible || !hasErrors) {
       return null;
     }
 

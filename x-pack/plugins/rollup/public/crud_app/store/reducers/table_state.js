@@ -13,7 +13,7 @@ import {
 
 const initialState = {
   filter: '',
-  pageSize: 10,
+  pageSize: 20,
   currentPage: 0,
   sortField: 'job.id',
   isSortAscending: true,

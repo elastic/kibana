@@ -50,6 +50,8 @@ import {
   STEP_REVIEW,
   stepIds,
   stepIdToStepConfigMap,
+  getAffectedStepsFields,
+  hasErrors,
 } from './steps_config';
 
 const stepIdToTitleMap = {
@@ -79,7 +81,6 @@ export class JobCreateUi extends Component {
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      stepsFieldErrorsAsync: {},
       areStepErrorsVisible: false,
       stepsFields,
       isValidatingIndexPattern: false,
@@ -96,7 +97,6 @@ export class JobCreateUi extends Component {
   componentDidUpdate(prevProps, prevState) {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
-
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
@@ -307,13 +307,15 @@ export class JobCreateUi extends Component {
     const { stepsFields } = this.state;
     const prevFields = stepsFields[currentStepId];
 
+    const affectedStepsFields = getAffectedStepsFields(fields, stepsFields);
+
     const newFields = {
       ...prevFields,
       ...fields,
     };
 
     const newStepsFields = {
-      ...cloneDeep(stepsFields),
+      ...affectedStepsFields,
       [currentStepId]: newFields,
     };
 
@@ -413,13 +415,33 @@ export class JobCreateUi extends Component {
     let saveErrorFeedback;
 
     if (saveError) {
+      const { message, cause } = saveError;
+
+      let errorBody;
+
+      if (cause) {
+        if (cause.length === 1) {
+          errorBody = (
+            <p>{cause[0]}</p>
+          );
+        } else {
+          errorBody = (
+            <ul>
+              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+            </ul>
+          );
+        }
+      }
+
       saveErrorFeedback = (
         <Fragment>
           <EuiCallOut
-            title={saveError}
+            title={message}
             icon="cross"
             color="danger"
-          />
+          >
+            {errorBody}
+          </EuiCallOut>
 
           <EuiSpacer />
         </Fragment>
@@ -492,6 +514,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             isValidatingIndexPattern={isValidatingIndexPattern}
             indexPatternAsyncErrors={indexPatternAsyncErrors}
@@ -506,6 +529,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             dateFields={indexPatternDateFields}
           />
@@ -526,6 +550,7 @@ export class JobCreateUi extends Component {
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
+            hasErrors={hasErrors(currentStepFieldErrors)}
             areStepErrorsVisible={areStepErrorsVisible}
             histogramFields={indexPatternHistogramFields}
           />

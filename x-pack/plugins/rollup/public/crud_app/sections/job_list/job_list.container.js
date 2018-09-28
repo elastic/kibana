@@ -14,6 +14,7 @@ import {
 
 import {
   loadJobs,
+  refreshJobs,
   openDetailPanel,
   closeDetailPanel,
 } from '../../store/actions';
@@ -29,6 +30,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     loadJobs: () => {
       dispatch(loadJobs());
+    },
+    refreshJobs: () => {
+      dispatch(refreshJobs());
     },
     openDetailPanel: (jobId) => {
       dispatch(openDetailPanel({ jobId: jobId }));

@@ -5,18 +5,14 @@
  */
 
 export {
-  loadJobs,
-} from './load_jobs';
+  startJobs,
+  stopJobs,
+} from './change_job_status';
 
 export {
   createJob,
   clearCreateJobErrors,
 } from './create_job';
-
-export {
-  startJobs,
-  stopJobs,
-} from './change_job_status';
 
 export {
   deleteJobs,
@@ -26,6 +22,14 @@ export {
   openDetailPanel,
   closeDetailPanel,
 } from './detail_panel';
+
+export {
+  loadJobs,
+} from './load_jobs';
+
+export {
+  refreshJobs,
+} from './refresh_jobs';
 
 export {
   filterChanged,

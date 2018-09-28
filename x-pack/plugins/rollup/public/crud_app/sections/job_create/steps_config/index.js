@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import cloneDeep from 'lodash/lang/cloneDeep';
+
 import { WEEK } from '../../../services';
 
 import { validateId } from './validate_id';
@@ -40,7 +42,7 @@ export const stepIdToStepConfigMap = {
       indexPattern: '',
       rollupIndex: '',
       // Every week on Saturday, at 00:00:00
-      rollupCron: '0 0 0 * * 7',
+      rollupCron: '0 0 0 ? * 7',
       rollupPageSize: '',
       // Though the API doesn't require a delay, in many real-world cases, servers will go down for
       // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
@@ -133,3 +135,24 @@ export const stepIdToStepConfigMap = {
   },
   [STEP_REVIEW]: {},
 };
+
+export function getAffectedStepsFields(fields, stepsFields) {
+  const { indexPattern } = fields;
+
+  const affectedStepsFields = cloneDeep(stepsFields);
+
+  // A new index pattern means we have to clear all of the fields which depend upon it.
+  if (indexPattern) {
+    affectedStepsFields[STEP_DATE_HISTOGRAM].dateHistogramField = undefined;
+    affectedStepsFields[STEP_TERMS].terms = [];
+    affectedStepsFields[STEP_HISTOGRAM].histogram = [];
+    affectedStepsFields[STEP_METRICS].metrics = [];
+  }
+
+  return affectedStepsFields;
+}
+
+export function hasErrors(fieldErrors) {
+  const errorValues = Object.values(fieldErrors);
+  return errorValues.some(error => error !== undefined);
+}

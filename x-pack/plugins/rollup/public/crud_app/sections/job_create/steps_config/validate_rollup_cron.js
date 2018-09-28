@@ -21,9 +21,12 @@ export function validateRollupCron(rollupCron) {
   try {
     cronstrue.toString(rollupCron);
   } catch(error) {
+    const prefix = 'Error: ';
+    const prefixIndex = error.indexOf(prefix);
+
     // Note: cronstrue ships with a localizable version. Refer to the docs for more
     // info on how we can display a localized error value.
-    return error;
+    return error.substring(prefixIndex + prefix.length);
   }
 
   return undefined;

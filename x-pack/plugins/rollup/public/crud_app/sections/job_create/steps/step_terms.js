@@ -64,10 +64,6 @@ export class StepTermsUi extends Component {
       terms,
     } = fields;
 
-    const unselectedTermsFields = termsFields.filter(termField => {
-      return !fields.terms.includes(termField);
-    });
-
     const columns = [{
       field: 'name',
       name: 'Field',
@@ -142,7 +138,8 @@ export class StepTermsUi extends Component {
                 />
               )}
               columns={columns}
-              fields={unselectedTermsFields}
+              fields={termsFields}
+              selectedFields={terms}
               onSelectField={this.onSelectField}
             />
           )}

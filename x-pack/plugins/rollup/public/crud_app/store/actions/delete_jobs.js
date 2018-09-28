@@ -9,7 +9,7 @@ import { toastNotifications } from 'ui/notify';
 import { deleteJobs as sendDeleteJobsRequest } from '../../services';
 import { getDetailPanelJob } from '../selectors';
 
-import { loadJobs } from './load_jobs';
+import { refreshJobs } from './refresh_jobs';
 import { closeDetailPanel } from './detail_panel';
 
 export const deleteJobs = (jobIds) => async (dispatch, getState) => {
@@ -25,7 +25,7 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
     toastNotifications.addSuccess(`${jobIds.length} rollup jobs were deleted`);
   }
 
-  dispatch(loadJobs());
+  dispatch(refreshJobs());
 
   // If we've just deleted a job we were looking at, we need to close the panel.
   const detailPanelJob = getDetailPanelJob(getState());

@@ -190,7 +190,7 @@ export class TabSummaryUi extends Component {
                   content={(
                     <FormattedMessage
                       id="xpack.rollupJobs.jobDetails.tabSummary.itemCron.tip"
-                      defaultMessage="Interval at which data is rolled up"
+                      defaultMessage="The frequency with which data is rolled up"
                     />
                   )}
                 />
@@ -274,7 +274,7 @@ export class TabSummaryUi extends Component {
                   content={(
                     <FormattedMessage
                       id="xpack.rollupJobs.jobDetails.tabSummary.itemInterval.tip"
-                      defaultMessage="Time bucket interval generated at roll-up time"
+                      defaultMessage="The time bucket interval into which data is rolled up"
                     />
                   )}
                 />

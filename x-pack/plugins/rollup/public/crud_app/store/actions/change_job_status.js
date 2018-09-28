@@ -9,7 +9,7 @@ import {
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
 } from '../../services';
-import { loadJobs } from './load_jobs';
+import { refreshJobs } from './refresh_jobs';
 
 export const startJobs = (jobIds) => async (dispatch) => {
   try {
@@ -18,7 +18,7 @@ export const startJobs = (jobIds) => async (dispatch) => {
     return toastNotifications.addDanger(error.data.message);
   }
 
-  dispatch(loadJobs());
+  dispatch(refreshJobs());
 };
 
 export const stopJobs = (jobIds) => async (dispatch) => {
@@ -28,5 +28,5 @@ export const stopJobs = (jobIds) => async (dispatch) => {
     return toastNotifications.addDanger(error.data.message);
   }
 
-  dispatch(loadJobs());
+  dispatch(refreshJobs());
 };
