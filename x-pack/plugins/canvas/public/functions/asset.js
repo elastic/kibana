@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
 
@@ -14,12 +16,22 @@ export const asset = () => ({
     types: ['null'],
   },
   type: 'string',
-  help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
+  help: (
+    <FormattedMessage
+      id="xpack.canvas.functions.asset.assetValueDescription"
+      defaultMessage="Use Canvas workpad asset objects to provide argument values. Usually images."
+    />
+  ),
   args: {
     id: {
       aliases: ['_'],
       types: ['string'],
-      help: 'The ID of the asset value to return',
+      help: (
+        <FormattedMessage
+          id="xpack.canvas.functions.asset.assetValueIdDescription"
+          defaultMessage="The ID of the asset value to return"
+        />
+      ),
       multi: false,
     },
   },
@@ -28,6 +40,14 @@ export const asset = () => ({
     const asset = getAssetById(getState(), assetId);
     if (asset !== undefined) return asset.value;
 
-    throw new Error('Could not get the asset by ID: ' + assetId);
+    throw new Error(
+      (
+        <FormattedMessage
+          id="xpack.canvas.functions.asset.assetValueIdErrorMessage"
+          defaultMessage="Could not get the asset by ID: {assetId}"
+          values={{ assetId }}
+        />
+      )
+    );
   },
 });
