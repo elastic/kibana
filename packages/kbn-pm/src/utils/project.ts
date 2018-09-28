@@ -176,6 +176,10 @@ export class Project {
     return Object.keys(this.allDependencies).length > 0;
   }
 
+  public hasDevDependencies() {
+    return Object.keys(this.devDependencies).length > 0;
+  }
+
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
     return installInDir(this.path, extraArgs);

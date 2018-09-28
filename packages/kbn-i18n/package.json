@@ -6,9 +6,6 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",

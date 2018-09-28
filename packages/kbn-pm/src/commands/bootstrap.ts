@@ -38,7 +38,9 @@ export const BootstrapCommand: ICommand = {
 
     for (const batch of batchedProjects) {
       for (const project of batch) {
-        if (project.hasDependencies()) {
+        // Only packages that have dev dependencies need to be installed individually.
+        // All other dependencies will be installed by the main kibnaa package.
+        if (project.hasDevDependencies()) {
           await project.installDependencies({ extraArgs });
         }
       }

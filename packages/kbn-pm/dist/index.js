@@ -12430,6 +12430,9 @@ class Project {
     hasDependencies() {
         return Object.keys(this.allDependencies).length > 0;
     }
+    hasDevDependencies() {
+        return Object.keys(this.devDependencies).length > 0;
+    }
     installDependencies({ extraArgs }) {
         var _this2 = this;
 
@@ -28364,7 +28367,7 @@ const BootstrapCommand = exports.BootstrapCommand = {
             _log.log.write(_chalk2.default.bold('\nRunning installs in topological order:'));
             for (const batch of batchedProjects) {
                 for (const project of batch) {
-                    if (project.hasDependencies()) {
+                    if (project.hasDevDependencies()) {
                         yield project.installDependencies({ extraArgs });
                     }
                 }
